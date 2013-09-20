@@ -13,12 +13,11 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface HolidayRepository extends JpaRepository<Holiday, Long>,
-		JpaSpecificationExecutor<Holiday> {
+public interface HolidayRepository extends JpaRepository<Holiday, Long>, JpaSpecificationExecutor<Holiday> {
+
     @Query("select holiday from Holiday holiday, IN(holiday.offices) office where (holiday.fromDate >= :date OR :date <= holiday.toDate) and office.id = :officeId")
     List<Holiday> findByOfficeIdAndGreaterThanDate(@Param("officeId") Long officeId, @Param("date") Date date);
-    
+
     @Query("from Holiday holiday where holiday.processed = false")
     List<Holiday> findUnprocessed();
 }
-

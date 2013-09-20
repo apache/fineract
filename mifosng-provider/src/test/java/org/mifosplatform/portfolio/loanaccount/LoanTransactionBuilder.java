@@ -12,16 +12,16 @@ public class LoanTransactionBuilder {
     @SuppressWarnings("unused")
     private boolean repayment = false;
 
-   /** public LoanTransaction build() {
-
-        LoanTransaction transaction = null;
-
-        if (repayment) {
-            transaction = LoanTransaction.repayment(transactionAmount, transactionDate);
-        }
-
-        return transaction;
-    }**/
+    /**
+     * public LoanTransaction build() {
+     * 
+     * LoanTransaction transaction = null;
+     * 
+     * if (repayment) { transaction =
+     * LoanTransaction.repayment(transactionAmount, transactionDate); }
+     * 
+     * return transaction; }
+     **/
 
     public LoanTransactionBuilder with(final Money newAmount) {
         this.transactionAmount = newAmount;

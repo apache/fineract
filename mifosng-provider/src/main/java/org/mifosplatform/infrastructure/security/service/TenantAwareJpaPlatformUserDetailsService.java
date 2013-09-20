@@ -16,9 +16,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
- * Used in securityContext.xml as implementation of spring security's {@link UserDetailsService}.
+ * Used in securityContext.xml as implementation of spring security's
+ * {@link UserDetailsService}.
  */
-@Service(value="userDetailsService")
+@Service(value = "userDetailsService")
 public class TenantAwareJpaPlatformUserDetailsService implements PlatformUserDetailsService {
 
     @Autowired

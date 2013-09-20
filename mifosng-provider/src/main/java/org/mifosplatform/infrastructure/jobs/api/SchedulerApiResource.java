@@ -41,9 +41,9 @@ public class SchedulerApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveStatus(@Context final UriInfo uriInfo) {
-        boolean isSchedulerRunning = jobRegisterService.isSchedulerRunning();
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        SchedulerDetailData schedulerDetailData = new SchedulerDetailData(isSchedulerRunning);
+        final boolean isSchedulerRunning = this.jobRegisterService.isSchedulerRunning();
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final SchedulerDetailData schedulerDetailData = new SchedulerDetailData(isSchedulerRunning);
         return this.toApiJsonSerializer.serialize(settings, schedulerDetailData,
                 SchedulerJobApiConstants.SCHEDULER_DETAIL_RESPONSE_DATA_PARAMETERS);
     }
@@ -54,10 +54,10 @@ public class SchedulerApiResource {
     public Response changeSchedulerStatus(@QueryParam(SchedulerJobApiConstants.COMMAND) final String commandParam) {
         Response response = Response.status(400).build();
         if (is(commandParam, SchedulerJobApiConstants.COMMAND_START_SCHEDULER)) {
-            jobRegisterService.startScheduler();
+            this.jobRegisterService.startScheduler();
             response = Response.status(202).build();
         } else if (is(commandParam, SchedulerJobApiConstants.COMMAND_STOP_SCHEDULER)) {
-            jobRegisterService.pauseScheduler();
+            this.jobRegisterService.pauseScheduler();
             response = Response.status(202).build();
         } else {
             throw new UnrecognizedQueryParamException(SchedulerJobApiConstants.COMMAND, commandParam);

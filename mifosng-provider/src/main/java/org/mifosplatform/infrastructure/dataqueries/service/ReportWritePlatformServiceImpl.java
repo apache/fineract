@@ -67,7 +67,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
     public CommandProcessingResult createReport(final JsonCommand command) {
 
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validate(command.json());
 
@@ -84,7 +84,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
                     .withCommandId(command.commandId()) //
                     .withEntityId(report.getId()) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleReportDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
@@ -95,7 +95,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
     public CommandProcessingResult updateReport(final Long reportId, final JsonCommand command) {
 
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validate(command.json());
 
@@ -106,7 +106,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
 
             if (changes.containsKey("reportParameters")) {
                 final Set<ReportParameterUsage> reportParameterUsages = assembleSetOfReportParameterUsages(report, command);
-                boolean updated = report.update(reportParameterUsages);
+                final boolean updated = report.update(reportParameterUsages);
                 if (!updated) {
                     changes.remove("reportParameters");
                 }
@@ -121,7 +121,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
                     .withEntityId(report.getId()) //
                     .with(changes) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleReportDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
@@ -156,7 +156,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
      */
     private void handleReportDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
 
-        Throwable realCause = dve.getMostSpecificCause();
+        final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("unq_report_name")) {
             final String name = command.stringValueOfParameterNamed("reportName");
             throw new PlatformDataIntegrityException("error.msg.report.duplicate.name", "A report with name '" + name + "' already exists",
@@ -173,7 +173,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
         Set<ReportParameterUsage> reportParameterUsages = null;
 
         if (command.parameterExists("reportParameters")) {
-            JsonArray reportParametersArray = command.arrayOfParameterNamed("reportParameters");
+            final JsonArray reportParametersArray = command.arrayOfParameterNamed("reportParameters");
             if (reportParametersArray != null) {
 
                 reportParameterUsages = new HashSet<ReportParameterUsage>();

@@ -28,7 +28,7 @@ public class CreateDatatableEntryCommandHandler implements NewCommandSourceHandl
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        CommandProcessingResult commandProcessingResult = this.writePlatformService.createNewDatatableEntry(command.entityName(),
+        final CommandProcessingResult commandProcessingResult = this.writePlatformService.createNewDatatableEntry(command.entityName(),
                 command.entityId(), command);
 
         return new CommandProcessingResultBuilder() //

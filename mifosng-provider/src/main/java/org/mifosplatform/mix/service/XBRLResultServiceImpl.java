@@ -35,8 +35,8 @@ public class XBRLResultServiceImpl implements XBRLResultService {
     private HashMap<String, BigDecimal> accountBalanceMap;
 
     @Autowired
-    public XBRLResultServiceImpl(final RoutingDataSource dataSource, final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService,
-            final MixTaxonomyReadPlatformService readTaxonomyService) {
+    public XBRLResultServiceImpl(final RoutingDataSource dataSource,
+            final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService, final MixTaxonomyReadPlatformService readTaxonomyService) {
         this.readTaxonomyMappingService = readTaxonomyMappingService;
         this.readTaxonomyService = readTaxonomyService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);

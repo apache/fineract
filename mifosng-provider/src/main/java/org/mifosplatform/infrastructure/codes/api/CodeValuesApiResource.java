@@ -77,7 +77,7 @@ public class CodeValuesApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, codeValues, this.RESPONSE_DATA_PARAMETERS);
     }
-    
+
     @GET
     @Path("{codeValueId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -112,7 +112,8 @@ public class CodeValuesApiResource {
     public String updateCodeValue(@PathParam("codeId") final Long codeId, @PathParam("codeValueId") final Long codeValueId,
             final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCodeValue(codeId, codeValueId).withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCodeValue(codeId, codeValueId)
+                .withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

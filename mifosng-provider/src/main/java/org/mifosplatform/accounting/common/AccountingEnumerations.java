@@ -85,7 +85,7 @@ public class AccountingEnumerations {
     }
 
     public static EnumOptionData accountingRuleType(final AccountingRuleType type) {
-        EnumOptionData optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), type.toString());
+        final EnumOptionData optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), type.toString());
         return optionData;
     }
 

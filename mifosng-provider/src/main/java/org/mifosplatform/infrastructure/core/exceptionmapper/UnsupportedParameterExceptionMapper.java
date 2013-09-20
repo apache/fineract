@@ -32,19 +32,20 @@ public class UnsupportedParameterExceptionMapper implements ExceptionMapper<Unsu
     @Override
     public Response toResponse(final UnsupportedParameterException exception) {
 
-        List<ApiParameterError> errors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> errors = new ArrayList<ApiParameterError>();
 
-        for (String parameterName : exception.getUnsupportedParameters()) {
-            StringBuilder validationErrorCode = new StringBuilder("error.msg.parameter.unsupported");
-            StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameterName).append(" is not supported.");
-            ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
-                    parameterName, parameterName);
+        for (final String parameterName : exception.getUnsupportedParameters()) {
+            final StringBuilder validationErrorCode = new StringBuilder("error.msg.parameter.unsupported");
+            final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameterName).append(
+                    " is not supported.");
+            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                    defaultEnglishMessage.toString(), parameterName, parameterName);
 
             errors.add(error);
         }
 
-        ApiGlobalErrorResponse invalidParameterError = ApiGlobalErrorResponse.badClientRequest("validation.msg.validation.errors.exist",
-                "Validation errors exist.", errors);
+        final ApiGlobalErrorResponse invalidParameterError = ApiGlobalErrorResponse.badClientRequest(
+                "validation.msg.validation.errors.exist", "Validation errors exist.", errors);
 
         return Response.status(Status.BAD_REQUEST).entity(invalidParameterError).type(MediaType.APPLICATION_JSON).build();
     }

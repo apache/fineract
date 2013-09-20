@@ -35,7 +35,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             final List<Holiday> holidays, final WorkingDays workingDays) {
 
         // 1. generate list of proposed schedule due dates
-        final List<LocalDate> scheduledDates = this.scheduledDateGenerator.generate(loanApplicationTerms, isHolidayEnabled, holidays, workingDays);
+        final List<LocalDate> scheduledDates = this.scheduledDateGenerator.generate(loanApplicationTerms, isHolidayEnabled, holidays,
+                workingDays);
 
         // 2. determine the total charges due at time of disbursement
         final BigDecimal chargesDueAtTimeOfDisbursement = deriveTotalChargesDueAtTimeOfDisbursement(loanCharges);
@@ -49,12 +50,12 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         // variables for cumulative totals
         int loanTermInDays = Integer.valueOf(0);
         BigDecimal totalPrincipalExpected = BigDecimal.ZERO;
-        BigDecimal totalPrincipalPaid = BigDecimal.ZERO;
+        final BigDecimal totalPrincipalPaid = BigDecimal.ZERO;
         BigDecimal totalInterestCharged = BigDecimal.ZERO;
         BigDecimal totalFeeChargesCharged = chargesDueAtTimeOfDisbursement;
         BigDecimal totalPenaltyChargesCharged = BigDecimal.ZERO;
         BigDecimal totalRepaymentExpected = chargesDueAtTimeOfDisbursement;
-        BigDecimal totalOutstanding = BigDecimal.ZERO;
+        final BigDecimal totalOutstanding = BigDecimal.ZERO;
 
         final Collection<LoanScheduleModelPeriod> periods = createNewLoanScheduleListWithDisbursementDetails(numberOfRepayments,
                 loanApplicationTerms, chargesDueAtTimeOfDisbursement);
@@ -73,17 +74,17 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         Money totalCumulativeInterest = principalDisbursed.zero();
         Money totalOutstandingInterestPaymentDueToGrace = principalDisbursed.zero();
         Money outstandingBalance = principalDisbursed;
-        for (LocalDate scheduledDueDate : scheduledDates) {
+        for (final LocalDate scheduledDueDate : scheduledDates) {
 
             final int daysInPeriod = Days.daysBetween(startDate, scheduledDueDate).getDays();
 
-            double interestCalculationGraceOnRepaymentPeriodFraction = this.paymentPeriodsInOneYearCalculator
+            final double interestCalculationGraceOnRepaymentPeriodFraction = this.paymentPeriodsInOneYearCalculator
                     .calculatePortionOfRepaymentPeriodInterestChargingGrace(repaymentPeriodStartDate, scheduledDueDate,
                             loanApplicationTerms.getInterestChargedFromLocalDate(), loanApplicationTerms.getLoanTermPeriodFrequencyType(),
                             loanApplicationTerms.getRepaymentEvery());
 
             // 5 determine principal,interest of repayment period
-            PrincipalInterest principalInterestForThisPeriod = calculatePrincipalInterestComponentsForPeriod(
+            final PrincipalInterest principalInterestForThisPeriod = calculatePrincipalInterestComponentsForPeriod(
                     this.paymentPeriodsInOneYearCalculator, interestCalculationGraceOnRepaymentPeriodFraction, totalCumulativePrincipal,
                     totalCumulativeInterest, totalInterestChargedForFullLoanTerm, totalOutstandingInterestPaymentDueToGrace, daysInPeriod,
                     outstandingBalance, loanApplicationTerms, periodNumber, mc);
@@ -141,7 +142,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
     private BigDecimal deriveTotalChargesDueAtTimeOfDisbursement(final Set<LoanCharge> loanCharges) {
         BigDecimal chargesDueAtTimeOfDisbursement = BigDecimal.ZERO;
-        for (LoanCharge loanCharge : loanCharges) {
+        for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isDueAtDisbursement()) {
                 chargesDueAtTimeOfDisbursement = chargesDueAtTimeOfDisbursement.add(loanCharge.amount());
             }
@@ -166,7 +167,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
         Money cumulative = Money.zero(monetaryCurrency);
 
-        for (LoanCharge loanCharge : loanCharges) {
+        for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd) && loanCharge.isFeeCharge()) {
                 cumulative = cumulative.plus(loanCharge.amount());
             }
@@ -180,7 +181,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
         Money cumulative = Money.zero(monetaryCurrency);
 
-        for (LoanCharge loanCharge : loanCharges) {
+        for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd) && loanCharge.isPenaltyCharge()) {
                 cumulative = cumulative.plus(loanCharge.amount());
             }

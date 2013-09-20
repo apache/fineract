@@ -15,21 +15,21 @@ public class FlatInterestLoanScheduleGenerator extends AbstractLoanScheduleGener
     public PrincipalInterest calculatePrincipalInterestComponentsForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
             final double interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
             final Money totalCumulativeInterest, final Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
-            final int daysInPeriod, final Money outstandingBalance,
-            final LoanApplicationTerms loanApplicationTerms, final int periodNumber, final MathContext mc) {
+            final int daysInPeriod, final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms,
+            final int periodNumber, final MathContext mc) {
 
         Money principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator, daysInPeriod,
                 outstandingBalance, periodNumber, mc);
 
-        PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
+        final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
                 interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestPaymentDueToGrace, daysInPeriod,
                 outstandingBalance);
         Money interestForThisInstallment = result.interest();
 
         // update cumulative fields for principal & interest
-        Money interestBroughtForwardDueToGrace = result.interestPaymentDueToGrace();
-        Money totalCumulativePrincipalToDate = totalCumulativePrincipal.plus(principalForThisInstallment);
-        Money totalCumulativeInterestToDate = totalCumulativeInterest.plus(interestForThisInstallment);
+        final Money interestBroughtForwardDueToGrace = result.interestPaymentDueToGrace();
+        final Money totalCumulativePrincipalToDate = totalCumulativePrincipal.plus(principalForThisInstallment);
+        final Money totalCumulativeInterestToDate = totalCumulativeInterest.plus(interestForThisInstallment);
 
         // adjust if needed
         principalForThisInstallment = loanApplicationTerms.adjustPrincipalIfLastRepaymentPeriod(principalForThisInstallment,

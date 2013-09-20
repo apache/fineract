@@ -30,7 +30,8 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
 
     @Autowired
     public GlobalConfigurationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final GlobalConfigurationRepository codeRepository, final GlobalConfigurationCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+            final GlobalConfigurationRepository codeRepository,
+            final GlobalConfigurationCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
         this.repository = codeRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -40,30 +41,30 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
     @Override
     public CommandProcessingResult update(final JsonCommand command) {
 
-        context.authenticatedUser();
-        
+        this.context.authenticatedUser();
+
         final UpdateGlobalConfigurationCommand configurationCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
-        
+
         final Map<String, Boolean> params = configurationCommand.getGlobalConfiguration();
-        
+
         final Map<String, Object> changes = new LinkedHashMap<String, Object>(params.size());
         final Map<String, Boolean> propertiesMap = new LinkedHashMap<String, Boolean>(1);
-        for (String propertyName : params.keySet()) {
+        for (final String propertyName : params.keySet()) {
             final GlobalConfigurationProperty property = retrieveBy(propertyName);
-            
-            Boolean value = params.get(propertyName);
-            boolean updated = property.updateTo(value);
-            
+
+            final Boolean value = params.get(propertyName);
+            final boolean updated = property.updateTo(value);
+
             if (updated) {
-                propertiesMap.put(propertyName, value); 
+                propertiesMap.put(propertyName, value);
                 this.repository.save(property);
             }
         }
-        
+
         if (!propertiesMap.isEmpty()) {
             changes.put("globalConfiguration", propertiesMap);
         }
-        
+
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).with(changes).build();
     }
 

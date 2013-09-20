@@ -42,7 +42,7 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         // default to tenant database datasource
         DataSource tenantDataSource = this.tenantDataSource;
 
-        MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+        final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         if (tenant != null) {
             synchronized (this.tenantToDataSourceMap) {
                 // if tenant information available switch to appropriate
@@ -64,9 +64,9 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         // see
         // http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency
 
-        String jdbcUrl = tenant.databaseURL();
+        final String jdbcUrl = tenant.databaseURL();
 
-        PoolConfiguration poolConfiguration = new PoolProperties();
+        final PoolConfiguration poolConfiguration = new PoolProperties();
         poolConfiguration.setDriverClassName("com.mysql.jdbc.Driver");
         poolConfiguration.setName(tenant.getSchemaName() + "_pool");
         poolConfiguration.setUrl(jdbcUrl);

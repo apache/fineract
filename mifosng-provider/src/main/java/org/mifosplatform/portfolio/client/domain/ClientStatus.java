@@ -29,10 +29,10 @@ public enum ClientStatus {
             break;
             case 300:
                 enumeration = ClientStatus.ACTIVE;
-                break;
+            break;
             case 303:
                 enumeration = ClientStatus.TRANSFER_IN_PROGRESS;
-                break;
+            break;
             case 304:
                 enumeration = ClientStatus.TRANSFER_ON_HOLD;
             break;
@@ -57,7 +57,7 @@ public enum ClientStatus {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public boolean isPending() {

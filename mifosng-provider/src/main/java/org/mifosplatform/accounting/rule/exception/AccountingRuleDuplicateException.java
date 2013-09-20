@@ -13,10 +13,10 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
  */
 public class AccountingRuleDuplicateException extends AbstractPlatformDomainRuleException {
 
-    public AccountingRuleDuplicateException(String name) {
+    public AccountingRuleDuplicateException(final String name) {
         super("error.msg.accounting.rule.duplicate", "An accounting rule with the name " + name + " already exists" + name);
     }
-    
+
     public AccountingRuleDuplicateException() {
         super("error.msg.accounting.rule.tag.duplicate", "The accounting rule already have the tags which you defined");
     }

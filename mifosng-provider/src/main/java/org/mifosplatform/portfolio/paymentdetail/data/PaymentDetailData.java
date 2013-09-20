@@ -27,8 +27,8 @@ public class PaymentDetailData {
     @SuppressWarnings("unused")
     private final String bankNumber;
 
-    public PaymentDetailData(Long id, CodeValueData paymentType, String accountNumber, String checkNumber, String routingCode,
-            String receiptNumber, String bankNumber) {
+    public PaymentDetailData(final Long id, final CodeValueData paymentType, final String accountNumber, final String checkNumber,
+            final String routingCode, final String receiptNumber, final String bankNumber) {
         this.id = id;
         this.paymentType = paymentType;
         this.accountNumber = accountNumber;

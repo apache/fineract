@@ -24,10 +24,10 @@ public class EnumOptionData {
     }
 
     public Long getId() {
-        return id;
+        return this.id;
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 }

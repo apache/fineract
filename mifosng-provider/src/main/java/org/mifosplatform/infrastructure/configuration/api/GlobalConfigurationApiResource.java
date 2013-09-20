@@ -68,12 +68,12 @@ public class GlobalConfigurationApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveConfiguration(@Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         final GlobalConfigurationData configurationData = this.readPlatformService.retrieveGlobalConfiguration();
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, configurationData, RESPONSE_DATA_PARAMETERS);
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, configurationData, this.RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT
@@ -81,9 +81,9 @@ public class GlobalConfigurationApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateConfiguration(@Context final UriInfo uriInfo) {
 
-        Map<String, String> configurationParameters = ApiParameterHelper.asMap(uriInfo.getQueryParameters());
+        final Map<String, String> configurationParameters = ApiParameterHelper.asMap(uriInfo.getQueryParameters());
 
-        Map<String, Object> globalConfiguration = new HashMap<String, Object>();
+        final Map<String, Object> globalConfiguration = new HashMap<String, Object>();
         globalConfiguration.put("globalConfiguration", configurationParameters);
 
         final String apiRequestJson = this.toApiJsonSerializer.serialize(globalConfiguration);

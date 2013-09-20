@@ -69,11 +69,12 @@ public class LoanProductsApiResource {
             "graceOnInterestPayment", "graceOnInterestCharged", "interestRatePerPeriod", "minInterestRatePerPeriod",
             "maxInterestRatePerPeriod", "interestRateFrequencyType", "annualInterestRate", "amortizationType", "interestType",
             "interestCalculationPeriodType", "inArrearsTolerance", "transactionProcessingStrategyId", "transactionProcessingStrategyName",
-            "charges", "accountingRule", "externalId", "accountingMappings", "paymentChannelToFundSourceMappings", "fundOptions", "paymentTypeOptions",
-            "currencyOptions", "repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "amortizationTypeOptions",
-            "interestTypeOptions", "interestCalculationPeriodTypeOptions", "transactionProcessingStrategyOptions", "chargeOptions",
-            "accountingOptions", "accountingRuleOptions", "accountingMappingOptions"));
-    
+            "charges", "accountingRule", "externalId", "accountingMappings", "paymentChannelToFundSourceMappings", "fundOptions",
+            "paymentTypeOptions", "currencyOptions", "repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions",
+            "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions",
+            "transactionProcessingStrategyOptions", "chargeOptions", "accountingOptions", "accountingRuleOptions",
+            "accountingMappingOptions"));
+
     private final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("productId", "productName",
             "restrictedProducts", "allowedProducts", "productOptions"));
 
@@ -139,21 +140,21 @@ public class LoanProductsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllLoanProducts(@Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+
         if (!associationParameters.isEmpty()) {
             if (associationParameters.contains("productMixes")) {
-                context.authenticatedUser().validateHasReadPermission("PRODUCTMIX");
-                Collection<ProductMixData> productMixes = this.productMixReadPlatformService.retrieveAllProductMixes();
-                return this.productMixDataApiJsonSerializer.serialize(settings, productMixes, PRODUCT_MIX_DATA_PARAMETERS);
+                this.context.authenticatedUser().validateHasReadPermission("PRODUCTMIX");
+                final Collection<ProductMixData> productMixes = this.productMixReadPlatformService.retrieveAllProductMixes();
+                return this.productMixDataApiJsonSerializer.serialize(settings, productMixes, this.PRODUCT_MIX_DATA_PARAMETERS);
             }
         }
 
         final Collection<LoanProductData> products = this.loanProductReadPlatformService.retrieveAllLoanProducts();
 
-        return this.toApiJsonSerializer.serialize(settings, products, LOAN_PRODUCT_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, products, this.LOAN_PRODUCT_DATA_PARAMETERS);
     }
 
     @GET
@@ -162,21 +163,21 @@ public class LoanProductsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveTemplate(@Context final UriInfo uriInfo, @QueryParam("isProductMixTemplate") final boolean isProductMixTemplate) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         if (isProductMixTemplate) {
-            context.authenticatedUser().validateHasReadPermission("PRODUCTMIX");
+            this.context.authenticatedUser().validateHasReadPermission("PRODUCTMIX");
 
-            Collection<LoanProductData> productOptions = this.loanProductReadPlatformService.retrieveAvailableLoanProductsForMix();
-            ProductMixData productMixData = ProductMixData.template(productOptions);
-            return this.productMixDataApiJsonSerializer.serialize(settings, productMixData, PRODUCT_MIX_DATA_PARAMETERS);
+            final Collection<LoanProductData> productOptions = this.loanProductReadPlatformService.retrieveAvailableLoanProductsForMix();
+            final ProductMixData productMixData = ProductMixData.template(productOptions);
+            return this.productMixDataApiJsonSerializer.serialize(settings, productMixData, this.PRODUCT_MIX_DATA_PARAMETERS);
         }
 
         LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveNewLoanProductDetails();
         loanProduct = handleTemplate(loanProduct);
 
-        return this.toApiJsonSerializer.serialize(settings, loanProduct, LOAN_PRODUCT_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, loanProduct, this.LOAN_PRODUCT_DATA_PARAMETERS);
     }
 
     @GET
@@ -185,9 +186,9 @@ public class LoanProductsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveLoanProductDetails(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
 
@@ -196,12 +197,13 @@ public class LoanProductsApiResource {
         Collection<ChargeToGLAccountMapper> feeToGLAccountMappings = null;
         Collection<ChargeToGLAccountMapper> penaltyToGLAccountMappings = null;
         if (loanProduct.hasAccountingEnabled()) {
-            accountingMappings = accountMappingReadPlatformService.fetchAccountMappingDetailsForLoanProduct(productId, loanProduct
+            accountingMappings = this.accountMappingReadPlatformService.fetchAccountMappingDetailsForLoanProduct(productId, loanProduct
                     .accountingRuleType().getId().intValue());
-            paymentChannelToFundSourceMappings = accountMappingReadPlatformService
+            paymentChannelToFundSourceMappings = this.accountMappingReadPlatformService
                     .fetchPaymentTypeToFundSourceMappingsForLoanProduct(productId);
-            feeToGLAccountMappings = accountMappingReadPlatformService.fetchFeeToIncomeAccountMappingsForLoanProduct(productId);
-            penaltyToGLAccountMappings = accountMappingReadPlatformService.fetchPenaltyToIncomeAccountMappingsForLoanProduct(productId);
+            feeToGLAccountMappings = this.accountMappingReadPlatformService.fetchFeeToIncomeAccountMappingsForLoanProduct(productId);
+            penaltyToGLAccountMappings = this.accountMappingReadPlatformService
+                    .fetchPenaltyToIncomeAccountMappingsForLoanProduct(productId);
             loanProduct = LoanProductData.withAccountingDetails(loanProduct, accountingMappings, paymentChannelToFundSourceMappings,
                     feeToGLAccountMappings, penaltyToGLAccountMappings);
         }
@@ -209,7 +211,7 @@ public class LoanProductsApiResource {
         if (settings.isTemplate()) {
             loanProduct = handleTemplate(loanProduct);
         }
-        return this.toApiJsonSerializer.serialize(settings, loanProduct, LOAN_PRODUCT_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, loanProduct, this.LOAN_PRODUCT_DATA_PARAMETERS);
     }
 
     @PUT
@@ -239,15 +241,15 @@ public class LoanProductsApiResource {
             penaltyOptions = null;
         }
 
-        final Collection<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
-        final List<EnumOptionData> amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
-        final List<EnumOptionData> interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
-        final List<EnumOptionData> interestCalculationPeriodTypeOptions = dropdownReadPlatformService
+        final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
+        final List<EnumOptionData> amortizationTypeOptions = this.dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
+        final List<EnumOptionData> interestTypeOptions = this.dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
+        final List<EnumOptionData> interestCalculationPeriodTypeOptions = this.dropdownReadPlatformService
                 .retrieveLoanInterestRateCalculatedInPeriodOptions();
-        final List<EnumOptionData> repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
-        final List<EnumOptionData> interestRateFrequencyTypeOptions = dropdownReadPlatformService
+        final List<EnumOptionData> repaymentFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
+        final List<EnumOptionData> interestRateFrequencyTypeOptions = this.dropdownReadPlatformService
                 .retrieveInterestRateFrequencyTypeOptions();
-        final Collection<CodeValueData> paymentTypeOptions = codeValueReadPlatformService
+        final Collection<CodeValueData> paymentTypeOptions = this.codeValueReadPlatformService
                 .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
 
         Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
@@ -257,10 +259,11 @@ public class LoanProductsApiResource {
         final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = this.dropdownReadPlatformService
                 .retreiveTransactionProcessingStrategies();
 
-        Map<String, List<GLAccountData>> accountOptions = accountingDropdownReadPlatformService
+        final Map<String, List<GLAccountData>> accountOptions = this.accountingDropdownReadPlatformService
                 .retrieveAccountMappingOptionsForLoanProducts();
 
-        List<EnumOptionData> accountingRuleTypeOptions = accountingDropdownReadPlatformService.retrieveAccountingRuleTypeOptions();
+        final List<EnumOptionData> accountingRuleTypeOptions = this.accountingDropdownReadPlatformService
+                .retrieveAccountingRuleTypeOptions();
 
         return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions,
                 amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions,

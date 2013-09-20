@@ -59,7 +59,7 @@ public class Code extends AbstractPersistable<Long> {
 
     public Map<String, Object> update(final JsonCommand command) {
 
-        if (systemDefined) { throw new SystemDefinedCodeCannotBeChangedException(); }
+        if (this.systemDefined) { throw new SystemDefinedCodeCannotBeChangedException(); }
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(1);
 

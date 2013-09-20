@@ -21,7 +21,7 @@ public class JLGCollectionSheetData {
     private final Collection<LoanProductData> loanProducts;
     private final Collection<JLGGroupData> groups;
     @SuppressWarnings("unused")
-    private final List<EnumOptionData> attendanceTypeOptions; 
+    private final List<EnumOptionData> attendanceTypeOptions;
 
     public JLGCollectionSheetData(final LocalDate date, final Collection<LoanProductData> loanProducts,
             final Collection<JLGGroupData> groups, final List<EnumOptionData> attendanceTypeOptions) {

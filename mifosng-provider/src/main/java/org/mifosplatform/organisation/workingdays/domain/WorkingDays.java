@@ -15,23 +15,22 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Entity
 @Table(name = "m_working_days")
 public class WorkingDays extends AbstractPersistable<Long> {
-    
+
     @Column(name = "recurrence", length = 100, nullable = true)
     private String recurrence;
-    
+
     @Column(name = "repayment_rescheduling_enum", nullable = false)
     private Integer repaymentReschedulingType;
 
     protected WorkingDays() {
-        
+
     }
 
-    protected WorkingDays(String recurrence, Integer repaymentReschedulingType) {
+    protected WorkingDays(final String recurrence, final Integer repaymentReschedulingType) {
         this.recurrence = recurrence;
         this.repaymentReschedulingType = repaymentReschedulingType;
     }
 
-    
     /**
      * @return the recurrence
      */
@@ -39,12 +38,11 @@ public class WorkingDays extends AbstractPersistable<Long> {
         return this.recurrence;
     }
 
-    
     /**
      * @return the repaymentReschedulingType
      */
     public Integer getRepaymentReschedulingType() {
         return this.repaymentReschedulingType;
     }
-    
+
 }

@@ -19,7 +19,6 @@ public class SavingsApiConstants {
     public static final String SAVINGS_ACCOUNT_RESOURCE_NAME = "savingsaccount";
     public static final String SAVINGS_ACCOUNT_TRANSACTION_RESOURCE_NAME = "savingsaccount.transaction";
     public static final String SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME = "savingsaccountcharge";
-    
 
     // actions
     public static String summitalAction = ".summital";
@@ -39,8 +38,8 @@ public class SavingsApiConstants {
     // command
     public static String COMMAND_UNDO_TRANSACTION = "undo";
     public static String COMMAND_ADJUST_TRANSACTION = "modify";
-    public static String COMMAND_WAIVE_CHARGE= "waive";
-    public static String COMMAND_PAY_CHARGE= "paycharge";
+    public static String COMMAND_WAIVE_CHARGE = "waive";
+    public static String COMMAND_PAY_CHARGE = "paycharge";
 
     // general
     public static final String localeParamName = "locale";
@@ -98,8 +97,8 @@ public class SavingsApiConstants {
     public static final String runningBalanceParamName = "runningBalance";
     public static final String reversedParamName = "reversed";
     public static final String dateParamName = "date";
-    
-    //charges parameters
+
+    // charges parameters
     public static final String chargeIdParamName = "chargeId";
     public static final String chargesParamName = "charges";
     public static final String savingsAccountChargeIdParamName = "savingsAccountChargeId";
@@ -117,7 +116,7 @@ public class SavingsApiConstants {
     public static final String amountOrPercentageParamName = "amountOrPercentage";
     public static final String amountParamName = "amount";
     public static final String amountPaidParamName = "amountPaid";
-    public static final String chargeOptionsParamName = "chargeOptions";    
+    public static final String chargeOptionsParamName = "chargeOptions";
 
     public static final String noteParamName = "note";
 
@@ -184,13 +183,13 @@ public class SavingsApiConstants {
 
     public static final Set<String> SAVINGS_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, closedOnDateParamName, noteParamName));
-    
+
     public static final Set<String> SAVINGS_ACCOUNT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(chargeIdParamName,
             savingsAccountChargeIdParamName, chargeNameParamName, penaltyParamName, chargeTimeTypeParamName, dueAsOfDateParamName,
             chargeCalculationTypeParamName, percentageParamName, amountPercentageAppliedToParamName, currencyParamName,
-            amountWaivedParamName, amountWrittenOffParamName, amountOutstandingParamName, amountOrPercentageParamName, amountParamName, amountPaidParamName,
-            chargeOptionsParamName));
-    
+            amountWaivedParamName, amountWrittenOffParamName, amountOutstandingParamName, amountOrPercentageParamName, amountParamName,
+            amountPaidParamName, chargeOptionsParamName));
+
     public static final Set<String> SAVINGS_ACCOUNT_CHARGES_ADD_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
             chargeIdParamName, amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName));
 }

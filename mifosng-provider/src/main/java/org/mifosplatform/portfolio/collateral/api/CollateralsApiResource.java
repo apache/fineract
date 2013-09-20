@@ -75,7 +75,7 @@ public class CollateralsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String newCollateralTemplate(@Context final UriInfo uriInfo) {
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
@@ -90,11 +90,11 @@ public class CollateralsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveCollateralDetails(@Context final UriInfo uriInfo, @PathParam("loanId") final Long loanId) {
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
-        List<CollateralData> CollateralDatas = collateralReadPlatformService.retrieveCollateralsForValidLoan(loanId);
+        final List<CollateralData> CollateralDatas = this.collateralReadPlatformService.retrieveCollateralsForValidLoan(loanId);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         return this.apiJsonSerializerService.serialize(settings, CollateralDatas, RESPONSE_DATA_PARAMETERS);
     }
@@ -105,11 +105,11 @@ public class CollateralsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveCollateralDetails(@Context final UriInfo uriInfo, @PathParam("loanId") final Long loanId,
             @PathParam("collateralId") final Long CollateralId) {
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
-        CollateralData CollateralData = collateralReadPlatformService.retrieveCollateral(loanId, CollateralId);
+        CollateralData CollateralData = this.collateralReadPlatformService.retrieveCollateral(loanId, CollateralId);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
             final Collection<CodeValueData> codeValues = this.codeValueReadPlatformService
                     .retrieveCodeValuesByCode(CollateralApiConstants.COLLATERAL_CODE_NAME);

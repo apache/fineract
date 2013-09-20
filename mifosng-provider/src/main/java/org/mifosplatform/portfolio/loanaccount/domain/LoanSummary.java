@@ -137,31 +137,25 @@ public final class LoanSummary {
         return this.totalInterestCharged;
     }
 
-    
     public BigDecimal getTotalPrincipalOutstanding() {
         return this.totalPrincipalOutstanding;
     }
 
-    
     public BigDecimal getTotalInterestOutstanding() {
         return this.totalInterestOutstanding;
     }
 
-    
     public BigDecimal getTotalFeeChargesOutstanding() {
         return this.totalFeeChargesOutstanding;
     }
 
-    
     public BigDecimal getTotalPenaltyChargesOutstanding() {
         return this.totalPenaltyChargesOutstanding;
     }
-    
-    
+
     public BigDecimal getTotalOutstanding() {
         return this.totalOutstanding;
     }
-
 
     /**
      * All fields but <code>totalFeeChargesDueAtDisbursement</code> should be

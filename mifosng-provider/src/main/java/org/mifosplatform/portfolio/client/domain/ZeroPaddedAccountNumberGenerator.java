@@ -15,13 +15,13 @@ public class ZeroPaddedAccountNumberGenerator implements AccountNumberGenerator 
     private final Long id;
     private final int maxLength;
 
-    public ZeroPaddedAccountNumberGenerator(final Long id, int maxLength) {
+    public ZeroPaddedAccountNumberGenerator(final Long id, final int maxLength) {
         this.id = id;
         this.maxLength = maxLength;
     }
 
     @Override
     public String generate() {
-        return String.format("%0" + maxLength + "d", id);
+        return String.format("%0" + this.maxLength + "d", this.id);
     }
 }

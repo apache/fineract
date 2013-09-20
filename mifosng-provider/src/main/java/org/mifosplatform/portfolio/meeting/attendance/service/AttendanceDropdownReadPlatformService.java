@@ -10,5 +10,6 @@ import java.util.List;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 public interface AttendanceDropdownReadPlatformService {
+
     List<EnumOptionData> retrieveAttendanceTypeOptions();
 }

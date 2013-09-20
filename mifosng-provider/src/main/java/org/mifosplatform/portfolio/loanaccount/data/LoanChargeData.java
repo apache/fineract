@@ -156,7 +156,7 @@ public class LoanChargeData {
         this.loanId = loanId;
     }
 
-    public LoanChargeData(final Long id,final LocalDate dueAsOfDate,final BigDecimal amountOutstanding,final Long loanId) {
+    public LoanChargeData(final Long id, final LocalDate dueAsOfDate, final BigDecimal amountOutstanding, final Long loanId) {
         this.id = id;
         this.chargeId = null;
         this.name = null;
@@ -183,7 +183,7 @@ public class LoanChargeData {
 
     public boolean isChargePayable() {
         boolean isAccountTransfer = false;
-        if(this.chargePaymentMode!=null){
+        if (this.chargePaymentMode != null) {
             isAccountTransfer = ChargePaymentMode.fromInt(this.chargePaymentMode.getId().intValue()).isPaymentModeAccountTransfer();
         }
         return isAccountTransfer && !this.paid && !this.waived;
@@ -200,7 +200,6 @@ public class LoanChargeData {
     public Long getLoanId() {
         return this.loanId;
     }
-
 
     public BigDecimal getAmountOutstanding() {
         return this.amountOutstanding;

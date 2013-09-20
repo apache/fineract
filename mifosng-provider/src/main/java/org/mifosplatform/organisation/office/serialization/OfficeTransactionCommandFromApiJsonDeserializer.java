@@ -47,16 +47,16 @@ public final class OfficeTransactionCommandFromApiJsonDeserializer {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("officeTransaction");
 
-        final JsonElement element = fromApiJsonHelper.parse(json);
-        final Long fromOfficeId = fromApiJsonHelper.extractLongNamed("fromOfficeId", element);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        final Long fromOfficeId = this.fromApiJsonHelper.extractLongNamed("fromOfficeId", element);
         baseDataValidator.reset().parameter("fromOfficeId").value(fromOfficeId).ignoreIfNull().integerGreaterThanZero();
 
-        final Long toOfficeId = fromApiJsonHelper.extractLongNamed("toOfficeId", element);
+        final Long toOfficeId = this.fromApiJsonHelper.extractLongNamed("toOfficeId", element);
         baseDataValidator.reset().parameter("toOfficeId").value(toOfficeId).ignoreIfNull().integerGreaterThanZero();
 
         if (fromOfficeId == null && toOfficeId == null) {
@@ -67,16 +67,16 @@ public final class OfficeTransactionCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter("fromOfficeId").value(fromOfficeId).notSameAsParameter("toOfficeId", toOfficeId);
         }
 
-        final LocalDate transactionDate = fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
         baseDataValidator.reset().parameter("transactionDate").value(transactionDate).notNull();
 
-        final String currencyCode = fromApiJsonHelper.extractStringNamed("currencyCode", element);
+        final String currencyCode = this.fromApiJsonHelper.extractStringNamed("currencyCode", element);
         baseDataValidator.reset().parameter("currencyCode").value(currencyCode).notBlank().notExceedingLengthOf(3);
 
-        final BigDecimal transactionAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("transactionAmount", element);
+        final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("transactionAmount", element);
         baseDataValidator.reset().parameter("transactionAmount").value(transactionAmount).notNull().positiveAmount();
 
-        final String description = fromApiJsonHelper.extractStringNamed("description", element);
+        final String description = this.fromApiJsonHelper.extractStringNamed("description", element);
         baseDataValidator.reset().parameter("description").value(description).notExceedingLengthOf(100);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

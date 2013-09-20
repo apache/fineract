@@ -37,8 +37,8 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     @Autowired
     public ProductToGLAccountMappingWritePlatformServiceImpl(final FromJsonHelper fromApiJsonHelper,
             final ProductToGLAccountMappingFromApiJsonDeserializer deserializer,
-            LoanProductToGLAccountMappingHelper loanProductToGLAccountMappingHelper,
-            SavingsProductToGLAccountMappingHelper savingsProductToGLAccountMappingHelper) {
+            final LoanProductToGLAccountMappingHelper loanProductToGLAccountMappingHelper,
+            final SavingsProductToGLAccountMappingHelper savingsProductToGLAccountMappingHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.deserializer = deserializer;
         this.loanProductToGLAccountMappingHelper = loanProductToGLAccountMappingHelper;
@@ -57,84 +57,84 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
             break;
             case CASH_BASED:
                 // asset
-                loanProductToGLAccountMappingHelper
+                this.loanProductToGLAccountMappingHelper
                         .saveLoanToAssetAccountMapping(element, LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), loanProductId,
                                 CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE.getValue());
-                loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
+                this.loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(), loanProductId,
                         CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue());
-                loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
+                this.loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(), loanProductId,
                         CASH_ACCOUNTS_FOR_LOAN.TRANSFERS_SUSPENSE.getValue());
 
                 // income
-                loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
+                this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), loanProductId,
                         CASH_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS.getValue());
-                loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
+                this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), loanProductId,
                         CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES.getValue());
-                loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
+                this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), loanProductId,
                         CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.getValue());
 
                 // expenses
-                loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
+                this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), loanProductId,
                         CASH_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.getValue());
 
                 // advanced accounting mappings
-                loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, null);
-                loanProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, loanProductId, null);
+                this.loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, null);
+                this.loanProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, loanProductId, null);
             break;
             case ACCRUAL_BASED:
 
                 // assets (including receivables)
-                loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
+                this.loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), loanProductId,
                         ACCRUAL_ACCOUNTS_FOR_LOAN.FUND_SOURCE.getValue());
-                loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
+                this.loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(), loanProductId,
                         ACCRUAL_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue());
-                loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
+                this.loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(), loanProductId,
                         ACCRUAL_ACCOUNTS_FOR_LOAN.TRANSFERS_SUSPENSE.getValue());
-                loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
+                this.loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_RECEIVABLE.getValue(), loanProductId,
                         ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_RECEIVABLE.getValue());
-                loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
+                this.loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.FEES_RECEIVABLE.getValue(), loanProductId,
                         ACCRUAL_ACCOUNTS_FOR_LOAN.FEES_RECEIVABLE.getValue());
-                loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
+                this.loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue(), loanProductId,
                         ACCRUAL_ACCOUNTS_FOR_LOAN.PENALTIES_RECEIVABLE.getValue());
 
                 // income
-                loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
+                this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), loanProductId,
                         ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS.getValue());
-                loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
+                this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), loanProductId,
                         ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES.getValue());
-                loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
+                this.loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), loanProductId,
                         ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.getValue());
 
                 // expenses
-                loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
+                this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), loanProductId,
                         ACCRUAL_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.getValue());
 
                 // advanced accounting mappings
-                loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, null);
-                loanProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, loanProductId, null);
+                this.loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, null);
+                this.loanProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, loanProductId, null);
             break;
         }
     }
 
     @Override
     @Transactional
-    public void createSavingProductToGLAccountMapping(Long savingProductId, JsonCommand command) {
+    public void createSavingProductToGLAccountMapping(final Long savingProductId, final JsonCommand command) {
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
         final Integer accountingRuleTypeId = this.fromApiJsonHelper.extractIntegerNamed(accountingRuleParamName, element,
                 Locale.getDefault());
@@ -145,30 +145,30 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
             break;
             case CASH_BASED:
                 // asset
-                savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
+                this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_REFERENCE.getValue());
 
                 // income
-                savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
+                this.savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_FEES.getValue());
 
                 // expenses
-                savingsProductToGLAccountMappingHelper.saveSavingsToExpenseAccountMapping(element,
+                this.savingsProductToGLAccountMappingHelper.saveSavingsToExpenseAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.INTEREST_ON_SAVINGS.getValue());
 
                 // liability
-                savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
+                this.savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_CONTROL.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL.getValue());
-                savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
+                this.savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.TRANSFERS_SUSPENSE.getValue());
 
                 // advanced accounting mappings
-                savingsProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, savingProductId, null);
+                this.savingsProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, savingProductId, null);
             break;
             /*** Do not have accrual based accounting for now ***/
             case ACCRUAL_BASED:
@@ -195,23 +195,23 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
          ***/
         if (accountingRuleChanged) {
             this.deserializer.validateForLoanProductCreate(command.json());
-            loanProductToGLAccountMappingHelper.deleteLoanProductToGLAccountMapping(loanProductId);
+            this.loanProductToGLAccountMappingHelper.deleteLoanProductToGLAccountMapping(loanProductId);
             createLoanProductToGLAccountMapping(loanProductId, command);
-            changes = loanProductToGLAccountMappingHelper.populateChangesForNewLoanProductToGLAccountMappingCreation(element,
+            changes = this.loanProductToGLAccountMappingHelper.populateChangesForNewLoanProductToGLAccountMappingCreation(element,
                     accountingRuleType);
         }/*** else examine and update individual changes ***/
         else {
-            loanProductToGLAccountMappingHelper.handleChangesToLoanProductToGLAccountMappings(loanProductId, changes, element,
+            this.loanProductToGLAccountMappingHelper.handleChangesToLoanProductToGLAccountMappings(loanProductId, changes, element,
                     accountingRuleType);
-            loanProductToGLAccountMappingHelper.updatePaymentChannelToFundSourceMappings(command, element, loanProductId, changes);
-            loanProductToGLAccountMappingHelper.updateChargesToIncomeAccountMappings(command, element, loanProductId, changes);
+            this.loanProductToGLAccountMappingHelper.updatePaymentChannelToFundSourceMappings(command, element, loanProductId, changes);
+            this.loanProductToGLAccountMappingHelper.updateChargesToIncomeAccountMappings(command, element, loanProductId, changes);
         }
         return changes;
     }
 
     @Override
-    public Map<String, Object> updateSavingsProductToGLAccountMapping(Long savingsProductId, JsonCommand command,
-            boolean accountingRuleChanged, int accountingRuleTypeId) {
+    public Map<String, Object> updateSavingsProductToGLAccountMapping(final Long savingsProductId, final JsonCommand command,
+            final boolean accountingRuleChanged, final int accountingRuleTypeId) {
         /***
          * Variable tracks all accounting mapping properties that have been
          * updated
@@ -226,15 +226,16 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
          ***/
         if (accountingRuleChanged) {
             this.deserializer.validateForSavingsProductCreate(command.json());
-            savingsProductToGLAccountMappingHelper.deleteSavingsProductToGLAccountMapping(savingsProductId);
+            this.savingsProductToGLAccountMappingHelper.deleteSavingsProductToGLAccountMapping(savingsProductId);
             createSavingProductToGLAccountMapping(savingsProductId, command);
-            changes = savingsProductToGLAccountMappingHelper.populateChangesForNewSavingsProductToGLAccountMappingCreation(element,
+            changes = this.savingsProductToGLAccountMappingHelper.populateChangesForNewSavingsProductToGLAccountMappingCreation(element,
                     accountingRuleType);
         }/*** else examine and update individual changes ***/
         else {
-            savingsProductToGLAccountMappingHelper.handleChangesToSavingsProductToGLAccountMappings(savingsProductId, changes, element,
-                    accountingRuleType);
-            savingsProductToGLAccountMappingHelper.updatePaymentChannelToFundSourceMappings(command, element, savingsProductId, changes);
+            this.savingsProductToGLAccountMappingHelper.handleChangesToSavingsProductToGLAccountMappings(savingsProductId, changes,
+                    element, accountingRuleType);
+            this.savingsProductToGLAccountMappingHelper.updatePaymentChannelToFundSourceMappings(command, element, savingsProductId,
+                    changes);
         }
         return changes;
     }

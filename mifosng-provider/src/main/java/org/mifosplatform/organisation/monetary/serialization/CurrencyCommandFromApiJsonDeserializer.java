@@ -45,13 +45,13 @@ public final class CurrencyCommandFromApiJsonDeserializer {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("currencies");
 
-        final JsonElement element = fromApiJsonHelper.parse(json);
-        final String[] currencies = fromApiJsonHelper.extractArrayNamed("currencies", element);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        final String[] currencies = this.fromApiJsonHelper.extractArrayNamed("currencies", element);
         baseDataValidator.reset().parameter("currencies").value(currencies).arrayNotEmpty();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

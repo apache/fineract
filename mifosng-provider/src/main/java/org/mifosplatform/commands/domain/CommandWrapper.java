@@ -185,8 +185,8 @@ public class CommandWrapper {
 
     public boolean isUpdate() {
         // permissions resource has special update which involves no resource.
-        return isPermissionResource() && isUpdateOperation() || isCurrencyResource() && isUpdateOperation() || isCacheResource() && isUpdateOperation()
-                || isUpdateOperation() && this.entityId != null;
+        return isPermissionResource() && isUpdateOperation() || isCurrencyResource() && isUpdateOperation() || isCacheResource()
+                && isUpdateOperation() || isUpdateOperation() && this.entityId != null;
     }
 
     public boolean isUpdateOperation() {
@@ -445,7 +445,7 @@ public class CommandWrapper {
     public boolean isSavingsAccountResource() {
         return this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
     }
-    
+
     public boolean isRejectionOfSavingsAccountApplication() {
         return this.actionName.equalsIgnoreCase("REJECT") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
     }
@@ -501,7 +501,7 @@ public class CommandWrapper {
     public boolean isSavingsAccountChargeResource() {
         return this.entityName.equalsIgnoreCase("SAVINGSACCOUNTCHARGE");
     }
-    
+
     public boolean isAddSavingsAccountCharge() {
         return this.actionName.equalsIgnoreCase("CREATE") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNTCHARGE");
     }
@@ -517,11 +517,11 @@ public class CommandWrapper {
     public boolean isWaiveSavingsAccountCharge() {
         return this.actionName.equalsIgnoreCase("WAIVE") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNTCHARGE");
     }
-    
+
     public boolean isPaySavingsAccountCharge() {
         return this.actionName.equalsIgnoreCase("PAY") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNTCHARGE");
     }
-    
+
     public boolean isCalendarResource() {
         return this.entityName.equalsIgnoreCase("CALENDAR");
     }

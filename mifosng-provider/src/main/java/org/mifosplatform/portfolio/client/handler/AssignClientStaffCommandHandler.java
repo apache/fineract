@@ -10,9 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AssignClientStaffCommandHandler implements NewCommandSourceHandler {
-    
+
     private final ClientWritePlatformService clientWritePlatformService;
-    
+
     @Autowired
     public AssignClientStaffCommandHandler(final ClientWritePlatformService clientWritePlatformService) {
         this.clientWritePlatformService = clientWritePlatformService;
@@ -20,7 +20,7 @@ public class AssignClientStaffCommandHandler implements NewCommandSourceHandler 
 
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
+    public CommandProcessingResult processCommand(final JsonCommand command) {
         return this.clientWritePlatformService.assignClientStaff(command.entityId(), command);
     }
 

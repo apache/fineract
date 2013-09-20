@@ -68,7 +68,7 @@ public class SavingsProductAssembler {
         final String currencyCode = command.stringValueOfParameterNamed(currencyCodeParamName);
         final Integer digitsAfterDecimal = command.integerValueOfParameterNamed(digitsAfterDecimalParamName);
         final Integer inMultiplesOf = command.integerValueOfParameterNamed(inMultiplesOfParamName);
-        final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal,inMultiplesOf);
+        final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
 
         final BigDecimal interestRate = command.bigDecimalValueOfParameterNamed(nominalAnnualInterestRateParamName);
 
@@ -115,7 +115,7 @@ public class SavingsProductAssembler {
         }
 
         boolean iswithdrawalFeeApplicableForTransfer = false;
-        if(command.parameterExists(withdrawalFeeForTransfersParamName)){
+        if (command.parameterExists(withdrawalFeeForTransfersParamName)) {
             iswithdrawalFeeApplicableForTransfer = command.booleanPrimitiveValueOfParameterNamed(withdrawalFeeForTransfersParamName);
         }
 
@@ -123,13 +123,13 @@ public class SavingsProductAssembler {
         final MonthDay monthDayOfAnnualFee = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
 
-        //Savings product charges
+        // Savings product charges
         final Set<Charge> charges = assembleListOfSavingsProductCharges(command, currencyCode);
 
         return SavingsProduct.createNew(name, description, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, iswithdrawalFeeApplicableForTransfer,
-                annualFeeAmount, monthDayOfAnnualFee, accountingRuleType, charges);
+                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,
+                iswithdrawalFeeApplicableForTransfer, annualFeeAmount, monthDayOfAnnualFee, accountingRuleType, charges);
     }
 
     public Set<Charge> assembleListOfSavingsProductCharges(final JsonCommand command, final String savingsProductCurrencyCode) {
@@ -147,8 +147,9 @@ public class SavingsProductAssembler {
 
                         final Charge charge = this.chargeRepository.findOneWithNotFoundDetection(id);
 
-                        if(!charge.isSavingsCharge()){
-                            final String errorMessage = "Charge with identifier " + charge.getId() + " cannot be applied to Savings product.";
+                        if (!charge.isSavingsCharge()) {
+                            final String errorMessage = "Charge with identifier " + charge.getId()
+                                    + " cannot be applied to Savings product.";
                             throw new ChargeCannotBeAppliedToException("savings.product", errorMessage, charge.getId());
                         }
 

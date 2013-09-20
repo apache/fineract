@@ -58,7 +58,7 @@ public class ApiParameterHelper {
     public static boolean prettyPrint(final MultivaluedMap<String, String> queryParams) {
         boolean prettyPrint = false;
         if (queryParams.getFirst("pretty") != null) {
-            String prettyPrintValue = queryParams.getFirst("pretty");
+            final String prettyPrintValue = queryParams.getFirst("pretty");
             prettyPrint = "true".equalsIgnoreCase(prettyPrintValue);
         }
         return prettyPrint;
@@ -67,7 +67,7 @@ public class ApiParameterHelper {
     public static Locale extractLocale(final MultivaluedMap<String, String> queryParams) {
         Locale locale = null;
         if (queryParams.getFirst("locale") != null) {
-            String localeAsString = queryParams.getFirst("locale");
+            final String localeAsString = queryParams.getFirst("locale");
             locale = JsonParserHelper.localeFromString(localeAsString);
         }
         return locale;
@@ -76,7 +76,7 @@ public class ApiParameterHelper {
     public static boolean exportCsv(final MultivaluedMap<String, String> queryParams) {
         boolean exportCsv = false;
         if (queryParams.getFirst("exportCSV") != null) {
-            String exportCsvValue = queryParams.getFirst("exportCSV");
+            final String exportCsvValue = queryParams.getFirst("exportCSV");
             exportCsv = "true".equalsIgnoreCase(exportCsvValue);
         }
         return exportCsv;
@@ -85,7 +85,7 @@ public class ApiParameterHelper {
     public static boolean exportPdf(final MultivaluedMap<String, String> queryParams) {
         boolean exportPDF = false;
         if (queryParams.getFirst("exportPDF") != null) {
-            String exportPdfValue = queryParams.getFirst("exportPDF");
+            final String exportPdfValue = queryParams.getFirst("exportPDF");
             exportPDF = "true".equalsIgnoreCase(exportPdfValue);
         }
         return exportPDF;
@@ -94,7 +94,7 @@ public class ApiParameterHelper {
     public static boolean parameterType(final MultivaluedMap<String, String> queryParams) {
         boolean parameterType = false;
         if (queryParams.getFirst("parameterType") != null) {
-            String parameterTypeValue = queryParams.getFirst("parameterType");
+            final String parameterTypeValue = queryParams.getFirst("parameterType");
             parameterType = "true".equalsIgnoreCase(parameterTypeValue);
         }
         return parameterType;
@@ -103,7 +103,7 @@ public class ApiParameterHelper {
     public static boolean template(final MultivaluedMap<String, String> queryParams) {
         boolean template = false;
         if (queryParams.getFirst("template") != null) {
-            String prettyPrintValue = queryParams.getFirst("template");
+            final String prettyPrintValue = queryParams.getFirst("template");
             template = "true".equalsIgnoreCase(prettyPrintValue);
         }
         return template;
@@ -112,7 +112,7 @@ public class ApiParameterHelper {
     public static boolean makerCheckerable(final MultivaluedMap<String, String> queryParams) {
         boolean makerCheckerable = false;
         if (queryParams.getFirst("makerCheckerable") != null) {
-            String prettyPrintValue = queryParams.getFirst("makerCheckerable");
+            final String prettyPrintValue = queryParams.getFirst("makerCheckerable");
             makerCheckerable = "true".equalsIgnoreCase(prettyPrintValue);
         }
         return makerCheckerable;
@@ -121,7 +121,7 @@ public class ApiParameterHelper {
     public static boolean includeJson(final MultivaluedMap<String, String> queryParams) {
         boolean includeJson = false;
         if (queryParams.getFirst("includeJson") != null) {
-            String includeJsonValue = queryParams.getFirst("includeJson");
+            final String includeJsonValue = queryParams.getFirst("includeJson");
             includeJson = "true".equalsIgnoreCase(includeJsonValue);
         }
         return includeJson;
@@ -130,28 +130,28 @@ public class ApiParameterHelper {
     public static boolean genericResultSet(final MultivaluedMap<String, String> queryParams) {
         boolean genericResultSet = false;
         if (queryParams.getFirst("genericResultSet") != null) {
-            String genericResultSetValue = queryParams.getFirst("genericResultSet");
+            final String genericResultSetValue = queryParams.getFirst("genericResultSet");
             genericResultSet = "true".equalsIgnoreCase(genericResultSetValue);
         }
         return genericResultSet;
     }
 
-    public static boolean genericResultSetPassed(MultivaluedMap<String, String> queryParams) {
+    public static boolean genericResultSetPassed(final MultivaluedMap<String, String> queryParams) {
         return queryParams.getFirst("genericResultSet") != null;
     }
 
-    public static String sqlEncodeString(String str) {
-        String singleQuote = "'";
-        String twoSingleQuotes = "''";
+    public static String sqlEncodeString(final String str) {
+        final String singleQuote = "'";
+        final String twoSingleQuotes = "''";
         return singleQuote + StringUtils.replace(str, singleQuote, twoSingleQuotes, -1) + singleQuote;
     }
 
-    public static Map<String, String> asMap(MultivaluedMap<String, String> queryParameters) {
+    public static Map<String, String> asMap(final MultivaluedMap<String, String> queryParameters) {
 
         final Map<String, String> map = new HashMap<String, String>(queryParameters.size());
 
-        for (String parameterName : queryParameters.keySet()) {
-            List<String> values = queryParameters.get(parameterName);
+        for (final String parameterName : queryParameters.keySet()) {
+            final List<String> values = queryParameters.get(parameterName);
             map.put(parameterName, values.get(0));
         }
 

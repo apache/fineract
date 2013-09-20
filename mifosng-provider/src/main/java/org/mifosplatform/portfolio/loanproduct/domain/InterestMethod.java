@@ -21,7 +21,7 @@ public enum InterestMethod {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public static InterestMethod fromInt(final Integer selectedMethod) {

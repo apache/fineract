@@ -24,7 +24,7 @@ public enum GuarantorType {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     private static final Map<Integer, GuarantorType> intToEnumMap = new HashMap<Integer, GuarantorType>();
@@ -32,7 +32,7 @@ public enum GuarantorType {
     private static int maxValue;
     static {
         int i = 0;
-        for (GuarantorType type : GuarantorType.values()) {
+        for (final GuarantorType type : GuarantorType.values()) {
             if (i == 0) {
                 minValue = type.value;
             }
@@ -47,8 +47,8 @@ public enum GuarantorType {
         }
     }
 
-    public static GuarantorType fromInt(int i) {
-        GuarantorType type = intToEnumMap.get(Integer.valueOf(i));
+    public static GuarantorType fromInt(final int i) {
+        final GuarantorType type = intToEnumMap.get(Integer.valueOf(i));
         return type;
     }
 

@@ -54,44 +54,48 @@ public class SavingsAccountChargeAssembler {
 
         if (element.isJsonObject()) {
             final JsonObject topLevelJsonElement = element.getAsJsonObject();
-            final String dateFormat = fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
-            final Locale locale = fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+            final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
+            final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
             if (topLevelJsonElement.has(chargesParamName) && topLevelJsonElement.get(chargesParamName).isJsonArray()) {
                 final JsonArray array = topLevelJsonElement.get(chargesParamName).getAsJsonArray();
                 for (int i = 0; i < array.size(); i++) {
 
                     final JsonObject savingsChargeElement = array.get(i).getAsJsonObject();
 
-                    final Long id = fromApiJsonHelper.extractLongNamed(idParamName, savingsChargeElement);
-                    final Long chargeId = fromApiJsonHelper.extractLongNamed(chargeIdParamName, savingsChargeElement);
-                    final BigDecimal amount = fromApiJsonHelper.extractBigDecimalNamed(amountParamName, savingsChargeElement, locale);
-                    final Integer chargeTimeType = fromApiJsonHelper.extractIntegerNamed(chargeTimeTypeParamName, savingsChargeElement, locale);
-                    final Integer chargeCalculationType = fromApiJsonHelper.extractIntegerNamed(chargeCalculationTypeParamName, savingsChargeElement,
-                            locale);
-                    final LocalDate dueDate = fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, savingsChargeElement,
+                    final Long id = this.fromApiJsonHelper.extractLongNamed(idParamName, savingsChargeElement);
+                    final Long chargeId = this.fromApiJsonHelper.extractLongNamed(chargeIdParamName, savingsChargeElement);
+                    final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(amountParamName, savingsChargeElement, locale);
+                    final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerNamed(chargeTimeTypeParamName,
+                            savingsChargeElement, locale);
+                    final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerNamed(chargeCalculationTypeParamName,
+                            savingsChargeElement, locale);
+                    final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, savingsChargeElement,
                             dateFormat, locale);
 
                     if (id == null) {
                         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeId);
-                        
-                        if(!chargeDefinition.isSavingsCharge()){
-                            String errorMessage = "Charge with identifier " + chargeDefinition.getId() + " cannot be applied to Savings product.";
-                            throw new ChargeCannotBeAppliedToException("savings.product", errorMessage, chargeDefinition.getId()); 
+
+                        if (!chargeDefinition.isSavingsCharge()) {
+                            final String errorMessage = "Charge with identifier " + chargeDefinition.getId()
+                                    + " cannot be applied to Savings product.";
+                            throw new ChargeCannotBeAppliedToException("savings.product", errorMessage, chargeDefinition.getId());
                         }
-                        
-                        ChargeTimeType chargeTime = null;
+
+                        final ChargeTimeType chargeTime = null;
                         if (chargeTimeType != null) {
                             ChargeTimeType.fromInt(chargeTimeType);
                         }
-                        ChargeCalculationType chargeCalculation = null;
+                        final ChargeCalculationType chargeCalculation = null;
                         if (chargeCalculationType != null) {
                             ChargeCalculationType.fromInt(chargeCalculationType);
                         }
-                        final SavingsAccountCharge savingsAccountCharge = SavingsAccountCharge.createNewWithoutSavingsAccount(chargeDefinition, amount, chargeTime, chargeCalculation, dueDate);
+                        final SavingsAccountCharge savingsAccountCharge = SavingsAccountCharge.createNewWithoutSavingsAccount(
+                                chargeDefinition, amount, chargeTime, chargeCalculation, dueDate);
                         savingsAccountCharges.add(savingsAccountCharge);
                     } else {
                         final Long savingsAccountChargeId = id;
-                        final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository.findOne(savingsAccountChargeId);
+                        final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository
+                                .findOne(savingsAccountChargeId);
                         if (savingsAccountCharge == null) { throw new SavingsAccountChargeNotFoundException(savingsAccountChargeId); }
 
                         savingsAccountCharge.update(amount, dueDate);

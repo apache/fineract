@@ -8,7 +8,6 @@ package org.mifosplatform.portfolio.savings;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * <p>
  * The compounding interest period is the span of time at the end of which
@@ -19,13 +18,15 @@ public enum SavingsCompoundingInterestPeriodType {
 
     INVALID(0, "savingsCompoundingInterestPeriodType.invalid"), //
     DAILY(1, "savingsCompoundingInterestPeriodType.daily"), //
-//    WEEKLY(2, "savingsCompoundingInterestPeriodType.weekly"), //
-//    BIWEEKLY(3, "savingsCompoundingInterestPeriodType.biweekly"), //
+    // WEEKLY(2, "savingsCompoundingInterestPeriodType.weekly"), //
+    // BIWEEKLY(3, "savingsCompoundingInterestPeriodType.biweekly"), //
     MONTHLY(4, "savingsCompoundingInterestPeriodType.monthly");
-//    QUATERLY(5, "savingsCompoundingInterestPeriodType.quarterly"), //
-//    BI_ANNUAL(6, "savingsCompoundingInterestPeriodType.biannual"), //
-//    ANNUAL(7, "savingsCompoundingInterestPeriodType.annual"), //
-//    NO_COMPOUNDING_SIMPLE_INTEREST(8, "savingsCompoundingInterestPeriodType.nocompounding");
+
+    // QUATERLY(5, "savingsCompoundingInterestPeriodType.quarterly"), //
+    // BI_ANNUAL(6, "savingsCompoundingInterestPeriodType.biannual"), //
+    // ANNUAL(7, "savingsCompoundingInterestPeriodType.annual"), //
+    // NO_COMPOUNDING_SIMPLE_INTEREST(8,
+    // "savingsCompoundingInterestPeriodType.nocompounding");
 
     private final Integer value;
     private final String code;
@@ -40,12 +41,12 @@ public enum SavingsCompoundingInterestPeriodType {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public static Object[] integerValues() {
-        List<Integer> values = new ArrayList<Integer>();
-        for (SavingsCompoundingInterestPeriodType enumType : values()) {
+        final List<Integer> values = new ArrayList<Integer>();
+        for (final SavingsCompoundingInterestPeriodType enumType : values()) {
             if (enumType.getValue() > 0) {
                 values.add(enumType.getValue());
             }

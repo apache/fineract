@@ -35,40 +35,42 @@ public class GroupHelper {
 
     public static Integer associateClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId, final String clientMember) {
-        String GROUP_ASSOCIATE_URL = "/mifosng-provider/api/v1/groups/" + groupId + "?command=associateClients&tenantIdentifier=default";
+        final String GROUP_ASSOCIATE_URL = "/mifosng-provider/api/v1/groups/" + groupId
+                + "?command=associateClients&tenantIdentifier=default";
         System.out.println("---------------------------------Associate Client To A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, associateClientAsJSON(clientMember), "groupId");
     }
 
     public static Integer disAssociateClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId, final String clientMember) {
-        String GROUP_ASSOCIATE_URL = "/mifosng-provider/api/v1/groups/" + groupId + "?command=disassociateClients&tenantIdentifier=default";
+        final String GROUP_ASSOCIATE_URL = "/mifosng-provider/api/v1/groups/" + groupId
+                + "?command=disassociateClients&tenantIdentifier=default";
         System.out.println("---------------------------------Disassociate Client To A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, associateClientAsJSON(clientMember), "groupId");
     }
 
     public static Integer activateGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId) {
-        String GROUP_ASSOCIATE_URL = "/mifosng-provider/api/v1/groups/" + groupId + "?command=activate&tenantIdentifier=default";
+        final String GROUP_ASSOCIATE_URL = "/mifosng-provider/api/v1/groups/" + groupId + "?command=activate&tenantIdentifier=default";
         System.out.println("---------------------------------Activate A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, activateGroupAsJSON(""), "groupId");
     }
 
     public static Integer updateGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String name,
             final String groupId) {
-        String GROUP_ASSOCIATE_URL = "/mifosng-provider/api/v1/groups/" + groupId + "?tenantIdentifier=default";
+        final String GROUP_ASSOCIATE_URL = "/mifosng-provider/api/v1/groups/" + groupId + "?tenantIdentifier=default";
         System.out.println("---------------------------------UPDATE GROUP---------------------------------------------");
         return Utils.performServerPut(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, updateGroupAsJSON(name), "groupId");
     }
 
     public static Integer deleteGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId) {
-        String GROUP_ASSOCIATE_URL = "/mifosng-provider/api/v1/groups/" + groupId + "?tenantIdentifier=default";
+        final String GROUP_ASSOCIATE_URL = "/mifosng-provider/api/v1/groups/" + groupId + "?tenantIdentifier=default";
         System.out.println("---------------------------------DELETE GROUP---------------------------------------------");
         return Utils.performServerDelete(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, "groupId");
     }
 
     public static String getTestGroupAsJSON(final boolean active, final String activationDate) {
-        HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<String, String>();
         map.put("officeId", "1");
         map.put("name", randomNameGenerator("Group_Name_", 5));
         map.put("externalId", randomIDGenerator("ID_", 7));
@@ -77,16 +79,17 @@ public class GroupHelper {
             map.put("dateFormat", "dd MMMM yyyy");
             map.put("locale", "en");
             map.put("activationDate", activationDate);
-        } else
+        } else {
             map.put("active", "false");
+        }
 
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }
 
     public static String associateClientAsJSON(final String clientMember) {
-        HashMap<String, List<String>> map = new HashMap<String, List<String>>();
-        List<String> list = new ArrayList<String>();
+        final HashMap<String, List<String>> map = new HashMap<String, List<String>>();
+        final List<String> list = new ArrayList<String>();
         list.add(clientMember);
         map.put("clientMembers", list);
         System.out.println("map : " + map);
@@ -94,19 +97,20 @@ public class GroupHelper {
     }
 
     public static String activateGroupAsJSON(final String activationDate) {
-        HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<String, String>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
-        if (activationDate != "")
+        if (activationDate != "") {
             map.put("activationDate", activationDate);
-        else
+        } else {
             map.put("activationDate", "04 March 2011");
+        }
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }
 
     public static String updateGroupAsJSON(final String name) {
-        HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<String, String>();
         map.put("name", name);
         System.out.println("map : " + map);
         return new Gson().toJson(map);
@@ -115,24 +119,24 @@ public class GroupHelper {
     public static void verifyGroupCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID) {
         System.out.println("------------------------------CHECK GROUP DETAILS------------------------------------\n");
-        String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID + "?tenantIdentifier=default";
-        Integer responseGroupID = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "id");
+        final String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID + "?tenantIdentifier=default";
+        final Integer responseGroupID = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "id");
         assertEquals("ERROR IN CREATING THE GROUP", generatedGroupID, responseGroupID);
     }
 
     public static void verifyGroupDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID, final String field, final String expectedValue) {
         System.out.println("------------------------------CHECK GROUP DETAILS------------------------------------\n");
-        String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID + "?tenantIdentifier=default";
-        String responseValue = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, field);
+        final String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID + "?tenantIdentifier=default";
+        final String responseValue = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, field);
         assertEquals("ERROR IN CREATING THE GROUP", expectedValue, responseValue);
     }
 
     public static void verifyGroupActivatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID, final boolean generatedGroupStatus) {
         System.out.println("------------------------------CHECK GROUP STATUS------------------------------------\n");
-        String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID + "?tenantIdentifier=default";
-        Boolean responseGroupStatus = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "active");
+        final String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID + "?tenantIdentifier=default";
+        final Boolean responseGroupStatus = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "active");
         assertEquals("ERROR IN ACTIVATING THE GROUP", generatedGroupStatus, responseGroupStatus);
     }
 
@@ -140,7 +144,8 @@ public class GroupHelper {
             final Integer generatedGroupID, final Integer groupMember) {
         List<String> list = new ArrayList<String>();
         System.out.println("------------------------------CHECK GROUP MEMBERS------------------------------------\n");
-        String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID + "?associations=clientMembers&tenantIdentifier=default";
+        final String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID
+                + "?associations=clientMembers&tenantIdentifier=default";
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "clientMembers");
         assertTrue("ERROR IN GROUP MEMBER", list.toString().contains("id=" + groupMember.toString()));
     }
@@ -149,7 +154,8 @@ public class GroupHelper {
             final Integer generatedGroupID) {
         List<String> list = new ArrayList<String>();
         System.out.println("------------------------------CHECK EMPTY GROUP MEMBER LIST------------------------------------\n");
-        String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID + "?associations=clientMembers&tenantIdentifier=default";
+        final String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID
+                + "?associations=clientMembers&tenantIdentifier=default";
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "clientMembers");
         assertEquals("GROUP MEMBER LIST NOT EMPTY", list, null);
     }
@@ -158,7 +164,7 @@ public class GroupHelper {
             final Integer generatedGroupID) {
         List<String> list = new ArrayList<String>();
         System.out.println("------------------------------CHECK GROUP DELETED------------------------------------\n");
-        String GROUP_URL = "/mifosng-provider/api/v1/groups/?tenantIdentifier=default";
+        final String GROUP_URL = "/mifosng-provider/api/v1/groups/?tenantIdentifier=default";
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "pageItems");
 
         assertFalse("GROUP NOT DELETED", list.toString().contains("id=" + generatedGroupID.toString()));

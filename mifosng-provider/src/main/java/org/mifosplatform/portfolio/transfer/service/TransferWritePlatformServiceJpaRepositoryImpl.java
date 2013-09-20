@@ -90,7 +90,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
     @Override
     @Transactional
-    public CommandProcessingResult transferClientsBetweenGroups(Long sourceGroupId, JsonCommand jsonCommand) {
+    public CommandProcessingResult transferClientsBetweenGroups(final Long sourceGroupId, final JsonCommand jsonCommand) {
         this.transfersDataValidator.validateForClientsTransferBetweenGroups(jsonCommand.json());
 
         final Group sourceGroup = this.groupRepository.findOneWithNotFoundDetection(sourceGroupId);
@@ -105,7 +105,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
             staff = this.staffRepositoryWrapper.findByOfficeHierarchyWithNotFoundDetection(staffId, sourceOffice.getHierarchy());
         }
 
-        final List<Client> clients = this.assembleListOfClients(jsonCommand);
+        final List<Client> clients = assembleListOfClients(jsonCommand);
 
         if (sourceGroupId == destinationGroupId) { throw new TransferNotSupportedException(
                 TRANSFER_NOT_SUPPORTED_REASON.SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME, sourceGroupId, destinationGroupId); }
@@ -114,7 +114,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         if (!(sourceOffice.getId() == destinationGroup.getOffice().getId())) { throw new TransferNotSupportedException(
                 TRANSFER_NOT_SUPPORTED_REASON.BULK_CLIENT_TRANSFER_ACROSS_BRANCHES, sourceGroupId, destinationGroupId); }
 
-        for (Client client : clients) {
+        for (final Client client : clients) {
             transferClientBetweenGroups(sourceGroup, client, destinationGroup, inheritDestinationGroupLoanOfficer, staff);
         }
 
@@ -165,8 +165,8 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                     TRANSFER_NOT_SUPPORTED_REASON.DESTINATION_GROUP_HAS_NO_MEETING, destinationGroup.getId());
 
             }
-            Calendar sourceGroupCalendar = sourceGroupCalendarInstance.getCalendar();
-            Calendar destinationGroupCalendar = destinationGroupCalendarInstance.getCalendar();
+            final Calendar sourceGroupCalendar = sourceGroupCalendarInstance.getCalendar();
+            final Calendar destinationGroupCalendar = destinationGroupCalendarInstance.getCalendar();
 
             /***
              * Ensure that the recurrence pattern are same for collection
@@ -178,7 +178,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                     destinationGroup.getId()); }
 
             /** map all JLG loans for this client to the destinationGroup **/
-            for (CalendarInstance calendarInstance : activeLoanCalendarInstances) {
+            for (final CalendarInstance calendarInstance : activeLoanCalendarInstances) {
                 calendarInstance.updateCalendar(destinationGroupCalendar);
                 this.calendarInstanceRepository.save(calendarInstance);
             }
@@ -190,7 +190,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
          * Now Change the loan officer for this client and all his active JLG
          * loans
          **/
-        Staff destinationGroupLoanOfficer = destinationGroup.getStaff();
+        final Staff destinationGroupLoanOfficer = destinationGroup.getStaff();
         if (destinationGroupLoanOfficer != null) {
             client.updateStaff(destinationGroupLoanOfficer);
         }
@@ -201,8 +201,8 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         /**
          * Active JLG loans are now linked to the new Group and Loan officer
          **/
-        List<Loan> allClientJLGLoans = loanRepository.findByClientIdAndGroupId(client.getId(), sourceGroup.getId());
-        for (Loan loan : allClientJLGLoans) {
+        final List<Loan> allClientJLGLoans = this.loanRepository.findByClientIdAndGroupId(client.getId(), sourceGroup.getId());
+        for (final Loan loan : allClientJLGLoans) {
             if (loan.status().isActiveOrAwaitingApprovalOrDisbursal()) {
                 loan.updateGroup(destinationGroup);
                 if (inheritDestinationGroupLoanOfficer != null && inheritDestinationGroupLoanOfficer == true
@@ -281,7 +281,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
     @Override
     @Transactional
-    public CommandProcessingResult withdrawClientTransfer(Long clientId, JsonCommand jsonCommand) {
+    public CommandProcessingResult withdrawClientTransfer(final Long clientId, final JsonCommand jsonCommand) {
         // validation
         this.transfersDataValidator.validateForWithdrawClientTransfer(jsonCommand.json());
         final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
@@ -298,7 +298,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
     @Override
     @Transactional
-    public CommandProcessingResult rejectClientTransfer(Long clientId, JsonCommand jsonCommand) {
+    public CommandProcessingResult rejectClientTransfer(final Long clientId, final JsonCommand jsonCommand) {
         // validation
         this.transfersDataValidator.validateForRejectClientTransfer(jsonCommand.json());
         final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
@@ -312,8 +312,8 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     }
 
     private void handleClientTransferLifecycleEvent(final Client client, final Office destinationOffice,
-            TransferEventType transferEventType, JsonCommand jsonCommand) {
-        Date todaysDate = DateUtils.getDateOfTenant();
+            final TransferEventType transferEventType, final JsonCommand jsonCommand) {
+        final Date todaysDate = DateUtils.getDateOfTenant();
         /** Get destination loan officer if exists **/
         Staff staff = null;
         Group destinationGroup = null;
@@ -327,9 +327,9 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         }
 
         /*** Handle Active Loans ***/
-        if (loanRepository.doNonClosedLoanAccountsExistForClient(client.getId())) {
+        if (this.loanRepository.doNonClosedLoanAccountsExistForClient(client.getId())) {
             // get each individual loan for the client
-            for (Loan loan : loanRepository.findLoanByClientId(client.getId())) {
+            for (final Loan loan : this.loanRepository.findLoanByClientId(client.getId())) {
                 /**
                  * We need to create transactions etc only for loans which are
                  * disbursed and not yet closed
@@ -354,9 +354,9 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         }
 
         /*** Handle Active Savings (Currently throw and exception) ***/
-        if (savingsAccountRepository.doNonClosedSavingAccountsExistForClient(client.getId())) {
+        if (this.savingsAccountRepository.doNonClosedSavingAccountsExistForClient(client.getId())) {
             // get each individual saving account for the client
-            for (SavingsAccount savingsAccount : savingsAccountRepository.findSavingAccountByClientId(client.getId())) {
+            for (final SavingsAccount savingsAccount : this.savingsAccountRepository.findSavingAccountByClientId(client.getId())) {
                 if (!savingsAccount.isClosed()) {
                     switch (transferEventType) {
                         case ACCEPTANCE:
@@ -411,7 +411,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                 client.updateTransferToOffice(null);
         }
 
-        noteWritePlatformService.createAndPersistClientNote(client, jsonCommand);
+        this.noteWritePlatformService.createAndPersistClientNote(client, jsonCommand);
     }
 
     private List<Client> assembleListOfClients(final JsonCommand command) {
@@ -419,7 +419,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         final List<Client> clients = new ArrayList<Client>();
 
         if (command.parameterExists(TransferApiConstants.clients)) {
-            JsonArray clientsArray = command.arrayOfParameterNamed(TransferApiConstants.clients);
+            final JsonArray clientsArray = command.arrayOfParameterNamed(TransferApiConstants.clients);
             if (clientsArray != null) {
                 for (int i = 0; i < clientsArray.size(); i++) {
 

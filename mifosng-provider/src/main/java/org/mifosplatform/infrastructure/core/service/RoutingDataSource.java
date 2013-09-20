@@ -37,7 +37,7 @@ public class RoutingDataSource extends AbstractDataSource {
     }
 
     private DataSource determineTargetDataSource() {
-        return dataSourceServiceFactory.determineDataSourceService().retrieveDataSource();
+        return this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource();
     }
 
     @Override

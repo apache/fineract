@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * Wrapper for {@link MeetingRepository} that is responsible for checking
- * if {@link Meeting} is returned when using <code>findOne</code>
- * repository method and throwing an appropriate not found exception.
+ * Wrapper for {@link MeetingRepository} that is responsible for checking if
+ * {@link Meeting} is returned when using <code>findOne</code> repository method
+ * and throwing an appropriate not found exception.
  * </p>
  * 
  * <p>

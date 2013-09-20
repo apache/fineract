@@ -78,7 +78,8 @@ public class CentersApiResource {
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final CollectionSheetReadPlatformService collectionSheetReadPlatformService, final FromJsonHelper fromJsonHelper,
-            final AccountDetailsReadPlatformService accountDetailsReadPlatformService, final CalendarReadPlatformService calendarReadPlatformService) {
+            final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
+            final CalendarReadPlatformService calendarReadPlatformService) {
         this.context = context;
         this.centerReadPlatformService = centerReadPlatformService;
         this.centerApiJsonSerializer = centerApiJsonSerializer;
@@ -104,9 +105,10 @@ public class CentersApiResource {
         if (is(commandParam, "close")) {
             final CenterData centerClosureTemplate = this.centerReadPlatformService.retrieveCenterWithClosureReasons();
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.centerApiJsonSerializer.serialize(settings, centerClosureTemplate, GroupingTypesApiConstants.CENTER_RESPONSE_DATA_PARAMETERS);
+            return this.centerApiJsonSerializer.serialize(settings, centerClosureTemplate,
+                    GroupingTypesApiConstants.CENTER_RESPONSE_DATA_PARAMETERS);
         }
-        
+
         final CenterData template = this.centerReadPlatformService.retrieveTemplate(officeId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -128,7 +130,7 @@ public class CentersApiResource {
                 limit, orderBy, sortOrder);
         final Page<CenterData> centers = this.centerReadPlatformService.retrieveAll(searchParameters);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, centers, GroupingTypesApiConstants.CENTER_RESPONSE_DATA_PARAMETERS);
     }
 
@@ -154,17 +156,17 @@ public class CentersApiResource {
             if (associationParameters.contains("groupMembers")) {
                 groups = this.centerReadPlatformService.retrieveAssociatedGroups(centerId);
             }
-            
+
             if (associationParameters.contains("collectionMeetingCalendar")) {
-                collectionMeetingCalendar = this.calendarReadPlatformService.retrieveCollctionCalendarByEntity(centerId, CalendarEntityType.CENTERS.getValue());
-                if(collectionMeetingCalendar != null){
+                collectionMeetingCalendar = this.calendarReadPlatformService.retrieveCollctionCalendarByEntity(centerId,
+                        CalendarEntityType.CENTERS.getValue());
+                if (collectionMeetingCalendar != null) {
                     collectionMeetingCalendar = this.calendarReadPlatformService.generateRecurringDate(collectionMeetingCalendar);
                 }
             }
 
             center = CenterData.withAssociations(center, groups, collectionMeetingCalendar);
         }
-        
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.centerApiJsonSerializer.serialize(settings, center, GroupingTypesApiConstants.CENTER_RESPONSE_DATA_PARAMETERS);

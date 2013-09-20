@@ -137,7 +137,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
     /** TODO: Vishwas This change breaks caching, need to have a relook **/
     @Override
     @Cacheable(value = "offices", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'of')")
-    public Collection<OfficeData> retrieveAllOffices(boolean includeAllOffices) {
+    public Collection<OfficeData> retrieveAllOffices(final boolean includeAllOffices) {
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         String hierarchySearchString = null;

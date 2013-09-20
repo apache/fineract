@@ -22,7 +22,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalPrincipalRepaid(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getPrincipalCompleted(currency));
         }
         return total;
@@ -31,7 +31,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalPrincipalWrittenOff(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getPrincipalWrittenOff(currency));
         }
         return total;
@@ -40,7 +40,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalPrincipalOverdueOn(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency, final LocalDate overdueAsOf) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             if (installment.isOverdueOn(overdueAsOf)) {
                 total = total.plus(installment.getPrincipalOutstanding(currency));
             }
@@ -51,7 +51,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalInterestCharged(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getInterestCharged(currency));
         }
         return total;
@@ -60,7 +60,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalInterestRepaid(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getInterestPaid(currency));
         }
         return total;
@@ -69,7 +69,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalInterestWaived(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getInterestWaived(currency));
         }
         return total;
@@ -78,7 +78,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalInterestWrittenOff(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getInterestWrittenOff(currency));
         }
         return total;
@@ -87,7 +87,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalInterestOverdueOn(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency, final LocalDate overdueAsOf) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             if (installment.isOverdueOn(overdueAsOf)) {
                 total = total.plus(installment.getInterestOutstanding(currency));
             }
@@ -98,7 +98,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalFeeChargesCharged(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getFeeChargesCharged(currency));
         }
         return total;
@@ -107,7 +107,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalFeeChargesRepaid(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getFeeChargesPaid(currency));
         }
         return total;
@@ -116,7 +116,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalFeeChargesWaived(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getFeeChargesWaived(currency));
         }
         return total;
@@ -125,7 +125,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalFeeChargesWrittenOff(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getFeeChargesWrittenOff(currency));
         }
         return total;
@@ -134,7 +134,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalFeeChargesOverdueOn(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency, final LocalDate overdueAsOf) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             if (installment.isOverdueOn(overdueAsOf)) {
                 total = total.plus(installment.getFeeChargesOutstanding(currency));
             }
@@ -145,7 +145,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalPenaltyChargesCharged(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getPenaltyChargesCharged(currency));
         }
         return total;
@@ -154,7 +154,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalPenaltyChargesRepaid(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getPenaltyChargesPaid(currency));
         }
         return total;
@@ -163,7 +163,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalPenaltyChargesWaived(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getPenaltyChargesWaived(currency));
         }
         return total;
@@ -172,7 +172,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalPenaltyChargesWrittenOff(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             total = total.plus(installment.getPenaltyChargesWrittenOff(currency));
         }
         return total;
@@ -181,7 +181,7 @@ public final class LoanSummaryWrapper {
     public Money calculateTotalPenaltyChargesOverdueOn(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
             final MonetaryCurrency currency, final LocalDate overdueAsOf) {
         Money total = Money.zero(currency);
-        for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
             if (installment.isOverdueOn(overdueAsOf)) {
                 total = total.plus(installment.getPenaltyChargesOutstanding(currency));
             }
@@ -206,7 +206,7 @@ public final class LoanSummaryWrapper {
         LocalDate overdueSince = null;
         final Money totalOverdue = calculateTotalOverdueOn(repaymentScheduleInstallments, currency, from);
         if (totalOverdue.isGreaterThanZero()) {
-            for (LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
                 if (installment.isOverdueOn(from)) {
                     if (overdueSince == null || overdueSince.isAfter(installment.getDueDate())) {
                         overdueSince = installment.getDueDate();

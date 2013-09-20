@@ -29,9 +29,9 @@ import org.springframework.stereotype.Component;
 public class PlatformInternalServerExceptionMapper implements ExceptionMapper<PlatformInternalServerException> {
 
     @Override
-    public Response toResponse(PlatformInternalServerException exception) {
+    public Response toResponse(final PlatformInternalServerException exception) {
 
-        ApiGlobalErrorResponse notFoundErrorResponse = ApiGlobalErrorResponse.notFound(exception.getGlobalisationMessageCode(),
+        final ApiGlobalErrorResponse notFoundErrorResponse = ApiGlobalErrorResponse.notFound(exception.getGlobalisationMessageCode(),
                 exception.getDefaultUserMessage(), exception.getDefaultUserMessageArgs());
         return Response.status(Status.INTERNAL_SERVER_ERROR).entity(notFoundErrorResponse).type(MediaType.APPLICATION_JSON).build();
     }

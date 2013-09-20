@@ -18,14 +18,14 @@ public class GuarantorEnumerations {
     }
 
     public static EnumOptionData guarantorType(final GuarantorType guarantorType) {
-        EnumOptionData optionData = new EnumOptionData(guarantorType.getValue().longValue(), guarantorType.getCode(),
+        final EnumOptionData optionData = new EnumOptionData(guarantorType.getValue().longValue(), guarantorType.getCode(),
                 guarantorType.toString());
         return optionData;
     }
 
-    public static List<EnumOptionData> guarantorType(GuarantorType[] guarantorTypes) {
-        List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
-        for (GuarantorType guarantorType : guarantorTypes) {
+    public static List<EnumOptionData> guarantorType(final GuarantorType[] guarantorTypes) {
+        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        for (final GuarantorType guarantorType : guarantorTypes) {
             optionDatas.add(guarantorType(guarantorType));
         }
         return optionDatas;

@@ -35,7 +35,7 @@ public class JournalEntryHelper {
     }
 
     private String getEntryValueFromJournalEntry(final ArrayList<HashMap> entryResponse, final int entryNumber) {
-        HashMap map = (HashMap) entryResponse.get(entryNumber).get("entryType");
+        final HashMap map = (HashMap) entryResponse.get(entryNumber).get("entryType");
         return (String) map.get("value");
     }
 
@@ -44,8 +44,8 @@ public class JournalEntryHelper {
     }
 
     private void checkJournalEntry(final Account account, final String date, final JournalEntry... accountEntries) {
-        String url = createURLForGettingAccountEntries(account, date);
-        ArrayList<HashMap> response = Utils.performServerGet(requestSpec, responseSpec, url, "pageItems");
+        final String url = createURLForGettingAccountEntries(account, date);
+        final ArrayList<HashMap> response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, "pageItems");
         for (int i = 0; i < accountEntries.length; i++) {
             assertThat(getEntryValueFromJournalEntry(response, i), equalTo(accountEntries[i].getTransactionType()));
             assertThat(getTransactionAmountFromJournalEntry(response, i), equalTo(accountEntries[i].getTransactionAmount()));

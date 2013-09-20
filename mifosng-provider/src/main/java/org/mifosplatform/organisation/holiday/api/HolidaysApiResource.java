@@ -34,14 +34,14 @@ import org.springframework.stereotype.Component;
 public class HolidaysApiResource {
 
     private final String resourceNameForPermissions = "HOLIDAY";
-    
+
     private final DefaultToApiJsonSerializer<HolidayData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PlatformSecurityContext context;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    
+
     private final HolidayReadPlatformService holidayReadPlatformService;
-    
+
     @Autowired
     public HolidaysApiResource(final DefaultToApiJsonSerializer<HolidayData> toApiJsonSerializer,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService, final PlatformSecurityContext context,
@@ -52,7 +52,7 @@ public class HolidaysApiResource {
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.holidayReadPlatformService = holidayReadPlatformService;
     }
-    
+
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -64,7 +64,7 @@ public class HolidaysApiResource {
 
         return this.toApiJsonSerializer.serialize(result);
     }
-    
+
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -72,7 +72,7 @@ public class HolidaysApiResource {
             @QueryParam("fromDate") final DateParam fromDateParam, @QueryParam("toDate") final DateParam toDateParam,
             @QueryParam("locale") final String locale, @QueryParam("dateFormat") final String dateFormat) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         Date fromDate = null;
         if (fromDateParam != null) {
@@ -83,9 +83,10 @@ public class HolidaysApiResource {
             toDate = toDateParam.getDate("toDate", dateFormat, locale);
         }
 
-        Collection<HolidayData> holidays = this.holidayReadPlatformService.retrieveAllHolidaysBySearchParamerters(officeId, fromDate, toDate);
+        final Collection<HolidayData> holidays = this.holidayReadPlatformService.retrieveAllHolidaysBySearchParamerters(officeId, fromDate,
+                toDate);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, holidays, HolidayApiConstants.HOLIDAY_REQUEST_DATA_PARAMETERS);
     }
 

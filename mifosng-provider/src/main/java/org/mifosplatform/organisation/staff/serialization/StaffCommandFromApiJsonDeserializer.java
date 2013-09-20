@@ -31,7 +31,8 @@ public final class StaffCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("firstname", "lastname", "officeId", "externalId", "isLoanOfficer"));
+    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("firstname", "lastname", "officeId", "externalId",
+            "isLoanOfficer"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -44,24 +45,24 @@ public final class StaffCommandFromApiJsonDeserializer {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("staff");
 
-        final JsonElement element = fromApiJsonHelper.parse(json);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final Long officeId = fromApiJsonHelper.extractLongNamed("officeId", element);
+        final Long officeId = this.fromApiJsonHelper.extractLongNamed("officeId", element);
         baseDataValidator.reset().parameter("officeId").value(officeId).notNull().integerGreaterThanZero();
-        
-        final String firstname = fromApiJsonHelper.extractStringNamed("firstname", element);
+
+        final String firstname = this.fromApiJsonHelper.extractStringNamed("firstname", element);
         baseDataValidator.reset().parameter("firstname").value(firstname).notBlank().notExceedingLengthOf(50);
 
-        final String lastname = fromApiJsonHelper.extractStringNamed("lastname", element);
+        final String lastname = this.fromApiJsonHelper.extractStringNamed("lastname", element);
         baseDataValidator.reset().parameter("lastname").value(lastname).notBlank().notExceedingLengthOf(50);
 
-        if (fromApiJsonHelper.parameterExists("isLoanOfficer", element)) {
-            final Boolean loanOfficerFlag = fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
+        if (this.fromApiJsonHelper.parameterExists("isLoanOfficer", element)) {
+            final Boolean loanOfficerFlag = this.fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
             baseDataValidator.reset().parameter("isLoanOfficer").value(loanOfficerFlag).notNull();
         }
 
@@ -72,29 +73,29 @@ public final class StaffCommandFromApiJsonDeserializer {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("staff");
-        
-        final JsonElement element = fromApiJsonHelper.parse(json);
-        if (fromApiJsonHelper.parameterExists("officeId", element)) {
-            final Long officeId = fromApiJsonHelper.extractLongNamed("officeId", element);
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        if (this.fromApiJsonHelper.parameterExists("officeId", element)) {
+            final Long officeId = this.fromApiJsonHelper.extractLongNamed("officeId", element);
             baseDataValidator.reset().parameter("officeId").value(officeId).notNull().integerGreaterThanZero();
         }
-        
-        if (fromApiJsonHelper.parameterExists("firstname", element)) {
-            final String firstname = fromApiJsonHelper.extractStringNamed("firstname", element);
+
+        if (this.fromApiJsonHelper.parameterExists("firstname", element)) {
+            final String firstname = this.fromApiJsonHelper.extractStringNamed("firstname", element);
             baseDataValidator.reset().parameter("firstname").value(firstname).notBlank().notExceedingLengthOf(50);
         }
 
-        if (fromApiJsonHelper.parameterExists("lastname", element)) {
-            final String lastname = fromApiJsonHelper.extractStringNamed("lastname", element);
+        if (this.fromApiJsonHelper.parameterExists("lastname", element)) {
+            final String lastname = this.fromApiJsonHelper.extractStringNamed("lastname", element);
             baseDataValidator.reset().parameter("lastname").value(lastname).notBlank().notExceedingLengthOf(50);
         }
 
-        if (fromApiJsonHelper.parameterExists("isLoanOfficer", element)) {
-            final Boolean loanOfficerFlag = fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
+        if (this.fromApiJsonHelper.parameterExists("isLoanOfficer", element)) {
+            final Boolean loanOfficerFlag = this.fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
             baseDataValidator.reset().parameter("isLoanOfficer").value(loanOfficerFlag).notNull();
         }
 

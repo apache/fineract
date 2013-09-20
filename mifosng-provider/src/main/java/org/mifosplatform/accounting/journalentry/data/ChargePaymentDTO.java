@@ -8,7 +8,7 @@ public class ChargePaymentDTO {
     private final BigDecimal amount;
     private final Long loanChargeId;
 
-    public ChargePaymentDTO(Long chargeId, Long loanChargeId, BigDecimal amount) {
+    public ChargePaymentDTO(final Long chargeId, final Long loanChargeId, final BigDecimal amount) {
         this.chargeId = chargeId;
         this.amount = amount;
         this.loanChargeId = loanChargeId;

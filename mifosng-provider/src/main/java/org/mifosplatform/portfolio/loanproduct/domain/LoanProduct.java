@@ -48,7 +48,7 @@ import com.google.gson.JsonArray;
  */
 @Entity
 @Table(name = "m_product_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name"),
-@UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE") })
+        @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE") })
 public class LoanProduct extends AbstractPersistable<Long> {
 
     @ManyToOne
@@ -77,21 +77,21 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     @Column(name = "accounting_type", nullable = false)
     private Integer accountingRule;
-    
+
     @Column(name = "include_in_borrower_cycle")
     private boolean includeInBorrowerCycle;
 
     @Column(name = "start_date", nullable = true)
     @Temporal(TemporalType.DATE)
     private Date startDate;
-    
+
     @Column(name = "close_date", nullable = true)
     @Temporal(TemporalType.DATE)
     private Date closeDate;
 
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;
-    
+
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator) {
 
@@ -100,8 +100,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
         final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
         final Integer digitsAfterDecimal = command.integerValueOfParameterNamed("digitsAfterDecimal");
         final Integer inMultiplesOf = command.integerValueOfParameterNamed("inMultiplesOf");
-        
-        final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal,inMultiplesOf);
+
+        final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
         final BigDecimal principal = command.bigDecimalValueOfParameterNamed("principal");
         final BigDecimal minPrincipal = command.bigDecimalValueOfParameterNamed("minPrincipal");
         final BigDecimal maxPrincipal = command.bigDecimalValueOfParameterNamed("maxPrincipal");
@@ -132,16 +132,17 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
         final boolean includeInBorrowerCycle = command.booleanPrimitiveValueOfParameterNamed("includeInBorrowerCycle");
-        
+
         final LocalDate startDate = command.localDateValueOfParameterNamed("startDate");
         final LocalDate closeDate = command.localDateValueOfParameterNamed("closeDate");
         final String externalId = command.stringValueOfParameterNamedAllowingNull("externalId");
-        
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, description, currency, principal, minPrincipal, maxPrincipal,
                 interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType, annualInterestRate,
                 interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentFrequencyType, numberOfRepayments,
                 minNumberOfRepayments, maxNumberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
-                amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle, startDate, closeDate, externalId);
+                amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle, startDate, closeDate,
+                externalId);
     }
 
     protected LoanProduct() {
@@ -160,7 +161,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final Integer defaultMinNumberOfInstallments, final Integer defaultMaxNumberOfInstallments,
             final Integer graceOnPrincipalPayment, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
             final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final List<Charge> charges,
-            final AccountingRuleType accountingRuleType, final boolean includeInBorrowerCycle,  final LocalDate startDate,
+            final AccountingRuleType accountingRuleType, final boolean includeInBorrowerCycle, final LocalDate startDate,
             final LocalDate closeDate, final String externalId) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
@@ -190,11 +191,11 @@ public class LoanProduct extends AbstractPersistable<Long> {
             this.accountingRule = accountingRuleType.getValue();
         }
         this.includeInBorrowerCycle = includeInBorrowerCycle;
-        
+
         if (startDate != null) {
             this.startDate = startDate.toDateMidnight().toDate();
         }
-        
+
         if (closeDate != null) {
             this.closeDate = closeDate.toDateMidnight().toDate();
         }
@@ -219,7 +220,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     }
 
     public boolean update(final List<Charge> newProductCharges) {
-        if (newProductCharges == null) return false;
+        if (newProductCharges == null) { return false; }
 
         boolean updated = false;
         if (this.charges != null) {
@@ -244,7 +245,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     public Map<String, Object> update(final JsonCommand command, final AprCalculator aprCalculator) {
 
         final Map<String, Object> actualChanges = this.loanProductRelatedDetail.update(command, aprCalculator);
-        actualChanges.putAll(this.loanProductMinMaxConstraints().update(command));
+        actualChanges.putAll(loanProductMinMaxConstraints().update(command));
 
         final String accountingTypeParamName = "accountingRule";
         if (command.isChangeInIntegerParameterNamed(accountingTypeParamName, this.accountingRule)) {
@@ -276,7 +277,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final Long newValue = command.longValueOfParameterNamed(fundIdParamName);
             actualChanges.put(fundIdParamName, newValue);
         }
-        
+
         Long existingStrategyId = null;
         if (this.transactionProcessingStrategy != null) {
             existingStrategyId = this.transactionProcessingStrategy.getId();
@@ -289,22 +290,22 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
         final String chargesParamName = "charges";
         if (command.hasParameter(chargesParamName)) {
-            JsonArray jsonArray = command.arrayOfParameterNamed(chargesParamName);
+            final JsonArray jsonArray = command.arrayOfParameterNamed(chargesParamName);
             if (jsonArray != null) {
                 actualChanges.put(chargesParamName, command.jsonFragment(chargesParamName));
             }
         }
-        
+
         final String includeInBorrowerCycleParamName = "includeInBorrowerCycle";
         if (command.isChangeInBooleanParameterNamed(includeInBorrowerCycleParamName, this.includeInBorrowerCycle)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(includeInBorrowerCycleParamName);
             actualChanges.put(includeInBorrowerCycleParamName, newValue);
             this.includeInBorrowerCycle = newValue;
         }
-        
+
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
-        
+
         final String localeParamName = "locale";
         final String dateFormatParamName = "dateFormat";
 
@@ -319,7 +320,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             if (newValue != null) {
                 this.startDate = newValue.toDate();
             } else {
-            	this.startDate = null;
+                this.startDate = null;
             }
         }
 
@@ -334,7 +335,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             if (newValue != null) {
                 this.closeDate = newValue.toDate();
             } else {
-            	this.closeDate = null;
+                this.closeDate = null;
             }
         }
 
@@ -343,8 +344,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final String newValue = command.stringValueOfParameterNamed(externalIdTypeParamName);
             actualChanges.put(accountingTypeParamName, newValue);
             this.externalId = newValue;
-        }    
-        
+        }
+
         return actualChanges;
     }
 
@@ -361,11 +362,11 @@ public class LoanProduct extends AbstractPersistable<Long> {
     }
 
     public Money getMinPrincipalAmount() {
-        return Money.of(this.loanProductRelatedDetail.getCurrency(), this.loanProductMinMaxConstraints().getMinPrincipal());
+        return Money.of(this.loanProductRelatedDetail.getCurrency(), loanProductMinMaxConstraints().getMinPrincipal());
     }
 
     public Money getMaxPrincipalAmount() {
-        return Money.of(this.loanProductRelatedDetail.getCurrency(), this.loanProductMinMaxConstraints().getMaxPrincipal());
+        return Money.of(this.loanProductRelatedDetail.getCurrency(), loanProductMinMaxConstraints().getMaxPrincipal());
     }
 
     public BigDecimal getNominalInterestRatePerPeriod() {
@@ -377,11 +378,11 @@ public class LoanProduct extends AbstractPersistable<Long> {
     }
 
     public BigDecimal getMinNominalInterestRatePerPeriod() {
-        return this.loanProductMinMaxConstraints().getMinNominalInterestRatePerPeriod();
+        return loanProductMinMaxConstraints().getMinNominalInterestRatePerPeriod();
     }
 
     public BigDecimal getMaxNominalInterestRatePerPeriod() {
-        return this.loanProductMinMaxConstraints().getMaxNominalInterestRatePerPeriod();
+        return loanProductMinMaxConstraints().getMaxNominalInterestRatePerPeriod();
     }
 
     public Integer getNumberOfRepayments() {
@@ -389,11 +390,11 @@ public class LoanProduct extends AbstractPersistable<Long> {
     }
 
     public Integer getMinNumberOfRepayments() {
-        return this.loanProductMinMaxConstraints().getMinNumberOfRepayments();
+        return loanProductMinMaxConstraints().getMinNumberOfRepayments();
     }
 
     public Integer getMaxNumberOfRepayments() {
-        return this.loanProductMinMaxConstraints().getMaxNumberOfRepayments();
+        return loanProductMinMaxConstraints().getMaxNumberOfRepayments();
     }
 
     public LoanProductMinMaxConstraints loanProductMinMaxConstraints() {
@@ -402,13 +403,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
         // Reset LoanProductMinMaxConstraints with null values.
         this.loanProductMinMaxConstraints = (this.loanProductMinMaxConstraints == null) ? new LoanProductMinMaxConstraints(null, null,
                 null, null, null, null) : this.loanProductMinMaxConstraints;
-        return loanProductMinMaxConstraints;
+        return this.loanProductMinMaxConstraints;
     }
 
     public boolean isIncludeInBorrowerCycle() {
         return this.includeInBorrowerCycle;
     }
-    
+
     public LocalDate getStartDate() {
         LocalDate startLocalDate = null;
         if (this.startDate != null) {
@@ -416,7 +417,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         }
         return startLocalDate;
     }
-    
+
     public LocalDate getCloseDate() {
         LocalDate closeLocalDate = null;
         if (this.closeDate != null) {
@@ -429,8 +430,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return this.name;
     }
 
-	public String getExternalId() {
-		return externalId;
-	}
-    
+    public String getExternalId() {
+        return this.externalId;
+    }
+
 }

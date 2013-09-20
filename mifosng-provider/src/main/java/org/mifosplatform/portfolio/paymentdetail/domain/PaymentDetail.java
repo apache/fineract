@@ -71,7 +71,8 @@ public final class PaymentDetail extends AbstractPersistable<Long> {
         if (StringUtils.isNotBlank(bankNumber)) {
             changes.put(PaymentDetailConstants.bankNumberParamName, bankNumber);
         }
-        PaymentDetail paymentDetail = new PaymentDetail(paymentType, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber);
+        final PaymentDetail paymentDetail = new PaymentDetail(paymentType, accountNumber, checkNumber, routingCode, receiptNumber,
+                bankNumber);
         return paymentDetail;
     }
 
@@ -86,7 +87,7 @@ public final class PaymentDetail extends AbstractPersistable<Long> {
     }
 
     public PaymentDetailData toData() {
-        CodeValueData paymentTypeData = paymentType.toData();
+        final CodeValueData paymentTypeData = this.paymentType.toData();
         final PaymentDetailData paymentDetailData = new PaymentDetailData(getId(), paymentTypeData, this.accountNumber, this.checkNumber,
                 this.routingCode, this.receiptNumber, this.bankNumber);
         return paymentDetailData;

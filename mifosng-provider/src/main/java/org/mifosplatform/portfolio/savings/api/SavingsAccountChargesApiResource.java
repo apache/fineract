@@ -5,10 +5,10 @@
  */
 package org.mifosplatform.portfolio.savings.api;
 
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.COMMAND_PAY_CHARGE;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.COMMAND_WAIVE_CHARGE;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_CHARGES_RESPONSE_DATA_PARAMETERS;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.COMMAND_WAIVE_CHARGE;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.COMMAND_PAY_CHARGE;
 
 import java.util.Collection;
 
@@ -81,12 +81,12 @@ public class SavingsAccountChargesApiResource {
     public String retrieveAllSavingsAccountCharges(@PathParam("savingsAccountId") final Long savingsAccountId,
             @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
+        this.context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
 
         final Collection<SavingsAccountChargeData> savingsAccountCharges = this.savingsAccountChargeReadPlatformService
                 .retrieveSavingsAccountCharges(savingsAccountId);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, savingsAccountCharges,
                 SavingsApiConstants.SAVINGS_ACCOUNT_CHARGES_RESPONSE_DATA_PARAMETERS);
     }
@@ -97,13 +97,13 @@ public class SavingsAccountChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveTemplate(@Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
+        this.context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
 
         final boolean feeChargesOnly = false;
         final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSavingsAccountApplicableCharges(feeChargesOnly);
         final SavingsAccountChargeData savingsAccountChargeTemplate = SavingsAccountChargeData.template(chargeOptions);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, savingsAccountChargeTemplate, SAVINGS_ACCOUNT_CHARGES_RESPONSE_DATA_PARAMETERS);
     }
 
@@ -114,12 +114,12 @@ public class SavingsAccountChargesApiResource {
     public String retrieveSavingsAccountCharge(@PathParam("savingsAccountId") final Long savingsAccountId,
             @PathParam("savingsAccountChargeId") final Long savingsAccountChargeId, @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
+        this.context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
 
         final SavingsAccountChargeData savingsAccountCharge = this.savingsAccountChargeReadPlatformService
                 .retrieveSavingsAccountChargeDetails(savingsAccountChargeId, savingsAccountId);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, savingsAccountCharge, SAVINGS_ACCOUNT_CHARGES_RESPONSE_DATA_PARAMETERS);
     }
 

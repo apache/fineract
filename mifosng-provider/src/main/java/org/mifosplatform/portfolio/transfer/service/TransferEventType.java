@@ -5,7 +5,6 @@
  */
 package org.mifosplatform.portfolio.transfer.service;
 
-
 public enum TransferEventType {
     PROPOSAL(1, "transferEvent.proposal"), ACCEPTANCE(2, "transferEvent.acceptance"), WITHDRAWAL(3, "transferEvent.withdrawal"), REJECTION(
             4, "transferEvent.rejection");

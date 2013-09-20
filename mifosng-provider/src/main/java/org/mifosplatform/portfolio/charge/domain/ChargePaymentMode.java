@@ -8,17 +8,17 @@ public enum ChargePaymentMode {
     private final Integer value;
     private final String code;
 
-    private ChargePaymentMode(Integer value, String code) {
+    private ChargePaymentMode(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }
 
     public Integer getValue() {
-        return value;
+        return this.value;
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public static ChargePaymentMode fromInt(final Integer paymentMode) {
@@ -33,8 +33,8 @@ public enum ChargePaymentMode {
         }
         return chargeAppliesToType;
     }
-    
-    public boolean isPaymentModeAccountTransfer(){
+
+    public boolean isPaymentModeAccountTransfer() {
         return this.value.equals(ChargePaymentMode.ACCOUNT_TRANSFER.getValue());
     }
 }

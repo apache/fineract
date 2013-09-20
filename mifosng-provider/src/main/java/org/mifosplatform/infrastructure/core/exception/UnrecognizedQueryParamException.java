@@ -18,11 +18,11 @@ public class UnrecognizedQueryParamException extends RuntimeException {
     }
 
     public String getQueryParamKey() {
-        return queryParamKey;
+        return this.queryParamKey;
     }
 
     public String getQueryParamValue() {
-        return queryParamValue;
+        return this.queryParamValue;
     }
 
     public Object[] getSupportedParams() {

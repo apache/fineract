@@ -72,5 +72,4 @@ public interface LoanWritePlatformService {
 
     void transferFeeCharges() throws JobExecutionException;
 
-
 }

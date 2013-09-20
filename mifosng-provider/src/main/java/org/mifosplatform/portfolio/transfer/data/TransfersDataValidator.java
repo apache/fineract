@@ -105,7 +105,7 @@ public final class TransfersDataValidator {
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
-        final JsonElement element = fromApiJsonHelper.parse(json);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         if (this.fromApiJsonHelper.parameterExists(TransferApiConstants.newStaffIdParamName, element)) {
             final Long newStaffId = this.fromApiJsonHelper.extractLongNamed(TransferApiConstants.newStaffIdParamName, element);
@@ -134,7 +134,7 @@ public final class TransfersDataValidator {
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
-        final JsonElement element = fromApiJsonHelper.parse(json);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         validateNote(baseDataValidator, element);
 
@@ -151,7 +151,7 @@ public final class TransfersDataValidator {
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
-        final JsonElement element = fromApiJsonHelper.parse(json);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         validateNote(baseDataValidator, element);
 
@@ -159,7 +159,7 @@ public final class TransfersDataValidator {
     }
 
     private void validateNote(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
-        final String note = fromApiJsonHelper.extractStringNamed(TransferApiConstants.note, element);
+        final String note = this.fromApiJsonHelper.extractStringNamed(TransferApiConstants.note, element);
         baseDataValidator.reset().parameter(TransferApiConstants.note).value(note).notExceedingLengthOf(1000);
     }
 

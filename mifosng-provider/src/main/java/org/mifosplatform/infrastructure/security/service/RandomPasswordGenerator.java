@@ -15,7 +15,7 @@ public class RandomPasswordGenerator {
 
     public String generate() {
 
-        StringBuilder passwordBuilder = new StringBuilder(this.numberOfCharactersInPassword);
+        final StringBuilder passwordBuilder = new StringBuilder(this.numberOfCharactersInPassword);
         for (int i = 0; i < this.numberOfCharactersInPassword; i++) {
             passwordBuilder.append((char) ((int) (Math.random() * 26) + 97));
         }

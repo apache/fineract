@@ -74,6 +74,6 @@ public class LoanScheduleData {
     }
 
     public Collection<LoanSchedulePeriodData> getPeriods() {
-        return periods;
+        return this.periods;
     }
 }

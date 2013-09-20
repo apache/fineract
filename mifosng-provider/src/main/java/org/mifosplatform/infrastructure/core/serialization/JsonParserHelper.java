@@ -42,11 +42,11 @@ public class JsonParserHelper {
     public Boolean extractBooleanNamed(final String parameterName, final JsonElement element, final Set<String> requestParamatersDetected) {
         Boolean value = null;
         if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
+            final JsonObject object = element.getAsJsonObject();
             if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
                 requestParamatersDetected.add(parameterName);
 
-                JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
+                final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
                 value = primitive.getAsBoolean();
             }
         }
@@ -56,10 +56,10 @@ public class JsonParserHelper {
     public Long extractLongNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
         Long longValue = null;
         if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
+            final JsonObject object = element.getAsJsonObject();
             if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
                 parametersPassedInRequest.add(parameterName);
-                JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
+                final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
                 final String stringValue = primitive.getAsString();
                 if (StringUtils.isNotBlank(stringValue)) {
                     longValue = Long.valueOf(stringValue);
@@ -72,7 +72,7 @@ public class JsonParserHelper {
     public String extractStringNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
         String stringValue = null;
         if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
+            final JsonObject object = element.getAsJsonObject();
             if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
                 parametersPassedInRequest.add(parameterName);
                 final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
@@ -100,11 +100,11 @@ public class JsonParserHelper {
             final Set<String> modifiedParameters) {
         BigDecimal value = null;
         if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
+            final JsonObject object = element.getAsJsonObject();
             if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
                 modifiedParameters.add(parameterName);
-                JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
-                String valueAsString = primitive.getAsString();
+                final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
+                final String valueAsString = primitive.getAsString();
                 if (StringUtils.isNotBlank(valueAsString)) {
                     value = convertFrom(valueAsString, parameterName, locale);
                 }
@@ -130,8 +130,8 @@ public class JsonParserHelper {
             final JsonObject object = element.getAsJsonObject();
             if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
                 modifiedParameters.add(parameterName);
-                JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
-                String valueAsString = primitive.getAsString();
+                final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
+                final String valueAsString = primitive.getAsString();
                 if (StringUtils.isNotBlank(valueAsString)) {
                     value = convertToInteger(valueAsString, parameterName, locale);
                 }
@@ -156,10 +156,10 @@ public class JsonParserHelper {
             final Set<String> parametersPassedInRequest) {
         Integer intValue = null;
         if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
+            final JsonObject object = element.getAsJsonObject();
             if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
                 parametersPassedInRequest.add(parameterName);
-                JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
+                final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
                 final String stringValue = primitive.getAsString();
                 if (StringUtils.isNotBlank(stringValue)) {
                     intValue = convertToIntegerSanLocale(stringValue, parameterName);
@@ -172,7 +172,7 @@ public class JsonParserHelper {
     public String extractDateFormatParameter(final JsonObject element) {
         String value = null;
         if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
+            final JsonObject object = element.getAsJsonObject();
 
             final String dateFormatParameter = "dateFormat";
             if (object.has(dateFormatParameter) && object.get(dateFormatParameter).isJsonPrimitive()) {
@@ -186,7 +186,7 @@ public class JsonParserHelper {
     public String extractMonthDayFormatParameter(final JsonObject element) {
         String value = null;
         if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
+            final JsonObject object = element.getAsJsonObject();
 
             final String monthDayFormatParameter = "monthDayFormat";
             if (object.has(monthDayFormatParameter) && object.get(monthDayFormatParameter).isJsonPrimitive()) {
@@ -200,7 +200,7 @@ public class JsonParserHelper {
     public Locale extractLocaleParameter(final JsonObject element) {
         Locale clientApplicationLocale = null;
         if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
+            final JsonObject object = element.getAsJsonObject();
 
             String locale = null;
             final String localeParameter = "locale";
@@ -216,10 +216,10 @@ public class JsonParserHelper {
     public String[] extractArrayNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
         String[] arrayValue = null;
         if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
+            final JsonObject object = element.getAsJsonObject();
             if (object.has(parameterName)) {
                 parametersPassedInRequest.add(parameterName);
-                JsonArray array = object.get(parameterName).getAsJsonArray();
+                final JsonArray array = object.get(parameterName).getAsJsonArray();
                 arrayValue = new String[array.size()];
                 for (int i = 0; i < array.size(); i++) {
                     arrayValue[i] = array.get(i).getAsString();
@@ -233,7 +233,7 @@ public class JsonParserHelper {
         JsonArray jsonArray = null;
 
         if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
+            final JsonObject object = element.getAsJsonObject();
             if (object.has(parameterName)) {
                 jsonArray = object.get(parameterName).getAsJsonArray();
             }
@@ -249,7 +249,7 @@ public class JsonParserHelper {
             final Set<String> parametersPassedInCommand) {
         LocalDate value = null;
         if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
+            final JsonObject object = element.getAsJsonObject();
 
             if (object.has(parameterName) && object.get(parameterName).isJsonArray()) {
 
@@ -257,9 +257,9 @@ public class JsonParserHelper {
 
                 final JsonArray dateArray = object.get(parameterName).getAsJsonArray();
 
-                Integer year = dateArray.get(0).getAsInt();
-                Integer month = dateArray.get(1).getAsInt();
-                Integer day = dateArray.get(2).getAsInt();
+                final Integer year = dateArray.get(0).getAsInt();
+                final Integer month = dateArray.get(1).getAsInt();
+                final Integer day = dateArray.get(2).getAsInt();
 
                 value = new LocalDate().withYearOfEra(year).withMonthOfYear(month).withDayOfMonth(day);
             }
@@ -273,7 +273,7 @@ public class JsonParserHelper {
         MonthDay value = null;
 
         if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
+            final JsonObject object = element.getAsJsonObject();
 
             final String monthDayFormat = extractMonthDayFormatParameter(object);
             final Locale clientApplicationLocale = extractLocaleParameter(object);
@@ -286,14 +286,14 @@ public class JsonParserHelper {
             final Locale clientApplicationLocale) {
         MonthDay value = null;
         if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
+            final JsonObject object = element.getAsJsonObject();
 
             if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
 
                 final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
                 final String valueAsString = primitive.getAsString();
                 if (StringUtils.isNotBlank(valueAsString)) {
-                    DateTimeFormatter formatter = DateTimeFormat.forPattern(dateFormat).withLocale(clientApplicationLocale);
+                    final DateTimeFormatter formatter = DateTimeFormat.forPattern(dateFormat).withLocale(clientApplicationLocale);
                     value = MonthDay.parse(valueAsString.toLowerCase(clientApplicationLocale), formatter);
                 }
             }
@@ -308,7 +308,7 @@ public class JsonParserHelper {
         LocalDate value = null;
 
         if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
+            final JsonObject object = element.getAsJsonObject();
 
             final String dateFormat = extractDateFormatParameter(object);
             final Locale clientApplicationLocale = extractLocaleParameter(object);
@@ -321,7 +321,7 @@ public class JsonParserHelper {
             final Locale clientApplicationLocale, final Set<String> parametersPassedInCommand) {
         LocalDate value = null;
         if (element.isJsonObject()) {
-            JsonObject object = element.getAsJsonObject();
+            final JsonObject object = element.getAsJsonObject();
 
             if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
 
@@ -343,18 +343,18 @@ public class JsonParserHelper {
 
         if (StringUtils.isBlank(dateFormat) || clientApplicationLocale == null) {
 
-            List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
             if (StringUtils.isBlank(dateFormat)) {
-                String defaultMessage = new StringBuilder("The parameter '" + parameterName
+                final String defaultMessage = new StringBuilder("The parameter '" + parameterName
                         + "' requires a 'dateFormat' parameter to be passed with it.").toString();
-                ApiParameterError error = ApiParameterError.parameterError("validation.msg.missing.dateFormat.parameter", defaultMessage,
-                        parameterName);
+                final ApiParameterError error = ApiParameterError.parameterError("validation.msg.missing.dateFormat.parameter",
+                        defaultMessage, parameterName);
                 dataValidationErrors.add(error);
             }
             if (clientApplicationLocale == null) {
-                String defaultMessage = new StringBuilder("The parameter '" + parameterName
+                final String defaultMessage = new StringBuilder("The parameter '" + parameterName
                         + "' requires a 'locale' parameter to be passed with it.").toString();
-                ApiParameterError error = ApiParameterError.parameterError("validation.msg.missing.locale.parameter", defaultMessage,
+                final ApiParameterError error = ApiParameterError.parameterError("validation.msg.missing.locale.parameter", defaultMessage,
                         parameterName);
                 dataValidationErrors.add(error);
             }
@@ -368,9 +368,9 @@ public class JsonParserHelper {
                 // Locale locale = LocaleContextHolder.getLocale();
                 eventLocalDate = DateTimeFormat.forPattern(dateFormat).withLocale(clientApplicationLocale)
                         .parseLocalDate(dateAsString.toLowerCase(clientApplicationLocale));
-            } catch (IllegalArgumentException e) {
-                List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-                ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.date.format", "The parameter "
+            } catch (final IllegalArgumentException e) {
+                final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+                final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.date.format", "The parameter "
                         + parameterName + " is invalid based on the dateFormat: '" + dateFormat + "' and locale: '"
                         + clientApplicationLocale + "' provided:", parameterName, dateAsString, dateFormat);
                 dataValidationErrors.add(error);
@@ -387,10 +387,10 @@ public class JsonParserHelper {
 
         if (clientApplicationLocale == null) {
 
-            List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-            String defaultMessage = new StringBuilder("The parameter '" + parameterName
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final String defaultMessage = new StringBuilder("The parameter '" + parameterName
                     + "' requires a 'locale' parameter to be passed with it.").toString();
-            ApiParameterError error = ApiParameterError.parameterError("validation.msg.missing.locale.parameter", defaultMessage,
+            final ApiParameterError error = ApiParameterError.parameterError("validation.msg.missing.locale.parameter", defaultMessage,
                     parameterName);
             dataValidationErrors.add(error);
 
@@ -405,21 +405,21 @@ public class JsonParserHelper {
 
                 String source = numericalValueFormatted.trim();
 
-                NumberFormat format = NumberFormat.getInstance(clientApplicationLocale);
-                DecimalFormat df = (DecimalFormat) format;
-                DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
+                final NumberFormat format = NumberFormat.getInstance(clientApplicationLocale);
+                final DecimalFormat df = (DecimalFormat) format;
+                final DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
                 df.setParseBigDecimal(true);
 
                 // http://bugs.sun.com/view_bug.do?bug_id=4510618
-                char groupingSeparator = symbols.getGroupingSeparator();
+                final char groupingSeparator = symbols.getGroupingSeparator();
                 if (groupingSeparator == '\u00a0') {
                     source = source.replaceAll(" ", Character.toString('\u00a0'));
                 }
 
-                Number parsedNumber = df.parse(source);
+                final Number parsedNumber = df.parse(source);
 
-                double parsedNumberDouble = parsedNumber.doubleValue();
-                int parsedNumberInteger = parsedNumber.intValue();
+                final double parsedNumberDouble = parsedNumber.doubleValue();
+                final int parsedNumberInteger = parsedNumber.intValue();
 
                 if (source.contains(Character.toString(symbols.getDecimalSeparator()))) { throw new ParseException(source, 0); }
 
@@ -430,10 +430,10 @@ public class JsonParserHelper {
             }
 
             return number;
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
 
-            List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-            ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.integer.format", "The parameter "
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.integer.format", "The parameter "
                     + parameterName + " has value: " + numericalValueFormatted + " which is invalid integer value for provided locale of ["
                     + clientApplicationLocale.toString() + "].", parameterName, numericalValueFormatted, clientApplicationLocale);
             error.setValue(numericalValueFormatted);
@@ -454,11 +454,12 @@ public class JsonParserHelper {
             }
 
             return number;
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
 
-            List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-            ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.integer", "The parameter " + parameterName
-                    + " has value: " + numericalValueFormatted + " which is invalid integer.", parameterName, numericalValueFormatted);
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.integer", "The parameter "
+                    + parameterName + " has value: " + numericalValueFormatted + " which is invalid integer.", parameterName,
+                    numericalValueFormatted);
             error.setValue(numericalValueFormatted);
             dataValidationErrors.add(error);
 
@@ -471,10 +472,10 @@ public class JsonParserHelper {
 
         if (clientApplicationLocale == null) {
 
-            List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-            String defaultMessage = new StringBuilder("The parameter '" + parameterName
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final String defaultMessage = new StringBuilder("The parameter '" + parameterName
                     + "' requires a 'locale' parameter to be passed with it.").toString();
-            ApiParameterError error = ApiParameterError.parameterError("validation.msg.missing.locale.parameter", defaultMessage,
+            final ApiParameterError error = ApiParameterError.parameterError("validation.msg.missing.locale.parameter", defaultMessage,
                     parameterName);
             dataValidationErrors.add(error);
 
@@ -489,25 +490,25 @@ public class JsonParserHelper {
 
                 String source = numericalValueFormatted.trim();
 
-                NumberFormat format = NumberFormat.getNumberInstance(clientApplicationLocale);
-                DecimalFormat df = (DecimalFormat) format;
-                DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
+                final NumberFormat format = NumberFormat.getNumberInstance(clientApplicationLocale);
+                final DecimalFormat df = (DecimalFormat) format;
+                final DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
                 // http://bugs.sun.com/view_bug.do?bug_id=4510618
-                char groupingSeparator = symbols.getGroupingSeparator();
+                final char groupingSeparator = symbols.getGroupingSeparator();
                 if (groupingSeparator == '\u00a0') {
                     source = source.replaceAll(" ", Character.toString('\u00a0'));
                 }
 
-                NumberFormatter numberFormatter = new NumberFormatter();
-                Number parsedNumber = numberFormatter.parse(source, clientApplicationLocale);
+                final NumberFormatter numberFormatter = new NumberFormatter();
+                final Number parsedNumber = numberFormatter.parse(source, clientApplicationLocale);
                 number = BigDecimal.valueOf(Double.valueOf(parsedNumber.doubleValue()));
             }
 
             return number;
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
 
-            List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-            ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.decimal.format", "The parameter "
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.decimal.format", "The parameter "
                     + parameterName + " has value: " + numericalValueFormatted + " which is invalid decimal value for provided locale of ["
                     + clientApplicationLocale.toString() + "].", parameterName, numericalValueFormatted, clientApplicationLocale);
             error.setValue(numericalValueFormatted);
@@ -518,12 +519,12 @@ public class JsonParserHelper {
         }
     }
 
-    /***TODO: Vishwas move all Locale related code to a separate Utils class***/
+    /*** TODO: Vishwas move all Locale related code to a separate Utils class ***/
     public static Locale localeFromString(final String localeAsString) {
 
         if (StringUtils.isBlank(localeAsString)) {
-            List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-            ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.locale.format",
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.locale.format",
                     "The parameter locale is invalid. It cannot be blank.", "locale");
             dataValidationErrors.add(error);
 
@@ -535,7 +536,7 @@ public class JsonParserHelper {
         String countryCode = "";
         String variantCode = "";
 
-        String[] localeParts = localeAsString.split("_");
+        final String[] localeParts = localeAsString.split("_");
 
         if (localeParts != null && localeParts.length == 1) {
             languageCode = localeParts[0];
@@ -557,19 +558,19 @@ public class JsonParserHelper {
 
     private static Locale localeFrom(final String languageCode, final String courntryCode, final String variantCode) {
 
-        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-        List<String> allowedLanguages = Arrays.asList(Locale.getISOLanguages());
+        final List<String> allowedLanguages = Arrays.asList(Locale.getISOLanguages());
         if (!allowedLanguages.contains(languageCode.toLowerCase())) {
-            ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.locale.format",
+            final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.locale.format",
                     "The parameter locale has an invalid language value " + languageCode + " .", "locale", languageCode);
             dataValidationErrors.add(error);
         }
 
         if (StringUtils.isNotBlank(courntryCode.toUpperCase())) {
-            List<String> allowedCountries = Arrays.asList(Locale.getISOCountries());
+            final List<String> allowedCountries = Arrays.asList(Locale.getISOCountries());
             if (!allowedCountries.contains(courntryCode)) {
-                ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.locale.format",
+                final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.locale.format",
                         "The parameter locale has an invalid country value " + courntryCode + " .", "locale", courntryCode);
                 dataValidationErrors.add(error);
             }
@@ -585,7 +586,7 @@ public class JsonParserHelper {
         Locale clientApplicationLocale = null;
         String locale = null;
         if (object.has("locale") && object.get("locale").isJsonPrimitive()) {
-            JsonPrimitive primitive = object.get("locale").getAsJsonPrimitive();
+            final JsonPrimitive primitive = object.get("locale").getAsJsonPrimitive();
             locale = primitive.getAsString();
             clientApplicationLocale = localeFromString(locale);
         }

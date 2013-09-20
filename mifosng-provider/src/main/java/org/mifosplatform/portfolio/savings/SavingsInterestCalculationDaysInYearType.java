@@ -35,12 +35,12 @@ public enum SavingsInterestCalculationDaysInYearType {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public static Object[] integerValues() {
-        List<Integer> values = new ArrayList<Integer>();
-        for (SavingsInterestCalculationDaysInYearType enumType : values()) {
+        final List<Integer> values = new ArrayList<Integer>();
+        for (final SavingsInterestCalculationDaysInYearType enumType : values()) {
             if (enumType.getValue() > 0) {
                 values.add(enumType.getValue());
             }

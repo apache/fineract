@@ -44,11 +44,11 @@ public class EndOfDayBalance {
     public BigDecimal calculateInterestOnBalance(final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction,
             final long daysInYear) {
 
-        BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
-        BigDecimal dailyInterestRate = interestRateAsFraction.multiply(multiplicand, MathContext.DECIMAL64);
-        BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(this.numberOfDays), MathContext.DECIMAL64);
+        final BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
+        final BigDecimal dailyInterestRate = interestRateAsFraction.multiply(multiplicand, MathContext.DECIMAL64);
+        final BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(this.numberOfDays), MathContext.DECIMAL64);
 
-        BigDecimal realBalanceForInterestCalculation = this.endOfDayBalance.getAmount().add(interestToCompound);
+        final BigDecimal realBalanceForInterestCalculation = this.endOfDayBalance.getAmount().add(interestToCompound);
 
         return realBalanceForInterestCalculation.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(9, RoundingMode.HALF_EVEN);
     }
@@ -62,42 +62,42 @@ public class EndOfDayBalance {
      */
     public BigDecimal calculateInterestOnBalanceAndInterest(final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction,
             final long daysInYear) {
-        BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
+        final BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
 
-        BigDecimal presentValue = endOfDayBalance.getAmount().add(interestToCompound);
+        final BigDecimal presentValue = this.endOfDayBalance.getAmount().add(interestToCompound);
 
-        BigDecimal r = interestRateAsFraction.multiply(multiplicand);
+        final BigDecimal r = interestRateAsFraction.multiply(multiplicand);
 
-        BigDecimal interestRateForCompoundingPeriodPlusOne = BigDecimal.ONE.add(r);
+        final BigDecimal interestRateForCompoundingPeriodPlusOne = BigDecimal.ONE.add(r);
 
-        double interestRateForCompoundingPeriodPowered = Math.pow(interestRateForCompoundingPeriodPlusOne.doubleValue(),
-                Integer.valueOf(this.numberOfDays).doubleValue());
+        final double interestRateForCompoundingPeriodPowered = Math.pow(interestRateForCompoundingPeriodPlusOne.doubleValue(), Integer
+                .valueOf(this.numberOfDays).doubleValue());
 
-        BigDecimal futureValue = presentValue.multiply(BigDecimal.valueOf(interestRateForCompoundingPeriodPowered), MathContext.DECIMAL64)
-                .setScale(9, RoundingMode.HALF_EVEN);
+        final BigDecimal futureValue = presentValue.multiply(BigDecimal.valueOf(interestRateForCompoundingPeriodPowered),
+                MathContext.DECIMAL64).setScale(9, RoundingMode.HALF_EVEN);
         return futureValue.subtract(presentValue);
     }
 
     public EndOfDayBalance upTo(final LocalDateInterval compoundingPeriodInterval) {
 
-        Money startingBalance = openingBalance;
+        Money startingBalance = this.openingBalance;
         LocalDate balanceStartDate = this.date;
 
         if (this.date.isBefore(compoundingPeriodInterval.startDate())) {
             balanceStartDate = compoundingPeriodInterval.startDate();
-            startingBalance = endOfDayBalance;
+            startingBalance = this.endOfDayBalance;
         }
 
         int daysOfBalance = this.numberOfDays;
         LocalDate balanceEndDate = balanceStartDate.plusDays(this.numberOfDays);
         if (balanceEndDate.isAfter(compoundingPeriodInterval.endDate())) {
             balanceEndDate = compoundingPeriodInterval.endDate();
-            LocalDateInterval balancePeriodInterval = LocalDateInterval.create(balanceStartDate, balanceEndDate);
+            final LocalDateInterval balancePeriodInterval = LocalDateInterval.create(balanceStartDate, balanceEndDate);
             daysOfBalance = balancePeriodInterval.daysInPeriodInclusiveOfEndDate();
         }
         if (balanceEndDate.isAfter(DateUtils.getLocalDateOfTenant())) {
             balanceEndDate = DateUtils.getLocalDateOfTenant();
-            LocalDateInterval balancePeriodInterval = LocalDateInterval.create(balanceStartDate, balanceEndDate);
+            final LocalDateInterval balancePeriodInterval = LocalDateInterval.create(balanceStartDate, balanceEndDate);
             daysOfBalance = balancePeriodInterval.daysInPeriodInclusiveOfEndDate();
         }
 

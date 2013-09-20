@@ -22,7 +22,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
             final List<LoanRepaymentScheduleInstallment> repaymentPeriods, final Set<LoanCharge> loanCharges) {
 
         LocalDate startDate = disbursementDate;
-        for (LoanRepaymentScheduleInstallment period : repaymentPeriods) {
+        for (final LoanRepaymentScheduleInstallment period : repaymentPeriods) {
 
             final Money feeChargesDueForRepaymentPeriod = cumulativeFeeChargesDueWithin(startDate, period.getDueDate(), loanCharges,
                     currency);
@@ -51,7 +51,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
 
         Money cumulative = Money.zero(monetaryCurrency);
 
-        for (LoanCharge loanCharge : loanCharges) {
+        for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd) && loanCharge.isFeeCharge()) {
                 cumulative = cumulative.plus(loanCharge.amount());
             }
@@ -65,7 +65,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
 
         Money cumulative = Money.zero(currency);
 
-        for (LoanCharge loanCharge : loanCharges) {
+        for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd) && loanCharge.isFeeCharge()) {
                 cumulative = cumulative.plus(loanCharge.getAmountWaived(currency));
             }
@@ -79,7 +79,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
 
         Money cumulative = Money.zero(currency);
 
-        for (LoanCharge loanCharge : loanCharges) {
+        for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd) && loanCharge.isFeeCharge()) {
                 cumulative = cumulative.plus(loanCharge.getAmountWrittenOff(currency));
             }
@@ -93,7 +93,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
 
         Money cumulative = Money.zero(currency);
 
-        for (LoanCharge loanCharge : loanCharges) {
+        for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd) && loanCharge.isPenaltyCharge()) {
                 cumulative = cumulative.plus(loanCharge.amount());
             }
@@ -107,7 +107,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
 
         Money cumulative = Money.zero(currency);
 
-        for (LoanCharge loanCharge : loanCharges) {
+        for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd) && loanCharge.isPenaltyCharge()) {
                 cumulative = cumulative.plus(loanCharge.getAmountWaived(currency));
             }
@@ -121,7 +121,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
 
         Money cumulative = Money.zero(currency);
 
-        for (LoanCharge loanCharge : loanCharges) {
+        for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd) && loanCharge.isPenaltyCharge()) {
                 cumulative = cumulative.plus(loanCharge.getAmountWrittenOff(currency));
             }

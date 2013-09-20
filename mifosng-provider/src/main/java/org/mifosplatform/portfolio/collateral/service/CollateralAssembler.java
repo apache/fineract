@@ -52,16 +52,16 @@ public class CollateralAssembler {
 
                     final JsonObject collateralItemElement = array.get(i).getAsJsonObject();
 
-                    final Long id = fromApiJsonHelper.extractLongNamed("id", collateralItemElement);
-                    final Long collateralTypeId = fromApiJsonHelper.extractLongNamed("type", collateralItemElement);
+                    final Long id = this.fromApiJsonHelper.extractLongNamed("id", collateralItemElement);
+                    final Long collateralTypeId = this.fromApiJsonHelper.extractLongNamed("type", collateralItemElement);
                     final CodeValue collateralType = this.codeValueRepository.findOneWithNotFoundDetection(collateralTypeId);
-                    final String description = fromApiJsonHelper.extractStringNamed("description", collateralItemElement);
-                    final BigDecimal value = fromApiJsonHelper.extractBigDecimalNamed("value", collateralItemElement, locale);
+                    final String description = this.fromApiJsonHelper.extractStringNamed("description", collateralItemElement);
+                    final BigDecimal value = this.fromApiJsonHelper.extractBigDecimalNamed("value", collateralItemElement, locale);
 
                     if (id == null) {
                         collateralItems.add(LoanCollateral.from(collateralType, value, description));
                     } else {
-                        LoanCollateral loanCollateralItem = this.loanCollateralRepository.findOne(id);
+                        final LoanCollateral loanCollateralItem = this.loanCollateralRepository.findOne(id);
                         if (loanCollateralItem == null) { throw new CollateralNotFoundException(id); }
 
                         loanCollateralItem.assembleFrom(collateralType, value, description);

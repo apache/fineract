@@ -107,22 +107,24 @@ public class AccountingRuleApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllAccountingRules(@Context final UriInfo uriInfo) {
-        
-        final AppUser currentUser = context.authenticatedUser();
+
+        final AppUser currentUser = this.context.authenticatedUser();
         currentUser.validateHasReadPermission(this.resourceNameForPermission);
-        
+
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
-        
+
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         boolean isAssociationParametersExists = false;
         if (!associationParameters.isEmpty()) {
             if (associationParameters.contains("all")) {
-                isAssociationParametersExists = true; // If true, retrieve additional fields for journal entry form.
+                isAssociationParametersExists = true; // If true, retrieve
+                                                      // additional fields for
+                                                      // journal entry form.
             }
         }
-        final List<AccountingRuleData> accountingRuleDatas = this.accountingRuleReadPlatformService.retrieveAllAccountingRules(hierarchySearchString,
-                isAssociationParametersExists);
+        final List<AccountingRuleData> accountingRuleDatas = this.accountingRuleReadPlatformService.retrieveAllAccountingRules(
+                hierarchySearchString, isAssociationParametersExists);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, accountingRuleDatas, RESPONSE_DATA_PARAMETERS);
@@ -189,10 +191,14 @@ public class AccountingRuleApiResource {
         final Collection<CodeValueData> allowedTagOptions = this.codeValueReadPlatformService
                 .retrieveCodeValuesByCode(AccountingConstants.ASSESTS_TAG_OPTION_CODE_NAME);
 
-        allowedTagOptions.addAll(this.codeValueReadPlatformService.retrieveCodeValuesByCode(AccountingConstants.LIABILITIES_TAG_OPTION_CODE_NAME));
-        allowedTagOptions.addAll(this.codeValueReadPlatformService.retrieveCodeValuesByCode(AccountingConstants.EQUITY_TAG_OPTION_CODE_NAME));
-        allowedTagOptions.addAll(this.codeValueReadPlatformService.retrieveCodeValuesByCode(AccountingConstants.INCOME_TAG_OPTION_CODE_NAME));
-        allowedTagOptions.addAll(this.codeValueReadPlatformService.retrieveCodeValuesByCode(AccountingConstants.EXPENSES_TAG_OPTION_CODE_NAME));
+        allowedTagOptions.addAll(this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode(AccountingConstants.LIABILITIES_TAG_OPTION_CODE_NAME));
+        allowedTagOptions.addAll(this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode(AccountingConstants.EQUITY_TAG_OPTION_CODE_NAME));
+        allowedTagOptions.addAll(this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode(AccountingConstants.INCOME_TAG_OPTION_CODE_NAME));
+        allowedTagOptions.addAll(this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode(AccountingConstants.EXPENSES_TAG_OPTION_CODE_NAME));
 
         if (accountingRuleData == null) {
 

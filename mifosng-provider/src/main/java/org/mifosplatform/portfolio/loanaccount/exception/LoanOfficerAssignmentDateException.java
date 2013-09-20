@@ -9,8 +9,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
 
 public class LoanOfficerAssignmentDateException extends AbstractPlatformDomainRuleException {
 
-    public LoanOfficerAssignmentDateException(String postFix, String defaultUserMessage,
-            Object... defaultUserMessageArgs) {
+    public LoanOfficerAssignmentDateException(final String postFix, final String defaultUserMessage, final Object... defaultUserMessageArgs) {
         super("error.msg.loan.assignment.date." + postFix, defaultUserMessage, defaultUserMessageArgs);
     }
 

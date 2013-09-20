@@ -7,7 +7,6 @@ package org.mifosplatform.portfolio.collectionsheet.command;
 
 import org.joda.time.LocalDate;
 
-
 /**
  * Immutable command for loan bulk disburse.
  */
@@ -17,7 +16,8 @@ public class CollectionSheetBulkDisbursalCommand {
     private final LocalDate transactionDate;
     private final SingleDisbursalCommand[] disburseTransactions;
 
-    public CollectionSheetBulkDisbursalCommand(String note, final LocalDate transactionDate, SingleDisbursalCommand[] disburseTransactions) {
+    public CollectionSheetBulkDisbursalCommand(final String note, final LocalDate transactionDate,
+            final SingleDisbursalCommand[] disburseTransactions) {
         this.note = note;
         this.transactionDate = transactionDate;
         this.disburseTransactions = disburseTransactions;
@@ -26,7 +26,7 @@ public class CollectionSheetBulkDisbursalCommand {
     public String getNote() {
         return this.note;
     }
-    
+
     public SingleDisbursalCommand[] getDisburseTransactions() {
         return this.disburseTransactions;
     }
@@ -34,5 +34,5 @@ public class CollectionSheetBulkDisbursalCommand {
     public LocalDate getTransactionDate() {
         return this.transactionDate;
     }
-   
+
 }

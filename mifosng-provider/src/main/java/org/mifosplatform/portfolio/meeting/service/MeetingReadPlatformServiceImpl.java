@@ -50,7 +50,7 @@ public class MeetingReadPlatformServiceImpl implements MeetingReadPlatformServic
     }
 
     @Override
-    public MeetingData retrieveMeeting(final Long meetingId, Long entityId, Integer entityTypeId) {
+    public MeetingData retrieveMeeting(final Long meetingId, final Long entityId, final Integer entityTypeId) {
 
         try {
             final MeetingDataMapper rm = new MeetingDataMapper();
@@ -64,24 +64,24 @@ public class MeetingReadPlatformServiceImpl implements MeetingReadPlatformServic
     }
 
     @Override
-    public Collection<MeetingData> retrieveMeetingsByEntity(Long entityId, Integer entityTypeId, Integer limit) {
+    public Collection<MeetingData> retrieveMeetingsByEntity(final Long entityId, final Integer entityTypeId, final Integer limit) {
         final MeetingDataMapper rm = new MeetingDataMapper();
         String sql = rm.schema() + " where ci.entity_id = ? and ci.entity_type_enum = ? ";
-        if(limit != null && limit > 0){
-            sql = sql + " order by m.meeting_date desc " + " limit " + limit; 
+        if (limit != null && limit > 0) {
+            sql = sql + " order by m.meeting_date desc " + " limit " + limit;
         }
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
     }
 
     @Override
-    public Collection<MeetingData> retrieveMeetingsByEntityByCalendarType(Long entityId, Integer entityTypeId,
-            List<Integer> calendarTypeOptions) {
+    public Collection<MeetingData> retrieveMeetingsByEntityByCalendarType(final Long entityId, final Integer entityTypeId,
+            final List<Integer> calendarTypeOptions) {
         final MeetingDataMapper rm = new MeetingDataMapper();
-        String sqlCalendarTypeOptions = CalendarUtils.getSqlCalendarTypeOptionsInString(calendarTypeOptions);
+        final String sqlCalendarTypeOptions = CalendarUtils.getSqlCalendarTypeOptionsInString(calendarTypeOptions);
         final String sql = rm.schema()
                 + " inner join m_calendar c on ci.calendar_id=c.id  where ci.entity_id = ? and ci.entity_type_enum = ? and c.calendar_type_enum in ("
-                    + sqlCalendarTypeOptions + ") order by c.start_date ";
+                + sqlCalendarTypeOptions + ") order by c.start_date ";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
     }

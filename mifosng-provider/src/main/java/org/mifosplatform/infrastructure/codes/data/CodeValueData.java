@@ -10,7 +10,7 @@ import java.io.Serializable;
 /**
  * Immutable data object represent code-value data in system.
  */
-public class CodeValueData implements Serializable{
+public class CodeValueData implements Serializable {
 
     private final Long id;
 
@@ -35,6 +35,6 @@ public class CodeValueData implements Serializable{
     }
 
     public Long getId() {
-        return id;
+        return this.id;
     }
 }

@@ -83,11 +83,11 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
     @Column(name = "balance_number_of_days_derived", nullable = false)
     private Integer balanceNumberOfDays;
-    
+
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccountTransaction", orphanRemoval = true)
-    private Set<SavingsAccountChargePaidBy> savingsAccountChargesPaid = new HashSet<SavingsAccountChargePaidBy>();
-    
+    private final Set<SavingsAccountChargePaidBy> savingsAccountChargesPaid = new HashSet<SavingsAccountChargePaidBy>();
+
     protected SavingsAccountTransaction() {
         this.dateOf = null;
         this.typeOf = null;
@@ -127,14 +127,14 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.ANNUAL_FEE.getValue(), date, amount,
                 isReversed);
     }
-    
+
     public static SavingsAccountTransaction charge(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
             final Money amount) {
         final boolean isReversed = false;
         return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.APPLY_CHARGES.getValue(), date, amount,
                 isReversed);
     }
-    
+
     public static SavingsAccountTransaction waiver(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
             final Money amount) {
         final boolean isReversed = false;
@@ -433,11 +433,11 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     public boolean isDebit() {
         return isWithdrawal() || isWithdrawalFeeAndNotReversed() || isAnnualFeeAndNotReversed() || isCharge();
     }
- 
+
     public boolean isCharge() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isCharge();
     }
-    
+
     public boolean isFeeCharge() {
         final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
         return (isCharge() && chargePaidBy != null) ? chargePaidBy.isFeeCharge() : false;
@@ -447,24 +447,22 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
         return (isCharge() && chargePaidBy != null) ? chargePaidBy.isPenaltyCharge() : false;
     }
-    
-    public boolean isFeeChargeAndNotReversed(){
+
+    public boolean isFeeChargeAndNotReversed() {
         return isFeeCharge() && isNotReversed();
     }
-    
-    public boolean isPenaltyChargeAndNotReversed(){
+
+    public boolean isPenaltyChargeAndNotReversed() {
         return isPenaltyCharge() && isNotReversed();
     }
-    
-    private SavingsAccountChargePaidBy getSavingsAccountChargePaidBy(){
-        if(!CollectionUtils.isEmpty(this.savingsAccountChargesPaid)){
-            return this.savingsAccountChargesPaid.iterator().next();
-        }
+
+    private SavingsAccountChargePaidBy getSavingsAccountChargePaidBy() {
+        if (!CollectionUtils.isEmpty(this.savingsAccountChargesPaid)) { return this.savingsAccountChargesPaid.iterator().next(); }
         return null;
     }
-    
+
     public Set<SavingsAccountChargePaidBy> getSavingsAccountChargesPaid() {
         return this.savingsAccountChargesPaid;
     }
-    
+
 }

@@ -60,7 +60,8 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
 
             final Set<String> restrictedIds = new HashSet<String>(Arrays.asList(command.arrayValueOfParameterNamed("restrictedProducts")));
 
-            // remove the existed restriction if it is not exists in restrictedIds.
+            // remove the existed restriction if it is not exists in
+            // restrictedIds.
             final List<Long> removedRestrictions = updateRestrictionsForProduct(productId, restrictedIds);
             final Map<Long, LoanProduct> restrictedProductsAsMap = getRestrictedProducts(restrictedIds);
             final List<ProductMix> productMixes = new ArrayList<ProductMix>();
@@ -137,7 +138,7 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
             final Map<Long, LoanProduct> restrictedProductsAsMap = getRestrictedProducts(restrictedIds);
             createNewProductMix(restrictedProductsAsMap, productId, existedProductMixes);
 
-            this.productMixRepository.save(existedProductMixes);            
+            this.productMixRepository.save(existedProductMixes);
             changes.put("restrictedProductsForMix", getProductIdsFromCollection(existedProductMixes));
 
             if (!CollectionUtils.isEmpty(productMixesToRemove)) {
@@ -213,10 +214,10 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
             return CommandProcessingResult.empty();
         }
     }
-    
+
     private List<Long> getProductIdsFromCollection(final List<ProductMix> collection) {
         final List<Long> productIds = new ArrayList<Long>();
-        for (ProductMix productMix : collection) {
+        for (final ProductMix productMix : collection) {
             productIds.add(productMix.getRestrictedProductId());
         }
         return productIds;

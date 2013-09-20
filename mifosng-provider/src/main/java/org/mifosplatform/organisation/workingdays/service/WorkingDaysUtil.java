@@ -13,13 +13,13 @@ import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 
 public class WorkingDaysUtil {
 
-    public static LocalDate getOffSetDateIfNonWorkingDay(final LocalDate date, final LocalDate nextMeetingDate, final WorkingDays workingDays) {
+    public static LocalDate getOffSetDateIfNonWorkingDay(final LocalDate date, final LocalDate nextMeetingDate,
+            final WorkingDays workingDays) {
 
-        //If date is not a non working day then return date.
+        // If date is not a non working day then return date.
         if (isWorkingDay(workingDays, date)) { return date; }
 
-        final RepaymentRescheduleType rescheduleType = RepaymentRescheduleType.fromInt(workingDays
-                .getRepaymentReschedulingType());
+        final RepaymentRescheduleType rescheduleType = RepaymentRescheduleType.fromInt(workingDays.getRepaymentReschedulingType());
 
         switch (rescheduleType) {
             case INVALID:
@@ -37,7 +37,7 @@ public class WorkingDaysUtil {
         }
     }
 
-    public static boolean isWorkingDay(WorkingDays workingDays, final LocalDate date){
+    public static boolean isWorkingDay(final WorkingDays workingDays, final LocalDate date) {
         return CalendarUtils.isValidRedurringDate(workingDays.getRecurrence(), date, date);
     }
 }

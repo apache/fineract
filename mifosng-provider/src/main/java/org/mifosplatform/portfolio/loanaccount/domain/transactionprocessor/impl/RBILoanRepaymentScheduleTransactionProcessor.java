@@ -40,7 +40,7 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
     protected boolean isTransactionInAdvanceOfInstallment(final int currentInstallmentIndex,
             final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate, final Money transactionAmount) {
 
-        LoanRepaymentScheduleInstallment currentInstallment = installments.get(currentInstallmentIndex);
+        final LoanRepaymentScheduleInstallment currentInstallment = installments.get(currentInstallmentIndex);
 
         return transactionDate.isBefore(currentInstallment.getDueDate());
     }
@@ -80,23 +80,23 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
 
             final Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
             loanTransaction.updateComponents(principalPortion, interestWaivedPortion, feeChargesPortion, penaltyChargesPortion);
-        } else if(loanTransaction.isChargePayment()){
-            Money principalPortion = Money.zero(currency);
-            Money interestPortion = Money.zero(currency);
-            if(loanTransaction.isPenaltyPayment()){
+        } else if (loanTransaction.isChargePayment()) {
+            final Money principalPortion = Money.zero(currency);
+            final Money interestPortion = Money.zero(currency);
+            if (loanTransaction.isPenaltyPayment()) {
                 penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
                 transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
-            }else{
+            } else {
                 feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
                 transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
             }
             loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
-        }else {
+        } else {
 
-            LoanRepaymentScheduleInstallment currentInstallmentBasedOnTransactionDate = nearestInstallment(
+            final LoanRepaymentScheduleInstallment currentInstallmentBasedOnTransactionDate = nearestInstallment(
                     loanTransaction.getTransactionDate(), installments);
 
-            for (LoanRepaymentScheduleInstallment installment : installments) {
+            for (final LoanRepaymentScheduleInstallment installment : installments) {
                 if (installment.isInterestDue(currency)
                         && (installment.isOverdueOn(loanTransaction.getTransactionDate()) || installment.getInstallmentNumber().equals(
                                 currentInstallmentBasedOnTransactionDate.getInstallmentNumber()))) {
@@ -106,22 +106,22 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
                     feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
                     transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
 
-                    Money interestPortion = installment.payInterestComponent(transactionDate, transactionAmountRemaining);
+                    final Money interestPortion = installment.payInterestComponent(transactionDate, transactionAmountRemaining);
                     transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
 
-                    Money principalPortion = Money.zero(currency);
+                    final Money principalPortion = Money.zero(currency);
                     loanTransaction.updateComponents(principalPortion, interestPortion, Money.zero(currency), Money.zero(currency));
                 }
             }
 
             // With whatever is remaining, pay off principal components of
             // installments
-            for (LoanRepaymentScheduleInstallment installment : installments) {
+            for (final LoanRepaymentScheduleInstallment installment : installments) {
                 if (installment.isPrincipalNotCompleted(currency) && transactionAmountRemaining.isGreaterThanZero()) {
-                    Money principalPortion = installment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
+                    final Money principalPortion = installment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
                     transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
 
-                    Money interestPortion = Money.zero(currency);
+                    final Money interestPortion = Money.zero(currency);
                     loanTransaction.updateComponents(principalPortion, interestPortion, Money.zero(currency), Money.zero(currency));
                 }
             }
@@ -135,7 +135,7 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
 
         LoanRepaymentScheduleInstallment nearest = installments.get(0);
 
-        for (LoanRepaymentScheduleInstallment installment : installments) {
+        for (final LoanRepaymentScheduleInstallment installment : installments) {
             if (installment.getDueDate().isAfter(transactionDate) || installment.getDueDate().isEqual(transactionDate)) {
                 nearest = installment;
                 break;
@@ -172,15 +172,15 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
         } else if (loanTransaction.isInterestWaiver()) {
             interestPortion = currentInstallment.waiveInterestComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
-        } else if(loanTransaction.isChargePayment()){
-            if(loanTransaction.isPenaltyPayment()){
+        } else if (loanTransaction.isChargePayment()) {
+            if (loanTransaction.isPenaltyPayment()) {
                 penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
                 transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
-            }else{
+            } else {
                 feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
                 transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
             }
-        }else {
+        } else {
 
             penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);

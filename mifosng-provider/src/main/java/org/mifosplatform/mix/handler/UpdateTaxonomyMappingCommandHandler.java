@@ -14,13 +14,13 @@ public class UpdateTaxonomyMappingCommandHandler implements NewCommandSourceHand
     private final MixTaxonomyMappingWritePlatformService writeTaxonomyService;
 
     @Autowired
-    public UpdateTaxonomyMappingCommandHandler(MixTaxonomyMappingWritePlatformService writeTaxonomyService) {
+    public UpdateTaxonomyMappingCommandHandler(final MixTaxonomyMappingWritePlatformService writeTaxonomyService) {
         this.writeTaxonomyService = writeTaxonomyService;
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
+    public CommandProcessingResult processCommand(final JsonCommand command) {
         return this.writeTaxonomyService.updateMapping(command.entityId(), command);
     }
 

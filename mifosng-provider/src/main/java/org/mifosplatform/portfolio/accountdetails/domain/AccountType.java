@@ -13,7 +13,7 @@ public enum AccountType {
     INVALID(0, "accountType.invalid"), //
     INDIVIDUAL(1, "accountType.individual"), //
     GROUP(2, "accountType.group"), //
-    JLG(3, "accountType.jlg");//JLG account given in group context
+    JLG(3, "accountType.jlg");// JLG account given in group context
 
     private final Integer value;
     private final String code;
@@ -40,42 +40,42 @@ public enum AccountType {
         return enumeration;
     }
 
-    public static AccountType fromName(final String name){
+    public static AccountType fromName(final String name) {
         AccountType accountType = AccountType.INVALID;
-        for (AccountType type : AccountType.values()) {
-            if(type.getName().equals(name)) {
+        for (final AccountType type : AccountType.values()) {
+            if (type.getName().equals(name)) {
                 accountType = type;
                 break;
             }
         }
         return accountType;
     }
-    
+
     public Integer getValue() {
         return this.value;
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
-    
-    public String getName(){
+
+    public String getName() {
         return name().toLowerCase();
     }
-    
-    public boolean isInvalid(){
+
+    public boolean isInvalid() {
         return this.value.equals(AccountType.INVALID.getValue());
     }
-    
-    public boolean isIndividualAccount(){
+
+    public boolean isIndividualAccount() {
         return this.value.equals(AccountType.INDIVIDUAL.getValue());
     }
-    
-    public boolean isGroupAccount(){
+
+    public boolean isGroupAccount() {
         return this.value.equals(AccountType.GROUP.getValue());
     }
-    
-    public boolean isJLGAccount(){
+
+    public boolean isJLGAccount() {
         return this.value.equals(AccountType.JLG.getValue());
     }
 }

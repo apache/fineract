@@ -8,14 +8,15 @@ package org.mifosplatform.portfolio.calendar.exception;
 import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when CalendarInstance resources are not found.
+ * A {@link RuntimeException} thrown when CalendarInstance resources are not
+ * found.
  */
 public class CalendarInstanceNotFoundException extends AbstractPlatformResourceNotFoundException {
 
     public CalendarInstanceNotFoundException(final Long id) {
         super("error.msg.calendar.instance.id.invalid", "Calendar Instance with identifier " + id + " does not exist", id);
     }
-    
+
     public CalendarInstanceNotFoundException(final String postFix, final String defaultUserMessage, final Object... defaultUserMessageArgs) {
         super("error.msg.calendar.instance." + postFix, defaultUserMessage, defaultUserMessageArgs);
     }

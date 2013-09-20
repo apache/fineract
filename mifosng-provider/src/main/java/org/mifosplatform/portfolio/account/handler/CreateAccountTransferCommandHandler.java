@@ -27,6 +27,6 @@ public class CreateAccountTransferCommandHandler implements NewCommandSourceHand
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return writePlatformService.create(command);
+        return this.writePlatformService.create(command);
     }
 }

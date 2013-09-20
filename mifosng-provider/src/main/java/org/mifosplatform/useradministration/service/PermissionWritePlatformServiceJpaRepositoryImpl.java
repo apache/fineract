@@ -31,8 +31,7 @@ public class PermissionWritePlatformServiceJpaRepositoryImpl implements Permissi
 
     @Autowired
     public PermissionWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final PermissionRepository permissionRepository,
-            final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+            final PermissionRepository permissionRepository, final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
         this.permissionRepository = permissionRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -41,10 +40,10 @@ public class PermissionWritePlatformServiceJpaRepositoryImpl implements Permissi
     @Transactional
     @Override
     public CommandProcessingResult updateMakerCheckerPermissions(final JsonCommand command) {
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
         final Collection<Permission> allPermissions = this.permissionRepository.findAll();
-        
+
         final PermissionsCommand permissionsCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
 
         final Map<String, Boolean> commandPermissions = permissionsCommand.getPermissions();
@@ -58,13 +57,13 @@ public class PermissionWritePlatformServiceJpaRepositoryImpl implements Permissi
                     || permission.getGrouping().equalsIgnoreCase("special")) { throw new PermissionNotFoundException(permissionCode); }
 
             final boolean isSelected = commandPermissions.get(permissionCode).booleanValue();
-            boolean changed = permission.enableMakerChecker(isSelected);
+            final boolean changed = permission.enableMakerChecker(isSelected);
             if (changed) {
                 changedPermissions.put(permissionCode, isSelected);
                 this.permissionRepository.save(permission);
             }
         }
-        
+
         if (!changedPermissions.isEmpty()) {
             changes.put("permissions", changedPermissions);
         }
@@ -75,7 +74,7 @@ public class PermissionWritePlatformServiceJpaRepositoryImpl implements Permissi
     private Permission findPermissionInCollectionByCode(final Collection<Permission> allPermissions, final String permissionCode) {
 
         if (allPermissions != null) {
-            for (Permission permission : allPermissions) {
+            for (final Permission permission : allPermissions) {
                 if (permission.hasCode(permissionCode)) { return permission; }
             }
         }

@@ -45,7 +45,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class LoanTransactionsApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "type", "date", "currency", "amount", "externalId"));
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "type", "date", "currency", "amount",
+            "externalId"));
 
     private final String resourceNameForPermissions = "LOAN";
 
@@ -81,7 +82,7 @@ public class LoanTransactionsApiResource {
     public String retrieveTransactionTemplate(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
             @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         LoanTransactionData transactionData = null;
         if (is(commandParam, "repayment")) {
@@ -100,8 +101,8 @@ public class LoanTransactionsApiResource {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, transactionData, RESPONSE_DATA_PARAMETERS);
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, transactionData, this.RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -111,17 +112,17 @@ public class LoanTransactionsApiResource {
     public String retrieveTransaction(@PathParam("loanId") final Long loanId, @PathParam("transactionId") final Long transactionId,
             @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         LoanTransactionData transactionData = this.loanReadPlatformService.retrieveLoanTransaction(loanId, transactionId);
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
-            final Collection<CodeValueData> paymentTypeOptions = codeValueReadPlatformService
+            final Collection<CodeValueData> paymentTypeOptions = this.codeValueReadPlatformService
                     .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
             transactionData = LoanTransactionData.templateOnTop(transactionData, paymentTypeOptions);
         }
 
-        return this.toApiJsonSerializer.serialize(settings, transactionData, RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, transactionData, this.RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -130,7 +131,7 @@ public class LoanTransactionsApiResource {
     public String executeLoanTransaction(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
 
-        CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
         CommandProcessingResult result = null;
         if (is(commandParam, "repayment")) {
@@ -162,7 +163,7 @@ public class LoanTransactionsApiResource {
     public String adjustLoanTransaction(@PathParam("loanId") final Long loanId, @PathParam("transactionId") final Long transactionId,
             final String apiRequestBodyAsJson) {
 
-        CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
         final CommandWrapper commandRequest = builder.adjustTransaction(loanId, transactionId).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

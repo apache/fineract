@@ -210,8 +210,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     @Override
     public Collection<GroupGeneralData> retrieveGroupsForLookup(final Long officeId) {
         this.context.authenticatedUser();
-        GroupLookupDataMapper rm = new GroupLookupDataMapper();
-        String sql = "Select " + rm.schema() + " and g.office_id=?";
+        final GroupLookupDataMapper rm = new GroupLookupDataMapper();
+        final String sql = "Select " + rm.schema() + " and g.office_id=?";
         return this.jdbcTemplate.query(sql, rm, new Object[] { officeId });
     }
 
@@ -232,8 +232,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     @Override
     public GroupGeneralData retrieveGroupWithClosureReasons() {
         final List<CodeValueData> closureReasons = new ArrayList<CodeValueData>(
-                codeValueReadPlatformService.retrieveCodeValuesByCode(GroupingTypesApiConstants.GROUP_CLOSURE_REASON));
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(GroupingTypesApiConstants.GROUP_CLOSURE_REASON));
         return GroupGeneralData.withClosureReasons(closureReasons);
     }
-    
+
 }

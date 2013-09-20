@@ -13,10 +13,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class AccountingProcessorForLoanFactory {
 
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
     @Autowired
-    public AccountingProcessorForLoanFactory(ApplicationContext applicationContext) {
+    public AccountingProcessorForLoanFactory(final ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
 
@@ -25,12 +25,12 @@ public class AccountingProcessorForLoanFactory {
         AccountingProcessorForLoan accountingProcessorForLoan = null;
 
         if (loanDTO.isCashBasedAccountingEnabled()) {
-            accountingProcessorForLoan = applicationContext
-                    .getBean("cashBasedAccountingProcessorForLoan", AccountingProcessorForLoan.class);
+            accountingProcessorForLoan = this.applicationContext.getBean("cashBasedAccountingProcessorForLoan",
+                    AccountingProcessorForLoan.class);
         }
 
         else if (loanDTO.isAccrualBasedAccountingEnabled()) {
-            accountingProcessorForLoan = applicationContext.getBean("accrualBasedAccountingProcessorForLoan",
+            accountingProcessorForLoan = this.applicationContext.getBean("accrualBasedAccountingProcessorForLoan",
                     AccountingProcessorForLoan.class);
         }
 

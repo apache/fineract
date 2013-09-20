@@ -44,17 +44,17 @@ public final class RoleDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("role");
 
-        final JsonElement element = fromApiJsonHelper.parse(json);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final String name = fromApiJsonHelper.extractStringNamed("name", element);
+        final String name = this.fromApiJsonHelper.extractStringNamed("name", element);
         baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(100);
 
-        final String description = fromApiJsonHelper.extractStringNamed("description", element);
+        final String description = this.fromApiJsonHelper.extractStringNamed("description", element);
         baseDataValidator.reset().parameter("description").value(description).notBlank().notExceedingLengthOf(500);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -64,20 +64,20 @@ public final class RoleDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("role");
 
-        final JsonElement element = fromApiJsonHelper.parse(json);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        if (fromApiJsonHelper.parameterExists("name", element)) {
-            final String username = fromApiJsonHelper.extractStringNamed("name", element);
+        if (this.fromApiJsonHelper.parameterExists("name", element)) {
+            final String username = this.fromApiJsonHelper.extractStringNamed("name", element);
             baseDataValidator.reset().parameter("name").value(username).notBlank().notExceedingLengthOf(100);
         }
 
-        if (fromApiJsonHelper.parameterExists("description", element)) {
-            final String description = fromApiJsonHelper.extractStringNamed("description", element);
+        if (this.fromApiJsonHelper.parameterExists("description", element)) {
+            final String description = this.fromApiJsonHelper.extractStringNamed("description", element);
             baseDataValidator.reset().parameter("description").value(description).notBlank().notExceedingLengthOf(500);
         }
 

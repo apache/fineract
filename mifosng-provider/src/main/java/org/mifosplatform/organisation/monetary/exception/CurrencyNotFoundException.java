@@ -12,7 +12,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
  */
 public class CurrencyNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-	public CurrencyNotFoundException(final String currencyCode) {
-		super("error.msg.currency.currencyCode.invalid", "Currency with identifier " + currencyCode + " does not exist", currencyCode);
-	}
+    public CurrencyNotFoundException(final String currencyCode) {
+        super("error.msg.currency.currencyCode.invalid", "Currency with identifier " + currencyCode + " does not exist", currencyCode);
+    }
 }

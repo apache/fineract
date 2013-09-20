@@ -12,7 +12,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
  */
 public class CollateralNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public CollateralNotFoundException(Long loanId, Long collateralId) {
+    public CollateralNotFoundException(final Long loanId, final Long collateralId) {
         super("error.msg.loan.collateral.", "Collateral with Id " + collateralId + " does not exist for loan with Id " + loanId, loanId,
                 collateralId);
     }

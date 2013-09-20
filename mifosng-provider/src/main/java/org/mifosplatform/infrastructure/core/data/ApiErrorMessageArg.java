@@ -5,31 +5,30 @@
  */
 package org.mifosplatform.infrastructure.core.data;
 
-
 public class ApiErrorMessageArg {
-	
-	/**
-	 * The actual value of the parameter (if any) as passed to API.
-	 */
-	private Object value;
 
-	public static ApiErrorMessageArg from(Object object) {
-		return new ApiErrorMessageArg(object);
-	}
-	
-	protected ApiErrorMessageArg() {
-		//
-	}
+    /**
+     * The actual value of the parameter (if any) as passed to API.
+     */
+    private Object value;
 
-	public ApiErrorMessageArg(Object object) {
-		this.value = object;
-	}
+    public static ApiErrorMessageArg from(final Object object) {
+        return new ApiErrorMessageArg(object);
+    }
 
-	public Object getValue() {
-		return value;
-	}
+    protected ApiErrorMessageArg() {
+        //
+    }
 
-	public void setValue(Object value) {
-		this.value = value;
-	}
+    public ApiErrorMessageArg(final Object object) {
+        this.value = object;
+    }
+
+    public Object getValue() {
+        return this.value;
+    }
+
+    public void setValue(final Object value) {
+        this.value = value;
+    }
 }

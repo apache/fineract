@@ -29,7 +29,7 @@ public class GLAccountBuilder {
     private static String description = "DEFAULT_DESCRIPTION";
 
     public String build() {
-        HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<String, String>();
         map.put("name", GLAccountBuilder.name);
         map.put("glCode", GLAccountBuilder.GLCode);
         map.put("manualEntriesAllowed", GLAccountBuilder.manualEntriesAllowed);
@@ -43,12 +43,12 @@ public class GLAccountBuilder {
         GLAccountBuilder.accountType = ASSET_ACCOUNT;
         GLAccountBuilder.GLCode = Utils.randomStringGenerator("ASSET_", 2);
         GLAccountBuilder.GLCode += Calendar.getInstance().getTimeInMillis() + ""; // Added
-                                                                      // unique
-                                                                      // timestamp
-                                                                      // for
-                                                                      // avoiding
-                                                                      // random
-                                                                      // collisions
+        // unique
+        // timestamp
+        // for
+        // avoiding
+        // random
+        // collisions
         return this;
     }
 

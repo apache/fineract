@@ -12,7 +12,7 @@ public class ChargeToGLAccountMapper {
     @SuppressWarnings("unused")
     private final long incomeAccountId;
 
-    public ChargeToGLAccountMapper(long chargeId, long incomeAccountId) {
+    public ChargeToGLAccountMapper(final long chargeId, final long incomeAccountId) {
         this.chargeId = chargeId;
         this.incomeAccountId = incomeAccountId;
     }

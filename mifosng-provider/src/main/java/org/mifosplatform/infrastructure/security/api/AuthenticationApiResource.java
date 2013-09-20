@@ -52,23 +52,23 @@ public class AuthenticationApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String authenticate(@QueryParam("username") final String username, @QueryParam("password") final String password) {
 
-        Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
-        Authentication authenticationCheck = customAuthenticationProvider.authenticate(authentication);
+        final Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
+        final Authentication authenticationCheck = this.customAuthenticationProvider.authenticate(authentication);
 
-        Collection<String> permissions = new ArrayList<String>();
+        final Collection<String> permissions = new ArrayList<String>();
         AuthenticatedUserData authenticatedUserData = new AuthenticatedUserData(username, permissions);
 
         if (authenticationCheck.isAuthenticated()) {
-            Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>(authenticationCheck.getAuthorities());
-            for (GrantedAuthority grantedAuthority : authorities) {
+            final Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>(authenticationCheck.getAuthorities());
+            for (final GrantedAuthority grantedAuthority : authorities) {
                 permissions.add(grantedAuthority.getAuthority());
             }
-            AppUser principal = (AppUser) authenticationCheck.getPrincipal();
-            byte[] base64EncodedAuthenticationKey = Base64.encode(username + ":" + password);
+            final AppUser principal = (AppUser) authenticationCheck.getPrincipal();
+            final byte[] base64EncodedAuthenticationKey = Base64.encode(username + ":" + password);
 
-            Collection<RoleData> roles = new ArrayList<RoleData>();
-            Set<Role> userRoles = principal.getRoles();
-            for (Role role : userRoles) {
+            final Collection<RoleData> roles = new ArrayList<RoleData>();
+            final Set<Role> userRoles = principal.getRoles();
+            for (final Role role : userRoles) {
                 roles.add(role.toData());
             }
 
@@ -81,8 +81,7 @@ public class AuthenticationApiResource {
             final EnumOptionData organisationalRole = principal.organisationalRoleData();
 
             authenticatedUserData = new AuthenticatedUserData(username, officeId, officeName, staffId, staffDisplayName,
-                    organisationalRole, roles, permissions,
-                    principal.getId(), new String(base64EncodedAuthenticationKey));
+                    organisationalRole, roles, permissions, principal.getId(), new String(base64EncodedAuthenticationKey));
         }
 
         return this.apiJsonSerializerService.serialize(authenticatedUserData);

@@ -36,10 +36,10 @@ public final class SavingsAccountSummary {
 
     @Column(name = "total_withdrawal_fees_derived", scale = 6, precision = 19)
     private BigDecimal totalWithdrawalFees;
-    
+
     @Column(name = "total_fees_charge_derived", scale = 6, precision = 19)
     private BigDecimal totalFeeCharge;
-    
+
     @Column(name = "total_penalty_charge_derived", scale = 6, precision = 19)
     private BigDecimal totalPenaltyCharge;
 
@@ -65,7 +65,8 @@ public final class SavingsAccountSummary {
         this.totalPenaltyCharge = wrapper.calculateTotalPenaltyCharge(currency, transactions);
 
         this.accountBalance = Money.of(currency, this.totalDeposits).plus(this.totalInterestPosted).minus(this.totalWithdrawals)
-                .minus(this.totalWithdrawalFees).minus(this.totalAnnualFees).minus(totalFeeCharge).minus(totalPenaltyCharge).getAmount();
+                .minus(this.totalWithdrawalFees).minus(this.totalAnnualFees).minus(this.totalFeeCharge).minus(this.totalPenaltyCharge)
+                .getAmount();
     }
 
     public void updateFromInterestPeriodSummaries(final MonetaryCurrency currency, final List<PostingPeriod> allPostingPeriods) {

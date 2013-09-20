@@ -36,23 +36,24 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             } else {
                 dueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms, startDate);
             }
-            
+
             startDate = dueRepaymentPeriodDate;
-            LocalDate nextDueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms, dueRepaymentPeriodDate);
-            
-            dueRepaymentPeriodDate = WorkingDaysUtil.getOffSetDateIfNonWorkingDay(dueRepaymentPeriodDate, nextDueRepaymentPeriodDate, workingDays);
-            
-            if(isHolidayEnabled){
+            final LocalDate nextDueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms, dueRepaymentPeriodDate);
+
+            dueRepaymentPeriodDate = WorkingDaysUtil.getOffSetDateIfNonWorkingDay(dueRepaymentPeriodDate, nextDueRepaymentPeriodDate,
+                    workingDays);
+
+            if (isHolidayEnabled) {
                 dueRepaymentPeriodDate = HolidayUtil.getRepaymentRescheduleDateToIfHoliday(dueRepaymentPeriodDate, holidays);
             }
 
             dueRepaymentPeriodDates.add(dueRepaymentPeriodDate);
         }
-        
+
         return dueRepaymentPeriodDates;
     }
 
-    private LocalDate getRepaymentPeriodDate(final LoanApplicationTerms loanApplicationTerms, LocalDate startDate) {
+    private LocalDate getRepaymentPeriodDate(final LoanApplicationTerms loanApplicationTerms, final LocalDate startDate) {
         final int repaidEvery = loanApplicationTerms.getRepaymentEvery();
         LocalDate dueRepaymentPeriodDate = startDate;
         switch (loanApplicationTerms.getRepaymentPeriodFrequencyType()) {
@@ -78,7 +79,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
     public LocalDate idealDisbursementDateBasedOnFirstRepaymentDate(final PeriodFrequencyType repaymentPeriodFrequencyType,
             final int repaidEvery, final List<LocalDate> scheduledDates) {
 
-        LocalDate firstRepaymentDate = scheduledDates.get(0);
+        final LocalDate firstRepaymentDate = scheduledDates.get(0);
 
         LocalDate idealDisbursementDate = null;
 

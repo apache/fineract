@@ -40,22 +40,24 @@ public final class CollateralCommandFromApiJsonDeserializer extends AbstractFrom
     }
 
     @Override
-    public CollateralCommand commandFromApiJson(String json) {
+    public CollateralCommand commandFromApiJson(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        Set<String> supportedParameters = COLLATERAL_JSON_INPUT_PARAMS.getAllValues();
+        final Set<String> supportedParameters = COLLATERAL_JSON_INPUT_PARAMS.getAllValues();
         supportedParameters.add("locale");
         supportedParameters.add("dateFormat");
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        final JsonElement element = fromApiJsonHelper.parse(json);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
-        final Locale locale = fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+        final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
 
-        Long collateralTypeId = fromApiJsonHelper.extractLongNamed(COLLATERAL_JSON_INPUT_PARAMS.COLLATERAL_TYPE_ID.getValue(), element);
-        String description = fromApiJsonHelper.extractStringNamed(COLLATERAL_JSON_INPUT_PARAMS.DESCRIPTION.getValue(), element);
-        BigDecimal value = fromApiJsonHelper.extractBigDecimalNamed(COLLATERAL_JSON_INPUT_PARAMS.VALUE.getValue(), element, locale);
+        final Long collateralTypeId = this.fromApiJsonHelper.extractLongNamed(COLLATERAL_JSON_INPUT_PARAMS.COLLATERAL_TYPE_ID.getValue(),
+                element);
+        final String description = this.fromApiJsonHelper.extractStringNamed(COLLATERAL_JSON_INPUT_PARAMS.DESCRIPTION.getValue(), element);
+        final BigDecimal value = this.fromApiJsonHelper.extractBigDecimalNamed(COLLATERAL_JSON_INPUT_PARAMS.VALUE.getValue(), element,
+                locale);
 
         return new CollateralCommand(collateralTypeId, value, description);
     }

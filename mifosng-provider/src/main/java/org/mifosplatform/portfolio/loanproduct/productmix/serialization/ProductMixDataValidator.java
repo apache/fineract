@@ -51,7 +51,6 @@ public final class ProductMixDataValidator {
         if (restrictedProducts != null) {
             validateRestrictedProducts(restrictedProducts, baseDataValidator);
         }
-        
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -67,8 +66,8 @@ public final class ProductMixDataValidator {
                 "Validation errors exist.", dataValidationErrors); }
     }
 
-    public void validateForUpdate(String json) {
-        
+    public void validateForUpdate(final String json) {
+
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();

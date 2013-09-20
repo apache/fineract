@@ -7,53 +7,51 @@ package org.mifosplatform.portfolio.loanaccount.data;
 
 public class LoanConvenienceData {
 
-	private final int maxSubmittedOnOffsetFromToday;
-	private final int maxApprovedOnOffsetFromToday;
-	private final int maxDisbursedOnOffsetFromToday;
-	private final int expectedLoanTermInDays;
-	private final int actualLoanTermInDays;
-	private final int expectedLoanTermInMonths;
-	private final int actualLoanTermInMonths;
+    private final int maxSubmittedOnOffsetFromToday;
+    private final int maxApprovedOnOffsetFromToday;
+    private final int maxDisbursedOnOffsetFromToday;
+    private final int expectedLoanTermInDays;
+    private final int actualLoanTermInDays;
+    private final int expectedLoanTermInMonths;
+    private final int actualLoanTermInMonths;
 
-	public LoanConvenienceData(int maxSubmittedOnOffsetFromToday,
-			int maxApprovedOnOffsetFromToday,
-			int maxDisbursedOnOffsetFromToday, int expectedLoanTermInDays,
-			int actualLoanTermInDays, int expectedLoanTermInMonths,
-			int actualLoanTermInMonths) {
-		this.maxSubmittedOnOffsetFromToday = maxSubmittedOnOffsetFromToday;
-		this.maxApprovedOnOffsetFromToday = maxApprovedOnOffsetFromToday;
-		this.maxDisbursedOnOffsetFromToday = maxDisbursedOnOffsetFromToday;
-		this.expectedLoanTermInDays = expectedLoanTermInDays;
-		this.actualLoanTermInDays = actualLoanTermInDays;
-		this.expectedLoanTermInMonths = expectedLoanTermInMonths;
-		this.actualLoanTermInMonths = actualLoanTermInMonths;
-	}
+    public LoanConvenienceData(final int maxSubmittedOnOffsetFromToday, final int maxApprovedOnOffsetFromToday,
+            final int maxDisbursedOnOffsetFromToday, final int expectedLoanTermInDays, final int actualLoanTermInDays,
+            final int expectedLoanTermInMonths, final int actualLoanTermInMonths) {
+        this.maxSubmittedOnOffsetFromToday = maxSubmittedOnOffsetFromToday;
+        this.maxApprovedOnOffsetFromToday = maxApprovedOnOffsetFromToday;
+        this.maxDisbursedOnOffsetFromToday = maxDisbursedOnOffsetFromToday;
+        this.expectedLoanTermInDays = expectedLoanTermInDays;
+        this.actualLoanTermInDays = actualLoanTermInDays;
+        this.expectedLoanTermInMonths = expectedLoanTermInMonths;
+        this.actualLoanTermInMonths = actualLoanTermInMonths;
+    }
 
-	public int getMaxSubmittedOnOffsetFromToday() {
-		return maxSubmittedOnOffsetFromToday;
-	}
+    public int getMaxSubmittedOnOffsetFromToday() {
+        return this.maxSubmittedOnOffsetFromToday;
+    }
 
-	public int getMaxApprovedOnOffsetFromToday() {
-		return maxApprovedOnOffsetFromToday;
-	}
+    public int getMaxApprovedOnOffsetFromToday() {
+        return this.maxApprovedOnOffsetFromToday;
+    }
 
-	public int getMaxDisbursedOnOffsetFromToday() {
-		return maxDisbursedOnOffsetFromToday;
-	}
+    public int getMaxDisbursedOnOffsetFromToday() {
+        return this.maxDisbursedOnOffsetFromToday;
+    }
 
-	public int getExpectedLoanTermInDays() {
-		return expectedLoanTermInDays;
-	}
+    public int getExpectedLoanTermInDays() {
+        return this.expectedLoanTermInDays;
+    }
 
-	public int getActualLoanTermInDays() {
-		return actualLoanTermInDays;
-	}
+    public int getActualLoanTermInDays() {
+        return this.actualLoanTermInDays;
+    }
 
-	public int getExpectedLoanTermInMonths() {
-		return expectedLoanTermInMonths;
-	}
+    public int getExpectedLoanTermInMonths() {
+        return this.expectedLoanTermInMonths;
+    }
 
-	public int getActualLoanTermInMonths() {
-		return actualLoanTermInMonths;
-	}
+    public int getActualLoanTermInMonths() {
+        return this.actualLoanTermInMonths;
+    }
 }

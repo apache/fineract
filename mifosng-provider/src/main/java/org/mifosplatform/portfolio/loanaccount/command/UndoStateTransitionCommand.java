@@ -23,6 +23,6 @@ public class UndoStateTransitionCommand {
     }
 
     public String getNote() {
-        return note;
+        return this.note;
     }
 }

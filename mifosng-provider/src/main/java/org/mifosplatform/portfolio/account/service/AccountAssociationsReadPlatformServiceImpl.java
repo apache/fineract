@@ -47,17 +47,16 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
     @Override
     public boolean isLinkedWithAnyActiveLoan(final Long savingsId) {
         boolean hasActiveLoan = false;
-        final String sql = "select loanAccount.loan_status_id as status from m_portfolio_account_associations aa " +
-        		"left join m_loan loanAccount on loanAccount.id = aa.loan_account_id " +
-        		"where aa.linked_savings_account_id = ?";
+        final String sql = "select loanAccount.loan_status_id as status from m_portfolio_account_associations aa "
+                + "left join m_loan loanAccount on loanAccount.id = aa.loan_account_id " + "where aa.linked_savings_account_id = ?";
 
-        final List<Integer> statusList= this.jdbcTemplate.queryForList(sql,Integer.class, savingsId);
-        for(final Integer status:statusList){
-            final LoanStatus loanStatus= LoanStatus.fromInt(status);
-              if(loanStatus.isActiveOrAwaitingApprovalOrDisbursal() || loanStatus.isUnderTransfer()){
-                  hasActiveLoan = true;
-                  break;
-              }
+        final List<Integer> statusList = this.jdbcTemplate.queryForList(sql, Integer.class, savingsId);
+        for (final Integer status : statusList) {
+            final LoanStatus loanStatus = LoanStatus.fromInt(status);
+            if (loanStatus.isActiveOrAwaitingApprovalOrDisbursal() || loanStatus.isUnderTransfer()) {
+                hasActiveLoan = true;
+                break;
+            }
         }
         return hasActiveLoan;
     }

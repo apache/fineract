@@ -19,7 +19,8 @@ public class SavingsAccountApplicationSubmittalCommandHandler implements NewComm
     private final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService;
 
     @Autowired
-    public SavingsAccountApplicationSubmittalCommandHandler(final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService) {
+    public SavingsAccountApplicationSubmittalCommandHandler(
+            final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService) {
         this.savingAccountWritePlatformService = savingAccountWritePlatformService;
     }
 

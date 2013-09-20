@@ -64,7 +64,7 @@ public class ContentRepositoryUtils {
      * 
      * @param mimeType
      */
-    public static void validateImageMimeType(String mimeType) {
+    public static void validateImageMimeType(final String mimeType) {
         if (!(mimeType.equalsIgnoreCase(IMAGE_MIME_TYPE.GIF.getValue()) || mimeType.equalsIgnoreCase(IMAGE_MIME_TYPE.JPEG.getValue()) || mimeType
                 .equalsIgnoreCase(IMAGE_MIME_TYPE.PNG.getValue()))) { throw new ImageUploadException(); }
     }
@@ -74,7 +74,7 @@ public class ContentRepositoryUtils {
      * 
      * @param mimeType
      */
-    public static Base64EncodedImage extractImageFromDataURL(String dataURL) {
+    public static Base64EncodedImage extractImageFromDataURL(final String dataURL) {
         String fileExtension = "";
         String base64EncodedString = null;
         if (StringUtils.startsWith(dataURL, IMAGE_DATA_URI_SUFFIX.GIF.getValue())) {
@@ -93,7 +93,7 @@ public class ContentRepositoryUtils {
         return new Base64EncodedImage(base64EncodedString, fileExtension);
     }
 
-    public static void validateFileSizeWithinPermissibleRange(Long fileSize, String name) {
+    public static void validateFileSizeWithinPermissibleRange(final Long fileSize, final String name) {
         /**
          * Using Content-Length gives me size of the entire request, which is
          * good enough for now for a fast fail as the length of the rest of the
@@ -104,13 +104,13 @@ public class ContentRepositoryUtils {
                 name, fileSize, ContentRepository.MAX_FILE_UPLOAD_SIZE_IN_MB); }
     }
 
-    public static void validateClientImageNotEmpty(String imageFileName) {
-        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+    public static void validateClientImageNotEmpty(final String imageFileName) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         if (imageFileName == null) {
-            StringBuilder validationErrorCode = new StringBuilder("validation.msg.clientImage.cannot.be.blank");
-            StringBuilder defaultEnglishMessage = new StringBuilder("The parameter image cannot be blank.");
-            ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
-                    "image");
+            final StringBuilder validationErrorCode = new StringBuilder("validation.msg.clientImage.cannot.be.blank");
+            final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter image cannot be blank.");
+            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                    defaultEnglishMessage.toString(), "image");
             dataValidationErrors.add(error);
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                     dataValidationErrors);
@@ -123,9 +123,9 @@ public class ContentRepositoryUtils {
      * @return
      */
     public static String generateRandomString() {
-        String characters = "abcdefghijklmnopqrstuvwxyz123456789";
-        int length = generateRandomNumber();
-        char[] text = new char[length];
+        final String characters = "abcdefghijklmnopqrstuvwxyz123456789";
+        final int length = generateRandomNumber();
+        final char[] text = new char[length];
         for (int i = 0; i < length; i++) {
             text[i] = characters.charAt(random.nextInt(characters.length()));
         }
@@ -138,7 +138,7 @@ public class ContentRepositoryUtils {
      * @return
      */
     public static int generateRandomNumber() {
-        Random randomGenerator = new Random();
+        final Random randomGenerator = new Random();
         return randomGenerator.nextInt(11) + 5;
     }
 }

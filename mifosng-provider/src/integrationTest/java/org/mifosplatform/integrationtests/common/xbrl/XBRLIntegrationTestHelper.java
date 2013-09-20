@@ -17,19 +17,19 @@ public class XBRLIntegrationTestHelper {
     private static final String GET_TAXONOMY_LIST_URL = "/mifosng-provider/api/v1/mixtaxonomy?tenantIdentifier=default";
     private static final String TAXONOMY_MAPPING_URL = "/mifosng-provider/api/v1/mixmapping?tenantIdentifier=default";
 
-    public XBRLIntegrationTestHelper(RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+    public XBRLIntegrationTestHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
     }
 
     public ArrayList getTaxonomyList() {
-        ArrayList response = Utils.performServerGet(requestSpec, responseSpec, GET_TAXONOMY_LIST_URL, "");
+        final ArrayList response = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_TAXONOMY_LIST_URL, "");
 
         return response;
     }
 
     public HashMap getTaxonomyMapping() {
-        HashMap response = Utils.performServerGet(requestSpec, responseSpec, TAXONOMY_MAPPING_URL, "config");
+        final HashMap response = Utils.performServerGet(this.requestSpec, this.responseSpec, TAXONOMY_MAPPING_URL, "config");
         return response;
     }
 

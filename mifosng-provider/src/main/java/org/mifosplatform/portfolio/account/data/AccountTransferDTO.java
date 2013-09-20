@@ -10,19 +10,19 @@ import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 
 public class AccountTransferDTO {
 
-    private LocalDate transactionDate;
-    private BigDecimal transactionAmount;
-    private PortfolioAccountType fromAccountType;
-    private PortfolioAccountType toAccountType;
-    private Long fromAccountId;
-    private Long toAccountId;
-    private String description;
-    private Locale locale;
-    private DateTimeFormatter fmt;
-    private PaymentDetail paymentDetail;
-    private Integer fromTransferType;
-    private Integer toTransferType;
-    private Long chargeId;
+    private final LocalDate transactionDate;
+    private final BigDecimal transactionAmount;
+    private final PortfolioAccountType fromAccountType;
+    private final PortfolioAccountType toAccountType;
+    private final Long fromAccountId;
+    private final Long toAccountId;
+    private final String description;
+    private final Locale locale;
+    private final DateTimeFormatter fmt;
+    private final PaymentDetail paymentDetail;
+    private final Integer fromTransferType;
+    private final Integer toTransferType;
+    private final Long chargeId;
 
     public AccountTransferDTO(final LocalDate transactionDate, final BigDecimal transactionAmount,
             final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType, final Long fromAccountId,
@@ -91,7 +91,6 @@ public class AccountTransferDTO {
         return this.toTransferType;
     }
 
-    
     public Long getChargeId() {
         return this.chargeId;
     }

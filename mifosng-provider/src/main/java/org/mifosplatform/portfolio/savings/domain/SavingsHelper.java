@@ -20,7 +20,7 @@ public final class SavingsHelper {
     public List<LocalDateInterval> determineInterestPostingPeriods(final LocalDate activationLocalDate,
             final LocalDate interestPostingUpToDate, final SavingsPostingInterestPeriodType postingPeriodType) {
 
-        List<LocalDateInterval> postingPeriods = new ArrayList<LocalDateInterval>();
+        final List<LocalDateInterval> postingPeriods = new ArrayList<LocalDateInterval>();
 
         LocalDate periodStartDate = activationLocalDate;
         LocalDate periodEndDate = periodStartDate;
@@ -58,8 +58,8 @@ public final class SavingsHelper {
             case QUATERLY:
                 // jan 1st to mar 31st, 1st apr to jun 30, jul 1st to sept 30,
                 // oct 1st to dec 31
-                int year = periodStartDate.getYearOfEra();
-                int monthofYear = periodStartDate.getMonthOfYear();
+                final int year = periodStartDate.getYearOfEra();
+                final int monthofYear = periodStartDate.getMonthOfYear();
                 if (monthofYear <= 3) {
                     periodEndDate = new DateTime().withDate(year, 3, 31).toLocalDate();
                 } else if (monthofYear <= 6) {

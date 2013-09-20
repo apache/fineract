@@ -7,7 +7,6 @@ package org.mifosplatform.portfolio.group.exception;
 
 import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-
 public class InvalidGroupStateTransitionException extends AbstractPlatformDomainRuleException {
 
     public InvalidGroupStateTransitionException(final String levelName, final String action, final String postFix,

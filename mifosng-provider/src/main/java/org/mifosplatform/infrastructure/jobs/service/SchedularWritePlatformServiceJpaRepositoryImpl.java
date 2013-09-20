@@ -42,12 +42,12 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
 
     @Override
     public List<ScheduledJobDetail> retrieveAllJobs() {
-        return scheduledJobDetailsRepository.findAll();
+        return this.scheduledJobDetailsRepository.findAll();
     }
 
     @Override
     public ScheduledJobDetail findByJobKey(final String jobKey) {
-        return scheduledJobDetailsRepository.findByJobKey(jobKey);
+        return this.scheduledJobDetailsRepository.findByJobKey(jobKey);
     }
 
     @Transactional
@@ -66,7 +66,7 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     @Override
     public Long fetchMaxVersionBy(final String jobKey) {
         Long version = 0L;
-        Long versionFromDB = this.scheduledJobRunHistoryRepository.findMaxVersionByJobKey(jobKey);
+        final Long versionFromDB = this.scheduledJobRunHistoryRepository.findMaxVersionByJobKey(jobKey);
         if (versionFromDB != null) {
             version = versionFromDB;
         }
@@ -74,7 +74,7 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     }
 
     @Override
-    public ScheduledJobDetail findByJobId(Long jobId) {
+    public ScheduledJobDetail findByJobId(final Long jobId) {
         return this.scheduledJobDetailsRepository.findByJobId(jobId);
     }
 
@@ -87,7 +87,7 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     @Override
     public SchedulerDetail retriveSchedulerDetail() {
         SchedulerDetail schedulerDetail = null;
-        List<SchedulerDetail> schedulerDetailList = schedulerDetailRepository.findAll();
+        final List<SchedulerDetail> schedulerDetailList = this.schedulerDetailRepository.findAll();
         if (schedulerDetailList != null) {
             schedulerDetail = schedulerDetailList.get(0);
         }
@@ -97,7 +97,7 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     @Transactional
     @Override
     public CommandProcessingResult updateJobDetail(final Long jobId, final JsonCommand command) {
-        dataValidator.validateForUpdate(command.json());
+        this.dataValidator.validateForUpdate(command.json());
         final ScheduledJobDetail scheduledJobDetail = findByJobId(jobId);
         if (scheduledJobDetail == null) { throw new JobNotFoundException(String.valueOf(jobId)); }
         final Map<String, Object> changes = scheduledJobDetail.update(command);
@@ -114,9 +114,9 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
 
     @Transactional
     @Override
-    public boolean processJobDetailForExecution(String jobKey, String triggerType) {
+    public boolean processJobDetailForExecution(final String jobKey, final String triggerType) {
         boolean isStopExecution = false;
-        final ScheduledJobDetail scheduledJobDetail = scheduledJobDetailsRepository.findByJobKeyWithLock(jobKey);
+        final ScheduledJobDetail scheduledJobDetail = this.scheduledJobDetailsRepository.findByJobKeyWithLock(jobKey);
         if (scheduledJobDetail.isCurrentlyRunning()
                 || (triggerType == SchedulerServiceConstants.TRIGGER_TYPE_CRON && (scheduledJobDetail.getNextRunTime().after(new Date())))) {
             isStopExecution = true;
@@ -128,7 +128,7 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
         } else if (!isStopExecution) {
             scheduledJobDetail.updateCurrentlyRunningStatus(true);
         }
-        scheduledJobDetailsRepository.save(scheduledJobDetail);
+        this.scheduledJobDetailsRepository.save(scheduledJobDetail);
         return isStopExecution;
     }
 

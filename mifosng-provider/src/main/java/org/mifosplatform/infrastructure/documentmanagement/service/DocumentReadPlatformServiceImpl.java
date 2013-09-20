@@ -55,8 +55,8 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
     public FileData retrieveFileData(final String entityType, final Long entityId, final Long documentId) {
         try {
             final DocumentMapper mapper = new DocumentMapper(false, false);
-            DocumentData documentData = fetchDocumentDetails(entityType, entityId, documentId, mapper);
-            ContentRepository contentRepository = contentRepositoryFactory.getRepository(documentData.storageType());
+            final DocumentData documentData = fetchDocumentDetails(entityType, entityId, documentId, mapper);
+            final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(documentData.storageType());
             return contentRepository.fetchFile(documentData);
         } catch (final EmptyResultDataAccessException e) {
             throw new DocumentNotFoundException(entityType, entityId, documentId);
@@ -64,7 +64,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
     }
 
     @Override
-    public DocumentData retrieveDocument(String entityType, Long entityId, Long documentId) {
+    public DocumentData retrieveDocument(final String entityType, final Long entityId, final Long documentId) {
         try {
             final DocumentMapper mapper = new DocumentMapper(true, true);
             return fetchDocumentDetails(entityType, entityId, documentId, mapper);

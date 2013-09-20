@@ -97,11 +97,11 @@ public final class Group extends AbstractPersistable<Long> {
     @ManyToMany
     @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "client_id"))
     private Set<Client> clientMembers;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "closure_reason_cv_id", nullable = true)
     private CodeValue closureReason;
-    
+
     @Column(name = "closedon_date", nullable = true)
     @Temporal(TemporalType.DATE)
     private Date closureDate;
@@ -397,7 +397,7 @@ public final class Group extends AbstractPersistable<Long> {
     public boolean isTransferInProgress() {
         return GroupingTypeStatus.fromInt(this.status).isTransferInProgress();
     }
-    
+
     public boolean isTransferOnHold() {
         return GroupingTypeStatus.fromInt(this.status).isTransferOnHold();
     }
@@ -409,50 +409,50 @@ public final class Group extends AbstractPersistable<Long> {
     public boolean isChildClient(final Long clientId) {
         if (clientId != null && this.clientMembers != null && !this.clientMembers.isEmpty()) {
             for (final Client client : this.clientMembers) {
-                if (client.getId().equals(clientId)) {
-                    return true;
-                }
+                if (client.getId().equals(clientId)) { return true; }
             }
         }
         return false;
     }
 
-    public boolean isChildGroup(){
+    public boolean isChildGroup() {
         return (this.parent == null) ? false : true;
 
     }
-    
-    public boolean isClosed(){
+
+    public boolean isClosed() {
         return GroupingTypeStatus.fromInt(this.status).isClosed();
     }
-    
-    public void close(final CodeValue closureReason, final LocalDate closureDate){
-        
-        if (this.isClosed()) {
-            final String errorMessage = "Group with identifier " + this.getId() + " is alread closed.";
-            throw new InvalidGroupStateTransitionException(this.groupLevel.getLevelName(), "close", "already.closed", errorMessage, this.getId());
+
+    public void close(final CodeValue closureReason, final LocalDate closureDate) {
+
+        if (isClosed()) {
+            final String errorMessage = "Group with identifier " + getId() + " is alread closed.";
+            throw new InvalidGroupStateTransitionException(this.groupLevel.getLevelName(), "close", "already.closed", errorMessage, getId());
         }
-        
-        if (this.isNotPending() && this.getActivationLocalDate().isAfter(closureDate)) {
-            final String errorMessage = "The Group closure Date " + closureDate + " cannot be before the group Activation Date " + this.getActivationLocalDate() + ".";
-            throw new InvalidGroupStateTransitionException(this.groupLevel.getLevelName(), "close", "date.cannot.before.group.actvation.date", errorMessage, closureDate, this.getActivationLocalDate());
+
+        if (isNotPending() && getActivationLocalDate().isAfter(closureDate)) {
+            final String errorMessage = "The Group closure Date " + closureDate + " cannot be before the group Activation Date "
+                    + getActivationLocalDate() + ".";
+            throw new InvalidGroupStateTransitionException(this.groupLevel.getLevelName(), "close",
+                    "date.cannot.before.group.actvation.date", errorMessage, closureDate, getActivationLocalDate());
         }
-        
+
         this.closureReason = closureReason;
         this.closureDate = closureDate.toDate();
         this.status = GroupingTypeStatus.CLOSED.getValue();
     }
-    
-    public boolean hasActiveClients(){
-        for (Client client : this.clientMembers) {
-            if(!client.isClosed()) return true;
+
+    public boolean hasActiveClients() {
+        for (final Client client : this.clientMembers) {
+            if (!client.isClosed()) { return true; }
         }
         return false;
     }
-    
-    public boolean hasActiveGroups(){
-        for(Group group : this.groupMembers){
-            if(!group.isClosed()) return true;
+
+    public boolean hasActiveGroups() {
+        for (final Group group : this.groupMembers) {
+            if (!group.isClosed()) { return true; }
         }
         return false;
     }

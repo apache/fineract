@@ -22,7 +22,7 @@ public class SearchConstants {
 
         private static final Set<String> values = new HashSet<String>();
         static {
-            for (SEARCH_RESPONSE_PARAMETERS param : SEARCH_RESPONSE_PARAMETERS.values()) {
+            for (final SEARCH_RESPONSE_PARAMETERS param : SEARCH_RESPONSE_PARAMETERS.values()) {
                 values.add(param.value);
             }
         }
@@ -40,7 +40,7 @@ public class SearchConstants {
             return this.value;
         }
     }
-    
+
     public static enum SEARCH_SUPPORTED_PARAMETERS {
         QUERY("query"), RESOURCE("resource");
 
@@ -52,7 +52,7 @@ public class SearchConstants {
 
         private static final Set<String> values = new HashSet<String>();
         static {
-            for (SEARCH_SUPPORTED_PARAMETERS param : SEARCH_SUPPORTED_PARAMETERS.values()) {
+            for (final SEARCH_SUPPORTED_PARAMETERS param : SEARCH_SUPPORTED_PARAMETERS.values()) {
                 values.add(param.value);
             }
         }
@@ -82,7 +82,7 @@ public class SearchConstants {
 
         private static final Set<String> values = new HashSet<String>();
         static {
-            for (SEARCH_SUPPORTED_RESOURCES param : SEARCH_SUPPORTED_RESOURCES.values()) {
+            for (final SEARCH_SUPPORTED_RESOURCES param : SEARCH_SUPPORTED_RESOURCES.values()) {
                 values.add(param.value);
             }
         }

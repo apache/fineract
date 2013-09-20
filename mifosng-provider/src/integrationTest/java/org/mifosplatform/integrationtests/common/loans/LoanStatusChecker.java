@@ -5,9 +5,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 
+import org.mifosplatform.integrationtests.common.Utils;
+
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
-import org.mifosplatform.integrationtests.common.Utils;
 
 @SuppressWarnings("rawtypes")
 public class LoanStatusChecker {
@@ -32,13 +33,13 @@ public class LoanStatusChecker {
         assertTrue(getStatus(loanStatusHashMap, "closed"));
     }
 
-    public  static void verifyLoanAccountIsNotActive(final HashMap loanStatusHashMap) {
+    public static void verifyLoanAccountIsNotActive(final HashMap loanStatusHashMap) {
         assertFalse(getStatus(loanStatusHashMap, "active"));
     }
 
     public static HashMap getStatusOfLoan(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer loanID) {
-        String url = "/mifosng-provider/api/v1/loans/" + loanID + "?tenantIdentifier=default";
+        final String url = "/mifosng-provider/api/v1/loans/" + loanID + "?tenantIdentifier=default";
         return Utils.performServerGet(requestSpec, responseSpec, url, "status");
     }
 

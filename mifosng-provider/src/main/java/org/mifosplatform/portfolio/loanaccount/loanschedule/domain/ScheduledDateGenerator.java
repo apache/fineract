@@ -14,7 +14,8 @@ import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 public interface ScheduledDateGenerator {
 
-    List<LocalDate> generate(LoanApplicationTerms loanApplicationTerms, boolean isHolidayEnabled, List<Holiday> holidays, final WorkingDays workingDays);
+    List<LocalDate> generate(LoanApplicationTerms loanApplicationTerms, boolean isHolidayEnabled, List<Holiday> holidays,
+            final WorkingDays workingDays);
 
     LocalDate idealDisbursementDateBasedOnFirstRepaymentDate(PeriodFrequencyType repaymentPeriodFrequencyType, int repaidEvery,
             List<LocalDate> scheduledDates);

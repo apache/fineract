@@ -35,8 +35,8 @@ public class RepaymentScheduleRelatedLoanData {
 
     public LocalDate disbursementDate() {
         LocalDate disbursementDate = this.expectedDisbursementDate;
-        if (actualDisbursementDate != null) {
-            disbursementDate = actualDisbursementDate;
+        if (this.actualDisbursementDate != null) {
+            disbursementDate = this.actualDisbursementDate;
         }
         return disbursementDate;
     }
