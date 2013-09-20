@@ -31,14 +31,14 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
     @Override
     public PortfolioAccountData retriveLoanAssociation(final Long loanId) {
         PortfolioAccountData linkedAccount = null;
-        AccountAssociationsMapper mapper = new AccountAssociationsMapper();
-        String sql = "select " + mapper.schema() + " where aa.loan_account_id = ? ";
+        final AccountAssociationsMapper mapper = new AccountAssociationsMapper();
+        final String sql = "select " + mapper.schema() + " where aa.loan_account_id = ? ";
         try {
-            AccountAssociationsData accountAssociationsData = jdbcTemplate.queryForObject(sql, mapper, loanId);
+            final AccountAssociationsData accountAssociationsData = this.jdbcTemplate.queryForObject(sql, mapper, loanId);
             if (accountAssociationsData != null) {
                 linkedAccount = accountAssociationsData.linkedAccount();
             }
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             logger.debug("Linking account is not configured");
         }
         return linkedAccount;
@@ -47,13 +47,13 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
     @Override
     public boolean isLinkedWithAnyActiveLoan(final Long savingsId) {
         boolean hasActiveLoan = false;
-        String sql = "select loanAccount.loan_status_id as status from m_portfolio_account_associations aa " +
+        final String sql = "select loanAccount.loan_status_id as status from m_portfolio_account_associations aa " +
         		"left join m_loan loanAccount on loanAccount.id = aa.loan_account_id " +
         		"where aa.linked_savings_account_id = ?";
-        
-        List<Integer> statusList= this.jdbcTemplate.queryForList(sql,Integer.class, savingsId);
-        for(Integer status:statusList){
-            LoanStatus loanStatus= LoanStatus.fromInt(status);
+
+        final List<Integer> statusList= this.jdbcTemplate.queryForList(sql,Integer.class, savingsId);
+        for(final Integer status:statusList){
+            final LoanStatus loanStatus= LoanStatus.fromInt(status);
               if(loanStatus.isActiveOrAwaitingApprovalOrDisbursal() || loanStatus.isUnderTransfer()){
                   hasActiveLoan = true;
                   break;
@@ -67,7 +67,7 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
         private final String schemaSql;
 
         public AccountAssociationsMapper() {
-            StringBuilder sqlBuilder = new StringBuilder();
+            final StringBuilder sqlBuilder = new StringBuilder();
             sqlBuilder.append("aa.id as id,");
             // sqlBuilder.append("savingsAccount.id as savingsAccountId, savingsAccount.account_no as savingsAccountNo,");
             sqlBuilder.append("loanAccount.id as loanAccountId, loanAccount.account_no as loanAccountNo,");
@@ -86,7 +86,7 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
         }
 
         @Override
-        public AccountAssociationsData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+        public AccountAssociationsData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
             // final Long savingsAccountId = JdbcSupport.getLong(rs,
@@ -94,8 +94,7 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
             // final String savingsAccountNo = rs.getString("savingsAccountNo");
             final Long loanAccountId = JdbcSupport.getLong(rs, "loanAccountId");
             final String loanAccountNo = rs.getString("loanAccountNo");
-            PortfolioAccountData account = PortfolioAccountData.lookup(loanAccountId, loanAccountNo);
-            ;
+            final PortfolioAccountData account = PortfolioAccountData.lookup(loanAccountId, loanAccountNo);
             /*
              * if (savingsAccountId != null) { account =
              * PortfolioAccountData.lookup(savingsAccountId, savingsAccountNo);
@@ -108,7 +107,7 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
             // "linkLoanAccountId");
             // final String linkLoanAccountNo =
             // rs.getString("linkLoanAccountNo");
-            PortfolioAccountData linkedAccount = PortfolioAccountData.lookup(linkSavingsAccountId, linkSavingsAccountNo);
+            final PortfolioAccountData linkedAccount = PortfolioAccountData.lookup(linkSavingsAccountId, linkSavingsAccountNo);
             /*
              * if (linkSavingsAccountId != null) { linkedAccount =
              * PortfolioAccountData.lookup(linkSavingsAccountId,

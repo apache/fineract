@@ -7,12 +7,11 @@ package org.mifosplatform.portfolio.savings.domain;
 
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeAmountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeOnMonthDayParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.idParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.descriptionParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.idParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.inMultiplesOfParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationTypeParamName;
@@ -55,7 +54,7 @@ import com.google.gson.JsonObject;
 public class SavingsProductAssembler {
 
     private final ChargeRepositoryWrapper chargeRepository;
-    
+
     @Autowired
     public SavingsProductAssembler(final ChargeRepositoryWrapper chargeRepository) {
         this.chargeRepository = chargeRepository;
@@ -69,7 +68,7 @@ public class SavingsProductAssembler {
         final String currencyCode = command.stringValueOfParameterNamed(currencyCodeParamName);
         final Integer digitsAfterDecimal = command.integerValueOfParameterNamed(digitsAfterDecimalParamName);
         final Integer inMultiplesOf = command.integerValueOfParameterNamed(inMultiplesOfParamName);
-        MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal,inMultiplesOf);
+        final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal,inMultiplesOf);
 
         final BigDecimal interestRate = command.bigDecimalValueOfParameterNamed(nominalAnnualInterestRateParamName);
 
@@ -114,7 +113,7 @@ public class SavingsProductAssembler {
         if (withdrawalFeeTypeValue != null) {
             withdrawalFeeType = SavingsWithdrawalFeesType.fromInt(withdrawalFeeTypeValue);
         }
-        
+
         boolean iswithdrawalFeeApplicableForTransfer = false;
         if(command.parameterExists(withdrawalFeeForTransfersParamName)){
             iswithdrawalFeeApplicableForTransfer = command.booleanPrimitiveValueOfParameterNamed(withdrawalFeeForTransfersParamName);
@@ -123,10 +122,10 @@ public class SavingsProductAssembler {
         final BigDecimal annualFeeAmount = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(annualFeeAmountParamName);
         final MonthDay monthDayOfAnnualFee = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
-        
+
         //Savings product charges
-        final Set<Charge> charges = this.assembleListOfSavingsProductCharges(command, currencyCode); 
-        
+        final Set<Charge> charges = assembleListOfSavingsProductCharges(command, currencyCode);
+
         return SavingsProduct.createNew(name, description, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, iswithdrawalFeeApplicableForTransfer,
@@ -136,9 +135,9 @@ public class SavingsProductAssembler {
     public Set<Charge> assembleListOfSavingsProductCharges(final JsonCommand command, final String savingsProductCurrencyCode) {
 
         final Set<Charge> charges = new HashSet<Charge>();
-        
+
         if (command.parameterExists(chargesParamName)) {
-            JsonArray chargesArray = command.arrayOfParameterNamed(chargesParamName);
+            final JsonArray chargesArray = command.arrayOfParameterNamed(chargesParamName);
             if (chargesArray != null) {
                 for (int i = 0; i < chargesArray.size(); i++) {
 
@@ -149,12 +148,12 @@ public class SavingsProductAssembler {
                         final Charge charge = this.chargeRepository.findOneWithNotFoundDetection(id);
 
                         if(!charge.isSavingsCharge()){
-                            String errorMessage = "Charge with identifier " + charge.getId() + " cannot be applied to Savings product.";
-                            throw new ChargeCannotBeAppliedToException("savings.product", errorMessage, charge.getId()); 
+                            final String errorMessage = "Charge with identifier " + charge.getId() + " cannot be applied to Savings product.";
+                            throw new ChargeCannotBeAppliedToException("savings.product", errorMessage, charge.getId());
                         }
-                        
+
                         if (!savingsProductCurrencyCode.equals(charge.getCurrencyCode())) {
-                            String errorMessage = "Charge and Savings Product must have the same currency.";
+                            final String errorMessage = "Charge and Savings Product must have the same currency.";
                             throw new InvalidCurrencyException("charge", "attach.to.savings.product", errorMessage);
                         }
                         charges.add(charge);

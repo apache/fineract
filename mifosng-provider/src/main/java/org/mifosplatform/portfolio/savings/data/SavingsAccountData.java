@@ -55,6 +55,7 @@ public class SavingsAccountData {
     private final SavingsAccountSummaryData summary;
     @SuppressWarnings("unused")
     private final Collection<SavingsAccountTransactionData> transactions;
+    @SuppressWarnings("unused")
     private final Collection<SavingsAccountChargeData> charges;
 
     // template
@@ -76,7 +77,7 @@ public class SavingsAccountData {
             final EnumOptionData interestCalculationType, final EnumOptionData interestCalculationDaysInYearType,
             final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency,
             final EnumOptionData lockinPeriodFrequencyType, final BigDecimal withdrawalFeeAmount, final EnumOptionData withdrawalFeeType,
-            boolean withdrawalFeeForTransfers, final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay,
+            final boolean withdrawalFeeForTransfers, final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay,
             final LocalDate annualFeeNextDueDate, final SavingsAccountSummaryData summary) {
 
         final Collection<SavingsProductData> productOptions = null;
@@ -217,7 +218,7 @@ public class SavingsAccountData {
 
         final Collection<SavingsAccountChargeData> charges = null;
         final Collection<ChargeData> chargeOptions = null;
-        
+
         return new SavingsAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                 fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
@@ -282,7 +283,7 @@ public class SavingsAccountData {
         this.interestCalculationDaysInYearTypeOptions = interestCalculationDaysInYearTypeOptions;
         this.lockinPeriodFrequencyTypeOptions = lockinPeriodFrequencyTypeOptions;
         this.withdrawalFeeTypeOptions = withdrawalFeeTypeOptions;
-        
+
         this.charges = charges;//charges associated with Savings account
         this.chargeOptions = chargeOptions;//charges available for adding to Savings account
     }
@@ -313,7 +314,7 @@ public class SavingsAccountData {
         if (obj == null) { return false; }
         if (obj == this) { return true; }
         if (obj.getClass() != getClass()) { return false; }
-        SavingsAccountData rhs = (SavingsAccountData) obj;
+        final SavingsAccountData rhs = (SavingsAccountData) obj;
         return new EqualsBuilder().append(this.id, rhs.id).append(this.accountNo, rhs.accountNo).isEquals();
     }
 
