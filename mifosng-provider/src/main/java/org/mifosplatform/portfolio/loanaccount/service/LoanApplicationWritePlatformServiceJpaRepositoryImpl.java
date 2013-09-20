@@ -33,7 +33,6 @@ import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.mifosplatform.portfolio.calendar.domain.CalendarRepository;
 import org.mifosplatform.portfolio.calendar.exception.CalendarNotFoundException;
-import org.mifosplatform.portfolio.charge.domain.ChargePaymentMode;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
@@ -149,7 +148,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
-        List<LoanStatus> allowedLoanStatuses = Arrays.asList(LoanStatus.values());
+        final List<LoanStatus> allowedLoanStatuses = Arrays.asList(LoanStatus.values());
         return new DefaultLoanLifecycleStateMachine(allowedLoanStatuses);
     }
 
@@ -158,14 +157,14 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     public CommandProcessingResult submitApplication(final JsonCommand command) {
 
         try {
-            final AppUser currentUser = context.authenticatedUser();
+            final AppUser currentUser = this.context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
 
-            final Long productId = fromJsonHelper.extractLongNamed("productId", command.parsedJson());
+            final Long productId = this.fromJsonHelper.extractLongNamed("productId", command.parsedJson());
             final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
             if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
 
@@ -173,7 +172,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
 
-            final Loan newLoanApplication = loanAssembler.assembleFrom(command, currentUser);
+            final Loan newLoanApplication = this.loanAssembler.assembleFrom(command, currentUser);
 
             validateSubmittedOnDate(newLoanApplication);
 
@@ -193,7 +192,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             final String submittedOnNote = command.stringValueOfParameterNamed("submittedOnNote");
             if (StringUtils.isNotBlank(submittedOnNote)) {
-                Note note = Note.loanNote(newLoanApplication, submittedOnNote);
+                final Note note = Note.loanNote(newLoanApplication, submittedOnNote);
                 this.noteRepository.save(note);
             }
 
@@ -205,7 +204,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 calendar = this.calendarRepository.findOne(calendarId);
                 if (calendar == null) { throw new CalendarNotFoundException(calendarId); }
 
-                CalendarInstance calendarInstance = new CalendarInstance(calendar, newLoanApplication.getId(),
+                final CalendarInstance calendarInstance = new CalendarInstance(calendar, newLoanApplication.getId(),
                         CalendarEntityType.LOANS.getValue());
                 this.calendarInstanceRepository.save(calendarInstance);
             }
@@ -213,9 +212,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             // Save linked account information
             final Long savingsAccountId = command.longValueOfParameterNamed("linkAccountId");
             if (savingsAccountId != null) {
-                SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(savingsAccountId);
+                final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(savingsAccountId);
                 this.fromApiJsonDeserializer.validatelinkedSavingsAccount(savingsAccount, newLoanApplication);
-                AccountAssociations accountAssociations = AccountAssociations.associateSavingsAccount(newLoanApplication, savingsAccount);
+                final AccountAssociations accountAssociations = AccountAssociations.associateSavingsAccount(newLoanApplication, savingsAccount);
                 this.accountAssociationsRepository.save(accountAssociations);
             }
 
@@ -227,7 +226,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     .withGroupId(newLoanApplication.getGroupId()) //
                     .withLoanId(newLoanApplication.getId()) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
@@ -238,7 +237,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     public CommandProcessingResult modifyApplication(final Long loanId, final JsonCommand command) {
 
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForModify(command.json());
 
@@ -351,7 +350,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             final String submittedOnNote = command.stringValueOfParameterNamed("submittedOnNote");
             if (StringUtils.isNotBlank(submittedOnNote)) {
-                Note note = Note.loanNote(existingLoanApplication, submittedOnNote);
+                final Note note = Note.loanNote(existingLoanApplication, submittedOnNote);
                 this.noteRepository.save(note);
             }
 
@@ -362,27 +361,27 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 if (calendar == null) { throw new CalendarNotFoundException(calendarId); }
             }
 
-            List<CalendarInstance> ciList = (List<CalendarInstance>) this.calendarInstanceRepository.findByEntityIdAndEntityTypeId(loanId,
+            final List<CalendarInstance> ciList = (List<CalendarInstance>) this.calendarInstanceRepository.findByEntityIdAndEntityTypeId(loanId,
                     CalendarEntityType.LOANS.getValue());
             if (calendar != null) {
 
                 // For loans, allow to attach only one calendar instance per
                 // loan
                 if (ciList != null && !ciList.isEmpty()) {
-                    CalendarInstance calendarInstance = ciList.get(0);
+                    final CalendarInstance calendarInstance = ciList.get(0);
                     if (calendarInstance.getCalendar().getId() != calendar.getId()) {
                         calendarInstance.updateCalendar(calendar);
                         this.calendarInstanceRepository.saveAndFlush(calendarInstance);
                     }
                 } else {
                     // attaching new calendar
-                    CalendarInstance calendarInstance = new CalendarInstance(calendar, existingLoanApplication.getId(),
+                    final CalendarInstance calendarInstance = new CalendarInstance(calendar, existingLoanApplication.getId(),
                             CalendarEntityType.LOANS.getValue());
                     this.calendarInstanceRepository.save(calendarInstance);
                 }
 
             } else if (ciList != null && !ciList.isEmpty()) {
-                CalendarInstance calendarInstance = ciList.get(0);
+                final CalendarInstance calendarInstance = ciList.get(0);
                 this.calendarInstanceRepository.delete(calendarInstance);
             }
 
@@ -406,13 +405,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 if (accountAssociations == null) {
                     isModified = true;
                 } else {
-                    SavingsAccount savingsAccount = accountAssociations.linkedSavingsAccount();
+                    final SavingsAccount savingsAccount = accountAssociations.linkedSavingsAccount();
                     if (savingsAccount == null || savingsAccount.getId() != savingsAccountId) {
                         isModified = true;
                     }
                 }
                 if (isModified) {
-                    SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(savingsAccountId);
+                    final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(savingsAccountId);
                     this.fromApiJsonDeserializer.validatelinkedSavingsAccount(savingsAccount, existingLoanApplication);
                     if (accountAssociations == null) {
                         accountAssociations = AccountAssociations.associateSavingsAccount(existingLoanApplication, savingsAccount);
@@ -426,7 +425,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             if (!isLinkedAccPresent) {
                 final Set<LoanCharge> charges = existingLoanApplication.charges();
-                for (LoanCharge loanCharge : charges) {
+                for (final LoanCharge loanCharge : charges) {
                     if (loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
                         final String errorMessage = "one of the charges requires linked savings account for payment";
                         throw new LinkedAccountRequiredException("loanCharge", errorMessage);
@@ -441,7 +440,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     .withGroupId(existingLoanApplication.getGroupId()) //
                     .withLoanId(existingLoanApplication.getId()) //
                     .with(changes).build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
@@ -453,7 +452,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
 
-        Throwable realCause = dve.getMostSpecificCause();
+        final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("loan_account_no_UNIQUE")) {
 
             final String accountNo = command.stringValueOfParameterNamed("accountNo");
@@ -478,14 +477,14 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Override
     public CommandProcessingResult deleteApplication(final Long loanId) {
 
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
         final Loan loan = retrieveLoanBy(loanId);
         checkClientOrGroupActive(loan);
 
         if (loan.isNotSubmittedAndPendingApproval()) { throw new LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted(loanId); }
 
-        List<Note> relatedNotes = this.noteRepository.findByLoanId(loan.getId());
+        final List<Note> relatedNotes = this.noteRepository.findByLoanId(loan.getId());
         this.noteRepository.deleteInBatch(relatedNotes);
 
         this.loanRepository.delete(loanId);
@@ -503,7 +502,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Override
     public CommandProcessingResult approveApplication(final Long loanId, final JsonCommand command) {
 
-        final AppUser currentUser = context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
 
         this.loanApplicationTransitionApiJsonValidator.validateApproval(command.json());
 
@@ -516,7 +515,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
-                Note note = Note.loanNote(loan, noteText);
+                final Note note = Note.loanNote(loan, noteText);
                 changes.put("note", noteText);
                 this.noteRepository.save(note);
             }
@@ -537,7 +536,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Override
     public CommandProcessingResult undoApplicationApproval(final Long loanId, final JsonCommand command) {
 
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
         this.fromApiJsonDeserializer.validateForUndo(command.json());
 
@@ -548,9 +547,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
 
-            String noteText = command.stringValueOfParameterNamed("note");
+            final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
-                Note note = Note.loanNote(loan, noteText);
+                final Note note = Note.loanNote(loan, noteText);
                 this.noteRepository.save(note);
             }
         }
@@ -570,7 +569,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Override
     public CommandProcessingResult rejectApplication(final Long loanId, final JsonCommand command) {
 
-        final AppUser currentUser = context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
 
         this.loanApplicationTransitionApiJsonValidator.validateRejection(command.json());
 
@@ -581,9 +580,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
 
-            String noteText = command.stringValueOfParameterNamed("note");
+            final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
-                Note note = Note.loanNote(loan, noteText);
+                final Note note = Note.loanNote(loan, noteText);
                 this.noteRepository.save(note);
             }
         }
@@ -603,7 +602,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Override
     public CommandProcessingResult applicantWithdrawsFromApplication(final Long loanId, final JsonCommand command) {
 
-        final AppUser currentUser = context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
 
         this.loanApplicationTransitionApiJsonValidator.validateApplicantWithdrawal(command.json());
 
@@ -615,9 +614,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
 
-            String noteText = command.stringValueOfParameterNamed("note");
+            final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
-                Note note = Note.loanNote(loan, noteText);
+                final Note note = Note.loanNote(loan, noteText);
                 this.noteRepository.save(note);
             }
         }

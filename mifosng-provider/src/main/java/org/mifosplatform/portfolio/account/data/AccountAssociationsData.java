@@ -2,7 +2,9 @@ package org.mifosplatform.portfolio.account.data;
 
 public class AccountAssociationsData {
 
+    @SuppressWarnings("unused")
     private final Long id;
+    @SuppressWarnings("unused")
     private final PortfolioAccountData account;
     private final PortfolioAccountData linkedAccount;
 

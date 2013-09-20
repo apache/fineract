@@ -17,7 +17,6 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
-import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 import org.mifosplatform.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
     @Autowired
     public SavingsProductReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
         this.context = context;
-        jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     @Override
@@ -45,26 +44,26 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
         this.context.authenticatedUser();
 
-        final String sql = "select " + savingsProductRowMapper.schema();
+        final String sql = "select " + this.savingsProductRowMapper.schema();
 
-        return this.jdbcTemplate.query(sql, savingsProductRowMapper);
+        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper);
     }
 
     @Override
     public Collection<SavingsProductData> retrieveAllForLookup() {
 
-        final String sql = "select " + savingsProductLookupsRowMapper.schema();
+        final String sql = "select " + this.savingsProductLookupsRowMapper.schema();
 
-        return this.jdbcTemplate.query(sql, savingsProductLookupsRowMapper);
+        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper);
     }
 
     @Override
     public SavingsProductData retrieveOne(final Long savingProductId) {
         try {
             this.context.authenticatedUser();
-            final String sql = "select " + savingsProductRowMapper.schema() + " where sp.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, savingsProductRowMapper, new Object[] { savingProductId });
-        } catch (EmptyResultDataAccessException e) {
+            final String sql = "select " + this.savingsProductRowMapper.schema() + " where sp.id = ?";
+            return this.jdbcTemplate.queryForObject(sql, this.savingsProductRowMapper, new Object[] { savingProductId });
+        } catch (final EmptyResultDataAccessException e) {
             throw new SavingsProductNotFoundException(savingProductId);
         }
     }
@@ -108,29 +107,29 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         @Override
         public SavingsProductData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            Long id = rs.getLong("id");
-            String name = rs.getString("name");
-            String description = rs.getString("description");
+            final Long id = rs.getLong("id");
+            final String name = rs.getString("name");
+            final String description = rs.getString("description");
 
-            String currencyCode = rs.getString("currencyCode");
-            String currencyName = rs.getString("currencyName");
-            String currencyNameCode = rs.getString("currencyNameCode");
-            String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
-            Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            final String currencyCode = rs.getString("currencyCode");
+            final String currencyName = rs.getString("currencyName");
+            final String currencyNameCode = rs.getString("currencyNameCode");
+            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
             final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
                     currencyDisplaySymbol, currencyNameCode);
             final BigDecimal nominalAnnualInterestRate = rs.getBigDecimal("nominalAnnualInterestRate");
 
             final Integer compoundingInterestPeriodTypeValue = JdbcSupport.getInteger(rs, "compoundingInterestPeriodType");
-            EnumOptionData compoundingInterestPeriodType = SavingsEnumerations
+            final EnumOptionData compoundingInterestPeriodType = SavingsEnumerations
                     .compoundingInterestPeriodType(compoundingInterestPeriodTypeValue);
 
             final Integer interestPostingPeriodTypeValue = JdbcSupport.getInteger(rs, "interestPostingPeriodType");
-            EnumOptionData interestPostingPeriodType = SavingsEnumerations.interestPostingPeriodType(interestPostingPeriodTypeValue);
+            final EnumOptionData interestPostingPeriodType = SavingsEnumerations.interestPostingPeriodType(interestPostingPeriodTypeValue);
 
             final Integer interestCalculationTypeValue = JdbcSupport.getInteger(rs, "interestCalculationType");
-            EnumOptionData interestCalculationType = SavingsEnumerations.interestCalculationType(interestCalculationTypeValue);
+            final EnumOptionData interestCalculationType = SavingsEnumerations.interestCalculationType(interestCalculationTypeValue);
 
             EnumOptionData interestCalculationDaysInYearType = null;
             final Integer interestCalculationDaysInYearTypeValue = JdbcSupport.getInteger(rs, "interestCalculationDaysInYearType");
@@ -144,7 +143,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
             final BigDecimal minRequiredOpeningBalance = rs.getBigDecimal("minRequiredOpeningBalance");
 
-            Integer lockinPeriodFrequency = JdbcSupport.getInteger(rs, "lockinPeriodFrequency");
+            final Integer lockinPeriodFrequency = JdbcSupport.getInteger(rs, "lockinPeriodFrequency");
             EnumOptionData lockinPeriodFrequencyType = null;
             final Integer lockinPeriodFrequencyTypeValue = JdbcSupport.getInteger(rs, "lockinPeriodFrequencyType");
             if (lockinPeriodFrequencyTypeValue != null) {
@@ -158,7 +157,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             if (withdrawalFeeTypeValue != null) {
                 withdrawalFeeType = SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue);
             }
-            
+
             final boolean withdrawalFeeForTransfers = rs.getBoolean("withdrawalFeeForTransfers");
 
             final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");

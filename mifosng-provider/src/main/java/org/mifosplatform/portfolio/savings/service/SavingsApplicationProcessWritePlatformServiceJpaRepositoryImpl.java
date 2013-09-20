@@ -29,7 +29,6 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyReposit
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
-import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
@@ -232,11 +231,11 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     }
                     account.update(fieldOfficer);
                 }
-                
+
                 if (changes.containsKey("charges")) {
                     //final Set<Charge> savingsProductCharges = this.savi.assembleListOfSavingsProductCharges(command, product.currency().getCode());
                     final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(command.parsedJson());
-                    boolean updated = account.update(charges);
+                    final boolean updated = account.update(charges);
                     if (!updated) {
                         changes.remove("charges");
                     }

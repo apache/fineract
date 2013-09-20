@@ -19,19 +19,14 @@ import org.mifosplatform.portfolio.charge.domain.ChargePaymentMode;
  */
 public class LoanChargeData {
 
-    @SuppressWarnings("unused")
     private final Long id;
-
     @SuppressWarnings("unused")
     private final Long chargeId;
-
     @SuppressWarnings("unused")
     private final String name;
-
     @SuppressWarnings("unused")
     private final EnumOptionData chargeTimeType;
 
-    @SuppressWarnings("unused")
     private final LocalDate dueDate;
 
     @SuppressWarnings("unused")
@@ -55,7 +50,6 @@ public class LoanChargeData {
     @SuppressWarnings("unused")
     private final BigDecimal amountWrittenOff;
 
-    @SuppressWarnings("unused")
     private final BigDecimal amountOutstanding;
 
     @SuppressWarnings("unused")
@@ -72,9 +66,10 @@ public class LoanChargeData {
     private final boolean paid;
 
     private final boolean waived;
-    
+
+    @SuppressWarnings("unused")
     private final boolean chargePayable;
-    
+
     private final Long loanId;
 
     public static LoanChargeData template(final Collection<ChargeData> chargeOptions) {
@@ -96,7 +91,7 @@ public class LoanChargeData {
             final BigDecimal amountPaid, final BigDecimal amountWaived, final BigDecimal amountWrittenOff,
             final BigDecimal amountOutstanding, final EnumOptionData chargeTimeType, final LocalDate dueDate,
             final EnumOptionData chargeCalculationType, final BigDecimal percentage, final BigDecimal amountPercentageAppliedTo,
-            final boolean penalty, EnumOptionData chargePaymentMode, boolean paid, boolean waived, Long loanId) {
+            final boolean penalty, final EnumOptionData chargePaymentMode, final boolean paid, final boolean waived, final Long loanId) {
         this.id = id;
         this.chargeId = chargeId;
         this.name = name;
@@ -129,8 +124,8 @@ public class LoanChargeData {
 
     private LoanChargeData(final Long id, final Long chargeId, final String name, final CurrencyData currency, final BigDecimal amount,
             final BigDecimal pecentage, final EnumOptionData chargeTimeType, final EnumOptionData chargeCalculationType,
-            final Collection<ChargeData> chargeOptions, final boolean penalty, EnumOptionData chargePaymentMode, boolean paid,
-            boolean waived, Long loanId) {
+            final Collection<ChargeData> chargeOptions, final boolean penalty, final EnumOptionData chargePaymentMode, final boolean paid,
+            final boolean waived, final Long loanId) {
         this.id = id;
         this.chargeId = chargeId;
         this.name = name;
@@ -193,20 +188,20 @@ public class LoanChargeData {
         }
         return isAccountTransfer && !this.paid && !this.waived;
     }
-    
+
     public Long getId() {
         return this.id;
     }
-    
+
     public LocalDate getDueDate() {
         return this.dueDate;
     }
-    
+
     public Long getLoanId() {
         return this.loanId;
     }
 
-    
+
     public BigDecimal getAmountOutstanding() {
         return this.amountOutstanding;
     }
