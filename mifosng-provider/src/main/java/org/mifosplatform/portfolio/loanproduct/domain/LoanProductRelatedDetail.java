@@ -164,7 +164,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     }
 
     public PeriodFrequencyType getInterestPeriodFrequencyType() {
-        return interestPeriodFrequencyType;
+        return this.interestPeriodFrequencyType;
     }
 
     public BigDecimal getAnnualNominalInterestRate() {
@@ -172,30 +172,30 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     }
 
     public InterestMethod getInterestMethod() {
-        return interestMethod;
+        return this.interestMethod;
     }
 
     public InterestCalculationPeriodMethod getInterestCalculationPeriodMethod() {
-        return interestCalculationPeriodMethod;
+        return this.interestCalculationPeriodMethod;
     }
 
     @Override
     public Integer getRepayEvery() {
-        return repayEvery;
+        return this.repayEvery;
     }
 
     @Override
     public PeriodFrequencyType getRepaymentPeriodFrequencyType() {
-        return repaymentPeriodFrequencyType;
+        return this.repaymentPeriodFrequencyType;
     }
 
     @Override
     public Integer getNumberOfRepayments() {
-        return numberOfRepayments;
+        return this.numberOfRepayments;
     }
 
     public AmortizationMethod getAmortizationMethod() {
-        return amortizationMethod;
+        return this.amortizationMethod;
     }
 
     public Map<String, Object> update(final JsonCommand command, final AprCalculator aprCalculator) {
@@ -214,7 +214,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             actualChanges.put(digitsAfterDecimalParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             digitsAfterDecimal = newValue;
-            this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal,inMultiplesOf);
+            this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
         }
 
         final String currencyCodeParamName = "currencyCode";
@@ -222,7 +222,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final String newValue = command.stringValueOfParameterNamed(currencyCodeParamName);
             actualChanges.put(currencyCodeParamName, newValue);
             currencyCode = newValue;
-            this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal,inMultiplesOf);
+            this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
         }
 
         final String inMultiplesOfParamName = "inMultiplesOf";
@@ -230,7 +230,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final Integer newValue = command.integerValueOfParameterNamed(inMultiplesOfParamName);
             actualChanges.put(inMultiplesOfParamName, newValue);
             inMultiplesOf = newValue;
-            this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal,inMultiplesOf);
+            this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
         }
 
         final Map<String, Object> loanApplicationAttributeChanges = updateLoanApplicationAttributes(command, aprCalculator);
@@ -362,17 +362,17 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loanproduct");
 
         if (this.numberOfRepayments <= defaultToZeroIfNull(this.graceOnPrincipalPayment)) {
-            baseDataValidator.reset().parameter("graceOnPrincipalPayment").value(graceOnPrincipalPayment)
+            baseDataValidator.reset().parameter("graceOnPrincipalPayment").value(this.graceOnPrincipalPayment)
                     .failWithCode(".mustBeLessThan.numberOfRepayments");
         }
 
         if (this.numberOfRepayments <= defaultToZeroIfNull(this.graceOnInterestPayment)) {
-            baseDataValidator.reset().parameter("graceOnInterestPayment").value(graceOnInterestPayment)
+            baseDataValidator.reset().parameter("graceOnInterestPayment").value(this.graceOnInterestPayment)
                     .failWithCode(".mustBeLessThan.numberOfRepayments");
         }
 
         if (this.numberOfRepayments < defaultToZeroIfNull(this.graceOnInterestCharged)) {
-            baseDataValidator.reset().parameter("graceOnInterestCharged").value(graceOnInterestCharged)
+            baseDataValidator.reset().parameter("graceOnInterestCharged").value(this.graceOnInterestCharged)
                     .failWithCode(".mustBeLessThan.numberOfRepayments");
         }
 
@@ -394,7 +394,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public boolean hasCurrencyCodeOf(final String currencyCode) {
         return this.currency.getCode().equalsIgnoreCase(currencyCode);
     }
-    
+
     public void updatenterestPeriodFrequencyType(final PeriodFrequencyType interestPeriodFrequencyType) {
         this.interestPeriodFrequencyType = interestPeriodFrequencyType;
     }

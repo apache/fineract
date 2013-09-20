@@ -48,10 +48,10 @@ public enum PortfolioAccountType {
             switch (type) {
                 case 1:
                     enumType = LOAN;
-                    break;
+                break;
                 case 2:
                     enumType = SAVINGS;
-                    break;
+                break;
             }
         }
         return enumType;

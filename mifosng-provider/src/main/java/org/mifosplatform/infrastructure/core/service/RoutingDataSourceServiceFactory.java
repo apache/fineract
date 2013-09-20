@@ -22,7 +22,7 @@ public class RoutingDataSourceServiceFactory {
         if (ThreadLocalContextUtil.CONTEXT_TENANTS.equalsIgnoreCase(ThreadLocalContextUtil.getDataSourceContext())) {
             serviceName = "dataSourceForTenants";
         }
-        return applicationContext.getBean(serviceName, RoutingDataSourceService.class);
+        return this.applicationContext.getBean(serviceName, RoutingDataSourceService.class);
 
     }
 }

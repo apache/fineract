@@ -10,9 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UpdateGroupRoleCommandHandler implements NewCommandSourceHandler {
-    
+
     private final GroupRolesWritePlatformService groupRolesWritePlatformService;
-    
+
     @Autowired
     public UpdateGroupRoleCommandHandler(final GroupRolesWritePlatformService groupRolesWritePlatformService) {
         this.groupRolesWritePlatformService = groupRolesWritePlatformService;
@@ -20,7 +20,7 @@ public class UpdateGroupRoleCommandHandler implements NewCommandSourceHandler {
 
     @Override
     @Transactional
-    public CommandProcessingResult processCommand(JsonCommand command) {
+    public CommandProcessingResult processCommand(final JsonCommand command) {
         return this.groupRolesWritePlatformService.updateRole(command);
     }
 

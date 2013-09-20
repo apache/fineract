@@ -121,12 +121,10 @@ public class LoanTransactionEnumData {
         return this.rejectTransfer;
     }
 
-    
     public boolean isChargePayment() {
         return this.chargePayment;
     }
 
-    
     public boolean isRefund() {
         return this.refund;
     }

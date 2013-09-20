@@ -22,7 +22,7 @@ public class ImageData {
     private String contentType;
     private InputStream inputStream;
 
-    public ImageData(Long imageId, String location, Integer storageType, String entityDisplayName) {
+    public ImageData(final Long imageId, final String location, final Integer storageType, final String entityDisplayName) {
         this.imageId = imageId;
         this.location = location;
         this.storageType = storageType;
@@ -32,13 +32,13 @@ public class ImageData {
     public byte[] getContent() {
         // TODO Vishwas Fix error handling
         try {
-            if (inputStream == null) {
-                FileInputStream fileInputStream = new FileInputStream(file);
+            if (this.inputStream == null) {
+                final FileInputStream fileInputStream = new FileInputStream(this.file);
                 return IOUtils.toByteArray(fileInputStream);
             }
 
-            return IOUtils.toByteArray(inputStream);
-        } catch (IOException e) {
+            return IOUtils.toByteArray(this.inputStream);
+        } catch (final IOException e) {
             return null;
         }
     }
@@ -46,8 +46,8 @@ public class ImageData {
     private String setImageContentType() {
         String contentType = ContentRepositoryUtils.IMAGE_MIME_TYPE.JPEG.getValue();
 
-        if (file != null) {
-            String fileName = file.getName();
+        if (this.file != null) {
+            final String fileName = this.file.getName();
 
             if (StringUtils.endsWith(fileName, ContentRepositoryUtils.IMAGE_FILE_EXTENSION.GIF.getValue())) {
                 contentType = ContentRepositoryUtils.IMAGE_MIME_TYPE.GIF.getValue();
@@ -63,7 +63,7 @@ public class ImageData {
     }
 
     public StorageType storageType() {
-        return StorageType.fromInt(storageType);
+        return StorageType.fromInt(this.storageType);
     }
 
     public String name() {
@@ -74,11 +74,11 @@ public class ImageData {
         return this.location;
     }
 
-    public void updateContent(InputStream objectContent) {
+    public void updateContent(final InputStream objectContent) {
         this.inputStream = objectContent;
     }
 
-    public void updateContent(File file) {
+    public void updateContent(final File file) {
         this.file = file;
         setImageContentType();
     }

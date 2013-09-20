@@ -31,47 +31,47 @@ public class FileSystemContentRepository implements ContentRepository {
     public static final String MIFOSX_BASE_DIR = System.getProperty("user.home") + File.separator + ".mifosx";
 
     @Override
-    public String saveFile(InputStream uploadedInputStream, DocumentCommand documentCommand) {
-        String fileName = documentCommand.getFileName();
-        String uploadDocumentLocation = generateFileParentDirectory(documentCommand.getParentEntityType(),
+    public String saveFile(final InputStream uploadedInputStream, final DocumentCommand documentCommand) {
+        final String fileName = documentCommand.getFileName();
+        final String uploadDocumentLocation = generateFileParentDirectory(documentCommand.getParentEntityType(),
                 documentCommand.getParentEntityId());
 
         ContentRepositoryUtils.validateFileSizeWithinPermissibleRange(documentCommand.getSize(), fileName);
         makeDirectories(uploadDocumentLocation);
 
-        String fileLocation = uploadDocumentLocation + File.separator + fileName;
+        final String fileLocation = uploadDocumentLocation + File.separator + fileName;
 
         writeFileToFileSystem(fileName, uploadedInputStream, fileLocation);
         return fileLocation;
     }
 
     @Override
-    public String saveImage(InputStream uploadedInputStream, Long resourceId, String imageName, Long fileSize) {
-        String uploadImageLocation = generateClientImageParentDirectory(resourceId);
+    public String saveImage(final InputStream uploadedInputStream, final Long resourceId, final String imageName, final Long fileSize) {
+        final String uploadImageLocation = generateClientImageParentDirectory(resourceId);
 
         ContentRepositoryUtils.validateFileSizeWithinPermissibleRange(fileSize, imageName);
         makeDirectories(uploadImageLocation);
 
-        String fileLocation = uploadImageLocation + File.separator + imageName;
+        final String fileLocation = uploadImageLocation + File.separator + imageName;
 
         writeFileToFileSystem(imageName, uploadedInputStream, fileLocation);
         return fileLocation;
     }
 
     @Override
-    public String saveImage(Base64EncodedImage base64EncodedImage, Long resourceId, String imageName) {
-        String uploadImageLocation = generateClientImageParentDirectory(resourceId);
+    public String saveImage(final Base64EncodedImage base64EncodedImage, final Long resourceId, final String imageName) {
+        final String uploadImageLocation = generateClientImageParentDirectory(resourceId);
 
         makeDirectories(uploadImageLocation);
 
-        String fileLocation = uploadImageLocation + File.separator + imageName + base64EncodedImage.getFileExtension();
+        final String fileLocation = uploadImageLocation + File.separator + imageName + base64EncodedImage.getFileExtension();
         try {
-            OutputStream out = new FileOutputStream(new File(fileLocation));
-            byte[] imgBytes = Base64.decode(base64EncodedImage.getBase64EncodedString());
+            final OutputStream out = new FileOutputStream(new File(fileLocation));
+            final byte[] imgBytes = Base64.decode(base64EncodedImage.getBase64EncodedString());
             out.write(imgBytes);
             out.flush();
             out.close();
-        } catch (IOException ioe) {
+        } catch (final IOException ioe) {
             throw new ContentManagementException(imageName, ioe.getMessage());
         }
         return fileLocation;
@@ -87,12 +87,12 @@ public class FileSystemContentRepository implements ContentRepository {
     }
 
     @Override
-    public void deleteFile(String fileName, String documentPath) {
+    public void deleteFile(final String fileName, final String documentPath) {
         final boolean fileDeleted = deleteFile(documentPath);
         if (!fileDeleted) { throw new ContentManagementException(fileName, null); }
     }
 
-    private boolean deleteFile(String documentPath) {
+    private boolean deleteFile(final String documentPath) {
         final File fileToBeDeleted = new File(documentPath);
         return fileToBeDeleted.delete();
     }
@@ -103,14 +103,14 @@ public class FileSystemContentRepository implements ContentRepository {
     }
 
     @Override
-    public FileData fetchFile(DocumentData documentData) {
-        File file = new File(documentData.fileLocation());
+    public FileData fetchFile(final DocumentData documentData) {
+        final File file = new File(documentData.fileLocation());
         return new FileData(file, documentData.fileName(), documentData.contentType());
     }
 
     @Override
-    public ImageData fetchImage(ImageData imageData) {
-        File file = new File(imageData.location());
+    public ImageData fetchImage(final ImageData imageData) {
+        final File file = new File(imageData.location());
         imageData.updateContent(file);
         return imageData;
     }
@@ -122,7 +122,7 @@ public class FileSystemContentRepository implements ContentRepository {
      * @param entityId
      * @return
      */
-    private String generateFileParentDirectory(String entityType, Long entityId) {
+    private String generateFileParentDirectory(final String entityType, final Long entityId) {
         return FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator
                 + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim() + File.separator + "documents" + File.separator
                 + entityType + File.separator + entityId + File.separator + ContentRepositoryUtils.generateRandomString();
@@ -140,24 +140,24 @@ public class FileSystemContentRepository implements ContentRepository {
     /**
      * Recursively create the directory if it does not exist *
      */
-    private void makeDirectories(String uploadDocumentLocation) {
+    private void makeDirectories(final String uploadDocumentLocation) {
         if (!new File(uploadDocumentLocation).isDirectory()) {
             new File(uploadDocumentLocation).mkdirs();
         }
     }
 
-    private void writeFileToFileSystem(String fileName, InputStream uploadedInputStream, String fileLocation) {
+    private void writeFileToFileSystem(final String fileName, final InputStream uploadedInputStream, final String fileLocation) {
         try {
-            OutputStream out = new FileOutputStream(new File(fileLocation));
+            final OutputStream out = new FileOutputStream(new File(fileLocation));
             int read = 0;
-            byte[] bytes = new byte[1024];
+            final byte[] bytes = new byte[1024];
 
             while ((read = uploadedInputStream.read(bytes)) != -1) {
                 out.write(bytes, 0, read);
             }
             out.flush();
             out.close();
-        } catch (IOException ioException) {
+        } catch (final IOException ioException) {
             throw new ContentManagementException(fileName, ioException.getMessage());
         }
     }

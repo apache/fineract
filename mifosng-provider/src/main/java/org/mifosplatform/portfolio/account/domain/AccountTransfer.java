@@ -115,7 +115,8 @@ public class AccountTransfer extends AbstractPersistable<Long> {
 
     public static AccountTransfer LoanTosavingsTransfer(final Office fromOffice, final Client fromClient, final Loan fromLoanAccount,
             final Office toOffice, final Client toClient, final SavingsAccount toSavingsAccount, final SavingsAccountTransaction deposit,
-            final LoanTransaction loanRefundTransaction, final LocalDate transactionDate, final Money transactionAmount, final String description) {
+            final LoanTransaction loanRefundTransaction, final LocalDate transactionDate, final Money transactionAmount,
+            final String description) {
         return new AccountTransfer(fromOffice, fromClient, null, fromLoanAccount, toOffice, toClient, toSavingsAccount, null, null,
                 deposit, null, loanRefundTransaction, transactionDate, transactionAmount, description);
     }
@@ -127,7 +128,7 @@ public class AccountTransfer extends AbstractPersistable<Long> {
     private AccountTransfer(final Office fromOffice, final Client fromClient, final SavingsAccount fromSavingsAccount,
             final Loan fromLoanAccount, final Office toOffice, final Client toClient, final SavingsAccount toSavingsAccount,
             final Loan toLoanAccount, final SavingsAccountTransaction withdrawal, final SavingsAccountTransaction deposit,
-            final LoanTransaction loanRepaymentTransaction, LoanTransaction loanRefundTransaction, final LocalDate transactionDate,
+            final LoanTransaction loanRepaymentTransaction, final LoanTransaction loanRefundTransaction, final LocalDate transactionDate,
             final Money transactionAmount, final String description) {
         this.fromOffice = fromOffice;
         this.fromClient = fromClient;
@@ -147,22 +148,18 @@ public class AccountTransfer extends AbstractPersistable<Long> {
         this.description = description;
     }
 
-    
     public LoanTransaction getFromLoanTransaction() {
         return this.fromLoanTransaction;
     }
 
-    
     public SavingsAccountTransaction getFromTransaction() {
         return this.fromTransaction;
     }
 
-    
     public LoanTransaction getToLoanTransaction() {
         return this.toLoanTransaction;
     }
 
-    
     public SavingsAccountTransaction getToSavingsTransaction() {
         return this.toSavingsTransaction;
     }
@@ -171,12 +168,10 @@ public class AccountTransfer extends AbstractPersistable<Long> {
         this.reversed = true;
     }
 
-    
     public SavingsAccount getToSavingsAccount() {
         return this.toSavingsAccount;
     }
 
-    
     public SavingsAccount getFromAccount() {
         return this.fromAccount;
     }

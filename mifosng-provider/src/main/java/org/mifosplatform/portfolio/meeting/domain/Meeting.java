@@ -6,9 +6,9 @@
 
 package org.mifosplatform.portfolio.meeting.domain;
 
-import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.clientsAttendanceParamName;
 import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.attendanceTypeParamName;
 import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.clientIdParamName;
+import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.clientsAttendanceParamName;
 import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.meetingDateParamName;
 
 import java.util.Collection;
@@ -61,7 +61,7 @@ public class Meeting extends AbstractPersistable<Long> {
         //
     }
 
-    private Meeting(CalendarInstance calendarInstance, Date meetingDate) {
+    private Meeting(final CalendarInstance calendarInstance, final Date meetingDate) {
         this.calendarInstance = calendarInstance;
         this.meetingDate = meetingDate;
     }
@@ -96,7 +96,7 @@ public class Meeting extends AbstractPersistable<Long> {
             this.meetingDate = newValue.toDate();
 
             if (!isValidMeetingDate(this.calendarInstance, this.meetingDate)) { throw new NotValidRecurringDateException("meeting",
-                    "Not a valid meeting date", meetingDate); }
+                    "Not a valid meeting date", this.meetingDate); }
 
         }
 
@@ -107,11 +107,11 @@ public class Meeting extends AbstractPersistable<Long> {
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(1);
         final Map<String, Object> clientAttendanceChanges = new LinkedHashMap<String, Object>(clientsAttendance.size());
 
-        updateAttendanceLoop: for (ClientAttendance clientAttendance : clientsAttendance) {
+        updateAttendanceLoop: for (final ClientAttendance clientAttendance : clientsAttendance) {
             if (this.clientsAttendance == null) {
                 this.clientsAttendance = new HashSet<ClientAttendance>();
             }
-            for (ClientAttendance clientAttendanceOriginal : this.clientsAttendance) {
+            for (final ClientAttendance clientAttendanceOriginal : this.clientsAttendance) {
                 if (clientAttendanceOriginal.clientId().equals(clientAttendance.clientId())) {
                     final Integer newValue = clientAttendance.getAttendanceTypeId();
                     if (!newValue.equals(clientAttendanceOriginal.getAttendanceTypeId())) {
@@ -139,15 +139,15 @@ public class Meeting extends AbstractPersistable<Long> {
     }
 
     public Long entityId() {
-        return calendarInstance.getEntityId();
+        return this.calendarInstance.getEntityId();
     }
 
     public boolean isCenterEntity() {
-        return CalendarEntityType.isCenter(calendarInstance.getEntityTypeId());
+        return CalendarEntityType.isCenter(this.calendarInstance.getEntityTypeId());
     }
 
     public boolean isGroupEntity() {
-        return CalendarEntityType.isGroup(calendarInstance.getEntityTypeId());
+        return CalendarEntityType.isGroup(this.calendarInstance.getEntityTypeId());
     }
 
     public LocalDate getMeetingDateLocalDate() {

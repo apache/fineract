@@ -26,7 +26,7 @@ public class CollateralApiConstants {
 
         private static final Set<String> values = new HashSet<String>();
         static {
-            for (COLLATERAL_JSON_INPUT_PARAMS type : COLLATERAL_JSON_INPUT_PARAMS.values()) {
+            for (final COLLATERAL_JSON_INPUT_PARAMS type : COLLATERAL_JSON_INPUT_PARAMS.values()) {
                 values.add(type.value);
             }
         }

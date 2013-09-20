@@ -48,7 +48,7 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
     @Override
     public CommandProcessingResult updateAllowedCurrencies(final JsonCommand command) {
 
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
         this.fromApiJsonDeserializer.validateForUpdate(command.json());
 

@@ -23,7 +23,7 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
 
     @Override
     public Collection<EnumOptionData> retrievewithdrawalFeeTypeOptions() {
-        List<EnumOptionData> allowedOptions = Arrays.asList( //
+        final List<EnumOptionData> allowedOptions = Arrays.asList( //
                 SavingsEnumerations.withdrawalFeeType(SavingsWithdrawalFeesType.FLAT), //
                 SavingsEnumerations.withdrawalFeeType(SavingsWithdrawalFeesType.PERCENT_OF_AMOUNT) //
                 );
@@ -33,7 +33,7 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
 
     @Override
     public List<EnumOptionData> retrieveLockinPeriodFrequencyTypeOptions() {
-        List<EnumOptionData> allowedLockinPeriodFrequencyTypeOptions = Arrays.asList( //
+        final List<EnumOptionData> allowedLockinPeriodFrequencyTypeOptions = Arrays.asList( //
                 SavingsEnumerations.lockinPeriodFrequencyType(SavingsPeriodFrequencyType.DAYS), //
                 SavingsEnumerations.lockinPeriodFrequencyType(SavingsPeriodFrequencyType.WEEKS), //
                 SavingsEnumerations.lockinPeriodFrequencyType(SavingsPeriodFrequencyType.MONTHS), //
@@ -45,15 +45,21 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
 
     @Override
     public Collection<EnumOptionData> retrieveCompoundingInterestPeriodTypeOptions() {
-        List<EnumOptionData> allowedOptions = Arrays.asList( //
+        final List<EnumOptionData> allowedOptions = Arrays.asList( //
                 SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.DAILY), //
-//                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.WEEKLY), //
-//                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.BIWEEKLY), //
+                // SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.WEEKLY),
+                // //
+                // SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.BIWEEKLY),
+                // //
                 SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.MONTHLY)
-//                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.QUATERLY), //
-//                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.BI_ANNUAL), //
-//                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.ANNUAL), //
-//                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.NO_COMPOUNDING_SIMPLE_INTEREST) //
+        // SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.QUATERLY),
+        // //
+        // SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.BI_ANNUAL),
+        // //
+        // SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.ANNUAL),
+        // //
+        // SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.NO_COMPOUNDING_SIMPLE_INTEREST)
+        // //
                 );
 
         return allowedOptions;
@@ -61,7 +67,7 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
 
     @Override
     public Collection<EnumOptionData> retrieveInterestPostingPeriodTypeOptions() {
-        List<EnumOptionData> allowedOptions = Arrays.asList( //
+        final List<EnumOptionData> allowedOptions = Arrays.asList( //
                 SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.MONTHLY), //
                 SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.QUATERLY), //
                 SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.ANNUAL) //
@@ -72,7 +78,7 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
 
     @Override
     public Collection<EnumOptionData> retrieveInterestCalculationTypeOptions() {
-        List<EnumOptionData> allowedOptions = Arrays.asList( //
+        final List<EnumOptionData> allowedOptions = Arrays.asList( //
                 SavingsEnumerations.interestCalculationType(SavingsInterestCalculationType.DAILY_BALANCE), //
                 SavingsEnumerations.interestCalculationType(SavingsInterestCalculationType.AVERAGE_DAILY_BALANCE) //
                 );
@@ -82,7 +88,7 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
 
     @Override
     public Collection<EnumOptionData> retrieveInterestCalculationDaysInYearTypeOptions() {
-        List<EnumOptionData> allowedOptions = Arrays.asList( //
+        final List<EnumOptionData> allowedOptions = Arrays.asList( //
                 SavingsEnumerations.interestCalculationDaysInYearType(SavingsInterestCalculationDaysInYearType.DAYS_360), //
                 SavingsEnumerations.interestCalculationDaysInYearType(SavingsInterestCalculationDaysInYearType.DAYS_365) //
                 );

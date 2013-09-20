@@ -14,21 +14,22 @@ public class PlatformInternalServerException extends RuntimeException {
     private final String defaultUserMessage;
     private final Object[] defaultUserMessageArgs;
 
-    public PlatformInternalServerException(String globalisationMessageCode, String defaultUserMessage, Object... defaultUserMessageArgs) {
+    public PlatformInternalServerException(final String globalisationMessageCode, final String defaultUserMessage,
+            final Object... defaultUserMessageArgs) {
         this.globalisationMessageCode = globalisationMessageCode;
         this.defaultUserMessage = defaultUserMessage;
         this.defaultUserMessageArgs = defaultUserMessageArgs;
     }
 
     public String getGlobalisationMessageCode() {
-        return globalisationMessageCode;
+        return this.globalisationMessageCode;
     }
 
     public String getDefaultUserMessage() {
-        return defaultUserMessage;
+        return this.defaultUserMessage;
     }
 
     public Object[] getDefaultUserMessageArgs() {
-        return defaultUserMessageArgs;
+        return this.defaultUserMessageArgs;
     }
 }

@@ -31,9 +31,9 @@ public class ClientAttendanceReadPlatformServiceImpl implements ClientAttendance
 
         public String schema() {
 
-            return " select ca.id as id, ca.client_id as clientId, ca.attendance_type_enum as attendanceTypeId, " +
-            		" c.display_name as clientName from m_meeting m inner join m_client_attendance ca on m.id = ca.meeting_id " +
-            		" inner join m_client c on ca.client_id=c.id ";
+            return " select ca.id as id, ca.client_id as clientId, ca.attendance_type_enum as attendanceTypeId, "
+                    + " c.display_name as clientName from m_meeting m inner join m_client_attendance ca on m.id = ca.meeting_id "
+                    + " inner join m_client c on ca.client_id=c.id ";
         }
 
         @Override

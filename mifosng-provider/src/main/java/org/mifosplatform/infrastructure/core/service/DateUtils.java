@@ -45,12 +45,12 @@ public class DateUtils {
     public static LocalDate parseLocalDate(final String stringDate, final String pattern) {
 
         try {
-            DateTimeFormatter dateStringFormat = DateTimeFormat.forPattern(pattern);
-            DateTime dateTime = dateStringFormat.parseDateTime(stringDate);
+            final DateTimeFormatter dateStringFormat = DateTimeFormat.forPattern(pattern);
+            final DateTime dateTime = dateStringFormat.parseDateTime(stringDate);
             return dateTime.toLocalDate();
-        } catch (IllegalArgumentException e) {
-            List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-            ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.date.pattern", "The parameter date ("
+        } catch (final IllegalArgumentException e) {
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.date.pattern", "The parameter date ("
                     + stringDate + ") is invalid w.r.t. pattern " + pattern, "date", stringDate, pattern);
             dataValidationErrors.add(error);
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",

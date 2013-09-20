@@ -520,15 +520,15 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
             this.obligationsMetOnDate = transactionDate.toDate();
         }
     }
-    
-    public void updateDueDate(final LocalDate newDueDate){
-        if(newDueDate != null){
+
+    public void updateDueDate(final LocalDate newDueDate) {
+        if (newDueDate != null) {
             this.dueDate = newDueDate.toDate();
         }
     }
-    
-    public void updateFromDate(final LocalDate newFromDate){
-        if(newFromDate != null){
+
+    public void updateFromDate(final LocalDate newFromDate) {
+        if (newFromDate != null) {
             this.fromDate = newFromDate.toDate();
         }
     }

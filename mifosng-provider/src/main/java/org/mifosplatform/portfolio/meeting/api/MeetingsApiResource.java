@@ -65,12 +65,12 @@ public class MeetingsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
-    public MeetingsApiResource(PlatformSecurityContext context, MeetingReadPlatformService readPlatformService,
-            ClientAttendanceReadPlatformService attendanceReadPlatformService, final ClientReadPlatformService clientReadPlatformService,
-            final CalendarReadPlatformService calendarReadPlatformService,
+    public MeetingsApiResource(final PlatformSecurityContext context, final MeetingReadPlatformService readPlatformService,
+            final ClientAttendanceReadPlatformService attendanceReadPlatformService,
+            final ClientReadPlatformService clientReadPlatformService, final CalendarReadPlatformService calendarReadPlatformService,
             final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService,
-            DefaultToApiJsonSerializer<MeetingData> toApiJsonSerializer, ApiRequestParameterHelper apiRequestParameterHelper,
-            PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+            final DefaultToApiJsonSerializer<MeetingData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.attendanceReadPlatformService = attendanceReadPlatformService;
@@ -87,7 +87,7 @@ public class MeetingsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String template(@PathParam("entityType") final String entityType, @PathParam("entityId") final Long entityId,
-            @QueryParam("calendarId") Long calendarId, @Context final UriInfo uriInfo) {
+            @QueryParam("calendarId") final Long calendarId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(MEETING_RESOURCE_NAME);
         final Integer entityTypeId = CalendarEntityType.valueOf(entityType.toUpperCase()).getValue();
@@ -101,16 +101,17 @@ public class MeetingsApiResource {
         } else {
             final String defaultUserMessage = "Meeting attendance is not supported for the resource " + entityType
                     + ". The supported resources are [" + CalendarEntityType.GROUPS.name() + ", " + CalendarEntityType.CENTERS.name() + "]";
-            throw new MeetingNotSupportedResourceException(defaultUserMessage, CalendarEntityType.GROUPS.name(), CalendarEntityType.CENTERS.name());
+            throw new MeetingNotSupportedResourceException(defaultUserMessage, CalendarEntityType.GROUPS.name(),
+                    CalendarEntityType.CENTERS.name());
         }
 
         if (calendarId != null) {
             calendarData = this.calendarReadPlatformService.retrieveCalendar(calendarId, entityId, entityTypeId);
             calendarData = this.calendarReadPlatformService.generateRecurringDate(calendarData, DateUtils.getLocalDateOfTenant());
         }
-        
+
         final MeetingData meetingData = MeetingData.template(clients, calendarData,
-                attendanceDropdownReadPlatformService.retrieveAttendanceTypeOptions());
+                this.attendanceDropdownReadPlatformService.retrieveAttendanceTypeOptions());
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, meetingData, MEETING_RESPONSE_DATA_PARAMETERS);
@@ -144,7 +145,7 @@ public class MeetingsApiResource {
         final Collection<ClientAttendanceData> clientsAttendance = this.attendanceReadPlatformService
                 .retrieveClientAttendanceByMeetingId(meetingId);
         meetingData = MeetingData.withClientsAttendanceAndAttendanceTypeOptions(meetingData, clientsAttendance,
-                attendanceDropdownReadPlatformService.retrieveAttendanceTypeOptions());
+                this.attendanceDropdownReadPlatformService.retrieveAttendanceTypeOptions());
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, meetingData, MEETING_RESPONSE_DATA_PARAMETERS);
     }
@@ -158,7 +159,7 @@ public class MeetingsApiResource {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createMeeting(entityType, entityId)
                 .withJson(apiRequestBodyAsJson).build();
 
-        CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
 

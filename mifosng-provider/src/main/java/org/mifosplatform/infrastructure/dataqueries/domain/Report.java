@@ -74,13 +74,27 @@ public final class Report extends AbstractPersistable<Long> {
         boolean useReport = false;
         String reportSql = null;
 
-        if (command.parameterExists("reportName")) reportName = command.stringValueOfParameterNamed("reportName");
-        if (command.parameterExists("reportType")) reportType = command.stringValueOfParameterNamed("reportType");
-        if (command.parameterExists("reportSubType")) reportSubType = command.stringValueOfParameterNamed("reportSubType");
-        if (command.parameterExists("reportCategory")) reportCategory = command.stringValueOfParameterNamed("reportCategory");
-        if (command.parameterExists("description")) description = command.stringValueOfParameterNamed("description");
-        if (command.parameterExists("useReport")) useReport = command.booleanPrimitiveValueOfParameterNamed("useReport");
-        if (command.parameterExists("reportSql")) reportSql = command.stringValueOfParameterNamed("reportSql");
+        if (command.parameterExists("reportName")) {
+            reportName = command.stringValueOfParameterNamed("reportName");
+        }
+        if (command.parameterExists("reportType")) {
+            reportType = command.stringValueOfParameterNamed("reportType");
+        }
+        if (command.parameterExists("reportSubType")) {
+            reportSubType = command.stringValueOfParameterNamed("reportSubType");
+        }
+        if (command.parameterExists("reportCategory")) {
+            reportCategory = command.stringValueOfParameterNamed("reportCategory");
+        }
+        if (command.parameterExists("description")) {
+            description = command.stringValueOfParameterNamed("description");
+        }
+        if (command.parameterExists("useReport")) {
+            useReport = command.booleanPrimitiveValueOfParameterNamed("useReport");
+        }
+        if (command.parameterExists("reportSql")) {
+            reportSql = command.stringValueOfParameterNamed("reportSql");
+        }
 
         return new Report(reportName, reportType, reportSubType, reportCategory, description, useReport, reportSql);
     }
@@ -151,7 +165,7 @@ public final class Report extends AbstractPersistable<Long> {
 
         final String reportParametersParamName = "reportParameters";
         if (command.hasParameter(reportParametersParamName)) {
-            JsonArray jsonArray = command.arrayOfParameterNamed(reportParametersParamName);
+            final JsonArray jsonArray = command.arrayOfParameterNamed(reportParametersParamName);
             if (jsonArray != null) {
                 actualChanges.put(reportParametersParamName, command.jsonFragment(reportParametersParamName));
             }
@@ -173,12 +187,12 @@ public final class Report extends AbstractPersistable<Long> {
     }
 
     public boolean isCoreReport() {
-        return coreReport;
+        return this.coreReport;
     }
 
     public ReportParameterUsage findReportParameterById(final Long reportParameterId) {
         ReportParameterUsage reportParameterUsage = null;
-        for (ReportParameterUsage rpu : this.reportParameterUsages) {
+        for (final ReportParameterUsage rpu : this.reportParameterUsages) {
             if (rpu.hasIdOf(reportParameterId)) {
                 reportParameterUsage = rpu;
                 break;
@@ -229,11 +243,11 @@ public final class Report extends AbstractPersistable<Long> {
     }
 
     public String getReportName() {
-        return reportName;
+        return this.reportName;
     }
 
     public boolean update(final Set<ReportParameterUsage> newReportParameterUsages) {
-        if (newReportParameterUsages == null) return false;
+        if (newReportParameterUsages == null) { return false; }
 
         boolean updated = false;
 
@@ -247,7 +261,7 @@ public final class Report extends AbstractPersistable<Long> {
 
     private boolean changeInReportParameters(final Set<ReportParameterUsage> newReportParameterUsages) {
 
-        if (!(this.reportParameterUsages.equals(newReportParameterUsages))) return true;
+        if (!(this.reportParameterUsages.equals(newReportParameterUsages))) { return true; }
 
         return false;
     }

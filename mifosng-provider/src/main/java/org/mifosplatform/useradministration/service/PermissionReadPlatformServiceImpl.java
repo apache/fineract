@@ -36,7 +36,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
     @Override
     public Collection<PermissionData> retrieveAllPermissions() {
 
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
         final PermissionUsageDataMapper mapper = new PermissionUsageDataMapper();
         final String sql = mapper.permissionSchema();
@@ -47,7 +47,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
     @Override
     public Collection<PermissionData> retrieveAllMakerCheckerablePermissions() {
 
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
         final PermissionUsageDataMapper mapper = new PermissionUsageDataMapper();
         final String sql = mapper.makerCheckerablePermissionSchema();

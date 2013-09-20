@@ -8,11 +8,12 @@ package org.mifosplatform.portfolio.loanaccount.exception;
 import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * {@link AbstractPlatformDomainRuleException} thrown when not supported loan template type is sent.
+ * {@link AbstractPlatformDomainRuleException} thrown when not supported loan
+ * template type is sent.
  */
 public class LoanTemplateTypeRequiredException extends AbstractPlatformDomainRuleException {
 
-	public LoanTemplateTypeRequiredException(String defaultUserMessage) {
-		super("error.msg.loan.template.type.required", defaultUserMessage);
-	}
+    public LoanTemplateTypeRequiredException(final String defaultUserMessage) {
+        super("error.msg.loan.template.type.required", defaultUserMessage);
+    }
 }

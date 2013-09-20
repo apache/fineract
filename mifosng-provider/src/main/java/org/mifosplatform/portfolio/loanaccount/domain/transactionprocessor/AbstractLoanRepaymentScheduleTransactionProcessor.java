@@ -47,37 +47,37 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
 
         if (charges != null) {
-            for (LoanCharge loanCharge : charges) {
+            for (final LoanCharge loanCharge : charges) {
                 if (!loanCharge.isDueAtDisbursement()) {
                     loanCharge.resetPaidAmount(currency);
                 }
             }
         }
 
-        for (LoanRepaymentScheduleInstallment currentInstallment : installments) {
+        for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
             currentInstallment.resetDerivedComponents();
             currentInstallment.updateDerivedFields(currency, disbursementDate);
         }
 
         // re-process loan charges over repayment periods (picking up on waived
         // loan charges)
-        LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
+        final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
         wrapper.reprocess(currency, disbursementDate, installments, charges);
 
-        ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
-        List<LoanTransaction> transactionstoBeProcessed = new ArrayList<LoanTransaction>();
-        for (LoanTransaction loanTransaction : transactionsPostDisbursement) {
-            if (loanTransaction.isChargePayment()){
-                Set<LoanChargePaidBy> chargePaidBies =loanTransaction.getLoanChargesPaid();
-                Set<LoanCharge> transferCharges = new HashSet<LoanCharge>();
-                for(LoanChargePaidBy chargePaidBy: chargePaidBies){
+        final ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
+        final List<LoanTransaction> transactionstoBeProcessed = new ArrayList<LoanTransaction>();
+        for (final LoanTransaction loanTransaction : transactionsPostDisbursement) {
+            if (loanTransaction.isChargePayment()) {
+                final Set<LoanChargePaidBy> chargePaidBies = loanTransaction.getLoanChargesPaid();
+                final Set<LoanCharge> transferCharges = new HashSet<LoanCharge>();
+                for (final LoanChargePaidBy chargePaidBy : chargePaidBies) {
                     transferCharges.add(chargePaidBy.getLoanCharge());
                 }
-                List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<LoanRepaymentScheduleInstallment>();
+                final List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<LoanRepaymentScheduleInstallment>();
                 LocalDate startDate = disbursementDate;
-                for(LoanRepaymentScheduleInstallment installment:installments){
-                    for(LoanCharge loanCharge :transferCharges){
-                        if(loanCharge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())){
+                for (final LoanRepaymentScheduleInstallment installment : installments) {
+                    for (final LoanCharge loanCharge : transferCharges) {
+                        if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())) {
                             chargePaymentInstallments.add(installment);
                             break;
                         }
@@ -86,12 +86,12 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 }
                 loanTransaction.resetDerivedComponents();
                 handleTransaction(loanTransaction, currency, chargePaymentInstallments, transferCharges);
-            }else{
+            } else {
                 transactionstoBeProcessed.add(loanTransaction);
             }
         }
-        
-        for (LoanTransaction loanTransaction : transactionstoBeProcessed) {
+
+        for (final LoanTransaction loanTransaction : transactionstoBeProcessed) {
 
             if (loanTransaction.isRepayment() || loanTransaction.isInterestWaiver()) {
                 // pass through for new transactions
@@ -104,7 +104,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                      * breakup (principal, interest, fees, penalties) has
                      * changed.<br>
                      **/
-                    LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
+                    final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
 
                     // Reset derived component of new loan transaction and
                     // re-process transaction
@@ -146,7 +146,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
         Money transactionAmountUnprocessed = loanTransaction.getAmount(currency);
 
-        for (LoanRepaymentScheduleInstallment currentInstallment : installments) {
+        for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
 
             if (currentInstallment.isNotFullyPaidOff()) {
 
@@ -170,16 +170,16 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             installmentIndex++;
         }
 
-        Set<LoanCharge> loanFees = extractFeeCharges(charges);
-        Set<LoanCharge> loanPenalties = extractPenaltyCharges(charges);
+        final Set<LoanCharge> loanFees = extractFeeCharges(charges);
+        final Set<LoanCharge> loanPenalties = extractPenaltyCharges(charges);
 
         if (loanTransaction.isNotWaiver()) {
-            Money feeCharges = loanTransaction.getFeeChargesPortion(currency);
+            final Money feeCharges = loanTransaction.getFeeChargesPortion(currency);
             if (feeCharges.isGreaterThanZero()) {
                 updateFeeChargesPaidAmountBy(loanTransaction, feeCharges, loanFees);
             }
 
-            Money penaltyCharges = loanTransaction.getPenaltyChargesPortion(currency);
+            final Money penaltyCharges = loanTransaction.getPenaltyChargesPortion(currency);
             if (penaltyCharges.isGreaterThanZero()) {
                 updatePenaltyChargesPaidAmountBy(loanTransaction, penaltyCharges, loanPenalties);
             }
@@ -190,9 +190,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
     }
 
-    private Set<LoanCharge> extractFeeCharges(Set<LoanCharge> loanCharges) {
+    private Set<LoanCharge> extractFeeCharges(final Set<LoanCharge> loanCharges) {
         final Set<LoanCharge> feeCharges = new HashSet<LoanCharge>();
-        for (LoanCharge loanCharge : loanCharges) {
+        for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isFeeCharge()) {
                 feeCharges.add(loanCharge);
             }
@@ -200,9 +200,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         return feeCharges;
     }
 
-    private Set<LoanCharge> extractPenaltyCharges(Set<LoanCharge> loanCharges) {
+    private Set<LoanCharge> extractPenaltyCharges(final Set<LoanCharge> loanCharges) {
         final Set<LoanCharge> penaltyCharges = new HashSet<LoanCharge>();
-        for (LoanCharge loanCharge : loanCharges) {
+        for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isPenaltyCharge()) {
                 penaltyCharges.add(loanCharge);
             }
@@ -213,14 +213,14 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     private void updateFeeChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money feeCharges, final Set<LoanCharge> charges) {
 
         Money amountRemaining = feeCharges;
-        for (LoanCharge loanCharge : charges) {
+        for (final LoanCharge loanCharge : charges) {
             if (!loanCharge.isDueAtDisbursement()) {
                 if (loanCharge.isFeeCharge() && loanCharge.isNotFullyPaid() && amountRemaining.isGreaterThanZero()) {
                     final LoanCharge unpaidCharge = findEarliestUnpaidChargeFromUnOrderedSet(charges);
-                    Money amountPaidTowardsCharge = unpaidCharge.updatePaidAmountBy(amountRemaining);
+                    final Money amountPaidTowardsCharge = unpaidCharge.updatePaidAmountBy(amountRemaining);
                     if (!amountPaidTowardsCharge.isZero()) {
-                        if(!loanTransaction.isChargePayment()){
-                            LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(loanTransaction, loanCharge,
+                        if (!loanTransaction.isChargePayment()) {
+                            final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(loanTransaction, loanCharge,
                                     amountPaidTowardsCharge.getAmount());
                             loanTransaction.getLoanChargesPaid().add(loanChargePaidBy);
                         }
@@ -235,15 +235,15 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             final Set<LoanCharge> charges) {
 
         Money amountRemaining = feeCharges;
-        for (LoanCharge loanCharge : charges) {
+        for (final LoanCharge loanCharge : charges) {
             if (!loanCharge.isDueAtDisbursement()) {
 
                 if (loanCharge.isPenaltyCharge() && loanCharge.isNotFullyPaid() && amountRemaining.isGreaterThanZero()) {
                     final LoanCharge unpaidCharge = findEarliestUnpaidChargeFromUnOrderedSet(charges);
-                    Money amountPaidTowardsCharge = unpaidCharge.updatePaidAmountBy(amountRemaining);
+                    final Money amountPaidTowardsCharge = unpaidCharge.updatePaidAmountBy(amountRemaining);
                     if (!amountPaidTowardsCharge.isZero()) {
-                        if(!loanTransaction.isChargePayment()){
-                            LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(loanTransaction, loanCharge,
+                        if (!loanTransaction.isChargePayment()) {
+                            final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(loanTransaction, loanCharge,
                                     amountPaidTowardsCharge.getAmount());
                             loanTransaction.getLoanChargesPaid().add(loanChargePaidBy);
                         }
@@ -257,7 +257,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     private LoanCharge findEarliestUnpaidChargeFromUnOrderedSet(final Set<LoanCharge> charges) {
         LoanCharge earliestUnpaidCharge = null;
 
-        for (LoanCharge loanCharge : charges) {
+        for (final LoanCharge loanCharge : charges) {
             if (loanCharge.isNotFullyPaid() && !loanCharge.isDueAtDisbursement()) {
                 if (earliestUnpaidCharge == null || loanCharge.getDueLocalDate().isBefore(earliestUnpaidCharge.getDueLocalDate())) {
                     earliestUnpaidCharge = loanCharge;
@@ -272,7 +272,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     public void handleWriteOff(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
             final List<LoanRepaymentScheduleInstallment> installments) {
 
-        LocalDate transactionDate = loanTransaction.getTransactionDate();
+        final LocalDate transactionDate = loanTransaction.getTransactionDate();
         Money principalPortion = Money.zero(currency);
         Money interestPortion = Money.zero(currency);
         Money feeChargesPortion = Money.zero(currency);
@@ -280,7 +280,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
         // determine how much is written off in total and breakdown for
         // principal, interest and charges
-        for (LoanRepaymentScheduleInstallment currentInstallment : installments) {
+        for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
 
             if (currentInstallment.isNotFullyPaidOff()) {
                 principalPortion = principalPortion.plus(currentInstallment.writeOffOutstandingPrincipal(transactionDate, currency));
@@ -305,7 +305,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     protected boolean isTransactionALateRepaymentOnInstallment(final int installmentIndex,
             final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate) {
 
-        LoanRepaymentScheduleInstallment currentInstallment = installments.get(installmentIndex);
+        final LoanRepaymentScheduleInstallment currentInstallment = installments.get(installmentIndex);
 
         return transactionDate.isAfter(currentInstallment.getDueDate());
     }
@@ -328,7 +328,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate,
             @SuppressWarnings("unused") final Money transactionAmount) {
 
-        LoanRepaymentScheduleInstallment currentInstallment = installments.get(currentInstallmentIndex);
+        final LoanRepaymentScheduleInstallment currentInstallment = installments.get(currentInstallmentIndex);
 
         return transactionDate.isBefore(currentInstallment.getDueDate());
     }

@@ -22,8 +22,7 @@ import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
 /**
- * Group Loan Integration Test for checking Loan Application Repayment
- * Schedule.
+ * Group Loan Integration Test for checking Loan Application Repayment Schedule.
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class GroupLoanIntegrationTest {
@@ -35,29 +34,30 @@ public class GroupLoanIntegrationTest {
     @Before
     public void setup() {
         Utils.initializeRESTAssured();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
     public void checkGroupLoanCreateAndDisburseFlow() {
-        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
-        Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
-        Integer groupID = GroupHelper.createGroup(requestSpec, responseSpec, true);
-        groupID = GroupHelper.associateClient(requestSpec, responseSpec, groupID.toString(),clientID.toString());
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
+        groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
 
-        Integer loanProductID = createLoanProduct();
-        Integer loanID = applyForLoanApplication(groupID, loanProductID);
-        ArrayList<HashMap> loanSchedule = loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
+        final Integer loanProductID = createLoanProduct();
+        final Integer loanID = applyForLoanApplication(groupID, loanProductID);
+        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
+                loanID);
         verifyLoanRepaymentSchedule(loanSchedule);
 
     }
 
     private Integer createLoanProduct() {
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        String loanProductJSON = new LoanProductTestBuilder() //
+        final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("12,000.00") //
                 .withNumberOfRepayments("4") //
                 .withRepaymentAfterEvery("1") //
@@ -67,12 +67,12 @@ public class GroupLoanIntegrationTest {
                 .withAmortizationTypeAsEqualInstallments() //
                 .withInterestTypeAsDecliningBalance() //
                 .build();
-        return loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final Integer groupID, final Integer loanProductID) {
         System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        String loanApplicationJSON = new LoanApplicationTestBuilder() //
+        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal("12,000.00") //
                 .withLoanTermFrequency("4") //
                 .withLoanTermFrequencyAsMonths() //
@@ -85,10 +85,9 @@ public class GroupLoanIntegrationTest {
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
                 .withExpectedDisbursementDate("20 September 2011") //
                 .withSubmittedOnDate("20 September 2011") //
-                .withLoanType("group")
-                .build(groupID.toString(), loanProductID.toString());
+                .withLoanType("group").build(groupID.toString(), loanProductID.toString());
         System.out.println(loanApplicationJSON);
-        return loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
     private void verifyLoanRepaymentSchedule(final ArrayList<HashMap> loanSchedule) {

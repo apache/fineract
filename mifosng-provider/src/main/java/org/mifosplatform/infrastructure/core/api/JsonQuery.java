@@ -46,7 +46,7 @@ public final class JsonQuery {
     public String json() {
         return this.jsonQuery;
     }
-    
+
     public JsonElement parsedJson() {
         return this.parsedQuery;
     }
@@ -118,7 +118,7 @@ public final class JsonQuery {
     }
 
     private boolean parameterExists(final String parameterName) {
-        return this.fromApiJsonHelper.parameterExists(parameterName, parsedQuery);
+        return this.fromApiJsonHelper.parameterExists(parameterName, this.parsedQuery);
     }
 
     public boolean hasParameter(final String parameterName) {
@@ -136,11 +136,11 @@ public final class JsonQuery {
     public Map<String, Boolean> mapValueOfParameterNamed(final String parameterName) {
         final Type typeOfMap = new TypeToken<Map<String, Boolean>>() {}.getType();
 
-        if (parsedQuery.getAsJsonObject().has(parameterName)) {
-            parsedQuery.getAsJsonObject().get(parameterName);
+        if (this.parsedQuery.getAsJsonObject().has(parameterName)) {
+            this.parsedQuery.getAsJsonObject().get(parameterName);
         }
 
-        return this.fromApiJsonHelper.extractMap(typeOfMap, jsonQuery);
+        return this.fromApiJsonHelper.extractMap(typeOfMap, this.jsonQuery);
     }
 
     public boolean isChangeInLongParameterNamed(final String parameterName, final Long existingValue) {
@@ -153,7 +153,7 @@ public final class JsonQuery {
     }
 
     public Long longValueOfParameterNamed(final String parameterName) {
-        return this.fromApiJsonHelper.extractLongNamed(parameterName, parsedQuery);
+        return this.fromApiJsonHelper.extractLongNamed(parameterName, this.parsedQuery);
     }
 
     public boolean isChangeInLocalDateParameterNamed(final String parameterName, final LocalDate existingValue) {
@@ -166,7 +166,7 @@ public final class JsonQuery {
     }
 
     public LocalDate localDateValueOfParameterNamed(final String parameterName) {
-        return this.fromApiJsonHelper.extractLocalDateNamed(parameterName, parsedQuery);
+        return this.fromApiJsonHelper.extractLocalDateNamed(parameterName, this.parsedQuery);
     }
 
     public boolean isChangeInStringParameterNamed(final String parameterName, final String existingValue) {
@@ -179,7 +179,7 @@ public final class JsonQuery {
     }
 
     public String stringValueOfParameterNamed(final String parameterName) {
-        final String value = this.fromApiJsonHelper.extractStringNamed(parameterName, parsedQuery);
+        final String value = this.fromApiJsonHelper.extractStringNamed(parameterName, this.parsedQuery);
         return StringUtils.defaultIfEmpty(value, "");
     }
 
@@ -193,7 +193,7 @@ public final class JsonQuery {
     }
 
     public BigDecimal bigDecimalValueOfParameterNamed(final String parameterName) {
-        return this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(parameterName, parsedQuery);
+        return this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(parameterName, this.parsedQuery);
     }
 
     public boolean isChangeInIntegerParameterNamed(final String parameterName, final Integer existingValue) {
@@ -206,7 +206,7 @@ public final class JsonQuery {
     }
 
     public Integer integerValueOfParameterNamed(final String parameterName) {
-        return this.fromApiJsonHelper.extractIntegerWithLocaleNamed(parameterName, parsedQuery);
+        return this.fromApiJsonHelper.extractIntegerWithLocaleNamed(parameterName, this.parsedQuery);
     }
 
     public boolean isChangeInBooleanParameterNamed(final String parameterName, final Boolean existingValue) {
@@ -222,14 +222,14 @@ public final class JsonQuery {
      * Returns {@link Boolean} that could possibly be null.
      */
     public Boolean booleanObjectValueOfParameterNamed(final String parameterName) {
-        return this.fromApiJsonHelper.extractBooleanNamed(parameterName, parsedQuery);
+        return this.fromApiJsonHelper.extractBooleanNamed(parameterName, this.parsedQuery);
     }
 
     /**
      * always returns true or false
      */
     public boolean booleanPrimitiveValueOfParameterNamed(final String parameterName) {
-        final Boolean value = this.fromApiJsonHelper.extractBooleanNamed(parameterName, parsedQuery);
+        final Boolean value = this.fromApiJsonHelper.extractBooleanNamed(parameterName, this.parsedQuery);
         return (Boolean) ObjectUtils.defaultIfNull(value, Boolean.FALSE);
     }
 
@@ -243,7 +243,7 @@ public final class JsonQuery {
     }
 
     public String[] arrayValueOfParameterNamed(final String parameterName) {
-        return this.fromApiJsonHelper.extractArrayNamed(parameterName, parsedQuery);
+        return this.fromApiJsonHelper.extractArrayNamed(parameterName, this.parsedQuery);
     }
 
     public boolean isChangeInPasswordParameterNamed(final String parameterName, final String existingValue,

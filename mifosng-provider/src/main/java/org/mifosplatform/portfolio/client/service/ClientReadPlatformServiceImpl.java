@@ -72,7 +72,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         final Long defaultOfficeId = defaultToUsersOfficeIfNull(officeId);
 
-        final Collection<OfficeData> offices = officeReadPlatformService.retrieveAllOfficesForDropdown();
+        final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
 
         Collection<StaffData> staffOptions = null;
 
@@ -93,11 +93,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     @Override
     public Page<ClientData> retrieveAll(final SearchParameters searchParameters) {
 
-        final AppUser currentUser = context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
 
-        StringBuilder sqlBuilder = new StringBuilder(200);
+        final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(this.clientMapper.schema());
         sqlBuilder.append(" where o.hierarchy like ? or transferToOffice.hierarchy like ?");
@@ -180,23 +180,23 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     @Override
     public ClientData retrieveOne(final Long clientId) {
         try {
-            AppUser currentUser = context.authenticatedUser();
-            String hierarchy = currentUser.getOffice().getHierarchy();
-            String hierarchySearchString = hierarchy + "%";
+            final AppUser currentUser = this.context.authenticatedUser();
+            final String hierarchy = currentUser.getOffice().getHierarchy();
+            final String hierarchySearchString = hierarchy + "%";
 
-            String sql = "select " + this.clientMapper.schema()
+            final String sql = "select " + this.clientMapper.schema()
                     + " where ( o.hierarchy like ? or transferToOffice.hierarchy like ?) and c.id = ?";
-            ClientData clientData = this.jdbcTemplate.queryForObject(sql, this.clientMapper, new Object[] { hierarchySearchString,
+            final ClientData clientData = this.jdbcTemplate.queryForObject(sql, this.clientMapper, new Object[] { hierarchySearchString,
                     hierarchySearchString, clientId });
 
-            String clientGroupsSql = "select " + this.clientGroupsMapper.parentGroupsSchema();
+            final String clientGroupsSql = "select " + this.clientGroupsMapper.parentGroupsSchema();
 
-            Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(clientGroupsSql, this.clientGroupsMapper,
+            final Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(clientGroupsSql, this.clientGroupsMapper,
                     new Object[] { clientId });
 
             return ClientData.setParentGroups(clientData, parentGroups);
 
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new ClientNotFoundException(clientId);
         }
     }
@@ -224,7 +224,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     @Override
     public Collection<ClientData> retrieveClientMembersOfGroup(final Long groupId) {
 
-        final AppUser currentUser = context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
 
@@ -236,7 +236,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     @Override
     public Collection<ClientData> retrieveActiveClientMembersOfGroup(final Long groupId) {
 
-        final AppUser currentUser = context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
 
@@ -308,7 +308,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     @Override
     public Collection<ClientData> retrieveActiveClientMembersOfCenter(final Long centerId) {
 
-        final AppUser currentUser = context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
 
@@ -325,7 +325,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         private final String schema;
 
         public ClientMapper() {
-            StringBuilder builder = new StringBuilder(400);
+            final StringBuilder builder = new StringBuilder(400);
 
             builder.append("c.id as id, c.account_no as accountNo, c.external_id as externalId, c.status_enum as statusEnum, ");
             builder.append("c.office_id as officeId, o.name as officeName, ");
@@ -398,7 +398,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         private final String schema;
 
         public ClientLookupMapper() {
-            StringBuilder builder = new StringBuilder(200);
+            final StringBuilder builder = new StringBuilder(200);
 
             builder.append("c.id as id, c.display_name as displayName, ");
             builder.append("c.office_id as officeId, o.name as officeName ");
@@ -431,8 +431,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             final String sql = "select " + mapper.clientLookupByIdentifierSchema();
 
-            return jdbcTemplate.queryForObject(sql, mapper, new Object[] { identifierTypeId, identifierKey });
-        } catch (EmptyResultDataAccessException e) {
+            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { identifierTypeId, identifierKey });
+        } catch (final EmptyResultDataAccessException e) {
             return null;
         }
     }
@@ -482,7 +482,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     @Override
     public ClientData retrieveAllClosureReasons(final String clientClosureReason) {
         final List<CodeValueData> closureReasons = new ArrayList<CodeValueData>(
-                codeValueReadPlatformService.retrieveCodeValuesByCode(clientClosureReason));
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(clientClosureReason));
         return ClientData.template(null, null, null, null, closureReasons);
     }
 

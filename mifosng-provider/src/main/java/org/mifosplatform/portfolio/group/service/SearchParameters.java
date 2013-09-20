@@ -30,7 +30,7 @@ public final class SearchParameters {
             final String displayName, final String firstname, final String lastname, final String hierarchy, final Integer offset,
             final Integer limit, final String orderBy, final String sortOrder) {
 
-        Integer maxLimitAllowed = getCheckedLimit(limit);
+        final Integer maxLimitAllowed = getCheckedLimit(limit);
 
         return new SearchParameters(sqlSearch, officeId, externalId, displayName, hierarchy, firstname, lastname, offset, maxLimitAllowed,
                 orderBy, sortOrder);
@@ -39,7 +39,7 @@ public final class SearchParameters {
     public static SearchParameters forGroups(final String sqlSearch, final Long officeId, final String externalId, final String name,
             final String hierarchy, final Integer offset, final Integer limit, final String orderBy, final String sortOrder) {
 
-        Integer maxLimitAllowed = getCheckedLimit(limit);
+        final Integer maxLimitAllowed = getCheckedLimit(limit);
 
         return new SearchParameters(sqlSearch, officeId, externalId, name, hierarchy, null, null, offset, maxLimitAllowed, orderBy,
                 sortOrder);
@@ -48,7 +48,7 @@ public final class SearchParameters {
     public static SearchParameters forLoans(final String sqlSearch, final String externalId, final Integer offset, final Integer limit,
             final String orderBy, final String sortOrder) {
 
-        Integer maxLimitAllowed = getCheckedLimit(limit);
+        final Integer maxLimitAllowed = getCheckedLimit(limit);
 
         return new SearchParameters(sqlSearch, null, externalId, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder);
     }
@@ -56,15 +56,14 @@ public final class SearchParameters {
     public static SearchParameters forJournalEntries(final Long officeId, final Integer offset, final Integer limit, final String orderBy,
             final String sortOrder) {
 
-        Integer maxLimitAllowed = getCheckedLimit(limit);
+        final Integer maxLimitAllowed = getCheckedLimit(limit);
 
         return new SearchParameters(null, officeId, null, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder);
     }
 
-    public static SearchParameters forPagination(final Integer offset, final Integer limit, final String orderBy,
-            final String sortOrder) {
+    public static SearchParameters forPagination(final Integer offset, final Integer limit, final String orderBy, final String sortOrder) {
 
-        Integer maxLimitAllowed = getCheckedLimit(limit);
+        final Integer maxLimitAllowed = getCheckedLimit(limit);
 
         return new SearchParameters(null, null, null, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder);
     }

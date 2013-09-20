@@ -10,11 +10,9 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
 /**
  * A {@link RuntimeException} thrown when staff resources are not found.
  */
-public class StaffNotFoundException extends
-		AbstractPlatformResourceNotFoundException {
+public class StaffNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-	public StaffNotFoundException(final Long id) {
-		super("error.msg.staff.id.invalid", "Staff with identifier " + id
-				+ " does not exist", id);
-	}
+    public StaffNotFoundException(final Long id) {
+        super("error.msg.staff.id.invalid", "Staff with identifier " + id + " does not exist", id);
+    }
 }

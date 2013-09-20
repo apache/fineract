@@ -44,19 +44,19 @@ public class ApiParameterError {
      */
     private List<ApiErrorMessageArg> args = new ArrayList<ApiErrorMessageArg>();
 
-    public static ApiParameterError generalError(String globalisationMessageCode, String defaultUserMessage,
-            Object... defaultUserMessageArgs) {
+    public static ApiParameterError generalError(final String globalisationMessageCode, final String defaultUserMessage,
+            final Object... defaultUserMessageArgs) {
         return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
     }
 
-    public static ApiParameterError resourceIdentifierNotFound(String globalisationMessageCode, String defaultUserMessage,
-            Object... defaultUserMessageArgs) {
+    public static ApiParameterError resourceIdentifierNotFound(final String globalisationMessageCode, final String defaultUserMessage,
+            final Object... defaultUserMessageArgs) {
         return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
     }
 
     public static ApiParameterError parameterError(final String globalisationMessageCode, final String defaultUserMessage,
             final String parameterName, final Object... defaultUserMessageArgs) {
-        ApiParameterError error = new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
+        final ApiParameterError error = new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
         error.setParameterName(parameterName);
         return error;
     }
@@ -70,9 +70,9 @@ public class ApiParameterError {
         this.developerMessage = defaultUserMessage;
         this.defaultUserMessage = defaultUserMessage;
 
-        List<ApiErrorMessageArg> messageArgs = new ArrayList<ApiErrorMessageArg>();
+        final List<ApiErrorMessageArg> messageArgs = new ArrayList<ApiErrorMessageArg>();
         if (defaultUserMessageArgs != null) {
-            for (Object object : defaultUserMessageArgs) {
+            for (final Object object : defaultUserMessageArgs) {
                 messageArgs.add(ApiErrorMessageArg.from(object));
             }
         }
@@ -82,50 +82,50 @@ public class ApiParameterError {
     }
 
     public String getDeveloperMessage() {
-        return developerMessage;
+        return this.developerMessage;
     }
 
-    public void setDeveloperMessage(String developerMessage) {
+    public void setDeveloperMessage(final String developerMessage) {
         this.developerMessage = developerMessage;
     }
 
     public String getDefaultUserMessage() {
-        return defaultUserMessage;
+        return this.defaultUserMessage;
     }
 
-    public void setDefaultUserMessage(String defaultUserMessage) {
+    public void setDefaultUserMessage(final String defaultUserMessage) {
         this.defaultUserMessage = defaultUserMessage;
     }
 
     public String getUserMessageGlobalisationCode() {
-        return userMessageGlobalisationCode;
+        return this.userMessageGlobalisationCode;
     }
 
-    public void setUserMessageGlobalisationCode(String userMessageGlobalisationCode) {
+    public void setUserMessageGlobalisationCode(final String userMessageGlobalisationCode) {
         this.userMessageGlobalisationCode = userMessageGlobalisationCode;
     }
 
     public String getParameterName() {
-        return parameterName;
+        return this.parameterName;
     }
 
-    public void setParameterName(String parameterName) {
+    public void setParameterName(final String parameterName) {
         this.parameterName = parameterName;
     }
 
     public Object getValue() {
-        return value;
+        return this.value;
     }
 
-    public void setValue(Object value) {
+    public void setValue(final Object value) {
         this.value = value;
     }
 
     public List<ApiErrorMessageArg> getArgs() {
-        return args;
+        return this.args;
     }
 
-    public void setArgs(List<ApiErrorMessageArg> args) {
+    public void setArgs(final List<ApiErrorMessageArg> args) {
         this.args = args;
     }
 }

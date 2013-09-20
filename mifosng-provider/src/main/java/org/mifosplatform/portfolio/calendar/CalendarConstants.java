@@ -14,8 +14,8 @@ public class CalendarConstants {
         CALENDAR_ID("id"), ENTITY_TYPE("entityType"), ENTITY_ID("entityId"), TITLE("title"), DESCRIPTION("description"), LOCATION(
                 "location"), START_DATE("startDate"), END_DATE("endDate"), CREATED_DATE("createdDate"), DURATION("duration"), TYPE_ID(
                 "typeId"), REPEATING("repeating"), REMIND_BY_ID("remindById"), FIRST_REMINDER("firstReminder"), SECOND_REMINDER(
-                "secondReminder"), LOCALE("locale"), DATE_FORMAT("dateFormat"), REPEATS("repeats"), REPEATS_EVERY("repeatsEvery"),
-                REPEATS_ON_DAY("repeatsOnDay");
+                "secondReminder"), LOCALE("locale"), DATE_FORMAT("dateFormat"), REPEATS("repeats"), REPEATS_EVERY("repeatsEvery"), REPEATS_ON_DAY(
+                "repeatsOnDay");
 
         private final String value;
 

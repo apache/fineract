@@ -8,7 +8,8 @@ package org.mifosplatform.portfolio.collectionsheet.data;
 import java.util.Collection;
 
 /**
- * Immutable data object for groups with clients due for disbursement or collection.
+ * Immutable data object for groups with clients due for disbursement or
+ * collection.
  */
 public class JLGGroupData {
 

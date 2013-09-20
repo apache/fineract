@@ -62,7 +62,7 @@ public class SchedulerJobApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAll(@Context final UriInfo uriInfo) {
-        List<JobDetailData> jobDetailDatas = this.schedulerJobRunnerReadService.findAllJobDeatils();
+        final List<JobDetailData> jobDetailDatas = this.schedulerJobRunnerReadService.findAllJobDeatils();
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, jobDetailDatas, SchedulerJobApiConstants.JOB_DETAIL_RESPONSE_DATA_PARAMETERS);
     }
@@ -72,7 +72,7 @@ public class SchedulerJobApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveOne(@PathParam(SchedulerJobApiConstants.JOB_ID) final Long jobId, @Context final UriInfo uriInfo) {
-        JobDetailData jobDetailData = this.schedulerJobRunnerReadService.retrieveOne(jobId);
+        final JobDetailData jobDetailData = this.schedulerJobRunnerReadService.retrieveOne(jobId);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, jobDetailData, SchedulerJobApiConstants.JOB_DETAIL_RESPONSE_DATA_PARAMETERS);
     }
@@ -85,7 +85,8 @@ public class SchedulerJobApiResource {
             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
             @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
         final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
-        Page<JobDetailHistoryData> jobhistoryDetailData = this.schedulerJobRunnerReadService.retrieveJobHistory(jobId, searchParameters);
+        final Page<JobDetailHistoryData> jobhistoryDetailData = this.schedulerJobRunnerReadService.retrieveJobHistory(jobId,
+                searchParameters);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.jobHistoryToApiJsonSerializer.serialize(settings, jobhistoryDetailData,
                 SchedulerJobApiConstants.JOB_HISTORY_RESPONSE_DATA_PARAMETERS);
@@ -121,7 +122,7 @@ public class SchedulerJobApiResource {
         if (result.getChanges() != null
                 && (result.getChanges().containsKey(SchedulerJobApiConstants.jobActiveStatusParamName) || result.getChanges().containsKey(
                         SchedulerJobApiConstants.cronExpressionParamName))) {
-            jobRegisterService.rescheduleJob(jobId);
+            this.jobRegisterService.rescheduleJob(jobId);
         }
         return this.toApiJsonSerializer.serialize(result);
     }

@@ -259,7 +259,7 @@ public final class Client extends AbstractPersistable<Long> {
         }
 
         this.activationDate = activationLocalDate.toDate();
-        this.officeJoiningDate = activationDate;
+        this.officeJoiningDate = this.activationDate;
         this.status = ClientStatus.ACTIVE.getValue();
 
         validate();
@@ -280,8 +280,8 @@ public final class Client extends AbstractPersistable<Long> {
     public boolean isTransferInProgress() {
         return ClientStatus.fromInt(this.status).isTransferInProgress();
     }
-    
-    public boolean isTransferOnHold () {
+
+    public boolean isTransferOnHold() {
         return ClientStatus.fromInt(this.status).isTransferOnHold();
     }
 
@@ -363,7 +363,7 @@ public final class Client extends AbstractPersistable<Long> {
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(ClientApiConstants.activationDateParamName);
             this.activationDate = newValue.toDate();
-            this.officeJoiningDate = activationDate;
+            this.officeJoiningDate = this.activationDate;
         }
 
         validate();
@@ -529,7 +529,7 @@ public final class Client extends AbstractPersistable<Long> {
         return this.status;
     }
 
-    public void setStatus(Integer status) {
+    public void setStatus(final Integer status) {
         this.status = status;
     }
 
@@ -539,8 +539,8 @@ public final class Client extends AbstractPersistable<Long> {
 
     public boolean isChildOfGroup(final Long groupId) {
         if (groupId != null && this.groups != null && !this.groups.isEmpty()) {
-            for (Group group : this.groups) {
-                if (group.getId().equals(groupId)) return true;
+            for (final Group group : this.groups) {
+                if (group.getId().equals(groupId)) { return true; }
             }
         }
         return false;

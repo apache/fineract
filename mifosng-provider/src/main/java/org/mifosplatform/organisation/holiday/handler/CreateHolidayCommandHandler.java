@@ -11,14 +11,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CreateHolidayCommandHandler implements NewCommandSourceHandler {
 
-	private final HolidayWritePlatformService holidayWritePlatformService;
-	
-	@Autowired
+    private final HolidayWritePlatformService holidayWritePlatformService;
+
+    @Autowired
     public CreateHolidayCommandHandler(final HolidayWritePlatformService holidayWritePlatformService) {
         this.holidayWritePlatformService = holidayWritePlatformService;
     }
-	
-	@Transactional
+
+    @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 

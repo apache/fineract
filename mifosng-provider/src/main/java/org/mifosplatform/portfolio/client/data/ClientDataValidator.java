@@ -349,7 +349,7 @@ public final class ClientDataValidator {
 
     }
 
-    public void validateForAssignStaff(String json) {
+    public void validateForAssignStaff(final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
@@ -390,10 +390,11 @@ public final class ClientDataValidator {
 
         final LocalDate closureDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.closureDateParamName, element);
         baseDataValidator.reset().parameter(ClientApiConstants.closureDateParamName).value(closureDate).notNull();
-        
+
         final Long closureReasonId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.closureReasonIdParamName, element);
-        baseDataValidator.reset().parameter(ClientApiConstants.closureReasonIdParamName).value(closureReasonId).notNull().longGreaterThanZero();
-        
+        baseDataValidator.reset().parameter(ClientApiConstants.closureReasonIdParamName).value(closureReasonId).notNull()
+                .longGreaterThanZero();
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 

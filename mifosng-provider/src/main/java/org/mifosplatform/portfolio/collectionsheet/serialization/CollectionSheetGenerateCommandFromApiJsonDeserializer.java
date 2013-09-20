@@ -5,6 +5,11 @@
  */
 package org.mifosplatform.portfolio.collectionsheet.serialization;
 
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.calendarIdParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.dateFormatParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.localeParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.transactionDateParamName;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,11 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.localeParamName;
-import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.dateFormatParamName;
-import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.calendarIdParamName;
-import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.transactionDateParamName;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;

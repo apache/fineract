@@ -12,11 +12,11 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
  */
 public class GuarantorNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public GuarantorNotFoundException(Long id) {
+    public GuarantorNotFoundException(final Long id) {
         super("error.msg.loan.guarantor.", "Guarantor with identifier " + id + " does not exist", id);
     }
 
-    public GuarantorNotFoundException(Long loanId, Long guarantorId) {
+    public GuarantorNotFoundException(final Long loanId, final Long guarantorId) {
         super("error.msg.loan.guarantor.", "Guarantor with identifier " + guarantorId + " does not exist for loan with Identifier "
                 + loanId, loanId, guarantorId);
     }

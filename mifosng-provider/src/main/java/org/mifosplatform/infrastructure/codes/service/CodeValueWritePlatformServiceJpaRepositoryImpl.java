@@ -68,7 +68,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
                     .withCommandId(command.commandId()) //
                     .withEntityId(codeValue.getId()) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleCodeValueDataIntegrityIssues(command, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -115,7 +115,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
                     .withEntityId(codeValueId) //
                     .with(changes) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleCodeValueDataIntegrityIssues(command, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -137,7 +137,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
 
             final CodeValue codeValueToDelete = this.codeValueRepositoryWrapper.findOneWithNotFoundDetection(codeValueId);
 
-            boolean removed = code.remove(codeValueToDelete);
+            final boolean removed = code.remove(codeValueToDelete);
             if (removed) {
                 this.codeRepository.saveAndFlush(code);
             }
@@ -145,7 +145,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
             return new CommandProcessingResultBuilder() //
                     .withEntityId(codeValueId) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             logger.error(dve.getMessage(), dve);
             throw new PlatformDataIntegrityException("error.msg.code.value.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource: " + dve.getMostSpecificCause().getMessage());

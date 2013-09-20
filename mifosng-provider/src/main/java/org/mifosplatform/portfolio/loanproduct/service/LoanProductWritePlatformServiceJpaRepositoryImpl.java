@@ -81,14 +81,14 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
             validateInputDates(command);
-            
+
             final Fund fund = findFundByIdIfProvided(command.longValueOfParameterNamed("fundId"));
 
             final Long transactionProcessingStrategyId = command.longValueOfParameterNamed("transactionProcessingStrategyId");
             final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(transactionProcessingStrategyId);
 
             final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
-            final List<Charge> charges = this.assembleListOfProductCharges(command, currencyCode);
+            final List<Charge> charges = assembleListOfProductCharges(command, currencyCode);
 
             final LoanProduct loanproduct = LoanProduct.assembleFromJson(fund, loanTransactionProcessingStrategy, charges, command,
                     this.aprCalculator);
@@ -96,14 +96,14 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             this.loanProductRepository.save(loanproduct);
 
             // save accounting mappings
-            accountMappingWritePlatformService.createLoanProductToGLAccountMapping(loanproduct.getId(), command);
+            this.accountMappingWritePlatformService.createLoanProductToGLAccountMapping(loanproduct.getId(), command);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withEntityId(loanproduct.getId()) //
                     .build();
 
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
@@ -137,10 +137,10 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
             final LoanProduct product = this.loanProductRepository.findOne(loanProductId);
             if (product == null) { throw new LoanProductNotFoundException(loanProductId); }
-            
+
             this.fromApiJsonDeserializer.validateForUpdate(command.json(), product);
             validateInputDates(command);
-            
+
             final Map<String, Object> changes = product.update(command, this.aprCalculator);
 
             if (changes.containsKey("fundId")) {
@@ -156,17 +156,17 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             }
 
             if (changes.containsKey("charges")) {
-                final List<Charge> productCharges = this.assembleListOfProductCharges(command, product.getCurrency().getCode());
-                boolean updated = product.update(productCharges);
+                final List<Charge> productCharges = assembleListOfProductCharges(command, product.getCurrency().getCode());
+                final boolean updated = product.update(productCharges);
                 if (!updated) {
                     changes.remove("charges");
                 }
             }
 
             // accounting related changes
-            boolean accountingTypeChanged = changes.containsKey("accountingRule");
-            final Map<String, Object> accountingMappingChanges = accountMappingWritePlatformService.updateLoanProductToGLAccountMapping(
-                    product.getId(), command, accountingTypeChanged, product.getAccountingType());
+            final boolean accountingTypeChanged = changes.containsKey("accountingRule");
+            final Map<String, Object> accountingMappingChanges = this.accountMappingWritePlatformService
+                    .updateLoanProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingType());
             changes.putAll(accountingMappingChanges);
 
             if (!changes.isEmpty()) {
@@ -179,7 +179,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                     .with(changes) //
                     .build();
 
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return new CommandProcessingResult(Long.valueOf(-1));
         }
@@ -196,7 +196,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         }
 
         if (command.parameterExists("charges")) {
-            JsonArray chargesArray = command.arrayOfParameterNamed("charges");
+            final JsonArray chargesArray = command.arrayOfParameterNamed("charges");
             if (chargesArray != null) {
                 for (int i = 0; i < chargesArray.size(); i++) {
 
@@ -207,7 +207,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                         final Charge charge = this.chargeRepository.findOneWithNotFoundDetection(id);
 
                         if (!loanProductCurrencyCode.equals(charge.getCurrencyCode())) {
-                            String errorMessage = "Charge and Loan Product must have the same currency.";
+                            final String errorMessage = "Charge and Loan Product must have the same currency.";
                             throw new InvalidCurrencyException("charge", "attach.to.loan.product", errorMessage);
                         }
                         charges.add(charge);
@@ -225,20 +225,20 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
 
-        Throwable realCause = dve.getMostSpecificCause();
+        final Throwable realCause = dve.getMostSpecificCause();
 
         if (realCause.getMessage().contains("external_id")) {
 
             final String externalId = command.stringValueOfParameterNamed("externalId");
-            throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.externalId", "Loan Product with externalId `" + externalId
-                    + "` already exists", "externalId", externalId);
+            throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.externalId", "Loan Product with externalId `"
+                    + externalId + "` already exists", "externalId", externalId);
         } else if (realCause.getMessage().contains("unq_name")) {
 
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.name", "Loan product with name `" + name
                     + "` already exists", "name", name);
         } else if (realCause.getMessage().contains("Duplicate entry")) {
-            Object[] args = null;
+            final Object[] args = null;
             throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.charge",
                     "Loan product may only have one charge of each type.`", "charges", args);
         }
@@ -247,15 +247,13 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         throw new PlatformDataIntegrityException("error.msg.product.loan.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
-    
+
     private void validateInputDates(final JsonCommand command) {
         final LocalDate startDate = command.localDateValueOfParameterNamed("startDate");
         final LocalDate closeDate = command.localDateValueOfParameterNamed("closeDate");
 
         if (startDate != null && closeDate != null) {
-            if (closeDate.isBefore(startDate)) {
-                throw new LoanProductDateException(startDate.toString(), closeDate.toString());
-            }
+            if (closeDate.isBefore(startDate)) { throw new LoanProductDateException(startDate.toString(), closeDate.toString()); }
         }
     }
 

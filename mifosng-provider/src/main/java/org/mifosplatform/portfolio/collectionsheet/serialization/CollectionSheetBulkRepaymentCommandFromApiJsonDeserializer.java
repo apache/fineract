@@ -28,12 +28,13 @@ import com.google.gson.JsonObject;
  * {@link CollectionSheetBulkRepaymentCommand}'s.
  */
 @Component
-public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<CollectionSheetBulkRepaymentCommand> {
+public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer extends
+        AbstractFromApiJsonDeserializer<CollectionSheetBulkRepaymentCommand> {
 
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
-    public CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer(FromJsonHelper fromApiJsonHelper) {
+    public CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
@@ -43,25 +44,25 @@ public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer ex
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final LocalDate transactionDate = fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
 
-        final String note = fromApiJsonHelper.extractStringNamed("note", element);
-        
+        final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
+
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
 
         SingleRepaymentCommand[] loanRepaymentTransactions = null;
 
         if (element.isJsonObject()) {
-            if (topLevelJsonElement.has("bulkRepaymentTransactions")
-                    && topLevelJsonElement.get("bulkRepaymentTransactions").isJsonArray()) {
+            if (topLevelJsonElement.has("bulkRepaymentTransactions") && topLevelJsonElement.get("bulkRepaymentTransactions").isJsonArray()) {
                 final JsonArray array = topLevelJsonElement.get("bulkRepaymentTransactions").getAsJsonArray();
                 loanRepaymentTransactions = new SingleRepaymentCommand[array.size()];
                 for (int i = 0; i < array.size(); i++) {
                     final JsonObject loanTransactionElement = array.get(i).getAsJsonObject();
-                    
+
                     final Long loanId = this.fromApiJsonHelper.extractLongNamed("loanId", loanTransactionElement);
-                    final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalNamed("transactionAmount", loanTransactionElement, locale);
+                    final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalNamed("transactionAmount",
+                            loanTransactionElement, locale);
                     loanRepaymentTransactions[i] = new SingleRepaymentCommand(loanId, transactionAmount, transactionDate);
                 }
             }

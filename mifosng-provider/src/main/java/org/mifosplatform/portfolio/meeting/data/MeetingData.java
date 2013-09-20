@@ -57,7 +57,7 @@ public class MeetingData {
                 meetingData.calendarData, attendanceTypeOptions);
     }
 
-    private MeetingData(Long id, LocalDate meetingDate, Collection<ClientAttendanceData> clientsAttendance,
+    private MeetingData(final Long id, final LocalDate meetingDate, final Collection<ClientAttendanceData> clientsAttendance,
             final Collection<ClientData> clients, final CalendarData calendarData, final List<EnumOptionData> attendanceTypeOptions) {
         this.id = id;
         this.meetingDate = meetingDate;

@@ -51,7 +51,7 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
 
     @Override
     public LoanSchedulePeriodData toData() {
-        return LoanSchedulePeriodData.repaymentOnlyPeriod(periodNumber, this.fromDate, this.dueDate, this.principalDue.getAmount(),
+        return LoanSchedulePeriodData.repaymentOnlyPeriod(this.periodNumber, this.fromDate, this.dueDate, this.principalDue.getAmount(),
                 this.outstandingLoanBalance.getAmount(), this.interestDue.getAmount(), this.feeChargesDue.getAmount(),
                 this.penaltyChargesDue.getAmount(), this.totalDue.getAmount());
     }

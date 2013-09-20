@@ -172,14 +172,15 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         }
     }
 
-    private void validateDebitOrCreditArrayForExistingGLAccount(GLAccount glaccount, SingleDebitOrCreditEntryCommand[] creditOrDebits) {
+    private void validateDebitOrCreditArrayForExistingGLAccount(final GLAccount glaccount,
+            final SingleDebitOrCreditEntryCommand[] creditOrDebits) {
         /**
          * If a glaccount is assigned for a rule the credits or debits array
          * should have only one entry and it must be same as existing account
          */
         if (creditOrDebits.length != 1) { throw new JournalEntryInvalidException(
                 GL_JOURNAL_ENTRY_INVALID_REASON.INVALID_DEBIT_OR_CREDIT_ACCOUNTS, null, null, null); }
-        for (SingleDebitOrCreditEntryCommand creditOrDebit : creditOrDebits) {
+        for (final SingleDebitOrCreditEntryCommand creditOrDebit : creditOrDebits) {
             if (!glaccount.getId().equals(creditOrDebit.getGlAccountId())) { throw new JournalEntryInvalidException(
                     GL_JOURNAL_ENTRY_INVALID_REASON.INVALID_DEBIT_OR_CREDIT_ACCOUNTS, null, null, null); }
         }

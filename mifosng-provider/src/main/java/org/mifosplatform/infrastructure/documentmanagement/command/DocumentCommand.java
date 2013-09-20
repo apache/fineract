@@ -100,7 +100,7 @@ public class DocumentCommand {
         return this.storageType;
     }
 
-    public void setStorageType(Integer storageType) {
+    public void setStorageType(final Integer storageType) {
         this.storageType = storageType;
     }
 

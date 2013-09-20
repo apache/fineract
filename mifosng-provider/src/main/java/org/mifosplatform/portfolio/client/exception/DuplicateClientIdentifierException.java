@@ -15,7 +15,7 @@ public class DuplicateClientIdentifierException extends AbstractPlatformDomainRu
 
     private Long documentTypeId;
     private String identifierKey;
-    private String identifierType;
+    private final String identifierType;
 
     public DuplicateClientIdentifierException(final String identifierType) {
         super("error.msg.clientIdentifier.type.duplicate", "Client identifier of type " + identifierType
@@ -40,14 +40,14 @@ public class DuplicateClientIdentifierException extends AbstractPlatformDomainRu
     }
 
     public Long getDocumentTypeId() {
-        return documentTypeId;
+        return this.documentTypeId;
     }
 
     public String getIdentifierKey() {
-        return identifierKey;
+        return this.identifierKey;
     }
 
     public String getIdentifierType() {
-        return identifierType;
+        return this.identifierType;
     }
 }

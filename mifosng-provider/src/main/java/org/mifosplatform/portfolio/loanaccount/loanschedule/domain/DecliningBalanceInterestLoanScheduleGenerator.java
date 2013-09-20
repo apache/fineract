@@ -42,21 +42,21 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
             final double interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
             @SuppressWarnings("unused") final Money totalCumulativeInterest,
             @SuppressWarnings("unused") final Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
-            final int daysInPeriod, final Money outstandingBalance,
-            final LoanApplicationTerms loanApplicationTerms, final int periodNumber, final MathContext mc) {
+            final int daysInPeriod, final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms,
+            final int periodNumber, final MathContext mc) {
 
-        PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
+        final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
                 interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestPaymentDueToGrace, daysInPeriod,
                 outstandingBalance);
 
-        Money interestForThisInstallment = result.interest();
+        final Money interestForThisInstallment = result.interest();
 
         Money principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator, daysInPeriod,
                 outstandingBalance, periodNumber, mc);
 
         // update cumulative fields for principal & interest
-        Money interestBroughtFowardDueToGrace = result.interestPaymentDueToGrace();
-        Money totalCumulativePrincipalToDate = totalCumulativePrincipal.plus(principalForThisInstallment);
+        final Money interestBroughtFowardDueToGrace = result.interestPaymentDueToGrace();
+        final Money totalCumulativePrincipalToDate = totalCumulativePrincipal.plus(principalForThisInstallment);
 
         // adjust if needed
         principalForThisInstallment = loanApplicationTerms.adjustPrincipalIfLastRepaymentPeriod(principalForThisInstallment,

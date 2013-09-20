@@ -35,28 +35,29 @@ public class LoanApplicationTestBuilder {
 
     public String build(final String ID, final String loanProductId) {
 
-        HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<String, String>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en_GB");
-        if (loanType == "group")
+        if (this.loanType == "group") {
             map.put("groupId", ID);
-        else
+        } else {
             map.put("clientId", ID);
+        }
         map.put("productId", loanProductId);
-        map.put("principal", principal);
-        map.put("loanTermFrequency", loanTermFrequency);
-        map.put("loanTermFrequencyType", loanTermFrequencyType);
-        map.put("numberOfRepayments", numberOfRepayment);
-        map.put("repaymentEvery", repaymentPeriod);
-        map.put("repaymentFrequencyType", repaymentFrequencyType);
-        map.put("interestRatePerPeriod", interestRate);
-        map.put("amortizationType", amortizationType);
-        map.put("interestType", interestType);
-        map.put("interestCalculationPeriodType", interestCalculationPeriodType);
-        map.put("transactionProcessingStrategyId", transactionProcessingID);
-        map.put("expectedDisbursementDate", expectedDisbursmentDate);
-        map.put("submittedOnDate", submittedOnDate);
-        map.put("loanType", loanType);
+        map.put("principal", this.principal);
+        map.put("loanTermFrequency", this.loanTermFrequency);
+        map.put("loanTermFrequencyType", this.loanTermFrequencyType);
+        map.put("numberOfRepayments", this.numberOfRepayment);
+        map.put("repaymentEvery", this.repaymentPeriod);
+        map.put("repaymentFrequencyType", this.repaymentFrequencyType);
+        map.put("interestRatePerPeriod", this.interestRate);
+        map.put("amortizationType", this.amortizationType);
+        map.put("interestType", this.interestType);
+        map.put("interestCalculationPeriodType", this.interestCalculationPeriodType);
+        map.put("transactionProcessingStrategyId", this.transactionProcessingID);
+        map.put("expectedDisbursementDate", this.expectedDisbursmentDate);
+        map.put("submittedOnDate", this.submittedOnDate);
+        map.put("loanType", this.loanType);
         return new Gson().toJson(map);
     }
 
@@ -160,7 +161,7 @@ public class LoanApplicationTestBuilder {
         return this;
     }
 
-    public LoanApplicationTestBuilder withLoanType(final String loanType){
+    public LoanApplicationTestBuilder withLoanType(final String loanType) {
         this.loanType = loanType;
         return this;
     }

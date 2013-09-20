@@ -214,7 +214,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (savingsAccountId != null) {
                 final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(savingsAccountId);
                 this.fromApiJsonDeserializer.validatelinkedSavingsAccount(savingsAccount, newLoanApplication);
-                final AccountAssociations accountAssociations = AccountAssociations.associateSavingsAccount(newLoanApplication, savingsAccount);
+                final AccountAssociations accountAssociations = AccountAssociations.associateSavingsAccount(newLoanApplication,
+                        savingsAccount);
                 this.accountAssociationsRepository.save(accountAssociations);
             }
 
@@ -361,8 +362,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 if (calendar == null) { throw new CalendarNotFoundException(calendarId); }
             }
 
-            final List<CalendarInstance> ciList = (List<CalendarInstance>) this.calendarInstanceRepository.findByEntityIdAndEntityTypeId(loanId,
-                    CalendarEntityType.LOANS.getValue());
+            final List<CalendarInstance> ciList = (List<CalendarInstance>) this.calendarInstanceRepository.findByEntityIdAndEntityTypeId(
+                    loanId, CalendarEntityType.LOANS.getValue());
             if (calendar != null) {
 
                 // For loans, allow to attach only one calendar instance per

@@ -5,5 +5,5 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 public interface HolidayWritePlatformService {
 
-	CommandProcessingResult createHoliday(JsonCommand command);
+    CommandProcessingResult createHoliday(JsonCommand command);
 }

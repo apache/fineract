@@ -32,7 +32,7 @@ public class FinanicalFunctions {
         if (interestRateFraction == 0) {
             payment = -1 * (futureValue + principal) / numberOfPayments;
         } else {
-            double r1 = interestRateFraction + 1;
+            final double r1 = interestRateFraction + 1;
             payment = (futureValue + principal * Math.pow(r1, numberOfPayments)) * interestRateFraction
                     / ((type ? r1 : 1) * (1 - Math.pow(r1, numberOfPayments)));
         }

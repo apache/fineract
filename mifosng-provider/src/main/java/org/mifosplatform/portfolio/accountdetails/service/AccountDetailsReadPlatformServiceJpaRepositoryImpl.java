@@ -40,28 +40,30 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
     }
 
     @Override
-    public AccountSummaryCollectionData retrieveClientAccountDetails(Long clientId) {
+    public AccountSummaryCollectionData retrieveClientAccountDetails(final Long clientId) {
         // Check if client exists
-        clientReadPlatformService.retrieveOne(clientId);
-        String loanwhereClause = " where l.client_id = ?";
-        String savingswhereClause = " where sa.client_id = ? order by sa.status_enum ASC, sa.account_no ASC";
-        List<LoanAccountSummaryData> loanAccounts = retrieveLoanAccountDetails(loanwhereClause, new Object[] { clientId });
-        List<SavingsAccountSummaryData> savingsAccounts = retrieveAccountDetails(savingswhereClause, new Object[] { clientId });
+        this.clientReadPlatformService.retrieveOne(clientId);
+        final String loanwhereClause = " where l.client_id = ?";
+        final String savingswhereClause = " where sa.client_id = ? order by sa.status_enum ASC, sa.account_no ASC";
+        final List<LoanAccountSummaryData> loanAccounts = retrieveLoanAccountDetails(loanwhereClause, new Object[] { clientId });
+        final List<SavingsAccountSummaryData> savingsAccounts = retrieveAccountDetails(savingswhereClause, new Object[] { clientId });
         return new AccountSummaryCollectionData(loanAccounts, savingsAccounts);
     }
 
     @Override
-    public AccountSummaryCollectionData retrieveGroupAccountDetails(Long groupId) {
+    public AccountSummaryCollectionData retrieveGroupAccountDetails(final Long groupId) {
         // Check if group exists
-        groupReadPlatformService.retrieveOne(groupId);
-        String loanWhereClauseForGroup = " where l.group_id = ? and l.client_id is null";
-        String loanWhereClauseForMembers = " where l.group_id = ? and l.client_id is not null";
-        String savingswhereClauseForGroup = " where sa.group_id = ? and sa.client_id is null order by sa.status_enum ASC, sa.account_no ASC";
-        String savingswhereClauseForMembers = " where sa.group_id = ? and sa.client_id is not null order by sa.status_enum ASC, sa.account_no ASC";
-        List<LoanAccountSummaryData> groupLoanAccounts = retrieveLoanAccountDetails(loanWhereClauseForGroup, new Object[] { groupId });
-        List<SavingsAccountSummaryData> groupSavingsAccounts = retrieveAccountDetails(savingswhereClauseForGroup, new Object[] { groupId });
-        List<LoanAccountSummaryData> memberLoanAccounts = retrieveLoanAccountDetails(loanWhereClauseForMembers, new Object[] { groupId });
-        List<SavingsAccountSummaryData> memberSavingsAccounts = retrieveAccountDetails(savingswhereClauseForMembers,
+        this.groupReadPlatformService.retrieveOne(groupId);
+        final String loanWhereClauseForGroup = " where l.group_id = ? and l.client_id is null";
+        final String loanWhereClauseForMembers = " where l.group_id = ? and l.client_id is not null";
+        final String savingswhereClauseForGroup = " where sa.group_id = ? and sa.client_id is null order by sa.status_enum ASC, sa.account_no ASC";
+        final String savingswhereClauseForMembers = " where sa.group_id = ? and sa.client_id is not null order by sa.status_enum ASC, sa.account_no ASC";
+        final List<LoanAccountSummaryData> groupLoanAccounts = retrieveLoanAccountDetails(loanWhereClauseForGroup, new Object[] { groupId });
+        final List<SavingsAccountSummaryData> groupSavingsAccounts = retrieveAccountDetails(savingswhereClauseForGroup,
+                new Object[] { groupId });
+        final List<LoanAccountSummaryData> memberLoanAccounts = retrieveLoanAccountDetails(loanWhereClauseForMembers,
+                new Object[] { groupId });
+        final List<SavingsAccountSummaryData> memberSavingsAccounts = retrieveAccountDetails(savingswhereClauseForMembers,
                 new Object[] { groupId });
         return new AccountSummaryCollectionData(groupLoanAccounts, groupSavingsAccounts, memberLoanAccounts, memberSavingsAccounts);
     }
@@ -69,22 +71,22 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
     @Override
     public Collection<LoanAccountSummaryData> retrieveClientLoanAccountsByLoanOfficerId(final Long clientId, final Long loanOfficerId) {
         // Check if client exists
-        clientReadPlatformService.retrieveOne(clientId);
-        String loanWhereClause = " where l.client_id = ? and l.loan_officer_id = ?";
+        this.clientReadPlatformService.retrieveOne(clientId);
+        final String loanWhereClause = " where l.client_id = ? and l.loan_officer_id = ?";
         return retrieveLoanAccountDetails(loanWhereClause, new Object[] { clientId, loanOfficerId });
     }
 
     @Override
     public Collection<LoanAccountSummaryData> retrieveGroupLoanAccountsByLoanOfficerId(final Long groupId, final Long loanOfficerId) {
         // Check if group exists
-        groupReadPlatformService.retrieveOne(groupId);
-        String loanWhereClause = " where l.group_id = ? and l.client_id is null and l.loan_officer_id = ?";
+        this.groupReadPlatformService.retrieveOne(groupId);
+        final String loanWhereClause = " where l.group_id = ? and l.client_id is null and l.loan_officer_id = ?";
         return retrieveLoanAccountDetails(loanWhereClause, new Object[] { groupId, loanOfficerId });
     }
 
-    private List<LoanAccountSummaryData> retrieveLoanAccountDetails(String loanwhereClause, Object[] inputs) {
-        LoanAccountSummaryDataMapper rm = new LoanAccountSummaryDataMapper();
-        String sql = "select " + rm.loanAccountSummarySchema() + loanwhereClause;
+    private List<LoanAccountSummaryData> retrieveLoanAccountDetails(final String loanwhereClause, final Object[] inputs) {
+        final LoanAccountSummaryDataMapper rm = new LoanAccountSummaryDataMapper();
+        final String sql = "select " + rm.loanAccountSummarySchema() + loanwhereClause;
         return this.jdbcTemplate.query(sql, rm, inputs);
     }
 
@@ -92,8 +94,8 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
      * @param entityId
      * @return
      */
-    private List<SavingsAccountSummaryData> retrieveAccountDetails(String savingswhereClause, Object[] inputs) {
-        SavingsAccountSummaryDataMapper savingsAccountSummaryDataMapper = new SavingsAccountSummaryDataMapper();
+    private List<SavingsAccountSummaryData> retrieveAccountDetails(final String savingswhereClause, final Object[] inputs) {
+        final SavingsAccountSummaryDataMapper savingsAccountSummaryDataMapper = new SavingsAccountSummaryDataMapper();
         final String savingsSql = "select " + savingsAccountSummaryDataMapper.schema() + savingswhereClause;
         return this.jdbcTemplate.query(savingsSql, savingsAccountSummaryDataMapper, inputs);
     }
@@ -103,7 +105,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         final String schemaSql;
 
         public SavingsAccountSummaryDataMapper() {
-            StringBuilder accountsSummary = new StringBuilder();
+            final StringBuilder accountsSummary = new StringBuilder();
             accountsSummary.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId, sa.status_enum as statusEnum, ");
             accountsSummary.append("sa.account_type_enum as accountType, ");
             accountsSummary.append("sa.account_balance_derived as accountBalance, ");
@@ -155,7 +157,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
 
         public String loanAccountSummarySchema() {
 
-            StringBuilder accountsSummary = new StringBuilder("l.id as id, l.account_no as accountNo, l.external_id as externalId,");
+            final StringBuilder accountsSummary = new StringBuilder("l.id as id, l.account_no as accountNo, l.external_id as externalId,");
             accountsSummary.append("l.product_id as productId, lp.name as productName,")
                     .append("l.loan_status_id as statusId, l.loan_type_enum as loanType, ").append("l.loan_product_counter as loanCycle ")
                     .append(" from m_loan l ").append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id");

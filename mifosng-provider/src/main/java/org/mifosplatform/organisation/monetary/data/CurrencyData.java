@@ -21,10 +21,11 @@ public class CurrencyData {
     private final String displayLabel;
 
     public static CurrencyData blank() {
-        return new CurrencyData("", "", 0,0, "", "");
+        return new CurrencyData("", "", 0, 0, "", "");
     }
 
-    public CurrencyData(final String code, final String name, final int decimalPlaces,final Integer inMultiplesOf, final String displaySymbol, final String nameCode) {
+    public CurrencyData(final String code, final String name, final int decimalPlaces, final Integer inMultiplesOf,
+            final String displaySymbol, final String nameCode) {
         this.code = code;
         this.name = name;
         this.decimalPlaces = decimalPlaces;
@@ -41,14 +42,14 @@ public class CurrencyData {
     public int decimalPlaces() {
         return this.decimalPlaces;
     }
-    
+
     public Integer currencyInMultiplesOf() {
         return this.inMultiplesOf;
     }
-    
+
     @Override
-    public boolean equals(Object obj) {
-        CurrencyData currencyData = (CurrencyData) obj;
+    public boolean equals(final Object obj) {
+        final CurrencyData currencyData = (CurrencyData) obj;
         return currencyData.code.equals(this.code);
     }
 
@@ -59,9 +60,9 @@ public class CurrencyData {
 
     private String generateDisplayLabel() {
 
-        StringBuilder builder = new StringBuilder(this.name).append(' ');
+        final StringBuilder builder = new StringBuilder(this.name).append(' ');
 
-        if (this.displaySymbol != null && !"".equalsIgnoreCase(displaySymbol.trim())) {
+        if (this.displaySymbol != null && !"".equalsIgnoreCase(this.displaySymbol.trim())) {
             builder.append('(').append(this.displaySymbol).append(')');
         } else {
             builder.append('[').append(this.code).append(']');

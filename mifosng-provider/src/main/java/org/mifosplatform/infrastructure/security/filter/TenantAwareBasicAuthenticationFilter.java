@@ -35,16 +35,16 @@ import org.springframework.stereotype.Service;
 
 /**
  * A customised version of spring security's {@link BasicAuthenticationFilter}.
- *
+ * 
  * This filter is responsible for extracting multi-tenant and basic auth
  * credentials from the request and checking that the details provided are
  * valid.
- *
+ * 
  * If multi-tenant and basic auth credentials are valid, the details of the
  * tenant are stored in {@link MifosPlatformTenant} and stored in a
  * {@link ThreadLocal} variable for this request using
  * {@link ThreadLocalContextUtil}.
- *
+ * 
  * If multi-tenant and basic auth credentials are invalid, a http error response
  * is returned.
  */
@@ -64,10 +64,9 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
 
     @Autowired
     public TenantAwareBasicAuthenticationFilter(final AuthenticationManager authenticationManager,
-            final AuthenticationEntryPoint authenticationEntryPoint,
-            final BasicAuthTenantDetailsService basicAuthTenantDetailsService,
-            final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer,
-            final ConfigurationDomainService configurationDomainService, final CacheWritePlatformService cacheWritePlatformService) {
+            final AuthenticationEntryPoint authenticationEntryPoint, final BasicAuthTenantDetailsService basicAuthTenantDetailsService,
+            final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer, final ConfigurationDomainService configurationDomainService,
+            final CacheWritePlatformService cacheWritePlatformService) {
         super(authenticationManager, authenticationEntryPoint);
         this.basicAuthTenantDetailsService = basicAuthTenantDetailsService;
         this.toApiJsonSerializer = toApiJsonSerializer;

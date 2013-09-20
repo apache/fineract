@@ -32,7 +32,7 @@ public class ProductMix extends AbstractPersistable<Long> {
     public static ProductMix createNew(final LoanProduct product, final LoanProduct restrictedProduct) {
         return new ProductMix(product, restrictedProduct);
     }
-    
+
     public Long getRestrictedProductId() {
         return this.restrictedProduct.getId();
     }

@@ -38,8 +38,8 @@ public class FromJsonHelper {
 
     public FromJsonHelper() {
         this.gsonConverter = new Gson();
-        helperDelegator = new JsonParserHelper();
-        parser = new JsonParser();
+        this.helperDelegator = new JsonParserHelper();
+        this.parser = new JsonParser();
     }
 
     public Map<String, Boolean> extractMap(final Type typeOfMap, final String json) {
@@ -69,10 +69,10 @@ public class FromJsonHelper {
     public void checkForUnsupportedParameters(final Type typeOfMap, final String json, final Set<String> supportedParams) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
+        final Map<String, Object> requestMap = this.gsonConverter.fromJson(json, typeOfMap);
 
-        List<String> unsupportedParameterList = new ArrayList<String>();
-        for (String providedParameter : requestMap.keySet()) {
+        final List<String> unsupportedParameterList = new ArrayList<String>();
+        for (final String providedParameter : requestMap.keySet()) {
             if (!supportedParams.contains(providedParameter)) {
                 unsupportedParameterList.add(providedParameter);
             }
@@ -80,14 +80,14 @@ public class FromJsonHelper {
 
         if (!unsupportedParameterList.isEmpty()) { throw new UnsupportedParameterException(unsupportedParameterList); }
     }
-    
+
     public void checkForUnsupportedParameters(final JsonObject object, final Set<String> supportedParams) {
         if (object == null) { throw new InvalidParameterException(); }
 
-        Set<Entry<String, JsonElement>> entries = object.entrySet();
-        List<String> unsupportedParameterList = new ArrayList<String>();
-        
-        for (Entry<String, JsonElement> providedParameter : entries) {
+        final Set<Entry<String, JsonElement>> entries = object.entrySet();
+        final List<String> unsupportedParameterList = new ArrayList<String>();
+
+        for (final Entry<String, JsonElement> providedParameter : entries) {
             if (!supportedParams.contains(providedParameter.getKey())) {
                 unsupportedParameterList.add(providedParameter.getKey());
             }
@@ -100,119 +100,120 @@ public class FromJsonHelper {
 
         JsonElement parsedElement = null;
         if (StringUtils.isNotBlank(json)) {
-            parsedElement = parser.parse(json);
+            parsedElement = this.parser.parse(json);
         }
 
         return parsedElement;
     }
 
     public boolean parameterExists(final String parameterName, final JsonElement element) {
-        return helperDelegator.parameterExists(parameterName, element);
+        return this.helperDelegator.parameterExists(parameterName, element);
     }
 
     public String extractStringNamed(final String parameterName, final JsonElement element) {
-        return helperDelegator.extractStringNamed(parameterName, element, new HashSet<String>());
+        return this.helperDelegator.extractStringNamed(parameterName, element, new HashSet<String>());
     }
 
     public String extractStringNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
-        return helperDelegator.extractStringNamed(parameterName, element, parametersPassedInRequest);
+        return this.helperDelegator.extractStringNamed(parameterName, element, parametersPassedInRequest);
     }
 
     public Long extractLongNamed(final String parameterName, final JsonElement element) {
-        return helperDelegator.extractLongNamed(parameterName, element, new HashSet<String>());
+        return this.helperDelegator.extractLongNamed(parameterName, element, new HashSet<String>());
     }
 
     public Long extractLongNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
-        return helperDelegator.extractLongNamed(parameterName, element, parametersPassedInRequest);
+        return this.helperDelegator.extractLongNamed(parameterName, element, parametersPassedInRequest);
     }
 
     public JsonArray extractJsonArrayNamed(final String parameterName, final JsonElement element) {
-        return helperDelegator.extractJsonArrayNamed(parameterName, element);
+        return this.helperDelegator.extractJsonArrayNamed(parameterName, element);
     }
 
     public String[] extractArrayNamed(final String parameterName, final JsonElement element) {
-        return helperDelegator.extractArrayNamed(parameterName, element, new HashSet<String>());
+        return this.helperDelegator.extractArrayNamed(parameterName, element, new HashSet<String>());
     }
 
     public String[] extractArrayNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
-        return helperDelegator.extractArrayNamed(parameterName, element, parametersPassedInRequest);
+        return this.helperDelegator.extractArrayNamed(parameterName, element, parametersPassedInRequest);
     }
 
     public Boolean extractBooleanNamed(final String parameterName, final JsonElement element) {
-        return helperDelegator.extractBooleanNamed(parameterName, element, new HashSet<String>());
+        return this.helperDelegator.extractBooleanNamed(parameterName, element, new HashSet<String>());
     }
 
     public Boolean extractBooleanNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
-        return helperDelegator.extractBooleanNamed(parameterName, element, parametersPassedInRequest);
+        return this.helperDelegator.extractBooleanNamed(parameterName, element, parametersPassedInRequest);
     }
 
     public MonthDay extractMonthDayNamed(final String parameterName, final JsonElement element) {
-        return helperDelegator.extractMonthDayNamed(parameterName, element);
+        return this.helperDelegator.extractMonthDayNamed(parameterName, element);
     }
 
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element) {
-        return helperDelegator.extractLocalDateNamed(parameterName, element, new HashSet<String>());
+        return this.helperDelegator.extractLocalDateNamed(parameterName, element, new HashSet<String>());
     }
 
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element, final String dateFormat,
             final Locale locale) {
-        return helperDelegator.extractLocalDateNamed(parameterName, element.getAsJsonObject(), dateFormat, locale, new HashSet<String>());
+        return this.helperDelegator.extractLocalDateNamed(parameterName, element.getAsJsonObject(), dateFormat, locale,
+                new HashSet<String>());
     }
 
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element,
             final Set<String> parametersPassedInRequest) {
-        return helperDelegator.extractLocalDateNamed(parameterName, element, parametersPassedInRequest);
+        return this.helperDelegator.extractLocalDateNamed(parameterName, element, parametersPassedInRequest);
     }
 
     public LocalDate extractLocalDateAsArrayNamed(final String parameterName, final JsonElement element,
             final Set<String> parametersPassedInRequest) {
-        return helperDelegator.extractLocalDateAsArrayNamed(parameterName, element, parametersPassedInRequest);
+        return this.helperDelegator.extractLocalDateAsArrayNamed(parameterName, element, parametersPassedInRequest);
     }
 
     public BigDecimal extractBigDecimalWithLocaleNamed(final String parameterName, final JsonElement element) {
-        return helperDelegator.extractBigDecimalWithLocaleNamed(parameterName, element, new HashSet<String>());
+        return this.helperDelegator.extractBigDecimalWithLocaleNamed(parameterName, element, new HashSet<String>());
     }
 
     public BigDecimal extractBigDecimalWithLocaleNamed(final String parameterName, final JsonElement element,
             final Set<String> parametersPassedInRequest) {
-        return helperDelegator.extractBigDecimalWithLocaleNamed(parameterName, element, parametersPassedInRequest);
+        return this.helperDelegator.extractBigDecimalWithLocaleNamed(parameterName, element, parametersPassedInRequest);
     }
 
     public BigDecimal extractBigDecimalNamed(final String parameterName, final JsonElement element, final Locale locale) {
-        return helperDelegator.extractBigDecimalNamed(parameterName, element.getAsJsonObject(), locale, new HashSet<String>());
+        return this.helperDelegator.extractBigDecimalNamed(parameterName, element.getAsJsonObject(), locale, new HashSet<String>());
     }
 
     public BigDecimal extractBigDecimalNamed(final String parameterName, final JsonElement element,
             final Set<String> parametersPassedInRequest) {
-        return helperDelegator.extractBigDecimalNamed(parameterName, element.getAsJsonObject(), Locale.US, parametersPassedInRequest);
+        return this.helperDelegator.extractBigDecimalNamed(parameterName, element.getAsJsonObject(), Locale.US, parametersPassedInRequest);
     }
 
     public Integer extractIntegerWithLocaleNamed(final String parameterName, final JsonElement element) {
-        return helperDelegator.extractIntegerWithLocaleNamed(parameterName, element.getAsJsonObject(), new HashSet<String>());
+        return this.helperDelegator.extractIntegerWithLocaleNamed(parameterName, element.getAsJsonObject(), new HashSet<String>());
     }
 
     public Integer extractIntegerSansLocaleNamed(final String parameterName, final JsonElement element) {
-        return helperDelegator.extractIntegerSansLocaleNamed(parameterName, element.getAsJsonObject(), new HashSet<String>());
+        return this.helperDelegator.extractIntegerSansLocaleNamed(parameterName, element.getAsJsonObject(), new HashSet<String>());
     }
 
     public Integer extractIntegerWithLocaleNamed(final String parameterName, final JsonElement element,
             final Set<String> parametersPassedInRequest) {
-        return helperDelegator.extractIntegerWithLocaleNamed(parameterName, element.getAsJsonObject(), parametersPassedInRequest);
+        return this.helperDelegator.extractIntegerWithLocaleNamed(parameterName, element.getAsJsonObject(), parametersPassedInRequest);
     }
 
     public Integer extractIntegerNamed(final String parameterName, final JsonElement element, final Locale locale) {
-        return helperDelegator.extractIntegerNamed(parameterName, element.getAsJsonObject(), locale, new HashSet<String>());
+        return this.helperDelegator.extractIntegerNamed(parameterName, element.getAsJsonObject(), locale, new HashSet<String>());
     }
 
     public Integer extractIntegerNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
-        return helperDelegator.extractIntegerNamed(parameterName, element.getAsJsonObject(), Locale.US, parametersPassedInRequest);
+        return this.helperDelegator.extractIntegerNamed(parameterName, element.getAsJsonObject(), Locale.US, parametersPassedInRequest);
     }
 
     public Locale extractLocaleParameter(final JsonObject element) {
-        return helperDelegator.extractLocaleParameter(element);
+        return this.helperDelegator.extractLocaleParameter(element);
     }
 
     public String extractDateFormatParameter(final JsonObject element) {
-        return helperDelegator.extractDateFormatParameter(element);
+        return this.helperDelegator.extractDateFormatParameter(element);
     }
 }

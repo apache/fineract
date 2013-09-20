@@ -12,11 +12,12 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
  */
 public class LoanTransactionNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-	public LoanTransactionNotFoundException(Long id) {
-		super("error.msg.loan.id.invalid", "Transaction with identifier " + id + " does not exist", id);
-	}
+    public LoanTransactionNotFoundException(final Long id) {
+        super("error.msg.loan.id.invalid", "Transaction with identifier " + id + " does not exist", id);
+    }
 
-	public LoanTransactionNotFoundException(Long id, Long loanId) {
-		super("error.msg.loan.id.invalid", "Transaction with identifier " + id + " does not exist for loan with identifier " + loanId + "." , id, loanId);
-	}
+    public LoanTransactionNotFoundException(final Long id, final Long loanId) {
+        super("error.msg.loan.id.invalid",
+                "Transaction with identifier " + id + " does not exist for loan with identifier " + loanId + ".", id, loanId);
+    }
 }

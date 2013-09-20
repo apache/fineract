@@ -8,33 +8,32 @@ package org.mifosplatform.portfolio.charge.domain;
 public enum ChargeAppliesTo {
 
     INVALID(0, "chargeAppliesTo.invalid"), //
-    LOAN(1, "chargeAppliesTo.loan"),
-    SAVINGS(2, "chargeAppliesTo.savings");
+    LOAN(1, "chargeAppliesTo.loan"), SAVINGS(2, "chargeAppliesTo.savings");
 
     private final Integer value;
     private final String code;
 
-    private ChargeAppliesTo(Integer value, String code) {
+    private ChargeAppliesTo(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }
 
     public Integer getValue() {
-        return value;
+        return this.value;
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
-    public static int minValue(){
+    public static int minValue() {
         return 1;
     }
-    
-    public static int maxValue(){
-        return 2;//modify whenever a new value added
+
+    public static int maxValue() {
+        return 2;// modify whenever a new value added
     }
-    
+
     public static ChargeAppliesTo fromInt(final Integer chargeAppliesTo) {
         ChargeAppliesTo chargeAppliesToType = ChargeAppliesTo.INVALID;
         switch (chargeAppliesTo) {
@@ -50,12 +49,12 @@ public enum ChargeAppliesTo {
         }
         return chargeAppliesToType;
     }
-    
-    public boolean isLoanCharge(){
+
+    public boolean isLoanCharge() {
         return this.value.equals(ChargeAppliesTo.LOAN.getValue());
     }
-    
-    public boolean isSavingsCharge(){
+
+    public boolean isSavingsCharge() {
         return this.value.equals(ChargeAppliesTo.SAVINGS.getValue());
     }
 }

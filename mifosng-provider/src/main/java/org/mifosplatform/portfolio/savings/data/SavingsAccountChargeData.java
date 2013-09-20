@@ -83,9 +83,11 @@ public class SavingsAccountChargeData {
         final boolean penalty = false;
         final LocalDate dueAsOfDate = null;
 
-        return new SavingsAccountChargeData(id, chargeId, name, chargeTimeType, dueAsOfDate, chargeCalculationType, percentage, amountPercentageAppliedTo, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding, chargeOptions, penalty);
+        return new SavingsAccountChargeData(id, chargeId, name, chargeTimeType, dueAsOfDate, chargeCalculationType, percentage,
+                amountPercentageAppliedTo, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding, chargeOptions,
+                penalty);
     }
-    
+
     public static SavingsAccountChargeData instance(final Long id, final Long chargeId, final String name, final CurrencyData currency,
             final BigDecimal amount, final BigDecimal amountPaid, final BigDecimal amountWaived, final BigDecimal amountWrittenOff,
             final BigDecimal amountOutstanding, final EnumOptionData chargeTimeType, final LocalDate dueAsOfDate,
@@ -93,14 +95,15 @@ public class SavingsAccountChargeData {
             final Collection<ChargeData> chargeOptions, final boolean penalty) {
 
         return new SavingsAccountChargeData(id, chargeId, name, chargeTimeType, dueAsOfDate, chargeCalculationType, percentage,
-                amountPercentageAppliedTo, currency, amount, amountPaid, amountWaived, amountWrittenOff,
-                amountOutstanding, chargeOptions, penalty);
+                amountPercentageAppliedTo, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding, chargeOptions,
+                penalty);
     }
 
-    private SavingsAccountChargeData(Long id, Long chargeId, String name, EnumOptionData chargeTimeType, LocalDate dueAsOfDate,
-            EnumOptionData chargeCalculationType, BigDecimal percentage, BigDecimal amountPercentageAppliedTo, CurrencyData currency,
-            BigDecimal amount, BigDecimal amountPaid, BigDecimal amountWaived, BigDecimal amountWrittenOff, BigDecimal amountOutstanding,
-            Collection<ChargeData> chargeOptions, boolean penalty) {
+    private SavingsAccountChargeData(final Long id, final Long chargeId, final String name, final EnumOptionData chargeTimeType,
+            final LocalDate dueAsOfDate, final EnumOptionData chargeCalculationType, final BigDecimal percentage,
+            final BigDecimal amountPercentageAppliedTo, final CurrencyData currency, final BigDecimal amount, final BigDecimal amountPaid,
+            final BigDecimal amountWaived, final BigDecimal amountWrittenOff, final BigDecimal amountOutstanding,
+            final Collection<ChargeData> chargeOptions, final boolean penalty) {
         this.id = id;
         this.chargeId = chargeId;
         this.name = name;
@@ -115,13 +118,13 @@ public class SavingsAccountChargeData {
         this.amountWaived = amountWaived;
         this.amountWrittenOff = amountWrittenOff;
         this.amountOutstanding = amountOutstanding;
-        this.amountOrPercentage = this.getAmountOrPercentage();
+        this.amountOrPercentage = getAmountOrPercentage();
         this.chargeOptions = chargeOptions;
         this.penalty = penalty;
     }
 
     private BigDecimal getAmountOrPercentage() {
-        return (this.chargeCalculationType != null) && (chargeCalculationType.getId().intValue() > 1) ? this.percentage : this.amount;
+        return (this.chargeCalculationType != null) && (this.chargeCalculationType.getId().intValue() > 1) ? this.percentage : this.amount;
     }
 
 }

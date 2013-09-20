@@ -5,7 +5,6 @@
  */
 package org.mifosplatform.infrastructure.core.serialization;
 
-
 /**
  * Service for serializing commands into another format.
  * 

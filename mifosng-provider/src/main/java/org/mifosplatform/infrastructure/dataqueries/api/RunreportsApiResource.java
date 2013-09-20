@@ -62,12 +62,12 @@ public class RunreportsApiResource {
     @Produces({ MediaType.APPLICATION_JSON, "application/x-msdownload", "application/vnd.ms-excel", "application/pdf", "text/html" })
     public Response runReport(@PathParam("reportName") final String reportName, @Context final UriInfo uriInfo) {
 
-        MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+        final MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
 
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        boolean exportCsv = ApiParameterHelper.exportCsv(uriInfo.getQueryParameters());
-        boolean parameterType = ApiParameterHelper.parameterType(uriInfo.getQueryParameters());
-        boolean exportPdf = ApiParameterHelper.exportPdf(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        final boolean exportCsv = ApiParameterHelper.exportCsv(uriInfo.getQueryParameters());
+        final boolean parameterType = ApiParameterHelper.parameterType(uriInfo.getQueryParameters());
+        final boolean exportPdf = ApiParameterHelper.exportPdf(uriInfo.getQueryParameters());
 
         checkUserPermissionForReport(reportName, parameterType);
 
@@ -75,8 +75,8 @@ public class RunreportsApiResource {
         if (!parameterType) {
             parameterTypeValue = "report";
             if (this.readExtraDataAndReportingService.getReportType(reportName).equalsIgnoreCase("Pentaho")) {
-                Map<String, String> reportParams = getReportParams(queryParams, true);
-                Locale locale = ApiParameterHelper.extractLocale(queryParams);
+                final Map<String, String> reportParams = getReportParams(queryParams, true);
+                final Locale locale = ApiParameterHelper.extractLocale(queryParams);
                 return this.readExtraDataAndReportingService.processPentahoRequest(reportName, queryParams.getFirst("output-type"),
                         reportParams, locale);
             }
@@ -87,12 +87,13 @@ public class RunreportsApiResource {
         // PDF format
 
         if (exportPdf) {
-            Map<String, String> reportParams = getReportParams(queryParams, false);
-            String pdfFileName = this.readExtraDataAndReportingService.retrieveReportPDF(reportName, parameterTypeValue, reportParams);
+            final Map<String, String> reportParams = getReportParams(queryParams, false);
+            final String pdfFileName = this.readExtraDataAndReportingService
+                    .retrieveReportPDF(reportName, parameterTypeValue, reportParams);
 
-            File file = new File(pdfFileName);
+            final File file = new File(pdfFileName);
 
-            ResponseBuilder response = Response.ok(file);
+            final ResponseBuilder response = Response.ok(file);
             response.header("Content-Disposition", "attachment; filename=\"" + pdfFileName + "\"");
             response.header("content-Type", "application/pdf");
 
@@ -101,10 +102,10 @@ public class RunreportsApiResource {
         }
 
         if (!exportCsv) {
-            Map<String, String> reportParams = getReportParams(queryParams, false);
+            final Map<String, String> reportParams = getReportParams(queryParams, false);
 
-            GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(reportName, parameterTypeValue,
-                    reportParams);
+            final GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(reportName,
+                    parameterTypeValue, reportParams);
 
             String json = "";
             final boolean genericResultSetIsPassed = ApiParameterHelper.genericResultSetPassed(uriInfo.getQueryParameters());
@@ -123,8 +124,9 @@ public class RunreportsApiResource {
         }
 
         // CSV Export
-        Map<String, String> reportParams = getReportParams(queryParams, false);
-        StreamingOutput result = this.readExtraDataAndReportingService.retrieveReportCSV(reportName, parameterTypeValue, reportParams);
+        final Map<String, String> reportParams = getReportParams(queryParams, false);
+        final StreamingOutput result = this.readExtraDataAndReportingService
+                .retrieveReportCSV(reportName, parameterTypeValue, reportParams);
 
         return Response.ok().entity(result).type("application/x-msdownload")
                 .header("Content-Disposition", "attachment;filename=" + reportName.replaceAll(" ", "") + ".csv").build();
@@ -135,7 +137,7 @@ public class RunreportsApiResource {
         // Anyone can run a 'report' that is simply getting possible parameter
         // (dropdown listbox) values.
         if (!parameterType) {
-            AppUser currentUser = context.authenticatedUser();
+            final AppUser currentUser = this.context.authenticatedUser();
             if (currentUser.hasNotPermissionForReport(reportName)) { throw new NoAuthorizationException("Not authorised to run report: "
                     + reportName); }
         }
@@ -143,17 +145,18 @@ public class RunreportsApiResource {
 
     private Map<String, String> getReportParams(final MultivaluedMap<String, String> queryParams, final Boolean isPentaho) {
 
-        Map<String, String> reportParams = new HashMap<String, String>();
-        Set<String> keys = queryParams.keySet();
+        final Map<String, String> reportParams = new HashMap<String, String>();
+        final Set<String> keys = queryParams.keySet();
         String pKey;
         String pValue;
-        for (String k : keys) {
+        for (final String k : keys) {
 
             if (k.startsWith("R_")) {
-                if (isPentaho)
+                if (isPentaho) {
                     pKey = k.substring(2);
-                else
+                } else {
                     pKey = "${" + k.substring(2) + "}";
+                }
 
                 pValue = queryParams.get(k).get(0);
                 reportParams.put(pKey, pValue);

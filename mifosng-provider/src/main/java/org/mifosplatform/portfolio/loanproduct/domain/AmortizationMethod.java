@@ -23,7 +23,7 @@ public enum AmortizationMethod {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public static AmortizationMethod fromInt(final Integer selectedMethod) {

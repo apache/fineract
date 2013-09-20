@@ -88,7 +88,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         final CenterData center = this.centerReadPlatformService.retrieveOne(centerId);
         final String groupHierarchy = center.getHierarchy() + "%";
 
-        Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.retriveJLGCollectionSheet(groupHierarchy, officeHierarchy,
+        final Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = retriveJLGCollectionSheet(groupHierarchy, officeHierarchy,
                 dueDate);
 
         final JLGCollectionSheetData jlgCollectionSheetData = buildJLGCollectionSheet(dueDate, collectionSheetFlatDatas);
@@ -116,7 +116,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         JLGCollectionSheetData jlgCollectionSheetData = null;
         JLGCollectionSheetFlatData prevCollectioSheetFlatData = null;
         JLGCollectionSheetFlatData corrCollectioSheetFlatData = null;
-        Set<LoanProductData> loanProducts = new HashSet<LoanProductData>();
+        final Set<LoanProductData> loanProducts = new HashSet<LoanProductData>();
         if (jlgCollectionSheetFlatData != null) {
 
             for (final JLGCollectionSheetFlatData collectionSheetFlatData : jlgCollectionSheetFlatData) {
@@ -182,7 +182,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             }
 
             jlgCollectionSheetData = new JLGCollectionSheetData(dueDate, loanProducts, jlgGroupsData,
-                    attendanceDropdownReadPlatformService.retrieveAttendanceTypeOptions());
+                    this.attendanceDropdownReadPlatformService.retrieveAttendanceTypeOptions());
         }
 
         return jlgCollectionSheetData;
@@ -315,10 +315,10 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper();
 
-        StringBuilder sql = new StringBuilder(mapper.collectionSheetSchema());
+        final StringBuilder sql = new StringBuilder(mapper.collectionSheetSchema());
         sql.append(" WHERE gp.id = :groupId GROUP BY gp.id ,cl.id , ln.id ORDER BY gp.id , cl.id , ln.id ");
 
-        //entityType should be center if it's within a center
+        // entityType should be center if it's within a center
         final CalendarEntityType entityType = (group.isChildGroup()) ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
 
         final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("dueDate", transactionDateStr)

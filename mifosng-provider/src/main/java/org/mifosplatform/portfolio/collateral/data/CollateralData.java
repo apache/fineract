@@ -44,7 +44,7 @@ public class CollateralData {
     }
 
     private CollateralData(final Long id, final CodeValueData type, final BigDecimal value, final String description,
-            final CurrencyData currencyData, Collection<CodeValueData> allowedCollateralTypes) {
+            final CurrencyData currencyData, final Collection<CodeValueData> allowedCollateralTypes) {
         this.id = id;
         this.type = type;
         this.value = value;
@@ -53,7 +53,7 @@ public class CollateralData {
         this.allowedCollateralTypes = allowedCollateralTypes;
     }
 
-    public CollateralData template(CollateralData collateralData, Collection<CodeValueData> codeValues) {
+    public CollateralData template(final CollateralData collateralData, final Collection<CodeValueData> codeValues) {
         return new CollateralData(collateralData.id, collateralData.type, collateralData.value, collateralData.description,
                 collateralData.currency, codeValues);
     }

@@ -46,13 +46,14 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     @Transactional
     @Override
     public SavingsAccountTransaction handleWithdrawal(final SavingsAccount account, final DateTimeFormatter fmt,
-            final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail, boolean applyWithdrawFee) {
+            final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
+            final boolean applyWithdrawFee) {
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
-        SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount, 
-                existingTransactionIds,existingReversedTransactionIds, paymentDetail);
-        final SavingsAccountTransaction withdrawal = account.withdraw(transactionDTO , applyWithdrawFee);
+        final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
+                existingTransactionIds, existingReversedTransactionIds, paymentDetail);
+        final SavingsAccountTransaction withdrawal = account.withdraw(transactionDTO, applyWithdrawFee);
 
         final MathContext mc = MathContext.DECIMAL64;
         if (account.isBeforeLastPostingPeriod(transactionDate)) {
@@ -78,7 +79,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
-        SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount, 
+        final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
                 existingTransactionIds, existingReversedTransactionIds, paymentDetail);
         final SavingsAccountTransaction deposit = account.deposit(transactionDTO);
 
@@ -113,6 +114,6 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
         final Map<String, Object> accountingBridgeData = savingsAccount.deriveAccountingBridgeData(applicationCurrency.toData(),
                 existingTransactionIds, existingReversedTransactionIds);
-        journalEntryWritePlatformService.createJournalEntriesForSavings(accountingBridgeData);
+        this.journalEntryWritePlatformService.createJournalEntriesForSavings(accountingBridgeData);
     }
 }

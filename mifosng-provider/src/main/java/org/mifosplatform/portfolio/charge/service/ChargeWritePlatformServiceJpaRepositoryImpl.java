@@ -43,6 +43,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
     private final DataSource dataSource;
     private final ChargeRepository chargeRepository;
     private final LoanProductRepository loanProductRepository;
+
     @Autowired
     public ChargeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer, final ChargeRepository chargeRepository,
@@ -66,9 +67,9 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
             final Charge charge = Charge.fromJson(command);
             this.chargeRepository.save(charge);
-            
+
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(charge.getId()).build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
@@ -94,7 +95,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
             }
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(chargeId).with(changes).build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
@@ -109,17 +110,17 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
         final Charge chargeForDelete = this.chargeRepository.findOne(chargeId);
         if (chargeForDelete == null || chargeForDelete.isDeleted()) { throw new ChargeNotFoundException(chargeId); }
-        
-        Collection<LoanProduct> loanProducts = this.loanProductRepository.retrieveLoanProductsByChargeId(chargeId);
-        Boolean isChargeExistWithLoans = isAnyLoansAssociateWithThisCharge(chargeId);
-        
+
+        final Collection<LoanProduct> loanProducts = this.loanProductRepository.retrieveLoanProductsByChargeId(chargeId);
+        final Boolean isChargeExistWithLoans = isAnyLoansAssociateWithThisCharge(chargeId);
+
         if (!loanProducts.isEmpty() || isChargeExistWithLoans) { throw new ChargeCannotBeDeletedException(
                 "error.msg.charge.cannot.be.deleted.it.is.already.used.in.loan",
                 "This charge cannot be deleted, it is already used in loan"); }
-        
+
         chargeForDelete.delete();
-        
-        chargeRepository.save(chargeForDelete);
+
+        this.chargeRepository.save(chargeForDelete);
 
         return new CommandProcessingResultBuilder().withEntityId(chargeForDelete.getId()).build();
     }
@@ -130,7 +131,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
 
-        Throwable realCause = dve.getMostSpecificCause();
+        final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("name")) {
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.charge.duplicate.name", "Charge with name `" + name + "` already exists",
@@ -141,7 +142,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         throw new PlatformDataIntegrityException("error.msg.charge.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
-    
+
     private boolean isAnyLoansAssociateWithThisCharge(final Long chargeId) {
 
         final String sql = "select if((exists (select 1 from m_loan_charge lc where lc.charge_id = ?)) = 1, 'true', 'false')";

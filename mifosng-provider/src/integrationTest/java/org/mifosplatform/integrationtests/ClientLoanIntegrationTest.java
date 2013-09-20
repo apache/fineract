@@ -34,27 +34,28 @@ public class ClientLoanIntegrationTest {
     @Before
     public void setup() {
         Utils.initializeRESTAssured();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
     public void checkClientLoanCreateAndDisburseFlow() {
-        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
-        Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
-        Integer loanProductID = createLoanProduct();
-        Integer loanID = applyForLoanApplication(clientID, loanProductID);
-        ArrayList<HashMap> loanSchedule = loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer loanProductID = createLoanProduct();
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID);
+        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
+                loanID);
         verifyLoanRepaymentSchedule(loanSchedule);
 
     }
 
     private Integer createLoanProduct() {
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        String loanProductJSON = new LoanProductTestBuilder() //
+        final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("12,000.00") //
                 .withNumberOfRepayments("4") //
                 .withRepaymentAfterEvery("1") //
@@ -64,12 +65,12 @@ public class ClientLoanIntegrationTest {
                 .withAmortizationTypeAsEqualInstallments() //
                 .withInterestTypeAsDecliningBalance() //
                 .build();
-        return loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
         System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        String loanApplicationJSON = new LoanApplicationTestBuilder() //
+        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal("12,000.00") //
                 .withLoanTermFrequency("4") //
                 .withLoanTermFrequencyAsMonths() //
@@ -83,7 +84,7 @@ public class ClientLoanIntegrationTest {
                 .withExpectedDisbursementDate("20 September 2011") //
                 .withSubmittedOnDate("20 September 2011") //
                 .build(clientID.toString(), loanProductID.toString());
-        return loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
     private void verifyLoanRepaymentSchedule(final ArrayList<HashMap> loanSchedule) {

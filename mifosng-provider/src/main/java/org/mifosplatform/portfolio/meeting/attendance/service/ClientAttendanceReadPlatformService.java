@@ -10,5 +10,6 @@ import java.util.Collection;
 import org.mifosplatform.portfolio.meeting.attendance.data.ClientAttendanceData;
 
 public interface ClientAttendanceReadPlatformService {
+
     Collection<ClientAttendanceData> retrieveClientAttendanceByMeetingId(final Long meetingId);
 }

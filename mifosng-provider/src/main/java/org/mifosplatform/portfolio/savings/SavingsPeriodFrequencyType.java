@@ -28,7 +28,7 @@ public enum SavingsPeriodFrequencyType {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public static SavingsPeriodFrequencyType fromInt(final Integer type) {

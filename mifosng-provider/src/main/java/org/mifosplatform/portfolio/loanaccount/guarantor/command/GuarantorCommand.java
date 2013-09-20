@@ -69,7 +69,7 @@ public class GuarantorCommand {
     }
 
     public boolean isExternalGuarantor() {
-        return GuarantorType.EXTERNAL.getValue().equals(guarantorTypeId);
+        return GuarantorType.EXTERNAL.getValue().equals(this.guarantorTypeId);
     }
 
     public Date getDobAsDate() {
@@ -78,9 +78,9 @@ public class GuarantorCommand {
 
     public void validateForCreate() {
 
-        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-        DataValidatorBuilder baseDataValidator = getDataValidator(dataValidationErrors);
+        final DataValidatorBuilder baseDataValidator = getDataValidator(dataValidationErrors);
 
         baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.CLIENT_RELATIONSHIP_TYPE_ID.getValue())
                 .value(this.clientRelationshipTypeId).ignoreIfNull().integerGreaterThanZero();
@@ -89,7 +89,7 @@ public class GuarantorCommand {
                 .inMinMaxRange(GuarantorType.getMinValue(), GuarantorType.getMaxValue());
 
         // validate for existing Client or Staff serving as gurantor
-        if (!this.isExternalGuarantor()) {
+        if (!isExternalGuarantor()) {
             baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID.getValue()).value(this.entityId).notNull()
                     .integerGreaterThanZero();
         } else {
@@ -106,9 +106,9 @@ public class GuarantorCommand {
     }
 
     public void validateForUpdate() {
-        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-        DataValidatorBuilder baseDataValidator = getDataValidator(dataValidationErrors);
+        final DataValidatorBuilder baseDataValidator = getDataValidator(dataValidationErrors);
 
         baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.CLIENT_RELATIONSHIP_TYPE_ID.getValue())
                 .value(this.clientRelationshipTypeId).ignoreIfNull().integerGreaterThanZero();
@@ -117,7 +117,7 @@ public class GuarantorCommand {
                 .ignoreIfNull().inMinMaxRange(GuarantorType.getMinValue(), GuarantorType.getMaxValue());
 
         // validate for existing Client or Staff serving as gurantor
-        if (!this.isExternalGuarantor()) {
+        if (!isExternalGuarantor()) {
             baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID.getValue()).value(this.entityId).ignoreIfNull()
                     .integerGreaterThanZero();
         } else {
@@ -143,7 +143,7 @@ public class GuarantorCommand {
     /**
      * @param baseDataValidator
      */
-    private void validateNonMandatoryFieldsForMaxLength(DataValidatorBuilder baseDataValidator) {
+    private void validateNonMandatoryFieldsForMaxLength(final DataValidatorBuilder baseDataValidator) {
         // validate non mandatory fields for length
         baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.ADDRESS_LINE_1.getValue()).value(this.addressLine1).ignoreIfNull()
                 .notExceedingLengthOf(500);
@@ -169,15 +169,15 @@ public class GuarantorCommand {
      * @param dataValidationErrors
      * @return
      */
-    private DataValidatorBuilder getDataValidator(List<ApiParameterError> dataValidationErrors) {
-        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("Guarantor");
+    private DataValidatorBuilder getDataValidator(final List<ApiParameterError> dataValidationErrors) {
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("Guarantor");
         return baseDataValidator;
     }
 
     public Long getClientRelationshipTypeId() {
         return this.clientRelationshipTypeId;
     }
-    
+
     public Long getEntityId() {
         return this.entityId;
     }

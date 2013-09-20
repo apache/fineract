@@ -111,8 +111,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
-        }
-        else if (wrapper.isConfigurationResource()) {
+        } else if (wrapper.isConfigurationResource()) {
             handler = this.applicationContext.getBean("updateGlobalConfigurationCommandHandler", NewCommandSourceHandler.class);
         } else if (wrapper.isDatatableResource()) {
             if (wrapper.isCreateDatatable()) {
@@ -442,7 +441,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = this.applicationContext.getBean("paySavingsAccountChargeCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
-            }            
+            }
         } else if (wrapper.isCalendarResource()) {
             if (wrapper.isCreate()) {
                 handler = this.applicationContext.getBean("createCalendarCommandHandler", NewCommandSourceHandler.class);
@@ -476,7 +475,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = this.applicationContext.getBean("unassignRoleCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdateGroupRole()) {
                 handler = this.applicationContext.getBean("updateGroupRoleCommandHandler", NewCommandSourceHandler.class);
-            }  else if (wrapper.isAssignStaff()) {
+            } else if (wrapper.isAssignStaff()) {
                 handler = this.applicationContext.getBean("assignGroupStaffCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isTransferClientsBetweenGroups()) {
                 handler = this.applicationContext.getBean("transferClientsBetweenGroupsCommandHandler", NewCommandSourceHandler.class);
@@ -534,9 +533,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             }
 
         } else if (wrapper.isXBRLMappingResource()) {
-        	if (wrapper.isUpdate()) {
-        		handler = this.applicationContext.getBean("updateTaxonomyMappingCommandHandler", NewCommandSourceHandler.class);
-        	} else {
+            if (wrapper.isUpdate()) {
+                handler = this.applicationContext.getBean("updateTaxonomyMappingCommandHandler", NewCommandSourceHandler.class);
+            } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
         } else if (wrapper.isHolidayResource()) {

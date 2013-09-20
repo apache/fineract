@@ -83,16 +83,18 @@ public class Guarantor extends AbstractPersistable<Long> {
 
     }
 
-    public static Guarantor createNew(Loan loan, CodeValue clientRelationshipType, Integer gurantorType, Long entityId, String firstname,
-            String lastname, Date dateOfBirth, String addressLine1, String addressLine2, String city, String state, String country,
-            String zip, String housePhoneNumber, String mobilePhoneNumber, String comment) {
+    public static Guarantor createNew(final Loan loan, final CodeValue clientRelationshipType, final Integer gurantorType,
+            final Long entityId, final String firstname, final String lastname, final Date dateOfBirth, final String addressLine1,
+            final String addressLine2, final String city, final String state, final String country, final String zip,
+            final String housePhoneNumber, final String mobilePhoneNumber, final String comment) {
         return new Guarantor(loan, clientRelationshipType, gurantorType, entityId, firstname, lastname, dateOfBirth, addressLine1,
                 addressLine2, city, state, country, zip, housePhoneNumber, mobilePhoneNumber, comment);
     }
 
-    public Guarantor(Loan loan, CodeValue clientRelationshipType, Integer gurantorType, Long entityId, String firstname, String lastname,
-            Date dateOfBirth, String addressLine1, String addressLine2, String city, String state, String country, String zip,
-            String housePhoneNumber, String mobilePhoneNumber, String comment) {
+    public Guarantor(final Loan loan, final CodeValue clientRelationshipType, final Integer gurantorType, final Long entityId,
+            final String firstname, final String lastname, final Date dateOfBirth, final String addressLine1, final String addressLine2,
+            final String city, final String state, final String country, final String zip, final String housePhoneNumber,
+            final String mobilePhoneNumber, final String comment) {
         this.loan = loan;
         this.clientRelationshipType = clientRelationshipType;
         this.gurantorType = gurantorType;
@@ -112,22 +114,23 @@ public class Guarantor extends AbstractPersistable<Long> {
     }
 
     public static Guarantor fromJson(final Loan loan, final CodeValue clientRelationshipType, final JsonCommand command) {
-        Integer gurantorType = command.integerValueSansLocaleOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID.getValue());
-        Long entityId = command.longValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID.getValue());
+        final Integer gurantorType = command.integerValueSansLocaleOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID
+                .getValue());
+        final Long entityId = command.longValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID.getValue());
 
         if (GuarantorType.EXTERNAL.getValue().equals(gurantorType)) {
-            String firstname = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.FIRSTNAME.getValue());
-            String lastname = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.LASTNAME.getValue());
-            Date dateOfBirth = command.DateValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.DATE_OF_BIRTH.getValue());
-            String addressLine1 = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.ADDRESS_LINE_1.getValue());
-            String addressLine2 = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.ADDRESS_LINE_2.getValue());
-            String city = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.CITY.getValue());
-            String state = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.STATE.getValue());
-            String country = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.COUNTRY.getValue());
-            String zip = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.ZIP.getValue());
-            String housePhoneNumber = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.PHONE_NUMBER.getValue());
-            String mobilePhoneNumber = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.MOBILE_NUMBER.getValue());
-            String comment = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.COMMENT.getValue());
+            final String firstname = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.FIRSTNAME.getValue());
+            final String lastname = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.LASTNAME.getValue());
+            final Date dateOfBirth = command.DateValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.DATE_OF_BIRTH.getValue());
+            final String addressLine1 = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.ADDRESS_LINE_1.getValue());
+            final String addressLine2 = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.ADDRESS_LINE_2.getValue());
+            final String city = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.CITY.getValue());
+            final String state = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.STATE.getValue());
+            final String country = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.COUNTRY.getValue());
+            final String zip = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.ZIP.getValue());
+            final String housePhoneNumber = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.PHONE_NUMBER.getValue());
+            final String mobilePhoneNumber = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.MOBILE_NUMBER.getValue());
+            final String comment = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.COMMENT.getValue());
 
             return new Guarantor(loan, clientRelationshipType, gurantorType, entityId, firstname, lastname, dateOfBirth, addressLine1,
                     addressLine2, city, state, country, zip, housePhoneNumber, mobilePhoneNumber, comment);
@@ -145,7 +148,7 @@ public class Guarantor extends AbstractPersistable<Long> {
         handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID.getValue(), this.gurantorType, true);
         handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.CLIENT_RELATIONSHIP_TYPE_ID.getValue(), 0, true);
 
-        if (this.isExternalGuarantor()) {
+        if (isExternalGuarantor()) {
             handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.FIRSTNAME.getValue(), this.firstname);
             handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.LASTNAME.getValue(), this.lastname);
             handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.DATE_OF_BIRTH.getValue(), this.dateOfBirth);
@@ -180,7 +183,7 @@ public class Guarantor extends AbstractPersistable<Long> {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            Integer propertyToBeUpdated, boolean sansLocale) {
+            Integer propertyToBeUpdated, final boolean sansLocale) {
         if (command.isChangeInIntegerParameterNamed(paramName, propertyToBeUpdated)) {
             Integer newValue = null;
             if (sansLocale) {
@@ -280,7 +283,7 @@ public class Guarantor extends AbstractPersistable<Long> {
         return this.clientRelationshipType;
     }
 
-    public void updateClientRelationshipType(CodeValue clientRelationshipType) {
+    public void updateClientRelationshipType(final CodeValue clientRelationshipType) {
         this.clientRelationshipType = clientRelationshipType;
     }
 

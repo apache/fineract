@@ -39,7 +39,7 @@ public class CronMethodParser {
 
     public static final int METHOD_INDEX = 1;
 
-    public static String[] findTargetMethodDetails(String attributeValue) throws IOException {
+    public static String[] findTargetMethodDetails(final String attributeValue) throws IOException {
         if (!targetMethosMap.containsKey(attributeValue)) {
             findAnnotationMethods(CronTarget.class, CRON_ANNOTATION_ATTRIBUTE_NAME);
         }
@@ -50,21 +50,23 @@ public class CronMethodParser {
      * method adds all the method names to map with annotation attribute value
      * as key
      */
-    private static void findAnnotationMethods(Class<? extends Annotation> annotationClass, String attributeName) throws IOException {
-        String basePackagePath = ClassUtils.convertClassNameToResourcePath(new StandardEnvironment()
+    private static void findAnnotationMethods(final Class<? extends Annotation> annotationClass, final String attributeName)
+            throws IOException {
+        final String basePackagePath = ClassUtils.convertClassNameToResourcePath(new StandardEnvironment()
                 .resolveRequiredPlaceholders(SEARCH_PACKAGE));
-        String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + basePackagePath + "/" + RESOURCE_PATTERN;
-        Resource[] resources = resourcePatternResolver.getResources(packageSearchPath);
-        for (Resource resource : resources) {
+        final String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + basePackagePath + "/" + RESOURCE_PATTERN;
+        final Resource[] resources = resourcePatternResolver.getResources(packageSearchPath);
+        for (final Resource resource : resources) {
             if (resource.isReadable()) {
-                MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
-                Set<MethodMetadata> metadataSet = metadataReader.getAnnotationMetadata().getAnnotatedMethods(annotationClass.getName());
+                final MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
+                final Set<MethodMetadata> metadataSet = metadataReader.getAnnotationMetadata().getAnnotatedMethods(
+                        annotationClass.getName());
                 if (metadataSet != null && metadataSet.size() > 0) {
-                    for (MethodMetadata metadata : metadataSet) {
-                        Map<String, Object> attributes = metadata.getAnnotationAttributes(annotationClass.getName());
-                        JobName attributeValue = (JobName) attributes.get(attributeName);
-                        String className = metadata.getDeclaringClassName();
-                        String[] mapVal = { className, metadata.getMethodName() };
+                    for (final MethodMetadata metadata : metadataSet) {
+                        final Map<String, Object> attributes = metadata.getAnnotationAttributes(annotationClass.getName());
+                        final JobName attributeValue = (JobName) attributes.get(attributeName);
+                        final String className = metadata.getDeclaringClassName();
+                        final String[] mapVal = { className, metadata.getMethodName() };
                         targetMethosMap.put(attributeValue.toString(), mapVal);
                     }
                 }

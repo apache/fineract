@@ -31,7 +31,7 @@ public class AccountSummaryCollectionData {
 
     public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,
             final Collection<SavingsAccountSummaryData> savingsAccounts, final Collection<LoanAccountSummaryData> memberLoanAccounts,
-            Collection<SavingsAccountSummaryData> memberSavingsAccounts) {
+            final Collection<SavingsAccountSummaryData> memberSavingsAccounts) {
         this.loanAccounts = defaultLoanAccountsIfEmpty(loanAccounts);
         this.savingsAccounts = defaultSavingsAccountsIfEmpty(savingsAccounts);
         this.memberLoanAccounts = defaultLoanAccountsIfEmpty(memberLoanAccounts);

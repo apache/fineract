@@ -43,46 +43,48 @@ public class SavingsAccountChargeDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SAVINGS_ACCOUNT_CHARGES_ADD_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SAVINGS_ACCOUNT_CHARGES_ADD_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
 
-        final JsonElement element = fromApiJsonHelper.parse(json);
-        final Long chargeId = fromApiJsonHelper.extractLongNamed(chargeIdParamName, element);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        final Long chargeId = this.fromApiJsonHelper.extractLongNamed(chargeIdParamName, element);
         baseDataValidator.reset().parameter(chargeIdParamName).value(chargeId).notNull().integerGreaterThanZero();
 
-        final BigDecimal amount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(amountParamName, element);
+        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(amountParamName, element);
         baseDataValidator.reset().parameter(amountParamName).value(amount).notNull().positiveAmount();
 
-        if (fromApiJsonHelper.parameterExists(dueAsOfDateParamName, element)) {
-            fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element);
+        if (this.fromApiJsonHelper.parameterExists(dueAsOfDateParamName, element)) {
+            this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
- 
+
     public void validateUpdate(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SAVINGS_ACCOUNT_CHARGES_ADD_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SAVINGS_ACCOUNT_CHARGES_ADD_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
 
-        final JsonElement element = fromApiJsonHelper.parse(json);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final BigDecimal amount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(amountParamName, element);
+        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(amountParamName, element);
         baseDataValidator.reset().parameter(amountParamName).value(amount).notNull().positiveAmount();
 
-        if (fromApiJsonHelper.parameterExists(dueAsOfDateParamName, element)) {
-            fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element);
+        if (this.fromApiJsonHelper.parameterExists(dueAsOfDateParamName, element)) {
+            this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
-    
+
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }

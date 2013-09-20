@@ -32,10 +32,11 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
     private final MeetingWritePlatformService meetingWritePlatformService;
 
     @Autowired
-    public CollectionSheetWritePlatformServiceJpaRepositoryImpl(LoanWritePlatformService loanWritePlatformService,
-            CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer bulkRepaymentCommandFromApiJsonDeserializer,
-            CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer bulkDisbursalCommandFromApiJsonDeserializer,
-            final CollectionSheetTransactionDataValidator transactionDataValidator, final MeetingWritePlatformService meetingWritePlatformService) {
+    public CollectionSheetWritePlatformServiceJpaRepositoryImpl(final LoanWritePlatformService loanWritePlatformService,
+            final CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer bulkRepaymentCommandFromApiJsonDeserializer,
+            final CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer bulkDisbursalCommandFromApiJsonDeserializer,
+            final CollectionSheetTransactionDataValidator transactionDataValidator,
+            final MeetingWritePlatformService meetingWritePlatformService) {
         this.loanWritePlatformService = loanWritePlatformService;
         this.bulkRepaymentCommandFromApiJsonDeserializer = bulkRepaymentCommandFromApiJsonDeserializer;
         this.bulkDisbursalCommandFromApiJsonDeserializer = bulkDisbursalCommandFromApiJsonDeserializer;
@@ -44,43 +45,44 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
     }
 
     @Override
-    public CommandProcessingResult updateCollectionSheet(JsonCommand command) {
-        
+    public CommandProcessingResult updateCollectionSheet(final JsonCommand command) {
+
         this.transactionDataValidator.validateTransaction(command);
-        
-        Map<String, Object> changes = new HashMap<String, Object>();
+
+        final Map<String, Object> changes = new HashMap<String, Object>();
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
-        
+
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
         }
-        
+
         changes.putAll(updateBulkReapayments(command));
 
         changes.putAll(updateBulkDisbursals(command));
-        
+
         this.meetingWritePlatformService.updateCollectionSheetAttendance(command);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(command.entityId()) //
                 .withGroupId(command.entityId()) //
-                .with(changes)
-                .with(changes).build();
+                .with(changes).with(changes).build();
     }
 
-    private Map<String, Object> updateBulkReapayments(JsonCommand command) {
-        Map<String, Object> changes = new HashMap<String, Object>();
-        final CollectionSheetBulkRepaymentCommand bulkRepaymentCommand = this.bulkRepaymentCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
+    private Map<String, Object> updateBulkReapayments(final JsonCommand command) {
+        final Map<String, Object> changes = new HashMap<String, Object>();
+        final CollectionSheetBulkRepaymentCommand bulkRepaymentCommand = this.bulkRepaymentCommandFromApiJsonDeserializer
+                .commandFromApiJson(command.json());
         changes.putAll(this.loanWritePlatformService.makeLoanBulkRepayment(bulkRepaymentCommand));
         return changes;
     }
 
-    private Map<String, Object> updateBulkDisbursals(JsonCommand command) {
-        Map<String, Object> changes = new HashMap<String, Object>();
-        final CollectionSheetBulkDisbursalCommand bulkDisbursalCommand = this.bulkDisbursalCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
+    private Map<String, Object> updateBulkDisbursals(final JsonCommand command) {
+        final Map<String, Object> changes = new HashMap<String, Object>();
+        final CollectionSheetBulkDisbursalCommand bulkDisbursalCommand = this.bulkDisbursalCommandFromApiJsonDeserializer
+                .commandFromApiJson(command.json());
         changes.putAll(this.loanWritePlatformService.bulkLoanDisbursal(command, bulkDisbursalCommand));
         return changes;
     }

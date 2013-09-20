@@ -157,13 +157,13 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             final Long savingsId = account.getId();
             return new CommandProcessingResultBuilder() //
-            .withCommandId(command.commandId()) //
-            .withEntityId(savingsId) //
-            .withOfficeId(account.officeId()) //
-            .withClientId(account.clientId()) //
-            .withGroupId(account.groupId()) //
-            .withSavingsId(savingsId) //
-            .build();
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(savingsId) //
+                    .withOfficeId(account.officeId()) //
+                    .withClientId(account.clientId()) //
+                    .withGroupId(account.groupId()) //
+                    .withSavingsId(savingsId) //
+                    .build();
         } catch (final DataAccessException dve) {
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
@@ -233,7 +233,9 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 }
 
                 if (changes.containsKey("charges")) {
-                    //final Set<Charge> savingsProductCharges = this.savi.assembleListOfSavingsProductCharges(command, product.currency().getCode());
+                    // final Set<Charge> savingsProductCharges =
+                    // this.savi.assembleListOfSavingsProductCharges(command,
+                    // product.currency().getCode());
                     final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(command.parsedJson());
                     final boolean updated = account.update(charges);
                     if (!updated) {
@@ -245,14 +247,14 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             }
 
             return new CommandProcessingResultBuilder() //
-            .withCommandId(command.commandId()) //
-            .withEntityId(savingsId) //
-            .withOfficeId(account.officeId()) //
-            .withClientId(account.clientId()) //
-            .withGroupId(account.groupId()) //
-            .withSavingsId(savingsId) //
-            .with(changes) //
-            .build();
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(savingsId) //
+                    .withOfficeId(account.officeId()) //
+                    .withClientId(account.clientId()) //
+                    .withGroupId(account.groupId()) //
+                    .withSavingsId(savingsId) //
+                    .with(changes) //
+                    .build();
         } catch (final DataAccessException dve) {
             handleDataIntegrityIssues(command, dve);
             return new CommandProcessingResult(Long.valueOf(-1));
@@ -269,10 +271,10 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         if (account.isNotSubmittedAndPendingApproval()) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-            .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.deleteApplicationAction);
+                    .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.deleteApplicationAction);
 
             baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName)
-            .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
+                    .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
 
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
@@ -283,12 +285,12 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.savingAccountRepository.delete(account);
 
         return new CommandProcessingResultBuilder() //
-        .withEntityId(savingsId) //
-        .withOfficeId(account.officeId()) //
-        .withClientId(account.clientId()) //
-        .withGroupId(account.groupId()) //
-        .withSavingsId(savingsId) //
-        .build();
+                .withEntityId(savingsId) //
+                .withOfficeId(account.officeId()) //
+                .withClientId(account.clientId()) //
+                .withGroupId(account.groupId()) //
+                .withSavingsId(savingsId) //
+                .build();
     }
 
     @Transactional
@@ -315,14 +317,14 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         }
 
         return new CommandProcessingResultBuilder() //
-        .withCommandId(command.commandId()) //
-        .withEntityId(savingsId) //
-        .withOfficeId(savingsAccount.officeId()) //
-        .withClientId(savingsAccount.clientId()) //
-        .withGroupId(savingsAccount.groupId()) //
-        .withSavingsId(savingsId) //
-        .with(changes) //
-        .build();
+                .withCommandId(command.commandId()) //
+                .withEntityId(savingsId) //
+                .withOfficeId(savingsAccount.officeId()) //
+                .withClientId(savingsAccount.clientId()) //
+                .withGroupId(savingsAccount.groupId()) //
+                .withSavingsId(savingsId) //
+                .with(changes) //
+                .build();
     }
 
     @Transactional
@@ -349,14 +351,14 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         }
 
         return new CommandProcessingResultBuilder() //
-        .withCommandId(command.commandId()) //
-        .withEntityId(savingsId) //
-        .withOfficeId(savingsAccount.officeId()) //
-        .withClientId(savingsAccount.clientId()) //
-        .withGroupId(savingsAccount.groupId()) //
-        .withSavingsId(savingsId) //
-        .with(changes) //
-        .build();
+                .withCommandId(command.commandId()) //
+                .withEntityId(savingsId) //
+                .withOfficeId(savingsAccount.officeId()) //
+                .withClientId(savingsAccount.clientId()) //
+                .withGroupId(savingsAccount.groupId()) //
+                .withSavingsId(savingsId) //
+                .with(changes) //
+                .build();
     }
 
     @Transactional
@@ -383,14 +385,14 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         }
 
         return new CommandProcessingResultBuilder() //
-        .withCommandId(command.commandId()) //
-        .withEntityId(savingsId) //
-        .withOfficeId(savingsAccount.officeId()) //
-        .withClientId(savingsAccount.clientId()) //
-        .withGroupId(savingsAccount.groupId()) //
-        .withSavingsId(savingsId) //
-        .with(changes) //
-        .build();
+                .withCommandId(command.commandId()) //
+                .withEntityId(savingsId) //
+                .withOfficeId(savingsAccount.officeId()) //
+                .withClientId(savingsAccount.clientId()) //
+                .withGroupId(savingsAccount.groupId()) //
+                .withSavingsId(savingsId) //
+                .with(changes) //
+                .build();
     }
 
     @Transactional
@@ -417,14 +419,14 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         }
 
         return new CommandProcessingResultBuilder() //
-        .withCommandId(command.commandId()) //
-        .withEntityId(savingsId) //
-        .withOfficeId(savingsAccount.officeId()) //
-        .withClientId(savingsAccount.clientId()) //
-        .withGroupId(savingsAccount.groupId()) //
-        .withSavingsId(savingsId) //
-        .with(changes) //
-        .build();
+                .withCommandId(command.commandId()) //
+                .withEntityId(savingsId) //
+                .withOfficeId(savingsAccount.officeId()) //
+                .withClientId(savingsAccount.clientId()) //
+                .withGroupId(savingsAccount.groupId()) //
+                .withSavingsId(savingsId) //
+                .with(changes) //
+                .build();
     }
 
     private void postJournalEntries(final SavingsAccount savingsAccount, final List<Long> existingTransactionIds,

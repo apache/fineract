@@ -73,7 +73,7 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final DataAccessException dae) {
-        logger.error(dae.getMessage(), dae);
+        this.logger.error(dae.getMessage(), dae);
     }
 
     @Transactional
@@ -88,12 +88,12 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
             this.savingProductRepository.save(product);
 
             // save accounting mappings
-            accountMappingWritePlatformService.createSavingProductToGLAccountMapping(product.getId(), command);
+            this.accountMappingWritePlatformService.createSavingProductToGLAccountMapping(product.getId(), command);
 
             return new CommandProcessingResultBuilder() //
                     .withEntityId(product.getId()) //
                     .build();
-        } catch (DataAccessException e) {
+        } catch (final DataAccessException e) {
             handleDataIntegrityIssues(command, e);
             return CommandProcessingResult.empty();
         }
@@ -113,17 +113,18 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
             final Map<String, Object> changes = product.update(command);
 
             if (changes.containsKey(chargesParamName)) {
-                final Set<Charge> savingsProductCharges = this.savingsProductAssembler.assembleListOfSavingsProductCharges(command, product.currency().getCode());
-                boolean updated = product.update(savingsProductCharges);
+                final Set<Charge> savingsProductCharges = this.savingsProductAssembler.assembleListOfSavingsProductCharges(command, product
+                        .currency().getCode());
+                final boolean updated = product.update(savingsProductCharges);
                 if (!updated) {
                     changes.remove(chargesParamName);
                 }
             }
-            
+
             // accounting related changes
-            boolean accountingTypeChanged = changes.containsKey(accountingRuleParamName);
-            final Map<String, Object> accountingMappingChanges = accountMappingWritePlatformService.updateSavingsProductToGLAccountMapping(
-                    product.getId(), command, accountingTypeChanged, product.getAccountingType());
+            final boolean accountingTypeChanged = changes.containsKey(accountingRuleParamName);
+            final Map<String, Object> accountingMappingChanges = this.accountMappingWritePlatformService
+                    .updateSavingsProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingType());
             changes.putAll(accountingMappingChanges);
 
             if (!changes.isEmpty()) {
@@ -133,7 +134,7 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
             return new CommandProcessingResultBuilder() //
                     .withEntityId(product.getId()) //
                     .with(changes).build();
-        } catch (DataAccessException e) {
+        } catch (final DataAccessException e) {
             handleDataIntegrityIssues(command, e);
             return CommandProcessingResult.empty();
         }

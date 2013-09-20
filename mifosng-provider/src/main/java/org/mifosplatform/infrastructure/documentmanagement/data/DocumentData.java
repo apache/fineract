@@ -27,7 +27,7 @@ public class DocumentData {
     private final Integer storageType;
 
     public DocumentData(final Long id, final String parentEntityType, final Long parentEntityId, final String name, final String fileName,
-            final Long size, final String type, final String description, final String location, Integer storageType) {
+            final Long size, final String type, final String description, final String location, final Integer storageType) {
         this.id = id;
         this.parentEntityType = parentEntityType;
         this.parentEntityId = parentEntityId;
@@ -53,7 +53,7 @@ public class DocumentData {
     }
 
     public StorageType storageType() {
-        return StorageType.fromInt(storageType);
+        return StorageType.fromInt(this.storageType);
     }
 
     public String getParentEntityType() {

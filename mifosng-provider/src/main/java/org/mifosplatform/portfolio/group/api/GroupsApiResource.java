@@ -125,9 +125,10 @@ public class GroupsApiResource {
         if (is(commandParam, "close")) {
             final GroupGeneralData groupClosureTemplate = this.groupReadPlatformService.retrieveGroupWithClosureReasons();
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.groupGeneralApiJsonSerializer.serialize(settings, groupClosureTemplate, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
+            return this.groupGeneralApiJsonSerializer.serialize(settings, groupClosureTemplate,
+                    GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
         }
-        
+
         if (centerId != null) {
             final GroupGeneralData centerGroupTemplate = this.centerReadPlatformService.retrieveCenterGroupTemplate(centerId);
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());

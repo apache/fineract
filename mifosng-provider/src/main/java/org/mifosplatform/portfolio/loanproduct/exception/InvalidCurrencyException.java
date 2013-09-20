@@ -13,7 +13,8 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
  */
 public class InvalidCurrencyException extends AbstractPlatformDomainRuleException {
 
-    public InvalidCurrencyException(final String entity, final String postFix, String defaultUserMessage, Object... defaultUserMessageArgs) {
+    public InvalidCurrencyException(final String entity, final String postFix, final String defaultUserMessage,
+            final Object... defaultUserMessageArgs) {
         super("error.msg." + entity + "." + postFix + ".invalid.currency", defaultUserMessage, defaultUserMessageArgs);
     }
 }

@@ -12,14 +12,14 @@ public class CompoundInterestHelper {
 
         // sum up the 'rounded' values that are posted each posting period
         Money interestEarned = Money.zero(currency);
-        
+
         // total interest earned in previous periods but not yet recognised
         BigDecimal interestEarnedButNotPosted = BigDecimal.ZERO;
-        for (PostingPeriod postingPeriod : allPeriods) {
+        for (final PostingPeriod postingPeriod : allPeriods) {
 
             final BigDecimal interestEarnedThisPeriod = postingPeriod.calculateInterest(interestEarnedButNotPosted);
 
-            Money moneyToBePostedForPeriod = Money.of(currency, interestEarnedThisPeriod);
+            final Money moneyToBePostedForPeriod = Money.of(currency, interestEarnedThisPeriod);
 
             interestEarned = interestEarned.plus(moneyToBePostedForPeriod);
 

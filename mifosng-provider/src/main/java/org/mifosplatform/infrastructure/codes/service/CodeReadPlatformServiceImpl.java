@@ -52,7 +52,7 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
     @Override
     @Cacheable(value = "codes", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('CD')")
     public Collection<CodeData> retrieveAllCodes() {
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
         final CodeMapper rm = new CodeMapper();
         final String sql = "select " + rm.schema() + " order by c.code_name";
@@ -63,27 +63,27 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
     @Override
     public CodeData retrieveCode(final Long codeId) {
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
             final CodeMapper rm = new CodeMapper();
             final String sql = "select " + rm.schema() + " where c.id = ?";
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeId });
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new CodeNotFoundException(codeId);
         }
     }
 
     @Override
-    public CodeData retriveCode(String codeName) {
+    public CodeData retriveCode(final String codeName) {
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
             final CodeMapper rm = new CodeMapper();
             final String sql = "select " + rm.schema() + " where c.code_name = ?";
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeName });
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new CodeNotFoundException(codeName);
         }
     }

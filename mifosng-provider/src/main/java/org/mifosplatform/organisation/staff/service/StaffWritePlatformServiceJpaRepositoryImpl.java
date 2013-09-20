@@ -52,7 +52,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
     public CommandProcessingResult createStaff(final JsonCommand command) {
 
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
@@ -69,7 +69,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
                     .withCommandId(command.commandId()) //
                     .withEntityId(staff.getId()).withOfficeId(officeId) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleStaffDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
@@ -80,7 +80,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
     public CommandProcessingResult updateStaff(final Long staffId, final JsonCommand command) {
 
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
@@ -103,7 +103,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(staffId)
                     .withOfficeId(staffForUpdate.officeId()).with(changesOnly).build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleStaffDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
@@ -114,15 +114,14 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
      * is.
      */
     private void handleStaffDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
-        Throwable realCause = dve.getMostSpecificCause();
+        final Throwable realCause = dve.getMostSpecificCause();
 
         if (realCause.getMessage().contains("external_id")) {
 
             final String externalId = command.stringValueOfParameterNamed("externalId");
             throw new PlatformDataIntegrityException("error.msg.staff.duplicate.externalId", "Staff with externalId `" + externalId
                     + "` already exists", "externalId", externalId);
-        }
-        else if (realCause.getMessage().contains("display_name")) {
+        } else if (realCause.getMessage().contains("display_name")) {
             final String lastname = command.stringValueOfParameterNamed("lastname");
             String displayName = lastname;
             if (!StringUtils.isBlank(displayName)) {

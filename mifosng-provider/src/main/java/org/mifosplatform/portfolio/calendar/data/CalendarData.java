@@ -54,8 +54,9 @@ public class CalendarData {
     public CalendarData(final Long id, final Long entityId, final EnumOptionData entityType, final String title, final String description,
             final String location, final LocalDate startDate, final LocalDate endDate, final Integer duration, final EnumOptionData type,
             final boolean repeating, final String recurrence, final EnumOptionData remindBy, final Integer firstReminder,
-            final Integer secondReminder, final String humanReadable, final LocalDate recentEligibleMeetingDate, final LocalDate createdDate, final LocalDate lastUpdatedDate,
-            final Long createdByUserId, final String createdByUsername, final Long lastUpdatedByUserId, final String lastUpdatedByUsername) {
+            final Integer secondReminder, final String humanReadable, final LocalDate recentEligibleMeetingDate,
+            final LocalDate createdDate, final LocalDate lastUpdatedDate, final Long createdByUserId, final String createdByUsername,
+            final Long lastUpdatedByUserId, final String lastUpdatedByUsername) {
 
         this.id = id;
         this.entityId = entityId;
@@ -120,7 +121,8 @@ public class CalendarData {
         this.lastUpdatedByUsername = calendarData.lastUpdatedByUsername;
     }
 
-    public CalendarData(final CalendarData calendarData, final Collection<LocalDate> recurringDates, final Collection<LocalDate> nextTenRecurringDates, final LocalDate recentEligibleMeetingDate) {
+    public CalendarData(final CalendarData calendarData, final Collection<LocalDate> recurringDates,
+            final Collection<LocalDate> nextTenRecurringDates, final LocalDate recentEligibleMeetingDate) {
         this.id = calendarData.id;
         this.entityId = calendarData.entityId;
         this.entityType = calendarData.entityType;
@@ -170,7 +172,7 @@ public class CalendarData {
         final Integer secondReminder = new Integer(0);
         final String humanReadable = null;
         final LocalDate recentEligibleMeetingDate = null;
-        
+
         final LocalDate createdDate = null;
         final LocalDate lastUpdatedDate = null;
         final Long createdByUserId = null;

@@ -8,7 +8,8 @@ package org.mifosplatform.useradministration.exception;
 import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when permission is attempted to be set as maker-checker enabled.
+ * A {@link RuntimeException} thrown when permission is attempted to be set as
+ * maker-checker enabled.
  */
 public class PermissionCantBeMakerCheckerableException extends AbstractPlatformResourceNotFoundException {
 

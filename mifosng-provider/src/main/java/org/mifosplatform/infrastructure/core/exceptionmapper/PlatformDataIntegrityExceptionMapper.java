@@ -29,10 +29,11 @@ import org.springframework.stereotype.Component;
 public class PlatformDataIntegrityExceptionMapper implements ExceptionMapper<PlatformDataIntegrityException> {
 
     @Override
-    public Response toResponse(PlatformDataIntegrityException exception) {
+    public Response toResponse(final PlatformDataIntegrityException exception) {
 
-        ApiGlobalErrorResponse dataIntegrityError = ApiGlobalErrorResponse.dataIntegrityError(exception.getGlobalisationMessageCode(),
-                exception.getDefaultUserMessage(), exception.getParameterName(), exception.getDefaultUserMessageArgs());
+        final ApiGlobalErrorResponse dataIntegrityError = ApiGlobalErrorResponse.dataIntegrityError(
+                exception.getGlobalisationMessageCode(), exception.getDefaultUserMessage(), exception.getParameterName(),
+                exception.getDefaultUserMessageArgs());
 
         return Response.status(Status.FORBIDDEN).entity(dataIntegrityError).type(MediaType.APPLICATION_JSON).build();
     }

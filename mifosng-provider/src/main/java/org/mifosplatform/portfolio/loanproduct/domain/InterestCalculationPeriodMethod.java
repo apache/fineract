@@ -23,7 +23,7 @@ public enum InterestCalculationPeriodMethod {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public static InterestCalculationPeriodMethod fromInt(final Integer selectedMethod) {

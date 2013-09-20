@@ -11,7 +11,7 @@ public class MoneyBuilder {
     private BigDecimal newAmount = BigDecimal.ZERO;
 
     public Money build() {
-        return Money.of(currencyDetail, newAmount);
+        return Money.of(this.currencyDetail, this.newAmount);
     }
 
     public MoneyBuilder with(final MonetaryCurrency withDetail) {

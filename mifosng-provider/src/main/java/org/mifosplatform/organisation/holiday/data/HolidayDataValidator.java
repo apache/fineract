@@ -38,8 +38,8 @@ public class HolidayDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, HolidayApiConstants.HOLIDAY_CREATE_REQUEST_DATA_PARAMETERS);
-        final JsonElement element = fromApiJsonHelper.parse(json);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, HolidayApiConstants.HOLIDAY_CREATE_REQUEST_DATA_PARAMETERS);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
@@ -54,8 +54,9 @@ public class HolidayDataValidator {
 
         final LocalDate toDate = this.fromApiJsonHelper.extractLocalDateNamed(HolidayApiConstants.toDate, element);
         baseDataValidator.reset().parameter(HolidayApiConstants.toDate).value(toDate).notNull();
-        
-        final LocalDate repaymentsRescheduledTo = this.fromApiJsonHelper.extractLocalDateNamed(HolidayApiConstants.repaymentsRescheduledTo, element);
+
+        final LocalDate repaymentsRescheduledTo = this.fromApiJsonHelper.extractLocalDateNamed(HolidayApiConstants.repaymentsRescheduledTo,
+                element);
         baseDataValidator.reset().parameter(HolidayApiConstants.repaymentsRescheduledTo).value(repaymentsRescheduledTo).notNull();
 
         Set<Long> offices = null;

@@ -32,14 +32,14 @@ public class PlatformApiDataValidationException extends RuntimeException {
     }
 
     public String getGlobalisationMessageCode() {
-        return globalisationMessageCode;
+        return this.globalisationMessageCode;
     }
 
     public String getDefaultUserMessage() {
-        return defaultUserMessage;
+        return this.defaultUserMessage;
     }
 
     public List<ApiParameterError> getErrors() {
-        return errors;
+        return this.errors;
     }
 }

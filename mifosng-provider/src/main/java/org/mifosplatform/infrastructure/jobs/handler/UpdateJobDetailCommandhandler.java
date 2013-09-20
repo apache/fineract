@@ -18,7 +18,7 @@ public class UpdateJobDetailCommandhandler implements NewCommandSourceHandler {
     }
 
     @Override
-    public CommandProcessingResult processCommand(JsonCommand command) {
+    public CommandProcessingResult processCommand(final JsonCommand command) {
         return this.schedularWritePlatformService.updateJobDetail(command.entityId(), command);
     }
 

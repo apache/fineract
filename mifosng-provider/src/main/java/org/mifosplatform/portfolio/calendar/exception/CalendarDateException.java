@@ -12,7 +12,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
  */
 public class CalendarDateException extends AbstractPlatformDomainRuleException {
 
-    public CalendarDateException(String postFix, String defaultUserMessage, Object... defaultUserMessageArgs) {
-        super("error.msg.calendar." + postFix , defaultUserMessage, defaultUserMessageArgs);
+    public CalendarDateException(final String postFix, final String defaultUserMessage, final Object... defaultUserMessageArgs) {
+        super("error.msg.calendar." + postFix, defaultUserMessage, defaultUserMessageArgs);
     }
 }

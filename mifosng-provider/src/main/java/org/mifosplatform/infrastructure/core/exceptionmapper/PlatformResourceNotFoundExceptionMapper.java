@@ -30,9 +30,9 @@ import org.springframework.stereotype.Component;
 public class PlatformResourceNotFoundExceptionMapper implements ExceptionMapper<AbstractPlatformResourceNotFoundException> {
 
     @Override
-    public Response toResponse(AbstractPlatformResourceNotFoundException exception) {
+    public Response toResponse(final AbstractPlatformResourceNotFoundException exception) {
 
-        ApiGlobalErrorResponse notFoundErrorResponse = ApiGlobalErrorResponse.notFound(exception.getGlobalisationMessageCode(),
+        final ApiGlobalErrorResponse notFoundErrorResponse = ApiGlobalErrorResponse.notFound(exception.getGlobalisationMessageCode(),
                 exception.getDefaultUserMessage(), exception.getDefaultUserMessageArgs());
         return Response.status(Status.NOT_FOUND).entity(notFoundErrorResponse).type(MediaType.APPLICATION_JSON).build();
     }

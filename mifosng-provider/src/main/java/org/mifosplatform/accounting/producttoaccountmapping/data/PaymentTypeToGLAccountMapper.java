@@ -12,7 +12,7 @@ public class PaymentTypeToGLAccountMapper {
     @SuppressWarnings("unused")
     private final long fundSourceAccountId;
 
-    public PaymentTypeToGLAccountMapper(long paymentTypeId, long fundSourceAccountId) {
+    public PaymentTypeToGLAccountMapper(final long paymentTypeId, final long fundSourceAccountId) {
         this.paymentTypeId = paymentTypeId;
         this.fundSourceAccountId = fundSourceAccountId;
     }

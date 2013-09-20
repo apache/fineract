@@ -23,7 +23,7 @@ public class JdbcSupport {
 
     public static DateTime getDateTime(final ResultSet rs, final String columnName) throws SQLException {
         DateTime dateTime = null;
-        Timestamp dateValue = rs.getTimestamp(columnName);
+        final Timestamp dateValue = rs.getTimestamp(columnName);
         if (dateValue != null) {
             dateTime = new DateTime(dateValue.getTime());
         }
@@ -48,7 +48,7 @@ public class JdbcSupport {
     }
 
     public static Integer getIntegerDefaultToNullIfZero(final ResultSet rs, final String columnName) throws SQLException {
-        Integer value = (Integer) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Integer.class);
+        final Integer value = (Integer) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Integer.class);
         return defaultToNullIfZero(value);
     }
 

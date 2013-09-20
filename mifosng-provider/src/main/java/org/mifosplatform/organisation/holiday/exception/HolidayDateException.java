@@ -9,8 +9,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
 
 public class HolidayDateException extends AbstractPlatformDomainRuleException {
 
-    public HolidayDateException(String postFix, String defaultUserMessage,
-            Object... defaultUserMessageArgs) {
+    public HolidayDateException(final String postFix, final String defaultUserMessage, final Object... defaultUserMessageArgs) {
         super("error.msg.holiday." + postFix, defaultUserMessage, defaultUserMessageArgs);
     }
 

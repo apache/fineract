@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 /**
  * At present this implementation of {@link CacheManager} just delegates to the
  * real {@link CacheManager} to use.
- *
+ * 
  * By default it is {@link NoOpCacheManager} but we can change that by checking
  * some persisted configuration in the database on startup and allow user to
  * switch implementation through UI/API

@@ -15,9 +15,9 @@ import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetFlatDa
 public interface CollectionSheetReadPlatformService {
 
     JLGCollectionSheetData retriveCollectionSheet(LocalDate localDate, Long groupId);
-    
+
     JLGCollectionSheetData generateGroupCollectionSheet(final Long groupId, final JsonQuery query);
-    
+
     JLGCollectionSheetData generateCenterCollectionSheet(final Long groupId, final JsonQuery query);
 
     Collection<JLGCollectionSheetFlatData> retriveJLGCollectionSheet(String groupHierarchy, String officeHierarchy, LocalDate dueDate);

@@ -28,7 +28,7 @@ public interface ClientReadPlatformService {
     Collection<ClientData> retrieveClientMembersOfGroup(Long groupId);
 
     Collection<ClientData> retrieveActiveClientMembersOfGroup(Long groupId);
-    
+
     Collection<ClientData> retrieveActiveClientMembersOfCenter(final Long centerId);
 
     ClientData retrieveAllClosureReasons(String clientClosureReason);

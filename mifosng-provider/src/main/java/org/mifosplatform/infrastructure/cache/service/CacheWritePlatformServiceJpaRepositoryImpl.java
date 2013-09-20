@@ -36,7 +36,7 @@ public class CacheWritePlatformServiceJpaRepositoryImpl implements CacheWritePla
         final Map<String, Object> changes = this.cacheService.switchToCache(ehCacheEnabled, toCacheType);
 
         if (!changes.isEmpty()) {
-             this.configurationDomainService.updateCache(toCacheType);
+            this.configurationDomainService.updateCache(toCacheType);
         }
 
         return changes;

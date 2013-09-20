@@ -41,18 +41,18 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
     @Override
     public StaffAccountSummaryCollectionData retrieveLoanOfficerAccountSummary(final Long loanOfficerId) {
 
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
         final StaffClientMapper staffClientMapper = new StaffClientMapper();
-        final String clientSql = "select distinct " + staffClientMapper.schema() +" and c.status_enum=?";
+        final String clientSql = "select distinct " + staffClientMapper.schema() + " and c.status_enum=?";
 
         final StaffGroupMapper staffGroupMapper = new StaffGroupMapper();
-        final String groupSql = "select distinct " + staffGroupMapper.schema() +" and g.status_enum=?";
+        final String groupSql = "select distinct " + staffGroupMapper.schema() + " and g.status_enum=?";
 
         final List<StaffAccountSummaryCollectionData.LoanAccountSummary> clientSummaryList = this.jdbcTemplate.query(clientSql,
-                staffClientMapper, new Object[] { loanOfficerId, ClientStatus.ACTIVE.getValue()});
+                staffClientMapper, new Object[] { loanOfficerId, ClientStatus.ACTIVE.getValue() });
 
-        for (StaffAccountSummaryCollectionData.LoanAccountSummary clientSummary : clientSummaryList) {
+        for (final StaffAccountSummaryCollectionData.LoanAccountSummary clientSummary : clientSummaryList) {
 
             final Collection<LoanAccountSummaryData> clientLoanAccounts = this.accountDetailsReadPlatformService
                     .retrieveClientLoanAccountsByLoanOfficerId(clientSummary.getId(), loanOfficerId);
@@ -60,10 +60,10 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
             clientSummary.setLoans(clientLoanAccounts);
         }
 
-        final List<StaffAccountSummaryCollectionData.LoanAccountSummary> groupSummaryList = this.jdbcTemplate.query(groupSql, staffGroupMapper,
-                new Object[] { loanOfficerId, GroupingTypeStatus.ACTIVE.getValue()});
+        final List<StaffAccountSummaryCollectionData.LoanAccountSummary> groupSummaryList = this.jdbcTemplate.query(groupSql,
+                staffGroupMapper, new Object[] { loanOfficerId, GroupingTypeStatus.ACTIVE.getValue() });
 
-        for (StaffAccountSummaryCollectionData.LoanAccountSummary groupSummary : groupSummaryList) {
+        for (final StaffAccountSummaryCollectionData.LoanAccountSummary groupSummary : groupSummaryList) {
 
             final Collection<LoanAccountSummaryData> groupLoanAccounts = this.accountDetailsReadPlatformService
                     .retrieveGroupLoanAccountsByLoanOfficerId(groupSummary.getId(), loanOfficerId);

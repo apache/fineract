@@ -27,20 +27,20 @@ public class XBRLIntegrationTest {
     @Before
     public void setUp() throws Exception {
         Utils.initializeRESTAssured();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
     public void shouldRetrieveTaxonomyList() {
-        xbrlHelper = new XBRLIntegrationTestHelper(requestSpec, responseSpec);
+        this.xbrlHelper = new XBRLIntegrationTestHelper(this.requestSpec, this.responseSpec);
 
-        ArrayList<HashMap> taxonomyList = xbrlHelper.getTaxonomyList();
-        this.verifyTaxonomyList(taxonomyList);
+        final ArrayList<HashMap> taxonomyList = this.xbrlHelper.getTaxonomyList();
+        verifyTaxonomyList(taxonomyList);
     }
 
-    private void verifyTaxonomyList(ArrayList<HashMap> taxonomyList) {
+    private void verifyTaxonomyList(final ArrayList<HashMap> taxonomyList) {
         System.out.println("--------------------VERIFYING TAXONOMY LIST--------------------------");
         assertEquals("Checking for the 1st taxonomy", "AdministrativeExpense", taxonomyList.get(0).get("name"));
     }

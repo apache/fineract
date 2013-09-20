@@ -75,7 +75,7 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             CodeValue glAccountTagType = null;
             final Long tagId = command.longValueOfParameterNamed(GLAccountJsonInputParams.TAGID.getValue());
             final Long type = command.longValueOfParameterNamed(GLAccountJsonInputParams.TYPE.getValue());
-            GLAccountType accountType = GLAccountType.fromInt(type.intValue());
+            final GLAccountType accountType = GLAccountType.fromInt(type.intValue());
 
             if (tagId != null) {
                 glAccountTagType = retrieveTagId(tagId, accountType);
@@ -113,7 +113,7 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
 
             // is the new parent valid
             if (changesOnly.containsKey(GLAccountJsonInputParams.PARENT_ID.getValue())) {
-                GLAccount parentAccount = validateParentGLAccount(parentId);
+                final GLAccount parentAccount = validateParentGLAccount(parentId);
                 glAccount.updateParentAccount(parentAccount);
             }
 
@@ -203,7 +203,7 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
                 "Unknown data integrity issue with resource GL Account: " + realCause.getMessage());
     }
 
-    private CodeValue retrieveTagId(Long tagId, GLAccountType accountType) {
+    private CodeValue retrieveTagId(final Long tagId, final GLAccountType accountType) {
         CodeValue glAccountTagType = null;
         if (accountType.isAssetType()) {
             glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(

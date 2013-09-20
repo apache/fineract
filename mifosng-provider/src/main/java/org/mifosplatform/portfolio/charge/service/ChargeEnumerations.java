@@ -29,12 +29,10 @@ public class ChargeEnumerations {
                         ChargeTimeType.SPECIFIED_DUE_DATE.getCode(), "Specified due date");
             break;
             case MONTHLY:
-                optionData = new EnumOptionData(ChargeTimeType.MONTHLY.getValue().longValue(),
-                        ChargeTimeType.MONTHLY.getCode(), "Monthly");
+                optionData = new EnumOptionData(ChargeTimeType.MONTHLY.getValue().longValue(), ChargeTimeType.MONTHLY.getCode(), "Monthly");
             break;
             case YEARLY:
-                optionData = new EnumOptionData(ChargeTimeType.YEARLY.getValue().longValue(),
-                        ChargeTimeType.YEARLY.getCode(), "Yearly");
+                optionData = new EnumOptionData(ChargeTimeType.YEARLY.getValue().longValue(), ChargeTimeType.YEARLY.getCode(), "Yearly");
             break;
             default:
                 optionData = new EnumOptionData(ChargeTimeType.INVALID.getValue().longValue(), ChargeTimeType.INVALID.getCode(), "Invalid");
@@ -54,7 +52,8 @@ public class ChargeEnumerations {
                 optionData = new EnumOptionData(ChargeAppliesTo.LOAN.getValue().longValue(), ChargeAppliesTo.LOAN.getCode(), "Loan");
             break;
             case SAVINGS:
-                optionData = new EnumOptionData(ChargeAppliesTo.SAVINGS.getValue().longValue(), ChargeAppliesTo.SAVINGS.getCode(), "Savings");
+                optionData = new EnumOptionData(ChargeAppliesTo.SAVINGS.getValue().longValue(), ChargeAppliesTo.SAVINGS.getCode(),
+                        "Savings");
             break;
             default:
                 optionData = new EnumOptionData(ChargeAppliesTo.INVALID.getValue().longValue(), ChargeAppliesTo.INVALID.getCode(),
@@ -94,11 +93,10 @@ public class ChargeEnumerations {
         }
         return optionData;
     }
-    
+
     public static EnumOptionData chargePaymentMode(final int id) {
         return chargePaymentMode(ChargePaymentMode.fromInt(id));
     }
-
 
     public static EnumOptionData chargePaymentMode(final ChargePaymentMode type) {
         EnumOptionData optionData = null;

@@ -12,7 +12,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
  */
 public class RoleNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public RoleNotFoundException(Long id) {
+    public RoleNotFoundException(final Long id) {
         super("error.msg.role.id.invalid", "Role with identifier " + id + " does not exist", id);
     }
 }

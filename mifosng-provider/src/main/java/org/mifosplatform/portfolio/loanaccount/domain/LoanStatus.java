@@ -81,7 +81,7 @@ public enum LoanStatus {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public boolean isSubmittedAndPendingApproval() {
@@ -121,7 +121,7 @@ public enum LoanStatus {
     }
 
     public boolean isActiveOrAwaitingApprovalOrDisbursal() {
-        return this.isApproved() || this.isSubmittedAndPendingApproval() || this.isActive();
+        return isApproved() || isSubmittedAndPendingApproval() || isActive();
     }
 
     public boolean isTransferInProgress() {

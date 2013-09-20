@@ -6,8 +6,8 @@
 package org.mifosplatform.portfolio.savings.domain;
 
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.amountParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dateFormatParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.localeParamName;
 
 import java.math.BigDecimal;
@@ -89,7 +89,8 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
     @Column(name = "waived", nullable = false)
     private boolean waived = false;
 
-    public static SavingsAccountCharge createNewFromJson(final SavingsAccount savingsAccount, final Charge chargeDefinition, final JsonCommand command) {
+    public static SavingsAccountCharge createNewFromJson(final SavingsAccount savingsAccount, final Charge chargeDefinition,
+            final JsonCommand command) {
 
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed(amountParamName);
         final LocalDate dueDate = command.localDateValueOfParameterNamed(dueAsOfDateParamName);
@@ -99,7 +100,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         return new SavingsAccountCharge(savingsAccount, chargeDefinition, amount, chargeTime, chargeCalculation, dueDate);
     }
 
-    //TODO AA: refactor method signature
+    // TODO AA: refactor method signature
     public static SavingsAccountCharge createNewWithoutSavingsAccount(final Charge chargeDefinition, final BigDecimal amount,
             final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate) {
         return new SavingsAccountCharge(null, chargeDefinition, amount, chargeTime, chargeCalculation, dueDate);
@@ -111,7 +112,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
     public SavingsAccountCharge(final SavingsAccount savingsAccount, final Charge chargeDefinition, final BigDecimal amount,
             final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate) {
-        
+
         this.savingsAccount = savingsAccount;
         this.charge = chargeDefinition;
         this.penaltyCharge = chargeDefinition.isPenalty();
@@ -120,10 +121,10 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         if (isOnSpecifiedDueDate()) {
             if (dueDate == null) {
                 final String defaultUserMessage = "Savings Account charge is missing due date.";
-                throw new SavingsAccountChargeWithoutMandatoryFieldException("savingsaccount.charge", dueAsOfDateParamName, defaultUserMessage, chargeDefinition.getId(),
-                        chargeDefinition.getName());
+                throw new SavingsAccountChargeWithoutMandatoryFieldException("savingsaccount.charge", dueAsOfDateParamName,
+                        defaultUserMessage, chargeDefinition.getId(), chargeDefinition.getName());
             }
-            
+
         }
 
         this.dueDate = (dueDate == null) ? null : dueDate.toDate();
@@ -137,8 +138,12 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         if (amount != null) {
             chargeAmount = amount;
         }
-        
-        final BigDecimal transactionAmount = new BigDecimal(0);//percentage based fee is not yet supported for savings
+
+        final BigDecimal transactionAmount = new BigDecimal(0);// percentage
+                                                               // based fee is
+                                                               // not yet
+                                                               // supported for
+                                                               // savings
         populateDerivedFields(transactionAmount, chargeAmount);
         this.paid = determineIfFullyPaid();
     }
@@ -222,11 +227,11 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         this.waived = true;
         return getAmountWaived(currency);
     }
-    
+
     public Money pay(final MonetaryCurrency currency, final BigDecimal chargePaid) {
-        
+
         Money amountPaidToDate = Money.of(currency, this.amountPaid);
-        Money amountPaid = Money.of(currency, chargePaid);
+        final Money amountPaid = Money.of(currency, chargePaid);
         Money amountOutstanding = Money.of(currency, this.amountOutstanding);
         amountPaidToDate = amountPaidToDate.plus(amountPaid);
         amountOutstanding = amountOutstanding.minus(chargePaid);
@@ -245,7 +250,11 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
     }
 
     public void update(final BigDecimal amount, final LocalDate dueDate) {
-        final BigDecimal transactionAmount = BigDecimal.ZERO;//percentage based fee calculation is not yet supported for Savings
+        final BigDecimal transactionAmount = BigDecimal.ZERO;// percentage based
+                                                             // fee calculation
+                                                             // is not yet
+                                                             // supported for
+                                                             // Savings
         if (dueDate != null) {
             this.dueDate = dueDate.toDate();
         }
@@ -285,7 +294,6 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
-
 
         if (command.isChangeInLocalDateParameterNamed(dueAsOfDateParamName, getDueLocalDate())) {
             final String valueAsInput = command.stringValueOfParameterNamed(dueAsOfDateParamName);
@@ -379,7 +387,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
         if (isGreaterThanZero(value)) {
             final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
-            BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100l), mc);
+            final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100l), mc);
             percentageOf = value.multiply(multiplicand, mc);
         }
 
@@ -440,7 +448,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
     public Money updatePaidAmountBy(final Money incrementBy) {
 
         Money amountPaidToDate = Money.of(incrementBy.getCurrency(), this.amountPaid);
-        Money amountOutstanding = Money.of(incrementBy.getCurrency(), this.amountOutstanding);
+        final Money amountOutstanding = Money.of(incrementBy.getCurrency(), this.amountOutstanding);
 
         Money amountPaidOnThisCharge = Money.zero(incrementBy.getCurrency());
         if (incrementBy.isGreaterThanOrEqualTo(amountOutstanding)) {
@@ -453,7 +461,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
             amountPaidToDate = amountPaidToDate.plus(incrementBy);
             this.amountPaid = amountPaidToDate.getAmount();
 
-            Money amountExpected = Money.of(incrementBy.getCurrency(), this.amount);
+            final Money amountExpected = Money.of(incrementBy.getCurrency(), this.amount);
             this.amountOutstanding = amountExpected.minus(amountPaidToDate).getAmount();
         }
 
@@ -473,8 +481,8 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
     public Charge getCharge() {
         return this.charge;
     }
-    
-    public boolean isOnSpecifiedDueDate(){
+
+    public boolean isOnSpecifiedDueDate() {
         return ChargeTimeType.fromInt(this.chargeTime).isOnSpecifiedDueDate();
     }
 
@@ -483,21 +491,21 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         if (obj == null) { return false; }
         if (obj == this) { return true; }
         if (obj.getClass() != getClass()) { return false; }
-        SavingsAccountCharge rhs = (SavingsAccountCharge) obj;
+        final SavingsAccountCharge rhs = (SavingsAccountCharge) obj;
         return new EqualsBuilder().appendSuper(super.equals(obj)) //
-                .append(this.getId(), rhs.getId()) //
+                .append(getId(), rhs.getId()) //
                 .append(this.charge.getId(), rhs.charge.getId()) //
                 .append(this.amount, rhs.amount) //
-                .append(this.getDueLocalDate(), rhs.getDueLocalDate()) //
+                .append(getDueLocalDate(), rhs.getDueLocalDate()) //
                 .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(3, 5) //
-                .append(this.getId()) //
+                .append(getId()) //
                 .append(this.charge.getId()) //
-                .append(this.amount).append(this.getDueLocalDate()) //
+                .append(this.amount).append(getDueLocalDate()) //
                 .toHashCode();
     }
 }

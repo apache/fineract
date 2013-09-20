@@ -10,9 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CloseCenterCommandHandler implements NewCommandSourceHandler {
-    
+
     private final GroupingTypesWritePlatformService groupingTypesWritePlatformService;
-    
+
     @Autowired
     public CloseCenterCommandHandler(final GroupingTypesWritePlatformService groupingTypesWritePlatformService) {
         this.groupingTypesWritePlatformService = groupingTypesWritePlatformService;
@@ -20,7 +20,7 @@ public class CloseCenterCommandHandler implements NewCommandSourceHandler {
 
     @Override
     @Transactional
-    public CommandProcessingResult processCommand(JsonCommand command) {
+    public CommandProcessingResult processCommand(final JsonCommand command) {
         return this.groupingTypesWritePlatformService.closeCenter(command.entityId(), command);
     }
 

@@ -10,7 +10,8 @@ import java.math.BigDecimal;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 
 /**
- * Immutable data object for representing loan with dues (example: loan is due for disbursement, repayments).
+ * Immutable data object for representing loan with dues (example: loan is due
+ * for disbursement, repayments).
  */
 public class LoanDueData {
 
@@ -29,9 +30,8 @@ public class LoanDueData {
     private BigDecimal totalDue = BigDecimal.ZERO;
 
     public LoanDueData(final Long loanId, final String accountId, final Integer accountStatusId, final String productShortName,
-            final Long productId, final CurrencyData currency, final BigDecimal disbursementAmount,
-            final BigDecimal principalDue, final BigDecimal principalPaid, final BigDecimal interestDue, final BigDecimal interestPaid,
-            final BigDecimal chargesDue) {
+            final Long productId, final CurrencyData currency, final BigDecimal disbursementAmount, final BigDecimal principalDue,
+            final BigDecimal principalPaid, final BigDecimal interestDue, final BigDecimal interestPaid, final BigDecimal chargesDue) {
         this.loanId = loanId;
         this.accountId = accountId;
         this.accountStatusId = accountStatusId;
@@ -66,7 +66,7 @@ public class LoanDueData {
     public Long getProductId() {
         return this.productId;
     }
- 
+
     public CurrencyData getCurrency() {
         return this.currency;
     }

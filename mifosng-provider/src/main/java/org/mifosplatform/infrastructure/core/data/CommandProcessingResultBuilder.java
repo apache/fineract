@@ -26,8 +26,8 @@ public class CommandProcessingResultBuilder {
     private Long productId;
 
     public CommandProcessingResult build() {
-        return CommandProcessingResult.fromDetails(commandId, officeId, groupId, clientId, loanId, savingsId, resourceIdentifier, entityId,
-                transactionId, changes, productId);
+        return CommandProcessingResult.fromDetails(this.commandId, this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId,
+                this.resourceIdentifier, this.entityId, this.transactionId, this.changes, this.productId);
     }
 
     public CommandProcessingResultBuilder withCommandId(final Long withCommandId) {
@@ -79,7 +79,7 @@ public class CommandProcessingResultBuilder {
         this.transactionId = withTransactionId;
         return this;
     }
-    
+
     public CommandProcessingResultBuilder withProductId(final Long productId) {
         this.productId = productId;
         return this;

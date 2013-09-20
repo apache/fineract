@@ -57,7 +57,7 @@ public class AccountTransferData {
         BigDecimal transferAmount = BigDecimal.ZERO;
         if (fromAccount != null) {
             currency = fromAccount.currency();
-            if(fromAccount.getAmtForTransfer() != null){
+            if (fromAccount.getAmtForTransfer() != null) {
                 transferAmount = fromAccount.getAmtForTransfer();
             }
         }
@@ -74,8 +74,8 @@ public class AccountTransferData {
             final PortfolioAccountData fromAccount, final EnumOptionData toAccountType, final PortfolioAccountData toAccount) {
 
         return new AccountTransferData(id, reversed, fromOffice, fromClient, fromAccountType, fromAccount, currency, transferAmount,
-                transferDate, transferDescription, toOffice, toClient, toAccountType, toAccount, null, null, null, null, null, null,
-                null, null);
+                transferDate, transferDescription, toOffice, toClient, toAccountType, toAccount, null, null, null, null, null, null, null,
+                null);
     }
 
     public static AccountTransferData transferBasicDetails(final Long id, final CurrencyData currency, final BigDecimal transferAmount,

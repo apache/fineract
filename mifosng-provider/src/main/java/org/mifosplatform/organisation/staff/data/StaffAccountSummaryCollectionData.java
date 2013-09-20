@@ -32,24 +32,24 @@ public class StaffAccountSummaryCollectionData {
 
         private Collection<LoanAccountSummaryData> loans;
 
-        public LoanAccountSummary(Long id, String displayName) {
+        public LoanAccountSummary(final Long id, final String displayName) {
             this.id = id;
             this.displayName = displayName;
         }
 
         public Long getId() {
-            return id;
+            return this.id;
         }
 
         public String getDisplayName() {
-            return displayName;
+            return this.displayName;
         }
 
         public Collection<LoanAccountSummaryData> getLoans() {
-            return loans;
+            return this.loans;
         }
 
-        public void setLoans(Collection<LoanAccountSummaryData> loans) {
+        public void setLoans(final Collection<LoanAccountSummaryData> loans) {
             this.loans = loans;
         }
     }

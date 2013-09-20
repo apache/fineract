@@ -110,9 +110,9 @@ final public class ClientData implements Comparable<ClientData> {
         this.accountNo = accountNo;
         this.status = status;
         if (status != null) {
-            active = status.getId().equals(300L);
+            this.active = status.getId().equals(300L);
         } else {
-            active = null;
+            this.active = null;
         }
         this.officeId = officeId;
         this.officeName = officeName;
@@ -182,7 +182,7 @@ final public class ClientData implements Comparable<ClientData> {
         if (obj == null) { return false; }
         if (obj == this) { return true; }
         if (obj.getClass() != getClass()) { return false; }
-        ClientData rhs = (ClientData) obj;
+        final ClientData rhs = (ClientData) obj;
         return new EqualsBuilder() //
                 .append(this.id, rhs.id) //
                 .append(this.displayName, rhs.displayName) //

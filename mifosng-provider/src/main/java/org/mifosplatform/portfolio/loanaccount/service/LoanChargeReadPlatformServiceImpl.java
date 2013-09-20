@@ -154,8 +154,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
         public String schema() {
             return "lc.id as id, lc.due_for_collection_as_of_date as dueAsOfDate, "
-                    + "lc.amount_outstanding_derived as amountOutstanding, "
-                    + "loan.id as loanId " + "from  m_loan_charge lc "
+                    + "lc.amount_outstanding_derived as amountOutstanding, " + "loan.id as loanId " + "from  m_loan_charge lc "
                     + "join m_loan loan on loan.id = lc.loan_id ";
         }
 

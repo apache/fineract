@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 public class BadCredentialsExceptionMapper implements ExceptionMapper<BadCredentialsException> {
 
     @Override
-    public Response toResponse(@SuppressWarnings("unused") BadCredentialsException exception) {
+    public Response toResponse(@SuppressWarnings("unused") final BadCredentialsException exception) {
         return Response.status(Status.UNAUTHORIZED).entity(ApiGlobalErrorResponse.unAuthenticated()).type(MediaType.APPLICATION_JSON)
                 .build();
     }

@@ -41,7 +41,7 @@ public class ClientAttendance extends AbstractPersistable<Long> {
     }
 
     public Long clientId() {
-        return client.getId();
+        return this.client.getId();
     }
 
     public void updateAttendanceTypeId(final Integer attendanceTypeId) {

@@ -319,18 +319,20 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     @Override
-    public CommandProcessingResult undoTransaction(final Long savingsId, final Long transactionId, final boolean allowAccountTransferModification) {
+    public CommandProcessingResult undoTransaction(final Long savingsId, final Long transactionId,
+            final boolean allowAccountTransferModification) {
 
         final List<Long> newTransactionIds = new ArrayList<Long>();
         final List<Long> reversedTransactionIds = new ArrayList<Long>();
 
-        final SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(
-                transactionId, savingsId);
+        final SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountTransactionRepository
+                .findOneByIdAndSavingsAccountId(transactionId, savingsId);
         if (savingsAccountTransaction == null) { throw new SavingsAccountTransactionNotFoundException(savingsId, transactionId); }
 
-        if(!allowAccountTransferModification && this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)){
-            throw new PlatformServiceUnavailableException("error.msg.saving.account.transfer.transaction.update.not.allowed","Savings account transaction:"+transactionId+" update not allowed as it involves in account transfer",transactionId);
-        }
+        if (!allowAccountTransferModification
+                && this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)) { throw new PlatformServiceUnavailableException(
+                "error.msg.saving.account.transfer.transaction.update.not.allowed", "Savings account transaction:" + transactionId
+                        + " update not allowed as it involves in account transfer", transactionId); }
 
         final LocalDate today = DateUtils.getLocalDateOfTenant();
         final MathContext mc = new MathContext(15, RoundingMode.HALF_EVEN);
@@ -363,16 +365,17 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Override
     public CommandProcessingResult adjustSavingsTransaction(final Long savingsId, final Long transactionId, final JsonCommand command) {
 
-        final SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(
-                transactionId, savingsId);
+        final SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountTransactionRepository
+                .findOneByIdAndSavingsAccountId(transactionId, savingsId);
         if (savingsAccountTransaction == null) { throw new SavingsAccountTransactionNotFoundException(savingsId, transactionId); }
 
         if (!(savingsAccountTransaction.isDeposit() || savingsAccountTransaction.isWithdrawal()) || savingsAccountTransaction.isReversed()) { throw new TransactionUpdateNotAllowedException(
                 savingsId, transactionId); }
 
-        if(this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)){
-            throw new PlatformServiceUnavailableException("error.msg.saving.account.transfer.transaction.update.not.allowed","Savings account transaction:"+transactionId+" update not allowed as it involves in account transfer",transactionId);
-        }
+        if (this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)) { throw new PlatformServiceUnavailableException(
+                "error.msg.saving.account.transfer.transaction.update.not.allowed", "Savings account transaction:" + transactionId
+                        + " update not allowed as it involves in account transfer", transactionId); }
+
         this.savingsAccountTransactionDataValidator.validate(command);
 
         final LocalDate today = DateUtils.getLocalDateOfTenant();
@@ -395,10 +398,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         account.undoTransaction(transactionId, existingReversedTransactionIds);
 
         // for undo withdrawal fee
-        final SavingsAccountTransaction nextSavingsAccountTransaction = this.savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(
-                transactionId+1, savingsId);
-        if(nextSavingsAccountTransaction!=null && nextSavingsAccountTransaction.isWithdrawalFeeAndNotReversed()){
-            account.undoTransaction(transactionId+1, existingReversedTransactionIds);
+        final SavingsAccountTransaction nextSavingsAccountTransaction = this.savingsAccountTransactionRepository
+                .findOneByIdAndSavingsAccountId(transactionId + 1, savingsId);
+        if (nextSavingsAccountTransaction != null && nextSavingsAccountTransaction.isWithdrawalFeeAndNotReversed()) {
+            account.undoTransaction(transactionId + 1, existingReversedTransactionIds);
         }
 
         SavingsAccountTransaction transaction = null;
@@ -472,8 +475,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.savingsAccountTransactionDataValidator.validateClosing(command);
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
         final boolean isLinkedWithAnyActiveLoan = this.accountAssociationsReadPlatformService.isLinkedWithAnyActiveLoan(savingsId);
-        if(isLinkedWithAnyActiveLoan){
-            final String defaultUserMessage = "Closing savings account with id:"+savingsId+" is not allowed, since it is linked with one of the active loans";
+
+        if (isLinkedWithAnyActiveLoan) {
+            final String defaultUserMessage = "Closing savings account with id:" + savingsId
+                    + " is not allowed, since it is linked with one of the active loans";
             throw new SavingsAccountClosingNotAllowedException("linked", defaultUserMessage, savingsId);
         }
 
@@ -546,8 +551,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     @Override
-    public SavingsAccountTransaction acceptSavingsTransfer(final Long accountId, final LocalDate transferDate, final Office acceptedInOffice,
-            final Staff fieldOfficer) {
+    public SavingsAccountTransaction acceptSavingsTransfer(final Long accountId, final LocalDate transferDate,
+            final Office acceptedInOffice, final Staff fieldOfficer) {
         final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(accountId);
 
         final List<Long> existingTransactionIds = new ArrayList<Long>(savingsAccount.findExistingTransactionIds());
@@ -608,33 +613,38 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         this.savingsAccountChargeDataValidator.validateUpdate(command.json());
         final Long savingsAccountId = command.getSavingsId();
-        final Long savingsChargeId = command.entityId();//SavingsAccount Charge entity
+        // SavingsAccount Charge entity
+        final Long savingsChargeId = command.entityId();
 
         final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsAccountId);
         checkClientOrGroupActive(savingsAccount);
 
-        final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository.findOneWithNotFoundDetection(savingsChargeId, savingsAccountId);
+        final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository.findOneWithNotFoundDetection(savingsChargeId,
+                savingsAccountId);
+
         final Map<String, Object> changes = savingsAccountCharge.update(command);
         this.savingsAccountChargeRepository.saveAndFlush(savingsAccountCharge);
-        //TODO AA: revisit the code
+        // TODO AA: revisit the code
         /*
-        // Charges may be edited only when the loan associated with them are
-        // yet to be approved (are in submitted and pending status)
-        if (!loan.status().isSubmittedAndPendingApproval()) { throw new LoanChargeCannotBeUpdatedException(
-                LOAN_CHARGE_CANNOT_BE_UPDATED_REASON.LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE, loanCharge.getId()); }
-*/
+         * // Charges may be edited only when the loan associated with them are
+         * // yet to be approved (are in submitted and pending status) if
+         * (!loan.status().isSubmittedAndPendingApproval()) { throw new
+         * LoanChargeCannotBeUpdatedException(
+         * LOAN_CHARGE_CANNOT_BE_UPDATED_REASON
+         * .LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE,
+         * loanCharge.getId()); }
+         */
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(savingsChargeId) //
-                //.withOfficeId(savings) //
-                //.withClientId(loan.getClientId()) //
-                //.withGroupId(loan.getGroupId()) //
-                //.withLoanId(savingsAccountId) //
+                // .withOfficeId(savings) //
+                // .withClientId(loan.getClientId()) //
+                // .withGroupId(loan.getGroupId()) //
+                // .withLoanId(savingsAccountId) //
                 .with(changes) //
                 .build();
     }
-
 
     @Transactional
     @Override
@@ -653,36 +663,38 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.savingAccountRepository.saveAndFlush(savingsAccount);
 
         return new CommandProcessingResultBuilder() //
-        .withCommandId(command.commandId()) //
-        .withEntityId(savingsAccountChargeId) //
-        .withOfficeId(savingsAccount.officeId()) //
-        .withClientId(savingsAccount.clientId()) //
-        .withGroupId(savingsAccount.groupId()) //
-        .withSavingsId(savingsAccountId) //
-        .build();
+                .withCommandId(command.commandId()) //
+                .withEntityId(savingsAccountChargeId) //
+                .withOfficeId(savingsAccount.officeId()) //
+                .withClientId(savingsAccount.clientId()) //
+                .withGroupId(savingsAccount.groupId()) //
+                .withSavingsId(savingsAccountId) //
+                .build();
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult deleteSavingsAccountCharge(final Long savingsAccountId, final Long savingsAccountChargeId, @SuppressWarnings("unused") final JsonCommand command) {
+    public CommandProcessingResult deleteSavingsAccountCharge(final Long savingsAccountId, final Long savingsAccountChargeId,
+            @SuppressWarnings("unused") final JsonCommand command) {
         this.context.authenticatedUser();
 
         final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsAccountId);
         checkClientOrGroupActive(savingsAccount);
-        final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository.findOneWithNotFoundDetection(savingsAccountChargeId, savingsAccountId);
+        final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository.findOneWithNotFoundDetection(
+                savingsAccountChargeId, savingsAccountId);
 
-        //TODO AA: validate before deleting a charge
+        // TODO AA: validate before deleting a charge
 
         savingsAccount.removeCharge(savingsAccountCharge);
         this.savingAccountRepository.saveAndFlush(savingsAccount);
 
         return new CommandProcessingResultBuilder() //
-        .withEntityId(savingsAccountChargeId) //
-        .withOfficeId(savingsAccount.officeId()) //
-        .withClientId(savingsAccount.clientId()) //
-        .withGroupId(savingsAccount.groupId()) //
-        .withSavingsId(savingsAccountId) //
-        .build();
+                .withEntityId(savingsAccountChargeId) //
+                .withOfficeId(savingsAccount.officeId()) //
+                .withClientId(savingsAccount.clientId()) //
+                .withGroupId(savingsAccount.groupId()) //
+                .withSavingsId(savingsAccountId) //
+                .build();
     }
 
     @Transactional

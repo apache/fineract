@@ -37,7 +37,7 @@ public class Money implements Comparable<Money> {
     }
 
     public static Money total(final Iterable<? extends Money> monies) {
-        Iterator<? extends Money> it = monies.iterator();
+        final Iterator<? extends Money> it = monies.iterator();
         if (it.hasNext() == false) { throw new IllegalArgumentException("Money iterator must not be empty"); }
         Money total = it.next();
         while (it.hasNext()) {
@@ -72,13 +72,13 @@ public class Money implements Comparable<Money> {
         final BigDecimal amountScaled = amountStripped.setScale(this.currencyDigitsAfterDecimal, RoundingMode.HALF_EVEN);
 
         // round monetary amounts into multiplesof say 20/50.
-        if (inMultiplesOf!= null && this.currencyDigitsAfterDecimal == 0 && inMultiplesOf>0 && amountScaled.doubleValue()>0) {
-            double existingVal = amountScaled.doubleValue();
-            double ceilingOfValue = ceiling(existingVal, inMultiplesOf);
-            double floorOfValue = floor(existingVal, inMultiplesOf);
+        if (inMultiplesOf != null && this.currencyDigitsAfterDecimal == 0 && inMultiplesOf > 0 && amountScaled.doubleValue() > 0) {
+            final double existingVal = amountScaled.doubleValue();
+            final double ceilingOfValue = ceiling(existingVal, inMultiplesOf);
+            final double floorOfValue = floor(existingVal, inMultiplesOf);
 
-            double floorDiff = existingVal - floorOfValue;
-            double ceilDiff = ceilingOfValue - existingVal;
+            final double floorDiff = existingVal - floorOfValue;
+            final double ceilDiff = ceilingOfValue - existingVal;
 
             if (ceilDiff > floorDiff) {
                 this.amount = BigDecimal.valueOf(floorOfValue);
@@ -128,15 +128,15 @@ public class Money implements Comparable<Money> {
 
     public Money plus(final Iterable<? extends Money> moniesToAdd) {
         BigDecimal total = this.amount;
-        for (Money moneyProvider : moniesToAdd) {
-            Money money = this.checkCurrencyEqual(moneyProvider);
+        for (final Money moneyProvider : moniesToAdd) {
+            final Money money = checkCurrencyEqual(moneyProvider);
             total = total.add(money.amount);
         }
         return Money.of(monetaryCurrency(), total);
     }
 
     public Money plus(final Money moneyToAdd) {
-        Money toAdd = this.checkCurrencyEqual(moneyToAdd);
+        final Money toAdd = checkCurrencyEqual(moneyToAdd);
         return this.plus(toAdd.getAmount());
     }
 
@@ -148,12 +148,12 @@ public class Money implements Comparable<Money> {
 
     public Money plus(final double amountToAdd) {
         if (amountToAdd == 0) { return this; }
-        BigDecimal newAmount = this.amount.add(BigDecimal.valueOf(amountToAdd));
+        final BigDecimal newAmount = this.amount.add(BigDecimal.valueOf(amountToAdd));
         return Money.of(monetaryCurrency(), newAmount);
     }
 
     public Money minus(final Money moneyToSubtract) {
-        Money toSubtract = this.checkCurrencyEqual(moneyToSubtract);
+        final Money toSubtract = checkCurrencyEqual(moneyToSubtract);
         return this.minus(toSubtract.getAmount());
     }
 
@@ -164,7 +164,7 @@ public class Money implements Comparable<Money> {
     }
 
     private Money checkCurrencyEqual(final Money money) {
-        if (this.isSameCurrency(money) == false) { throw new UnsupportedOperationException("currencies are different."); }
+        if (isSameCurrency(money) == false) { throw new UnsupportedOperationException("currencies are different."); }
         return money;
     }
 
@@ -174,37 +174,37 @@ public class Money implements Comparable<Money> {
 
     public Money dividedBy(final BigDecimal valueToDivideBy, final RoundingMode roundingMode) {
         if (valueToDivideBy.compareTo(BigDecimal.ONE) == 0) { return this; }
-        BigDecimal newAmount = this.amount.divide(valueToDivideBy, roundingMode);
+        final BigDecimal newAmount = this.amount.divide(valueToDivideBy, roundingMode);
         return Money.of(monetaryCurrency(), newAmount);
     }
 
     public Money dividedBy(final double valueToDivideBy, final RoundingMode roundingMode) {
         if (valueToDivideBy == 1) { return this; }
-        BigDecimal newAmount = this.amount.divide(BigDecimal.valueOf(valueToDivideBy), roundingMode);
+        final BigDecimal newAmount = this.amount.divide(BigDecimal.valueOf(valueToDivideBy), roundingMode);
         return Money.of(monetaryCurrency(), newAmount);
     }
 
     public Money dividedBy(final long valueToDivideBy, final RoundingMode roundingMode) {
         if (valueToDivideBy == 1) { return this; }
-        BigDecimal newAmount = this.amount.divide(BigDecimal.valueOf(valueToDivideBy), roundingMode);
+        final BigDecimal newAmount = this.amount.divide(BigDecimal.valueOf(valueToDivideBy), roundingMode);
         return Money.of(monetaryCurrency(), newAmount);
     }
 
     public Money multipliedBy(final BigDecimal valueToMultiplyBy) {
         if (valueToMultiplyBy.compareTo(BigDecimal.ONE) == 0) { return this; }
-        BigDecimal newAmount = this.amount.multiply(valueToMultiplyBy);
+        final BigDecimal newAmount = this.amount.multiply(valueToMultiplyBy);
         return Money.of(monetaryCurrency(), newAmount);
     }
 
     public Money multipliedBy(final double valueToMultiplyBy) {
         if (valueToMultiplyBy == 1) { return this; }
-        BigDecimal newAmount = this.amount.multiply(BigDecimal.valueOf(valueToMultiplyBy));
+        final BigDecimal newAmount = this.amount.multiply(BigDecimal.valueOf(valueToMultiplyBy));
         return Money.of(monetaryCurrency(), newAmount);
     }
 
     public Money multipliedBy(final long valueToMultiplyBy) {
         if (valueToMultiplyBy == 1) { return this; }
-        BigDecimal newAmount = this.amount.multiply(BigDecimal.valueOf(valueToMultiplyBy));
+        final BigDecimal newAmount = this.amount.multiply(BigDecimal.valueOf(valueToMultiplyBy));
         return Money.of(monetaryCurrency(), newAmount);
     }
 
@@ -221,18 +221,18 @@ public class Money implements Comparable<Money> {
 
     @Override
     public int compareTo(final Money other) {
-        Money otherMoney = other;
+        final Money otherMoney = other;
         if (this.currencyCode.equals(otherMoney.currencyCode) == false) { throw new UnsupportedOperationException(
                 "currencies arent different"); }
         return this.amount.compareTo(otherMoney.amount);
     }
 
     public boolean isZero() {
-        return this.isEqualTo(Money.zero(this.getCurrency()));
+        return isEqualTo(Money.zero(getCurrency()));
     }
 
     public boolean isEqualTo(final Money other) {
-        return this.compareTo(other) == 0;
+        return compareTo(other) == 0;
     }
 
     public boolean isNotEqualTo(final Money other) {
@@ -240,23 +240,23 @@ public class Money implements Comparable<Money> {
     }
 
     public boolean isGreaterThanOrEqualTo(final Money other) {
-        return this.isGreaterThan(other) || this.isEqualTo(other);
+        return isGreaterThan(other) || isEqualTo(other);
     }
 
     public boolean isGreaterThan(final Money other) {
-        return this.compareTo(other) > 0;
+        return compareTo(other) > 0;
     }
 
     public boolean isGreaterThanZero() {
-        return this.isGreaterThan(Money.zero(this.getCurrency()));
+        return isGreaterThan(Money.zero(getCurrency()));
     }
 
     public boolean isLessThan(final Money other) {
-        return this.compareTo(other) < 0;
+        return compareTo(other) < 0;
     }
 
     public boolean isLessThanZero() {
-        return this.isLessThan(Money.zero(this.getCurrency()));
+        return isLessThan(Money.zero(getCurrency()));
     }
 
     public String getCurrencyCode() {
@@ -293,12 +293,12 @@ public class Money implements Comparable<Money> {
     }
 
     public Money negated() {
-        if (this.isZero()) { return this; }
+        if (isZero()) { return this; }
         return Money.of(monetaryCurrency(), this.amount.negate());
     }
 
     public Money abs() {
-        return this.isLessThanZero() ? this.negated() : this;
+        return isLessThanZero() ? negated() : this;
     }
 
     public MonetaryCurrency getCurrency() {

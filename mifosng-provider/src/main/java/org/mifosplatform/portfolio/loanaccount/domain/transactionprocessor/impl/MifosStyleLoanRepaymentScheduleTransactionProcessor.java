@@ -33,7 +33,7 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends Abstrac
     protected boolean isTransactionInAdvanceOfInstallment(final int currentInstallmentIndex,
             final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate, final Money transactionAmount) {
 
-        LoanRepaymentScheduleInstallment currentInstallment = installments.get(currentInstallmentIndex);
+        final LoanRepaymentScheduleInstallment currentInstallment = installments.get(currentInstallmentIndex);
 
         return transactionDate.isBefore(currentInstallment.getDueDate());
     }
@@ -85,11 +85,11 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends Abstrac
             transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
 
             loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
-        } else if(loanTransaction.isChargePayment()){
-            if(loanTransaction.isPenaltyPayment()){
+        } else if (loanTransaction.isChargePayment()) {
+            if (loanTransaction.isPenaltyPayment()) {
                 penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
                 transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
-            }else{
+            } else {
                 feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
                 transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
             }

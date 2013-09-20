@@ -68,7 +68,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                     sql = "select " + this.savingsAccountMapper.schema() + " where sa.id = ?";
                     if (currencyCode != null) {
                         sql += " and sa.currency_code = ?";
-                        sqlParams = new Object[] {accountId, currencyCode};
+                        sqlParams = new Object[] { accountId, currencyCode };
                     }
 
                     accountData = this.jdbcTemplate.queryForObject(sql, this.savingsAccountMapper, sqlParams);
@@ -84,23 +84,24 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
     }
 
     @Override
-    public Collection<PortfolioAccountData> retrieveAllForLookup(final Integer accountTypeId, final Long clientId, long[] accountStatus) {
+    public Collection<PortfolioAccountData> retrieveAllForLookup(final Integer accountTypeId, final Long clientId,
+            final long[] accountStatus) {
         return retrieveAllForLookup(accountTypeId, clientId, null, accountStatus);
     }
 
     @Override
     public Collection<PortfolioAccountData> retrieveAllForLookup(final Integer accountTypeId, final Long clientId,
-            final String currencyCode, long[] accountStatus) {
+            final String currencyCode, final long[] accountStatus) {
 
         Object[] sqlParams = new Object[] { clientId };
         Collection<PortfolioAccountData> accounts = null;
         String sql = null;
         String defaultAccountStatus = "300";
         if (accountStatus != null) {
-            for (long status : accountStatus) {
+            for (final long status : accountStatus) {
                 defaultAccountStatus += ", " + status;
             }
-            defaultAccountStatus = defaultAccountStatus.substring(defaultAccountStatus.indexOf(",")+1);
+            defaultAccountStatus = defaultAccountStatus.substring(defaultAccountStatus.indexOf(",") + 1);
         }
         final PortfolioAccountType accountType = PortfolioAccountType.fromInt(accountTypeId);
         switch (accountType) {

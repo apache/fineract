@@ -15,6 +15,7 @@ public class ReportNotFoundException extends AbstractPlatformResourceNotFoundExc
     public ReportNotFoundException(final String reportSql) {
         super("error.msg.report.name.not.found", "Reporting meta-data entry not found.", "Input sql: " + reportSql);
     }
+
     public ReportNotFoundException(final Long id) {
         super("error.msg.report.parameter.id.invalid", "Report Parameter with identifier " + id + " does not exist", id);
     }

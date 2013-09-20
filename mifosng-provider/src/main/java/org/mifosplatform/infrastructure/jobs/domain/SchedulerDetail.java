@@ -27,7 +27,7 @@ public class SchedulerDetail extends AbstractPersistable<Long> {
         return this.executeInstructionForMisfiredJobs;
     }
 
-    public void updateExecuteInstructionForMisfiredJobs(boolean executeInstructionForMisfiredJobs) {
+    public void updateExecuteInstructionForMisfiredJobs(final boolean executeInstructionForMisfiredJobs) {
         this.executeInstructionForMisfiredJobs = executeInstructionForMisfiredJobs;
     }
 
@@ -35,7 +35,7 @@ public class SchedulerDetail extends AbstractPersistable<Long> {
         return this.suspended;
     }
 
-    public void updateSuspendedState(boolean suspended) {
+    public void updateSuspendedState(final boolean suspended) {
         this.suspended = suspended;
     }
 
@@ -43,7 +43,7 @@ public class SchedulerDetail extends AbstractPersistable<Long> {
         return this.resetSchedulerOnBootup;
     }
 
-    public void updateResetSchedulerOnBootup(boolean resetSchedulerOnBootup) {
+    public void updateResetSchedulerOnBootup(final boolean resetSchedulerOnBootup) {
         this.resetSchedulerOnBootup = resetSchedulerOnBootup;
     }
 }

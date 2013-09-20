@@ -13,7 +13,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
  */
 public class SavingsTransferTransactionsCannotBeUndoneException extends AbstractPlatformDomainRuleException {
 
-    public SavingsTransferTransactionsCannotBeUndoneException(Long transactionId) {
+    public SavingsTransferTransactionsCannotBeUndoneException(final Long transactionId) {
         super("error.msg.savings.transfer.transactions.cannot.be.undone",
                 "Transactions related to savings account transfers cannot be undone", transactionId);
     }

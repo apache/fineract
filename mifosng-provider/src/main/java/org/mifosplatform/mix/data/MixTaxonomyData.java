@@ -16,7 +16,8 @@ public class MixTaxonomyData {
     @SuppressWarnings("unused")
     private final String description;
 
-    public MixTaxonomyData(final Long id, final String name, final String namespace, final String dimension, final Integer type, final String description) {
+    public MixTaxonomyData(final Long id, final String name, final String namespace, final String dimension, final Integer type,
+            final String description) {
 
         this.id = id;
         this.name = name;

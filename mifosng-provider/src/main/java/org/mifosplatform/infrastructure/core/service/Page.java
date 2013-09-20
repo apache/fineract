@@ -22,6 +22,6 @@ public class Page<E> {
     }
 
     public List<E> getPageItems() {
-        return pageItems;
+        return this.pageItems;
     }
 }

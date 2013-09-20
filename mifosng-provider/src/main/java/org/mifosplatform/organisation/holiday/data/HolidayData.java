@@ -2,9 +2,8 @@ package org.mifosplatform.organisation.holiday.data;
 
 import org.joda.time.LocalDate;
 
-
 public class HolidayData {
-    
+
     @SuppressWarnings("unused")
     private final Long id;
     @SuppressWarnings("unused")
@@ -17,7 +16,7 @@ public class HolidayData {
     private final LocalDate repaymentsScheduleTO;
     @SuppressWarnings("unused")
     private final Long officeId;
-    
+
     public HolidayData(final Long id, final String name, final LocalDate fromDate, final LocalDate toDate,
             final LocalDate repaymentsScheduleTO) {
         this.id = id;
@@ -26,6 +25,6 @@ public class HolidayData {
         this.toDate = toDate;
         this.repaymentsScheduleTO = repaymentsScheduleTO;
         this.officeId = null;
-        
+
     }
 }

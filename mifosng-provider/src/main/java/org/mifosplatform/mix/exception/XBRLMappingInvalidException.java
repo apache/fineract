@@ -4,7 +4,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
 
 public class XBRLMappingInvalidException extends AbstractPlatformDomainRuleException {
 
-    public XBRLMappingInvalidException(String msg) {
+    public XBRLMappingInvalidException(final String msg) {
         super("error.msg.xbrl.report.mapping.invalid.id", "Mapping does not exist", msg);
     }
 

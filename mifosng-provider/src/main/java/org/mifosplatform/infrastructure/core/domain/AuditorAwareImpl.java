@@ -22,16 +22,16 @@ public class AuditorAwareImpl implements AuditorAware<AppUser> {
     public AppUser getCurrentAuditor() {
 
         AppUser currentUser = null;
-        SecurityContext securityContext = SecurityContextHolder.getContext();
+        final SecurityContext securityContext = SecurityContextHolder.getContext();
         if (securityContext != null) {
-            Authentication authentication = securityContext.getAuthentication();
+            final Authentication authentication = securityContext.getAuthentication();
             if (authentication != null) {
                 currentUser = (AppUser) authentication.getPrincipal();
             } else {
-                currentUser = this.retrieveSuperUser();
+                currentUser = retrieveSuperUser();
             }
         } else {
-            currentUser = this.retrieveSuperUser();
+            currentUser = retrieveSuperUser();
         }
         return currentUser;
     }

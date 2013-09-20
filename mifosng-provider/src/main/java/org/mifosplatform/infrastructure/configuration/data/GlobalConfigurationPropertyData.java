@@ -11,9 +11,9 @@ package org.mifosplatform.infrastructure.configuration.data;
 public class GlobalConfigurationPropertyData {
 
     @SuppressWarnings("unused")
-    private String name;
+    private final String name;
     @SuppressWarnings("unused")
-    private boolean enabled;
+    private final boolean enabled;
 
     public GlobalConfigurationPropertyData(final String name, final boolean enabled) {
         this.name = name;

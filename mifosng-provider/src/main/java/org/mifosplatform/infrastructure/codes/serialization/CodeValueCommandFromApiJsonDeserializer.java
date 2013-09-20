@@ -56,9 +56,8 @@ public final class CodeValueCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter(CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue()).value(name).notBlank().notExceedingLengthOf(100);
 
         if (this.fromApiJsonHelper.parameterExists(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(), element)) {
-            //Validate input value is a valid Integer
-            this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(),
-                    element);
+            // Validate input value is a valid Integer
+            this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(), element);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -82,9 +81,8 @@ public final class CodeValueCommandFromApiJsonDeserializer {
         }
 
         if (this.fromApiJsonHelper.parameterExists(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(), element)) {
-            //Validate input value is a valid Integer
-            this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(),
-                    element);
+            // Validate input value is a valid Integer
+            this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(), element);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

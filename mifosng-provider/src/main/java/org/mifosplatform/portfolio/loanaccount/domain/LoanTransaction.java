@@ -108,11 +108,10 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
             final LocalDate paymentDate, final String externalId) {
         return new LoanTransaction(null, office, LoanTransactionType.REPAYMENT, paymentDetail, amount.getAmount(), paymentDate, externalId);
     }
-    
-    public static LoanTransaction loanPayment(final Loan loan ,final Office office, final Money amount, final PaymentDetail paymentDetail,
-            final LocalDate paymentDate, final String externalId,final LoanTransactionType transactionType){
-        return new LoanTransaction(loan, office, transactionType, paymentDetail, amount.getAmount(), paymentDate,
-                externalId);
+
+    public static LoanTransaction loanPayment(final Loan loan, final Office office, final Money amount, final PaymentDetail paymentDetail,
+            final LocalDate paymentDate, final String externalId, final LoanTransactionType transactionType) {
+        return new LoanTransaction(loan, office, transactionType, paymentDetail, amount.getAmount(), paymentDate, externalId);
     }
 
     public static LoanTransaction repaymentAtDisbursement(final Office office, final Money amount, final PaymentDetail paymentDetail,
@@ -156,7 +155,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return new LoanTransaction(null, office, LoanTransactionType.REFUND, paymentDetail, amount.getAmount(), paymentDate, externalId);
     }
 
-    public static LoanTransaction copyTransactionProperties(LoanTransaction loanTransaction) {
+    public static LoanTransaction copyTransactionProperties(final LoanTransaction loanTransaction) {
         return new LoanTransaction(loanTransaction.loan, loanTransaction.office, loanTransaction.typeOf, loanTransaction.dateOf,
                 loanTransaction.amount, loanTransaction.principalPortion, loanTransaction.interestPortion,
                 loanTransaction.feeChargesPortion, loanTransaction.penaltyChargesPortion, loanTransaction.reversed,
@@ -165,14 +164,14 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     public static LoanTransaction applyLoanCharge(final Loan loan, final Office office, final Money amount, final LocalDate applyDate,
             final Money feeCharges, final Money penaltyCharges) {
-        LoanTransaction applyCharge = new LoanTransaction(loan, office, LoanTransactionType.APPLY_CHARGES, amount.getAmount(), applyDate,
-                null);
+        final LoanTransaction applyCharge = new LoanTransaction(loan, office, LoanTransactionType.APPLY_CHARGES, amount.getAmount(),
+                applyDate, null);
         applyCharge.updateChargesComponents(feeCharges, penaltyCharges);
         return applyCharge;
     }
 
-    public static boolean transactionAmountsMatch(MonetaryCurrency currency, LoanTransaction loanTransaction,
-            LoanTransaction newLoanTransaction) {
+    public static boolean transactionAmountsMatch(final MonetaryCurrency currency, final LoanTransaction loanTransaction,
+            final LoanTransaction newLoanTransaction) {
         if (loanTransaction.getAmount(currency).isEqualTo(newLoanTransaction.getAmount(currency))
                 && (loanTransaction.getPrincipalPortion(currency).isEqualTo(newLoanTransaction.getPrincipalPortion(currency)))
                 && (loanTransaction.getInterestPortion(currency).isEqualTo(newLoanTransaction.getInterestPortion(currency)))
@@ -181,9 +180,9 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return false;
     }
 
-    private LoanTransaction(Loan loan, Office office, Integer typeOf, Date dateOf, BigDecimal amount, BigDecimal principalPortion,
-            BigDecimal interestPortion, BigDecimal feeChargesPortion, BigDecimal penaltyChargesPortion, boolean reversed,
-            PaymentDetail paymentDetail) {
+    private LoanTransaction(final Loan loan, final Office office, final Integer typeOf, final Date dateOf, final BigDecimal amount,
+            final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
+            final BigDecimal penaltyChargesPortion, final boolean reversed, final PaymentDetail paymentDetail) {
         super();
         this.loan = loan;
         this.typeOf = typeOf;
@@ -200,7 +199,8 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     public static LoanTransaction waiveLoanCharge(final Loan loan, final Office office, final Money waived, final LocalDate waiveDate,
             final Money feeChargesWaived, final Money penaltyChargesWaived) {
-        LoanTransaction waiver = new LoanTransaction(loan, office, LoanTransactionType.WAIVE_CHARGES, waived.getAmount(), waiveDate, null);
+        final LoanTransaction waiver = new LoanTransaction(loan, office, LoanTransactionType.WAIVE_CHARGES, waived.getAmount(), waiveDate,
+                null);
         waiver.updateChargesComponents(feeChargesWaived, penaltyChargesWaived);
 
         return waiver;
@@ -303,7 +303,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     }
 
     public Date getDateOf() {
-        return dateOf;
+        return this.dateOf;
     }
 
     public LoanTransactionType getTypeOf() {
@@ -361,15 +361,15 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     public boolean isNotWaiver() {
         return !isInterestWaiver() && !isChargesWaiver();
     }
-    
-    public boolean isChargePayment(){
+
+    public boolean isChargePayment() {
         return getTypeOf().isChargePayment() && isNotReversed();
     }
-    
-    public boolean isPenaltyPayment(){
+
+    public boolean isPenaltyPayment() {
         boolean isPenalty = false;
-        if(isChargePayment()){
-            for(LoanChargePaidBy chargePaidBy:this.loanChargesPaid){
+        if (isChargePayment()) {
+            for (final LoanChargePaidBy chargePaidBy : this.loanChargesPaid) {
                 isPenalty = chargePaidBy.getLoanCharge().isPenaltyCharge();
                 break;
             }
@@ -382,7 +382,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     }
 
     public boolean isIdentifiedBy(final Long identifier) {
-        return this.getId().equals(identifier);
+        return getId().equals(identifier);
     }
 
     public boolean isBelongingToLoanOf(final Loan check) {
@@ -417,13 +417,13 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return result;
     }
 
-    public LoanTransactionData toData(final CurrencyData currencyData,final AccountTransferData transfer) {
+    public LoanTransactionData toData(final CurrencyData currencyData, final AccountTransferData transfer) {
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(this.typeOf);
         PaymentDetailData paymentDetailData = null;
         if (this.paymentDetail != null) {
-            paymentDetailData = paymentDetail.toData();
+            paymentDetailData = this.paymentDetail.toData();
         }
-        return new LoanTransactionData(this.getId(), this.office.getId(), this.office.getName(), transactionType, paymentDetailData,
+        return new LoanTransactionData(getId(), this.office.getId(), this.office.getName(), transactionType, paymentDetailData,
                 currencyData, getTransactionDate(), this.amount, this.principalPortion, this.interestPortion, this.feeChargesPortion,
                 this.penaltyChargesPortion, this.externalId, transfer);
     }
@@ -433,11 +433,11 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(this.typeOf);
 
-        thisTransactionData.put("id", this.getId());
+        thisTransactionData.put("id", getId());
         thisTransactionData.put("officeId", this.office.getId());
         thisTransactionData.put("type", transactionType);
-        thisTransactionData.put("reversed", Boolean.valueOf(this.isReversed()));
-        thisTransactionData.put("date", this.getTransactionDate());
+        thisTransactionData.put("reversed", Boolean.valueOf(isReversed()));
+        thisTransactionData.put("date", getTransactionDate());
         thisTransactionData.put("currency", currencyData);
         thisTransactionData.put("amount", this.amount);
         thisTransactionData.put("principalPortion", this.principalPortion);
@@ -451,7 +451,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
         if (!this.loanChargesPaid.isEmpty()) {
             final List<Map<String, Object>> loanChargesPaidData = new ArrayList<Map<String, Object>>();
-            for (LoanChargePaidBy chargePaidBy : this.loanChargesPaid) {
+            for (final LoanChargePaidBy chargePaidBy : this.loanChargesPaid) {
                 final Map<String, Object> loanChargePaidData = new LinkedHashMap<String, Object>();
                 loanChargePaidData.put("chargeId", chargePaidBy.getLoanCharge().getCharge().getId());
                 loanChargePaidData.put("isPenalty", chargePaidBy.getLoanCharge().getCharge().isPenalty());
@@ -474,12 +474,12 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return this.loanChargesPaid;
     }
 
-    public void setLoanChargesPaid(Set<LoanChargePaidBy> loanChargesPaid) {
+    public void setLoanChargesPaid(final Set<LoanChargePaidBy> loanChargesPaid) {
         this.loanChargesPaid = loanChargesPaid;
     }
 
     public String getExternalId() {
-        return externalId;
+        return this.externalId;
     }
 
     public boolean isRefund() {

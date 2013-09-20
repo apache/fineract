@@ -60,7 +60,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     // data mappers
     private final CenterDataMapper centerMapper = new CenterDataMapper();
     private final GroupDataMapper groupDataMapper = new GroupDataMapper();
-    
+
     private final PaginationHelper<CenterData> paginationHelper = new PaginationHelper<CenterData>();
 
     @Autowired
@@ -194,11 +194,11 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     @Override
     public Page<CenterData> retrieveAll(final SearchParameters searchParameters) {
 
-        final AppUser currentUser = context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
 
-        StringBuilder sqlBuilder = new StringBuilder(200);
+        final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(this.centerMapper.schema());
         sqlBuilder.append(" where o.hierarchy like ?");
@@ -218,7 +218,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             if (searchParameters.isOffset()) {
                 sqlBuilder.append(" offset ").append(searchParameters.getOffset());
             }
-        } 
+        }
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
@@ -228,14 +228,14 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     @Override
     public Collection<CenterData> retrieveAllForDropdown(final Long officeId) {
 
-        final AppUser currentUser = context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
 
-        final String sql = "select " + centerMapper.schema()
+        final String sql = "select " + this.centerMapper.schema()
                 + " where g.office_id = ? and g.parent_id is null and g.level_Id = ? and o.hierarchy like ? order by g.hierarchy";
 
-        return this.jdbcTemplate.query(sql, centerMapper, new Object[] { officeId, GroupTypes.CENTER.getId(), hierarchySearchString });
+        return this.jdbcTemplate.query(sql, this.centerMapper, new Object[] { officeId, GroupTypes.CENTER.getId(), hierarchySearchString });
     }
 
     @Override
@@ -265,14 +265,14 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         final Long defaultOfficeId = defaultToUsersOfficeIfNull(officeId);
 
-        final AppUser currentUser = context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
 
-        final String sql = "select " + allGroupTypesDataMapper.schema()
+        final String sql = "select " + this.allGroupTypesDataMapper.schema()
                 + " where g.office_id = ? and g.parent_id is null and g.level_Id = ? and o.hierarchy like ? order by g.hierarchy";
 
-        return this.jdbcTemplate.query(sql, allGroupTypesDataMapper, new Object[] { defaultOfficeId, GroupTypes.GROUP.getId(),
+        return this.jdbcTemplate.query(sql, this.allGroupTypesDataMapper, new Object[] { defaultOfficeId, GroupTypes.GROUP.getId(),
                 hierarchySearchString });
     }
 
@@ -288,14 +288,14 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     public CenterData retrieveOne(final Long centerId) {
 
         try {
-            final AppUser currentUser = context.authenticatedUser();
+            final AppUser currentUser = this.context.authenticatedUser();
             final String hierarchy = currentUser.getOffice().getHierarchy();
             final String hierarchySearchString = hierarchy + "%";
 
-            String sql = "select " + this.centerMapper.schema() + " where g.id = ? and o.hierarchy like ?";
+            final String sql = "select " + this.centerMapper.schema() + " where g.id = ? and o.hierarchy like ?";
             return this.jdbcTemplate.queryForObject(sql, this.centerMapper, new Object[] { centerId, hierarchySearchString });
 
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new CenterNotFoundException(centerId);
         }
     }
@@ -303,7 +303,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     @Override
     public GroupGeneralData retrieveCenterGroupTemplate(final Long centerId) {
 
-        final CenterData center = this.retrieveOne(centerId);
+        final CenterData center = retrieveOne(centerId);
 
         final Long centerOfficeId = center.officeId();
         final OfficeData centerOffice = this.officeReadPlatformService.retrieveOffice(centerOfficeId);
@@ -335,14 +335,14 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
     @Override
     public Collection<GroupGeneralData> retrieveAssociatedGroups(final Long centerId) {
-        String sql = "select " + this.groupDataMapper.schema() + " where g.parent_id = ? ";
+        final String sql = "select " + this.groupDataMapper.schema() + " where g.parent_id = ? ";
         return this.jdbcTemplate.query(sql, this.groupDataMapper, new Object[] { centerId });
     }
-    
+
     @Override
     public CenterData retrieveCenterWithClosureReasons() {
         final List<CodeValueData> closureReasons = new ArrayList<CodeValueData>(
-                codeValueReadPlatformService.retrieveCodeValuesByCode(GroupingTypesApiConstants.GROUP_CLOSURE_REASON));
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(GroupingTypesApiConstants.GROUP_CLOSURE_REASON));
         return CenterData.withClosureReasons(closureReasons);
     }
 }

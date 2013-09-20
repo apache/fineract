@@ -27,33 +27,33 @@ public class LoanWithdrawnByApplicantIntegrationTest {
     @Before
     public void setup() {
         Utils.initializeRESTAssured();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
 
-        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
     }
 
     @Test
     public void loanWithdrawnByApplicant() {
-        Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2012");
-        Integer loanProductID = loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build());
-        Integer loanID = applyForLoanApplication(clientID, loanProductID);
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
+        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build());
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
-        loanTransactionHelper.withdrawLoanApplicationByClient("03 April 2012", loanID);
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
+        this.loanTransactionHelper.withdrawLoanApplicationByClient("03 April 2012", loanID);
+        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsNotActive(loanStatusHashMap);
 
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
-        String loanApplication = new LoanApplicationTestBuilder().withPrincipal("5000").withLoanTermFrequency("5")
+        final String loanApplication = new LoanApplicationTestBuilder().withPrincipal("5000").withLoanTermFrequency("5")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("5").withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2").withExpectedDisbursementDate("04 April 2012")
                 .withSubmittedOnDate("02 April 2012").build(clientID.toString(), loanProductID.toString());
-        return loanTransactionHelper.getLoanId(loanApplication);
+        return this.loanTransactionHelper.getLoanId(loanApplication);
     }
 }

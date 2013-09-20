@@ -27,22 +27,23 @@ public class LoanRepaymentScheduleInstallmentBuilder {
     }
 
     public LoanRepaymentScheduleInstallment build() {
-        LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan, installmentNumber, fromDate, dueDate,
-                principal.getAmount(), interest.getAmount(), feeCharges.getAmount(), penaltyCharges.getAmount());
-        if (completed) {
-            installment.payPrincipalComponent(latestTransactionDate, principal);
-            installment.payInterestComponent(latestTransactionDate, interest);
+        final LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(this.loan, this.installmentNumber,
+                this.fromDate, this.dueDate, this.principal.getAmount(), this.interest.getAmount(), this.feeCharges.getAmount(),
+                this.penaltyCharges.getAmount());
+        if (this.completed) {
+            installment.payPrincipalComponent(this.latestTransactionDate, this.principal);
+            installment.payInterestComponent(this.latestTransactionDate, this.interest);
         }
         return installment;
     }
 
     public LoanRepaymentScheduleInstallmentBuilder withPrincipal(final String withPrincipal) {
-        this.principal = new MoneyBuilder().with(currencyDetail).with(withPrincipal).build();
+        this.principal = new MoneyBuilder().with(this.currencyDetail).with(withPrincipal).build();
         return this;
     }
 
     public LoanRepaymentScheduleInstallmentBuilder withInterest(final String withInterest) {
-        this.interest = new MoneyBuilder().with(currencyDetail).with(withInterest).build();
+        this.interest = new MoneyBuilder().with(this.currencyDetail).with(withInterest).build();
         return this;
     }
 

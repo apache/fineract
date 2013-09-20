@@ -50,20 +50,21 @@ public class AccountingDropdownReadPlatformServiceImpl implements AccountingDrop
 
     @Override
     public Map<String, List<GLAccountData>> retrieveAccountMappingOptionsForLoanProducts() {
-        Map<String, List<GLAccountData>> accountOptions = new HashMap<String, List<GLAccountData>>();
-        List<GLAccountData> assetAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.ASSET);
+        final Map<String, List<GLAccountData>> accountOptions = new HashMap<String, List<GLAccountData>>();
+        List<GLAccountData> assetAccountOptions = this.accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.ASSET);
         if (assetAccountOptions.isEmpty()) {
             assetAccountOptions = null;
         }
         accountOptions.put("assetAccountOptions", assetAccountOptions);
 
-        List<GLAccountData> incomeAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.INCOME);
+        List<GLAccountData> incomeAccountOptions = this.accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.INCOME);
         if (incomeAccountOptions.isEmpty()) {
             incomeAccountOptions = null;
         }
         accountOptions.put("incomeAccountOptions", incomeAccountOptions);
 
-        List<GLAccountData> expenseAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.EXPENSE);
+        List<GLAccountData> expenseAccountOptions = this.accountReadPlatformService
+                .retrieveAllEnabledDetailGLAccounts(GLAccountType.EXPENSE);
         if (expenseAccountOptions.isEmpty()) {
             expenseAccountOptions = null;
         }
@@ -73,8 +74,8 @@ public class AccountingDropdownReadPlatformServiceImpl implements AccountingDrop
 
     @Override
     public Map<String, List<GLAccountData>> retrieveAccountMappingOptionsForSavingsProducts() {
-        Map<String, List<GLAccountData>> accountOptions = retrieveAccountMappingOptionsForLoanProducts();
-        List<GLAccountData> liabilityAccountOptions = accountReadPlatformService
+        final Map<String, List<GLAccountData>> accountOptions = retrieveAccountMappingOptionsForLoanProducts();
+        List<GLAccountData> liabilityAccountOptions = this.accountReadPlatformService
                 .retrieveAllEnabledDetailGLAccounts(GLAccountType.LIABILITY);
         if (liabilityAccountOptions.isEmpty()) {
             liabilityAccountOptions = null;

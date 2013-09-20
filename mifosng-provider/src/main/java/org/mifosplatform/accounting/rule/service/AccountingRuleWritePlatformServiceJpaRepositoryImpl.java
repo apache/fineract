@@ -112,7 +112,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         // get the GL Accounts or tags to Debit and Credit
         final String[] debitTags = command.arrayValueOfParameterNamed(AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue());
         final String[] creditTags = command.arrayValueOfParameterNamed(AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue());
-        final Set<String> incomingDebitTags = debitTags == null ? new HashSet<String>(): new HashSet<String>(Arrays.asList(debitTags));
+        final Set<String> incomingDebitTags = debitTags == null ? new HashSet<String>() : new HashSet<String>(Arrays.asList(debitTags));
         final Set<String> incomingCreditTags = creditTags == null ? new HashSet<String>() : new HashSet<String>(Arrays.asList(creditTags));
         final Long accountToDebitId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue());
         final Long accountToCreditId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue());

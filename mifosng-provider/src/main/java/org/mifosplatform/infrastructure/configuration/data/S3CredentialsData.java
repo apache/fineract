@@ -6,7 +6,7 @@ public class S3CredentialsData {
     private final String accessKey;
     private final String secretKey;
 
-    public S3CredentialsData(String bucketName, String accessKey, String secretKey) {
+    public S3CredentialsData(final String bucketName, final String accessKey, final String secretKey) {
         this.bucketName = bucketName;
         this.accessKey = accessKey;
         this.secretKey = secretKey;

@@ -84,7 +84,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             final GenericDataService genericDataService) {
         // kick off pentaho reports server
         ClassicEngineBoot.getInstance().start();
-        noPentaho = false;
+        this.noPentaho = false;
 
         this.context = context;
         this.dataSource = dataSource;
@@ -101,12 +101,12 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             public void write(final OutputStream out) {
                 try {
 
-                    GenericResultsetData result = retrieveGenericResultset(name, type, queryParams);
-                    StringBuffer sb = generateCsvFileBuffer(result);
+                    final GenericResultsetData result = retrieveGenericResultset(name, type, queryParams);
+                    final StringBuffer sb = generateCsvFileBuffer(result);
 
-                    InputStream in = new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
+                    final InputStream in = new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
 
-                    byte[] outputByte = new byte[4096];
+                    final byte[] outputByte = new byte[4096];
                     Integer readLen = in.read(outputByte, 0, 4096);
 
                     while (readLen != -1) {
@@ -116,7 +116,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                     // in.close();
                     // out.flush();
                     // out.close();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage());
                 }
             }
@@ -125,25 +125,27 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     private StringBuffer generateCsvFileBuffer(final GenericResultsetData result) {
-        StringBuffer writer = new StringBuffer();
+        final StringBuffer writer = new StringBuffer();
 
-        List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
+        final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
         logger.info("NO. of Columns: " + columnHeaders.size());
-        Integer chSize = columnHeaders.size();
+        final Integer chSize = columnHeaders.size();
         for (int i = 0; i < chSize; i++) {
             writer.append('"' + columnHeaders.get(i).getColumnName() + '"');
-            if (i < (chSize - 1)) writer.append(",");
+            if (i < (chSize - 1)) {
+                writer.append(",");
+            }
         }
         writer.append('\n');
 
-        List<ResultsetRowData> data = result.getData();
+        final List<ResultsetRowData> data = result.getData();
         List<String> row;
         Integer rSize;
         // String currCol;
         String currColType;
         String currVal;
-        String doubleQuote = "\"";
-        String twoDoubleQuotes = doubleQuote + doubleQuote;
+        final String doubleQuote = "\"";
+        final String twoDoubleQuotes = doubleQuote + doubleQuote;
         logger.info("NO. of Rows: " + data.size());
         for (int i = 0; i < data.size(); i++) {
             row = data.get(i).getRow();
@@ -154,13 +156,16 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                 currVal = row.get(j);
                 if (currVal != null) {
                     if (currColType.equals("DECIMAL") || currColType.equals("DOUBLE") || currColType.equals("BIGINT")
-                            || currColType.equals("SMALLINT") || currColType.equals("INT"))
+                            || currColType.equals("SMALLINT") || currColType.equals("INT")) {
                         writer.append(currVal);
-                    else
-                        writer.append('"' + genericDataService.replace(currVal, doubleQuote, twoDoubleQuotes) + '"');
+                    } else {
+                        writer.append('"' + this.genericDataService.replace(currVal, doubleQuote, twoDoubleQuotes) + '"');
+                    }
 
                 }
-                if (j < (rSize - 1)) writer.append(",");
+                if (j < (rSize - 1)) {
+                    writer.append(",");
+                }
             }
             writer.append('\n');
         }
@@ -171,14 +176,14 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     @Override
     public GenericResultsetData retrieveGenericResultset(final String name, final String type, final Map<String, String> queryParams) {
 
-        long startTime = System.currentTimeMillis();
+        final long startTime = System.currentTimeMillis();
         logger.info("STARTING REPORT: " + name + "   Type: " + type);
 
-        String sql = getSQLtoRun(name, type, queryParams);
+        final String sql = getSQLtoRun(name, type, queryParams);
 
-        GenericResultsetData result = genericDataService.fillGenericResultSet(sql);
+        final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
 
-        long elapsed = System.currentTimeMillis() - startTime;
+        final long elapsed = System.currentTimeMillis() - startTime;
         logger.info("FINISHING Report/Request Name: " + name + " - " + type + "     Elapsed Time: " + elapsed);
         return result;
     }
@@ -187,22 +192,22 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         String sql = getSql(name, type);
 
-        Set<String> keys = queryParams.keySet();
-        for (String key : keys) {
-            String pValue = queryParams.get(key);
+        final Set<String> keys = queryParams.keySet();
+        for (final String key : keys) {
+            final String pValue = queryParams.get(key);
             // logger.info("(" + key + " : " + pValue + ")");
-            sql = genericDataService.replace(sql, key, pValue);
+            sql = this.genericDataService.replace(sql, key, pValue);
         }
 
-        AppUser currentUser = context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
         // Allows sql query to restrict data by office hierarchy if required
-        sql = genericDataService.replace(sql, "${currentUserHierarchy}", currentUser.getOffice().getHierarchy());
+        sql = this.genericDataService.replace(sql, "${currentUserHierarchy}", currentUser.getOffice().getHierarchy());
         // Allows sql query to restrict data by current user Id if required
         // (typically used to return report lists containing only reports
         // permitted to be run by the user
-        sql = genericDataService.replace(sql, "${currentUserId}", currentUser.getId().toString());
+        sql = this.genericDataService.replace(sql, "${currentUserId}", currentUser.getId().toString());
 
-        sql = genericDataService.wrapSQL(sql);
+        sql = this.genericDataService.wrapSQL(sql);
 
         return sql;
 
@@ -211,7 +216,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     private String getSql(final String name, final String type) {
 
         final String inputSql = "select " + type + "_sql as the_sql from stretchy_" + type + " where " + type + "_name = '" + name + "'";
-        final String inputSqlWrapped = genericDataService.wrapSQL(inputSql);
+        final String inputSqlWrapped = this.genericDataService.wrapSQL(inputSql);
 
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(inputSqlWrapped);
 
@@ -224,7 +229,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         final String sql = "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '" + reportName + "'";
 
-        final String sqlWrapped = genericDataService.wrapSQL(sql);
+        final String sqlWrapped = this.genericDataService.wrapSQL(sql);
 
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sqlWrapped);
 
@@ -237,13 +242,15 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             final Locale locale) {
 
         String outputType = "HTML";
-        if (StringUtils.isNotBlank(outputTypeParam)) outputType = outputTypeParam;
+        if (StringUtils.isNotBlank(outputTypeParam)) {
+            outputType = outputTypeParam;
+        }
 
         if (!(outputType.equalsIgnoreCase("HTML") || outputType.equalsIgnoreCase("PDF") || outputType.equalsIgnoreCase("XLS") || outputType
-                .equalsIgnoreCase("CSV")))
-            throw new PlatformDataIntegrityException("error.msg.invalid.outputType", "No matching Output Type: " + outputType);
+                .equalsIgnoreCase("CSV"))) { throw new PlatformDataIntegrityException("error.msg.invalid.outputType",
+                "No matching Output Type: " + outputType); }
 
-        if (noPentaho) { throw new PlatformDataIntegrityException("error.msg.no.pentaho", "Pentaho is not enabled",
+        if (this.noPentaho) { throw new PlatformDataIntegrityException("error.msg.no.pentaho", "Pentaho is not enabled",
                 "Pentaho is not enabled"); }
 
         final String reportPath = FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + "pentahoReports" + File.separator
@@ -251,20 +258,20 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         logger.info("Report path: " + reportPath);
 
         // load report definition
-        ResourceManager manager = new ResourceManager();
+        final ResourceManager manager = new ResourceManager();
         manager.registerDefaults();
         Resource res;
 
         try {
             res = manager.createDirectly(reportPath, MasterReport.class);
-            MasterReport masterReport = (MasterReport) res.getResource();
-            DefaultReportEnvironment reportEnvironment = (DefaultReportEnvironment) masterReport.getReportEnvironment();
+            final MasterReport masterReport = (MasterReport) res.getResource();
+            final DefaultReportEnvironment reportEnvironment = (DefaultReportEnvironment) masterReport.getReportEnvironment();
             if (locale != null) {
                 reportEnvironment.setLocale(locale);
             }
             addParametersToReport(masterReport, queryParams);
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
             if ("PDF".equalsIgnoreCase(outputType)) {
                 PdfReportUtil.createPDF(masterReport, baos);
@@ -287,11 +294,11 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                 HtmlReportUtil.createStreamHTML(masterReport, baos);
                 return Response.ok().entity(baos.toByteArray()).type("text/html").build();
             }
-        } catch (ResourceException e) {
+        } catch (final ResourceException e) {
             throw new PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage());
-        } catch (ReportProcessingException e) {
+        } catch (final ReportProcessingException e) {
             throw new PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage());
         }
 
@@ -300,12 +307,12 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     private void addParametersToReport(final MasterReport report, final Map<String, String> queryParams) {
 
-        AppUser currentUser = context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
 
         try {
 
-            ReportParameterValues rptParamValues = report.getParameterValues();
-            ReportParameterDefinition paramsDefinition = report.getParameterDefinition();
+            final ReportParameterValues rptParamValues = report.getParameterValues();
+            final ReportParameterDefinition paramsDefinition = report.getParameterDefinition();
 
             /*
              * only allow integer, long, date and string parameter types and
@@ -314,25 +321,25 @@ public class ReadReportingServiceImpl implements ReadReportingService {
              * better... currently assuming they come in ok... and if not an
              * error
              */
-            for (ParameterDefinitionEntry paramDefEntry : paramsDefinition.getParameterDefinitions()) {
-                String paramName = paramDefEntry.getName();
+            for (final ParameterDefinitionEntry paramDefEntry : paramsDefinition.getParameterDefinitions()) {
+                final String paramName = paramDefEntry.getName();
                 if (!((paramName.equals("tenantdb")) || (paramName.equals("userhierarchy")))) {
                     logger.info("paramName:" + paramName);
-                    String pValue = queryParams.get(paramName);
-                    if (StringUtils.isBlank(pValue))
-                        throw new PlatformDataIntegrityException("error.msg.reporting.error", "Pentaho Parameter: " + paramName
-                                + " - not Provided");
+                    final String pValue = queryParams.get(paramName);
+                    if (StringUtils.isBlank(pValue)) { throw new PlatformDataIntegrityException("error.msg.reporting.error",
+                            "Pentaho Parameter: " + paramName + " - not Provided"); }
 
-                    Class<?> clazz = paramDefEntry.getValueType();
+                    final Class<?> clazz = paramDefEntry.getValueType();
                     logger.info("addParametersToReport(" + paramName + " : " + pValue + " : " + clazz.getCanonicalName() + ")");
-                    if (clazz.getCanonicalName().equalsIgnoreCase("java.lang.Integer"))
+                    if (clazz.getCanonicalName().equalsIgnoreCase("java.lang.Integer")) {
                         rptParamValues.put(paramName, Integer.parseInt(pValue));
-                    else if (clazz.getCanonicalName().equalsIgnoreCase("java.lang.Long"))
+                    } else if (clazz.getCanonicalName().equalsIgnoreCase("java.lang.Long")) {
                         rptParamValues.put(paramName, Long.parseLong(pValue));
-                    else if (clazz.getCanonicalName().equalsIgnoreCase("java.sql.Date"))
+                    } else if (clazz.getCanonicalName().equalsIgnoreCase("java.sql.Date")) {
                         rptParamValues.put(paramName, Date.valueOf(pValue));
-                    else
+                    } else {
                         rptParamValues.put(paramName, pValue);
+                    }
                 }
 
             }
@@ -341,18 +348,18 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             // passed as parameters to allow multitenant penaho reporting
             // and
             // data scoping
-            Connection connection = dataSource.getConnection();
+            final Connection connection = this.dataSource.getConnection();
             String tenantdb;
             try {
                 tenantdb = connection.getCatalog();
             } finally {
                 connection.close();
             }
-            String userhierarchy = currentUser.getOffice().getHierarchy();
+            final String userhierarchy = currentUser.getOffice().getHierarchy();
             logger.info("db name:" + tenantdb + "      userhierarchy:" + userhierarchy);
             rptParamValues.put("tenantdb", tenantdb);
             rptParamValues.put("userhierarchy", userhierarchy);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.error("error.msg.reporting.error:" + e.getMessage());
             throw new PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage());
         }
@@ -361,29 +368,29 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     @Override
     public String retrieveReportPDF(final String reportName, final String type, final Map<String, String> queryParams) {
 
-        String fileLocation = FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + "";
+        final String fileLocation = FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + "";
         if (!new File(fileLocation).isDirectory()) {
             new File(fileLocation).mkdirs();
         }
 
-        String genaratePdf = fileLocation + File.separator + reportName + ".pdf";
+        final String genaratePdf = fileLocation + File.separator + reportName + ".pdf";
 
         try {
-            GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams);
+            final GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams);
 
-            List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
-            List<ResultsetRowData> data = result.getData();
+            final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
+            final List<ResultsetRowData> data = result.getData();
             List<String> row;
 
             logger.info("NO. of Columns: " + columnHeaders.size());
-            Integer chSize = columnHeaders.size();
+            final Integer chSize = columnHeaders.size();
 
-            Document document = new Document(PageSize.B0.rotate());
+            final Document document = new Document(PageSize.B0.rotate());
 
             PdfWriter.getInstance(document, new FileOutputStream(new File(fileLocation + reportName + ".pdf")));
             document.open();
 
-            PdfPTable table = new PdfPTable(chSize);
+            final PdfPTable table = new PdfPTable(chSize);
             table.setWidthPercentage(100);
 
             for (int i = 0; i < chSize; i++) {
@@ -418,7 +425,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             document.add(table);
             document.close();
             return genaratePdf;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.error("error.msg.reporting.error:" + e.getMessage());
             throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage());
         }
@@ -426,9 +433,9 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     @Override
     public ReportData retrieveReport(final Long id) {
-        Collection<ReportData> reports = retrieveReports(id);
+        final Collection<ReportData> reports = retrieveReports(id);
 
-        for (ReportData report : reports) {
+        for (final ReportData report : reports) {
             return report;
         }
         return null;
@@ -441,14 +448,14 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     private Collection<ReportData> retrieveReports(final Long id) {
 
-        ReportParameterJoinMapper rm = new ReportParameterJoinMapper();
+        final ReportParameterJoinMapper rm = new ReportParameterJoinMapper();
 
-        String sql = rm.schema(id);
+        final String sql = rm.schema(id);
 
-        Collection<ReportParameterJoinData> rpJoins = this.jdbcTemplate.query(sql, rm, new Object[] {});
+        final Collection<ReportParameterJoinData> rpJoins = this.jdbcTemplate.query(sql, rm, new Object[] {});
 
-        Collection<ReportData> reportList = new ArrayList<ReportData>();
-        if (rpJoins == null || rpJoins.size() == 0) return reportList;
+        final Collection<ReportData> reportList = new ArrayList<ReportData>();
+        if (rpJoins == null || rpJoins.size() == 0) { return reportList; }
 
         Collection<ReportParameterData> reportParameters = null;
 
@@ -464,7 +471,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         Long prevReportId = (long) -1234;
         Boolean firstReport = true;
-        for (ReportParameterJoinData rpJoin : rpJoins) {
+        for (final ReportParameterJoinData rpJoin : rpJoins) {
 
             if (rpJoin.getReportId().equals(prevReportId)) {
                 // more than one parameter for report
@@ -516,9 +523,9 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     @Override
     public Collection<ReportParameterData> getAllowedParameters() {
 
-        ReportParameterMapper rm = new ReportParameterMapper();
-        String sql = rm.schema();
-        Collection<ReportParameterData> parameters = this.jdbcTemplate.query(sql, rm, new Object[] {});
+        final ReportParameterMapper rm = new ReportParameterMapper();
+        final String sql = rm.schema();
+        final Collection<ReportParameterData> parameters = this.jdbcTemplate.query(sql, rm, new Object[] {});
         return parameters;
     }
 
@@ -530,14 +537,17 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                     + " r.report_subtype as reportSubType, r.report_category as reportCategory, r.description, r.core_report as coreReport, r.use_report as useReport, "
                     + " rp.id as reportParameterId, rp.parameter_id as parameterId, rp.report_parameter_name as reportParameterName, p.parameter_name as parameterName";
 
-            if (reportId != null) sql += ", r.report_sql as reportSql ";
+            if (reportId != null) {
+                sql += ", r.report_sql as reportSql ";
+            }
 
             sql += " from stretchy_report r" + " left join stretchy_report_parameter rp on rp.report_id = r.id"
                     + " left join stretchy_parameter p on p.id = rp.parameter_id";
-            if (reportId != null)
+            if (reportId != null) {
                 sql += " where r.id = " + reportId;
-            else
+            } else {
                 sql += " order by r.id, rp.parameter_id";
+            }
 
             return sql;
 
@@ -571,7 +581,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             // reportSql might not be on the select list of columns
             try {
                 reportSql = rs.getString("reportSql");
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 reportSql = null;
             }
 

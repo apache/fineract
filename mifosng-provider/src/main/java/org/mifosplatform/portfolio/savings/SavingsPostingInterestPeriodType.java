@@ -32,12 +32,12 @@ public enum SavingsPostingInterestPeriodType {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public static Object[] integerValues() {
-        List<Integer> values = new ArrayList<Integer>();
-        for (SavingsPostingInterestPeriodType enumType : values()) {
+        final List<Integer> values = new ArrayList<Integer>();
+        for (final SavingsPostingInterestPeriodType enumType : values()) {
             if (enumType.getValue() > 0) {
                 values.add(enumType.getValue());
             }

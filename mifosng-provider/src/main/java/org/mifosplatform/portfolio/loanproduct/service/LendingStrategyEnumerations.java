@@ -31,7 +31,7 @@ public class LendingStrategyEnumerations {
             break;
 
             default:
-                optionData = new EnumOptionData(LendingStrategy.INVALID.getId().longValue(), LendingStrategy.INVALID.getCode() , "Invalid");
+                optionData = new EnumOptionData(LendingStrategy.INVALID.getId().longValue(), LendingStrategy.INVALID.getCode(), "Invalid");
             break;
 
         }

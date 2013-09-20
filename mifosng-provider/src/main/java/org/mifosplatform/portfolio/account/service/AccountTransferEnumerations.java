@@ -21,15 +21,15 @@ public class AccountTransferEnumerations {
         if (type != null) {
             switch (type) {
                 case INVALID:
-                    break;
+                break;
                 case LOAN:
                     optionData = new EnumOptionData(PortfolioAccountType.LOAN.getValue().longValue(), PortfolioAccountType.LOAN.getCode(),
                             "Loan Account");
-                    break;
+                break;
                 case SAVINGS:
                     optionData = new EnumOptionData(PortfolioAccountType.SAVINGS.getValue().longValue(),
                             PortfolioAccountType.SAVINGS.getCode(), "Savings Account");
-                    break;
+                break;
             }
         }
 

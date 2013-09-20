@@ -22,8 +22,8 @@ public interface CenterReadPlatformService {
     Page<CenterData> retrieveAll(SearchParameters searchParameters);
 
     GroupGeneralData retrieveCenterGroupTemplate(Long centerId);
-    
+
     Collection<GroupGeneralData> retrieveAssociatedGroups(Long centerId);
-    
+
     CenterData retrieveCenterWithClosureReasons();
 }

@@ -19,9 +19,8 @@ public enum SavingsAccountTransactionType {
     INTEREST_POSTING(3, "savingsAccountTransactionType.interestPosting"), //
     WITHDRAWAL_FEE(4, "savingsAccountTransactionType.withdrawalFee"), //
     ANNUAL_FEE(5, "savingsAccountTransactionType.annualFee"), //
-    WAIVE_CHARGES(6, "savingsAccountTransactionType.waiveCharges"),
-    APPLY_CHARGES(7, "savingsAccountTransactionType.applyCharges"),
-    INITIATE_TRANSFER(12, "savingsAccountTransactionType.initiateTransfer"), //
+    WAIVE_CHARGES(6, "savingsAccountTransactionType.waiveCharges"), APPLY_CHARGES(7, "savingsAccountTransactionType.applyCharges"), INITIATE_TRANSFER(
+            12, "savingsAccountTransactionType.initiateTransfer"), //
     APPROVE_TRANSFER(13, "savingsAccountTransactionType.approveTransfer"), //
     WITHDRAW_TRANSFER(14, "savingsAccountTransactionType.withdrawTransfer"), //
     REJECT_TRANSFER(15, "savingsAccountTransactionType.rejectTransfer");
@@ -39,7 +38,7 @@ public enum SavingsAccountTransactionType {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public static SavingsAccountTransactionType fromInt(final Integer transactionType) {
@@ -104,11 +103,11 @@ public enum SavingsAccountTransactionType {
     public boolean isAnnualFee() {
         return this.value.equals(SavingsAccountTransactionType.ANNUAL_FEE.getValue());
     }
-    
+
     public boolean isCharge() {
         return this.value.equals(SavingsAccountTransactionType.APPLY_CHARGES.getValue());
     }
-    
+
     public boolean isWaiveCharge() {
         return this.value.equals(SavingsAccountTransactionType.WAIVE_CHARGES.getValue());
     }

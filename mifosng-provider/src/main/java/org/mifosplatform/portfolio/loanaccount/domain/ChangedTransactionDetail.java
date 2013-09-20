@@ -16,9 +16,9 @@ import java.util.List;
  */
 public class ChangedTransactionDetail {
 
-    private List<LoanTransaction> newTransactions = new ArrayList<LoanTransaction>();
+    private final List<LoanTransaction> newTransactions = new ArrayList<LoanTransaction>();
 
-    private List<LoanTransaction> reversedTransactions = new ArrayList<LoanTransaction>();
+    private final List<LoanTransaction> reversedTransactions = new ArrayList<LoanTransaction>();
 
     public List<LoanTransaction> getNewTransactions() {
         return this.newTransactions;

@@ -67,28 +67,28 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             final GuarantorCommand guarantorCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
             guarantorCommand.validateForCreate();
 
-            Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
 
-            Long clientRelationshipId = guarantorCommand.getClientRelationshipTypeId();
+            final Long clientRelationshipId = guarantorCommand.getClientRelationshipTypeId();
             CodeValue clientRelationshipType = null;
 
             if (clientRelationshipId != null) {
                 clientRelationshipType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
                         GuarantorConstants.GUARANTOR_RELATIONSHIP_CODE_NAME, clientRelationshipId);
             }
-            
-            List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
-            Long entityId = guarantorCommand.getEntityId();
 
-            for (Guarantor guarantor : existGuarantorList) {
+            final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
+            final Long entityId = guarantorCommand.getEntityId();
+
+            for (final Guarantor guarantor : existGuarantorList) {
                 if (guarantor.getLoanId() == loanId && guarantor.getEntityId() == entityId) {
                     String defaultUserMessage = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
                     defaultUserMessage = defaultUserMessage + " is already exist as a guarantor for this loan";
-                    String action = loan.client() != null ? "client.guarantor" : "group.guarantor";
+                    final String action = loan.client() != null ? "client.guarantor" : "group.guarantor";
                     throw new DuplicateGuarantorException(action, "is.already.exist.same.loan", defaultUserMessage, entityId, loanId);
                 }
             }
-            
+
             Guarantor guarantor = null;
             guarantor = Guarantor.fromJson(loan, clientRelationshipType, command);
 
@@ -98,7 +98,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(guarantor.getOfficeId())
                     .withEntityId(guarantor.getId()).withLoanId(loanId).build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleGuarantorDataIntegrityIssues(dve);
             return CommandProcessingResult.empty();
         }
@@ -118,7 +118,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             final Map<String, Object> changesOnly = guarantorForUpdate.update(command);
 
             if (changesOnly.containsKey(GUARANTOR_JSON_INPUT_PARAMS.CLIENT_RELATIONSHIP_TYPE_ID.getValue())) {
-                Long clientRelationshipId = guarantorCommand.getClientRelationshipTypeId();
+                final Long clientRelationshipId = guarantorCommand.getClientRelationshipTypeId();
                 CodeValue clientRelationshipType = null;
                 if (clientRelationshipId != null) {
                     clientRelationshipType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
@@ -126,7 +126,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                 }
                 guarantorForUpdate.updateClientRelationshipType(clientRelationshipType);
             }
-            
+
             final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
             final Integer guarantorTypeId = guarantorCommand.getGuarantorTypeId();
             final GuarantorType guarantorType = GuarantorType.fromInt(guarantorTypeId);
@@ -147,14 +147,14 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                     || changesOnly.containsKey(GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID)) {
                 validateGuarantorBusinessRules(guarantorForUpdate);
             }
-            
+
             if (!changesOnly.isEmpty()) {
                 this.guarantorRepository.saveAndFlush(guarantorForUpdate);
             }
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(guarantorForUpdate.getOfficeId())
                     .withEntityId(guarantorForUpdate.getId()).withOfficeId(guarantorForUpdate.getLoanId()).with(changesOnly).build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleGuarantorDataIntegrityIssues(dve);
             return CommandProcessingResult.empty();
         }
@@ -177,7 +177,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
         // validate guarantor conditions
         if (guarantor.isExistingCustomer()) {
             // check client exists
-            clientRepositoryWrapper.findOneWithNotFoundDetection(guarantor.getEntityId());
+            this.clientRepositoryWrapper.findOneWithNotFoundDetection(guarantor.getEntityId());
             // validate that the client is not set as a self guarantor
             if (guarantor.getClientId() != null) {
                 if (guarantor.getClientId().equals(guarantor.getEntityId())) {
@@ -186,12 +186,12 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                 }
             }
         } else if (guarantor.isExistingEmployee()) {
-            staffRepositoryWrapper.findOneWithNotFoundDetection(guarantor.getEntityId());
+            this.staffRepositoryWrapper.findOneWithNotFoundDetection(guarantor.getEntityId());
         }
     }
 
     private void handleGuarantorDataIntegrityIssues(final DataIntegrityViolationException dve) {
-        Throwable realCause = dve.getMostSpecificCause();
+        final Throwable realCause = dve.getMostSpecificCause();
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.guarantor.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource Guarantor: " + realCause.getMessage());

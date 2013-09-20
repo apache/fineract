@@ -1,8 +1,5 @@
 package org.mifosplatform.portfolio.loanaccount;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
 import java.util.List;
 
 import org.joda.time.LocalDate;
@@ -10,7 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
-import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.HeavensFamilyLoanRepaymentScheduleTransactionProcessor;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -23,16 +19,16 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessorTest {
     private HeavensFamilyLoanRepaymentScheduleTransactionProcessor processor;
 
     //
-    private LocalDate july2nd = new LocalDate(2012, 7, 2);
-    private MonetaryCurrency usDollars = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
+    private final LocalDate july2nd = new LocalDate(2012, 7, 2);
+    private final MonetaryCurrency usDollars = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
     private List<LoanRepaymentScheduleInstallment> installments;
 
     @Before
     public void setUpForEachTestCase() {
 
-        installments = LoanScheduleTestDataHelper.createSimpleLoanSchedule(july2nd, usDollars);
+        this.installments = LoanScheduleTestDataHelper.createSimpleLoanSchedule(this.july2nd, this.usDollars);
 
-        processor = new HeavensFamilyLoanRepaymentScheduleTransactionProcessor();
+        this.processor = new HeavensFamilyLoanRepaymentScheduleTransactionProcessor();
     }
 
     /**

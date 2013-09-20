@@ -23,7 +23,7 @@ public class ClientHelper {
     }
 
     public static String getTestClientAsJSON(final String dateOfJoining) {
-        HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<String, String>();
         map.put("officeId", "1");
         map.put("firstname", randomNameGenerator("Client_FirstName_", 5));
         map.put("lastname", randomNameGenerator("Client_LastName_", 4));
@@ -39,9 +39,9 @@ public class ClientHelper {
     public static void verifyClientCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedClientID) {
         System.out.println("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
-        String CLIENT_URL = "/mifosng-provider/api/v1/clients/" + generatedClientID + "?tenantIdentifier=default";
-        Integer responseClientID = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL, "id");
-        assertEquals("ERROR IN CREATING THE CLIENT",generatedClientID, responseClientID);
+        final String CLIENT_URL = "/mifosng-provider/api/v1/clients/" + generatedClientID + "?tenantIdentifier=default";
+        final Integer responseClientID = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL, "id");
+        assertEquals("ERROR IN CREATING THE CLIENT", generatedClientID, responseClientID);
     }
 
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
