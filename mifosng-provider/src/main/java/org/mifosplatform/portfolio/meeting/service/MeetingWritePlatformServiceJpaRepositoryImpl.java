@@ -111,10 +111,11 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
         final Calendar calendarForUpdate = this.calendarRepository.findOne(calendarId);
         if (calendarForUpdate == null) { throw new CalendarNotFoundException(calendarId); }
         CalendarEntityType entityType = CalendarEntityType.valueOf(command.getSupportedEntityType().toUpperCase());
-        //If group is within a center then center entityType should be passed for retrieving  CalendarInstance.
-        if(CalendarEntityType.isGroup(command.getSupportedEntityType().toUpperCase())){
+        // If group is within a center then center entityType should be passed
+        // for retrieving CalendarInstance.
+        if (CalendarEntityType.isGroup(command.getSupportedEntityType().toUpperCase())) {
             final Group group = this.groupRepository.findOne(entityId);
-            if(group.isChildGroup()){
+            if (group.isChildGroup()) {
                 entityType = CalendarEntityType.CENTERS;
                 entityId = group.getParent().getId();
             }
@@ -234,9 +235,10 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
     private void handleMeetingDataIntegrityIssues(final Date meetingDate, final DataIntegrityViolationException dve) {
         final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("unique_calendar_instance_id_meeting_date")) {
-        final LocalDate meetingDateLocal = LocalDate.fromDateFields(meetingDate);
-        throw new PlatformDataIntegrityException("error.msg.meeting.duplicate", "A meeting with date '" + meetingDateLocal + "' already exists",
-                meetingDateParamName, meetingDateLocal); }
+            final LocalDate meetingDateLocal = LocalDate.fromDateFields(meetingDate);
+            throw new PlatformDataIntegrityException("error.msg.meeting.duplicate", "A meeting with date '" + meetingDateLocal
+                    + "' already exists", meetingDateParamName, meetingDateLocal);
+        }
 
         throw new PlatformDataIntegrityException("error.msg.meeting.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());

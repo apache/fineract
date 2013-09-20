@@ -60,8 +60,8 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
             final String timezoneId = rs.getString("timezoneId");
             final boolean autoUpdateEnabled = rs.getBoolean("autoUpdate");
 
-            return new MifosPlatformTenant(id, tenantIdentifier,name, schemaName, schemaServer, schemaServerPort, schemaUsername, schemaPassword,
-                    timezoneId, autoUpdateEnabled);
+            return new MifosPlatformTenant(id, tenantIdentifier, name, schemaName, schemaServer, schemaServerPort, schemaUsername,
+                    schemaPassword, timezoneId, autoUpdateEnabled);
         }
     }
 

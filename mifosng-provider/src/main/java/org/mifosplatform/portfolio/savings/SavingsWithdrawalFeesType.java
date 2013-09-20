@@ -27,12 +27,12 @@ public enum SavingsWithdrawalFeesType {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public static Object[] integerValues() {
-        List<Integer> values = new ArrayList<Integer>();
-        for (SavingsWithdrawalFeesType enumType : values()) {
+        final List<Integer> values = new ArrayList<Integer>();
+        for (final SavingsWithdrawalFeesType enumType : values()) {
             if (enumType.getValue() > 0) {
                 values.add(enumType.getValue());
             }

@@ -5,39 +5,36 @@
  */
 package org.mifosplatform.portfolio.charge.domain;
 
-
 public enum ChargeTimeType {
 
     INVALID(0, "chargeTimeType.invalid"), //
     DISBURSEMENT(1, "chargeTimeType.disbursement"), //
-    SPECIFIED_DUE_DATE(2, "chargeTimeType.specifiedDueDate"),
-    MONTHLY(3, "chargeTimeType.monthly"),
-    YEARLY(4, "chargeTimeType.yearly");
+    SPECIFIED_DUE_DATE(2, "chargeTimeType.specifiedDueDate"), MONTHLY(3, "chargeTimeType.monthly"), YEARLY(4, "chargeTimeType.yearly");
 
     private final Integer value;
     private final String code;
 
-    private ChargeTimeType(Integer value, String code) {
+    private ChargeTimeType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }
 
     public Integer getValue() {
-        return value;
+        return this.value;
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
-    public static int minValue(){
+    public static int minValue() {
         return 1;
     }
-    
-    public static int maxValue(){
+
+    public static int maxValue() {
         return 4;
     }
-    
+
     public static ChargeTimeType fromInt(final Integer chargeTime) {
         ChargeTimeType chargeTimeType = ChargeTimeType.INVALID;
         switch (chargeTime) {
@@ -63,24 +60,24 @@ public enum ChargeTimeType {
     public boolean isTimeOfDisbursement() {
         return ChargeTimeType.DISBURSEMENT.getValue().equals(this.value);
     }
-    
+
     public boolean isOnSpecifiedDueDate() {
         return this.value.equals(ChargeTimeType.SPECIFIED_DUE_DATE.getValue());
     }
-    
-    public boolean isMonthly(){
+
+    public boolean isMonthly() {
         return this.value.equals(ChargeTimeType.MONTHLY.getValue());
     }
-    
-    public boolean isYearly(){
+
+    public boolean isYearly() {
         return this.value.equals(ChargeTimeType.YEARLY.getValue());
     }
-    
-    public boolean isAllowedLoanChargeTime(){
-        return this.isTimeOfDisbursement() || this.isOnSpecifiedDueDate();
+
+    public boolean isAllowedLoanChargeTime() {
+        return isTimeOfDisbursement() || isOnSpecifiedDueDate();
     }
-    
-    public boolean isAllowedSavingsChargeTime(){
-        return this.isOnSpecifiedDueDate() || this.isMonthly() || this.isYearly();
+
+    public boolean isAllowedSavingsChargeTime() {
+        return isOnSpecifiedDueDate() || isMonthly() || isYearly();
     }
 }

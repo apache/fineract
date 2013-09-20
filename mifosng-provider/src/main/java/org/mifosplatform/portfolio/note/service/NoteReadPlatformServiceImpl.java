@@ -63,8 +63,8 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
             final Long lastModifiedById = JdbcSupport.getLong(rs, "lastModifiedById");
             final String createdByUsername = rs.getString("createdBy");
             final String updatedByUsername = rs.getString("modifiedBy");
-            return new NoteData(id, clientId, groupId, loanId, transactionId, null, null, noteType, note,
-                    createdDate, createdById, createdByUsername, lastModifiedDate, lastModifiedById, updatedByUsername);
+            return new NoteData(id, clientId, groupId, loanId, transactionId, null, null, noteType, note, createdDate, createdById,
+                    createdByUsername, lastModifiedDate, lastModifiedById, updatedByUsername);
         }
     }
 
@@ -90,11 +90,11 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
     public Collection<NoteData> retrieveNotesByResource(final Long resourceId, final Integer noteTypeId) {
         final NoteType noteType = NoteType.fromInt(noteTypeId);
         final NoteMapper rm = new NoteMapper();
-        String conditionSql = getResourceCondition(noteType);
+        final String conditionSql = getResourceCondition(noteType);
 
         final String sql = rm.schema() + " where " + conditionSql + " order by n.created_date DESC";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { resourceId});
+        return this.jdbcTemplate.query(sql, rm, new Object[] { resourceId });
     }
 
     public static String getResourceCondition(final NoteType noteType) {
@@ -104,7 +104,8 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
                 conditionSql = " n.client_id = ? and note_type_enum = " + NoteType.CLIENT.getValue();
             break;
             case LOAN:
-                conditionSql = " n.loan_id = ? and ( n.note_type_enum = " + NoteType.LOAN.getValue()+ " or n.note_type_enum = " + NoteType.LOAN_TRANSACTION.getValue() + " )";
+                conditionSql = " n.loan_id = ? and ( n.note_type_enum = " + NoteType.LOAN.getValue() + " or n.note_type_enum = "
+                        + NoteType.LOAN_TRANSACTION.getValue() + " )";
             break;
             case LOAN_TRANSACTION:
                 conditionSql = " n.loan_transaction_id = ? ";

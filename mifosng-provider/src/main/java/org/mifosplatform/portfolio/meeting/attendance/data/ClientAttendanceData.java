@@ -20,16 +20,17 @@ public class ClientAttendanceData {
     private final String clientName;
     @SuppressWarnings("unused")
     private final EnumOptionData attendanceType;
-    
-    public static ClientAttendanceData instance(Long id, Long clientId, String clientName, EnumOptionData attendanceType){
+
+    public static ClientAttendanceData instance(final Long id, final Long clientId, final String clientName,
+            final EnumOptionData attendanceType) {
         return new ClientAttendanceData(id, clientId, clientName, attendanceType);
     }
-    
-    private ClientAttendanceData(Long id, Long clientId, String clientName, EnumOptionData attendanceType) {
+
+    private ClientAttendanceData(final Long id, final Long clientId, final String clientName, final EnumOptionData attendanceType) {
         this.id = id;
         this.clientId = clientId;
         this.clientName = clientName;
         this.attendanceType = attendanceType;
     }
-    
+
 }

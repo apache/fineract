@@ -76,11 +76,11 @@ public class ApplicationCurrency extends AbstractPersistable<Long> {
     }
 
     public String getNameCode() {
-        return nameCode;
+        return this.nameCode;
     }
 
     public String getDisplaySymbol() {
-        return displaySymbol;
+        return this.displaySymbol;
     }
 
     public CurrencyData toData() {
@@ -92,6 +92,6 @@ public class ApplicationCurrency extends AbstractPersistable<Long> {
     }
 
     public OrganisationCurrency toOrganisationCurrency() {
-        return new OrganisationCurrency(this.code, this.name, this.decimalPlaces,this.inMultiplesOf, this.nameCode, this.displaySymbol);
+        return new OrganisationCurrency(this.code, this.name, this.decimalPlaces, this.inMultiplesOf, this.nameCode, this.displaySymbol);
     }
 }

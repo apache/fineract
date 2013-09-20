@@ -80,9 +80,10 @@ public class GuarantorData {
                 null, null, null, staffData.getOfficeName(), null, null, null, guarantorData.allowedClientRelationshipTypes);
     }
 
-    public GuarantorData(final Long id, final Long loanId, final CodeValueData clientRelationshipType, final Long entityId, final EnumOptionData guarantorType,
-            final String firstname, final String lastname, final LocalDate dob, final String addressLine1, final String addressLine2, final String city, final String state,
-            final String zip, final String country, final String mobileNumber, final String housePhoneNumber, final String comment, final String officeName,
+    public GuarantorData(final Long id, final Long loanId, final CodeValueData clientRelationshipType, final Long entityId,
+            final EnumOptionData guarantorType, final String firstname, final String lastname, final LocalDate dob,
+            final String addressLine1, final String addressLine2, final String city, final String state, final String zip,
+            final String country, final String mobileNumber, final String housePhoneNumber, final String comment, final String officeName,
             final LocalDate joinedDate, final String externalId, final List<EnumOptionData> guarantorTypeOptions,
             final Collection<CodeValueData> allowedClientRelationshipTypes) {
         this.id = id;
@@ -110,15 +111,15 @@ public class GuarantorData {
     }
 
     public boolean isExternalGuarantor() {
-        return GuarantorType.EXTERNAL.getValue().equals(guarantorType.getId().intValue());
+        return GuarantorType.EXTERNAL.getValue().equals(this.guarantorType.getId().intValue());
     }
 
     public boolean isExistingClient() {
-        return GuarantorType.CUSTOMER.getValue().equals(guarantorType.getId().intValue());
+        return GuarantorType.CUSTOMER.getValue().equals(this.guarantorType.getId().intValue());
     }
 
     public boolean isStaffMember() {
-        return GuarantorType.STAFF.getValue().equals(guarantorType.getId().intValue());
+        return GuarantorType.STAFF.getValue().equals(this.guarantorType.getId().intValue());
     }
 
     public Long getEntityId() {

@@ -22,11 +22,11 @@ public enum ChargeCalculationType {
     }
 
     public Integer getValue() {
-        return value;
+        return this.value;
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public static ChargeCalculationType fromInt(final Integer chargeCalculation) {
@@ -47,16 +47,16 @@ public enum ChargeCalculationType {
         }
         return chargeCalculationType;
     }
-    
-    public boolean isPercentageOfAmount(){
+
+    public boolean isPercentageOfAmount() {
         return this.value.equals(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue());
     }
-    
-    public boolean isFlat(){
+
+    public boolean isFlat() {
         return this.value.equals(ChargeCalculationType.FLAT.getValue());
     }
-    
-    public boolean isAllowedSavingsChargeCalculationType(){
-        return this.isFlat();
+
+    public boolean isAllowedSavingsChargeCalculationType() {
+        return isFlat();
     }
 }

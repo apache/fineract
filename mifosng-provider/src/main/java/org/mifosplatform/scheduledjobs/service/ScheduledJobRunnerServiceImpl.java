@@ -47,9 +47,9 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     @CronTarget(jobName = JobName.UPDATE_LOAN_SUMMARY)
     public void updateLoanSummaryDetails() {
 
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
 
-        StringBuilder updateSqlBuilder = new StringBuilder(900);
+        final StringBuilder updateSqlBuilder = new StringBuilder(900);
         updateSqlBuilder.append("update m_loan ");
         updateSqlBuilder.append("join (");
         updateSqlBuilder.append("SELECT ml.id AS loanId,");
@@ -118,7 +118,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         updateSqlBuilder
                 .append(" (x.penalty_charges_charged_derived - (x.penalty_charges_repaid_derived + x.penalty_charges_waived_derived + x.penalty_charges_writtenoff_derived))");
 
-        int result = jdbcTemplate.update(updateSqlBuilder.toString());
+        final int result = jdbcTemplate.update(updateSqlBuilder.toString());
 
         logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by update: " + result);
     }
@@ -128,11 +128,11 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     @CronTarget(jobName = JobName.UPDATE_LOAN_ARREARS_AGEING)
     public void updateLoanArrearsAgeingDetails() {
 
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
 
         jdbcTemplate.execute("truncate table m_loan_arrears_aging");
 
-        StringBuilder updateSqlBuilder = new StringBuilder(900);
+        final StringBuilder updateSqlBuilder = new StringBuilder(900);
 
         updateSqlBuilder
                 .append("INSERT INTO m_loan_arrears_aging(`loan_id`,`principal_overdue_derived`,`interest_overdue_derived`,`fee_charges_overdue_derived`,`penalty_charges_overdue_derived`,`total_overdue_derived`,`overdue_since_date_derived`)");
@@ -158,7 +158,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         updateSqlBuilder.append(" and mr.duedate < CURDATE() ");
         updateSqlBuilder.append(" GROUP BY ml.id");
 
-        int result = jdbcTemplate.update(updateSqlBuilder.toString());
+        final int result = jdbcTemplate.update(updateSqlBuilder.toString());
 
         logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by update: " + result);
     }
@@ -168,11 +168,11 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     @CronTarget(jobName = JobName.UPDATE_LOAN_PAID_IN_ADVANCE)
     public void updateLoanPaidInAdvance() {
 
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
 
         jdbcTemplate.execute("truncate table m_loan_paid_in_advance");
 
-        StringBuilder updateSqlBuilder = new StringBuilder(900);
+        final StringBuilder updateSqlBuilder = new StringBuilder(900);
 
         updateSqlBuilder
                 .append("INSERT INTO m_loan_paid_in_advance(loan_id, principal_in_advance_derived, interest_in_advance_derived, fee_charges_in_advance_derived, penalty_charges_in_advance_derived, total_in_advance_derived)");
@@ -193,7 +193,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         updateSqlBuilder
                 .append(" SUM(ifnull(mr.fee_charges_completed_derived, 0)) + SUM(ifnull(mr.penalty_charges_completed_derived, 0))) > 0.0");
 
-        int result = jdbcTemplate.update(updateSqlBuilder.toString());
+        final int result = jdbcTemplate.update(updateSqlBuilder.toString());
 
         logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by update: " + result);
     }
@@ -202,18 +202,19 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     @Override
     @CronTarget(jobName = JobName.APPLY_ANNUAL_FEE_FOR_SAVINGS)
     public void applyAnnualFeeForSavings() {
-        
+
         final Collection<SavingsAccountAnnualFeeData> annualFeeData = this.savingsAccountReadPlatformService
                 .retrieveAccountsWithAnnualFeeDue();
 
-        for (SavingsAccountAnnualFeeData savingsAccountReference : annualFeeData) {
-            try{
+        for (final SavingsAccountAnnualFeeData savingsAccountReference : annualFeeData) {
+            try {
                 this.savingsAccountWritePlatformService.applyAnnualFee(savingsAccountReference.getId(),
                         savingsAccountReference.getNextAnnualFeeDueDate());
-            } catch (PlatformApiDataValidationException e) {
-                List<ApiParameterError> errors = e.getErrors();
-                for(ApiParameterError error : errors){
-                    logger.error("Apply annual fee failed for account:"+savingsAccountReference.getAccountNo()+" with message "+error.getDeveloperMessage());
+            } catch (final PlatformApiDataValidationException e) {
+                final List<ApiParameterError> errors = e.getErrors();
+                for (final ApiParameterError error : errors) {
+                    logger.error("Apply annual fee failed for account:" + savingsAccountReference.getAccountNo() + " with message "
+                            + error.getDeveloperMessage());
                 }
             }
         }

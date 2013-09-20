@@ -21,7 +21,7 @@ public final class Image extends AbstractPersistable<Long> {
     @Column(name = "storage_type_enum")
     private Integer storageType;
 
-    public Image(String location, StorageType storageType) {
+    public Image(final String location, final StorageType storageType) {
         this.location = location;
         this.storageType = storageType.getValue();
     }
@@ -38,11 +38,11 @@ public final class Image extends AbstractPersistable<Long> {
         return this.storageType;
     }
 
-    public void setLocation(String location) {
+    public void setLocation(final String location) {
         this.location = location;
     }
 
-    public void setStorageType(Integer storageType) {
+    public void setStorageType(final Integer storageType) {
         this.storageType = storageType;
     }
 

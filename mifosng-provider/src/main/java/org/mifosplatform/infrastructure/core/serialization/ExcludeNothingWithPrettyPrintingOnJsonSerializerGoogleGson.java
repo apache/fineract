@@ -17,9 +17,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 /**
- * <p>A google gson implementation of {@link ExcludeNothingJsonSerializer} contract.</p>
+ * <p>
+ * A google gson implementation of {@link ExcludeNothingJsonSerializer}
+ * contract.
+ * </p>
  * 
- * <p>It serializes all fields of any Java {@link Object} passed to it.</p>
+ * <p>
+ * It serializes all fields of any Java {@link Object} passed to it.
+ * </p>
  */
 @Component
 public final class ExcludeNothingWithPrettyPrintingOnJsonSerializerGoogleGson {
@@ -27,12 +32,12 @@ public final class ExcludeNothingWithPrettyPrintingOnJsonSerializerGoogleGson {
     private final Gson gson;
 
     public ExcludeNothingWithPrettyPrintingOnJsonSerializerGoogleGson() {
-        GsonBuilder builder = new GsonBuilder();
+        final GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
         builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
         builder.registerTypeAdapter(MonthDay.class, new JodaMonthDayAdapter());
         builder.setPrettyPrinting();
-        
+
         this.gson = builder.create();
     }
 

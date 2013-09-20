@@ -46,27 +46,28 @@ public class LoanChargeAssembler {
 
         final Set<LoanCharge> loanCharges = new HashSet<LoanCharge>();
 
-        final BigDecimal principal = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
+        final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
 
         if (element.isJsonObject()) {
             final JsonObject topLevelJsonElement = element.getAsJsonObject();
-            final String dateFormat = fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
-            final Locale locale = fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+            final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
+            final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
             if (topLevelJsonElement.has("charges") && topLevelJsonElement.get("charges").isJsonArray()) {
                 final JsonArray array = topLevelJsonElement.get("charges").getAsJsonArray();
                 for (int i = 0; i < array.size(); i++) {
 
                     final JsonObject loanChargeElement = array.get(i).getAsJsonObject();
 
-                    final Long id = fromApiJsonHelper.extractLongNamed("id", loanChargeElement);
-                    final Long chargeId = fromApiJsonHelper.extractLongNamed("chargeId", loanChargeElement);
-                    final BigDecimal amount = fromApiJsonHelper.extractBigDecimalNamed("amount", loanChargeElement, locale);
-                    final Integer chargeTimeType = fromApiJsonHelper.extractIntegerNamed("chargeTimeType", loanChargeElement, locale);
-                    final Integer chargeCalculationType = fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", loanChargeElement,
+                    final Long id = this.fromApiJsonHelper.extractLongNamed("id", loanChargeElement);
+                    final Long chargeId = this.fromApiJsonHelper.extractLongNamed("chargeId", loanChargeElement);
+                    final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed("amount", loanChargeElement, locale);
+                    final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerNamed("chargeTimeType", loanChargeElement, locale);
+                    final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerNamed("chargeCalculationType",
+                            loanChargeElement, locale);
+                    final LocalDate dueDate = this.fromApiJsonHelper
+                            .extractLocalDateNamed("dueDate", loanChargeElement, dateFormat, locale);
+                    final Integer chargePaymentMode = this.fromApiJsonHelper.extractIntegerNamed("chargePaymentMode", loanChargeElement,
                             locale);
-                    final LocalDate dueDate = fromApiJsonHelper.extractLocalDateNamed("dueDate", loanChargeElement,
-                            dateFormat, locale);
-                    final Integer chargePaymentMode = fromApiJsonHelper.extractIntegerNamed("chargePaymentMode", loanChargeElement, locale);
                     if (id == null) {
                         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeId);
                         ChargeTimeType chargeTime = null;
@@ -78,7 +79,7 @@ public class LoanChargeAssembler {
                             chargeCalculation = ChargeCalculationType.fromInt(chargeCalculationType);
                         }
                         ChargePaymentMode chargePaymentModeEnum = null;
-                        if(chargePaymentMode != null){
+                        if (chargePaymentMode != null) {
                             chargePaymentModeEnum = ChargePaymentMode.fromInt(chargePaymentMode);
                         }
                         final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition, principal, amount, chargeTime,

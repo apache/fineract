@@ -73,8 +73,8 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public Calendar(final String title, final String description, final String location, final LocalDate startDate,
-            final LocalDate endDate, final Integer duration, final Integer typeId, final boolean repeating,
-            final String recurrence, final Integer remindById, final Integer firstReminder, final Integer secondReminder) {
+            final LocalDate endDate, final Integer duration, final Integer typeId, final boolean repeating, final String recurrence,
+            final Integer remindById, final Integer firstReminder, final Integer secondReminder) {
         this.title = StringUtils.defaultIfEmpty(title, null);
         this.description = StringUtils.defaultIfEmpty(description, null);
         this.location = StringUtils.defaultIfEmpty(location, null);
@@ -120,8 +120,8 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
                 .getValue());
         final String recurrence = Calendar.constructRecurrence(command, null);
 
-        return new Calendar(title, description, location, startDate, endDate, duration, typeId, repeating, recurrence,
-                remindById, firstReminder, secondReminder);
+        return new Calendar(title, description, location, startDate, endDate, duration, typeId, repeating, recurrence, remindById,
+                firstReminder, secondReminder);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -153,15 +153,17 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
             final String valueAsInput = command.stringValueOfParameterNamed(startDateParamName);
             final LocalDate newValue = command.localDateValueOfParameterNamed(startDateParamName);
-            if(isStartDateBefore(newValue)){
+            if (isStartDateBefore(newValue)) {
                 actualChanges.put(startDateParamName, valueAsInput);
                 actualChanges.put("dateFormat", dateFormatAsInput);
                 actualChanges.put("locale", localeAsInput);
                 this.startDate = newValue.toDate();
-            }else{
-                //new meeting start date should be greater than existing meeting start date
+            } else {
+                // new meeting start date should be greater than existing
+                // meeting start date
                 final String defaultUserMessage = "New meeting start on or after date cannot be a date before existing meeting start date";
-                throw new CalendarDateException("new.start.date.before.existing.date", defaultUserMessage, newValue, getStartDateLocalDate());
+                throw new CalendarDateException("new.start.date.before.existing.date", defaultUserMessage, newValue,
+                        getStartDateLocalDate());
             }
         }
 
@@ -183,21 +185,25 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
             this.duration = newValue;
         }
 
-        //Do not allow to change calendar type
-        //TODO: AA Instead of throwing an exception, do not allow meeting calendar type to update. 
+        // Do not allow to change calendar type
+        // TODO: AA Instead of throwing an exception, do not allow meeting
+        // calendar type to update.
         final String typeParamName = CALENDAR_SUPPORTED_PARAMETERS.TYPE_ID.getValue();
         if (command.isChangeInIntegerSansLocaleParameterNamed(typeParamName, this.typeId)) {
             final Integer newValue = command.integerValueSansLocaleOfParameterNamed(typeParamName);
             final String defaultUserMessage = "Meeting calendar type update is not supported";
             final String oldMeeingType = CalendarType.fromInt(this.typeId).name();
             final String newMeetingType = CalendarType.fromInt(newValue).name();
-            
+
             throw new CalendarParameterUpdateNotSupportedException("meeting.type", defaultUserMessage, newMeetingType, oldMeeingType);
-            /*final Integer newValue = command.integerValueSansLocaleOfParameterNamed(typeParamName);
-            actualChanges.put(typeParamName, newValue);
-            this.typeId = newValue;*/
+            /*
+             * final Integer newValue =
+             * command.integerValueSansLocaleOfParameterNamed(typeParamName);
+             * actualChanges.put(typeParamName, newValue); this.typeId =
+             * newValue;
+             */
         }
-        
+
         final String repeatingParamName = CALENDAR_SUPPORTED_PARAMETERS.REPEATING.getValue();
         if (command.isChangeInBooleanParameterNamed(repeatingParamName, this.repeating)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(repeatingParamName);
@@ -208,16 +214,17 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
         final String newRecurrence = Calendar.constructRecurrence(command, this);
         if (this.recurrence != null && !newRecurrence.equalsIgnoreCase(this.recurrence)) {
 
-            //FIXME: AA - Is this restriction required only for collection type meetings or for all?. 
-            //Do not allow to change meeting frequency
-            
-            if(!CalendarUtils.isFrequencySame(this.recurrence, newRecurrence)){
+            // FIXME: AA - Is this restriction required only for collection type
+            // meetings or for all?.
+            // Do not allow to change meeting frequency
+
+            if (!CalendarUtils.isFrequencySame(this.recurrence, newRecurrence)) {
                 final String defaultUserMessage = "Update of meeting frequency is not supported";
                 throw new CalendarParameterUpdateNotSupportedException("meeting.frequency", defaultUserMessage);
             }
-            
-            //Do not allow to change meeting interval
-            if(!CalendarUtils.isIntervalSame(this.recurrence, newRecurrence)){
+
+            // Do not allow to change meeting interval
+            if (!CalendarUtils.isIntervalSame(this.recurrence, newRecurrence)) {
                 final String defaultUserMessage = "Update of meeting interval is not supported";
                 throw new CalendarParameterUpdateNotSupportedException("meeting.interval", defaultUserMessage);
             }
@@ -329,7 +336,7 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
         }
 
         if (repeating) {
-            StringBuilder recurrenceBuilder = new StringBuilder(200);
+            final StringBuilder recurrenceBuilder = new StringBuilder(200);
             final String repeats = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS.getValue());
             recurrenceBuilder.append("FREQ=");
             recurrenceBuilder.append(repeats.toUpperCase());

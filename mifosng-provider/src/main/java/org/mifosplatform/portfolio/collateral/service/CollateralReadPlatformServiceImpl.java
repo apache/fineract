@@ -43,7 +43,7 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
 
     private static final class CollateralMapper implements RowMapper<CollateralData> {
 
-        private StringBuilder sqlBuilder = new StringBuilder(
+        private final StringBuilder sqlBuilder = new StringBuilder(
                 "lc.id as id, lc.description as description, lc.value as value, cv.id as typeId, cv.code_value as typeName, oc.code as currencyCode, ")
                 .append(" oc.name as currencyName,oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, oc.internationalized_name_code as currencyNameCode")
                 .append(" FROM m_loan_collateral lc") //
@@ -52,7 +52,7 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
                 .append(" JOIN m_organisation_currency oc on loan.currency_code = oc.code");
 
         public String schema() {
-            return sqlBuilder.toString();
+            return this.sqlBuilder.toString();
         }
 
         @Override
@@ -92,7 +92,7 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
     }
 
     @Override
-    public CollateralData retrieveCollateral(Long loanId, Long collateralId) {
+    public CollateralData retrieveCollateral(final Long loanId, final Long collateralId) {
         try {
             final CollateralMapper rm = new CollateralMapper();
             String sql = "select " + rm.schema();
@@ -105,8 +105,8 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
     }
 
     @Override
-    public List<CollateralData> retrieveCollateralsForValidLoan(Long loanId) {
-        Loan loan = this.loanRepository.findOne(loanId);
+    public List<CollateralData> retrieveCollateralsForValidLoan(final Long loanId) {
+        final Loan loan = this.loanRepository.findOne(loanId);
         if (loan == null) { throw new LoanNotFoundException(loanId); }
         return retrieveCollaterals(loanId);
     }

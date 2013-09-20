@@ -35,19 +35,19 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
     @Override
     public Collection<CurrencyData> retrieveAllowedCurrencies() {
 
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
-        final String sql = "select " + currencyRowMapper.schema() + " from m_organisation_currency c order by c.name";
+        final String sql = "select " + this.currencyRowMapper.schema() + " from m_organisation_currency c order by c.name";
 
-        return this.jdbcTemplate.query(sql, currencyRowMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.currencyRowMapper, new Object[] {});
     }
 
     @Override
     public Collection<CurrencyData> retrieveAllPlatformCurrencies() {
 
-        final String sql = "select " + currencyRowMapper.schema() + " from m_currency c order by c.name";
+        final String sql = "select " + this.currencyRowMapper.schema() + " from m_currency c order by c.name";
 
-        return this.jdbcTemplate.query(sql, currencyRowMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.currencyRowMapper, new Object[] {});
     }
 
     private static final class CurrencyMapper implements RowMapper<CurrencyData> {

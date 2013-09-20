@@ -28,7 +28,7 @@ public class ApplyAnnualFeeSavingsAccountCommandHandler implements NewCommandSou
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        LocalDate annualFeeTransactionDate = command.localDateValueOfParameterNamed("annualFeeTransactionDate");
+        final LocalDate annualFeeTransactionDate = command.localDateValueOfParameterNamed("annualFeeTransactionDate");
 
         return this.writePlatformService.applyAnnualFee(command.getSavingsId(), annualFeeTransactionDate);
     }

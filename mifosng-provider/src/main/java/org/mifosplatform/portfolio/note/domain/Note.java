@@ -75,7 +75,7 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     public static Note savingNote(final SavingsAccount account, final String note) {
         return new Note(account, note);
     }
-    
+
     public Note(final Client client, final String note) {
         this.client = client;
         this.note = note;

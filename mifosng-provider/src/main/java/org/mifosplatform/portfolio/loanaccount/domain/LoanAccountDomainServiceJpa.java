@@ -148,8 +148,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
 
         final Money paymentAmout = Money.of(loan.getCurrency(), transactionAmount);
-        LoanTransactionType loanTransactionType = LoanTransactionType.fromInt(transactionType);
-        
+        final LoanTransactionType loanTransactionType = LoanTransactionType.fromInt(transactionType);
+
         final LoanTransaction newPaymentTransaction = LoanTransaction.loanPayment(null, loan.getOffice(), paymentAmout, paymentDetail,
                 transactionDate, txnExternalId, loanTransactionType);
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
@@ -157,11 +157,11 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 .findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), transactionDate.toDate());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
-        if(loanTransactionType.isRepaymentAtDisbursement()){
+        if (loanTransactionType.isRepaymentAtDisbursement()) {
             loan.handlePayDisbursementTransaction(chargeId, newPaymentTransaction);
-        }else{
-        loan.makeChargePayment(chargeId, defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds,
-                allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay, newPaymentTransaction);
+        } else {
+            loan.makeChargePayment(chargeId, defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds,
+                    allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay, newPaymentTransaction);
         }
         this.loanTransactionRepository.save(newPaymentTransaction);
         this.loanRepository.saveAndFlush(loan);
@@ -203,8 +203,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     }
 
     @Override
-    public LoanTransaction makeRefund(Long accountId, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId) {
+    public LoanTransaction makeRefund(final Long accountId, final CommandProcessingResultBuilder builderResult,
+            final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText,
+            final String txnExternalId) {
         final Loan loan = this.loanAccountAssembler.assembleFrom(accountId);
         checkClientOrGroupActive(loan);
 
@@ -242,7 +243,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     }
 
     @Override
-    public void reverseTransfer(LoanTransaction loanTransaction) {
+    public void reverseTransfer(final LoanTransaction loanTransaction) {
         loanTransaction.reverse();
         this.loanTransactionRepository.save(loanTransaction);
     }

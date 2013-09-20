@@ -38,7 +38,7 @@ public class ApplicationCurrencyRepositoryWrapper {
         if (defaultApplicationCurrency == null) { throw new CurrencyNotFoundException(currency.getCode()); }
 
         final ApplicationCurrency applicationCurrency = ApplicationCurrency.from(defaultApplicationCurrency,
-                currency.getDigitsAfterDecimal(),currency.getCurrencyInMultiplesOf());
+                currency.getDigitsAfterDecimal(), currency.getCurrencyInMultiplesOf());
 
         return applicationCurrency;
     }

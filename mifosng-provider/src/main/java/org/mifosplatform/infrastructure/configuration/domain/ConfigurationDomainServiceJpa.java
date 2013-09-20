@@ -7,8 +7,8 @@ package org.mifosplatform.infrastructure.configuration.domain;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.cache.domain.CacheType;
-import org.mifosplatform.infrastructure.cache.domain.PlatformCacheRepository;
 import org.mifosplatform.infrastructure.cache.domain.PlatformCache;
+import org.mifosplatform.infrastructure.cache.domain.PlatformCacheRepository;
 import org.mifosplatform.infrastructure.configuration.exception.GlobalConfigurationPropertyNotFoundException;
 import org.mifosplatform.useradministration.domain.Permission;
 import org.mifosplatform.useradministration.domain.PermissionRepository;
@@ -26,8 +26,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
     @Autowired
     public ConfigurationDomainServiceJpa(final PermissionRepository permissionRepository,
-            final GlobalConfigurationRepository globalConfigurationRepository,
-            final PlatformCacheRepository cacheTypeRepository) {
+            final GlobalConfigurationRepository globalConfigurationRepository, final PlatformCacheRepository cacheTypeRepository) {
         this.permissionRepository = permissionRepository;
         this.globalConfigurationRepository = globalConfigurationRepository;
         this.cacheTypeRepository = cacheTypeRepository;
@@ -48,20 +47,24 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
-    public boolean isAmazonS3Enabled(){
+    public boolean isAmazonS3Enabled() {
         return this.globalConfigurationRepository.findOneByName("amazon-S3").isEnabled();
     }
 
     @Override
     public boolean isRescheduleFutureRepaymentsEnabled() {
         final String rescheduleRepaymentsConfigurationProperty = "reschedule-future-repayments";
-        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByName(rescheduleRepaymentsConfigurationProperty);
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository
+                .findOneByName(rescheduleRepaymentsConfigurationProperty);
         if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(rescheduleRepaymentsConfigurationProperty); }
         return property.isEnabled();
     }
 
-    /* (non-Javadoc)
-     * @see org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService#isHolidaysEnabled()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.mifosplatform.infrastructure.configuration.domain.
+     * ConfigurationDomainService#isHolidaysEnabled()
      */
     @Override
     public boolean isRescheduleRepaymentsOnHolidaysEnabled() {
@@ -82,7 +85,8 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     @Override
     public boolean allowTransactionsOnNonWorkingDayEnabled() {
         final String allowTransactionsOnNonWorkingDayProperty = "allow-transactions-on-non_workingday";
-        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByName(allowTransactionsOnNonWorkingDayProperty);
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository
+                .findOneByName(allowTransactionsOnNonWorkingDayProperty);
         if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(allowTransactionsOnNonWorkingDayProperty); }
         return property.isEnabled();
     }

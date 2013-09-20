@@ -30,14 +30,13 @@ public final class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<
     public DefaultToApiJsonSerializer(
             final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOff,
             final ExcludeNothingWithPrettyPrintingOnJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOn,
-            final CommandProcessingResultJsonSerializer commandProcessingResultSerializer,
-            final GoogleGsonSerializerHelper helper) {
+            final CommandProcessingResultJsonSerializer commandProcessingResultSerializer, final GoogleGsonSerializerHelper helper) {
         this.excludeNothingWithPrettyPrintingOff = excludeNothingWithPrettyPrintingOff;
         this.excludeNothingWithPrettyPrintingOn = excludeNothingWithPrettyPrintingOn;
         this.commandProcessingResultSerializer = commandProcessingResultSerializer;
         this.helper = helper;
     }
-    
+
     @Override
     public String serializeResult(final Object object) {
         return this.commandProcessingResultSerializer.serialize(object);
@@ -47,11 +46,11 @@ public final class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<
     public String serialize(final Object object) {
         return this.excludeNothingWithPrettyPrintingOff.serialize(object);
     }
-    
+
     @Override
-    public String serializePretty(boolean prettyOn, final Object object) {
+    public String serializePretty(final boolean prettyOn, final Object object) {
         String json = "";
-        
+
         if (prettyOn) {
             json = this.excludeNothingWithPrettyPrintingOn.serialize(object);
         } else {
@@ -75,15 +74,16 @@ public final class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<
     }
 
     @Override
-    public String serialize(ApiRequestJsonSerializationSettings settings, Page<T> singleObject, Set<String> supportedResponseParameters) {
+    public String serialize(final ApiRequestJsonSerializationSettings settings, final Page<T> singleObject,
+            final Set<String> supportedResponseParameters) {
         final Gson delegatedSerializer = findAppropriateSerializer(settings, supportedResponseParameters);
         return serializeWithSettings(delegatedSerializer, settings, singleObject);
     }
-    
+
     private String serializeWithSettings(final Gson gson, final ApiRequestJsonSerializationSettings settings, final Object[] dataObject) {
         String json = null;
         if (gson != null) {
-            json = helper.serializedJsonFrom(gson, dataObject);
+            json = this.helper.serializedJsonFrom(gson, dataObject);
         } else {
             if (settings.isPrettyPrint()) {
                 json = this.excludeNothingWithPrettyPrintingOn.serialize(dataObject);
@@ -93,11 +93,11 @@ public final class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<
         }
         return json;
     }
-    
+
     private String serializeWithSettings(final Gson gson, final ApiRequestJsonSerializationSettings settings, final Object dataObject) {
         String json = null;
         if (gson != null) {
-            json = helper.serializedJsonFrom(gson, dataObject);
+            json = this.helper.serializedJsonFrom(gson, dataObject);
         } else {
             if (settings.isPrettyPrint()) {
                 json = this.excludeNothingWithPrettyPrintingOn.serialize(dataObject);
@@ -111,7 +111,7 @@ public final class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<
     private Gson findAppropriateSerializer(final ApiRequestJsonSerializationSettings settings, final Set<String> supportedResponseParameters) {
         Gson gson = null;
         if (settings.isPartialResponseRequired()) {
-            gson = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(supportedResponseParameters,
+            gson = this.helper.createGsonBuilderWithParameterExclusionSerializationStrategy(supportedResponseParameters,
                     settings.isPrettyPrint(), settings.getParametersForPartialResponse());
         }
         return gson;

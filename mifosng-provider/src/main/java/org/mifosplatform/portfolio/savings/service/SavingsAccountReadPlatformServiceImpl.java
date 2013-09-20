@@ -102,23 +102,23 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     @Override
     public Collection<SavingsAccountData> retrieveAllForLookup(final Long clientId) {
 
-        StringBuilder sqlBuilder = new StringBuilder("select " + this.savingAccountMapper.schema());
+        final StringBuilder sqlBuilder = new StringBuilder("select " + this.savingAccountMapper.schema());
         sqlBuilder.append(" where sa.client_id = ? and sa.status_enum = 300");
 
-        Object[] queryParameters = new Object[] { clientId };
+        final Object[] queryParameters = new Object[] { clientId };
         return this.jdbcTemplate.query(sqlBuilder.toString(), this.savingAccountMapper, queryParameters);
     }
 
     @Override
     public Page<SavingsAccountData> retrieveAll(final SearchParameters searchParameters) {
 
-        final AppUser currentUser = context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
 
-        StringBuilder sqlBuilder = new StringBuilder(200);
+        final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
-        sqlBuilder.append(savingAccountMapper.schema());
+        sqlBuilder.append(this.savingAccountMapper.schema());
 
         sqlBuilder.append(" join m_office o on o.id = c.office_id");
         sqlBuilder.append(" where o.hierarchy like ?");
@@ -167,7 +167,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final String sql = "select " + this.savingAccountMapper.schema() + " where sa.id = ?";
 
             return this.jdbcTemplate.queryForObject(sql, this.savingAccountMapper, new Object[] { accountId });
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new SavingsAccountNotFoundException(accountId);
         }
     }
@@ -358,7 +358,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             if (withdrawalFeeTypeValue != null) {
                 withdrawalFeeType = SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue);
             }
-            
+
             final boolean withdrawalFeeForTransfers = rs.getBoolean("withdrawalFeeForTransfers");
 
             final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
@@ -382,7 +382,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final BigDecimal accountBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "accountBalance");
             final BigDecimal totalFeeCharge = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalFeeCharge");
             final BigDecimal totalPenaltyCharge = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalPenaltyCharge");
-            
+
             final SavingsAccountSummaryData summary = new SavingsAccountSummaryData(currency, totalDeposits, totalWithdrawals,
                     totalWithdrawalFees, totalAnnualFees, totalInterestEarned, totalInterestPosted, accountBalance, totalFeeCharge,
                     totalPenaltyCharge);
@@ -399,7 +399,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     public SavingsAccountData retrieveTemplate(final Long clientId, final Long groupId, final Long productId,
             final boolean staffInSelectedOfficeOnly) {
 
-        AppUser loggedInUser = context.authenticatedUser();
+        final AppUser loggedInUser = this.context.authenticatedUser();
         Long officeId = loggedInUser.getOffice().getId();
 
         ClientData client = null;
@@ -418,7 +418,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         SavingsAccountData template = null;
         if (productId != null) {
 
-            SavingAccountTemplateMapper mapper = new SavingAccountTemplateMapper(client, group);
+            final SavingAccountTemplateMapper mapper = new SavingAccountTemplateMapper(client, group);
 
             final String sql = "select " + mapper.schema() + " where sp.id = ?";
             template = this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { productId });
@@ -442,11 +442,12 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             final Collection<SavingsAccountTransactionData> transactions = null;
             final Collection<ChargeData> productCharges = this.chargeReadPlatformService.retrieveSavingsProductCharges(productId);
-            //update charges from Product charges
+            // update charges from Product charges
             final Collection<SavingsAccountChargeData> charges = fromChargesToSavingsCharges(productCharges);
-            
+
             final boolean feeChargesOnly = false;
-            final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSavingsAccountApplicableCharges(feeChargesOnly);
+            final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
+                    .retrieveSavingsAccountApplicableCharges(feeChargesOnly);
 
             Collection<StaffData> fieldOfficerOptions = null;
 
@@ -454,7 +455,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
                 if (staffInSelectedOfficeOnly) {
                     // only bring back loan officers in selected branch/office
-                    Collection<StaffData> fieldOfficersInBranch = this.staffReadPlatformService
+                    final Collection<StaffData> fieldOfficersInBranch = this.staffReadPlatformService
                             .retrieveAllLoanOfficersInOfficeById(officeId);
 
                     if (!CollectionUtils.isEmpty(fieldOfficersInBranch)) {
@@ -465,7 +466,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     // branch/office as well as officers in office above
                     // this office
                     final boolean restrictToLoanOfficersOnly = true;
-                    Collection<StaffData> loanOfficersInHierarchy = this.staffReadPlatformService
+                    final Collection<StaffData> loanOfficersInHierarchy = this.staffReadPlatformService
                             .retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(officeId, restrictToLoanOfficersOnly);
 
                     if (!CollectionUtils.isEmpty(loanOfficersInHierarchy)) {
@@ -476,7 +477,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             template = SavingsAccountData.withTemplateOptions(template, productOptions, fieldOfficerOptions,
                     interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
-                    interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, transactions, charges, chargeOptions);
+                    interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, transactions,
+                    charges, chargeOptions);
         } else {
 
             String clientName = null;
@@ -501,21 +503,23 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             final Collection<SavingsAccountTransactionData> transactions = null;
             final Collection<SavingsAccountChargeData> charges = null;
-            
+
             final boolean feeChargesOnly = true;
-            final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSavingsAccountApplicableCharges(feeChargesOnly);
+            final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
+                    .retrieveSavingsAccountApplicableCharges(feeChargesOnly);
 
             template = SavingsAccountData.withTemplateOptions(template, productOptions, fieldOfficerOptions,
                     interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
-                    interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, transactions, charges, chargeOptions);
+                    interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, transactions,
+                    charges, chargeOptions);
         }
 
         return template;
     }
 
-    private Collection<SavingsAccountChargeData> fromChargesToSavingsCharges(Collection<ChargeData> productCharges) {
+    private Collection<SavingsAccountChargeData> fromChargesToSavingsCharges(final Collection<ChargeData> productCharges) {
         final Collection<SavingsAccountChargeData> savingsCharges = new ArrayList<SavingsAccountChargeData>();
-        for (ChargeData chargeData : productCharges) {
+        for (final ChargeData chargeData : productCharges) {
             final SavingsAccountChargeData savingsCharge = chargeData.toSavingsAccountChargeData();
             savingsCharges.add(savingsCharge);
         }
@@ -526,10 +530,10 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     public SavingsAccountTransactionData retrieveDepositTransactionTemplate(final Long savingsId) {
 
         try {
-            final String sql = "select " + transactionTemplateMapper.schema() + " where sa.id = ?";
+            final String sql = "select " + this.transactionTemplateMapper.schema() + " where sa.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, transactionTemplateMapper, new Object[] { savingsId });
-        } catch (EmptyResultDataAccessException e) {
+            return this.jdbcTemplate.queryForObject(sql, this.transactionTemplateMapper, new Object[] { savingsId });
+        } catch (final EmptyResultDataAccessException e) {
             throw new SavingsAccountNotFoundException(savingsId);
         }
     }
@@ -552,7 +556,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
     @Override
     public Collection<SavingsAccountAnnualFeeData> retrieveAccountsWithAnnualFeeDue() {
-        final String sql = "select " + annualFeeMapper.schema()
+        final String sql = "select " + this.annualFeeMapper.schema()
                 + " where sa.annual_fee_next_due_date is not null and sa.annual_fee_next_due_date <= NOW()";
 
         return this.jdbcTemplate.query(sql, this.annualFeeMapper, new Object[] {});
@@ -616,7 +620,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentType");
                 if (paymentTypeId != null) {
                     final String typeName = rs.getString("paymentTypeName");
-                    CodeValueData paymentType = CodeValueData.instance(paymentTypeId, typeName);
+                    final CodeValueData paymentType = CodeValueData.instance(paymentTypeId, typeName);
                     final String accountNumber = rs.getString("accountNumber");
                     final String checkNumber = rs.getString("checkNumber");
                     final String routingCode = rs.getString("routingCode");
@@ -761,17 +765,17 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             final BigDecimal nominalAnnualIterestRate = rs.getBigDecimal("nominalAnnualIterestRate");
 
-            EnumOptionData interestCompoundingPeriodType = SavingsEnumerations
+            final EnumOptionData interestCompoundingPeriodType = SavingsEnumerations
                     .compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.fromInt(JdbcSupport.getInteger(rs,
                             "interestCompoundingPeriodType")));
 
             final EnumOptionData interestPostingPeriodType = SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType
                     .fromInt(JdbcSupport.getInteger(rs, "interestPostingPeriodType")));
 
-            EnumOptionData interestCalculationType = SavingsEnumerations.interestCalculationType(SavingsInterestCalculationType
+            final EnumOptionData interestCalculationType = SavingsEnumerations.interestCalculationType(SavingsInterestCalculationType
                     .fromInt(JdbcSupport.getInteger(rs, "interestCalculationType")));
 
-            EnumOptionData interestCalculationDaysInYearType = SavingsEnumerations
+            final EnumOptionData interestCalculationDaysInYearType = SavingsEnumerations
                     .interestCalculationDaysInYearType(SavingsInterestCalculationDaysInYearType.fromInt(JdbcSupport.getInteger(rs,
                             "interestCalculationDaysInYearType")));
 
@@ -792,9 +796,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             if (withdrawalFeeTypeValue != null) {
                 withdrawalFeeType = SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue);
             }
-            
+
             final boolean withdrawalFeeForTransfers = rs.getBoolean("withdrawalFeeForTransfers");
-            
+
             final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
 
             MonthDay annualFeeOnMonthDay = null;
@@ -806,16 +810,16 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             Long clientId = null;
             String clientName = null;
-            if (client != null) {
-                clientId = client.id();
-                clientName = client.displayName();
+            if (this.client != null) {
+                clientId = this.client.id();
+                clientName = this.client.displayName();
             }
 
             Long groupId = null;
             String groupName = null;
-            if (group != null) {
-                groupId = group.getId();
-                groupName = group.getName();
+            if (this.group != null) {
+                groupId = this.group.getId();
+                groupName = this.group.getName();
             }
 
             final Long fieldOfficerId = null;

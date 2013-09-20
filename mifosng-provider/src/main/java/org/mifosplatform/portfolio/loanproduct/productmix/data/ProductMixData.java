@@ -31,13 +31,13 @@ public class ProductMixData {
                 productMixData.allowedProducts, productOptions);
     }
 
-    public static ProductMixData withDetails(Long productId, String productName, Collection<LoanProductData> restrictedProducts,
-            Collection<LoanProductData> allowedProducts) {
+    public static ProductMixData withDetails(final Long productId, final String productName,
+            final Collection<LoanProductData> restrictedProducts, final Collection<LoanProductData> allowedProducts) {
         return new ProductMixData(productId, productName, restrictedProducts, allowedProducts, null);
     }
 
-    public static ProductMixData withRestrictedOptions(Collection<LoanProductData> restrictedProducts,
-            Collection<LoanProductData> allowedProducts) {
+    public static ProductMixData withRestrictedOptions(final Collection<LoanProductData> restrictedProducts,
+            final Collection<LoanProductData> allowedProducts) {
         return new ProductMixData(null, null, restrictedProducts, allowedProducts, null);
     }
 

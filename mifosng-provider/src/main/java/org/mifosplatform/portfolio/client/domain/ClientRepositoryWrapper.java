@@ -30,7 +30,7 @@ public class ClientRepositoryWrapper {
         if (client == null) { throw new ClientNotFoundException(id); }
         return client;
     }
-    
+
     public void save(final Client client) {
         this.repository.save(client);
     }

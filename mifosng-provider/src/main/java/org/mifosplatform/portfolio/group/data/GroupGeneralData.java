@@ -42,7 +42,7 @@ public class GroupGeneralData {
     private final Collection<ClientData> clientMembers;
     private final Collection<GroupRoleData> groupRoles;
     private final Collection<CalendarData> calendarsData;
-    private final CalendarData collectionMeetingCalendar; 
+    private final CalendarData collectionMeetingCalendar;
 
     // template
     private final Collection<CenterData> centerOptions;
@@ -71,7 +71,8 @@ public class GroupGeneralData {
         final Collection<CodeValueData> closureReasons = null;
 
         return new GroupGeneralData(null, null, null, null, null, officeId, null, centerId, centerName, staffId, staffName, null,
-                clientMembers, centerOptions, officeOptions, staffOptions, clientOptions, groupRoles, availableRoles, null, null, null, closureReasons);
+                clientMembers, centerOptions, officeOptions, staffOptions, clientOptions, groupRoles, availableRoles, null, null, null,
+                closureReasons);
     }
 
     public static GroupGeneralData withTemplate(final GroupGeneralData templatedGrouping, final GroupGeneralData grouping) {
@@ -83,11 +84,13 @@ public class GroupGeneralData {
     }
 
     public static GroupGeneralData withAssocations(final GroupGeneralData grouping, final Collection<ClientData> membersOfGroup,
-            final Collection<GroupRoleData> groupRoles, final Collection<CalendarData> calendarsData, final CalendarData collectionMeetingCalendar) {
+            final Collection<GroupRoleData> groupRoles, final Collection<CalendarData> calendarsData,
+            final CalendarData collectionMeetingCalendar) {
         return new GroupGeneralData(grouping.id, grouping.name, grouping.externalId, grouping.status, grouping.activationDate,
                 grouping.officeId, grouping.officeName, grouping.centerId, grouping.centerName, grouping.staffId, grouping.staffName,
                 grouping.hierarchy, membersOfGroup, grouping.centerOptions, grouping.officeOptions, grouping.staffOptions,
-                grouping.clientOptions, groupRoles, grouping.availableRoles, grouping.selectedRole, calendarsData, collectionMeetingCalendar, grouping.closureReasons);
+                grouping.clientOptions, groupRoles, grouping.availableRoles, grouping.selectedRole, calendarsData,
+                collectionMeetingCalendar, grouping.closureReasons);
     }
 
     public static GroupGeneralData instance(final Long id, final String name, final String externalId, final EnumOptionData status,
@@ -117,7 +120,8 @@ public class GroupGeneralData {
             final Collection<CenterData> centerOptions, final Collection<OfficeData> officeOptions,
             final Collection<StaffData> staffOptions, final Collection<ClientData> clientOptions,
             final Collection<GroupRoleData> groupRoles, final Collection<CodeValueData> availableRoles, final GroupRoleData role,
-            final Collection<CalendarData> calendarsData, final CalendarData collectionMeetingCalendar, final Collection<CodeValueData> closureReasons) {
+            final Collection<CalendarData> calendarsData, final CalendarData collectionMeetingCalendar,
+            final Collection<CodeValueData> closureReasons) {
         this.id = id;
         this.name = name;
         this.externalId = externalId;
@@ -172,21 +176,21 @@ public class GroupGeneralData {
     public String getHierarchy() {
         return this.hierarchy;
     }
-    
-    public boolean isChildGroup(){
+
+    public boolean isChildGroup() {
         return this.centerId == null ? false : true;
     }
 
-    public Long getParentId(){
+    public Long getParentId() {
         return this.centerId;
     }
-    
-    
+
     public static GroupGeneralData updateSelectedRole(final GroupGeneralData grouping, final GroupRoleData selectedRole) {
         return new GroupGeneralData(grouping.id, grouping.name, grouping.externalId, grouping.status, grouping.activationDate,
                 grouping.officeId, grouping.officeName, grouping.centerId, grouping.centerName, grouping.staffId, grouping.staffName,
                 grouping.hierarchy, grouping.clientMembers, grouping.centerOptions, grouping.officeOptions, grouping.staffOptions,
-                grouping.clientOptions, grouping.groupRoles, grouping.availableRoles, selectedRole, grouping.calendarsData, grouping.collectionMeetingCalendar, grouping.closureReasons);
+                grouping.clientOptions, grouping.groupRoles, grouping.availableRoles, selectedRole, grouping.calendarsData,
+                grouping.collectionMeetingCalendar, grouping.closureReasons);
     }
 
     public static GroupGeneralData withClosureReasons(final Collection<CodeValueData> closureReasons) {

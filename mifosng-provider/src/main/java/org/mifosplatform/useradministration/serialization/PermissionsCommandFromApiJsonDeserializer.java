@@ -46,8 +46,8 @@ public final class PermissionsCommandFromApiJsonDeserializer extends AbstractFro
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
-        return fromApiJsonHelper.fromJson(json, PermissionsCommand.class);
+        return this.fromApiJsonHelper.fromJson(json, PermissionsCommand.class);
     }
 }

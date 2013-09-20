@@ -5,7 +5,6 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
-
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeAmountParamName;
@@ -83,7 +82,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     /**
      * The interest period is the span of time at the end of which savings in a
      * client's account earn interest.
-     *
+     * 
      * A value from the {@link SavingsCompoundingInterestPeriodType}
      * enumeration.
      */
@@ -141,7 +140,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
 
     @Column(name = "annual_fee_on_day", nullable = true)
     private Integer annualFeeOnDay;
-    
+
     @ManyToMany
     @JoinTable(name = "m_savings_product_charge", joinColumns = @JoinColumn(name = "savings_product_id"), inverseJoinColumns = @JoinColumn(name = "charge_id"))
     private Set<Charge> charges;
@@ -151,12 +150,13 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final boolean withdrawalFeeApplicableForTransfer,
-            final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay, final AccountingRuleType accountingRuleType, final Set<Charge> charges) {
+            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType,
+            final boolean withdrawalFeeApplicableForTransfer, final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay,
+            final AccountingRuleType accountingRuleType, final Set<Charge> charges) {
 
         return new SavingsProduct(name, description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
-                lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,withdrawalFeeApplicableForTransfer, annualFeeAmount,
+                lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, withdrawalFeeApplicableForTransfer, annualFeeAmount,
                 annualFeeOnMonthDay, accountingRuleType, charges);
     }
 
@@ -170,8 +170,9 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final boolean withdrawalFeeApplicableForTransfer,
-            final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay, final AccountingRuleType accountingRuleType, final Set<Charge> charges) {
+            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType,
+            final boolean withdrawalFeeApplicableForTransfer, final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay,
+            final AccountingRuleType accountingRuleType, final Set<Charge> charges) {
 
         this.name = name;
         this.description = description;
@@ -304,7 +305,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             actualChanges.put(digitsAfterDecimalParamName, newValue);
             actualChanges.put(localeParamName, localeAsInput);
             digitsAfterDecimal = newValue;
-            this.currency = new MonetaryCurrency(this.currency.getCode(), digitsAfterDecimal,this.currency.getCurrencyInMultiplesOf());
+            this.currency = new MonetaryCurrency(this.currency.getCode(), digitsAfterDecimal, this.currency.getCurrencyInMultiplesOf());
         }
 
         String currencyCode = this.currency.getCode();
@@ -312,7 +313,8 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final String newValue = command.stringValueOfParameterNamed(currencyCodeParamName);
             actualChanges.put(currencyCodeParamName, newValue);
             currencyCode = newValue;
-            this.currency = new MonetaryCurrency(currencyCode, this.currency.getDigitsAfterDecimal(),this.currency.getCurrencyInMultiplesOf());
+            this.currency = new MonetaryCurrency(currencyCode, this.currency.getDigitsAfterDecimal(),
+                    this.currency.getCurrencyInMultiplesOf());
         }
 
         Integer inMultiplesOf = this.currency.getCurrencyInMultiplesOf();
@@ -321,7 +323,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             actualChanges.put(inMultiplesOfParamName, newValue);
             actualChanges.put(localeParamName, localeAsInput);
             inMultiplesOf = newValue;
-            this.currency = new MonetaryCurrency(this.currency.getCode(), this.currency.getDigitsAfterDecimal(),inMultiplesOf);
+            this.currency = new MonetaryCurrency(this.currency.getCode(), this.currency.getDigitsAfterDecimal(), inMultiplesOf);
         }
 
         if (command.isChangeInBigDecimalParameterNamed(nominalAnnualInterestRateParamName, this.nominalAnnualInterestRate)) {
@@ -394,7 +396,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             this.withdrawalFeeType = newValue != null ? SavingsWithdrawalFeesType.fromInt(newValue).getValue() : newValue;
         }
 
-        if(command.isChangeInBooleanParameterNamed(withdrawalFeeForTransfersParamName, this.withdrawalFeeApplicableForTransfer)){
+        if (command.isChangeInBooleanParameterNamed(withdrawalFeeForTransfersParamName, this.withdrawalFeeApplicableForTransfer)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(withdrawalFeeForTransfersParamName);
             actualChanges.put(withdrawalFeeForTransfersParamName, newValue);
             this.withdrawalFeeApplicableForTransfer = newValue;
@@ -441,10 +443,10 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             actualChanges.put(accountingRuleParamName, newValue);
             this.accountingRule = newValue;
         }
- 
-        //charges 
+
+        // charges
         if (command.hasParameter(chargesParamName)) {
-            JsonArray jsonArray = command.arrayOfParameterNamed(chargesParamName);
+            final JsonArray jsonArray = command.arrayOfParameterNamed(chargesParamName);
             if (jsonArray != null) {
                 actualChanges.put(chargesParamName, command.jsonFragment(chargesParamName));
             }
@@ -517,11 +519,11 @@ public class SavingsProduct extends AbstractPersistable<Long> {
                         .integerZeroOrGreater();
             }
         } else {
-            baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(this.lockinPeriodFrequencyType).integerZeroOrGreater();
+            baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(this.lockinPeriodFrequencyType)
+                    .integerZeroOrGreater();
             baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(this.lockinPeriodFrequencyType).notNull()
                     .inMinMaxRange(0, 3);
         }
-
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
@@ -537,9 +539,9 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     public Integer getAccountingType() {
         return this.accountingRule;
     }
-    
+
     public boolean update(final Set<Charge> newSavingsProductCharges) {
-        if (newSavingsProductCharges == null) return false;
+        if (newSavingsProductCharges == null) { return false; }
 
         boolean updated = false;
         if (this.charges != null) {

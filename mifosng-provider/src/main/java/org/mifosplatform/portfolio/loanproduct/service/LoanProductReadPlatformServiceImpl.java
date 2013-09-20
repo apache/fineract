@@ -54,7 +54,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId });
 
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new LoanProductNotFoundException(loanProductId);
         }
     }

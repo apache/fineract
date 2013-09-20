@@ -41,11 +41,11 @@ public class SchedulerStopListener implements JobListener {
     public void jobWasExecuted(final JobExecutionContext context, @SuppressWarnings("unused") final JobExecutionException jobException) {
         final String schedulerName = context.getTrigger().getJobDataMap().getString(SchedulerServiceConstants.SCHEDULER_NAME);
         if (schedulerName != null) {
-            Thread newThread = new Thread(new Runnable() {
+            final Thread newThread = new Thread(new Runnable() {
 
                 @Override
                 public void run() {
-                    jobRegisterService.stopScheduler(schedulerName);
+                    SchedulerStopListener.this.jobRegisterService.stopScheduler(schedulerName);
                 }
             });
             newThread.run();

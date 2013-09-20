@@ -52,7 +52,7 @@ public class Charge extends AbstractPersistable<Long> {
 
     @Column(name = "charge_calculation_enum")
     private Integer chargeCalculation;
-    
+
     @Column(name = "charge_payment_mode_enum")
     private Integer chargePaymentMode;
 
@@ -88,8 +88,8 @@ public class Charge extends AbstractPersistable<Long> {
     }
 
     private Charge(final String name, final BigDecimal amount, final String currencyCode, final ChargeAppliesTo chargeAppliesTo,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean penalty, final boolean active,
-            final ChargePaymentMode paymentMode) {
+            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean penalty,
+            final boolean active, final ChargePaymentMode paymentMode) {
         this.name = name;
         this.amount = amount;
         this.currencyCode = currencyCode;
@@ -114,14 +114,14 @@ public class Charge extends AbstractPersistable<Long> {
                 baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
                         .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.calculation.type.for.savings");
             }
-            
+
         } else if (isLoanCharge()) {
-            
+
             if (penalty && chargeTime.isTimeOfDisbursement()) { throw new ChargeDueAtDisbursementCannotBePenaltyException(name); }
-            
+
             if (!isAllowedLoanChargeTime()) {
                 baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTime)
-                .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
+                        .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
             }
         }
 
@@ -133,77 +133,77 @@ public class Charge extends AbstractPersistable<Long> {
         if (obj == null) { return false; }
         if (obj == this) { return true; }
         if (obj.getClass() != getClass()) { return false; }
-        LoanCharge rhs = (LoanCharge) obj;
+        final LoanCharge rhs = (LoanCharge) obj;
         return new EqualsBuilder().appendSuper(super.equals(obj)) //
-                .append(this.getId(), rhs.getId()) //
+                .append(getId(), rhs.getId()) //
                 .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(3, 5) //
-                .append(this.getId()) //
+                .append(getId()) //
                 .toHashCode();
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public BigDecimal getAmount() {
-        return amount;
+        return this.amount;
     }
 
     public String getCurrencyCode() {
-        return currencyCode;
+        return this.currencyCode;
     }
 
     public Integer getChargeTime() {
-        return chargeTime;
+        return this.chargeTime;
     }
 
     public Integer getChargeCalculation() {
-        return chargeCalculation;
+        return this.chargeCalculation;
     }
 
     public boolean isActive() {
-        return active;
+        return this.active;
     }
 
     public boolean isPenalty() {
-        return penalty;
+        return this.penalty;
     }
 
     public boolean isDeleted() {
-        return deleted;
+        return this.deleted;
     }
-    
-    public boolean isLoanCharge(){
+
+    public boolean isLoanCharge() {
         return ChargeAppliesTo.fromInt(this.chargeAppliesTo).isLoanCharge();
     }
-    
-    public boolean isAllowedLoanChargeTime(){
+
+    public boolean isAllowedLoanChargeTime() {
         return ChargeTimeType.fromInt(this.chargeTime).isAllowedLoanChargeTime();
     }
-    
-    public boolean isSavingsCharge(){
+
+    public boolean isSavingsCharge() {
         return ChargeAppliesTo.fromInt(this.chargeAppliesTo).isSavingsCharge();
     }
-    
-    public boolean isAllowedSavingsChargeTime(){
+
+    public boolean isAllowedSavingsChargeTime() {
         return ChargeTimeType.fromInt(this.chargeTime).isAllowedSavingsChargeTime();
     }
 
-    public boolean isAllowedSavingsChargeCalculationType(){
+    public boolean isAllowedSavingsChargeCalculationType() {
         return ChargeCalculationType.fromInt(this.chargeCalculation).isAllowedSavingsChargeCalculationType();
     }
-    
+
     public Map<String, Object> update(final JsonCommand command) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
 
         final String localeAsInput = command.locale();
-        
+
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charges");
 
@@ -244,7 +244,7 @@ public class Charge extends AbstractPersistable<Long> {
             } else if (isLoanCharge()) {
                 if (!isAllowedLoanChargeTime()) {
                     baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTime)
-                    .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
+                            .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
                 }
             }
 
@@ -252,12 +252,15 @@ public class Charge extends AbstractPersistable<Long> {
 
         final String chargeAppliesToParamName = "chargeAppliesTo";
         if (command.isChangeInIntegerParameterNamed(chargeAppliesToParamName, this.chargeAppliesTo)) {
-            /*final Integer newValue = command.integerValueOfParameterNamed(chargeAppliesToParamName);
-            actualChanges.put(chargeAppliesToParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.chargeAppliesTo = ChargeAppliesTo.fromInt(newValue).getValue();*/
-            
-            //AA: Do not allow to change chargeAppliesTo.
+            /*
+             * final Integer newValue =
+             * command.integerValueOfParameterNamed(chargeAppliesToParamName);
+             * actualChanges.put(chargeAppliesToParamName, newValue);
+             * actualChanges.put("locale", localeAsInput); this.chargeAppliesTo
+             * = ChargeAppliesTo.fromInt(newValue).getValue();
+             */
+
+            // AA: Do not allow to change chargeAppliesTo.
             final String errorMessage = "Update of Charge applies to is not supported";
             throw new ChargeParameterUpdateNotSupportedException("charge.applies.to", errorMessage);
         }
@@ -268,7 +271,7 @@ public class Charge extends AbstractPersistable<Long> {
             actualChanges.put(chargeCalculationParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.chargeCalculation = ChargeCalculationType.fromInt(newValue).getValue();
-            
+
             if (isSavingsCharge()) {
                 if (!isAllowedSavingsChargeCalculationType()) {
                     baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
@@ -276,7 +279,7 @@ public class Charge extends AbstractPersistable<Long> {
                 }
             }
         }
-        
+
         final String paymentModeParamName = "chargePaymentMode";
         if (command.isChangeInIntegerParameterNamed(paymentModeParamName, this.chargePaymentMode)) {
             final Integer newValue = command.integerValueOfParameterNamed(paymentModeParamName);
@@ -284,7 +287,6 @@ public class Charge extends AbstractPersistable<Long> {
             actualChanges.put("locale", localeAsInput);
             this.chargePaymentMode = ChargePaymentMode.fromInt(newValue).getValue();
         }
-
 
         final String penaltyParamName = "penalty";
         if (command.isChangeInBooleanParameterNamed(penaltyParamName, this.penalty)) {
@@ -301,10 +303,10 @@ public class Charge extends AbstractPersistable<Long> {
         }
 
         if (this.penalty && ChargeTimeType.fromInt(this.chargeTime).isTimeOfDisbursement()) { throw new ChargeDueAtDisbursementCannotBePenaltyException(
-                name); }
-        
+                this.name); }
+
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-        
+
         return actualChanges;
     }
 
@@ -316,21 +318,20 @@ public class Charge extends AbstractPersistable<Long> {
      */
     public void delete() {
         this.deleted = true;
-        this.name = this.getId() + "_" + this.name;
+        this.name = getId() + "_" + this.name;
     }
 
     public ChargeData toData() {
 
-        EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(this.chargeTime);
-        EnumOptionData chargeAppliesTo = ChargeEnumerations.chargeAppliesTo(this.chargeAppliesTo);
-        EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(this.chargeCalculation);
-        EnumOptionData chargePaymentmode = ChargeEnumerations.chargePaymentMode(this.chargePaymentMode);
-        CurrencyData currency = new CurrencyData(this.currencyCode, null, 0, 0, null, null);
-        return ChargeData.instance(this.getId(), this.name, this.amount, currency, chargeTimeType, chargeAppliesTo, chargeCalculationType,
-                chargePaymentmode, penalty, active);
+        final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(this.chargeTime);
+        final EnumOptionData chargeAppliesTo = ChargeEnumerations.chargeAppliesTo(this.chargeAppliesTo);
+        final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(this.chargeCalculation);
+        final EnumOptionData chargePaymentmode = ChargeEnumerations.chargePaymentMode(this.chargePaymentMode);
+        final CurrencyData currency = new CurrencyData(this.currencyCode, null, 0, 0, null, null);
+        return ChargeData.instance(getId(), this.name, this.amount, currency, chargeTimeType, chargeAppliesTo, chargeCalculationType,
+                chargePaymentmode, this.penalty, this.active);
     }
 
-    
     public Integer getChargePaymentMode() {
         return this.chargePaymentMode;
     }

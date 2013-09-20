@@ -56,18 +56,18 @@ public class CollectionSheetTransactionDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, COLLECTIONSHEET_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, COLLECTIONSHEET_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(COLLECTIONSHEET_RESOURCE_NAME);
 
-        final JsonElement element = fromApiJsonHelper.parse(json);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final LocalDate transactionDate = fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
         baseDataValidator.reset().parameter(transactionDateParamName).value(transactionDate).notNull();
 
-        final String note = fromApiJsonHelper.extractStringNamed(noteParamName, element);
+        final String note = this.fromApiJsonHelper.extractStringNamed(noteParamName, element);
         if (StringUtils.isNotBlank(note)) {
             baseDataValidator.reset().parameter(noteParamName).value(note).notExceedingLengthOf(1000);
         }
@@ -76,9 +76,9 @@ public class CollectionSheetTransactionDataValidator {
         baseDataValidator.reset().parameter(calendarIdParamName).value(calendarId).notNull();
 
         validateAttendanceDetails(element, baseDataValidator);
-        
+
         validateDisbursementTransactions(element, baseDataValidator);
-        
+
         validateRepaymentTransactions(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -147,7 +147,7 @@ public class CollectionSheetTransactionDataValidator {
             }
         }
     }
-    
+
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }

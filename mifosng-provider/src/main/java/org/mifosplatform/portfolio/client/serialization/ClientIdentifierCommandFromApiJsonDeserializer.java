@@ -24,8 +24,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 /**
- * Implementation of {@link FromApiJsonDeserializer} for {@link ClientIdentifierCommandFromApiJsonDeserializer} 
- * 's.
+ * Implementation of {@link FromApiJsonDeserializer} for
+ * {@link ClientIdentifierCommandFromApiJsonDeserializer} 's.
  */
 @Component
 public final class ClientIdentifierCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<ClientIdentifierCommand> {

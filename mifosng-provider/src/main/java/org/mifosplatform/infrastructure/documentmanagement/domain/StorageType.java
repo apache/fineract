@@ -8,12 +8,12 @@ public enum StorageType {
 
     private Integer value;
 
-    StorageType(Integer value) {
+    StorageType(final Integer value) {
         this.value = value;
     }
 
     public Integer getValue() {
-        return value;
+        return this.value;
     }
 
     private static final Map<Integer, StorageType> intToEnumMap = new HashMap<Integer, StorageType>();

@@ -18,6 +18,6 @@ public class UnsupportedCommandException extends RuntimeException {
     }
 
     public String getUnsupportedCommandName() {
-        return unsupportedCommandName;
+        return this.unsupportedCommandName;
     }
 }

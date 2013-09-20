@@ -25,7 +25,7 @@ public enum PeriodFrequencyType {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public static PeriodFrequencyType fromInt(final Integer frequency) {

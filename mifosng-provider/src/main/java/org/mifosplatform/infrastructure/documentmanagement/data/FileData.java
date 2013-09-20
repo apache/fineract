@@ -17,14 +17,14 @@ public class FileData {
     private final String contentType;
     private final InputStream inputStream;
 
-    public FileData(File file, String fileName, String contentType) {
+    public FileData(final File file, final String fileName, final String contentType) {
         this.file = file;
         this.fileName = fileName;
         this.contentType = contentType;
         this.inputStream = null;
     }
 
-    public FileData(InputStream inputStream, String fileName, String contentType) {
+    public FileData(final InputStream inputStream, final String fileName, final String contentType) {
         this.file = null;
         this.inputStream = inputStream;
         this.fileName = fileName;
@@ -32,18 +32,18 @@ public class FileData {
     }
 
     public String contentType() {
-        return contentType;
+        return this.contentType;
     }
 
     public String name() {
-        return fileName;
+        return this.fileName;
     }
 
     public InputStream file() {
         try {
-            if (inputStream == null) { return new FileInputStream(file); }
-            return inputStream;
-        } catch (FileNotFoundException e) {
+            if (this.inputStream == null) { return new FileInputStream(this.file); }
+            return this.inputStream;
+        } catch (final FileNotFoundException e) {
             logger.error(e.toString());
             return null;
         }

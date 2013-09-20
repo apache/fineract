@@ -67,7 +67,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             final String sql = "select " + rm.chargeSchema() + " where c.id = ? and c.is_deleted=0 ";
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { chargeId });
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new ChargeNotFoundException(chargeId);
         }
     }
@@ -77,7 +77,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         this.context.authenticatedUser();
 
-        final Collection<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
+        final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
         final List<EnumOptionData> allowedChargeCalculationTypeOptions = this.chargeDropdownReadPlatformService.retrieveCalculationTypes();
         final List<EnumOptionData> allowedChargeAppliesToOptions = this.chargeDropdownReadPlatformService.retrieveApplicableToTypes();
         final List<EnumOptionData> allowedChargeTimeOptions = this.chargeDropdownReadPlatformService.retrieveCollectionTimeTypes();
@@ -121,7 +121,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         final ChargeMapper rm = new ChargeMapper();
 
-        String sql = "select " + rm.chargeSchema()
+        final String sql = "select " + rm.chargeSchema()
                 + " where c.is_deleted=0 and c.is_active=1 and c.is_penalty=1 and c.charge_applies_to_enum=? order by c.name ";
         return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.LOAN.getValue() });
     }
@@ -131,7 +131,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         public String chargeSchema() {
             return "c.id as id, c.name as name, c.amount as amount, c.currency_code as currencyCode, "
                     + "c.charge_applies_to_enum as chargeAppliesTo, c.charge_time_enum as chargeTime, "
-                    +"c.charge_payment_mode_enum as chargePaymentMode, "
+                    + "c.charge_payment_mode_enum as chargePaymentMode, "
                     + "c.charge_calculation_enum as chargeCalculation, c.is_penalty as penalty, c.is_active as active, oc.name as currencyName, "
                     + "oc.decimal_places as currencyDecimalPlaces,oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
                     + "oc.internationalized_name_code as currencyNameCode from m_charge c "
@@ -141,7 +141,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         public String loanProductChargeSchema() {
             return chargeSchema() + " join m_product_loan_charge plc on plc.charge_id = c.id";
         }
-        
+
         public String savingsProductChargeSchema() {
             return chargeSchema() + " join m_savings_product_charge spc on spc.charge_id = c.id";
         }
@@ -174,17 +174,16 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             final int paymentMode = rs.getInt("chargePaymentMode");
             final EnumOptionData chargePaymentMode = ChargeEnumerations.chargePaymentMode(paymentMode);
 
-            
             final boolean penalty = rs.getBoolean("penalty");
             final boolean active = rs.getBoolean("active");
 
-            return ChargeData.instance(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType, chargePaymentMode,
-                    penalty, active);
+            return ChargeData.instance(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType,
+                    chargePaymentMode, penalty, active);
         }
     }
 
     @Override
-    public Collection<ChargeData> retrieveSavingsAccountApplicableCharges(boolean feeChargesOnly) {
+    public Collection<ChargeData> retrieveSavingsAccountApplicableCharges(final boolean feeChargesOnly) {
         this.context.authenticatedUser();
 
         final ChargeMapper rm = new ChargeMapper();
@@ -205,20 +204,21 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         final ChargeMapper rm = new ChargeMapper();
 
-        String sql = "select " + rm.chargeSchema()
+        final String sql = "select " + rm.chargeSchema()
                 + " where c.is_deleted=0 and c.is_active=1 and c.is_penalty=1 and c.charge_applies_to_enum=? order by c.name ";
         return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SAVINGS.getValue() });
     }
 
     @Override
-    public Collection<ChargeData> retrieveSavingsProductCharges(Long savingsProductId) {
+    public Collection<ChargeData> retrieveSavingsProductCharges(final Long savingsProductId) {
         this.context.authenticatedUser();
 
         final ChargeMapper rm = new ChargeMapper();
 
-        final String sql = "select " + rm.savingsProductChargeSchema() + " where c.is_deleted=0 and c.is_active=1 and spc.savings_product_id=?";
+        final String sql = "select " + rm.savingsProductChargeSchema()
+                + " where c.is_deleted=0 and c.is_active=1 and spc.savings_product_id=?";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { savingsProductId });
     }
-    
+
 }

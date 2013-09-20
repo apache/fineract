@@ -130,11 +130,11 @@ public class SavingsProductsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME);
+        this.context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME);
 
         final Collection<SavingsProductData> products = this.savingProductReadPlatformService.retrieveAll();
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, products, SavingsApiConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
     }
 
@@ -144,20 +144,20 @@ public class SavingsProductsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveOne(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME);
+        this.context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME);
 
         SavingsProductData savingProductData = this.savingProductReadPlatformService.retrieveOne(productId);
-        
+
         final Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveSavingsProductCharges(productId);
-        
+
         savingProductData = SavingsProductData.withCharges(savingProductData, charges);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         if (savingProductData.hasAccountingEnabled()) {
-            Map<String, Object> accountingMappings = accountMappingReadPlatformService.fetchAccountMappingDetailsForSavingsProduct(
-                    productId, savingProductData.accountingRuleTypeId());
-            Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = accountMappingReadPlatformService
+            final Map<String, Object> accountingMappings = this.accountMappingReadPlatformService
+                    .fetchAccountMappingDetailsForSavingsProduct(productId, savingProductData.accountingRuleTypeId());
+            final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = this.accountMappingReadPlatformService
                     .fetchPaymentTypeToFundSourceMappingsForSavingsProduct(productId);
             savingProductData = SavingsProductData.withAccountingDetails(savingProductData, accountingMappings,
                     paymentChannelToFundSourceMappings);
@@ -177,11 +177,11 @@ public class SavingsProductsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveTemplate(@Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME);
+        this.context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME);
 
-        SavingsProductData savingProduct = handleTemplateRelatedData(null);
+        final SavingsProductData savingProduct = handleTemplateRelatedData(null);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, savingProduct, SavingsApiConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
     }
 
@@ -224,21 +224,21 @@ public class SavingsProductsApiResource {
 
         final Collection<EnumOptionData> withdrawalFeeTypeOptions = this.dropdownReadPlatformService.retrievewithdrawalFeeTypeOptions();
 
-        final Collection<CodeValueData> paymentTypeOptions = codeValueReadPlatformService
+        final Collection<CodeValueData> paymentTypeOptions = this.codeValueReadPlatformService
                 .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
         final Collection<EnumOptionData> accountingRuleOptions = this.accountingDropdownReadPlatformService
                 .retrieveAccountingRuleTypeOptions();
-        final Map<String, List<GLAccountData>> accountingMappingOptions = accountingDropdownReadPlatformService
+        final Map<String, List<GLAccountData>> accountingMappingOptions = this.accountingDropdownReadPlatformService
                 .retrieveAccountMappingOptionsForSavingsProducts();
-        
-        //charges 
+
+        // charges
         final boolean feeChargesOnly = true;
         Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSavingsAccountApplicableCharges(feeChargesOnly);
         chargeOptions = CollectionUtils.isEmpty(chargeOptions) ? null : chargeOptions;
-        
+
         Collection<ChargeData> penaltyOptions = this.chargeReadPlatformService.retrieveSavingsAccountApplicablePenalties();
         penaltyOptions = CollectionUtils.isEmpty(penaltyOptions) ? null : penaltyOptions;
-        
+
         SavingsProductData savingsProductToReturn = null;
         if (savingsProduct != null) {
             savingsProductToReturn = SavingsProductData.withTemplate(savingsProduct, currencyOptions, interestCompoundingPeriodTypeOptions,

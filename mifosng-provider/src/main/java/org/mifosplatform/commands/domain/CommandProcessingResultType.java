@@ -21,11 +21,11 @@ public enum CommandProcessingResultType {
     }
 
     public Integer getValue() {
-        return value;
+        return this.value;
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public static CommandProcessingResultType fromInt(final Integer typeValue) {

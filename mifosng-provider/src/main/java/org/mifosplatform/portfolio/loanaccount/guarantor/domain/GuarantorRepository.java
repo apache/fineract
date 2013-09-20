@@ -14,5 +14,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface GuarantorRepository extends JpaRepository<Guarantor, Long>, JpaSpecificationExecutor<Guarantor> {
 
     Guarantor findByLoanAndId(Loan loan, Long id);
+
     List<Guarantor> findByLoan(Loan loan);
 }

@@ -12,7 +12,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
  */
 public class NotValidRecurringDateException extends AbstractPlatformDomainRuleException {
 
-    public NotValidRecurringDateException(String postFix, String defaultUserMessage, Object... defaultUserMessageArgs) {
+    public NotValidRecurringDateException(final String postFix, final String defaultUserMessage, final Object... defaultUserMessageArgs) {
         super("error.msg.calendar." + postFix + ".not.valid.recurring.date", defaultUserMessage, defaultUserMessageArgs);
     }
 }

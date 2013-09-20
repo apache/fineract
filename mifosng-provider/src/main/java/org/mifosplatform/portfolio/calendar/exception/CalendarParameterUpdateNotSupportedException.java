@@ -12,7 +12,8 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
  */
 public class CalendarParameterUpdateNotSupportedException extends AbstractPlatformDomainRuleException {
 
-    public CalendarParameterUpdateNotSupportedException(String postFix, String defaultUserMessage, Object... defaultUserMessageArgs) {
+    public CalendarParameterUpdateNotSupportedException(final String postFix, final String defaultUserMessage,
+            final Object... defaultUserMessageArgs) {
         super("error.msg.calendar.update.of." + postFix + ".is.not.supported", defaultUserMessage, defaultUserMessageArgs);
     }
 }

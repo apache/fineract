@@ -22,11 +22,11 @@ public enum StaffOrganisationalRoleType {
     }
 
     public Integer getValue() {
-        return value;
+        return this.value;
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public static StaffOrganisationalRoleType fromInt(final Integer chargeCalculation) {

@@ -77,12 +77,12 @@ public class MakercheckersApiResource {
         final String extraCriteria = getExtraCriteria(actionName, entityName, resourceId, makerId, makerDateTimeFrom, makerDateTimeTo,
                 officeId, groupId, clientId, loanId, savingsAccountId);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         final Collection<AuditData> entries = this.readPlatformService.retrieveAllEntriesToBeChecked(extraCriteria,
                 settings.isIncludeJson());
 
-        return this.toApiJsonSerializerAudit.serialize(settings, entries, RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializerAudit.serialize(settings, entries, this.RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -91,7 +91,7 @@ public class MakercheckersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAuditSearchTemplate(@Context final UriInfo uriInfo) {
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         final AuditSearchData auditSearchData = this.readPlatformService.retrieveSearchTemplate("makerchecker");
 

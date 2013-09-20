@@ -20,22 +20,22 @@ import org.apache.commons.lang.time.StopWatch;
 public class PlatformRequestLog {
 
     @SuppressWarnings("unused")
-    private long startTime;
+    private final long startTime;
     @SuppressWarnings("unused")
-    private long totalTime;
+    private final long totalTime;
     @SuppressWarnings("unused")
     private final String method;
     @SuppressWarnings("unused")
-    private String url;
+    private final String url;
     @SuppressWarnings("unused")
-    private Map<String, String> parameters;
+    private final Map<String, String> parameters;
 
     public static PlatformRequestLog from(final StopWatch task, final HttpServletRequest request) throws IOException {
 
         final String requestUrl = request.getRequestURL().toString();
 
         @SuppressWarnings("unchecked")
-        Map<String, String> parameters = new HashMap<String, String>(request.getParameterMap());
+        final Map<String, String> parameters = new HashMap<String, String>(request.getParameterMap());
         parameters.remove("password");
         parameters.remove("_");
 

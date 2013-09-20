@@ -33,7 +33,7 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 
     @Override
     public Collection<RoleData> retrieveAll() {
-        final String sql = "select " + roleRowMapper.schema() + " order by r.id";
+        final String sql = "select " + this.roleRowMapper.schema() + " order by r.id";
 
         return this.jdbcTemplate.query(sql, this.roleRowMapper);
     }
@@ -42,10 +42,10 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
     public RoleData retrieveOne(final Long id) {
 
         try {
-            final String sql = "select " + roleRowMapper.schema() + " where r.id=?";
+            final String sql = "select " + this.roleRowMapper.schema() + " where r.id=?";
 
             return this.jdbcTemplate.queryForObject(sql, this.roleRowMapper, new Object[] { id });
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new RoleNotFoundException(id);
         }
     }

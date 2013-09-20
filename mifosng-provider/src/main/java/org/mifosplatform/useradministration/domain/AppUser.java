@@ -243,7 +243,7 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
     /**
      * Delete is a <i>soft delete</i>. Updates flag so it wont appear in
      * query/report results.
-     *
+     * 
      * Any fields with unique constraints and prepended with id of record.
      */
     public void delete() {
@@ -455,7 +455,8 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
 
     public void validateHasReadPermission(final String function, final Long userId) {
         if ("USER".equalsIgnoreCase(function) && userId.equals(getId())) {
-            // abstain from validation as user allowed fetch their own data no matter what permissions they have.
+            // abstain from validation as user allowed fetch their own data no
+            // matter what permissions they have.
         } else {
             validateHasPermissionTo(function);
         }

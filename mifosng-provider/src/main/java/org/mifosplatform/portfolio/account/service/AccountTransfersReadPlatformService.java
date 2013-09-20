@@ -18,6 +18,6 @@ public interface AccountTransfersReadPlatformService {
     Page<AccountTransferData> retrieveAll(SearchParameters searchParameters);
 
     AccountTransferData retrieveOne(Long transferId);
-    
-    boolean isAccountTransfer(Long transactionId,PortfolioAccountType accountType);
+
+    boolean isAccountTransfer(Long transactionId, PortfolioAccountType accountType);
 }

@@ -41,10 +41,11 @@ public class MixTaxonomyMappingApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @Autowired
-    public MixTaxonomyMappingApiResource(PlatformSecurityContext context, ToApiJsonSerializer<MixTaxonomyMappingData> toApiJsonSerializer,
-            MixTaxonomyMappingReadPlatformService readTaxonomyMappingService,
-            PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            ApiRequestParameterHelper apiRequestParameterHelper) {
+    public MixTaxonomyMappingApiResource(final PlatformSecurityContext context,
+            final ToApiJsonSerializer<MixTaxonomyMappingData> toApiJsonSerializer,
+            final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService,
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            final ApiRequestParameterHelper apiRequestParameterHelper) {
 
         this.context = context;
         this.toApiJsonSerializer = toApiJsonSerializer;
@@ -57,10 +58,10 @@ public class MixTaxonomyMappingApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveTaxonomyMapping(@Context final UriInfo uriInfo) {
-        context.authenticatedUser();
-        MixTaxonomyMappingData mappingData = this.readTaxonomyMappingService.retrieveTaxonomyMapping();
+        this.context.authenticatedUser();
+        final MixTaxonomyMappingData mappingData = this.readTaxonomyMappingService.retrieveTaxonomyMapping();
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, mappingData, RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, mappingData, this.RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT

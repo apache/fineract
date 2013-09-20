@@ -26,9 +26,9 @@ public class DateParam {
         this.dateAsString = dateStr;
     }
 
-    public Date getDate(String parameterName,String dateFormat, String localeAsString) {
-        Locale locale = JsonParserHelper.localeFromString(localeAsString);
-        LocalDate localDate = JsonParserHelper.convertFrom(dateAsString, parameterName, dateFormat, locale);
+    public Date getDate(final String parameterName, final String dateFormat, final String localeAsString) {
+        final Locale locale = JsonParserHelper.localeFromString(localeAsString);
+        final LocalDate localDate = JsonParserHelper.convertFrom(this.dateAsString, parameterName, dateFormat, locale);
         return localDate.toDate();
     }
 }

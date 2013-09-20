@@ -47,7 +47,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
 
         boolean isApprovedByChecker = false;
         // check if is update of own account details
-        if (wrapper.isUpdateOfOwnUserDetails(context.authenticatedUser().getId())) {
+        if (wrapper.isUpdateOfOwnUserDetails(this.context.authenticatedUser().getId())) {
             // then allow this operation to proceed.
             // maker checker doesnt mean anything here.
             isApprovedByChecker = true; // set to true in case permissions have
@@ -56,7 +56,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         } else {
             // if not user changing their own details - check user has
             // permission to perform specific task.
-            context.authenticatedUser().validateHasPermissionTo(wrapper.getTaskPermissionName());
+            this.context.authenticatedUser().validateHasPermissionTo(wrapper.getTaskPermissionName());
         }
         validateIsUpdateAllowed();
 
@@ -70,7 +70,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                     wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId());
 
             result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
-        } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
+        } catch (final RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
 
             result = this.processAndLogCommandService.logCommand(e.getCommandSourceResult());
         }
@@ -81,7 +81,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
     @Override
     public CommandProcessingResult approveEntry(final Long makerCheckerId) {
 
-        CommandSource commandSourceInput = validateMakerCheckerTransaction(makerCheckerId);
+        final CommandSource commandSourceInput = validateMakerCheckerTransaction(makerCheckerId);
         validateIsUpdateAllowed();
 
         final CommandWrapper wrapper = CommandWrapper.fromExistingCommand(makerCheckerId, commandSourceInput.getActionName(),
@@ -115,13 +115,13 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         if (commandSourceInput == null) { throw new CommandNotFoundException(makerCheckerId); }
         if (!(commandSourceInput.isMarkedAsAwaitingApproval())) { throw new CommandNotAwaitingApprovalException(makerCheckerId); }
 
-        context.authenticatedUser().validateHasCheckerPermissionTo(commandSourceInput.getPermissionCode());
+        this.context.authenticatedUser().validateHasCheckerPermissionTo(commandSourceInput.getPermissionCode());
 
         return commandSourceInput;
     }
 
     private boolean validateIsUpdateAllowed() {
-        return schedulerJobRunnerReadService.isUpdatesAllowed();
+        return this.schedulerJobRunnerReadService.isUpdatesAllowed();
 
     }
 }

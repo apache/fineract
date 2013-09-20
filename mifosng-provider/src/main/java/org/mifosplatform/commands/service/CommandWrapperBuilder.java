@@ -490,20 +490,20 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId + "/charges/" + loanChargeId;
         return this;
     }
-    
+
     public CommandWrapperBuilder payLoanCharge(final Long loanId, final Long loanChargeId) {
         this.actionName = "PAY";
         this.entityName = "LOANCHARGE";
         this.entityId = loanChargeId;
         this.loanId = loanId;
-        if(loanChargeId == null){
+        if (loanChargeId == null) {
             this.href = "/loans/" + loanId;
-        }else{
-            this.href = "/loans/" + loanId + "/charges/" + loanChargeId; 
+        } else {
+            this.href = "/loans/" + loanId + "/charges/" + loanChargeId;
         }
         return this;
     }
-    
+
     public CommandWrapperBuilder deleteLoanCharge(final Long loanId, final Long loanChargeId) {
         this.actionName = "DELETE";
         this.entityName = "LOANCHARGE";
@@ -866,7 +866,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-
     public CommandWrapperBuilder createAccountTransfer() {
         this.actionName = "CREATE";
         this.entityName = "ACCOUNTTRANSFER";
@@ -941,7 +940,7 @@ public class CommandWrapperBuilder {
         this.href = "/savingsaccounts/" + accountId + "?command=applyAnnualFees";
         return this;
     }
-    
+
     public CommandWrapperBuilder createSavingsAccountCharge(final Long savingsAccountId) {
         this.actionName = "CREATE";
         this.entityName = "SAVINGSACCOUNTCHARGE";
@@ -978,7 +977,7 @@ public class CommandWrapperBuilder {
         return this;
 
     }
-    
+
     public CommandWrapperBuilder deleteSavingsAccountCharge(final Long savingsAccountId, final Long savingsAccountChargeId) {
         this.actionName = "DELETE";
         this.entityName = "SAVINGSACCOUNTCHARGE";

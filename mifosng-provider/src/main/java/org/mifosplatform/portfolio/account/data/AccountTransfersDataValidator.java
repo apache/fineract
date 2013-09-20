@@ -56,7 +56,7 @@ public class AccountTransfersDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -64,40 +64,41 @@ public class AccountTransfersDataValidator {
 
         final JsonElement element = command.parsedJson();
 
-        final Long fromOfficeId = fromApiJsonHelper.extractLongNamed(fromOfficeIdParamName, element);
+        final Long fromOfficeId = this.fromApiJsonHelper.extractLongNamed(fromOfficeIdParamName, element);
         baseDataValidator.reset().parameter(fromOfficeIdParamName).value(fromOfficeId).notNull().integerGreaterThanZero();
 
-        final Long fromClientId = fromApiJsonHelper.extractLongNamed(fromClientIdParamName, element);
+        final Long fromClientId = this.fromApiJsonHelper.extractLongNamed(fromClientIdParamName, element);
         baseDataValidator.reset().parameter(fromClientIdParamName).value(fromClientId).notNull().integerGreaterThanZero();
 
-        final Long fromAccountId = fromApiJsonHelper.extractLongNamed(fromAccountIdParamName, element);
+        final Long fromAccountId = this.fromApiJsonHelper.extractLongNamed(fromAccountIdParamName, element);
         baseDataValidator.reset().parameter(fromAccountIdParamName).value(fromAccountId).notNull().integerGreaterThanZero();
 
-        final Integer fromAccountType = fromApiJsonHelper.extractIntegerSansLocaleNamed(fromAccountTypeParamName, element);
+        final Integer fromAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(fromAccountTypeParamName, element);
         baseDataValidator.reset().parameter(fromAccountTypeParamName).value(fromAccountType)
                 .isOneOfTheseValues(Integer.valueOf(1), Integer.valueOf(2));
 
-        final Long toOfficeId = fromApiJsonHelper.extractLongNamed(toOfficeIdParamName, element);
+        final Long toOfficeId = this.fromApiJsonHelper.extractLongNamed(toOfficeIdParamName, element);
         baseDataValidator.reset().parameter(toOfficeIdParamName).value(toOfficeId).notNull().integerGreaterThanZero();
 
-        final Long toClientId = fromApiJsonHelper.extractLongNamed(toClientIdParamName, element);
+        final Long toClientId = this.fromApiJsonHelper.extractLongNamed(toClientIdParamName, element);
         baseDataValidator.reset().parameter(toClientIdParamName).value(toClientId).notNull().integerGreaterThanZero();
 
-        final Long toAccountId = fromApiJsonHelper.extractLongNamed(toAccountIdParamName, element);
+        final Long toAccountId = this.fromApiJsonHelper.extractLongNamed(toAccountIdParamName, element);
         baseDataValidator.reset().parameter(toAccountIdParamName).value(toAccountId).notNull().integerGreaterThanZero();
 
-        final Integer toAccountType = fromApiJsonHelper.extractIntegerSansLocaleNamed(toAccountTypeParamName, element);
+        final Integer toAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(toAccountTypeParamName, element);
         baseDataValidator.reset().parameter(toAccountTypeParamName).value(toAccountType)
                 .isOneOfTheseValues(Integer.valueOf(1), Integer.valueOf(2));
 
-        final LocalDate transactionDate = fromApiJsonHelper.extractLocalDateNamed(transferDateParamName, element);
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(transferDateParamName, element);
         baseDataValidator.reset().parameter(transferDateParamName).value(transactionDate).notNull();
 
-        final BigDecimal transactionAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(transferAmountParamName, element);
+        final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(transferAmountParamName, element);
         baseDataValidator.reset().parameter(transferAmountParamName).value(transactionAmount).notNull().positiveAmount();
 
-        final String transactionDescription = fromApiJsonHelper.extractStringNamed(transferDescriptionParamName, element);
-        baseDataValidator.reset().parameter(transferDescriptionParamName).value(transactionDescription).notBlank().notExceedingLengthOf(200);
+        final String transactionDescription = this.fromApiJsonHelper.extractStringNamed(transferDescriptionParamName, element);
+        baseDataValidator.reset().parameter(transferDescriptionParamName).value(transactionDescription).notBlank()
+                .notExceedingLengthOf(200);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

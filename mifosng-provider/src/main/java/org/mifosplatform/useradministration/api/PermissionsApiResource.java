@@ -65,9 +65,9 @@ public class PermissionsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllPermissions(@Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         Collection<PermissionData> permissions = null;
         if (settings.isMakerCheckerable()) {
@@ -76,7 +76,7 @@ public class PermissionsApiResource {
             permissions = this.permissionReadPlatformService.retrieveAllPermissions();
         }
 
-        return this.toApiJsonSerializer.serialize(settings, permissions, RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, permissions, this.RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT

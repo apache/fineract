@@ -17,14 +17,13 @@ public class HolidayUtil {
         }
         return repaymentDate;
     }
-    
-    public static boolean isHoliday(final LocalDate date, final List<Holiday> holidays){
-        for (Holiday holiday : holidays) {
-            if (date.isEqual(holiday.getFromDateLocalDate()) || date.isEqual(holiday.getToDateLocalDate()) || (date.isAfter(holiday.getFromDateLocalDate()) && date.isBefore(holiday.getToDateLocalDate()))) {
-                return true;
-            }
+
+    public static boolean isHoliday(final LocalDate date, final List<Holiday> holidays) {
+        for (final Holiday holiday : holidays) {
+            if (date.isEqual(holiday.getFromDateLocalDate()) || date.isEqual(holiday.getToDateLocalDate())
+                    || (date.isAfter(holiday.getFromDateLocalDate()) && date.isBefore(holiday.getToDateLocalDate()))) { return true; }
         }
-        
+
         return false;
     }
 }

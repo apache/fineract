@@ -23,13 +23,13 @@ public class ParameterListExclusionStrategy implements ExclusionStrategy {
     }
 
     @Override
-    public boolean shouldSkipField(FieldAttributes f) {
-        return parameterNamesToSkip.contains(f.getName());
+    public boolean shouldSkipField(final FieldAttributes f) {
+        return this.parameterNamesToSkip.contains(f.getName());
     }
 
     @SuppressWarnings("unused")
     @Override
-    public boolean shouldSkipClass(Class<?> clazz) {
+    public boolean shouldSkipClass(final Class<?> clazz) {
         return false;
     }
 }

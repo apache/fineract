@@ -55,7 +55,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     public CommandProcessingResult createRole(final JsonCommand command) {
 
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
             this.roleCommandFromApiJsonDeserializer.validateForCreate(command.json());
 
@@ -64,7 +64,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             this.roleRepository.save(entity);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(entity.getId()).build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -78,7 +78,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
 
-        Throwable realCause = dve.getMostSpecificCause();
+        final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("unq_name")) {
 
             final String name = command.stringValueOfParameterNamed("name");
@@ -99,7 +99,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     @Override
     public CommandProcessingResult updateRole(final Long roleId, final JsonCommand command) {
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
             this.roleCommandFromApiJsonDeserializer.validateForUpdate(command.json());
 
@@ -116,7 +116,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
                     .withEntityId(roleId) //
                     .with(changes) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -127,7 +127,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     @Transactional
     @Override
     public CommandProcessingResult updateRolePermissions(final Long roleId, final JsonCommand command) {
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
         final Role role = this.roleRepository.findOne(roleId);
         if (role == null) { throw new RoleNotFoundException(roleId); }
@@ -143,7 +143,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             final boolean isSelected = commandPermissions.get(permissionCode).booleanValue();
 
             final Permission permission = findPermissionByCode(allPermissions, permissionCode);
-            boolean changed = role.updatePermission(permission, isSelected);
+            final boolean changed = role.updatePermission(permission, isSelected);
             if (changed) {
                 changedPermissions.put(permissionCode, isSelected);
             }
@@ -161,10 +161,10 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
                 .build();
     }
 
-    private Permission findPermissionByCode(Collection<Permission> allPermissions, String permissionCode) {
+    private Permission findPermissionByCode(final Collection<Permission> allPermissions, final String permissionCode) {
 
         if (allPermissions != null) {
-            for (Permission permission : allPermissions) {
+            for (final Permission permission : allPermissions) {
                 if (permission.hasCode(permissionCode)) { return permission; }
             }
         }

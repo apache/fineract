@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ContentRepositoryFactory {
 
-    private ApplicationContext applicationContext;
-    private ExternalServicesReadPlatformService externalServicesReadPlatformService;
+    private final ApplicationContext applicationContext;
+    private final ExternalServicesReadPlatformService externalServicesReadPlatformService;
 
     @Autowired
     public ContentRepositoryFactory(final ApplicationContext applicationContext,
@@ -22,19 +22,19 @@ public class ContentRepositoryFactory {
     }
 
     public ContentRepository getRepository() {
-        ConfigurationDomainService configurationDomainServiceJpa = applicationContext.getBean("configurationDomainServiceJpa",
+        final ConfigurationDomainService configurationDomainServiceJpa = this.applicationContext.getBean("configurationDomainServiceJpa",
                 ConfigurationDomainService.class);
         if (configurationDomainServiceJpa.isAmazonS3Enabled()) { return createS3DocumentStore(); }
         return new FileSystemContentRepository();
     }
 
-    public ContentRepository getRepository(StorageType documentStoreType) {
+    public ContentRepository getRepository(final StorageType documentStoreType) {
         if (documentStoreType == StorageType.FILE_SYSTEM) { return new FileSystemContentRepository(); }
         return createS3DocumentStore();
     }
 
     private ContentRepository createS3DocumentStore() {
-        S3CredentialsData s3CredentialsData = externalServicesReadPlatformService.getS3Credentials();
+        final S3CredentialsData s3CredentialsData = this.externalServicesReadPlatformService.getS3Credentials();
         return new S3ContentRepository(s3CredentialsData.getBucketName(), s3CredentialsData.getSecretKey(),
                 s3CredentialsData.getAccessKey());
     }

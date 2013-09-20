@@ -66,19 +66,19 @@ public enum CalendarEntityType {
     public String toString() {
         return name().toString();
     }
-    
+
     public static boolean isGroup(final Integer value) {
         return CalendarEntityType.GROUPS.value.equals(value) ? true : false;
     }
-    
+
     public static boolean isGroup(final String name) {
         return CalendarEntityType.GROUPS.name().equalsIgnoreCase(name) ? true : false;
     }
-    
+
     public static boolean isCenter(final Integer value) {
         return CalendarEntityType.CENTERS.value.equals(value) ? true : false;
     }
-    
+
     public static boolean isCenter(final String name) {
         return CalendarEntityType.CENTERS.name().equalsIgnoreCase(name) ? true : false;
     }

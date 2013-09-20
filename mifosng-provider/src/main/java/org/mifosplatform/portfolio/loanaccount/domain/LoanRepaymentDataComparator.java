@@ -13,6 +13,6 @@ public class LoanRepaymentDataComparator implements Comparator<LoanTransactionDa
 
     @Override
     public int compare(final LoanTransactionData o1, final LoanTransactionData o2) {
-		return o2.dateOf().compareTo(o1.dateOf());
+        return o2.dateOf().compareTo(o1.dateOf());
     }
 }

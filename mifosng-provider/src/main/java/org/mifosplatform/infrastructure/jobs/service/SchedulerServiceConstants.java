@@ -19,5 +19,5 @@ public interface SchedulerServiceConstants {
     public static final int DEFAULT_THREAD_COUNT = 7;
     public static final int GROUP_THREAD_COUNT = 1;
     public static final String SCHEDULER_NAME = "schedulerName";
-    
+
 }

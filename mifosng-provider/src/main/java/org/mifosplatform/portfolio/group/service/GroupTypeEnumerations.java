@@ -24,7 +24,7 @@ public class GroupTypeEnumerations {
                 optionData = new EnumOptionData(type.getId().longValue(), type.getCode(), "Group loan");
             break;
             default:
-                optionData = new EnumOptionData(GroupTypes.INVALID.getId().longValue(), GroupTypes.INVALID.getCode() , "Invalid");
+                optionData = new EnumOptionData(GroupTypes.INVALID.getId().longValue(), GroupTypes.INVALID.getCode(), "Invalid");
             break;
 
         }

@@ -29,10 +29,10 @@ import org.springframework.stereotype.Component;
 public class PlatformDomainRuleExceptionMapper implements ExceptionMapper<AbstractPlatformDomainRuleException> {
 
     @Override
-    public Response toResponse(AbstractPlatformDomainRuleException exception) {
+    public Response toResponse(final AbstractPlatformDomainRuleException exception) {
 
-        ApiGlobalErrorResponse notFoundErrorResponse = ApiGlobalErrorResponse.domainRuleViolation(exception.getGlobalisationMessageCode(),
-                exception.getDefaultUserMessage(), exception.getDefaultUserMessageArgs());
+        final ApiGlobalErrorResponse notFoundErrorResponse = ApiGlobalErrorResponse.domainRuleViolation(
+                exception.getGlobalisationMessageCode(), exception.getDefaultUserMessage(), exception.getDefaultUserMessageArgs());
         // request understood but not carried out due to it violating some
         // domain/business logic
         return Response.status(Status.FORBIDDEN).entity(notFoundErrorResponse).type(MediaType.APPLICATION_JSON).build();

@@ -76,7 +76,7 @@ public class GLClosuresApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
         final List<GLClosureData> glClosureDatas = this.glClosureReadPlatformService.retrieveAllGLClosures(officeId);
-        
+
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, glClosureDatas, RESPONSE_DATA_PARAMETERS);
     }

@@ -8,11 +8,12 @@ package org.mifosplatform.portfolio.meeting.exception;
 import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * {@link AbstractPlatformDomainRuleException} thrown when meeting is captured against not supported resource.
+ * {@link AbstractPlatformDomainRuleException} thrown when meeting is captured
+ * against not supported resource.
  */
 public class MeetingNotSupportedResourceException extends AbstractPlatformDomainRuleException {
 
-	public MeetingNotSupportedResourceException(String defaultUserMessage, Object... defaultUserMessageArgs) {
-		super("error.msg.meeting.not.supported.resource", defaultUserMessage, defaultUserMessageArgs);
-	}
+    public MeetingNotSupportedResourceException(final String defaultUserMessage, final Object... defaultUserMessageArgs) {
+        super("error.msg.meeting.not.supported.resource", defaultUserMessage, defaultUserMessageArgs);
+    }
 }

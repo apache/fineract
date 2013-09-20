@@ -29,7 +29,7 @@ public class LoanChargePaidBy extends AbstractPersistable<Long> {
 
     }
 
-    public LoanChargePaidBy(LoanTransaction loanTransaction, LoanCharge loanCharge, BigDecimal amount) {
+    public LoanChargePaidBy(final LoanTransaction loanTransaction, final LoanCharge loanCharge, final BigDecimal amount) {
         this.loanTransaction = loanTransaction;
         this.loanCharge = loanCharge;
         this.amount = amount;
@@ -39,7 +39,7 @@ public class LoanChargePaidBy extends AbstractPersistable<Long> {
         return this.loanTransaction;
     }
 
-    public void setLoanTransaction(LoanTransaction loanTransaction) {
+    public void setLoanTransaction(final LoanTransaction loanTransaction) {
         this.loanTransaction = loanTransaction;
     }
 
@@ -47,7 +47,7 @@ public class LoanChargePaidBy extends AbstractPersistable<Long> {
         return this.loanCharge;
     }
 
-    public void setLoanCharge(LoanCharge loanCharge) {
+    public void setLoanCharge(final LoanCharge loanCharge) {
         this.loanCharge = loanCharge;
     }
 
@@ -55,7 +55,7 @@ public class LoanChargePaidBy extends AbstractPersistable<Long> {
         return this.amount;
     }
 
-    public void setAmount(BigDecimal amount) {
+    public void setAmount(final BigDecimal amount) {
         this.amount = amount;
     }
 }

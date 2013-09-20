@@ -113,7 +113,7 @@ public class ProductToGLAccountMapping extends AbstractPersistable<Long> {
         return this.paymentType;
     }
 
-    public void setPaymentType(CodeValue paymentType) {
+    public void setPaymentType(final CodeValue paymentType) {
         this.paymentType = paymentType;
     }
 
@@ -121,7 +121,7 @@ public class ProductToGLAccountMapping extends AbstractPersistable<Long> {
         return this.charge;
     }
 
-    public void setCharge(Charge charge) {
+    public void setCharge(final Charge charge) {
         this.charge = charge;
     }
 

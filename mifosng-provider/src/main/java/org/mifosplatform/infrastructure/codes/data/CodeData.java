@@ -27,8 +27,8 @@ public class CodeData implements Serializable {
         this.name = name;
         this.systemDefined = systemDefined;
     }
-    
-    public Long getCodeId(){
+
+    public Long getCodeId() {
         return this.id;
     }
 }

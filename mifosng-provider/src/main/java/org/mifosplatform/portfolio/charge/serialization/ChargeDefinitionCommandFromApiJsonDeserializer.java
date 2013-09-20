@@ -37,7 +37,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("name", "amount", "locale", "currencyCode",
             "currencyOptions", "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions", "penalty",
-            "active","chargePaymentMode"));
+            "active", "chargePaymentMode"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -50,41 +50,44 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charge");
 
-        final JsonElement element = fromApiJsonHelper.parse(json);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final String name = fromApiJsonHelper.extractStringNamed("name", element);
+        final String name = this.fromApiJsonHelper.extractStringNamed("name", element);
         baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(100);
 
-        final String currencyCode = fromApiJsonHelper.extractStringNamed("currencyCode", element);
+        final String currencyCode = this.fromApiJsonHelper.extractStringNamed("currencyCode", element);
         baseDataValidator.reset().parameter("currencyCode").value(currencyCode).notBlank().notExceedingLengthOf(3);
 
-        final BigDecimal amount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amount", element.getAsJsonObject());
+        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amount", element.getAsJsonObject());
         baseDataValidator.reset().parameter("amount").value(amount).notNull().positiveAmount();
 
-        final Integer chargeAppliesTo = fromApiJsonHelper.extractIntegerNamed("chargeAppliesTo", element, Locale.getDefault());
-        baseDataValidator.reset().parameter("chargeAppliesTo").value(chargeAppliesTo).notNull().inMinMaxRange(ChargeAppliesTo.minValue(), ChargeAppliesTo.maxValue());
+        final Integer chargeAppliesTo = this.fromApiJsonHelper.extractIntegerNamed("chargeAppliesTo", element, Locale.getDefault());
+        baseDataValidator.reset().parameter("chargeAppliesTo").value(chargeAppliesTo).notNull()
+                .inMinMaxRange(ChargeAppliesTo.minValue(), ChargeAppliesTo.maxValue());
 
-        final Integer chargeTimeType = fromApiJsonHelper.extractIntegerNamed("chargeTimeType", element, Locale.getDefault());
-        baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull().inMinMaxRange(ChargeTimeType.minValue(), ChargeTimeType.maxValue());
+        final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerNamed("chargeTimeType", element, Locale.getDefault());
+        baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull()
+                .inMinMaxRange(ChargeTimeType.minValue(), ChargeTimeType.maxValue());
 
-        final Integer chargeCalculationType = fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", element, Locale.getDefault());
+        final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", element,
+                Locale.getDefault());
         baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).notNull().inMinMaxRange(1, 4);
 
-        final Integer chargePaymentMode = fromApiJsonHelper.extractIntegerNamed("chargePaymentMode", element, Locale.getDefault());
+        final Integer chargePaymentMode = this.fromApiJsonHelper.extractIntegerNamed("chargePaymentMode", element, Locale.getDefault());
         baseDataValidator.reset().parameter("chargePaymentMode").value(chargePaymentMode).notNull().inMinMaxRange(0, 1);
 
-        if (fromApiJsonHelper.parameterExists("penalty", element)) {
-            final Boolean penalty = fromApiJsonHelper.extractBooleanNamed("penalty", element);
+        if (this.fromApiJsonHelper.parameterExists("penalty", element)) {
+            final Boolean penalty = this.fromApiJsonHelper.extractBooleanNamed("penalty", element);
             baseDataValidator.reset().parameter("penalty").value(penalty).notNull();
         }
 
-        if (fromApiJsonHelper.parameterExists("active", element)) {
-            final Boolean active = fromApiJsonHelper.extractBooleanNamed("active", element);
+        if (this.fromApiJsonHelper.parameterExists("active", element)) {
+            final Boolean active = this.fromApiJsonHelper.extractBooleanNamed("active", element);
             baseDataValidator.reset().parameter("active").value(active).notNull();
         }
 
@@ -95,55 +98,57 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charge");
 
-        final JsonElement element = fromApiJsonHelper.parse(json);
-        if (fromApiJsonHelper.parameterExists("name", element)) {
-            final String name = fromApiJsonHelper.extractStringNamed("name", element);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        if (this.fromApiJsonHelper.parameterExists("name", element)) {
+            final String name = this.fromApiJsonHelper.extractStringNamed("name", element);
             baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(100);
         }
 
-        if (fromApiJsonHelper.parameterExists("currencyCode", element)) {
-            final String currencyCode = fromApiJsonHelper.extractStringNamed("currencyCode", element);
+        if (this.fromApiJsonHelper.parameterExists("currencyCode", element)) {
+            final String currencyCode = this.fromApiJsonHelper.extractStringNamed("currencyCode", element);
             baseDataValidator.reset().parameter("currencyCode").value(currencyCode).notBlank().notExceedingLengthOf(3);
         }
 
-        if (fromApiJsonHelper.parameterExists("amount", element)) {
-            final BigDecimal amount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amount", element.getAsJsonObject());
+        if (this.fromApiJsonHelper.parameterExists("amount", element)) {
+            final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amount", element.getAsJsonObject());
             baseDataValidator.reset().parameter("amount").value(amount).notNull().positiveAmount();
         }
 
-        if (fromApiJsonHelper.parameterExists("chargeAppliesTo", element)) {
-            final Integer chargeAppliesTo = fromApiJsonHelper.extractIntegerNamed("chargeAppliesTo", element, Locale.getDefault());
-            baseDataValidator.reset().parameter("chargeAppliesTo").value(chargeAppliesTo).notNull().inMinMaxRange(ChargeAppliesTo.minValue(), ChargeAppliesTo.maxValue());
+        if (this.fromApiJsonHelper.parameterExists("chargeAppliesTo", element)) {
+            final Integer chargeAppliesTo = this.fromApiJsonHelper.extractIntegerNamed("chargeAppliesTo", element, Locale.getDefault());
+            baseDataValidator.reset().parameter("chargeAppliesTo").value(chargeAppliesTo).notNull()
+                    .inMinMaxRange(ChargeAppliesTo.minValue(), ChargeAppliesTo.maxValue());
         }
 
-        if (fromApiJsonHelper.parameterExists("chargeTimeType", element)) {
-            final Integer chargeTimeType = fromApiJsonHelper.extractIntegerNamed("chargeTimeType", element, Locale.getDefault());
-            baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull().inMinMaxRange(ChargeTimeType.minValue(), ChargeTimeType.maxValue());
+        if (this.fromApiJsonHelper.parameterExists("chargeTimeType", element)) {
+            final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerNamed("chargeTimeType", element, Locale.getDefault());
+            baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull()
+                    .inMinMaxRange(ChargeTimeType.minValue(), ChargeTimeType.maxValue());
         }
 
-        if (fromApiJsonHelper.parameterExists("chargeCalculationType", element)) {
-            final Integer chargeCalculationType = fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", element,
+        if (this.fromApiJsonHelper.parameterExists("chargeCalculationType", element)) {
+            final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", element,
                     Locale.getDefault());
             baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).notNull().inMinMaxRange(1, 4);
         }
-        
-        if (fromApiJsonHelper.parameterExists("chargePaymentMode", element)) {
-            final Integer chargePaymentMode = fromApiJsonHelper.extractIntegerNamed("chargePaymentMode", element, Locale.getDefault());
+
+        if (this.fromApiJsonHelper.parameterExists("chargePaymentMode", element)) {
+            final Integer chargePaymentMode = this.fromApiJsonHelper.extractIntegerNamed("chargePaymentMode", element, Locale.getDefault());
             baseDataValidator.reset().parameter("chargePaymentMode").value(chargePaymentMode).notNull().inMinMaxRange(0, 1);
         }
 
-        if (fromApiJsonHelper.parameterExists("penalty", element)) {
-            final Boolean penalty = fromApiJsonHelper.extractBooleanNamed("penalty", element);
+        if (this.fromApiJsonHelper.parameterExists("penalty", element)) {
+            final Boolean penalty = this.fromApiJsonHelper.extractBooleanNamed("penalty", element);
             baseDataValidator.reset().parameter("penalty").value(penalty).notNull();
         }
 
-        if (fromApiJsonHelper.parameterExists("active", element)) {
-            final Boolean active = fromApiJsonHelper.extractBooleanNamed("active", element);
+        if (this.fromApiJsonHelper.parameterExists("active", element)) {
+            final Boolean active = this.fromApiJsonHelper.extractBooleanNamed("active", element);
             baseDataValidator.reset().parameter("active").value(active).notNull();
         }
 

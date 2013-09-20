@@ -55,7 +55,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     @Column(name = "charge_calculation_enum")
     private Integer chargeCalculation;
-    
+
     @Column(name = "charge_payment_mode_enum")
     private Integer chargePaymentMode;
 
@@ -94,18 +94,20 @@ public class LoanCharge extends AbstractPersistable<Long> {
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
         final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
 
-        ChargeTimeType chargeTime = null;
-        ChargeCalculationType chargeCalculation = null;
-        ChargePaymentMode chargePaymentMode = null;
+        final ChargeTimeType chargeTime = null;
+        final ChargeCalculationType chargeCalculation = null;
+        final ChargePaymentMode chargePaymentMode = null;
 
-        return new LoanCharge(loan, chargeDefinition, loan.getPrincpal().getAmount(), amount, chargeTime, chargeCalculation, dueDate, chargePaymentMode);
+        return new LoanCharge(loan, chargeDefinition, loan.getPrincpal().getAmount(), amount, chargeTime, chargeCalculation, dueDate,
+                chargePaymentMode);
     }
 
     /*
      * loanPrincipal is required for charges that are percentage based
      */
     public static LoanCharge createNewWithoutLoan(final Charge chargeDefinition, final BigDecimal loanPrincipal, final BigDecimal amount,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate, ChargePaymentMode chargePaymentMode) {
+            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate,
+            final ChargePaymentMode chargePaymentMode) {
         return new LoanCharge(null, chargeDefinition, loanPrincipal, amount, chargeTime, chargeCalculation, dueDate, chargePaymentMode);
     }
 
@@ -114,7 +116,8 @@ public class LoanCharge extends AbstractPersistable<Long> {
     }
 
     public LoanCharge(final Loan loan, final Charge chargeDefinition, final BigDecimal loanPrincipal, final BigDecimal amount,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate, ChargePaymentMode chargePaymentMode) {
+            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate,
+            final ChargePaymentMode chargePaymentMode) {
         this.loan = loan;
         this.charge = chargeDefinition;
         this.penaltyCharge = chargeDefinition.isPenalty();
@@ -146,9 +149,9 @@ public class LoanCharge extends AbstractPersistable<Long> {
         if (amount != null) {
             chargeAmount = amount;
         }
-        
+
         this.chargePaymentMode = chargeDefinition.getChargePaymentMode();
-        if(chargePaymentMode != null){
+        if (chargePaymentMode != null) {
             this.chargePaymentMode = chargePaymentMode.getValue();
         }
 
@@ -344,8 +347,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
     }
 
     public LoanChargeCommand toCommand() {
-        return new LoanChargeCommand(this.getId(), this.charge.getId(), this.amount, this.chargeTime, this.chargeCalculation,
-                getDueLocalDate());
+        return new LoanChargeCommand(getId(), this.charge.getId(), this.amount, this.chargeTime, this.chargeCalculation, getDueLocalDate());
     }
 
     public LocalDate getDueLocalDate() {
@@ -388,7 +390,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
         if (isGreaterThanZero(value)) {
             final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
-            BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100l), mc);
+            final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100l), mc);
             percentageOf = value.multiply(multiplicand, mc);
         }
 
@@ -398,8 +400,8 @@ public class LoanCharge extends AbstractPersistable<Long> {
     public BigDecimal amount() {
         return this.amount;
     }
-    
-    public BigDecimal amountOutstanding(){
+
+    public BigDecimal amountOutstanding() {
         return this.amountOutstanding;
     }
 
@@ -471,7 +473,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
     public Money updatePaidAmountBy(final Money incrementBy) {
 
         Money amountPaidToDate = Money.of(incrementBy.getCurrency(), this.amountPaid);
-        Money amountOutstanding = Money.of(incrementBy.getCurrency(), this.amountOutstanding);
+        final Money amountOutstanding = Money.of(incrementBy.getCurrency(), this.amountOutstanding);
 
         Money amountPaidOnThisCharge = Money.zero(incrementBy.getCurrency());
         if (incrementBy.isGreaterThanOrEqualTo(amountOutstanding)) {
@@ -484,7 +486,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
             amountPaidToDate = amountPaidToDate.plus(incrementBy);
             this.amountPaid = amountPaidToDate.getAmount();
 
-            Money amountExpected = Money.of(incrementBy.getCurrency(), this.amount);
+            final Money amountExpected = Money.of(incrementBy.getCurrency(), this.amount);
             this.amountOutstanding = amountExpected.minus(amountPaidToDate).getAmount();
         }
 
@@ -510,25 +512,24 @@ public class LoanCharge extends AbstractPersistable<Long> {
         if (obj == null) { return false; }
         if (obj == this) { return true; }
         if (obj.getClass() != getClass()) { return false; }
-        LoanCharge rhs = (LoanCharge) obj;
+        final LoanCharge rhs = (LoanCharge) obj;
         return new EqualsBuilder().appendSuper(super.equals(obj)) //
-                .append(this.getId(), rhs.getId()) //
+                .append(getId(), rhs.getId()) //
                 .append(this.charge.getId(), rhs.charge.getId()) //
                 .append(this.amount, rhs.amount) //
-                .append(this.getDueLocalDate(), rhs.getDueLocalDate()) //
+                .append(getDueLocalDate(), rhs.getDueLocalDate()) //
                 .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(3, 5) //
-                .append(this.getId()) //
+                .append(getId()) //
                 .append(this.charge.getId()) //
-                .append(this.amount).append(this.getDueLocalDate()) //
+                .append(this.amount).append(getDueLocalDate()) //
                 .toHashCode();
     }
 
-    
     public ChargePaymentMode getChargePaymentMode() {
         return ChargePaymentMode.fromInt(this.chargePaymentMode);
     }

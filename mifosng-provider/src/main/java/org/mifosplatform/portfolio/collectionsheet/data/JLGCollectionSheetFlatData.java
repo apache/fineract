@@ -11,7 +11,8 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 
 /**
- * Immutable data object for extracting flat data for joint liability group's collection sheet.
+ * Immutable data object for extracting flat data for joint liability group's
+ * collection sheet.
  */
 public class JLGCollectionSheetFlatData {
 
@@ -41,7 +42,8 @@ public class JLGCollectionSheetFlatData {
             final Long levelId, final String levelName, final String clientName, final Long clientId, final Long loanId,
             final String accountId, final Integer accountStatusId, final String productShortName, final Long productId,
             final CurrencyData currency, final BigDecimal disbursementAmount, final BigDecimal principalDue,
-            final BigDecimal principalPaid, final BigDecimal interestDue, final BigDecimal interestPaid, final BigDecimal chargesDue, final EnumOptionData attendanceType) {
+            final BigDecimal principalPaid, final BigDecimal interestDue, final BigDecimal interestPaid, final BigDecimal chargesDue,
+            final EnumOptionData attendanceType) {
         this.groupName = groupName;
         this.groupId = groupId;
         this.staffId = staffId;
@@ -116,7 +118,7 @@ public class JLGCollectionSheetFlatData {
     public Long getProductId() {
         return this.productId;
     }
-    
+
     public CurrencyData getCurrency() {
         return this.currency;
     }

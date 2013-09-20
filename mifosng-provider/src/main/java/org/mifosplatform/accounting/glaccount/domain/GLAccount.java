@@ -83,7 +83,7 @@ public class GLAccount extends AbstractPersistable<Long> {
         this.tagId = tagId;
     }
 
-    public static GLAccount fromJson(final GLAccount parent, final JsonCommand command, CodeValue glAccountTagType) {
+    public static GLAccount fromJson(final GLAccount parent, final JsonCommand command, final CodeValue glAccountTagType) {
         final String name = command.stringValueOfParameterNamed(GLAccountJsonInputParams.NAME.getValue());
         final String glCode = command.stringValueOfParameterNamed(GLAccountJsonInputParams.GL_CODE.getValue());
         final boolean disabled = command.booleanPrimitiveValueOfParameterNamed(GLAccountJsonInputParams.DISABLED.getValue());
@@ -211,8 +211,8 @@ public class GLAccount extends AbstractPersistable<Long> {
 
     public void generateHierarchy() {
 
-        if (parent != null) {
-            this.hierarchy = this.parent.hierarchyOf(this.getId());
+        if (this.parent != null) {
+            this.hierarchy = this.parent.hierarchyOf(getId());
         } else {
             this.hierarchy = ".";
         }
@@ -226,12 +226,12 @@ public class GLAccount extends AbstractPersistable<Long> {
         return GLAccountUsage.DETAIL.getValue().equals(this.usage);
     }
 
-    public void updateTagId(CodeValue tagID) {
+    public void updateTagId(final CodeValue tagID) {
         this.tagId = tagID;
     }
 
-    public void updateParentAccount(GLAccount parentAccount) {
+    public void updateParentAccount(final GLAccount parentAccount) {
         this.parent = parentAccount;
-        this.generateHierarchy();
+        generateHierarchy();
     }
 }

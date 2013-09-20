@@ -28,8 +28,9 @@ public class MonthlyCompoundingPeriod implements CompoundingPeriod {
 
         BigDecimal interestEarned = BigDecimal.ZERO;
 
-        for (EndOfDayBalance balance : endOfDayBalances) {
-            BigDecimal interestOnBalanceUnrounded = balance.calculateInterestOnBalance(BigDecimal.ZERO, interestRateAsFraction, daysInYear);
+        for (final EndOfDayBalance balance : this.endOfDayBalances) {
+            final BigDecimal interestOnBalanceUnrounded = balance.calculateInterestOnBalance(BigDecimal.ZERO, interestRateAsFraction,
+                    daysInYear);
             interestEarned = interestEarned.add(interestOnBalanceUnrounded);
         }
 
@@ -64,22 +65,22 @@ public class MonthlyCompoundingPeriod implements CompoundingPeriod {
         BigDecimal cumulativeBalance = BigDecimal.ZERO;
         Integer numberOfDays = Integer.valueOf(0);
 
-        for (EndOfDayBalance balance : endOfDayBalances) {
-            BigDecimal endOfDayCumulativeBalance = balance.cumulativeBalance(interestToCompound);
+        for (final EndOfDayBalance balance : this.endOfDayBalances) {
+            final BigDecimal endOfDayCumulativeBalance = balance.cumulativeBalance(interestToCompound);
             cumulativeBalance = cumulativeBalance.add(endOfDayCumulativeBalance);
 
-            Integer balanceExistsForNumberOfDays = balance.getNumberOfDays();
+            final Integer balanceExistsForNumberOfDays = balance.getNumberOfDays();
             numberOfDays = numberOfDays + balanceExistsForNumberOfDays;
         }
 
         BigDecimal interestEarned = BigDecimal.ZERO;
         if (cumulativeBalance.compareTo(BigDecimal.ZERO) != 0 && numberOfDays > 0) {
-            BigDecimal averageDailyBalance = cumulativeBalance.divide(BigDecimal.valueOf(numberOfDays), MathContext.DECIMAL64).setScale(9,
-                    RoundingMode.HALF_EVEN);
+            final BigDecimal averageDailyBalance = cumulativeBalance.divide(BigDecimal.valueOf(numberOfDays), MathContext.DECIMAL64)
+                    .setScale(9, RoundingMode.HALF_EVEN);
 
-            BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
-            BigDecimal dailyInterestRate = interestRateAsFraction.multiply(multiplicand, MathContext.DECIMAL64);
-            BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(numberOfDays), MathContext.DECIMAL64);
+            final BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
+            final BigDecimal dailyInterestRate = interestRateAsFraction.multiply(multiplicand, MathContext.DECIMAL64);
+            final BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(numberOfDays), MathContext.DECIMAL64);
 
             interestEarned = averageDailyBalance.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(9, RoundingMode.HALF_EVEN);
         }
@@ -92,7 +93,7 @@ public class MonthlyCompoundingPeriod implements CompoundingPeriod {
 
         BigDecimal interestEarned = BigDecimal.ZERO;
         BigDecimal interestOnBalanceUnrounded = BigDecimal.ZERO;
-        for (EndOfDayBalance balance : endOfDayBalances) {
+        for (final EndOfDayBalance balance : this.endOfDayBalances) {
 
             switch (compoundingInterestPeriodType) {
                 case DAILY:
@@ -126,9 +127,9 @@ public class MonthlyCompoundingPeriod implements CompoundingPeriod {
     private static List<EndOfDayBalance> endOfDayBalancesWithinPeriodInterval(final LocalDateInterval compoundingPeriodInterval,
             final List<EndOfDayBalance> allEndOfDayBalances) {
 
-        List<EndOfDayBalance> endOfDayBalancesForPeriodInterval = new ArrayList<EndOfDayBalance>();
+        final List<EndOfDayBalance> endOfDayBalancesForPeriodInterval = new ArrayList<EndOfDayBalance>();
 
-        for (EndOfDayBalance endOfDayBalance : allEndOfDayBalances) {
+        for (final EndOfDayBalance endOfDayBalance : allEndOfDayBalances) {
 
             if (compoundingPeriodInterval.contains(endOfDayBalance.date())) {
                 final EndOfDayBalance cappedToPeriodEndDate = endOfDayBalance.upTo(compoundingPeriodInterval);

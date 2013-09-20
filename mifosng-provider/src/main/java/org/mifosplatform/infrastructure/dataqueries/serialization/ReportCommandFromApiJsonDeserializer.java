@@ -40,6 +40,6 @@ public final class ReportCommandFromApiJsonDeserializer {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
     }
 }

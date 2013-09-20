@@ -39,21 +39,21 @@ public class PostingPeriod {
             final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear) {
 
-        List<EndOfDayBalance> accountEndOfDayBalances = new ArrayList<EndOfDayBalance>();
+        final List<EndOfDayBalance> accountEndOfDayBalances = new ArrayList<EndOfDayBalance>();
 
         Money openingDayBalance = periodStartingBalance;
         Money closeOfDayBalance = openingDayBalance;
-        for (SavingsAccountTransaction transaction : orderedListOfTransactions) {
+        for (final SavingsAccountTransaction transaction : orderedListOfTransactions) {
 
             if (transaction.fallsWithin(periodInterval)) {
                 // the balance of the transaction falls entirely within this
                 // period so no need to do any cropping/bounding
-                EndOfDayBalance endOfDayBalance = transaction.toEndOfDayBalance(openingDayBalance);
+                final EndOfDayBalance endOfDayBalance = transaction.toEndOfDayBalance(openingDayBalance);
                 accountEndOfDayBalances.add(endOfDayBalance);
 
                 openingDayBalance = endOfDayBalance.closingBalance();
             } else if (transaction.spansAnyPortionOf(periodInterval)) {
-                EndOfDayBalance endOfDayBalance = transaction.toEndOfDayBalanceBoundedBy(openingDayBalance, periodInterval);
+                final EndOfDayBalance endOfDayBalance = transaction.toEndOfDayBalanceBoundedBy(openingDayBalance, periodInterval);
                 accountEndOfDayBalances.add(endOfDayBalance);
 
                 closeOfDayBalance = endOfDayBalance.closingBalance();
@@ -62,7 +62,7 @@ public class PostingPeriod {
         }
 
         if (accountEndOfDayBalances.isEmpty()) {
-            EndOfDayBalance endOfDayBalance = EndOfDayBalance.from(periodInterval.startDate(), openingDayBalance, closeOfDayBalance,
+            final EndOfDayBalance endOfDayBalance = EndOfDayBalance.from(periodInterval.startDate(), openingDayBalance, closeOfDayBalance,
                     periodInterval.daysInPeriodInclusiveOfEndDate());
             accountEndOfDayBalances.add(endOfDayBalance);
 
@@ -112,10 +112,10 @@ public class PostingPeriod {
         // for each compounding period accumulate the amount of interest
         // to be applied to the balanced for interest calculation
         BigDecimal interestCompounded = interestFromPreviousPostingPeriod;
-        for (CompoundingPeriod compoundingPeriod : this.compoundingPeriods) {
+        for (final CompoundingPeriod compoundingPeriod : this.compoundingPeriods) {
 
-            BigDecimal interestUnrounded = compoundingPeriod.calculateInterest(this.interestCompoundingType, this.interestCalculationType,
-                    interestCompounded, this.interestRateAsFraction, this.daysInYear);
+            final BigDecimal interestUnrounded = compoundingPeriod.calculateInterest(this.interestCompoundingType,
+                    this.interestCalculationType, interestCompounded, this.interestRateAsFraction, this.daysInYear);
             interestCompounded = interestCompounded.add(interestUnrounded);
             interestEarned = interestEarned.add(interestUnrounded);
         }
@@ -133,7 +133,7 @@ public class PostingPeriod {
     private static List<CompoundingPeriod> compoundingPeriodsInPostingPeriod(final LocalDateInterval postingPeriodInterval,
             final SavingsCompoundingInterestPeriodType interestPeriodType, final List<EndOfDayBalance> allEndOfDayBalances) {
 
-        List<CompoundingPeriod> compoundingPeriods = new ArrayList<CompoundingPeriod>();
+        final List<CompoundingPeriod> compoundingPeriods = new ArrayList<CompoundingPeriod>();
 
         CompoundingPeriod compoundingPeriod = null;
         switch (interestPeriodType) {

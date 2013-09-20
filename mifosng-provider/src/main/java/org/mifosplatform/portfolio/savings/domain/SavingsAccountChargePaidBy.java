@@ -29,29 +29,31 @@ public class SavingsAccountChargePaidBy extends AbstractPersistable<Long> {
 
     }
 
-    public static SavingsAccountChargePaidBy instance(final SavingsAccountTransaction savingsAccountTransaction, final SavingsAccountCharge savingsAccountCharge, final BigDecimal amount){
+    public static SavingsAccountChargePaidBy instance(final SavingsAccountTransaction savingsAccountTransaction,
+            final SavingsAccountCharge savingsAccountCharge, final BigDecimal amount) {
         return new SavingsAccountChargePaidBy(savingsAccountTransaction, savingsAccountCharge, amount);
     }
-    
-    private SavingsAccountChargePaidBy(SavingsAccountTransaction savingsAccountTransaction, SavingsAccountCharge savingsAccountCharge, BigDecimal amount) {
+
+    private SavingsAccountChargePaidBy(final SavingsAccountTransaction savingsAccountTransaction,
+            final SavingsAccountCharge savingsAccountCharge, final BigDecimal amount) {
         this.savingsAccountTransaction = savingsAccountTransaction;
         this.savingsAccountCharge = savingsAccountCharge;
         this.amount = amount;
     }
-    
+
     public SavingsAccountTransaction getSavingsAccountTransaction() {
         return this.savingsAccountTransaction;
     }
-    
-    public void setSavingsAccountTransaction(SavingsAccountTransaction savingsAccountTransaction) {
+
+    public void setSavingsAccountTransaction(final SavingsAccountTransaction savingsAccountTransaction) {
         this.savingsAccountTransaction = savingsAccountTransaction;
     }
-    
+
     public SavingsAccountCharge getSavingsAccountCharge() {
         return this.savingsAccountCharge;
     }
-    
-    public void setSavingsAccountCharge(SavingsAccountCharge savingsAccountCharge) {
+
+    public void setSavingsAccountCharge(final SavingsAccountCharge savingsAccountCharge) {
         this.savingsAccountCharge = savingsAccountCharge;
     }
 
@@ -59,15 +61,15 @@ public class SavingsAccountChargePaidBy extends AbstractPersistable<Long> {
         return this.amount;
     }
 
-    public void setAmount(BigDecimal amount) {
+    public void setAmount(final BigDecimal amount) {
         this.amount = amount;
     }
-    
-    public boolean isFeeCharge(){
+
+    public boolean isFeeCharge() {
         return (this.savingsAccountCharge == null) ? false : this.savingsAccountCharge.isFeeCharge();
     }
-    
-    public boolean isPenaltyCharge(){
+
+    public boolean isPenaltyCharge() {
         return (this.savingsAccountCharge == null) ? false : this.savingsAccountCharge.isPenaltyCharge();
     }
 }

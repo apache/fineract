@@ -85,19 +85,20 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom<AppUse
     }
 
     /**
-     *  If endDate is null then return false.
+     * If endDate is null then return false.
+     * 
      * @param compareDate
      * @return
      */
-    public boolean isEndDateAfter(final LocalDate compareDate){
+    public boolean isEndDateAfter(final LocalDate compareDate) {
         return this.endDate == null ? false : new LocalDate(this.endDate).isAfter(compareDate);
     }
- 
-    public LocalDate getEndDate(){
+
+    public LocalDate getEndDate() {
         return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.endDate), null);
     }
- 
-    public boolean isSameLoanOfficer(final Staff staff){
+
+    public boolean isSameLoanOfficer(final Staff staff) {
         return this.loanOfficer.identifiedBy(staff);
     }
 }

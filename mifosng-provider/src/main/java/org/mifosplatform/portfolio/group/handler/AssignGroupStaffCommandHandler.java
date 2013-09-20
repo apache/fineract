@@ -15,14 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AssignGroupStaffCommandHandler implements NewCommandSourceHandler {
-    
+
     private final GroupingTypesWritePlatformService groupWritePlatformService;
-    
+
     @Autowired
     public AssignGroupStaffCommandHandler(final GroupingTypesWritePlatformService groupWritePlatformService) {
         this.groupWritePlatformService = groupWritePlatformService;
     }
-    
+
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {

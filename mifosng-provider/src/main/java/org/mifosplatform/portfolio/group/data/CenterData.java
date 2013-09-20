@@ -75,10 +75,12 @@ public class CenterData {
                 groupMembers, officeOptions, staffOptions, groupMembersOptions, collectionMeetingCalendar, closureReasons);
     }
 
-    public static CenterData withAssociations(final CenterData centerData, final Collection<GroupGeneralData> groupMembers, final CalendarData collectionMeetingCalendar) {
+    public static CenterData withAssociations(final CenterData centerData, final Collection<GroupGeneralData> groupMembers,
+            final CalendarData collectionMeetingCalendar) {
         return new CenterData(centerData.id, centerData.name, centerData.externalId, centerData.status, centerData.activationDate,
                 centerData.officeId, centerData.officeName, centerData.staffId, centerData.staffName, centerData.hierarchy, groupMembers,
-                centerData.officeOptions, centerData.staffOptions, centerData.groupMembersOptions, collectionMeetingCalendar, centerData.closureReasons);
+                centerData.officeOptions, centerData.staffOptions, centerData.groupMembersOptions, collectionMeetingCalendar,
+                centerData.closureReasons);
     }
 
     public static CenterData withClosureReasons(final Collection<CodeValueData> closureReasons) {
@@ -100,7 +102,7 @@ public class CenterData {
         return new CenterData(id, name, externalId, status, activationDate, officeId, officeName, staffId, staffName, hierarchy,
                 groupMembers, officeOptions, staffOptions, groupMembersOptions, collectionMeetingCalendar, closureReasons);
     }
-    
+
     private CenterData(final Long id, final String name, final String externalId, final EnumOptionData status,
             final LocalDate activationDate, final Long officeId, final String officeName, final Long staffId, final String staffName,
             final String hierarchy, final Collection<GroupGeneralData> groupMembers, final Collection<OfficeData> officeOptions,

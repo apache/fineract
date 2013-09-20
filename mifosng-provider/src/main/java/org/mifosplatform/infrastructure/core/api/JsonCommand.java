@@ -26,7 +26,7 @@ import com.google.gson.JsonElement;
 
 /**
  * Immutable representation of a command.
- *
+ * 
  * Wraps the provided JSON with convenience functions for extracting parameter
  * values and checking for changes against an existing value.
  */
@@ -68,7 +68,8 @@ public final class JsonCommand {
     public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
             final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final Long codeId,
-            final String supportedEntityType, final Long supportedEntityId, final String transactionId, final String url, final Long productId) {
+            final String supportedEntityType, final Long supportedEntityId, final String transactionId, final String url,
+            final Long productId) {
         this.commandId = commandId;
         this.jsonCommand = jsonCommand;
         this.parsedCommand = parsedCommand;

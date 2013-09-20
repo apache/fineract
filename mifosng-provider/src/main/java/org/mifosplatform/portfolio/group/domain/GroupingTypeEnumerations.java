@@ -34,12 +34,12 @@ public class GroupingTypeEnumerations {
                         "Closed");
             break;
             case TRANSFER_IN_PROGRESS:
-                optionData = new EnumOptionData(GroupingTypeStatus.TRANSFER_IN_PROGRESS.getValue().longValue(), GroupingTypeStatus.TRANSFER_IN_PROGRESS.getCode(),
-                        "Transfer in progress");
+                optionData = new EnumOptionData(GroupingTypeStatus.TRANSFER_IN_PROGRESS.getValue().longValue(),
+                        GroupingTypeStatus.TRANSFER_IN_PROGRESS.getCode(), "Transfer in progress");
             break;
             case TRANSFER_ON_HOLD:
-                optionData = new EnumOptionData(GroupingTypeStatus.TRANSFER_ON_HOLD.getValue().longValue(), GroupingTypeStatus.TRANSFER_ON_HOLD.getCode(),
-                        "Transfer on hold");
+                optionData = new EnumOptionData(GroupingTypeStatus.TRANSFER_ON_HOLD.getValue().longValue(),
+                        GroupingTypeStatus.TRANSFER_ON_HOLD.getCode(), "Transfer on hold");
             break;
         }
 

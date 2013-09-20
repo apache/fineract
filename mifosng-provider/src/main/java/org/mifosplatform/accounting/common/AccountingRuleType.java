@@ -19,13 +19,13 @@ public enum AccountingRuleType {
 
     private static final Map<Integer, AccountingRuleType> intToEnumMap = new HashMap<Integer, AccountingRuleType>();
     static {
-        for (AccountingRuleType type : AccountingRuleType.values()) {
+        for (final AccountingRuleType type : AccountingRuleType.values()) {
             intToEnumMap.put(type.value, type);
         }
     }
 
     public static AccountingRuleType fromInt(final Integer ruleTypeValue) {
-        AccountingRuleType type = intToEnumMap.get(ruleTypeValue);
+        final AccountingRuleType type = intToEnumMap.get(ruleTypeValue);
         return type;
     }
 

@@ -20,6 +20,6 @@ public class ResultsetRowData {
     }
 
     public List<String> getRow() {
-        return row;
+        return this.row;
     }
 }

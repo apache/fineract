@@ -19,8 +19,7 @@ public class CalculateInterestSavingsAccountCommandHandler implements NewCommand
     private final SavingsAccountWritePlatformService writePlatformService;
 
     @Autowired
-    public CalculateInterestSavingsAccountCommandHandler(
-            final SavingsAccountWritePlatformService writePlatformService) {
+    public CalculateInterestSavingsAccountCommandHandler(final SavingsAccountWritePlatformService writePlatformService) {
         this.writePlatformService = writePlatformService;
     }
 

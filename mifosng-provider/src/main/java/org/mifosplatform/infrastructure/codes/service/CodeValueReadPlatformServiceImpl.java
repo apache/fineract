@@ -51,7 +51,7 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
     @Override
     public Collection<CodeValueData> retrieveCodeValuesByCode(final String code) {
 
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
         final CodeValueDataMapper rm = new CodeValueDataMapper();
         final String sql = "select " + rm.schema() + "where c.code_name like ? order by position";
@@ -61,9 +61,9 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
 
     @Override
     @Cacheable(value = "code_values", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#codeId+'cv')")
-    public Collection<CodeValueData> retrieveAllCodeValues(Long codeId) {
+    public Collection<CodeValueData> retrieveAllCodeValues(final Long codeId) {
 
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
         final CodeValueDataMapper rm = new CodeValueDataMapper();
         final String sql = "select " + rm.schema() + "where cv.code_id = ? order by position";
@@ -72,9 +72,9 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
     }
 
     @Override
-    public CodeValueData retrieveCodeValue(Long codeValueId) {
+    public CodeValueData retrieveCodeValue(final Long codeValueId) {
 
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
         final CodeValueDataMapper rm = new CodeValueDataMapper();
         final String sql = "select " + rm.schema() + "where cv.id = ? order by position";

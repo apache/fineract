@@ -167,7 +167,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
 
     @Override
     @Transactional
-    public void reverseTransfersWithFromAccountType(Long accountNumber, PortfolioAccountType accountTypeId) {
+    public void reverseTransfersWithFromAccountType(final Long accountNumber, final PortfolioAccountType accountTypeId) {
         List<AccountTransfer> acccountTransfers = null;
         if (accountTypeId.isLoanAccount()) {
             acccountTransfers = this.accountTransferRepository.findByFromLoanId(accountNumber);
@@ -180,7 +180,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
 
     @Override
     @Transactional
-    public void reverseAllTransactions(Long accountId, PortfolioAccountType accountTypeId) {
+    public void reverseAllTransactions(final Long accountId, final PortfolioAccountType accountTypeId) {
         List<AccountTransfer> acccountTransfers = null;
         if (accountTypeId.isLoanAccount()) {
             acccountTransfers = this.accountTransferRepository.findAllByLoanId(accountId);
@@ -193,8 +193,8 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     /**
      * @param acccountTransfers
      */
-    private void undoTransactions(List<AccountTransfer> acccountTransfers) {
-        for (AccountTransfer accountTransfer : acccountTransfers) {
+    private void undoTransactions(final List<AccountTransfer> acccountTransfers) {
+        for (final AccountTransfer accountTransfer : acccountTransfers) {
             if (accountTransfer.getFromLoanTransaction() != null) {
                 this.loanAccountDomainService.reverseTransfer(accountTransfer.getFromLoanTransaction());
             } else if (accountTransfer.getToLoanTransaction() != null) {
@@ -215,7 +215,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
 
     @Override
     @Transactional
-    public Long transferFunds(AccountTransferDTO accountTransferDTO) {
+    public Long transferFunds(final AccountTransferDTO accountTransferDTO) {
         Long transferTransactionId = null;
         if (isSavingsToLoanAccountTransfer(accountTransferDTO.getFromAccountType(), accountTransferDTO.getToAccountType())) {
             //

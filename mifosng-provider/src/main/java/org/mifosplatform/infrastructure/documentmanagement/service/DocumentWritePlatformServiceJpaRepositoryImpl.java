@@ -56,7 +56,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
             validator.validateForCreate();
 
-            ContentRepository contentRepository = this.contentRepositoryFactory.getRepository();
+            final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository();
 
             final String fileLocation = contentRepository.saveFile(inputStream, documentCommand);
 
@@ -89,10 +89,10 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
             if (documentForUpdate == null) { throw new DocumentNotFoundException(documentCommand.getParentEntityType(),
                     documentCommand.getParentEntityId(), documentCommand.getId()); }
 
-            StorageType documentStoreType = documentForUpdate.storageType();
+            final StorageType documentStoreType = documentForUpdate.storageType();
             oldLocation = documentForUpdate.getLocation();
             if (inputStream != null && documentCommand.isFileNameChanged()) {
-                ContentRepository contentRepository = this.contentRepositoryFactory.getRepository();
+                final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository();
                 documentCommand.setLocation(contentRepository.saveFile(inputStream, documentCommand));
                 documentCommand.setStorageType(contentRepository.getStorageType().getValue());
             }
@@ -100,7 +100,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
             documentForUpdate.update(documentCommand);
 
             if (inputStream != null && documentCommand.isFileNameChanged()) {
-                ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(documentStoreType);
+                final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(documentStoreType);
                 contentRepository.deleteFile(documentCommand.getName(), oldLocation);
             }
 
@@ -129,7 +129,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
                 documentCommand.getParentEntityId(), documentCommand.getId()); }
         this.documentRepository.delete(document);
 
-        ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(document.storageType());
+        final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(document.storageType());
         contentRepository.deleteFile(document.getName(), document.getLocation());
         return new CommandProcessingResult(document.getId());
     }

@@ -29,7 +29,7 @@ public class OfficeTransactionData {
     @SuppressWarnings("unused")
     private final String toOfficeName;
     @SuppressWarnings("unused")
-    private CurrencyData currency;
+    private final CurrencyData currency;
     @SuppressWarnings("unused")
     private final BigDecimal transactionAmount;
     @SuppressWarnings("unused")

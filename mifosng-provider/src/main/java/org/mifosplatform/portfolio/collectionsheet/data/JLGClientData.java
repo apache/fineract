@@ -10,7 +10,8 @@ import java.util.Collection;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 /**
- * Immutable data object for clients with loans due for disbursement or collection.
+ * Immutable data object for clients with loans due for disbursement or
+ * collection.
  */
 public class JLGClientData {
 
@@ -20,7 +21,8 @@ public class JLGClientData {
     @SuppressWarnings("unused")
     private final EnumOptionData attendanceType;
 
-    public JLGClientData(final Long clientId, final String clientName, final Collection<LoanDueData> loans, final EnumOptionData attendanceType) {
+    public JLGClientData(final Long clientId, final String clientName, final Collection<LoanDueData> loans,
+            final EnumOptionData attendanceType) {
         this.clientId = clientId;
         this.clientName = clientName;
         this.loans = loans;

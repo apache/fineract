@@ -24,32 +24,32 @@ public class GroupTest {
     @Before
     public void setup() {
         Utils.initializeRESTAssured();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
     public void checkGroupFunctions() {
-        Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
-        Integer groupID = GroupHelper.createGroup(requestSpec, responseSpec);
-        GroupHelper.verifyGroupCreatedOnServer(requestSpec, responseSpec, groupID);
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec);
+        GroupHelper.verifyGroupCreatedOnServer(this.requestSpec, this.responseSpec, groupID);
 
-        groupID = GroupHelper.activateGroup(requestSpec, responseSpec, groupID.toString());
-        GroupHelper.verifyGroupActivatedOnServer(requestSpec, responseSpec, groupID, true);
+        groupID = GroupHelper.activateGroup(this.requestSpec, this.responseSpec, groupID.toString());
+        GroupHelper.verifyGroupActivatedOnServer(this.requestSpec, this.responseSpec, groupID, true);
 
-        groupID = GroupHelper.associateClient(requestSpec, responseSpec, groupID.toString(), clientID.toString());
-        GroupHelper.verifyGroupMembers(requestSpec, responseSpec, groupID, clientID);
+        groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
+        GroupHelper.verifyGroupMembers(this.requestSpec, this.responseSpec, groupID, clientID);
 
-        groupID = GroupHelper.disAssociateClient(requestSpec, responseSpec, groupID.toString(), clientID.toString());
-        GroupHelper.verifyEmptyGroupMembers(requestSpec, responseSpec, groupID);
+        groupID = GroupHelper.disAssociateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
+        GroupHelper.verifyEmptyGroupMembers(this.requestSpec, this.responseSpec, groupID);
 
-        String updatedGroupName = GroupHelper.randomNameGenerator("Group-", 5);
-        groupID = GroupHelper.updateGroup(requestSpec, responseSpec, updatedGroupName, groupID.toString());
-        GroupHelper.verifyGroupDetails(requestSpec, responseSpec, groupID, "name", updatedGroupName);
+        final String updatedGroupName = GroupHelper.randomNameGenerator("Group-", 5);
+        groupID = GroupHelper.updateGroup(this.requestSpec, this.responseSpec, updatedGroupName, groupID.toString());
+        GroupHelper.verifyGroupDetails(this.requestSpec, this.responseSpec, groupID, "name", updatedGroupName);
 
-        groupID = GroupHelper.createGroup(requestSpec, responseSpec);
-        GroupHelper.deleteGroup(requestSpec, responseSpec, groupID.toString());
-        GroupHelper.verifyGroupDeleted(requestSpec, responseSpec, groupID);
+        groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec);
+        GroupHelper.deleteGroup(this.requestSpec, this.responseSpec, groupID.toString());
+        GroupHelper.verifyGroupDeleted(this.requestSpec, this.responseSpec, groupID);
     }
 }

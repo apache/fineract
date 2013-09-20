@@ -29,7 +29,7 @@ public class GuarantorConstants {
 
         private static final Set<String> values = new HashSet<String>();
         static {
-            for (GUARANTOR_JSON_INPUT_PARAMS type : GUARANTOR_JSON_INPUT_PARAMS.values()) {
+            for (final GUARANTOR_JSON_INPUT_PARAMS type : GUARANTOR_JSON_INPUT_PARAMS.values()) {
                 values.add(type.value);
             }
         }

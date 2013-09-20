@@ -34,9 +34,11 @@ public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownRead
 
     @Override
     public List<EnumOptionData> retrieveApplicableToTypes() {
-        List<EnumOptionData> chargeAppliesToTypes = new ArrayList<EnumOptionData>();
-        for (ChargeAppliesTo chargeAppliesTo : ChargeAppliesTo.values()) {
-            if(ChargeAppliesTo.INVALID.equals(chargeAppliesTo)) continue;
+        final List<EnumOptionData> chargeAppliesToTypes = new ArrayList<EnumOptionData>();
+        for (final ChargeAppliesTo chargeAppliesTo : ChargeAppliesTo.values()) {
+            if (ChargeAppliesTo.INVALID.equals(chargeAppliesTo)) {
+                continue;
+            }
             chargeAppliesToTypes.add(ChargeEnumerations.chargeAppliesTo(chargeAppliesTo));
         }
         return chargeAppliesToTypes;
@@ -44,12 +46,19 @@ public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownRead
 
     @Override
     public List<EnumOptionData> retrieveCollectionTimeTypes() {
-        List<EnumOptionData> chargeTimeTypes = new ArrayList<EnumOptionData>();
-        for (ChargeTimeType chargeTimeType : ChargeTimeType.values()) {
-            if (ChargeTimeType.INVALID.equals(chargeTimeType) 
-                    || ChargeTimeType.MONTHLY.equals(chargeTimeType) // To be implemented for Savings
-                    || ChargeTimeType.YEARLY.equals(chargeTimeType)) // To be implemented for Savings 
+        final List<EnumOptionData> chargeTimeTypes = new ArrayList<EnumOptionData>();
+        for (final ChargeTimeType chargeTimeType : ChargeTimeType.values()) {
+            if (ChargeTimeType.INVALID.equals(chargeTimeType) || ChargeTimeType.MONTHLY.equals(chargeTimeType) // To
+                                                                                                               // be
+                                                                                                               // implemented
+                                                                                                               // for
+                                                                                                               // Savings
+                    || ChargeTimeType.YEARLY.equals(chargeTimeType)) {
+                // implemented
+                // for
+                // Savings
                 continue;
+            }
             chargeTimeTypes.add(ChargeEnumerations.chargeTimeType(chargeTimeType));
         }
         return chargeTimeTypes;

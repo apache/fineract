@@ -28,9 +28,9 @@ import com.google.gson.JsonElement;
 public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMappingHelper {
 
     @Autowired
-    public SavingsProductToGLAccountMappingHelper(GLAccountRepository glAccountRepository,
-            ProductToGLAccountMappingRepository glAccountMappingRepository, FromJsonHelper fromApiJsonHelper,
-            CodeValueRepositoryWrapper codeValueRepositoryWrapper, ChargeRepositoryWrapper chargeRepositoryWrapper) {
+    public SavingsProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,
+            final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper,
+            final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final ChargeRepositoryWrapper chargeRepositoryWrapper) {
         super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, codeValueRepositoryWrapper, chargeRepositoryWrapper);
     }
 
@@ -85,12 +85,12 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
     /*** Abstractions for payments channel related to savings products ***/
 
     public void savePaymentChannelToFundSourceMappings(final JsonCommand command, final JsonElement element, final Long productId,
-            Map<String, Object> changes) {
+            final Map<String, Object> changes) {
         savePaymentChannelToFundSourceMappings(command, element, productId, changes, PortfolioProductType.SAVING);
     }
 
     public void updatePaymentChannelToFundSourceMappings(final JsonCommand command, final JsonElement element, final Long productId,
-            Map<String, Object> changes) {
+            final Map<String, Object> changes) {
         updatePaymentChannelToFundSourceMappings(command, element, productId, changes, PortfolioProductType.SAVING);
     }
 

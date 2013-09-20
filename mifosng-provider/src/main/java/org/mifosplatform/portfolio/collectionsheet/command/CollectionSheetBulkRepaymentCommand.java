@@ -7,7 +7,6 @@ package org.mifosplatform.portfolio.collectionsheet.command;
 
 import org.joda.time.LocalDate;
 
-
 /**
  * Immutable command for loan bulk repayment.
  */
@@ -17,7 +16,8 @@ public class CollectionSheetBulkRepaymentCommand {
     private final LocalDate transactionDate;
     private final SingleRepaymentCommand[] repaymentTransactions;
 
-    public CollectionSheetBulkRepaymentCommand(String note, final LocalDate transactionDate, SingleRepaymentCommand[] repaymentTransactions) {
+    public CollectionSheetBulkRepaymentCommand(final String note, final LocalDate transactionDate,
+            final SingleRepaymentCommand[] repaymentTransactions) {
         this.note = note;
         this.transactionDate = transactionDate;
         this.repaymentTransactions = repaymentTransactions;
@@ -31,9 +31,8 @@ public class CollectionSheetBulkRepaymentCommand {
         return this.repaymentTransactions;
     }
 
-    
     public LocalDate getTransactionDate() {
         return this.transactionDate;
     }
-   
+
 }

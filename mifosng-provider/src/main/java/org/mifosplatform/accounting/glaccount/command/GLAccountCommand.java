@@ -71,8 +71,9 @@ public class GLAccountCommand {
 
         baseDataValidator.reset().parameter(GLAccountJsonInputParams.MANUAL_ENTRIES_ALLOWED.getValue()).value(this.manualEntriesAllowed)
                 .notBlank();
-        
-        baseDataValidator.reset().parameter(GLAccountJsonInputParams.TAGID.getValue()).value(this.tagId).ignoreIfNull().longGreaterThanZero();
+
+        baseDataValidator.reset().parameter(GLAccountJsonInputParams.TAGID.getValue()).value(this.tagId).ignoreIfNull()
+                .longGreaterThanZero();
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
@@ -106,7 +107,8 @@ public class GLAccountCommand {
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
-        baseDataValidator.reset().parameter(GLAccountJsonInputParams.TAGID.getValue()).value(this.tagId).ignoreIfNull().longGreaterThanZero();
+        baseDataValidator.reset().parameter(GLAccountJsonInputParams.TAGID.getValue()).value(this.tagId).ignoreIfNull()
+                .longGreaterThanZero();
     }
 
     public boolean isHeaderAccount() {

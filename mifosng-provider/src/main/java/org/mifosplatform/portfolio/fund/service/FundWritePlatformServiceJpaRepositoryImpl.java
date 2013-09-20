@@ -47,7 +47,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
     public CommandProcessingResult createFund(final JsonCommand command) {
 
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
@@ -56,7 +56,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
             this.fundRepository.save(fund);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(fund.getId()).build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleFundDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
@@ -68,7 +68,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
     public CommandProcessingResult updateFund(final Long fundId, final JsonCommand command) {
 
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
@@ -81,7 +81,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
             }
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(fund.getId()).with(changes).build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleFundDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
@@ -91,9 +91,9 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleFundDataIntegrityIssues(final JsonCommand command, DataIntegrityViolationException dve) {
+    private void handleFundDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
 
-        Throwable realCause = dve.getMostSpecificCause();
+        final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("fund_externalid_org")) {
             final String externalId = command.stringValueOfParameterNamed("externalId");
             throw new PlatformDataIntegrityException("error.msg.fund.duplicate.externalId", "A fund with external id '" + externalId

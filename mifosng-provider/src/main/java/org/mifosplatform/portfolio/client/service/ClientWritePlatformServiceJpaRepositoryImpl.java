@@ -334,11 +334,11 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         try {
             this.fromApiJsonDeserializer.validateClose(command);
 
-            Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+            final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
             final LocalDate closureDate = command.localDateValueOfParameterNamed(ClientApiConstants.closureDateParamName);
             final Long closureReasonId = command.longValueOfParameterNamed(ClientApiConstants.closureReasonIdParamName);
 
-            CodeValue closureReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
+            final CodeValue closureReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
                     ClientApiConstants.CLIENT_CLOSURE_REASON, closureReasonId);
 
             if (ClientStatus.fromInt(client.getStatus()).isClosed()) {
@@ -355,10 +355,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                         closureDate, client.getActivationLocalDate());
             }
 
-            List<Loan> clientLoans = this.loanRepository.findLoanByClientId(clientId);
+            final List<Loan> clientLoans = this.loanRepository.findLoanByClientId(clientId);
 
-            for (Loan loan : clientLoans) {
-                LoanStatusMapper loanStatus = new LoanStatusMapper(loan.status().getValue());
+            for (final Loan loan : clientLoans) {
+                final LoanStatusMapper loanStatus = new LoanStatusMapper(loan.status().getValue());
                 if (loanStatus.isOpen()) {
                     final String errorMessage = "Client cannot be closed because of non-closed loans.";
                     throw new InvalidClientStateTransitionException("close", "loan.non-closed", errorMessage);
@@ -374,9 +374,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     throw new InvalidClientStateTransitionException("close", "loan.non-closed", errorMessage);
                 }
             }
-            List<SavingsAccount> clientSavingAccounts = this.savingsRepository.findSavingAccountByClientId(clientId);
+            final List<SavingsAccount> clientSavingAccounts = this.savingsRepository.findSavingAccountByClientId(clientId);
 
-            for (SavingsAccount saving : clientSavingAccounts) {
+            for (final SavingsAccount saving : clientSavingAccounts) {
                 if (saving.isActive()) {
                     final String errorMessage = "Client cannot be closed because of non-closed savings account.";
                     throw new InvalidClientStateTransitionException("close", "non-closed.savings.account", errorMessage);
@@ -397,7 +397,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withClientId(clientId) //
                     .withEntityId(clientId) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }

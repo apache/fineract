@@ -30,7 +30,7 @@ public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
         this.name = name;
         this.enabled = enabled;
     }
-    
+
     public boolean isEnabled() {
         return this.enabled;
     }

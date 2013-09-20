@@ -21,6 +21,7 @@ import org.mifosplatform.mix.data.NamespaceData;
 import org.mifosplatform.mix.service.NamespaceReadPlatformServiceImpl;
 import org.mifosplatform.mix.service.XBRLBuilder;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -33,13 +34,13 @@ public class XBRLBuilderTest {
     @Mock
     private NamespaceReadPlatformServiceImpl readNamespaceService;
     @InjectMocks
-    private XBRLBuilder xbrlBuilder = new XBRLBuilder();
+    private final XBRLBuilder xbrlBuilder = new XBRLBuilder();
 
     @Before
     public void setUp() throws Exception {
 
-        readNamespaceService = Mockito.mock(NamespaceReadPlatformServiceImpl.class);
-        when(readNamespaceService.retrieveNamespaceByPrefix(Mockito.anyString())).thenReturn(
+        this.readNamespaceService = Mockito.mock(NamespaceReadPlatformServiceImpl.class);
+        when(this.readNamespaceService.retrieveNamespaceByPrefix(Matchers.anyString())).thenReturn(
                 new NamespaceData(1l, "mockedprefix", "mockedurl"));
 
     }
@@ -47,23 +48,23 @@ public class XBRLBuilderTest {
     @Test
     public void shouldCorrectlyBuildMap() {
 
-        HashMap<MixTaxonomyData, BigDecimal> map = new HashMap<MixTaxonomyData, BigDecimal>();
-        MixTaxonomyData data1 = Mockito.mock(MixTaxonomyData.class);
+        final HashMap<MixTaxonomyData, BigDecimal> map = new HashMap<MixTaxonomyData, BigDecimal>();
+        final MixTaxonomyData data1 = Mockito.mock(MixTaxonomyData.class);
         when(data1.getName()).thenReturn("Assets");
         map.put(data1, new BigDecimal(10000));
-        String result = xbrlBuilder.build(map, Date.valueOf("2005-11-11"), Date.valueOf("2013-07-17"), "USD");
+        final String result = this.xbrlBuilder.build(map, Date.valueOf("2005-11-11"), Date.valueOf("2013-07-17"), "USD");
         System.out.println(result);
         NodeList nodes = null;
         try {
             nodes = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(result.getBytes()))
                     .getElementsByTagName("Assets");
-        } catch (SAXException e) {
+        } catch (final SAXException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (ParserConfigurationException e) {
+        } catch (final ParserConfigurationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

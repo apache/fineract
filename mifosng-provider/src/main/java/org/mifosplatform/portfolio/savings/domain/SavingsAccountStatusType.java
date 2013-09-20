@@ -69,7 +69,7 @@ public enum SavingsAccountStatusType {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public boolean isSubmittedAndPendingApproval() {

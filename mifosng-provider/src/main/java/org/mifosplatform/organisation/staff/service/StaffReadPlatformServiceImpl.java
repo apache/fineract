@@ -62,7 +62,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
         public String schema(final boolean loanOfficersOnly) {
 
-            StringBuilder sqlBuilder = new StringBuilder(200);
+            final StringBuilder sqlBuilder = new StringBuilder(200);
             sqlBuilder.append("s.id as id, s.office_id as officeId, ohierarchy.name as officeName,");
             sqlBuilder.append("s.firstname as firstname, s.lastname as lastname,");
             sqlBuilder.append("s.display_name as displayName, s.is_loan_officer as isLoanOfficer, s.external_id as externalId ");
@@ -149,13 +149,13 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     public StaffData retrieveStaff(final Long staffId) {
 
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
             final StaffMapper rm = new StaffMapper();
             final String sql = "select " + rm.schema() + " where s.id = ?";
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { staffId });
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new StaffNotFoundException(staffId);
         }
     }

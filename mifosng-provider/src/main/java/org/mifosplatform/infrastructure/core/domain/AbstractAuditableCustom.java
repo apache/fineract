@@ -21,13 +21,16 @@ import org.springframework.data.jpa.domain.AbstractAuditable;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 /**
- * A custom copy of {@link AbstractAuditable} to override the column names used on database.
+ * A custom copy of {@link AbstractAuditable} to override the column names used
+ * on database.
  * 
  * Abstract base class for auditable entities. Stores the audition values in
  * persistent fields.
  * 
- * @param <U> the auditing type. Typically some kind of user.
- * @param <PK> the type of the auditing type's identifier
+ * @param <U>
+ *            the auditing type. Typically some kind of user.
+ * @param <PK>
+ *            the type of the auditing type's identifier
  */
 @MappedSuperclass
 public abstract class AbstractAuditableCustom<U, PK extends Serializable> extends AbstractPersistable<PK> implements Auditable<U, PK> {
@@ -35,26 +38,26 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
     private static final long serialVersionUID = 141481953116476081L;
 
     @OneToOne
-    @JoinColumn(name="createdby_id")
-    private U                 createdBy;
+    @JoinColumn(name = "createdby_id")
+    private U createdBy;
 
-    @Column(name="created_date")
+    @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date              createdDate;
+    private Date createdDate;
 
     @OneToOne
-    @JoinColumn(name="lastmodifiedby_id")
-    private U                 lastModifiedBy;
+    @JoinColumn(name = "lastmodifiedby_id")
+    private U lastModifiedBy;
 
-    @Column(name="lastmodified_date")
+    @Column(name = "lastmodified_date")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date              lastModifiedDate;
+    private Date lastModifiedDate;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.data.domain.Auditable#getCreatedBy()
-	 */
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.data.domain.Auditable#getCreatedBy()
+     */
     @Override
     public U getCreatedBy() {
 

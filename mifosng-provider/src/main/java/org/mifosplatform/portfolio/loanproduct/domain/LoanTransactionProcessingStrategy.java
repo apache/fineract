@@ -27,7 +27,7 @@ public class LoanTransactionProcessingStrategy extends AbstractPersistable<Long>
     }
 
     public TransactionProcessingStrategyData toData() {
-        return new TransactionProcessingStrategyData(this.getId(), this.code, this.name);
+        return new TransactionProcessingStrategyData(getId(), this.code, this.name);
     }
 
     public boolean isStandardMifosStrategy() {

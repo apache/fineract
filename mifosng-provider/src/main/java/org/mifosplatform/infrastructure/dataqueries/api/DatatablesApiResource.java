@@ -74,40 +74,35 @@ public class DatatablesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String createDatatable(final String apiRequestBodyAsJson) {
-    	
-    	final CommandWrapper commandRequest = new CommandWrapperBuilder()
-    		.createDBDatatable(apiRequestBodyAsJson).build();
 
-    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-    	return this.toApiJsonSerializer.serialize(result);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createDBDatatable(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @PUT
     @Path("{datatableName}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateDatatable(@PathParam("datatableName") final String datatableName,
-    		final String apiRequestBodyAsJson) {
-    	
-    	final CommandWrapper commandRequest = new CommandWrapperBuilder()
-    		.updateDBDatatable(datatableName, apiRequestBodyAsJson).build();
+    public String updateDatatable(@PathParam("datatableName") final String datatableName, final String apiRequestBodyAsJson) {
 
-    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-    	return this.toApiJsonSerializer.serialize(result);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateDBDatatable(datatableName, apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @DELETE
     @Path("{datatableName}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteDatatable(@PathParam("datatableName") final String datatableName,
-    		final String apiRequestBodyAsJson) {
-    	
-    	final CommandWrapper commandRequest = new CommandWrapperBuilder()
-    		.deleteDBDatatable(datatableName, apiRequestBodyAsJson).build();
+    public String deleteDatatable(@PathParam("datatableName") final String datatableName, final String apiRequestBodyAsJson) {
 
-    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-    	return this.toApiJsonSerializer.serialize(result);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteDBDatatable(datatableName, apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @POST
@@ -154,10 +149,10 @@ public class DatatablesApiResource {
     public String getDatatable(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
             @QueryParam("order") final String order, @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasDatatableReadPermission(datatable);
+        this.context.authenticatedUser().validateHasDatatableReadPermission(datatable);
 
-        GenericResultsetData results = this.readWriteNonCoreDataService.retrieveDataTableGenericResultSet(datatable, apptableId, order,
-                null);
+        final GenericResultsetData results = this.readWriteNonCoreDataService.retrieveDataTableGenericResultSet(datatable, apptableId,
+                order, null);
 
         String json = "";
         final boolean genericResultSet = ApiParameterHelper.genericResultSet(uriInfo.getQueryParameters());
@@ -178,10 +173,10 @@ public class DatatablesApiResource {
     public String getDatatableManyEntry(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
             @PathParam("datatableId") final Long datatableId, @QueryParam("order") final String order, @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasDatatableReadPermission(datatable);
+        this.context.authenticatedUser().validateHasDatatableReadPermission(datatable);
 
-        GenericResultsetData results = this.readWriteNonCoreDataService.retrieveDataTableGenericResultSet(datatable, apptableId, order,
-                datatableId);
+        final GenericResultsetData results = this.readWriteNonCoreDataService.retrieveDataTableGenericResultSet(datatable, apptableId,
+                order, datatableId);
 
         String json = "";
         final boolean genericResultSet = ApiParameterHelper.genericResultSet(uriInfo.getQueryParameters());

@@ -28,7 +28,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     public LoanScheduleModel calculateLoanSchedule(final JsonQuery query) {
 
         this.fromApiJsonDeserializer.validate(query.json());
-        
+
         return this.loanScheduleAssembler.assembleLoanScheduleFrom(query.parsedJson());
     }
 }

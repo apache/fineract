@@ -50,24 +50,24 @@ public class SchedulerJobListener implements JobListener {
 
     @Override
     public void jobWasExecuted(final JobExecutionContext context, final JobExecutionException jobException) {
-        Trigger trigger = context.getTrigger();
-        JobKey key = context.getJobDetail().getKey();
-        String jobKey = key.getName() + SchedulerServiceConstants.JOB_KEY_SEPERATOR + key.getGroup();
-        final ScheduledJobDetail scheduledJobDetails = schedularService.findByJobKey(jobKey);
-        Long version = schedularService.fetchMaxVersionBy(jobKey) + 1;
+        final Trigger trigger = context.getTrigger();
+        final JobKey key = context.getJobDetail().getKey();
+        final String jobKey = key.getName() + SchedulerServiceConstants.JOB_KEY_SEPERATOR + key.getGroup();
+        final ScheduledJobDetail scheduledJobDetails = this.schedularService.findByJobKey(jobKey);
+        final Long version = this.schedularService.fetchMaxVersionBy(jobKey) + 1;
         String status = SchedulerServiceConstants.STATUS_SUCCESS;
         String errorMessage = null;
         String errorLog = null;
         if (jobException != null) {
             status = SchedulerServiceConstants.STATUS_FAILED;
-            stackTraceLevel = 0;
-            Throwable throwable = getCauseFromException(jobException);
-            stackTraceLevel = 0;
+            this.stackTraceLevel = 0;
+            final Throwable throwable = getCauseFromException(jobException);
+            this.stackTraceLevel = 0;
             StackTraceElement[] stackTraceElements = null;
             errorMessage = throwable.getMessage();
             stackTraceElements = throwable.getStackTrace();
-            StringBuffer sb = new StringBuffer(throwable.toString());
-            for (StackTraceElement element : stackTraceElements) {
+            final StringBuffer sb = new StringBuffer(throwable.toString());
+            for (final StackTraceElement element : stackTraceElements) {
                 sb.append("\n \t at ").append(element.getClassName()).append(".").append(element.getMethodName()).append("(")
                         .append(element.getLineNumber()).append(")");
             }
@@ -86,21 +86,21 @@ public class SchedulerJobListener implements JobListener {
         scheduledJobDetails.updatePreviousRunStartTime(context.getFireTime());
         scheduledJobDetails.updateCurrentlyRunningStatus(false);
 
-        ScheduledJobRunHistory runHistory = new ScheduledJobRunHistory(scheduledJobDetails, version, context.getFireTime(), new Date(),
-                status, errorMessage, triggerType, errorLog);
+        final ScheduledJobRunHistory runHistory = new ScheduledJobRunHistory(scheduledJobDetails, version, context.getFireTime(),
+                new Date(), status, errorMessage, triggerType, errorLog);
         // scheduledJobDetails.addRunHistory(runHistory);
 
-        schedularService.saveOrUpdate(scheduledJobDetails, runHistory);
+        this.schedularService.saveOrUpdate(scheduledJobDetails, runHistory);
 
     }
 
     private Throwable getCauseFromException(final Throwable exception) {
-        if (stackTraceLevel <= SchedulerServiceConstants.STACK_TRACE_LEVEL
+        if (this.stackTraceLevel <= SchedulerServiceConstants.STACK_TRACE_LEVEL
                 && exception.getCause() != null
                 && (exception.getCause().toString().contains(SchedulerServiceConstants.SCHEDULER_EXCEPTION)
                         || exception.getCause().toString().contains(SchedulerServiceConstants.JOB_EXECUTION_EXCEPTION) || exception
                         .getCause().toString().contains(SchedulerServiceConstants.JOB_METHOD_INVOCATION_FAILED_EXCEPTION))) {
-            stackTraceLevel++;
+            this.stackTraceLevel++;
             return getCauseFromException(exception.getCause());
         } else if (exception.getCause() != null) { return exception.getCause(); }
         return exception;

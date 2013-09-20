@@ -74,7 +74,7 @@ public class LoanProductData {
     private final Collection<ChargeData> charges;
 
     // accounting
-    private EnumOptionData accountingRule;
+    private final EnumOptionData accountingRule;
     private Map<String, Object> accountingMappings;
     private Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings;
     private Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings;
@@ -134,7 +134,7 @@ public class LoanProductData {
         final EnumOptionData accountingType = null;
         final boolean includeInBorrowerCycle = false;
         final LocalDate startDate = null;
-        final LocalDate closeDate =  null;
+        final LocalDate closeDate = null;
         final String status = null;
         final String externalId = null;
         return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
@@ -416,39 +416,39 @@ public class LoanProductData {
     }
 
     public Long getId() {
-        return id;
+        return this.id;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public Long getFundId() {
-        return fundId;
+        return this.fundId;
     }
 
     public String getFundName() {
-        return fundName;
+        return this.fundName;
     }
 
     public Long getTransactionProcessingStrategyId() {
-        return transactionProcessingStrategyId;
+        return this.transactionProcessingStrategyId;
     }
 
     public String getTransactionProcessingStrategyName() {
-        return transactionProcessingStrategyName;
+        return this.transactionProcessingStrategyName;
     }
 
     public CurrencyData getCurrency() {
-        return currency;
+        return this.currency;
     }
 
     public BigDecimal getPrincipal() {
-        return principal;
+        return this.principal;
     }
 
     public BigDecimal getMinPrincipal() {
@@ -460,27 +460,27 @@ public class LoanProductData {
     }
 
     public BigDecimal getInArrearsTolerance() {
-        return inArrearsTolerance;
+        return this.inArrearsTolerance;
     }
 
     public Integer getNumberOfRepayments() {
-        return numberOfRepayments;
+        return this.numberOfRepayments;
     }
 
     public Integer getRepaymentEvery() {
-        return repaymentEvery;
+        return this.repaymentEvery;
     }
 
     public BigDecimal getInterestRatePerPeriod() {
-        return interestRatePerPeriod;
+        return this.interestRatePerPeriod;
     }
 
     public BigDecimal getAnnualInterestRate() {
-        return annualInterestRate;
+        return this.annualInterestRate;
     }
 
     public EnumOptionData getRepaymentFrequencyType() {
-        return repaymentFrequencyType;
+        return this.repaymentFrequencyType;
     }
 
     public Integer getGraceOnPrincipalPayment() {
@@ -496,52 +496,52 @@ public class LoanProductData {
     }
 
     public EnumOptionData getInterestRateFrequencyType() {
-        return interestRateFrequencyType;
+        return this.interestRateFrequencyType;
     }
 
     public EnumOptionData getAmortizationType() {
-        return amortizationType;
+        return this.amortizationType;
     }
 
     public EnumOptionData getInterestType() {
-        return interestType;
+        return this.interestType;
     }
 
     public EnumOptionData getInterestCalculationPeriodType() {
-        return interestCalculationPeriodType;
+        return this.interestCalculationPeriodType;
     }
 
     public Collection<FundData> getFundOptions() {
-        return fundOptions;
+        return this.fundOptions;
     }
 
     public List<EnumOptionData> getAmortizationTypeOptions() {
-        return amortizationTypeOptions;
+        return this.amortizationTypeOptions;
     }
 
     public List<EnumOptionData> getInterestTypeOptions() {
-        return interestTypeOptions;
+        return this.interestTypeOptions;
     }
 
     public List<EnumOptionData> getInterestCalculationPeriodTypeOptions() {
-        return interestCalculationPeriodTypeOptions;
+        return this.interestCalculationPeriodTypeOptions;
     }
 
     public List<EnumOptionData> getRepaymentFrequencyTypeOptions() {
-        return repaymentFrequencyTypeOptions;
+        return this.repaymentFrequencyTypeOptions;
     }
 
     public List<EnumOptionData> getInterestRateFrequencyTypeOptions() {
-        return interestRateFrequencyTypeOptions;
+        return this.interestRateFrequencyTypeOptions;
     }
 
     public Collection<ChargeData> getChargeOptions() {
-        return chargeOptions;
+        return this.chargeOptions;
     }
 
     @Override
     public boolean equals(final Object obj) {
-        LoanProductData loanProductData = (LoanProductData) obj;
+        final LoanProductData loanProductData = (LoanProductData) obj;
         return loanProductData.id.equals(this.id);
     }
 

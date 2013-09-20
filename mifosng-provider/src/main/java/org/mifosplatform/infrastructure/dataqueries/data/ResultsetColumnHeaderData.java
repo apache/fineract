@@ -39,14 +39,14 @@ public final class ResultsetColumnHeaderData {
 
     public static ResultsetColumnHeaderData detailed(final String columnName, final String columnType, final Long columnLength,
             final boolean columnNullable, final boolean columnIsPrimaryKey, final List<ResultsetColumnValueData> columnValues,
-            String columnCode) {
+            final String columnCode) {
         return new ResultsetColumnHeaderData(columnName, columnType, columnLength, columnNullable, columnIsPrimaryKey, columnValues,
                 columnCode);
     }
 
     private ResultsetColumnHeaderData(final String columnName, final String columnType, final Long columnLength,
             final boolean columnNullable, final boolean columnIsPrimaryKey, final List<ResultsetColumnValueData> columnValues,
-            String columnCode) {
+            final String columnCode) {
         this.columnName = columnName;
         this.columnType = columnType;
         this.columnLength = columnLength;
@@ -119,7 +119,7 @@ public final class ResultsetColumnHeaderData {
     private boolean isDate() {
         return "date".equalsIgnoreCase(this.columnType);
     }
-    
+
     private boolean isDateTime() {
         return "datetime".equalsIgnoreCase(this.columnType);
     }
@@ -167,9 +167,9 @@ public final class ResultsetColumnHeaderData {
     public String getColumnType() {
         return this.columnType;
     }
-    
+
     public Long getColumnLength() {
-    	return this.columnLength;
+        return this.columnLength;
     }
 
     public String getColumnDisplayType() {
@@ -210,7 +210,7 @@ public final class ResultsetColumnHeaderData {
 
     public boolean isColumnValueAllowed(final String match) {
         boolean allowed = false;
-        for (ResultsetColumnValueData allowedValue : this.columnValues) {
+        for (final ResultsetColumnValueData allowedValue : this.columnValues) {
             if (allowedValue.matches(match)) {
                 allowed = true;
             }
@@ -228,7 +228,7 @@ public final class ResultsetColumnHeaderData {
 
     public boolean isColumnCodeAllowed(final Integer match) {
         boolean allowed = false;
-        for (ResultsetColumnValueData allowedValue : this.columnValues) {
+        for (final ResultsetColumnValueData allowedValue : this.columnValues) {
             if (allowedValue.codeMatches(match)) {
                 allowed = true;
             }

@@ -80,7 +80,7 @@ public class BulkLoansApiResource {
     public String loanReassignmentTemplate(@QueryParam("officeId") final Long officeId,
             @QueryParam("fromLoanOfficerId") final Long loanOfficerId, @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
 
@@ -98,8 +98,8 @@ public class BulkLoansApiResource {
         final BulkTransferLoanOfficerData loanReassignmentData = BulkTransferLoanOfficerData.templateForBulk(officeId, loanOfficerId,
                 new LocalDate(), offices, loanOfficers, staffAccountSummaryCollectionData);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, loanReassignmentData, RESPONSE_DATA_PARAMETERS);
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, loanReassignmentData, this.RESPONSE_DATA_PARAMETERS);
     }
 
     @POST

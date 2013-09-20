@@ -45,9 +45,9 @@ public final class ReportParameterUsage extends AbstractPersistable<Long> {
         if (obj == null) { return false; }
         if (obj == this) { return true; }
         if (obj.getClass() != getClass()) { return false; }
-        ReportParameterUsage rhs = (ReportParameterUsage) obj;
+        final ReportParameterUsage rhs = (ReportParameterUsage) obj;
         return new EqualsBuilder().appendSuper(super.equals(obj)) //
-                .append(this.getId(), rhs.getId()) //
+                .append(getId(), rhs.getId()) //
                 .append(this.report.getId(), rhs.report.getId()) //
                 .append(this.parameter.getId(), rhs.parameter.getId()) //
                 .append(this.reportParameterName, rhs.reportParameterName) //
@@ -57,7 +57,7 @@ public final class ReportParameterUsage extends AbstractPersistable<Long> {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(3, 5) //
-                .append(this.getId()) //
+                .append(getId()) //
                 .append(this.report.getId()) //
                 .append(this.parameter.getId()) //
                 .append(this.reportParameterName) //

@@ -26,25 +26,25 @@ public class MonetaryCurrency {
         this.inMultiplesOf = 0;
     }
 
-    public MonetaryCurrency(final String code, final int digitsAfterDecimal,final Integer inMultiplesOf) {
+    public MonetaryCurrency(final String code, final int digitsAfterDecimal, final Integer inMultiplesOf) {
         this.code = code;
         this.digitsAfterDecimal = digitsAfterDecimal;
         this.inMultiplesOf = inMultiplesOf;
     }
 
     public MonetaryCurrency copy() {
-        return new MonetaryCurrency(this.code, this.digitsAfterDecimal,this.inMultiplesOf);
+        return new MonetaryCurrency(this.code, this.digitsAfterDecimal, this.inMultiplesOf);
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public int getDigitsAfterDecimal() {
-        return digitsAfterDecimal;
+        return this.digitsAfterDecimal;
     }
-    
+
     public Integer getCurrencyInMultiplesOf() {
-        return inMultiplesOf;
+        return this.inMultiplesOf;
     }
 }

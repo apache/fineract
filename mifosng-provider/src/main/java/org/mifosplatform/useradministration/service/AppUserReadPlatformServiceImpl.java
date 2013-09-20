@@ -52,24 +52,24 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
     @Cacheable(value = "users", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy())")
     public Collection<AppUserData> retrieveAllUsers() {
 
-        AppUser currentUser = context.authenticatedUser();
-        String hierarchy = currentUser.getOffice().getHierarchy();
-        String hierarchySearchString = hierarchy + "%";
+        final AppUser currentUser = this.context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final String hierarchySearchString = hierarchy + "%";
 
-        AppUserMapper mapper = new AppUserMapper();
-        String sql = "select " + mapper.schema();
+        final AppUserMapper mapper = new AppUserMapper();
+        final String sql = "select " + mapper.schema();
 
         return this.jdbcTemplate.query(sql, mapper, new Object[] { hierarchySearchString });
     }
 
     @Override
     public Collection<AppUserData> retrieveSearchTemplate() {
-        AppUser currentUser = context.authenticatedUser();
-        String hierarchy = currentUser.getOffice().getHierarchy();
-        String hierarchySearchString = hierarchy + "%";
+        final AppUser currentUser = this.context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final String hierarchySearchString = hierarchy + "%";
 
-        AppUserLookupMapper mapper = new AppUserLookupMapper();
-        String sql = "select " + mapper.schema();
+        final AppUserLookupMapper mapper = new AppUserLookupMapper();
+        final String sql = "select " + mapper.schema();
 
         return this.jdbcTemplate.query(sql, mapper, new Object[] { hierarchySearchString });
     }
@@ -86,16 +86,16 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
     @Override
     public AppUserData retrieveUser(final Long userId) {
 
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
         final AppUser user = this.appUserRepository.findOne(userId);
         if (user == null || user.isDeleted()) { throw new UserNotFoundException(userId); }
 
-        Collection<RoleData> availableRoles = this.roleReadPlatformService.retrieveAll();
+        final Collection<RoleData> availableRoles = this.roleReadPlatformService.retrieveAll();
 
-        Collection<RoleData> selectedUserRoles = new ArrayList<RoleData>();
-        Set<Role> userRoles = user.getRoles();
-        for (Role role : userRoles) {
+        final Collection<RoleData> selectedUserRoles = new ArrayList<RoleData>();
+        final Set<Role> userRoles = user.getRoles();
+        for (final Role role : userRoles) {
             selectedUserRoles.add(role.toData());
         }
 
@@ -145,7 +145,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
                     + " join m_office o on o.id = u.office_id where o.hierarchy like ? and u.is_deleted=0 order by u.username";
         }
     }
-    
+
     public PlatformSecurityContext getContext() {
         return this.context;
     }

@@ -42,9 +42,9 @@ public class CollateralCommand {
     }
 
     public void validateForCreate() {
-        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("collateral");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("collateral");
 
         baseDataValidator.reset().parameter(COLLATERAL_JSON_INPUT_PARAMS.COLLATERAL_TYPE_ID.getValue()).value(this.collateralTypeId)
                 .notNull().integerGreaterThanZero();
@@ -58,9 +58,9 @@ public class CollateralCommand {
     }
 
     public void validateForUpdate() {
-        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("collateral");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("collateral");
 
         baseDataValidator.reset().parameter(COLLATERAL_JSON_INPUT_PARAMS.COLLATERAL_TYPE_ID.getValue()).value(this.collateralTypeId)
                 .ignoreIfNull().integerGreaterThanZero();

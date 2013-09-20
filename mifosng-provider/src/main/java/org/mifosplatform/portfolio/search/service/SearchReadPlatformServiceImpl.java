@@ -35,12 +35,12 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
 
     @Override
     public Collection<SearchData> retriveMatchingData(final SearchConditions searchConditions) {
-        AppUser currentUser = context.authenticatedUser();
-        String hierarchy = currentUser.getOffice().getHierarchy();
+        final AppUser currentUser = this.context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
 
-        SearchMapper rm = new SearchMapper();
+        final SearchMapper rm = new SearchMapper();
 
-        MapSqlParameterSource params = new MapSqlParameterSource();
+        final MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("hierarchy", hierarchy + "%");
         params.addValue("search", searchConditions.getSearchQuery());
         params.addValue("partialSearch", "%" + searchConditions.getSearchQuery() + "%");
@@ -52,44 +52,44 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
 
         public String searchSchema(final SearchConditions searchConditions) {
 
-            String union = " union ";
-            String clientExactMatchSql = " (select 'CLIENT' as entityType, c.id as entityId, c.display_name as entityName, c.external_id as entityExternalId, c.account_no as entityAccountNo "
+            final String union = " union ";
+            final String clientExactMatchSql = " (select 'CLIENT' as entityType, c.id as entityId, c.display_name as entityName, c.external_id as entityExternalId, c.account_no as entityAccountNo "
                     + " , c.office_id as parentId, o.name as parentName "
                     + " from m_client c join m_office o on o.id = c.office_id where o.hierarchy like :hierarchy and (c.account_no like :search or c.display_name like :search or c.external_id like :search)) ";
 
-            String clientMatchSql = " (select 'CLIENT' as entityType, c.id as entityId, c.display_name as entityName, c.external_id as entityExternalId, c.account_no as entityAccountNo "
+            final String clientMatchSql = " (select 'CLIENT' as entityType, c.id as entityId, c.display_name as entityName, c.external_id as entityExternalId, c.account_no as entityAccountNo "
                     + " , c.office_id as parentId, o.name as parentName "
                     + " from m_client c join m_office o on o.id = c.office_id where o.hierarchy like :hierarchy and (c.account_no like :partialSearch and c.account_no not like :search) or "
                     + "(c.display_name like :partialSearch and c.display_name not like :search) or "
                     + "(c.external_id like :partialSearch and c.external_id not like :search))";
 
-            String loanExactMatchSql = " (select 'LOAN' as entityType, l.id as entityId, pl.name as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
+            final String loanExactMatchSql = " (select 'LOAN' as entityType, l.id as entityId, pl.name as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
                     + " , c.id as parentId, c.display_name as parentName "
                     + " from m_loan l join m_client c on l.client_id = c.id join m_office o on o.id = c.office_id join m_product_loan pl on pl.id=l.product_id where o.hierarchy like :hierarchy and l.account_no like :search) ";
 
-            String loanMatchSql = " (select 'LOAN' as entityType, l.id as entityId, pl.name as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
+            final String loanMatchSql = " (select 'LOAN' as entityType, l.id as entityId, pl.name as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
                     + " , c.id as parentId, c.display_name as parentName "
                     + " from m_loan l join m_client c on l.client_id = c.id join m_office o on o.id = c.office_id join m_product_loan pl on pl.id=l.product_id where o.hierarchy like :hierarchy and l.account_no like :partialSearch and l.account_no not like :search) ";
 
-            String clientIdentifierExactMatchSql = " (select 'CLIENTIDENTIFIER' as entityType, ci.id as entityId, ci.document_key as entityName, "
+            final String clientIdentifierExactMatchSql = " (select 'CLIENTIDENTIFIER' as entityType, ci.id as entityId, ci.document_key as entityName, "
                     + " null as entityExternalId, null as entityAccountNo, c.id as parentId, c.display_name as parentName "
                     + " from m_client_identifier ci join m_client c on ci.client_id=c.id join m_office o on o.id = c.office_id "
                     + " where o.hierarchy like :hierarchy and ci.document_key like :search) ";
-            
-            String clientIdentifierMatchSql = " (select 'CLIENTIDENTIFIER' as entityType, ci.id as entityId, ci.document_key as entityName, "
+
+            final String clientIdentifierMatchSql = " (select 'CLIENTIDENTIFIER' as entityType, ci.id as entityId, ci.document_key as entityName, "
                     + " null as entityExternalId, null as entityAccountNo, c.id as parentId, c.display_name as parentName "
                     + " from m_client_identifier ci join m_client c on ci.client_id=c.id join m_office o on o.id = c.office_id "
                     + " where o.hierarchy like :hierarchy and ci.document_key like :partialSearch and ci.document_key not like :search) ";
 
-            String groupExactMatchSql = " (select IF(g.level_id=1,'CENTER','GROUP') as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, NULL as entityAccountNo "
+            final String groupExactMatchSql = " (select IF(g.level_id=1,'CENTER','GROUP') as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, NULL as entityAccountNo "
                     + " , g.office_id as parentId, o.name as parentName "
                     + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and g.display_name like :search) ";
 
-            String groupMatchSql = " (select IF(g.level_id=1,'CENTER','GROUP') as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, NULL as entityAccountNo "
+            final String groupMatchSql = " (select IF(g.level_id=1,'CENTER','GROUP') as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, NULL as entityAccountNo "
                     + " , g.office_id as parentId, o.name as parentName "
                     + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and g.display_name like :partialSearch and g.display_name not like :search) ";
 
-            StringBuffer sql = new StringBuffer();
+            final StringBuffer sql = new StringBuffer();
 
             // first include all exact matches
             if (searchConditions.isClientSearch()) {
@@ -100,10 +100,10 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                 sql.append(loanExactMatchSql).append(union);
             }
 
-            if(searchConditions.isClientIdentifierSearch()){
+            if (searchConditions.isClientIdentifierSearch()) {
                 sql.append(clientIdentifierExactMatchSql).append(union);
             }
-            
+
             if (searchConditions.isGroupSearch()) {
                 sql.append(groupExactMatchSql).append(union);
             }
@@ -116,8 +116,8 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
             if (searchConditions.isLoanSeach()) {
                 sql.append(loanMatchSql).append(union);
             }
-            
-            if(searchConditions.isClientIdentifierSearch()){
+
+            if (searchConditions.isClientIdentifierSearch()) {
                 sql.append(clientIdentifierMatchSql).append(union);
             }
 

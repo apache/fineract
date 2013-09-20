@@ -10,12 +10,20 @@ import org.mifosplatform.infrastructure.cache.domain.CacheType;
 public interface ConfigurationDomainService {
 
     boolean isMakerCheckerEnabledForTask(String taskPermissionCode);
+
     boolean isAmazonS3Enabled();
+
     boolean isRescheduleFutureRepaymentsEnabled();
+
     boolean isRescheduleRepaymentsOnHolidaysEnabled();
+
     boolean allowTransactionsOnHolidayEnabled();
+
     boolean allowTransactionsOnNonWorkingDayEnabled();
+
     boolean isConstraintApproachEnabledForDatatables();
+
     boolean isEhcacheEnabled();
+
     void updateCache(CacheType cacheType);
 }

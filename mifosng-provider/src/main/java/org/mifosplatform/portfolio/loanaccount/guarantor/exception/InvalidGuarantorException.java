@@ -13,7 +13,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
  */
 public class InvalidGuarantorException extends AbstractPlatformDomainRuleException {
 
-    public InvalidGuarantorException(Long clientId, Long loanId) {
+    public InvalidGuarantorException(final Long clientId, final Long loanId) {
         super("error.msg.invalid.guarantor", "Tried to set Client with id " + clientId
                 + " as a guarantor to his/her own loan with loan identifier =" + loanId, clientId, loanId);
     }

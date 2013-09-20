@@ -9,12 +9,12 @@ import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 
 public class SavingsAccountTransactionDTO {
 
-    private DateTimeFormatter formatter;
-    private LocalDate transactionDate;
-    private BigDecimal transactionAmount;
-    private List<Long> existingTransactionIds;
-    private List<Long> existingReversedTransactionIds;
-    private PaymentDetail paymentDetail;
+    private final DateTimeFormatter formatter;
+    private final LocalDate transactionDate;
+    private final BigDecimal transactionAmount;
+    private final List<Long> existingTransactionIds;
+    private final List<Long> existingReversedTransactionIds;
+    private final PaymentDetail paymentDetail;
 
     public SavingsAccountTransactionDTO(final DateTimeFormatter formatter, final LocalDate transactionDate,
             final BigDecimal transactionAmount, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,

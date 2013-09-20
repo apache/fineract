@@ -103,7 +103,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
         final CollateralCommand collateralCommand = this.collateralCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
         collateralCommand.validateForUpdate();
 
-        Long collateralTypeId = collateralCommand.getCollateralTypeId();
+        final Long collateralTypeId = collateralCommand.getCollateralTypeId();
         try {
             final Loan loan = this.loanRepository.findOne(loanId);
             if (loan == null) { throw new LoanNotFoundException(loanId); }

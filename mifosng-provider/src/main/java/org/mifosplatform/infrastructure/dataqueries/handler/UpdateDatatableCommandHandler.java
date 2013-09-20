@@ -27,14 +27,11 @@ public class UpdateDatatableCommandHandler implements NewCommandSourceHandler {
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-    	
-    	final String datatableName = command.getUrl().replaceAll("/datatables/", "");
-    	
+
+        final String datatableName = command.getUrl().replaceAll("/datatables/", "");
+
         this.writePlatformService.updateDatatable(datatableName, command);
 
-        return new CommandProcessingResultBuilder()
-        	.withCommandId(command.commandId())
-        	.withResourceIdAsString(datatableName)
-        	.build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withResourceIdAsString(datatableName).build();
     }
 }

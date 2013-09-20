@@ -51,7 +51,7 @@ public enum GroupingTypeStatus {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public boolean isPending() {
@@ -67,11 +67,11 @@ public enum GroupingTypeStatus {
     }
 
     public boolean isTransferInProgress() {
-        return this.isTransferInProgress();
+        return isTransferInProgress();
     }
 
     public boolean isTransferOnHold() {
-        return this.isTransferOnHold();
+        return isTransferOnHold();
     }
 
     public boolean isUnderTransfer() {

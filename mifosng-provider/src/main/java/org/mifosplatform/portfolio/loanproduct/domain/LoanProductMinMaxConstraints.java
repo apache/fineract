@@ -120,11 +120,11 @@ public class LoanProductMinMaxConstraints {
 
         return actualChanges;
     }
-    
+
     public BigDecimal getMinPrincipal() {
         return this.minPrincipal;
     }
-    
+
     public BigDecimal getMaxPrincipal() {
         return this.maxPrincipal;
     }
@@ -140,11 +140,11 @@ public class LoanProductMinMaxConstraints {
     }
 
     public Integer getMinNumberOfRepayments() {
-        return minNumberOfRepayments;
+        return this.minNumberOfRepayments;
     }
 
     public Integer getMaxNumberOfRepayments() {
-        return maxNumberOfRepayments;
+        return this.maxNumberOfRepayments;
     }
 
 }

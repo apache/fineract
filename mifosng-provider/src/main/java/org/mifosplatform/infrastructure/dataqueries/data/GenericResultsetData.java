@@ -21,17 +21,17 @@ public final class GenericResultsetData {
     }
 
     public List<ResultsetColumnHeaderData> getColumnHeaders() {
-        return columnHeaders;
+        return this.columnHeaders;
     }
 
     public List<ResultsetRowData> getData() {
-        return data;
+        return this.data;
     }
 
     public String getColTypeOfColumnNamed(final String columnName) {
 
         String colType = null;
-        for (ResultsetColumnHeaderData columnHeader : this.columnHeaders) {
+        for (final ResultsetColumnHeaderData columnHeader : this.columnHeaders) {
             if (columnHeader.isNamed(columnName)) {
                 colType = columnHeader.getColumnType();
             }

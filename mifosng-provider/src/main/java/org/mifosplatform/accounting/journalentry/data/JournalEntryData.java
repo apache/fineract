@@ -63,7 +63,8 @@ public class JournalEntryData {
             final Long glAccountId, final String glAccountCode, final EnumOptionData glAccountClassification,
             final LocalDate transactionDate, final EnumOptionData entryType, final BigDecimal amount, final String transactionId,
             final Boolean manualEntry, final EnumOptionData entityType, final Long entityId, final Long createdByUserId,
-            final LocalDate createdDate, final String createdByUserName, final String comments, final Boolean reversed, final String referenceNumber) {
+            final LocalDate createdDate, final String createdByUserName, final String comments, final Boolean reversed,
+            final String referenceNumber) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;

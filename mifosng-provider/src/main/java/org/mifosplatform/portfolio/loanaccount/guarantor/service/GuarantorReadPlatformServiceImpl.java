@@ -37,9 +37,8 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
     private final LoanRepository loanRepository;
 
     @Autowired
-    public GuarantorReadPlatformServiceImpl(final RoutingDataSource dataSource,
-            final ClientReadPlatformService clientReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
-            final LoanRepository loanRepository) {
+    public GuarantorReadPlatformServiceImpl(final RoutingDataSource dataSource, final ClientReadPlatformService clientReadPlatformService,
+            final StaffReadPlatformService staffReadPlatformService, final LoanRepository loanRepository) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.clientReadPlatformService = clientReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
@@ -48,21 +47,21 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
 
     private static final class GuarantorMapper implements RowMapper<GuarantorData> {
 
-        private StringBuilder sqlBuilder = new StringBuilder(
+        private final StringBuilder sqlBuilder = new StringBuilder(
                 " g.id as id, g.loan_id as loanId, g.client_reln_cv_id clientRelationshipTypeId, g.entity_id as entityId, g.type_enum guarantorType ,g.firstname as firstname, g.lastname as lastname, g.dob as dateOfBirth, g.address_line_1 as addressLine1, g.address_line_2 as addressLine2, g.city as city, g.state as state, g.country as country, g.zip as zip, g.house_phone_number as housePhoneNumber, g.mobile_number as mobilePhoneNumber, g.comment as comment, ")
                 .append(" cv.code_value as typeName")//
                 .append(" FROM m_guarantor g") //
                 .append(" left JOIN m_code_value cv on g.client_reln_cv_id = cv.id");
 
         public String schema() {
-            return sqlBuilder.toString();
+            return this.sqlBuilder.toString();
         }
 
         @Override
         public GuarantorData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-            Long id = rs.getLong("id");
-            Long loanId = rs.getLong("loanId");
-            Long clientRelationshipTypeId = JdbcSupport.getLong(rs, "clientRelationshipTypeId");
+            final Long id = rs.getLong("id");
+            final Long loanId = rs.getLong("loanId");
+            final Long clientRelationshipTypeId = JdbcSupport.getLong(rs, "clientRelationshipTypeId");
             CodeValueData clientRelationshipType = null;
 
             if (clientRelationshipTypeId != null) {
@@ -70,54 +69,54 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
                 clientRelationshipType = CodeValueData.instance(clientRelationshipTypeId, typeName);
             }
 
-            Integer guarantorTypeId = rs.getInt("guarantorType");
+            final Integer guarantorTypeId = rs.getInt("guarantorType");
             final EnumOptionData guarantorType = GuarantorEnumerations.guarantorType(guarantorTypeId);
-            Long entityId = rs.getLong("entityId");
-            String firstname = rs.getString("firstname");
-            String lastname = rs.getString("lastname");
-            LocalDate dob = JdbcSupport.getLocalDate(rs, "dateOfBirth");
-            String addressLine1 = rs.getString("addressLine1");
-            String addressLine2 = rs.getString("addressLine2");
-            String city = rs.getString("city");
-            String state = rs.getString("state");
-            String zip = rs.getString("zip");
-            String country = rs.getString("country");
-            String mobileNumber = rs.getString("mobilePhoneNumber");
-            String housePhoneNumber = rs.getString("housePhoneNumber");
-            String comment = rs.getString("comment");
+            final Long entityId = rs.getLong("entityId");
+            final String firstname = rs.getString("firstname");
+            final String lastname = rs.getString("lastname");
+            final LocalDate dob = JdbcSupport.getLocalDate(rs, "dateOfBirth");
+            final String addressLine1 = rs.getString("addressLine1");
+            final String addressLine2 = rs.getString("addressLine2");
+            final String city = rs.getString("city");
+            final String state = rs.getString("state");
+            final String zip = rs.getString("zip");
+            final String country = rs.getString("country");
+            final String mobileNumber = rs.getString("mobilePhoneNumber");
+            final String housePhoneNumber = rs.getString("housePhoneNumber");
+            final String comment = rs.getString("comment");
             return new GuarantorData(id, loanId, clientRelationshipType, entityId, guarantorType, firstname, lastname, dob, addressLine1,
                     addressLine2, city, state, zip, country, mobileNumber, housePhoneNumber, comment, null, null, null, null, null);
         }
     }
 
     @Override
-    public List<GuarantorData> retrieveGuarantorsForValidLoan(Long loanId) {
-        Loan loan = this.loanRepository.findOne(loanId);
+    public List<GuarantorData> retrieveGuarantorsForValidLoan(final Long loanId) {
+        final Loan loan = this.loanRepository.findOne(loanId);
         if (loan == null) { throw new LoanNotFoundException(loanId); }
         return retrieveGuarantorsForLoan(loanId);
     }
 
     @Override
-    public List<GuarantorData> retrieveGuarantorsForLoan(Long loanId) {
+    public List<GuarantorData> retrieveGuarantorsForLoan(final Long loanId) {
         final GuarantorMapper rm = new GuarantorMapper();
         String sql = "select " + rm.schema();
         sql += " where loan_id = ?";
-        List<GuarantorData> guarantorDatas = this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+        final List<GuarantorData> guarantorDatas = this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
 
-        List<GuarantorData> mergedGuarantorDatas = new ArrayList<GuarantorData>();
+        final List<GuarantorData> mergedGuarantorDatas = new ArrayList<GuarantorData>();
 
-        for (GuarantorData guarantorData : guarantorDatas) {
+        for (final GuarantorData guarantorData : guarantorDatas) {
             mergedGuarantorDatas.add(mergeDetailsForClientOrStaffGuarantor(guarantorData));
         }
         return mergedGuarantorDatas;
     }
 
     @Override
-    public GuarantorData retrieveGuarantor(Long loanId, Long guarantorId) {
+    public GuarantorData retrieveGuarantor(final Long loanId, final Long guarantorId) {
         final GuarantorMapper rm = new GuarantorMapper();
         String sql = "select " + rm.schema();
         sql += " where g.loan_id = ? and g.id = ?";
-        GuarantorData guarantorData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId, guarantorId });
+        final GuarantorData guarantorData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId, guarantorId });
 
         return mergeDetailsForClientOrStaffGuarantor(guarantorData);
     }
@@ -125,12 +124,12 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
     /**
      * @param guarantorData
      */
-    private GuarantorData mergeDetailsForClientOrStaffGuarantor(GuarantorData guarantorData) {
+    private GuarantorData mergeDetailsForClientOrStaffGuarantor(final GuarantorData guarantorData) {
         if (guarantorData.isExistingClient()) {
-            ClientData clientData = clientReadPlatformService.retrieveOne(guarantorData.getEntityId());
+            final ClientData clientData = this.clientReadPlatformService.retrieveOne(guarantorData.getEntityId());
             return GuarantorData.mergeClientData(clientData, guarantorData);
         } else if (guarantorData.isStaffMember()) {
-            StaffData staffData = staffReadPlatformService.retrieveStaff(guarantorData.getEntityId());
+            final StaffData staffData = this.staffReadPlatformService.retrieveStaff(guarantorData.getEntityId());
             return GuarantorData.mergeStaffData(staffData, guarantorData);
         }
         return guarantorData;

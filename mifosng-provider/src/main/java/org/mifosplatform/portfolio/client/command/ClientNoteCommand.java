@@ -24,9 +24,9 @@ public class ClientNoteCommand {
     }
 
     public void validate() {
-        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("clientnote");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("clientnote");
 
         baseDataValidator.reset().parameter("note").value(this.note).notBlank().notExceedingLengthOf(1000);
 

@@ -19,7 +19,8 @@ public class SavingsAccountApplicationModificationCommandHandler implements NewC
     private final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService;
 
     @Autowired
-    public SavingsAccountApplicationModificationCommandHandler(final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService) {
+    public SavingsAccountApplicationModificationCommandHandler(
+            final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService) {
         this.savingAccountWritePlatformService = savingAccountWritePlatformService;
     }
 

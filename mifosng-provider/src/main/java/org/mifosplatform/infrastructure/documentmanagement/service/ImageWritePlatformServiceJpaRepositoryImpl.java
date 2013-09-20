@@ -38,12 +38,12 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
     @Transactional
     @Override
     public CommandProcessingResult saveOrUpdateClientImage(final Long clientId, final String imageName, final InputStream inputStream,
-            Long fileSize) {
+            final Long fileSize) {
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
         deletePreviousClientImage(client);
 
-        ContentRepository contentRepository = this.contentRepositoryFactory.getRepository();
-        String imageLocation = contentRepository.saveImage(inputStream, clientId, imageName, fileSize);
+        final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository();
+        final String imageLocation = contentRepository.saveImage(inputStream, clientId, imageName, fileSize);
         return updateClientImage(client, imageLocation, contentRepository.getStorageType());
     }
 
@@ -53,7 +53,7 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
         deletePreviousClientImage(client);
 
-        ContentRepository contenRepository = this.contentRepositoryFactory.getRepository();
+        final ContentRepository contenRepository = this.contentRepositoryFactory.getRepository();
         final String imageLocation = contenRepository.saveImage(encodedImage, clientId, "image");
 
         return updateClientImage(client, imageLocation, contenRepository.getStorageType());
@@ -65,10 +65,11 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
 
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
 
-        Image image = client.getImage();
+        final Image image = client.getImage();
         // delete image from the file system
         if (image != null) {
-            ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(StorageType.fromInt(image.getStorageType()));
+            final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(StorageType.fromInt(image
+                    .getStorageType()));
             contentRepository.deleteImage(clientId, image.getLocation());
             client.setImage(null);
             this.imageRepository.delete(image);
@@ -79,9 +80,10 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
     }
 
     private void deletePreviousClientImage(final Client client) {
-        Image image = client.getImage();
+        final Image image = client.getImage();
         if (image != null) {
-            ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(StorageType.fromInt(image.getStorageType()));
+            final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(StorageType.fromInt(image
+                    .getStorageType()));
             contentRepository.deleteImage(client.getId(), image.getLocation());
         }
     }

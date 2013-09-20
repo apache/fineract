@@ -29,8 +29,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 /**
- * Implementation of {@link FromApiJsonDeserializer} for {@link NoteCommand} 
- * 's.
+ * Implementation of {@link FromApiJsonDeserializer} for {@link NoteCommand} 's.
  */
 @Component
 public final class NoteCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<NoteCommand> {

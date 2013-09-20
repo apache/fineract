@@ -24,9 +24,8 @@ public class GroupLevelReadPlatformServiceImpl implements GroupLevelReadPlatform
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
 
-
     @Autowired
-    public GroupLevelReadPlatformServiceImpl(final PlatformSecurityContext context , final RoutingDataSource dataSource) {
+    public GroupLevelReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
@@ -34,13 +33,13 @@ public class GroupLevelReadPlatformServiceImpl implements GroupLevelReadPlatform
     @Override
     public Collection<GroupLevelData> retrieveAllLevels() {
         this.context.authenticatedUser();
-        
+
         final GroupLevelDataMapper rm = new GroupLevelDataMapper();
         final String sql = "select " + rm.groupLevelSchema();
         return this.jdbcTemplate.query(sql, rm);
-        
+
     }
-    
+
     private static final class GroupLevelDataMapper implements RowMapper<GroupLevelData> {
 
         public String groupLevelSchema() {

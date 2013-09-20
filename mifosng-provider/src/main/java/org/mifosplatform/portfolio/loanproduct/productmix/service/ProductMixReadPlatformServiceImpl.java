@@ -86,9 +86,11 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
             final Map<Long, ProductMixData> extractedData = new HashMap<Long, ProductMixData>();
 
             if (!rs.next()) {
-                final Collection<LoanProductData> restrictedProducts = this.loanProductReadPlatformService.retrieveRestrictedProductsForMix(this.productId);
-                final Collection<LoanProductData> allowedProducts = this.loanProductReadPlatformService.retrieveAllowedProductsForMix(this.productId);
-                ProductMixData productMixData = ProductMixData.withRestrictedOptions(restrictedProducts, allowedProducts);
+                final Collection<LoanProductData> restrictedProducts = this.loanProductReadPlatformService
+                        .retrieveRestrictedProductsForMix(this.productId);
+                final Collection<LoanProductData> allowedProducts = this.loanProductReadPlatformService
+                        .retrieveAllowedProductsForMix(this.productId);
+                final ProductMixData productMixData = ProductMixData.withRestrictedOptions(restrictedProducts, allowedProducts);
                 extractedData.put(this.productId, productMixData);
                 return extractedData;
             }
@@ -97,8 +99,10 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
             while (rs.next()) {
                 final Long productId = rs.getLong("productId");
                 final String name = rs.getString("name");
-                final Collection<LoanProductData> restrictedProducts = this.loanProductReadPlatformService.retrieveRestrictedProductsForMix(productId);
-                final Collection<LoanProductData> allowedProducts = this.loanProductReadPlatformService.retrieveAllowedProductsForMix(productId);
+                final Collection<LoanProductData> restrictedProducts = this.loanProductReadPlatformService
+                        .retrieveRestrictedProductsForMix(productId);
+                final Collection<LoanProductData> allowedProducts = this.loanProductReadPlatformService
+                        .retrieveAllowedProductsForMix(productId);
                 final ProductMixData productMixData = ProductMixData.withDetails(productId, name, restrictedProducts, allowedProducts);
                 extractedData.put(productId, productMixData);
             }

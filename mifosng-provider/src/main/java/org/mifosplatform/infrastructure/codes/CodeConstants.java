@@ -11,7 +11,8 @@ import java.util.Set;
 public class CodeConstants {
 
     /***
-     * Enum of all parameters passed in while creating/updating a code and code value
+     * Enum of all parameters passed in while creating/updating a code and code
+     * value
      ***/
     public static enum CODEVALUE_JSON_INPUT_PARAMS {
         CODEVALUE_ID("id"), NAME("name"), POSITION("position");
@@ -24,7 +25,7 @@ public class CodeConstants {
 
         private static final Set<String> values = new HashSet<String>();
         static {
-            for (CODEVALUE_JSON_INPUT_PARAMS type : CODEVALUE_JSON_INPUT_PARAMS.values()) {
+            for (final CODEVALUE_JSON_INPUT_PARAMS type : CODEVALUE_JSON_INPUT_PARAMS.values()) {
                 values.add(type.value);
             }
         }

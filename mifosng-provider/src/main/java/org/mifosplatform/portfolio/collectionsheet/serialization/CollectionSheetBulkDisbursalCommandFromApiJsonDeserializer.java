@@ -28,12 +28,13 @@ import com.google.gson.JsonObject;
  * {@link CollectionSheetBulkDisbursalCommand}'s.
  */
 @Component
-public final class CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<CollectionSheetBulkDisbursalCommand> {
+public final class CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer extends
+        AbstractFromApiJsonDeserializer<CollectionSheetBulkDisbursalCommand> {
 
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
-    public CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer(FromJsonHelper fromApiJsonHelper) {
+    public CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
@@ -45,8 +46,8 @@ public final class CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer ex
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
 
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
-        final LocalDate transactionDate = fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
-        final String note = fromApiJsonHelper.extractStringNamed("note", element);
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
+        final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
 
         SingleDisbursalCommand[] loanDisbursementTransactions = null;
 
@@ -57,9 +58,10 @@ public final class CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer ex
                 loanDisbursementTransactions = new SingleDisbursalCommand[array.size()];
                 for (int i = 0; i < array.size(); i++) {
                     final JsonObject loanTransactionElement = array.get(i).getAsJsonObject();
-                    
+
                     final Long loanId = this.fromApiJsonHelper.extractLongNamed("loanId", loanTransactionElement);
-                    final BigDecimal disbursementAmount = this.fromApiJsonHelper.extractBigDecimalNamed("transactionAmount", loanTransactionElement, locale);
+                    final BigDecimal disbursementAmount = this.fromApiJsonHelper.extractBigDecimalNamed("transactionAmount",
+                            loanTransactionElement, locale);
                     loanDisbursementTransactions[i] = new SingleDisbursalCommand(loanId, disbursementAmount, transactionDate);
                 }
             }

@@ -141,7 +141,8 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
     }
 
     @Override
-    public List<AccountingRuleData> retrieveAllAccountingRules(final String hierarchySearchString, final boolean isAssociationParametersExists) {
+    public List<AccountingRuleData> retrieveAllAccountingRules(final String hierarchySearchString,
+            final boolean isAssociationParametersExists) {
         final AccountingRuleDataExtractor resultSetExtractor = new AccountingRuleDataExtractor(this.jdbcTemplate,
                 this.glAccountReadPlatformService, isAssociationParametersExists);
         Object[] arguments = new Object[] {};

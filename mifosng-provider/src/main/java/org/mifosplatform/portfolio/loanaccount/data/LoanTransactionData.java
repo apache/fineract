@@ -41,20 +41,21 @@ public class LoanTransactionData {
     // templates
     final Collection<CodeValueData> paymentTypeOptions;
 
-    public static LoanTransactionData templateOnTop(LoanTransactionData loanTransactionData, Collection<CodeValueData> paymentTypeOptions) {
+    public static LoanTransactionData templateOnTop(final LoanTransactionData loanTransactionData,
+            final Collection<CodeValueData> paymentTypeOptions) {
         return new LoanTransactionData(loanTransactionData.id, loanTransactionData.officeId, loanTransactionData.officeName,
                 loanTransactionData.type, loanTransactionData.paymentDetailData, loanTransactionData.currency, loanTransactionData.date,
                 loanTransactionData.amount, loanTransactionData.principalPortion, loanTransactionData.interestPortion,
                 loanTransactionData.feeChargesPortion, loanTransactionData.penaltyChargesPortion, paymentTypeOptions,
-                loanTransactionData.externalId,loanTransactionData.transfer);
+                loanTransactionData.externalId, loanTransactionData.transfer);
     }
 
     public LoanTransactionData(final Long id, final Long officeId, final String officeName, final LoanTransactionEnumData transactionType,
             final PaymentDetailData paymentDetailData, final CurrencyData currency, final LocalDate date, final BigDecimal amount,
             final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
-            final BigDecimal penaltyChargesPortion, final String externalId, AccountTransferData transfer) {
+            final BigDecimal penaltyChargesPortion, final String externalId, final AccountTransferData transfer) {
         this(id, officeId, officeName, transactionType, paymentDetailData, currency, date, amount, principalPortion, interestPortion,
-                feeChargesPortion, penaltyChargesPortion, null, externalId,transfer);
+                feeChargesPortion, penaltyChargesPortion, null, externalId, transfer);
     }
 
     public LoanTransactionData(final Long id, final Long officeId, final String officeName, final LoanTransactionEnumData transactionType,
@@ -84,6 +85,6 @@ public class LoanTransactionData {
     }
 
     public boolean isNotDisbursement() {
-        return Integer.valueOf(1).equals(type.id());
+        return Integer.valueOf(1).equals(this.type.id());
     }
 }

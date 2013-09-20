@@ -108,7 +108,7 @@ public class ImagesApiResource {
     @Produces({ MediaType.TEXT_PLAIN })
     public String retrieveClientImage(@PathParam("clientId") final Long clientId) {
 
-        context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
+        this.context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
 
         final ImageData imageData = this.imageReadPlatformService.retrieveClientImage(clientId);
 
@@ -120,7 +120,7 @@ public class ImagesApiResource {
             imageDataURISuffix = ContentRepositoryUtils.IMAGE_DATA_URI_SUFFIX.PNG.getValue();
         }
 
-        String clientImageAsBase64Text = imageDataURISuffix + Base64.encodeBytes(imageData.getContent());
+        final String clientImageAsBase64Text = imageDataURISuffix + Base64.encodeBytes(imageData.getContent());
         return clientImageAsBase64Text;
     }
 
@@ -129,10 +129,10 @@ public class ImagesApiResource {
     @Produces({ MediaType.APPLICATION_OCTET_STREAM })
     public Response downloadClientImage(@PathParam("clientId") final Long clientId) {
 
-        context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
+        this.context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
         final ImageData imageData = this.imageReadPlatformService.retrieveClientImage(clientId);
 
-        ResponseBuilder response = Response.ok(imageData.getContent());
+        final ResponseBuilder response = Response.ok(imageData.getContent());
         response.header("Content-Disposition", "attachment; filename=\"" + imageData.getEntityDisplayName() + IMAGE_FILE_EXTENSION.JPEG
                 + "\"");
 

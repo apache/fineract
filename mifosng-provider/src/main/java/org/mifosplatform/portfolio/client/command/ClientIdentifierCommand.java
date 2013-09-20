@@ -28,21 +28,21 @@ public class ClientIdentifierCommand {
     }
 
     public Long getDocumentTypeId() {
-        return documentTypeId;
+        return this.documentTypeId;
     }
 
     public String getDocumentKey() {
-        return documentKey;
+        return this.documentKey;
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public void validateForCreate() {
-        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("clientIdentifier");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("clientIdentifier");
 
         baseDataValidator.reset().parameter("documentTypeId").value(this.documentTypeId).notNull().integerGreaterThanZero();
         baseDataValidator.reset().parameter("documentKey").value(this.documentKey).notBlank();
@@ -52,9 +52,9 @@ public class ClientIdentifierCommand {
     }
 
     public void validateForUpdate() {
-        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("clientIdentifier");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("clientIdentifier");
 
         baseDataValidator.reset().parameter("documentKey").value(this.documentKey).ignoreIfNull().notBlank();
 

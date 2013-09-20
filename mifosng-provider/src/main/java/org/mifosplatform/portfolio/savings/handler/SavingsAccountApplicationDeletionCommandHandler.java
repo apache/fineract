@@ -19,7 +19,8 @@ public class SavingsAccountApplicationDeletionCommandHandler implements NewComma
     private final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService;
 
     @Autowired
-    public SavingsAccountApplicationDeletionCommandHandler(final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService) {
+    public SavingsAccountApplicationDeletionCommandHandler(
+            final SavingsApplicationProcessWritePlatformService savingAccountWritePlatformService) {
         this.savingAccountWritePlatformService = savingAccountWritePlatformService;
     }
 

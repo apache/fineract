@@ -23,7 +23,7 @@ public class AccountingTagRuleData {
     }
 
     public CodeValueData getTag() {
-        return tag;
+        return this.tag;
     }
 
 }

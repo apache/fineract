@@ -15,11 +15,11 @@ public class UnsupportedParameterException extends RuntimeException {
 
     private final List<String> unsupportedParameters;
 
-    public UnsupportedParameterException(List<String> unsupportedParameters) {
+    public UnsupportedParameterException(final List<String> unsupportedParameters) {
         this.unsupportedParameters = unsupportedParameters;
     }
 
     public List<String> getUnsupportedParameters() {
-        return unsupportedParameters;
+        return this.unsupportedParameters;
     }
 }

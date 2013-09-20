@@ -32,7 +32,7 @@ public enum AttendanceType {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     public static AttendanceType fromInt(final Integer attendanceTypeId) {

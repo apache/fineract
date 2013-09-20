@@ -100,9 +100,9 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
     public Page<JournalEntryData> retrieveAll(final SearchParameters searchParameters, final Long glAccountId,
             final Boolean onlyManualEntries, final Date fromDate, final Date toDate, final String transactionId) {
 
-        StringBuilder sqlBuilder = new StringBuilder(200);
+        final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
-        sqlBuilder.append(journalEntryMapper.schema());
+        sqlBuilder.append(this.journalEntryMapper.schema());
 
         final Object[] objectArray = new Object[5];
         int arrayPos = 0;

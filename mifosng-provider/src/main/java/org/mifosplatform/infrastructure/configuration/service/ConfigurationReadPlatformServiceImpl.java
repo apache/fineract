@@ -30,16 +30,16 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
 
-        rm = new GlobalConfigurationRowMapper();
+        this.rm = new GlobalConfigurationRowMapper();
     }
 
     @Override
     public GlobalConfigurationData retrieveGlobalConfiguration() {
 
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
         final String sql = "SELECT c.name, c.enabled FROM c_configuration c order by c.id";
-        final List<GlobalConfigurationPropertyData> globalConfiguration = this.jdbcTemplate.query(sql, rm, new Object[] {});
+        final List<GlobalConfigurationPropertyData> globalConfiguration = this.jdbcTemplate.query(sql, this.rm, new Object[] {});
 
         return new GlobalConfigurationData(globalConfiguration);
     }

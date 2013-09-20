@@ -97,10 +97,12 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
             final int chargeCalculation = rs.getInt("chargeCalculation");
             final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(chargeCalculation);
             final boolean penalty = rs.getBoolean("penalty");
-            
+
             final Collection<ChargeData> chargeOptions = null;
-            
-            return SavingsAccountChargeData.instance(id, chargeId, name, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding, chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo, chargeOptions, penalty);
+
+            return SavingsAccountChargeData.instance(id, chargeId, name, currency, amount, amountPaid, amountWaived, amountWrittenOff,
+                    amountOutstanding, chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo,
+                    chargeOptions, penalty);
         }
     }
 
@@ -111,7 +113,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
         final List<EnumOptionData> allowedChargeCalculationTypeOptions = this.chargeDropdownReadPlatformService.retrieveCalculationTypes();
         final List<EnumOptionData> allowedChargeTimeOptions = this.chargeDropdownReadPlatformService.retrieveCollectionTimeTypes();
 
-        //TODO AA : revisit for merge conflict - Not sure method signature
+        // TODO AA : revisit for merge conflict - Not sure method signature
         return ChargeData.template(null, allowedChargeCalculationTypeOptions, null, allowedChargeTimeOptions, null);
     }
 
@@ -125,7 +127,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
             final String sql = "select " + rm.schema() + " where sc.id=? and sc.savings_account_id=?";
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { id, savingsAccountId });
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new SavingsAccountChargeNotFoundException(savingsAccountId);
         }
     }

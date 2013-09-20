@@ -10,9 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UnassignRoleCommandHandler implements NewCommandSourceHandler {
-    
+
     private final GroupRolesWritePlatformService groupRolesWritePlatformService;
-    
+
     @Autowired
     public UnassignRoleCommandHandler(final GroupRolesWritePlatformService groupRolesWritePlatformService) {
         this.groupRolesWritePlatformService = groupRolesWritePlatformService;
@@ -20,8 +20,8 @@ public class UnassignRoleCommandHandler implements NewCommandSourceHandler {
 
     @Override
     @Transactional
-    public CommandProcessingResult processCommand(JsonCommand command) {
-       return this.groupRolesWritePlatformService.deleteRole(command.entityId());
+    public CommandProcessingResult processCommand(final JsonCommand command) {
+        return this.groupRolesWritePlatformService.deleteRole(command.entityId());
     }
 
 }

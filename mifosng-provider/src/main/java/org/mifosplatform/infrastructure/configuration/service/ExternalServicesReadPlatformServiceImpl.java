@@ -24,7 +24,7 @@ public class ExternalServicesReadPlatformServiceImpl implements ExternalServices
     private static final class S3CredentialsDataExtractor implements ResultSetExtractor<S3CredentialsData> {
 
         @Override
-        public S3CredentialsData extractData(ResultSet rs) throws SQLException, DataAccessException {
+        public S3CredentialsData extractData(final ResultSet rs) throws SQLException, DataAccessException {
             String accessKey = null;
             String bucketName = null;
             String secretKey = null;

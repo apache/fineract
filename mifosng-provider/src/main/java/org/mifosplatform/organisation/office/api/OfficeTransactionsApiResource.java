@@ -41,8 +41,8 @@ import org.springframework.stereotype.Component;
 public class OfficeTransactionsApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "transactionDate", "fromOfficeId",
-            "fromOfficeName", "toOfficeId", "toOfficeIdName", "currencyCode", "digitsAfterDecimal","inMultiplesOf", "transactionAmount", "description",
-            "allowedOffices", "currencyOptions"));
+            "fromOfficeName", "toOfficeId", "toOfficeIdName", "currencyCode", "digitsAfterDecimal", "inMultiplesOf", "transactionAmount",
+            "description", "allowedOffices", "currencyOptions"));
 
     private final String resourceNameForReadPermissions = "OFFICE";
 
@@ -69,11 +69,11 @@ public class OfficeTransactionsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveOfficeTransactions(@Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForReadPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForReadPermissions);
 
         final Collection<OfficeTransactionData> officeTransactions = this.readPlatformService.retrieveAllOfficeTransactions();
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, officeTransactions, RESPONSE_DATA_PARAMETERS);
     }
 
@@ -83,11 +83,11 @@ public class OfficeTransactionsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String newOfficeTransactionDetails(@Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForReadPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForReadPermissions);
 
         final OfficeTransactionData officeTransactionData = this.readPlatformService.retrieveNewOfficeTransactionDetails();
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, officeTransactionData, RESPONSE_DATA_PARAMETERS);
     }
 
@@ -102,7 +102,7 @@ public class OfficeTransactionsApiResource {
 
         return this.toApiJsonSerializer.serialize(result);
     }
-    
+
     @DELETE
     @Path("{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })

@@ -69,7 +69,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         final EnumOptionData loanAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.LOAN);
         final EnumOptionData savingsAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.SAVINGS);
 
-        Integer mostRelevantFromAccountType = fromAccountType;
+        final Integer mostRelevantFromAccountType = fromAccountType;
         final Collection<EnumOptionData> fromAccountTypeOptions = Arrays.asList(savingsAccountType, loanAccountType);
         final Collection<EnumOptionData> toAccountTypeOptions;
         if (mostRelevantFromAccountType == 1) {
@@ -309,17 +309,16 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             final String toClientName = rs.getString("toClientName");
             final ClientData toClient = ClientData.lookup(toClientId, toClientName, toOfficeId, toOfficeName);
 
-
             final Long fromSavingsAccountId = JdbcSupport.getLong(rs, "fromSavingsAccountId");
             final String fromSavingsAccountNo = rs.getString("fromSavingsAccountNo");
             final Long fromLoanAccountId = JdbcSupport.getLong(rs, "fromLoanAccountId");
             final String fromLoanAccountNo = rs.getString("fromLoanAccountNo");
             PortfolioAccountData fromAccount = null;
             EnumOptionData fromAccountType = null;
-            if(fromSavingsAccountId != null){
+            if (fromSavingsAccountId != null) {
                 fromAccount = PortfolioAccountData.lookup(fromSavingsAccountId, fromSavingsAccountNo);
                 fromAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.SAVINGS);
-            }else if(fromLoanAccountId != null){
+            } else if (fromLoanAccountId != null) {
                 fromAccount = PortfolioAccountData.lookup(fromLoanAccountId, fromLoanAccountNo);
                 fromAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.LOAN);
             }
@@ -345,15 +344,16 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     }
 
     @Override
-    public boolean isAccountTransfer(Long transactionId, PortfolioAccountType accountType) {
-        StringBuilder sql = new StringBuilder("select count(*) from m_savings_account_transfer at where ");
+    public boolean isAccountTransfer(final Long transactionId, final PortfolioAccountType accountType) {
+        final StringBuilder sql = new StringBuilder("select count(*) from m_savings_account_transfer at where ");
         if (accountType.isLoanAccount()) {
             sql.append("at.from_loan_transaction_id=").append(transactionId).append(" or at.to_loan_transaction_id=").append(transactionId);
         } else {
-            sql.append("at.from_savings_transaction_id=").append(transactionId).append(" or at.to_savings_transaction_id=").append(transactionId);
+            sql.append("at.from_savings_transaction_id=").append(transactionId).append(" or at.to_savings_transaction_id=")
+                    .append(transactionId);
         }
 
-        int count = this.jdbcTemplate.queryForInt(sql.toString());
+        final int count = this.jdbcTemplate.queryForInt(sql.toString());
         return count > 0;
     }
 

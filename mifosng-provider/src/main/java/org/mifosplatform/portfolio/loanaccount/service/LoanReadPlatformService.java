@@ -35,22 +35,22 @@ public interface LoanReadPlatformService {
     LoanTransactionData retrieveLoanTransaction(Long loanId, Long transactionId);
 
     LoanTransactionData retrieveNewClosureDetails();
-    
+
     LoanTransactionData retrieveDisbursalTemplate(Long loanId);
 
     LoanAccountData retrieveTemplateWithCompleteGroupAndProductDetails(Long groupId, Long productId);
-    
+
     LoanAccountData retrieveLoanProductDetailsTemplate(Long productId);
-    
+
     LoanAccountData retrieveClientDetailsTemplate(Long clientId);
-    
+
     LoanAccountData retrieveGroupDetailsTemplate(Long groupId);
-    
+
     LoanAccountData retrieveGroupAndMembersDetailsTemplate(Long groupId);
 
     Collection<CalendarData> retrieveCalendars(Long groupId);
 
     Page<LoanAccountData> retrieveAll(SearchParameters searchParameters);
-    
+
     Collection<StaffData> retrieveAllowedLoanOfficers(Long selectedOfficeId, boolean staffInSelectedOfficeOnly);
 }

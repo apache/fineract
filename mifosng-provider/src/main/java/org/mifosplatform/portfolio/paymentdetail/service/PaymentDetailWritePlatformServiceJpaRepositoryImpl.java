@@ -32,27 +32,27 @@ public class PaymentDetailWritePlatformServiceJpaRepositoryImpl implements Payme
 
     @Override
     @Transactional
-    public PaymentDetail createPaymentDetail(JsonCommand command, Map<String, Object> changes) {
+    public PaymentDetail createPaymentDetail(final JsonCommand command, final Map<String, Object> changes) {
         final Long paymentTypeId = command.longValueOfParameterNamed(PaymentDetailConstants.paymentTypeParamName);
         if (paymentTypeId == null) { return null; }
 
-        CodeValue paymentType = codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+        final CodeValue paymentType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
                 PaymentDetailConstants.paymentTypeCodeName, paymentTypeId);
-        PaymentDetail paymentDetail = PaymentDetail.generatePaymentDetail(paymentType, command, changes);
+        final PaymentDetail paymentDetail = PaymentDetail.generatePaymentDetail(paymentType, command, changes);
         return paymentDetail;
 
     }
 
     @Override
     @Transactional
-    public PaymentDetail persistPaymentDetail(PaymentDetail paymentDetail) {
-        return paymentDetailRepository.save(paymentDetail);
+    public PaymentDetail persistPaymentDetail(final PaymentDetail paymentDetail) {
+        return this.paymentDetailRepository.save(paymentDetail);
     }
 
     @Override
     @Transactional
-    public PaymentDetail createAndPersistPaymentDetail(JsonCommand command, Map<String, Object> changes) {
-        PaymentDetail paymentDetail = createPaymentDetail(command, changes);
+    public PaymentDetail createAndPersistPaymentDetail(final JsonCommand command, final Map<String, Object> changes) {
+        final PaymentDetail paymentDetail = createPaymentDetail(command, changes);
         if (paymentDetail != null) { return persistPaymentDetail(paymentDetail); }
         return paymentDetail;
     }

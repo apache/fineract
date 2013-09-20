@@ -36,7 +36,8 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
     @Autowired
     public CalendarWritePlatformServiceJpaRepositoryImpl(final CalendarRepository calendarRepository,
             final CalendarCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final CalendarInstanceRepository calendarInstanceRepository, final LoanWritePlatformService loanWritePlatformService, final ConfigurationDomainService configurationDomainService) {
+            final CalendarInstanceRepository calendarInstanceRepository, final LoanWritePlatformService loanWritePlatformService,
+            final ConfigurationDomainService configurationDomainService) {
         this.calendarRepository = calendarRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.calendarInstanceRepository = calendarInstanceRepository;
@@ -75,14 +76,18 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
 
         if (!changes.isEmpty()) {
             this.calendarRepository.saveAndFlush(calendarForUpdate);
-            
-            if(this.configurationDomainService.isRescheduleFutureRepaymentsEnabled()){
-                //In this approach loans following this meeting calendar will be affected immediately.
-                //get all calendar instances following this meeting calendar and calendar entity type is loan    
-                final Collection<CalendarInstance> loanCalendarInstances = this.calendarInstanceRepository.findByCalendarIdAndEntityTypeId(calendarId, CalendarEntityType.LOANS.getValue());
-                
+
+            if (this.configurationDomainService.isRescheduleFutureRepaymentsEnabled()) {
+                // In this approach loans following this meeting calendar will
+                // be affected immediately.
+                // get all calendar instances following this meeting calendar
+                // and calendar entity type is loan
+                final Collection<CalendarInstance> loanCalendarInstances = this.calendarInstanceRepository.findByCalendarIdAndEntityTypeId(
+                        calendarId, CalendarEntityType.LOANS.getValue());
+
                 if (!CollectionUtils.isEmpty(loanCalendarInstances)) {
-                    // update all loans which are following this meeting calendar
+                    // update all loans which are following this meeting
+                    // calendar
                     this.loanWritePlatformService.applyMeetingDateChanges(calendarForUpdate, loanCalendarInstances);
                     //
                 }
@@ -113,26 +118,27 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
 
         final Calendar calendarForUpdate = this.calendarRepository.findOne(calendarId);
         if (calendarForUpdate == null) { throw new CalendarNotFoundException(calendarId); }
-        
+
         final CalendarInstance newCalendarInstance = new CalendarInstance(calendarForUpdate, entityId, entityTypeId);
         this.calendarInstanceRepository.save(newCalendarInstance);
-        
+
         return new CommandProcessingResultBuilder() //
-        .withCommandId(null) //
-        .withEntityId(calendarForUpdate.getId()) //
-        .build();
+                .withCommandId(null) //
+                .withEntityId(calendarForUpdate.getId()) //
+                .build();
     }
 
     @Override
-    public CommandProcessingResult updateCalendarInstance(Long calendarId, Long entityId, Integer entityTypeId) {
+    public CommandProcessingResult updateCalendarInstance(final Long calendarId, final Long entityId, final Integer entityTypeId) {
         final Calendar calendarForUpdate = this.calendarRepository.findOne(calendarId);
         if (calendarForUpdate == null) { throw new CalendarNotFoundException(calendarId); }
-        
-        final CalendarInstance calendarInstanceForUpdate = this.calendarInstanceRepository.findByCalendarIdAndEntityIdAndEntityTypeId(calendarId, entityId, entityTypeId);
+
+        final CalendarInstance calendarInstanceForUpdate = this.calendarInstanceRepository.findByCalendarIdAndEntityIdAndEntityTypeId(
+                calendarId, entityId, entityTypeId);
         this.calendarInstanceRepository.saveAndFlush(calendarInstanceForUpdate);
         return new CommandProcessingResultBuilder() //
-        .withCommandId(null) //
-        .withEntityId(calendarForUpdate.getId()) //
-        .build();
+                .withCommandId(null) //
+                .withEntityId(calendarForUpdate.getId()) //
+                .build();
     }
 }

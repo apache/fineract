@@ -56,23 +56,23 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
             final Long id = JdbcSupport.getLong(rs, "id");
             final String location = rs.getString("location");
             final Integer storageType = JdbcSupport.getInteger(rs, "storageType");
-            return new ImageData(id, location, storageType, entityDisplayName);
+            return new ImageData(id, location, storageType, this.entityDisplayName);
         }
     }
 
     @Override
-    public ImageData retrieveClientImage(Long clientId) {
+    public ImageData retrieveClientImage(final Long clientId) {
         try {
-            Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+            final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
 
             final ImageMapper imageMapper = new ImageMapper(client.getDisplayName());
 
             final String sql = "select " + imageMapper.schema();
 
-            ImageData imageData = this.jdbcTemplate.queryForObject(sql, imageMapper, new Object[] { clientId });
-            ContentRepository contentRepository = contentRepositoryFactory.getRepository(imageData.storageType());
+            final ImageData imageData = this.jdbcTemplate.queryForObject(sql, imageMapper, new Object[] { clientId });
+            final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(imageData.storageType());
             return contentRepository.fetchImage(imageData);
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new ImageNotFoundException("clients", clientId);
         }
     }

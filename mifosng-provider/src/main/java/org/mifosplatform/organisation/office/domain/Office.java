@@ -161,7 +161,7 @@ public class Office extends AbstractPersistable<Long> {
 
         if (this.parent == null) { throw new RootOfficeParentCannotBeUpdated(); }
 
-        if (this.identifiedBy(newParent.getId())) { throw new CannotUpdateOfficeWithParentOfficeSameAsSelf(this.getId(), newParent.getId()); }
+        if (identifiedBy(newParent.getId())) { throw new CannotUpdateOfficeWithParentOfficeSameAsSelf(getId(), newParent.getId()); }
 
         this.parent = newParent;
         generateHierarchy();
@@ -173,8 +173,8 @@ public class Office extends AbstractPersistable<Long> {
 
     public void generateHierarchy() {
 
-        if (parent != null) {
-            this.hierarchy = this.parent.hierarchyOf(this.getId());
+        if (this.parent != null) {
+            this.hierarchy = this.parent.hierarchyOf(getId());
         } else {
             this.hierarchy = ".";
         }
@@ -189,7 +189,7 @@ public class Office extends AbstractPersistable<Long> {
     }
 
     public String getHierarchy() {
-        return hierarchy;
+        return this.hierarchy;
     }
 
     public boolean hasParentOf(final Office office) {
@@ -201,7 +201,7 @@ public class Office extends AbstractPersistable<Long> {
     }
 
     public boolean doesNotHaveAnOfficeInHierarchyWithId(final Long officeId) {
-        return !this.hasAnOfficeInHierarchyWithId(officeId);
+        return !hasAnOfficeInHierarchyWithId(officeId);
     }
 
     private boolean hasAnOfficeInHierarchyWithId(final Long officeId) {
@@ -213,8 +213,8 @@ public class Office extends AbstractPersistable<Long> {
         }
 
         if (!match) {
-            for (Office child : this.children) {
-                boolean result = child.hasAnOfficeInHierarchyWithId(officeId);
+            for (final Office child : this.children) {
+                final boolean result = child.hasAnOfficeInHierarchyWithId(officeId);
 
                 if (result) {
                     match = result;
