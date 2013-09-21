@@ -29,12 +29,6 @@
 		<beans:property name="realmName" value="Mifos Platform API" />
 	</beans:bean>
 
-	<!--
-	<beans:bean id="basicAuthenticationProcessingFilter" class="org.mifosplatform.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter" depends-on="cacheManager">
-		<beans:constructor-arg ref="authenticationManager" />
-		<beans:constructor-arg ref="basicAuthenticationEntryPoint" />
-	</beans:bean>
-	-->
 	<beans:bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.ShaPasswordEncoder">
     	<beans:constructor-arg value="256"/>
  	</beans:bean>
@@ -49,7 +43,7 @@
 		<beans:property name="saltSource" ref="saltSource" />
 	</beans:bean>
 
-	<authentication-manager alias="authenticationManager">
+	<authentication-manager alias="authenticationManager" erase-credentials="false">
 		<authentication-provider ref="customAuthenticationProvider" />
 	</authentication-manager>
 </beans:beans>

@@ -99,6 +99,7 @@ dependencies {
 	   			[group: 'org.springframework', name: 'spring-core', version: springVersion],
 	   			[group: 'org.springframework', name: 'spring-aspects', version: springVersion],
 	   			[group: 'org.springframework', name: 'spring-web', version: springVersion],
+	   			[group: 'org.springframework', name: 'spring-test', version: springVersion],
 	   			[group: 'org.springframework.security', name: 'spring-security-core', version: springSecurityVersion],
 	   			[group: 'org.springframework.security', name: 'spring-security-web', version: springSecurityVersion],
 	   			[group: 'org.springframework.security', name: 'spring-security-config', version: springSecurityVersion],
@@ -162,8 +163,8 @@ dependencies {
                 [group: 'com.googlecode.flyway', name: 'flyway-maven-plugin', version: '2.1.1'],
                 [group: 'org.quartz-scheduler', name: 'quartz', version: '2.1.7'],
                 [group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.2.1'],
-                
-                [group: 'net.sf.ehcache', name: 'ehcache', version: '2.7.2']
+                [group: 'net.sf.ehcache', name: 'ehcache', version: '2.7.2'],
+                [group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.8.12']
  	        )
 
  	 testCompile 'junit:junit:4.10',

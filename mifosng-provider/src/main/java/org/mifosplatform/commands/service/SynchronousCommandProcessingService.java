@@ -144,7 +144,6 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
         } else if (wrapper.isClientIdentifierResource()) {
-
             if (wrapper.isCreate()) {
                 handler = this.applicationContext.getBean("createClientIdentifierCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdate()) {
@@ -501,15 +500,12 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
         } else if (wrapper.isCollectionSheetResource()) {
-
             if (wrapper.isUpdate()) {
                 handler = this.applicationContext.getBean("updateCollectionSheetCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
-
         } else if (wrapper.isReportResource()) {
-
             if (wrapper.isCreate()) {
                 handler = this.applicationContext.getBean("createReportCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdate()) {
@@ -519,9 +515,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
-
         } else if (wrapper.isAccountingRuleResource()) {
-
             if (wrapper.isCreate()) {
                 handler = this.applicationContext.getBean("createAccountingRuleCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdate()) {
@@ -531,7 +525,6 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
-
         } else if (wrapper.isXBRLMappingResource()) {
             if (wrapper.isUpdate()) {
                 handler = this.applicationContext.getBean("updateTaxonomyMappingCommandHandler", NewCommandSourceHandler.class);
@@ -539,7 +532,6 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
         } else if (wrapper.isHolidayResource()) {
-
             if (wrapper.isCreate()) {
                 handler = this.applicationContext.getBean("createHolidayCommandHandler", NewCommandSourceHandler.class);
             }
@@ -577,6 +569,29 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
+        } else if (wrapper.isTemplateRessource()) {
+
+            if (wrapper.isCreate()) {
+                handler = this.applicationContext.getBean("createTemplateCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdate()) {
+                handler = this.applicationContext.getBean("updateTemplateCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDelete()) {
+                handler = this.applicationContext.getBean("deleteTemplateCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
+
+        } else if (wrapper.isTemplateRessource()) {
+            if (wrapper.isCreate()) {
+                handler = this.applicationContext.getBean("createTemplateCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdate()) {
+                handler = this.applicationContext.getBean("updateTemplateCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDelete()) {
+                handler = this.applicationContext.getBean("deleteTemplateCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
+
         } else {
 
             throw new UnsupportedCommandException(wrapper.commandName());

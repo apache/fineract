@@ -1,0 +1,82 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:jee="http://www.springframework.org/schema/jee"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd 
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+        http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
+
+	<tx:annotation-driven />
+
+    <bean id="dataSource"
+        class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+        p:driverClassName="com.mysql.jdbc.Driver"
+        p:url="jdbc:mysql://localhost:3306/mifosplatform-tenants"
+        p:username="root"
+        p:password="mysql" />
+        
+    <bean id="hibernateExceptionTranslator" class="org.springframework.orm.hibernate4.HibernateExceptionTranslator" />
+	
+    
+    <bean id="entityManagerFactory"
+        class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" >
+        <property name="dataSource" ref="tenantDataSourceJndi"/>
+        <property name="packagesToScan">
+	        <list>
+	            <value>org.mifosplatform.template</value>
+	            <value>org.mifosplatform.commands.domain</value>
+				<value>org.mifosplatform.useradministration.domain</value>
+				<value>org.mifosplatform.organisation.office.domain</value>
+				<value>org.mifosplatform.organisation.staff.domain</value>
+	            <value>org.mifosplatform.infrastructure.core.serialization</value>
+	        </list> 
+        </property>
+	    <property name="jpaVendorAdapter">
+	        <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+	    </property>
+	    <property name="jpaProperties">
+	        <props>
+	            <prop key="hibernate.dialect">org.hibernate.dialect.MySQLInnoDBDialect</prop>
+    			<prop key="hibernate.hbm2ddl.auto">create</prop>
+	        </props>
+    	</property>
+    </bean> 
+    
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+    
+    <context:component-scan base-package="org.mifosplatform.accounting.*,
+									      org.mifosplatform.commands.handler.*,
+										  org.mifosplatform.commands.service.*,
+										  org.mifosplatform.commands.*,
+										  org.mifosplatform.audit.*,
+										  org.mifosplatform.infrastructure.*,
+										  org.mifosplatform.scheduledjobs.*,
+										  org.mifosplatform.organisation.*, 
+										  org.mifosplatform.portfolio.loanaccount.*,
+										  org.mifosplatform.portfolio.savingsaccount.*,
+										  org.mifosplatform.portfolio.*,
+										  org.mifosplatform.template.*,
+										  org.mifosplatform.template.service.*,
+										  org.mifosplatform.useradministration.*" >
+		<context:exclude-filter expression="org.springframework.stereotype.Controller" type="annotation" />
+	</context:component-scan>
+    
+    <jpa:repositories base-package="org.mifosplatform.commands.domain" />
+    <jpa:repositories base-package="org.mifosplatform.infrastructure.*.domain" />
+    <jpa:repositories base-package="org.mifosplatform.accounting.*.domain" />
+    <jpa:repositories base-package="org.mifosplatform.useradministration.domain" />
+    <jpa:repositories base-package="org.mifosplatform.organisation.*.domain" />
+    <jpa:repositories base-package="org.mifosplatform.portfolio.*" />
+    <jpa:repositories base-package="org.mifosplatform.template.domain" />
+    
+    <jee:jndi-lookup jndi-name="java:comp/env/jdbc/mifosplatform-tenants" id="tenantDataSourceJndi" />
+    
+</beans>

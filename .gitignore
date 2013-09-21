@@ -20,3 +20,4 @@ rebel.xml
 *.DS_Store
 *.ini
 *~
+.metadata
