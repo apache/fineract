@@ -14,7 +14,7 @@ public interface TemplateDomainService {
 
     List<Template> getAllByEntityAndType(TemplateEntity entity, TemplateType type);
 
-    Template getById(Long id);
+    Template findOneById(Long id);
 
     Template updateTemplate(Template template);
 

@@ -45,13 +45,15 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Path("/templates")
+@Consumes({ MediaType.APPLICATION_JSON })
+@Produces({ MediaType.APPLICATION_JSON })
 @Component
 @Scope("singleton")
 public class TemplatesApiResource {
 
     private final Set<String> RESPONSE_TEMPLATES_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id"));
     private final Set<String> RESPONSE_TEMPLATE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "entities", "types", "template"));
-    private final String RESOURCEN_NAME_FOR_PERMISSION = "template";
+    private final String RESOURCE_NAME_FOR_PERMISSION = "template";
 
     private final PlatformSecurityContext context;
     private final DefaultToApiJsonSerializer<Template> toApiJsonSerializer;
@@ -77,12 +79,12 @@ public class TemplatesApiResource {
     }
 
     @GET
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String getTemplates(@DefaultValue("-1") @QueryParam("typeId") final int typeId,
+    public String retrieveAll(@DefaultValue("-1") @QueryParam("typeId") final int typeId,
             @DefaultValue("-1") @QueryParam("entityId") final int entityId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCEN_NAME_FOR_PERMISSION);
+        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCE_NAME_FOR_PERMISSION);
 
+        // FIXME - we dont use the ORM when doing fetches - we write SQL and fetch through JDBC returning data to be serialized to JSON
         List<Template> templates = new ArrayList<Template>();
 
         if (typeId != -1 && entityId != -1) {
@@ -97,10 +99,9 @@ public class TemplatesApiResource {
 
     @GET
     @Path("template")
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String getTemplatesByTemplate(@Context final UriInfo uriInfo) {
+    public String template(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCEN_NAME_FOR_PERMISSION);
+        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCE_NAME_FOR_PERMISSION);
 
         final TemplateData templateData = TemplateData.template();
 
@@ -108,14 +109,22 @@ public class TemplatesApiResource {
         return this.templateDataApiJsonSerializer.serialize(settings, templateData, this.RESPONSE_TEMPLATES_DATA_PARAMETERS);
     }
 
+    @POST
+    public String createTemplate(final String apiRequestBodyAsJson) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createTemplate().withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
     @GET
     @Path("{templateId}")
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String getTemplate(@PathParam("templateId") final Long templateId, @Context final UriInfo uriInfo) {
+    public String retrieveOne(@PathParam("templateId") final Long templateId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCEN_NAME_FOR_PERMISSION);
+        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCE_NAME_FOR_PERMISSION);
 
-        final Template template = this.templateService.getById(templateId);
+        final Template template = this.templateService.findOneById(templateId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, template, this.RESPONSE_TEMPLATES_DATA_PARAMETERS);
@@ -123,25 +132,18 @@ public class TemplatesApiResource {
 
     @GET
     @Path("{templateId}/template")
-    @Produces({ MediaType.APPLICATION_JSON })
     public String getTemplateByTemplate(@PathParam("templateId") final Long templateId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCEN_NAME_FOR_PERMISSION);
+        this.context.authenticatedUser().validateHasReadPermission(this.RESOURCE_NAME_FOR_PERMISSION);
 
-        final TemplateData template = TemplateData.template(this.templateService.getById(templateId));
+        final TemplateData template = TemplateData.template(this.templateService.findOneById(templateId));
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        System.out.println("QUERY_PARAMETER: " + uriInfo.getQueryParameters());
-        System.out.println("SETTINGS: " + settings);
-        System.out.println("FOO: " + this.templateDataApiJsonSerializer.serialize(settings, template, this.RESPONSE_TEMPLATE_DATA_PARAMETERS));
-
         return this.templateDataApiJsonSerializer.serialize(settings, template, this.RESPONSE_TEMPLATE_DATA_PARAMETERS);
     }
 
     @PUT
     @Path("{templateId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
     public String saveTemplate(@PathParam("templateId") final Long templateId, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateTemplate(templateId).withJson(apiRequestBodyAsJson).build();
@@ -153,7 +155,6 @@ public class TemplatesApiResource {
 
     @DELETE
     @Path("{templateId}")
-    @Produces({ MediaType.APPLICATION_JSON })
     public String deleteTemplate(@PathParam("templateId") final Long templateId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteTemplate(templateId).build();
@@ -164,24 +165,12 @@ public class TemplatesApiResource {
     }
 
     @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String createTemplate(final String apiRequestBodyAsJson) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createTemplate().withJson(apiRequestBodyAsJson).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
-    }
-
-    @POST
     @Path("{templateId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.TEXT_HTML })
     public String mergeTemplate(@PathParam("templateId") final Long templateId, @Context final UriInfo uriInfo,
             final String apiRequestBodyAsJson) throws MalformedURLException, IOException {
 
-        final Template template = this.templateService.getById(templateId);
+        final Template template = this.templateService.findOneById(templateId);
 
         @SuppressWarnings("unchecked")
         final
@@ -202,5 +191,4 @@ public class TemplatesApiResource {
         parametersMap.putAll(result);
         return this.templateMergeService.compile(template, parametersMap);
     }
-
 }

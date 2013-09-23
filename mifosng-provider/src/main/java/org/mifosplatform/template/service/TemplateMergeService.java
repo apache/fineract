@@ -72,7 +72,6 @@ public class TemplateMergeService {
                 if (!url.startsWith("http")) {
                     url = this.scopes.get("BASE_URI") + url;
                 }
-                System.out.println("URL: " + url);
                 try {
                     this.scopes.put(entry.getKey(), getMapFromUrl(url));
                 } catch (final MalformedURLException e) {
@@ -92,7 +91,6 @@ public class TemplateMergeService {
 
         final String response = getStringFromInputStream(connection.getInputStream());
         HashMap<String, Object> result = new HashMap<String, Object>();
-        System.out.println("CONTENT_TYPE" + connection.getContentType());
         if (connection.getContentType().equals("text/plain")) {
             result.put("src", response);
         } else {
@@ -150,7 +148,7 @@ public class TemplateMergeService {
             }
 
         } catch (final IOException e) {
-            e.printStackTrace();
+            // FIXME - HANDLE THIS CASE
         } finally {
             if (br != null) {
                 try {

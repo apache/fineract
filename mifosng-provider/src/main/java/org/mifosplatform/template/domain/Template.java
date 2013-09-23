@@ -14,6 +14,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -44,23 +45,27 @@ public class Template extends AbstractPersistable<Long> {
     private List<TemplateMapper> mappers;
 
     public Template(final String name, final String text, final TemplateEntity entity, final TemplateType type, final List<TemplateMapper> mappers) {
-        this.name = name;
+        this.name = StringUtils.defaultIfEmpty(name, null);
         this.entity = entity;
         this.type = type;
-        this.text = text;
+        this.text = StringUtils.defaultIfEmpty(text, null);
         this.mappers = mappers;
     }
 
-    protected Template() {}
+    protected Template() {
+        //
+    }
 
     public static Template fromJson(final JsonCommand command) {
-        System.out.println("COMMAND: " + command);
         final String name = command.stringValueOfParameterNamed("name");
         final String text = command.stringValueOfParameterNamed("text");
         final TemplateEntity entity = TemplateEntity.values()[command.integerValueSansLocaleOfParameterNamed("entity")];
         final TemplateType type = TemplateType.values()[command.integerValueSansLocaleOfParameterNamed("type")];
+
         final JsonArray array = command.arrayOfParameterNamed("mappers");
+
         final List<TemplateMapper> mappersList = new ArrayList<TemplateMapper>();
+
         for (final JsonElement element : array) {
             mappersList.add(new TemplateMapper(element.getAsJsonObject().get("mappersorder").getAsInt(), element.getAsJsonObject()
                     .get("mapperskey").getAsString(), element.getAsJsonObject().get("mappersvalue").getAsString()));

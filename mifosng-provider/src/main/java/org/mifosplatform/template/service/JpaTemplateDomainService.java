@@ -24,7 +24,7 @@ public class JpaTemplateDomainService implements TemplateDomainService {
 
     private static final String PROPERTY_NAME = "name";
     private static final String PROPERTY_TEXT = "text";
-    private static final String PROPERTY_MAPPERS = "mappers";
+//    private static final String PROPERTY_MAPPERS = "mappers";
     private static final String PROPERTY_ENTITY = "entity";
     private static final String PROPERTY_TYPE = "type";
 
@@ -37,7 +37,7 @@ public class JpaTemplateDomainService implements TemplateDomainService {
     }
 
     @Override
-    public Template getById(final Long id) {
+    public Template findOneById(final Long id) {
         final Template template = this.templateRepository.findOne(id);
         if (template == null) { throw new TemplateNotFoundException(id); }
         return template;
@@ -46,6 +46,8 @@ public class JpaTemplateDomainService implements TemplateDomainService {
     @Transactional
     @Override
     public CommandProcessingResult createTemplate(final JsonCommand command) {
+        // FIXME - no validation here of the data in the command object, is name, text populated etc
+        // FIXME - handle cases where data integrity constraints are fired from database when saving.
         final Template template = Template.fromJson(command);
 
         this.templateRepository.saveAndFlush(template);
@@ -55,8 +57,10 @@ public class JpaTemplateDomainService implements TemplateDomainService {
     @Transactional
     @Override
     public CommandProcessingResult updateTemplate(final Long templateId, final JsonCommand command) {
-        final Template template = getById(templateId);
-        System.out.println("COMM: " + command);
+     // FIXME - no validation here of the data in the command object, is name, text populated etc
+        // FIXME - handle cases where data integrity constraints are fired from database when saving.
+
+        final Template template = findOneById(templateId);
         template.setName(command.stringValueOfParameterNamed(PROPERTY_NAME));
         template.setText(command.stringValueOfParameterNamed(PROPERTY_TEXT));
         template.setEntity(TemplateEntity.values()[command.integerValueSansLocaleOfParameterNamed(PROPERTY_ENTITY)]);
@@ -78,13 +82,14 @@ public class JpaTemplateDomainService implements TemplateDomainService {
     @Transactional
     @Override
     public CommandProcessingResult removeTemplate(final Long templateId) {
-        final Template template = getById(templateId);
+        final Template template = findOneById(templateId);
 
         this.templateRepository.delete(template);
 
         return new CommandProcessingResultBuilder().withEntityId(templateId).build();
     }
 
+    @Transactional
     @Override
     public Template updateTemplate(final Template template) {
         return this.templateRepository.saveAndFlush(template);
