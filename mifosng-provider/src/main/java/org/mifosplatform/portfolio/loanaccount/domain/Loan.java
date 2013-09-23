@@ -444,10 +444,10 @@ public class Loan extends AbstractPersistable<Long> {
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(),
                     allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, setOfLoanCharges());
-            for (final LoanTransaction transaction : changedTransactionDetail.getNewTransactions()) {
-                transaction.updateLoan(this);
+            for(Map.Entry<Long,LoanTransaction> mapEntry:changedTransactionDetail.getNewTransactionMappings().entrySet()){
+                mapEntry.getValue().updateLoan(this);
             }
-            this.loanTransactions.addAll(changedTransactionDetail.getNewTransactions());
+            this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
         } else {
             // just reprocess the loan schedule only for now.
             final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
@@ -1710,10 +1710,10 @@ public class Loan extends AbstractPersistable<Long> {
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(),
                     allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, setOfLoanCharges());
-            for (final LoanTransaction newLoanTransaction : changedTransactionDetail.getNewTransactions()) {
-                newLoanTransaction.updateLoan(this);
+            for(Map.Entry<Long,LoanTransaction> mapEntry:changedTransactionDetail.getNewTransactionMappings().entrySet()){
+                mapEntry.getValue().updateLoan(this);
             }
-            this.loanTransactions.addAll(changedTransactionDetail.getNewTransactions());
+            this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
         }
 
         updateLoanSummaryDerivedFields();

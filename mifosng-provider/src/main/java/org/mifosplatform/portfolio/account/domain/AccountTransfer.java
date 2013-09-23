@@ -175,4 +175,9 @@ public class AccountTransfer extends AbstractPersistable<Long> {
     public SavingsAccount getFromAccount() {
         return this.fromAccount;
     }
+
+    
+    public void updateToLoanTransaction(LoanTransaction toLoanTransaction) {
+        this.toLoanTransaction = toLoanTransaction;
+    }
 }
