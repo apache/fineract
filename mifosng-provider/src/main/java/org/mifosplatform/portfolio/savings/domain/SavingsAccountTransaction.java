@@ -131,7 +131,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     public static SavingsAccountTransaction charge(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
             final Money amount) {
         final boolean isReversed = false;
-        return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.APPLY_CHARGES.getValue(), date, amount,
+        return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.PAY_CHARGE.getValue(), date, amount,
                 isReversed);
     }
 

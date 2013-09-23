@@ -90,7 +90,7 @@
 <body>
 	<div id="page-wrapper">
 		<div id="flybar">
-			<div id="nav-logo">1.10.1.RELEASE API</div>
+			<div id="nav-logo">1.10.2.RELEASE API</div>
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Overview</h2>
 				<div class="flybar-menu-overview">
@@ -235,6 +235,14 @@
 								<td></td>
 								<td>clients/{clientId}?command=rejectTransfer</td>
 								<td><a href="#clients_reject_transfer">Reject Client Transfer</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td class="alt"></td>
+								<td>clients/{clientId}?command=proposeAndAcceptTransfer</td>
+								<td><a href="#clients_propose_and_accept_transfer">Propose and Accept a Client Transfer</a></td>
 								<td></td>
 								<td></td>
 								<td></td>
@@ -2278,6 +2286,37 @@ Request Body:
    "staffId":"1",
    "note":"Due Diligence done and all documents received"
 }			
+			</code>
+	        <code class="method-response">
+{
+   "clientId": 2,
+   "resourceId": 2
+}
+
+
+	        </code>
+	    </div>
+	</div>
+
+
+	<a id="clients_propose_and_accept_transfer" name="clients_propose_and_accept_transfer" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Propose and Accept a Client Transfer</h4>
+	        <p>Abstraction over the <a href="#clients_propose_transfer">Propose</a> and <a href="#clients_propose_transfer">Accept</a> <i>Client Transfer</i> API's which enable a user with Data Scope over both the Target and Destination Branches to directly
+	        transfer a Client to the destination <i>Office</i>.</p>
+	    </div>
+		<div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=proposeAndAcceptTransfer</code>
+	        <code class="method-request">POST clients/1?command=proposeTransfer
+Content-Type: application/json
+Request Body:
+{
+  "destinationOfficeId":"2",
+  "destinationGroupId":"13",
+  "staffId":"1",
+  "note":"Client Relocating to Bangalore"
+}				
 			</code>
 	        <code class="method-response">
 {
@@ -8469,7 +8508,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 						<tr class=alt>
 							<td>fundSourceAccountId, loanPortfolioAccountId, interestOnLoanAccountId, 
 								incomeFromFeeAccountId, incomeFromPenaltyAccountId, 
-								writeOffAccountId</td>
+								writeOffAccountId, transfersInSuspenseAccountId</td>
 						</tr>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Additional Mandatory Fields for Accrual(3) based accounting</div></td>
@@ -8478,7 +8517,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td>fundSourceAccountId, loanPortfolioAccountId, interestOnLoanAccountId, 
 								incomeFromFeeAccountId, incomeFromPenaltyAccountId, 
 								writeOffAccountId, receivableInterestAccountId, receivableFeeAccountId,
-								receivablePenaltyAccountId</td>
+								receivablePenaltyAccountId, transfersInSuspenseAccountId</td>
 						</tr>
 					</table>
 				</div>
@@ -8543,6 +8582,7 @@ Request Body:
     "incomeFromFeeAccountId":"37",
     "incomeFromPenaltyAccountId":"35",
     "writeOffAccountId":"41",
+    "transfersInSuspenseAccountId":"4",
     "paymentChannelToFundSourceMappings": [
     {
       "paymentTypeId": "11",
@@ -12323,7 +12363,7 @@ Content-Type: application/json
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields for Cash based accounting (accountingRule = 2)</div></td></tr>
                 <tr class=alt>
-                	<td>savingsReferenceAccountId,savingsControlAccountId, interestOnSavingsAccountId, incomeFromFeeAccountId</td>
+                	<td>savingsReferenceAccountId,savingsControlAccountId, interestOnSavingsAccountId, incomeFromFeeAccountId, transfersInSuspenseAccountId</td>
                 </tr>
             </table>
             <br/>
@@ -12384,6 +12424,7 @@ Request Body:
   "annualFeeOnMonthDay": "01 May",
   "accountingRule": "2",
   "savingsReferenceAccountId": "16",
+  "transfersInSuspenseAccountId": "16",
   "savingsControlAccountId": "15",
   "interestOnSavingsAccountId": "18",
   "incomeFromFeeAccountId": "4",

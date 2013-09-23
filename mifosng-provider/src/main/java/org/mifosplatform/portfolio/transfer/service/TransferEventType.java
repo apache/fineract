@@ -25,4 +25,8 @@ public enum TransferEventType {
         return this.code;
     }
 
+    public boolean isAcceptance() {
+        return value.equals(TransferEventType.ACCEPTANCE.value);
+    }
+
 }

@@ -212,6 +212,9 @@ public class ClientsApiResource {
         } else if (is(commandParam, "proposeTransfer")) {
             commandRequest = builder.proposeClientTransfer(clientId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "proposeAndAcceptTransfer")) {
+            commandRequest = builder.proposeAndAcceptClientTransfer(clientId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "withdrawTransfer")) {
             commandRequest = builder.withdrawClientTransferRequest(clientId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

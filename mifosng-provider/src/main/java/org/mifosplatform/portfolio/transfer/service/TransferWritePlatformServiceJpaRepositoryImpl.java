@@ -223,6 +223,35 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     /**
      * This API is meant for transferring clients between branches mainly by
      * Organizations following an Individual lending Model <br/>
+     * 
+     * @param clientId
+     * @param destinationOfficeId
+     * @param jsonCommand
+     * @return
+     **/
+    @Transactional
+    @Override
+    public CommandProcessingResult proposeAndAcceptClientTransfer(final Long clientId, final JsonCommand jsonCommand) {
+        // validation
+        this.transfersDataValidator.validateForProposeAndAcceptClientTransfer(jsonCommand.json());
+
+        final Long destinationOfficeId = jsonCommand.longValueOfParameterNamed(TransferApiConstants.destinationOfficeIdParamName);
+        final Office office = this.officeRepository.findOneWithNotFoundDetection(destinationOfficeId);
+        final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+        handleClientTransferLifecycleEvent(client, office, TransferEventType.PROPOSAL, jsonCommand);
+        this.clientRepository.saveAndFlush(client);
+        handleClientTransferLifecycleEvent(client, client.getTransferToOffice(), TransferEventType.ACCEPTANCE, jsonCommand);
+        this.clientRepository.save(client);
+
+        return new CommandProcessingResultBuilder() //
+                .withClientId(clientId) //
+                .withEntityId(clientId) //
+                .build();
+    }
+
+    /**
+     * This API is meant for transferring clients between branches mainly by
+     * Organizations following an Individual lending Model <br/>
      * If the Client is linked to any Groups, we can optionally choose to have
      * all the linkages broken and all JLG Loans are converted into Individual
      * Loans
@@ -322,8 +351,8 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         if (staffId != null) {
             staff = this.staffRepositoryWrapper.findByOfficeHierarchyWithNotFoundDetection(staffId, destinationOffice.getHierarchy());
         }
-        if (destinationGroupId != null) {
-            destinationGroup = this.groupRepository.findOneWithNotFoundDetection(destinationGroupId);
+        if (transferEventType.isAcceptance() && destinationGroupId != null) {
+            destinationGroup = this.groupRepository.findByOfficeWithNotFoundDetection(destinationGroupId, destinationOffice);
         }
 
         /*** Handle Active Loans ***/
