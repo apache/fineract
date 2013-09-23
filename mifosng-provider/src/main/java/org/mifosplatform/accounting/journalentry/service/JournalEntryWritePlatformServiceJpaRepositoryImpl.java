@@ -40,10 +40,12 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.domain.OrganisationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +69,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private final AccountingRuleRepository accountingRuleRepository;
     private final GLAccountReadPlatformService glAccountReadPlatformService;
     private final OrganisationCurrencyRepositoryWrapper organisationCurrencyRepository;
+    private final PlatformSecurityContext context;
 
     @Autowired
     public JournalEntryWritePlatformServiceJpaRepositoryImpl(final GLClosureRepository glClosureRepository,
@@ -76,7 +79,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             final AccountingProcessorForLoanFactory accountingProcessorForLoanFactory,
             final AccountingProcessorForSavingsFactory accountingProcessorForSavingsFactory,
             final GLAccountReadPlatformService glAccountReadPlatformService,
-            final OrganisationCurrencyRepositoryWrapper organisationCurrencyRepository) {
+            final OrganisationCurrencyRepositoryWrapper organisationCurrencyRepository,
+            final PlatformSecurityContext context) {
         this.glClosureRepository = glClosureRepository;
         this.officeRepository = officeRepository;
         this.glJournalEntryRepository = glJournalEntryRepository;
@@ -88,6 +92,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         this.accountingRuleRepository = accountingRuleRepository;
         this.glAccountReadPlatformService = glAccountReadPlatformService;
         this.organisationCurrencyRepository = organisationCurrencyRepository;
+        this.context = context;
     }
 
     @Transactional
@@ -109,7 +114,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
             /** Set a transaction Id and save these Journal entries **/
             final Date transactionDate = command.DateValueOfParameterNamed(JournalEntryJsonInputParams.TRANSACTION_DATE.getValue());
-            final String transactionId = generateTransactionId();
+            final String transactionId = generateTransactionId(officeId);
             final String referenceNumber = command.stringValueOfParameterNamed(JournalEntryJsonInputParams.REFERENCE_NUMBER.getValue());
 
             if (accountRuleId != null) {
@@ -263,10 +268,10 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                 .getTransactionId());
 
         if (journalEntries.size() <= 1) { throw new JournalEntriesNotFoundException(command.getTransactionId()); }
-
-        final String reversalTransactionId = generateTransactionId();
+        Long officeId = journalEntries.get(0).getOffice().getId();
+        final String reversalTransactionId = generateTransactionId(officeId);
         final boolean manualEntry = true;
-
+        
         for (final JournalEntry journalEntry : journalEntries) {
             JournalEntry reversalJournalEntry;
             final String reversalComment = "Reversal entry for Journal Entry with Entry Id  :" + journalEntry.getId()
@@ -377,8 +382,12 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
      * TODO: Need a better implementation with guaranteed uniqueness (but not a
      * long UUID)...maybe something tied to system clock..
      */
-    private String generateTransactionId() {
-        return RandomStringUtils.random(15, "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890");
+    private String generateTransactionId(Long officeId) {
+        AppUser user = this.context.authenticatedUser();
+        Long time = System.currentTimeMillis();
+        String uniqueVal = String.valueOf(time) + user.getId() + officeId;
+        String transactionId = Long.toHexString(Long.parseLong(uniqueVal)); 
+        return transactionId;
     }
 
     private void handleJournalEntryDataIntegrityIssues(final DataIntegrityViolationException dve) {
