@@ -239,6 +239,16 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
 
         return transferTransactionId;
     }
+    
+    @Override
+    @Transactional
+    public void updateLoanTransaction(final Long loanTransactionId,final LoanTransaction newLoanTransaction){
+        final AccountTransfer transferTransaction = this.accountTransferRepository.findByToLoanTransactionId(loanTransactionId);
+        if(transferTransaction!=null){
+            transferTransaction.updateToLoanTransaction(newLoanTransaction);
+            this.accountTransferRepository.save(transferTransaction);
+        }
+    }
 
     private boolean isLoanToSavingsAccountTransfer(final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType) {
         return fromAccountType.isLoanAccount() && toAccountType.isSavingsAccount();
