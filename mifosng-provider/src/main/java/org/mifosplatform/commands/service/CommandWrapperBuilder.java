@@ -362,6 +362,15 @@ public class CommandWrapperBuilder {
         this.href = "/clientId/" + clientId + "?command=proposeTransfer";
         return this;
     }
+    
+    public CommandWrapperBuilder proposeAndAcceptClientTransfer(final Long clientId) {
+        this.actionName = "PROPOSEANDACCEPTTRANSFER";
+        this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.clientId = clientId;
+        this.href = "/clientId/" + clientId + "?command=proposeAndAcceptTransfer";
+        return this;
+    }
 
     public CommandWrapperBuilder withdrawClientTransferRequest(final Long clientId) {
         this.actionName = "WITHDRAWTRANSFER";

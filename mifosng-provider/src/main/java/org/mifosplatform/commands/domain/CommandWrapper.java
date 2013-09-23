@@ -621,6 +621,10 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("PROPOSETRANSFER") && this.entityName.equalsIgnoreCase("CLIENT");
     }
 
+    public boolean isProposeAndAcceptClientTransfer() {
+        return this.actionName.equalsIgnoreCase("PROPOSEANDACCEPTTRANSFER") && this.entityName.equalsIgnoreCase("CLIENT");
+    }
+
     public boolean isWithdrawClientTransfer() {
         return this.actionName.equalsIgnoreCase("WITHDRAWTRANSFER") && this.entityName.equalsIgnoreCase("CLIENT");
     }

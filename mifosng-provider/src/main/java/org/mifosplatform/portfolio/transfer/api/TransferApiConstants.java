@@ -35,6 +35,9 @@ public class TransferApiConstants {
     public static final Set<String> ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(newStaffIdParamName,
             destinationGroupIdParamName, note));
 
+    public static final Set<String> PROPOSE_AND_ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
+            dateFormatParamName, destinationOfficeIdParamName, transferActiveLoans, newStaffIdParamName, destinationGroupIdParamName, note));
+
     public static final Set<String> REJECT_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(note));
 
     public static final Set<String> WITHDRAW_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(note));

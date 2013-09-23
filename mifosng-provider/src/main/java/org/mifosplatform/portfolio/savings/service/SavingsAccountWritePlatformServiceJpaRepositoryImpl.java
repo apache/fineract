@@ -514,6 +514,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 savingsAccount.office(), transferDate);
         savingsAccount.getTransactions().add(newTransferTransaction);
         savingsAccount.setStatus(SavingsAccountStatusType.TRANSFER_IN_PROGRESS.getValue());
+        final MathContext mc = MathContext.DECIMAL64;
+        savingsAccount.calculateInterestUsing(mc, transferDate);
 
         this.savingsAccountTransactionRepository.save(newTransferTransaction);
         this.savingAccountRepository.save(savingsAccount);
@@ -534,6 +536,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 savingsAccount.office(), transferDate);
         savingsAccount.getTransactions().add(withdrawtransferTransaction);
         savingsAccount.setStatus(SavingsAccountStatusType.ACTIVE.getValue());
+        final MathContext mc = MathContext.DECIMAL64;
+        savingsAccount.calculateInterestUsing(mc, transferDate);
 
         this.savingsAccountTransactionRepository.save(withdrawtransferTransaction);
         this.savingAccountRepository.save(savingsAccount);
@@ -565,6 +569,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         if (fieldOfficer != null) {
             savingsAccount.update(fieldOfficer);
         }
+        
+        final MathContext mc = MathContext.DECIMAL64;
+        savingsAccount.calculateInterestUsing(mc, transferDate);
 
         this.savingsAccountTransactionRepository.save(acceptTransferTransaction);
         this.savingAccountRepository.save(savingsAccount);

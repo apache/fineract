@@ -101,9 +101,9 @@ public class SavingsEnumerations {
                         SavingsAccountTransactionType.WITHDRAW_TRANSFER.getCode(), "Transfer Withdrawn");
             break;
             default:
-            case APPLY_CHARGES:
-                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.APPLY_CHARGES.getValue().longValue(),
-                        SavingsAccountTransactionType.APPLY_CHARGES.getCode(), "Apply Charge");
+            case PAY_CHARGE:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.PAY_CHARGE.getValue().longValue(),
+                        SavingsAccountTransactionType.PAY_CHARGE.getCode(), "Pay Charge");
             break;
             case WAIVE_CHARGES:
                 optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.WAIVE_CHARGES.getValue().longValue(),
