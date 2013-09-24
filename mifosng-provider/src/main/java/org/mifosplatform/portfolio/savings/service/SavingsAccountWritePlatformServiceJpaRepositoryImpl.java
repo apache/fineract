@@ -787,6 +787,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         savingsAccount.payCharge(savingsAccountChargeId, chargeAmount, transactionDate, fmt, existingTransactionIds, existingReversedTransactionIds);
 
         this.savingAccountRepository.saveAndFlush(savingsAccount);
+        
+        postJournalEntries(savingsAccount, existingTransactionIds, existingReversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsAccountChargeId) //

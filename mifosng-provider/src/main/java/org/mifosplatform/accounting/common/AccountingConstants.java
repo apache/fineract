@@ -108,7 +108,8 @@ public class AccountingConstants {
 
     /*** Accounting placeholders for cash based accounting for savings products ***/
     public static enum CASH_ACCOUNTS_FOR_SAVINGS {
-        SAVINGS_REFERENCE(1), SAVINGS_CONTROL(2), INTEREST_ON_SAVINGS(3), INCOME_FROM_FEES(4), TRANSFERS_SUSPENSE(10);
+        SAVINGS_REFERENCE(1), SAVINGS_CONTROL(2), INTEREST_ON_SAVINGS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), TRANSFERS_SUSPENSE(
+                10);
 
         private final Integer value;
 
@@ -144,9 +145,11 @@ public class AccountingConstants {
      ***/
     public static enum SAVINGS_PRODUCT_ACCOUNTING_PARAMS {
         SAVINGS_REFERENCE("savingsReferenceAccountId"), SAVINGS_CONTROL("savingsControlAccountId"), INCOME_FROM_FEES(
-                "incomeFromFeeAccountId"), INTEREST_ON_SAVINGS("interestOnSavingsAccountId"), PAYMENT_CHANNEL_FUND_SOURCE_MAPPING(
-                "paymentChannelToFundSourceMappings"), PAYMENT_TYPE("paymentTypeId"), FUND_SOURCE("fundSourceAccountId"), TRANSFERS_SUSPENSE(
-                "transfersInSuspenseAccountId");
+                "incomeFromFeeAccountId"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccountId"), INTEREST_ON_SAVINGS(
+                "interestOnSavingsAccountId"), PAYMENT_CHANNEL_FUND_SOURCE_MAPPING("paymentChannelToFundSourceMappings"), PAYMENT_TYPE(
+                "paymentTypeId"), FUND_SOURCE("fundSourceAccountId"), TRANSFERS_SUSPENSE("transfersInSuspenseAccountId"), FEE_INCOME_ACCOUNT_MAPPING(
+                "feeToIncomeAccountMappings"), PENALTY_INCOME_ACCOUNT_MAPPING("penaltyToIncomeAccountMappings"), CHARGE_ID("chargeId"), INCOME_ACCOUNT_ID(
+                "incomeAccountId");
 
         private final String value;
 

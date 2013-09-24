@@ -154,6 +154,10 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_FEES.getValue());
 
+                this.savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
+                        SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), savingProductId,
+                        CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_PENALTIES.getValue());
+
                 // expenses
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToExpenseAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(), savingProductId,
@@ -169,6 +173,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
 
                 // advanced accounting mappings
                 this.savingsProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, savingProductId, null);
+                this.savingsProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, savingProductId, null);
             break;
             /*** Do not have accrual based accounting for now ***/
             case ACCRUAL_BASED:
@@ -236,6 +241,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                     element, accountingRuleType);
             this.savingsProductToGLAccountMappingHelper.updatePaymentChannelToFundSourceMappings(command, element, savingsProductId,
                     changes);
+            this.savingsProductToGLAccountMappingHelper.updateChargesToIncomeAccountMappings(command, element, savingsProductId, changes);
         }
         return changes;
     }
