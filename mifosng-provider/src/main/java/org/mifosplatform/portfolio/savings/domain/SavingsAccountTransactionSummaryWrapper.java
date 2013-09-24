@@ -72,17 +72,37 @@ public final class SavingsAccountTransactionSummaryWrapper {
     public BigDecimal calculateTotalFeesCharge(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
-            if (transaction.isFeeChargeAndNotReversed() && transaction.isNotReversed()) {
+            if (transaction.isFeeChargeAndNotReversed()) {
                 total = total.plus(transaction.getAmount(currency));
             }
         }
         return total.getAmountDefaultedToNullIfZero();
     }
 
+    public BigDecimal calculateTotalFeesChargeWaived(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
+        Money total = Money.zero(currency);
+        for (final SavingsAccountTransaction transaction : transactions) {
+            if (transaction.isWaiveFeeChargeAndNotReversed()) {
+                total = total.plus(transaction.getAmount(currency));
+            }
+        }
+        return total.getAmountDefaultedToNullIfZero();
+    }
+    
     public BigDecimal calculateTotalPenaltyCharge(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
-            if (transaction.isPenaltyChargeAndNotReversed() && transaction.isNotReversed()) {
+            if (transaction.isPenaltyChargeAndNotReversed()) {
+                total = total.plus(transaction.getAmount(currency));
+            }
+        }
+        return total.getAmountDefaultedToNullIfZero();
+    }
+    
+    public BigDecimal calculateTotalPenaltyChargeWaived(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
+        Money total = Money.zero(currency);
+        for (final SavingsAccountTransaction transaction : transactions) {
+            if (transaction.isWaivePenaltyChargeAndNotReversed()) {
                 total = total.plus(transaction.getAmount(currency));
             }
         }

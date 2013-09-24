@@ -1,9 +1,11 @@
 package org.mifosplatform.organisation.holiday.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -39,7 +41,7 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
     private final HolidayDataValidator fromApiJsonDeserializer;
     private final HolidayRepository holidayRepository;
     private final WorkingDaysRepositoryWrapper daysRepositoryWrapper;
-
+    private final ConfigurationDomainService configurationDomainService;
     private final PlatformSecurityContext context;
     private final OfficeRepository officeRepository;
     private final FromJsonHelper fromApiJsonHelper;
@@ -47,13 +49,14 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
     @Autowired
     public HolidayWritePlatformServiceJpaRepositoryImpl(final HolidayDataValidator fromApiJsonDeserializer,
             final HolidayRepository holidayRepository, final PlatformSecurityContext context, final OfficeRepository officeRepository,
-            final FromJsonHelper fromApiJsonHelper, final WorkingDaysRepositoryWrapper daysRepositoryWrapper) {
+            final FromJsonHelper fromApiJsonHelper, final WorkingDaysRepositoryWrapper daysRepositoryWrapper, final ConfigurationDomainService configurationDomainService) {
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.holidayRepository = holidayRepository;
         this.context = context;
         this.officeRepository = officeRepository;
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.daysRepositoryWrapper = daysRepositoryWrapper;
+        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional
@@ -152,4 +155,16 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
                     toDate.toString(), repaymentsRescheduledTo.toString());
         }
     }
+
+    @Override
+    public boolean isHoliday(Long officeId, LocalDate transactionDate) {
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId, transactionDate.toDate());
+        return HolidayUtil.isHoliday(transactionDate, holidays);
+    }
+
+    @Override
+    public boolean isTransactionAllowedOnHoliday() {
+        return this.configurationDomainService.allowTransactionsOnHolidayEnabled();
+    }
+    
 }

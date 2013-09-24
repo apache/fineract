@@ -437,6 +437,10 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     public boolean isCharge() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isCharge();
     }
+    
+    public boolean isWaiveCharge(){
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isWaiveCharge();
+    }
 
     public boolean isFeeCharge() {
         final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
@@ -454,6 +458,24 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
     public boolean isPenaltyChargeAndNotReversed() {
         return isPenaltyCharge() && isNotReversed();
+    }
+
+    public boolean isWaiveFeeCharge() {
+        final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
+        return (isWaiveCharge() && chargePaidBy != null) ? chargePaidBy.isFeeCharge() : false;
+    }
+
+    public boolean isWaivePenaltyCharge() {
+        final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
+        return (isWaiveCharge() && chargePaidBy != null) ? chargePaidBy.isPenaltyCharge() : false;
+    }
+
+    public boolean isWaiveFeeChargeAndNotReversed() {
+        return isWaiveFeeCharge() && isNotReversed();
+    }
+
+    public boolean isWaivePenaltyChargeAndNotReversed() {
+        return isWaivePenaltyCharge() && isNotReversed();
     }
 
     private SavingsAccountChargePaidBy getSavingsAccountChargePaidBy() {

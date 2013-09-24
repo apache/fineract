@@ -48,7 +48,9 @@ public interface SavingsAccountWritePlatformService {
 
     CommandProcessingResult deleteSavingsAccountCharge(Long savingsAccountId, Long savingsAccountChargeId, JsonCommand command);
 
-    CommandProcessingResult waiveCharge(Long savingsAccountId, Long savingsAccountChargeId, JsonCommand command);
+    CommandProcessingResult waiveCharge(Long savingsAccountId, Long savingsAccountChargeId);
 
     CommandProcessingResult payCharge(Long savingsAccountId, Long savingsAccountChargeId, JsonCommand command);
+    
+    void payDueCharges();
 }

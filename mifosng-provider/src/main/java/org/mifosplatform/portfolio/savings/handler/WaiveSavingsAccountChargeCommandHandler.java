@@ -27,6 +27,6 @@ public class WaiveSavingsAccountChargeCommandHandler implements NewCommandSource
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.waiveCharge(command.getSavingsId(), command.entityId(), command);
+        return this.writePlatformService.waiveCharge(command.getSavingsId(), command.entityId());
     }
 }

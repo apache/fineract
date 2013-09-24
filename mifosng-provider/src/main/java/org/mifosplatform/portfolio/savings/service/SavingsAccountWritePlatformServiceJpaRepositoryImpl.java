@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.savings.service;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.amountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeIdParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -34,11 +35,13 @@ import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.holiday.service.HolidayWritePlatformService;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
+import org.mifosplatform.organisation.workingdays.service.WorkingDaysWritePlatformService;
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.mifosplatform.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.mifosplatform.portfolio.account.service.AccountTransfersReadPlatformService;
@@ -65,6 +68,7 @@ import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepository;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountStatusType;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransaction;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransactionRepository;
+import org.mifosplatform.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.mifosplatform.portfolio.savings.exception.SavingsAccountClosingNotAllowedException;
 import org.mifosplatform.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
 import org.mifosplatform.portfolio.savings.exception.TransactionUpdateNotAllowedException;
@@ -91,6 +95,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
     private final ChargeRepositoryWrapper chargeRepository;
     private final SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepository;
+    private final HolidayWritePlatformService holidayWritePlatformService;
+    private final WorkingDaysWritePlatformService workingDaysWritePlatformService;
 
     @Autowired
     public SavingsAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -105,7 +111,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final SavingsAccountDomainService savingsAccountDomainService, final NoteRepository noteRepository,
             final AccountTransfersReadPlatformService accountTransfersReadPlatformService,
             final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
-            final ChargeRepositoryWrapper chargeRepository, final SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepository) {
+            final ChargeRepositoryWrapper chargeRepository, final SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepository,
+            final HolidayWritePlatformService holidayWritePlatformService,
+            final WorkingDaysWritePlatformService workingDaysWritePlatformService) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
@@ -121,6 +129,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.accountAssociationsReadPlatformService = accountAssociationsReadPlatformService;
         this.chargeRepository = chargeRepository;
         this.savingsAccountChargeRepository = savingsAccountChargeRepository;
+        this.holidayWritePlatformService = holidayWritePlatformService;
+        this.workingDaysWritePlatformService = workingDaysWritePlatformService;
     }
 
     @Transactional
@@ -586,6 +596,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public CommandProcessingResult addSavingsAccountCharge(final JsonCommand command) {
 
         this.context.authenticatedUser();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
+
         final Long savingsAccountId = command.getSavingsId();
         this.savingsAccountChargeDataValidator.validateAdd(command.json());
 
@@ -599,6 +613,23 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final SavingsAccountCharge savingsAccountCharge = SavingsAccountCharge.createNewFromJson(savingsAccount, chargeDefinition, command);
 
+        if (savingsAccountCharge.getDueLocalDate() != null) {
+            // transaction date should not be on a holiday or non working day
+            if (!this.holidayWritePlatformService.isTransactionAllowedOnHoliday()
+                    && this.holidayWritePlatformService.isHoliday(savingsAccount.officeId(), savingsAccountCharge.getDueLocalDate())) {
+                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().toString(fmt))
+                        .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.on.holiday");
+                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            }
+            
+            if (!this.workingDaysWritePlatformService.isTransactionAllowedOnNonWorkingDay()
+                    && !this.workingDaysWritePlatformService.isWorkingDay(savingsAccountCharge.getDueLocalDate())) {
+                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().toString(fmt))
+                .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.a.nonworking.day");
+                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            }
+        }
+        
         savingsAccount.addCharge(fmt, savingsAccountCharge, chargeDefinition);
 
         this.savingAccountRepository.saveAndFlush(savingsAccount);
@@ -616,9 +647,12 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Transactional
     @Override
     public CommandProcessingResult updateSavingsAccountCharge(final JsonCommand command) {
+        
         this.context.authenticatedUser();
-
         this.savingsAccountChargeDataValidator.validateUpdate(command.json());
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
+
         final Long savingsAccountId = command.getSavingsId();
         // SavingsAccount Charge entity
         final Long savingsChargeId = command.entityId();
@@ -630,20 +664,30 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 savingsAccountId);
 
         final Map<String, Object> changes = savingsAccountCharge.update(command);
+
+        if (savingsAccountCharge.getDueLocalDate() != null) {
+            final Locale locale = command.extractLocale();
+            final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+
+            // transaction date should not be on a holiday or non working day
+            if (!this.holidayWritePlatformService.isTransactionAllowedOnHoliday()
+                    && this.holidayWritePlatformService.isHoliday(savingsAccount.officeId(), savingsAccountCharge.getDueLocalDate())) {
+                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().toString(fmt))
+                        .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.on.holiday");
+                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            }
+            
+            if (!this.workingDaysWritePlatformService.isTransactionAllowedOnNonWorkingDay()
+                    && !this.workingDaysWritePlatformService.isWorkingDay(savingsAccountCharge.getDueLocalDate())) {
+                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().toString(fmt))
+                .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.a.nonworking.day");
+                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            }
+        }
+        
         this.savingsAccountChargeRepository.saveAndFlush(savingsAccountCharge);
-        // TODO AA: revisit the code
-        /*
-         * // Charges may be edited only when the loan associated with them are
-         * // yet to be approved (are in submitted and pending status) if
-         * (!loan.status().isSubmittedAndPendingApproval()) { throw new
-         * LoanChargeCannotBeUpdatedException(
-         * LOAN_CHARGE_CANNOT_BE_UPDATED_REASON
-         * .LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE,
-         * loanCharge.getId()); }
-         */
 
         return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
                 .withEntityId(savingsChargeId) //
                 // .withOfficeId(savings) //
                 // .withClientId(loan.getClientId()) //
@@ -655,7 +699,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Transactional
     @Override
-    public CommandProcessingResult waiveCharge(final Long savingsAccountId, final Long savingsAccountChargeId, final JsonCommand command) {
+    public CommandProcessingResult waiveCharge(final Long savingsAccountId, final Long savingsAccountChargeId) {
 
         this.context.authenticatedUser();
 
@@ -670,7 +714,6 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.savingAccountRepository.saveAndFlush(savingsAccount);
 
         return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
                 .withEntityId(savingsAccountChargeId) //
                 .withOfficeId(savingsAccount.officeId()) //
                 .withClientId(savingsAccount.clientId()) //
@@ -707,21 +750,45 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Transactional
     @Override
     public CommandProcessingResult payCharge(final Long savingsAccountId, final Long savingsAccountChargeId, final JsonCommand command) {
-        this.context.authenticatedUser();
 
+        this.context.authenticatedUser();
+        this.savingsAccountChargeDataValidator.validatePayCharge(command.json());
+        
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
 
+        final Locale locale = command.extractLocale();
+        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        
         final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsAccountId);
         checkClientOrGroupActive(savingsAccount);
 
         final BigDecimal chargeAmount = command.bigDecimalValueOfParameterNamed(amountParamName);
-        savingsAccount.payCharge(savingsAccountChargeId, chargeAmount, existingTransactionIds, existingReversedTransactionIds);
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed(dueAsOfDateParamName);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
+
+        //transaction date should not be on a holiday or non working day
+        if (!this.holidayWritePlatformService.isTransactionAllowedOnHoliday()
+                && this.holidayWritePlatformService.isHoliday(savingsAccount.officeId(), transactionDate)) {
+            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate.toString(fmt))
+            .failWithCodeNoParameterAddedToErrorCode("transaction.not.allowed.transaction.date.is.on.holiday");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+        
+        if (!this.workingDaysWritePlatformService.isTransactionAllowedOnNonWorkingDay()
+                && !this.workingDaysWritePlatformService.isWorkingDay(transactionDate)) {
+            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate.toString(fmt))
+            .failWithCodeNoParameterAddedToErrorCode("transaction.not.allowed.transaction.date.is.a.nonworking.day");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+                
+        savingsAccount.payCharge(savingsAccountChargeId, chargeAmount, transactionDate, fmt, existingTransactionIds, existingReversedTransactionIds);
 
         this.savingAccountRepository.saveAndFlush(savingsAccount);
 
         return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
                 .withEntityId(savingsAccountChargeId) //
                 .withOfficeId(savingsAccount.officeId()) //
                 .withClientId(savingsAccount.clientId()) //
@@ -730,5 +797,34 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .build();
 
     }
+
+    @Transactional
+    @Override
+    @CronTarget(jobName = JobName.PAY_DUE_SAVINGS_CHARGES)
+    public void payDueCharges() {
+        //always use current date as transaction date for batch job 
+        final LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+        final List<SavingsAccountCharge> pendingCharges = this.savingsAccountChargeRepository.findPendingCharges(transactionDate.toDate());
+        final List<SavingsAccountCharge> paidCharges = new ArrayList<SavingsAccountCharge>(pendingCharges.size());
+        for (SavingsAccountCharge savingsAccountCharge : pendingCharges) {
+            // Get Savings account from savings charge
+            final SavingsAccount account = savingsAccountCharge.savingsAccount();
+            this.savingAccountAssembler.assignSavingAccountHelpers(account);
+            final List<Long> existingTransactionIds = new ArrayList<Long>();
+            final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+
+            try {
+                account.payDueCharge(savingsAccountCharge, transactionDate, existingTransactionIds, existingReversedTransactionIds);
+                paidCharges.add(savingsAccountCharge);
+            } catch (InsufficientAccountBalanceException isab) {
+                // TODO: AA - provide a meaningful error with failed
+                // transactions list
+            }
+        }
+        
+        this.savingsAccountChargeRepository.save(paidCharges);
+    }
+    
+    
 
 }

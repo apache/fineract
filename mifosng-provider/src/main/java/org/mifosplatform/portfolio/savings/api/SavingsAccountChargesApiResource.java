@@ -155,7 +155,7 @@ public class SavingsAccountChargesApiResource {
     @Path("{savingsAccountChargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String waiveSavingsAccountCharge(@PathParam("savingsAccountId") final Long savingsAccountId,
+    public String payOrWaiveSavingsAccountCharge(@PathParam("savingsAccountId") final Long savingsAccountId,
             @PathParam("savingsAccountChargeId") final Long savingsAccountChargeId, @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
 

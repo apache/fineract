@@ -228,13 +228,25 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         return getAmountWaived(currency);
     }
 
-    public Money pay(final MonetaryCurrency currency, final BigDecimal chargePaid) {
+    public Money pay(final MonetaryCurrency currency, final Money amountPaid) {
 
         Money amountPaidToDate = Money.of(currency, this.amountPaid);
-        final Money amountPaid = Money.of(currency, chargePaid);
         Money amountOutstanding = Money.of(currency, this.amountOutstanding);
         amountPaidToDate = amountPaidToDate.plus(amountPaid);
-        amountOutstanding = amountOutstanding.minus(chargePaid);
+        amountOutstanding = amountOutstanding.minus(amountPaid);
+        this.amountPaid = amountPaidToDate.getAmount();
+        this.amountOutstanding = amountOutstanding.getAmount();
+        this.paid = determineIfFullyPaid();
+        return amountPaid;
+    }
+    
+    public Money payDueCharge(final MonetaryCurrency currency) {
+
+        Money amountPaidToDate = Money.of(currency, this.amountPaid);
+        Money amountOutstanding = Money.of(currency, this.amountOutstanding);
+        final Money amountPaid = Money.of(currency, this.amountOutstanding);;
+        amountPaidToDate = amountPaidToDate.plus(amountPaid);
+        amountOutstanding = amountOutstanding.minus(amountPaid);
         this.amountPaid = amountPaidToDate.getAmount();
         this.amountOutstanding = amountOutstanding.getAmount();
         this.paid = determineIfFullyPaid();
@@ -440,6 +452,10 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         return Money.of(currency, this.amountWrittenOff);
     }
 
+    public Money getAmountOutstanding(final MonetaryCurrency currency){
+        return Money.of(currency, this.amountOutstanding);
+    }
+    
     /**
      * @param incrementBy
      *            Amount used to pay off this charge
@@ -486,6 +502,10 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         return ChargeTimeType.fromInt(this.chargeTime).isOnSpecifiedDueDate();
     }
 
+    public SavingsAccount savingsAccount(){
+        return this.savingsAccount;
+    }
+    
     @Override
     public boolean equals(final Object obj) {
         if (obj == null) { return false; }
