@@ -192,4 +192,7 @@ public class SavingsApiConstants {
 
     public static final Set<String> SAVINGS_ACCOUNT_CHARGES_ADD_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
             chargeIdParamName, amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName));
+
+    public static final Set<String> SAVINGS_ACCOUNT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
+            amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName));
 }

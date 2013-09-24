@@ -43,7 +43,8 @@ public class ChargesApiResource {
 
     private final Set<String> CHARGES_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "amount", "currency", "penalty",
             "active", "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions",
-            "chargeAppliesToOptions", "chargeTimeTypeOptions", "currencyOptions"));
+            "chargeAppliesToOptions", "chargeTimeTypeOptions", "currencyOptions", "loanChargeCalculationTypeOptions",
+            "loanChargeTimeTypeOptions", "savingsChargeCalculationTypeOptions", "savingsChargeTimeTypeOptions"));
 
     private final String resourceNameForPermissions = "CHARGE";
 

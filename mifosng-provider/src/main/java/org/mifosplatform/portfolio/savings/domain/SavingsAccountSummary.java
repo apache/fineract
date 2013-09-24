@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.Transient;
 
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
@@ -49,6 +50,13 @@ public final class SavingsAccountSummary {
     @Column(name = "account_balance_derived", scale = 6, precision = 19)
     private BigDecimal accountBalance = BigDecimal.ZERO;
 
+    //TODO: AA do we need this data to be persisted.
+    @Transient
+    private BigDecimal totalFeeChargesWaived = BigDecimal.ZERO;
+    
+    @Transient
+    private BigDecimal totalPenaltyChargesWaived = BigDecimal.ZERO;
+    
     protected SavingsAccountSummary() {
         //
     }
@@ -63,6 +71,8 @@ public final class SavingsAccountSummary {
         this.totalAnnualFees = wrapper.calculateTotalAnnualFees(currency, transactions);
         this.totalFeeCharge = wrapper.calculateTotalFeesCharge(currency, transactions);
         this.totalPenaltyCharge = wrapper.calculateTotalPenaltyCharge(currency, transactions);
+        this.totalFeeChargesWaived = wrapper.calculateTotalFeesChargeWaived(currency, transactions);
+        this.totalPenaltyChargesWaived = wrapper.calculateTotalPenaltyChargeWaived(currency, transactions);
 
         this.accountBalance = Money.of(currency, this.totalDeposits).plus(this.totalInterestPosted).minus(this.totalWithdrawals)
                 .minus(this.totalWithdrawalFees).minus(this.totalAnnualFees).minus(this.totalFeeCharge).minus(this.totalPenaltyCharge)

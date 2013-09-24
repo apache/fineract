@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.charge.service;
 
 import static org.mifosplatform.portfolio.charge.service.ChargeEnumerations.chargeCalculationType;
 import static org.mifosplatform.portfolio.charge.service.ChargeEnumerations.chargePaymentMode;
+import static org.mifosplatform.portfolio.charge.service.ChargeEnumerations.chargeTimeType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,5 +68,31 @@ public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownRead
     @Override
     public List<EnumOptionData> retrivePaymentModes() {
         return Arrays.asList(chargePaymentMode(ChargePaymentMode.REGULAR), chargePaymentMode(ChargePaymentMode.ACCOUNT_TRANSFER));
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveLoanCalculationTypes() {
+        return Arrays.asList(chargeCalculationType(ChargeCalculationType.FLAT), chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT));
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveLoanCollectionTimeTypes() {
+        return Arrays.asList(chargeTimeType(ChargeTimeType.DISBURSEMENT), chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE));
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveSavingsCalculationTypes() {
+        return Arrays.asList(chargeCalculationType(ChargeCalculationType.FLAT)
+                //Enable when percentage of amount is supported for savings charges
+                //, chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT)
+                );
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveSavingsCollectionTimeTypes() {
+        return Arrays.asList(chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE)
+                //enable when support is added for recurring Monthly and yearly charges
+                //, chargeTimeType(ChargeTimeType.MONTHLY), chargeTimeType(ChargeTimeType.YEARLY)
+                );
     }
 }
