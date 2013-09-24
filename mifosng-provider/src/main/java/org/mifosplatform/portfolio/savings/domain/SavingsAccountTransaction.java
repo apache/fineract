@@ -6,9 +6,11 @@
 package org.mifosplatform.portfolio.savings.domain;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -313,6 +315,25 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
         if (this.paymentDetail != null) {
             thisTransactionData.put("paymentTypeId", this.paymentDetail.getPaymentType().getId());
+        }
+
+        /***
+         * Sending data in a map, though in savings we currently expect a transaction to
+         * always repay a single charge (or may repay a part of a single charge
+         * too)
+         ***/
+        if (!this.savingsAccountChargesPaid.isEmpty()) {
+            final List<Map<String, Object>> savingsChargesPaidData = new ArrayList<Map<String, Object>>();
+            for (final SavingsAccountChargePaidBy chargePaidBy : this.savingsAccountChargesPaid) {
+                final Map<String, Object> savingChargePaidData = new LinkedHashMap<String, Object>();
+                savingChargePaidData.put("chargeId", chargePaidBy.getSavingsAccountCharge().getCharge().getId());
+                savingChargePaidData.put("isPenalty", chargePaidBy.getSavingsAccountCharge().getCharge().isPenalty());
+                savingChargePaidData.put("savingsChargeId", chargePaidBy.getSavingsAccountCharge().getId());
+                savingChargePaidData.put("amount", chargePaidBy.getAmount());
+
+                savingsChargesPaidData.add(savingChargePaidData);
+            }
+            thisTransactionData.put("savingsChargesPaid", savingsChargesPaidData);
         }
 
         return thisTransactionData;

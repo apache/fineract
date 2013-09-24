@@ -235,7 +235,13 @@ public class SavingsProductDataValidator {
             baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue()).value(incomeFromFeeId)
                     .notNull().integerGreaterThanZero();
 
+            final Long incomeFromPenaltyId = this.fromApiJsonHelper.extractLongNamed(
+                    SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), element);
+            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue())
+                    .value(incomeFromPenaltyId).notNull().integerGreaterThanZero();
+
             validatePaymentChannelFundSourceMappings(baseDataValidator, element);
+            validateChargeToIncomeAccountMappings(baseDataValidator, element);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -380,7 +386,13 @@ public class SavingsProductDataValidator {
         baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue()).value(incomeFromFeeId)
                 .ignoreIfNull().integerGreaterThanZero();
 
+        final Long incomeFromPenaltyId = this.fromApiJsonHelper.extractLongNamed(
+                SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), element);
+        baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue()).value(incomeFromPenaltyId)
+                .ignoreIfNull().integerGreaterThanZero();
+
         validatePaymentChannelFundSourceMappings(baseDataValidator, element);
+        validateChargeToIncomeAccountMappings(baseDataValidator, element);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -422,6 +434,43 @@ public class SavingsProductDataValidator {
                             .notNull().integerGreaterThanZero();
                     i++;
                 } while (i < paymentChannelMappingArray.size());
+            }
+        }
+    }
+
+    private void validateChargeToIncomeAccountMappings(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        // validate for both fee and penalty charges
+        validateChargeToIncomeAccountMappings(baseDataValidator, element, true);
+        validateChargeToIncomeAccountMappings(baseDataValidator, element, true);
+    }
+
+    private void validateChargeToIncomeAccountMappings(final DataValidatorBuilder baseDataValidator, final JsonElement element,
+            final boolean isPenalty) {
+        String parameterName;
+        if (isPenalty) {
+            parameterName = SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PENALTY_INCOME_ACCOUNT_MAPPING.getValue();
+        } else {
+            parameterName = SAVINGS_PRODUCT_ACCOUNTING_PARAMS.FEE_INCOME_ACCOUNT_MAPPING.getValue();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(parameterName, element)) {
+            final JsonArray chargeToIncomeAccountMappingArray = this.fromApiJsonHelper.extractJsonArrayNamed(parameterName, element);
+            if (chargeToIncomeAccountMappingArray != null && chargeToIncomeAccountMappingArray.size() > 0) {
+                int i = 0;
+                do {
+                    final JsonObject jsonObject = chargeToIncomeAccountMappingArray.get(i).getAsJsonObject();
+                    final Long chargeId = this.fromApiJsonHelper.extractLongNamed(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.CHARGE_ID.getValue(),
+                            jsonObject);
+                    final Long incomeAccountId = this.fromApiJsonHelper.extractLongNamed(
+                            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_ACCOUNT_ID.getValue(), jsonObject);
+                    baseDataValidator.reset()
+                            .parameter(parameterName + "[" + i + "]." + SAVINGS_PRODUCT_ACCOUNTING_PARAMS.CHARGE_ID.getValue())
+                            .value(chargeId).notNull().integerGreaterThanZero();
+                    baseDataValidator.reset()
+                            .parameter(parameterName + "[" + i + "]." + SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_ACCOUNT_ID.getValue())
+                            .value(incomeAccountId).notNull().integerGreaterThanZero();
+                    i++;
+                } while (i < chargeToIncomeAccountMappingArray.size());
             }
         }
     }

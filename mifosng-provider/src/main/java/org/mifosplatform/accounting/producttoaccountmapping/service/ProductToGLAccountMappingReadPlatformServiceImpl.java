@@ -169,6 +169,8 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
                     accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_CONTROL.getValue(), glAccountId);
                 } else if (glAccountForSavings.equals(CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_FEES)) {
                     accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), glAccountId);
+                } else if (glAccountForSavings.equals(CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_PENALTIES)) {
+                    accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), glAccountId);
                 } else if (glAccountForSavings.equals(CASH_ACCOUNTS_FOR_SAVINGS.TRANSFERS_SUSPENSE)) {
                     accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(), glAccountId);
                 } else if (glAccountForSavings.equals(CASH_ACCOUNTS_FOR_SAVINGS.INTEREST_ON_SAVINGS)) {
@@ -225,6 +227,16 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         return fetchChargeToIncomeAccountMappings(PortfolioProductType.LOAN, loanProductId, true);
     }
 
+    @Override
+    public List<ChargeToGLAccountMapper> fetchFeeToIncomeAccountMappingsForSavingsProduct(Long savingsProductId) {
+        return fetchChargeToIncomeAccountMappings(PortfolioProductType.SAVING, savingsProductId, false);
+    }
+
+    @Override
+    public List<ChargeToGLAccountMapper> fetchPenaltyToIncomeAccountMappingsForSavingsProduct(Long savingsProductId) {
+        return fetchChargeToIncomeAccountMappings(PortfolioProductType.SAVING, savingsProductId, true);
+    }
+
     private List<ChargeToGLAccountMapper> fetchChargeToIncomeAccountMappings(final PortfolioProductType portfolioProductType,
             final Long loanProductId, final boolean penalty) {
         final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
@@ -249,4 +261,5 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         }
         return chargeToGLAccountMappers;
     }
+
 }
