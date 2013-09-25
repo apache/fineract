@@ -19,7 +19,7 @@ public enum SavingsAccountTransactionType {
     INTEREST_POSTING(3, "savingsAccountTransactionType.interestPosting"), //
     WITHDRAWAL_FEE(4, "savingsAccountTransactionType.withdrawalFee"), //
     ANNUAL_FEE(5, "savingsAccountTransactionType.annualFee"), //
-    WAIVE_CHARGES(6, "savingsAccountTransactionType.waiveCharges"), //
+    WAIVE_CHARGES(6, "savingsAccountTransactionType.waiveCharge"), //
     PAY_CHARGE(7, "savingsAccountTransactionType.payCharge"), //
     INITIATE_TRANSFER(12, "savingsAccountTransactionType.initiateTransfer"), //
     APPROVE_TRANSFER(13, "savingsAccountTransactionType.approveTransfer"), //

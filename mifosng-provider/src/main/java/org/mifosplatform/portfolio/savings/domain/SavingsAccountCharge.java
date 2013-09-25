@@ -214,8 +214,10 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         this.waived = false;
     }
 
-    public void resetPaidAmount(final MonetaryCurrency currency) {
-        this.amountPaid = BigDecimal.ZERO;
+    public void undoPayment(final MonetaryCurrency currency, final Money transactionAmount) {
+        Money amountPaid = getAmountPaid(currency);
+        amountPaid = amountPaid.minus(transactionAmount);
+        this.amountPaid = amountPaid.getAmount();
         this.amountOutstanding = calculateAmountOutstanding(currency);
         this.paid = false;
     }
@@ -223,9 +225,16 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
     public Money waive(final MonetaryCurrency currency) {
         this.amountWaived = this.amountOutstanding;
         this.amountOutstanding = BigDecimal.ZERO;
-        this.paid = false;
         this.waived = true;
         return getAmountWaived(currency);
+    }
+    
+    public void undoWaiver(final MonetaryCurrency currency, final Money transactionAmount) {
+        Money amountWaived = getAmountWaived(currency);
+        amountWaived = amountWaived.minus(transactionAmount);
+        this.amountWaived = amountWaived.getAmount();
+        this.amountOutstanding = calculateAmountOutstanding(currency);
+        this.waived = false;
     }
 
     public Money pay(final MonetaryCurrency currency, final Money amountPaid) {
@@ -237,20 +246,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         this.amountPaid = amountPaidToDate.getAmount();
         this.amountOutstanding = amountOutstanding.getAmount();
         this.paid = determineIfFullyPaid();
-        return amountPaid;
-    }
-    
-    public Money payDueCharge(final MonetaryCurrency currency) {
-
-        Money amountPaidToDate = Money.of(currency, this.amountPaid);
-        Money amountOutstanding = Money.of(currency, this.amountOutstanding);
-        final Money amountPaid = Money.of(currency, this.amountOutstanding);;
-        amountPaidToDate = amountPaidToDate.plus(amountPaid);
-        amountOutstanding = amountOutstanding.minus(amountPaid);
-        this.amountPaid = amountPaidToDate.getAmount();
-        this.amountOutstanding = amountOutstanding.getAmount();
-        this.paid = determineIfFullyPaid();
-        return amountPaid;
+        return amountOutstanding;
     }
 
     private BigDecimal calculateAmountOutstanding(final MonetaryCurrency currency) {
@@ -408,6 +404,10 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
     public BigDecimal amount() {
         return this.amount;
+    }
+    
+    public BigDecimal amoutOutstanding(){
+        return this.amountOutstanding;
     }
 
     public boolean isFeeCharge() {

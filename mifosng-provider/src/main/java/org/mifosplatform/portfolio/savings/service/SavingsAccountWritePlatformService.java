@@ -52,5 +52,5 @@ public interface SavingsAccountWritePlatformService {
 
     CommandProcessingResult payCharge(Long savingsAccountId, Long savingsAccountChargeId, JsonCommand command);
     
-    void payDueCharges();
+    void processDueCharges();
 }
