@@ -6,6 +6,9 @@
 	xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd">
 	<defaultCache eternal="true" maxEntriesLocalHeap="100"
 		overflowToDisk="false" />
+		
+	<cache name="users" maxEntriesLocalHeap="10000"
+		eternal="true" overflowToDisk="false" />
 	<cache name="usersByUsername" maxEntriesLocalHeap="10000"
 		eternal="true" overflowToDisk="false" />
 	<cache name="tenantsById" maxEntriesLocalHeap="10000"
