@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.amountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeCalculationTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeIdParamName;
@@ -14,11 +15,16 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDat
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.idParamName;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
@@ -48,7 +54,7 @@ public class SavingsAccountChargeAssembler {
         this.savingsAccountChargeRepository = savingsAccountChargeRepository;
     }
 
-    public Set<SavingsAccountCharge> fromParsedJson(final JsonElement element) {
+    public Set<SavingsAccountCharge> fromParsedJson(final JsonElement element, final String productCurrencyCode) {
 
         final Set<SavingsAccountCharge> savingsAccountCharges = new HashSet<SavingsAccountCharge>();
 
@@ -106,6 +112,20 @@ public class SavingsAccountChargeAssembler {
             }
         }
 
+        this.validateSavingsCharges(savingsAccountCharges, productCurrencyCode);
         return savingsAccountCharges;
+    }
+    
+    private void validateSavingsCharges(final Set<SavingsAccountCharge> charges, final String productCurrencyCode) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
+        for (SavingsAccountCharge savingsAccountCharge : charges) {
+            if(!savingsAccountCharge.hasCurrencyCodeOf(productCurrencyCode)){
+                baseDataValidator.reset().parameter("currency").value(savingsAccountCharge.getCharge().getId())
+                        .failWithCodeNoParameterAddedToErrorCode("currency.and.charge.currency.not.same");
+            }
+        }
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 }

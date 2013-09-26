@@ -236,7 +236,7 @@ public class SavingsAccountAssembler {
             monthDayOfAnnualFee = product.monthDayOfAnnualFee();
         }
 
-        final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(element);
+        final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(element, product.currency().getCode());
 
         final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer, accountNo,
                 externalId, accountType, submittedOnDate, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,

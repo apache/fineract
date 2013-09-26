@@ -336,9 +336,6 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         if (!CollectionUtils.isEmpty(savingsAccountCharges)) {
             this.charges = associateChargesWithThisSavingsAccount(savingsAccountCharges);
-            // TODO:Add charges details to savings summary
-            // this.summary =
-            // updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
         }
 
         this.summary = new SavingsAccountSummary();

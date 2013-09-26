@@ -233,10 +233,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 }
 
                 if (changes.containsKey("charges")) {
-                    // final Set<Charge> savingsProductCharges =
-                    // this.savi.assembleListOfSavingsProductCharges(command,
-                    // product.currency().getCode());
-                    final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(command.parsedJson());
+                    final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(command.parsedJson(), account.getCurrency().getCode());
                     final boolean updated = account.update(charges);
                     if (!updated) {
                         changes.remove("charges");

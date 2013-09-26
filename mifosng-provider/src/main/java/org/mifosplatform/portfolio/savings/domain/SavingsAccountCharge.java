@@ -505,6 +505,11 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
     public SavingsAccount savingsAccount(){
         return this.savingsAccount;
     }
+ 
+    public boolean hasCurrencyCodeOf(final String matchingCurrencyCode) {
+        if (this.currencyCode() == null || matchingCurrencyCode == null) { return false; }
+        return this.currencyCode().equalsIgnoreCase(matchingCurrencyCode);
+    }
     
     @Override
     public boolean equals(final Object obj) {
