@@ -542,7 +542,7 @@ public final class LoanApplicationTerms {
         switch (this.interestCalculationPeriodMethod) {
             case DAILY:
                 final BigDecimal dailyInterestRate = this.annualNominalInterestRate.divide(BigDecimal.valueOf(Long.valueOf(365)), mc)
-                        .divide(BigDecimal.valueOf(Double.valueOf("100.0")), mc).multiply(BigDecimal.valueOf(this.repaymentEvery));
+                        .divide(BigDecimal.valueOf(Double.valueOf("100.0")), mc);
 
                 final BigDecimal equivalentInterestRateForPeriod = dailyInterestRate
                         .multiply(BigDecimal.valueOf(Long.valueOf(daysInPeriod)));
