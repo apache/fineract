@@ -1493,7 +1493,10 @@ public class Loan extends AbstractPersistable<Long> {
         return disbursementTransaction;
     }
 
-    public LoanTransaction handlePayDisbursementTransaction(final Long chargeId, final LoanTransaction chargesPayment) {
+    public LoanTransaction handlePayDisbursementTransaction(final Long chargeId, final LoanTransaction chargesPayment, 
+            final List<Long> existingTransactionIds,final List<Long> existingReversedTransactionIds) {
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
         LoanCharge charge = null;
         for (final LoanCharge loanCharge : this.charges) {
             if (chargeId.equals(loanCharge.getId())) {
