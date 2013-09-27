@@ -87,4 +87,29 @@ public class JournalEntryData {
         this.referenceNumber = referenceNumber;
     }
 
+    
+    public Long getId() {
+        return this.id;
+    }
+
+    
+    public Long getGlAccountId() {
+        return this.glAccountId;
+    }
+
+    
+    public EnumOptionData getGlAccountType() {
+        return this.glAccountType;
+    }
+
+    
+    public BigDecimal getAmount() {
+        return this.amount;
+    }
+
+    
+    public EnumOptionData getEntryType() {
+        return this.entryType;
+    }
+
 }
