@@ -12,13 +12,12 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 /**
  * Immutable object representing a General Ledger Account
- * 
+ *
  * Note: no getter/setters required as google will produce json from fields of
  * object.
  */
 public class JournalEntryData {
 
-    @SuppressWarnings("unused")
     private final Long id;
     @SuppressWarnings("unused")
     private final Long officeId;
@@ -26,17 +25,13 @@ public class JournalEntryData {
     private final String officeName;
     @SuppressWarnings("unused")
     private final String glAccountName;
-    @SuppressWarnings("unused")
     private final Long glAccountId;
     @SuppressWarnings("unused")
     private final String glAccountCode;
-    @SuppressWarnings("unused")
     private final EnumOptionData glAccountType;
     @SuppressWarnings("unused")
     private final LocalDate transactionDate;
-    @SuppressWarnings("unused")
     private final EnumOptionData entryType;
-    @SuppressWarnings("unused")
     private final BigDecimal amount;
     @SuppressWarnings("unused")
     private final String transactionId;
@@ -87,29 +82,26 @@ public class JournalEntryData {
         this.referenceNumber = referenceNumber;
     }
 
-    
-    public Long getId() {
-        return this.id;
-    }
 
-    
-    public Long getGlAccountId() {
-        return this.glAccountId;
-    }
+     public Long getId() {
+     return this.id;
+     }
 
-    
-    public EnumOptionData getGlAccountType() {
-        return this.glAccountType;
-    }
 
-    
+     public Long getGlAccountId() {
+     return this.glAccountId;
+     }
+
+
+     public EnumOptionData getGlAccountType() {
+     return this.glAccountType;
+     }
+
     public BigDecimal getAmount() {
         return this.amount;
     }
 
-    
     public EnumOptionData getEntryType() {
         return this.entryType;
     }
-
 }
