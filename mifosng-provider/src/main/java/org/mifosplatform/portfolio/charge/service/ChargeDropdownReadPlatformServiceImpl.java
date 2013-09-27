@@ -49,15 +49,7 @@ public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownRead
     public List<EnumOptionData> retrieveCollectionTimeTypes() {
         final List<EnumOptionData> chargeTimeTypes = new ArrayList<EnumOptionData>();
         for (final ChargeTimeType chargeTimeType : ChargeTimeType.values()) {
-            if (ChargeTimeType.INVALID.equals(chargeTimeType) || ChargeTimeType.MONTHLY.equals(chargeTimeType) // To
-                                                                                                               // be
-                                                                                                               // implemented
-                                                                                                               // for
-                                                                                                               // Savings
-                    || ChargeTimeType.YEARLY.equals(chargeTimeType)) {
-                // implemented
-                // for
-                // Savings
+            if (ChargeTimeType.INVALID.equals(chargeTimeType)) {
                 continue;
             }
             chargeTimeTypes.add(ChargeEnumerations.chargeTimeType(chargeTimeType));
@@ -82,17 +74,14 @@ public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownRead
 
     @Override
     public List<EnumOptionData> retrieveSavingsCalculationTypes() {
-        return Arrays.asList(chargeCalculationType(ChargeCalculationType.FLAT)
-                //Enable when percentage of amount is supported for savings charges
-                //, chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT)
-                );
+        return Arrays.asList(chargeCalculationType(ChargeCalculationType.FLAT),
+                chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT));
     }
 
     @Override
     public List<EnumOptionData> retrieveSavingsCollectionTimeTypes() {
-        return Arrays.asList(chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE)
-                //enable when support is added for recurring Monthly and yearly charges
-                //, chargeTimeType(ChargeTimeType.MONTHLY), chargeTimeType(ChargeTimeType.YEARLY)
-                );
+        return Arrays.asList(chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE), chargeTimeType(ChargeTimeType.SAVINGS_ACTIVATION),
+                chargeTimeType(ChargeTimeType.SAVINGS_CLOSURE), chargeTimeType(ChargeTimeType.WITHDRAWAL_FEE),
+                chargeTimeType(ChargeTimeType.ANNUAL_FEE));
     }
 }

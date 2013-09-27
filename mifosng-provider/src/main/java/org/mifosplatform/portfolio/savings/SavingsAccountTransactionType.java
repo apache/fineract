@@ -105,8 +105,12 @@ public enum SavingsAccountTransactionType {
         return this.value.equals(SavingsAccountTransactionType.ANNUAL_FEE.getValue());
     }
 
-    public boolean isCharge() {
+    public boolean isPayCharge() {
         return this.value.equals(SavingsAccountTransactionType.PAY_CHARGE.getValue());
+    }
+    
+    public boolean isChargeTransaction(){
+        return isPayCharge() || isWithdrawalFee() || isAnnualFee();
     }
 
     public boolean isWaiveCharge() {
@@ -130,7 +134,7 @@ public enum SavingsAccountTransactionType {
     }
 
     public boolean isDebit() {
-        return isWithdrawal() || isWithdrawalFee() || isAnnualFee() || isCharge();
+        return isWithdrawal() || isWithdrawalFee() || isAnnualFee() || isPayCharge();
     }
 
     public boolean isCredit() {

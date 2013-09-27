@@ -20,7 +20,7 @@ public interface SavingsAccountWritePlatformService {
 
     CommandProcessingResult withdrawal(Long savingsId, JsonCommand command);
 
-    CommandProcessingResult applyAnnualFee(Long savingsId, LocalDate annualFeeTransactionDate);
+    /*CommandProcessingResult applyAnnualFee(Long savingsId, LocalDate annualFeeTransactionDate);*/
 
     CommandProcessingResult calculateInterest(Long savingsId);
 

@@ -154,11 +154,11 @@ public class SavingsAccountsApiResource {
         if (!associationParameters.isEmpty()) {
 
             if (associationParameters.contains("all")) {
-                associationParameters.addAll(Arrays.asList("transactions", "charges"));
+                associationParameters.addAll(Arrays.asList(SavingsApiConstants.transactions, SavingsApiConstants.charges));
             }
 
-            if (associationParameters.contains("transactions")) {
-                mandatoryResponseParameters.add("transactions");
+            if (associationParameters.contains(SavingsApiConstants.transactions)) {
+                mandatoryResponseParameters.add(SavingsApiConstants.transactions);
                 final Collection<SavingsAccountTransactionData> currentTransactions = this.savingsAccountReadPlatformService
                         .retrieveAllTransactions(accountId);
                 if (!CollectionUtils.isEmpty(currentTransactions)) {
@@ -166,8 +166,8 @@ public class SavingsAccountsApiResource {
                 }
             }
 
-            if (associationParameters.contains("charges")) {
-                mandatoryResponseParameters.add("charges");
+            if (associationParameters.contains(SavingsApiConstants.charges)) {
+                mandatoryResponseParameters.add(SavingsApiConstants.charges);
                 final Collection<SavingsAccountChargeData> currentCharges = this.savingsAccountChargeReadPlatformService
                         .retrieveSavingsAccountCharges(accountId);
                 if (!CollectionUtils.isEmpty(currentCharges)) {

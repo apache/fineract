@@ -114,6 +114,11 @@ public class Charge extends AbstractPersistable<Long> {
                 baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
                         .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.calculation.type.for.savings");
             }
+            
+            if (!ChargeTimeType.fromInt(getChargeTime()).isWithdrawalFee() && ChargeCalculationType.fromInt(getChargeCalculation()).isPercentageOfAmount()) {
+                baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
+                        .failWithCodeNoParameterAddedToErrorCode("charge.calculation.type.percentage.allowed.only.for.withdrawal");
+            }
 
         } else if (isLoanCharge()) {
 
@@ -276,6 +281,11 @@ public class Charge extends AbstractPersistable<Long> {
                 if (!isAllowedSavingsChargeCalculationType()) {
                     baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
                             .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.calculation.type.for.savings");
+                }
+                
+                if (!ChargeTimeType.fromInt(getChargeTime()).isWithdrawalFee() && ChargeCalculationType.fromInt(getChargeCalculation()).isPercentageOfAmount()) {
+                    baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
+                            .failWithCodeNoParameterAddedToErrorCode("charge.calculation.type.percentage.allowed.only.for.withdrawal");
                 }
             }
         }

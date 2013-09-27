@@ -5,8 +5,6 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeAmountParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeOnMonthDayParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.descriptionParamName;
@@ -22,15 +20,12 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeri
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nameParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeAmountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.joda.time.MonthDay;
 import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
@@ -43,7 +38,6 @@ import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearT
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
 import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
-import org.mifosplatform.portfolio.savings.SavingsWithdrawalFeesType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -107,20 +101,11 @@ public class SavingsProductAssembler {
             lockinPeriodFrequencyType = SavingsPeriodFrequencyType.fromInt(lockinPeriodFrequencyTypeValue);
         }
 
-        final BigDecimal withdrawalFeeAmount = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(withdrawalFeeAmountParamName);
-        SavingsWithdrawalFeesType withdrawalFeeType = null;
-        final Integer withdrawalFeeTypeValue = command.integerValueOfParameterNamed(withdrawalFeeTypeParamName);
-        if (withdrawalFeeTypeValue != null) {
-            withdrawalFeeType = SavingsWithdrawalFeesType.fromInt(withdrawalFeeTypeValue);
-        }
-
         boolean iswithdrawalFeeApplicableForTransfer = false;
         if (command.parameterExists(withdrawalFeeForTransfersParamName)) {
             iswithdrawalFeeApplicableForTransfer = command.booleanPrimitiveValueOfParameterNamed(withdrawalFeeForTransfersParamName);
         }
 
-        final BigDecimal annualFeeAmount = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(annualFeeAmountParamName);
-        final MonthDay monthDayOfAnnualFee = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
 
         // Savings product charges
@@ -128,8 +113,7 @@ public class SavingsProductAssembler {
 
         return SavingsProduct.createNew(name, description, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,
-                iswithdrawalFeeApplicableForTransfer, annualFeeAmount, monthDayOfAnnualFee, accountingRuleType, charges);
+                lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, accountingRuleType, charges);
     }
 
     public Set<Charge> assembleListOfSavingsProductCharges(final JsonCommand command, final String savingsProductCurrencyCode) {

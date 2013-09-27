@@ -81,8 +81,8 @@ public class SavingsApiConstants {
     public static final String withdrawalFeeAmountParamName = "withdrawalFeeAmount";
     public static final String withdrawalFeeTypeParamName = "withdrawalFeeType";
     public static final String withdrawalFeeForTransfersParamName = "withdrawalFeeForTransfers";
-    public static final String annualFeeAmountParamName = "annualFeeAmount";
-    public static final String annualFeeOnMonthDayParamName = "annualFeeOnMonthDay";
+    public static final String feeAmountParamName = "feeAmount";//to be deleted
+    public static final String feeOnMonthDayParamName = "feeOnMonthDay";
     public static final String accountingRuleParamName = "accountingRule";
     public static final String paymentTypeIdParamName = "paymentTypeId";
     public static final String transactionAccountNumberParamName = "accountNumber";
@@ -118,16 +118,22 @@ public class SavingsApiConstants {
     public static final String amountParamName = "amount";
     public static final String amountPaidParamName = "amountPaid";
     public static final String chargeOptionsParamName = "chargeOptions";
+    public static final String chargePaymentModeParamName = "chargePaymentMode";
 
     public static final String noteParamName = "note";
+    
+    //Savings account associations
+    public static final String transactions = "transactions";
+    public static final String charges = "charges";
+    
 
     public static final Set<String> SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             monthDayFormatParamName, nameParamName, descriptionParamName, currencyCodeParamName, digitsAfterDecimalParamName,
             inMultiplesOfParamName, nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName,
             interestPostingPeriodTypeParamName, interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
             minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName,
-            withdrawalFeeAmountParamName, withdrawalFeeTypeParamName, withdrawalFeeForTransfersParamName, annualFeeAmountParamName,
-            annualFeeOnMonthDayParamName, accountingRuleParamName, chargesParamName,
+            withdrawalFeeAmountParamName, withdrawalFeeTypeParamName, withdrawalFeeForTransfersParamName, feeAmountParamName,
+            feeOnMonthDayParamName, accountingRuleParamName, chargesParamName,
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(),
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(),
@@ -147,7 +153,7 @@ public class SavingsApiConstants {
             nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName,
             interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName,
             lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, withdrawalFeeAmountParamName, withdrawalFeeTypeParamName,
-            withdrawalFeeForTransfersParamName, annualFeeAmountParamName, annualFeeOnMonthDayParamName, "currencyOptions",
+            withdrawalFeeForTransfersParamName, feeAmountParamName, feeOnMonthDayParamName, "currencyOptions",
             "interestCompoundingPeriodTypeOptions", "interestPostingPeriodTypeOptions", "interestCalculationTypeOptions",
             "interestCalculationDaysInYearTypeOptions", "lockinPeriodFrequencyTypeOptions", "withdrawalFeeTypeOptions"));
 
@@ -156,8 +162,10 @@ public class SavingsApiConstants {
             productIdParamName, fieldOfficerIdParamName, submittedOnDateParamName, nominalAnnualInterestRateParamName,
             interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName, interestCalculationTypeParamName,
             interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
-            lockinPeriodFrequencyTypeParamName, withdrawalFeeAmountParamName, withdrawalFeeTypeParamName,
-            withdrawalFeeForTransfersParamName, annualFeeAmountParamName, annualFeeOnMonthDayParamName, chargesParamName));
+            lockinPeriodFrequencyTypeParamName, 
+            //withdrawalFeeAmountParamName, withdrawalFeeTypeParamName,
+            //withdrawalFeeForTransfersParamName, 
+            feeAmountParamName, feeOnMonthDayParamName, chargesParamName));
 
     /**
      * These parameters will match the class level parameters of
@@ -169,10 +177,10 @@ public class SavingsApiConstants {
             groupIdParamName, "groupName", "savingsProductId", "savingsProductName", "currency", nominalAnnualInterestRateParamName,
             interestCompoundingPeriodTypeParamName, interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
             minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName,
-            withdrawalFeeAmountParamName, withdrawalFeeTypeParamName, withdrawalFeeForTransfersParamName, annualFeeAmountParamName,
-            annualFeeOnMonthDayParamName, "summary", "transactions", "productOptions", "interestCompoundingPeriodTypeOptions",
+            withdrawalFeeAmountParamName, withdrawalFeeTypeParamName, withdrawalFeeForTransfersParamName, feeAmountParamName,
+            feeOnMonthDayParamName, "summary", "transactions", "productOptions", "interestCompoundingPeriodTypeOptions",
             "interestPostingPeriodTypeOptions", "interestCalculationTypeOptions", "interestCalculationDaysInYearTypeOptions",
-            "lockinPeriodFrequencyTypeOptions", "withdrawalFeeTypeOptions"));
+            "lockinPeriodFrequencyTypeOptions", "withdrawalFeeTypeOptions", "withdrawalFee", "annualFee"));
 
     public static final Set<String> SAVINGS_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
             localeParamName, dateFormatParamName, transactionDateParamName, transactionAmountParamName, paymentTypeIdParamName,
@@ -195,7 +203,7 @@ public class SavingsApiConstants {
             amountPaidParamName, chargeOptionsParamName));
 
     public static final Set<String> SAVINGS_ACCOUNT_CHARGES_ADD_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
-            chargeIdParamName, amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName));
+            chargeIdParamName, amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName, feeOnMonthDayParamName, monthDayFormatParamName));
 
     public static final Set<String> SAVINGS_ACCOUNT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
             amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName));

@@ -28,11 +28,17 @@ public class ChargeEnumerations {
                 optionData = new EnumOptionData(ChargeTimeType.SPECIFIED_DUE_DATE.getValue().longValue(),
                         ChargeTimeType.SPECIFIED_DUE_DATE.getCode(), "Specified due date");
             break;
-            case MONTHLY:
-                optionData = new EnumOptionData(ChargeTimeType.MONTHLY.getValue().longValue(), ChargeTimeType.MONTHLY.getCode(), "Monthly");
+            case SAVINGS_ACTIVATION:
+                optionData = new EnumOptionData(ChargeTimeType.SAVINGS_ACTIVATION.getValue().longValue(), ChargeTimeType.SAVINGS_ACTIVATION.getCode(), "Savings Activation");
             break;
-            case YEARLY:
-                optionData = new EnumOptionData(ChargeTimeType.YEARLY.getValue().longValue(), ChargeTimeType.YEARLY.getCode(), "Yearly");
+            case SAVINGS_CLOSURE:
+                optionData = new EnumOptionData(ChargeTimeType.SAVINGS_CLOSURE.getValue().longValue(), ChargeTimeType.SAVINGS_CLOSURE.getCode(), "Savings Closure");
+            break;
+            case WITHDRAWAL_FEE:
+                optionData = new EnumOptionData(ChargeTimeType.WITHDRAWAL_FEE.getValue().longValue(), ChargeTimeType.WITHDRAWAL_FEE.getCode(), "Withdrawal Fee");
+            break;
+            case ANNUAL_FEE:
+                optionData = new EnumOptionData(ChargeTimeType.ANNUAL_FEE.getValue().longValue(), ChargeTimeType.ANNUAL_FEE.getCode(), "Annual Fee");
             break;
             default:
                 optionData = new EnumOptionData(ChargeTimeType.INVALID.getValue().longValue(), ChargeTimeType.INVALID.getCode(), "Invalid");
