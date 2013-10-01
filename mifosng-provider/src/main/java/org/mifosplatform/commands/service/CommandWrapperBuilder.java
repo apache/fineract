@@ -773,6 +773,15 @@ public class CommandWrapperBuilder {
         this.href = "/journalentries/" + transactionId;
         return this;
     }
+    
+    public CommandWrapperBuilder updateRunningBalanceForJournalEntry() {
+        this.actionName = "UPDATERUNNINGBALANCE";
+        this.entityName = "JOURNALENTRY";
+        this.entityId = null;
+        this.href = "/journalentries/update";
+        return this;
+    }
+
 
     public CommandWrapperBuilder createSavingProduct() {
         this.actionName = "CREATE";

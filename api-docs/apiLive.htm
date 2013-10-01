@@ -711,7 +711,8 @@
 							<tr class="alt">
 								<td><a href="#journalentries">Journal Entries</a></td>
 								<td>journalentries</td>
-								<td><a href="#journalentries_create">Create Journal Entries</a></td>
+								<td><a href="#journalentries_create">Create Journal Entries</a><br> 
+								<a href="#journalentries_updatebalance">Update Journal Entries Running Balance</a></td>
 								<td><a href="#journalentries_list">List Journal Entries</a></td>
 								<td></td>
 								<td></td>
@@ -18735,6 +18736,27 @@ No Request Body:
                             <td class=fielddesc>Denotes the accounting rule id for posting journal entries.
                         	</td>
                         </tr>
+						<tr class=alt>
+                            <td>officeRunningBalance</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Describes office balance after the journal entry for the Ledger Account.
+                        	</td>
+                        </tr>
+						<tr class=alt>
+                            <td>organizationRunningBalance</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Describes complete organization balances after the journal entry for the Ledger Account.
+                        	</td>
+                        </tr>
+						<tr class=alt>
+                            <td>runningBalanceComputed</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Describes whether account balances computed for the journal entry.
+                        	</td>
+                        </tr>
                     </table>
                 </div>
             </div>
@@ -18869,7 +18891,10 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
         5
       ],
       "createdByUserName": "mifos",
-      "reversed": false
+      "reversed": false,
+	  "officeRunningBalance":0,
+	  "organizationRunningBalance":0
+	  "runningBalanceComputed":false
     },
     {
       "id": 2,
@@ -18909,7 +18934,11 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
         5
       ],
       "createdByUserName": "mifos",
-      "reversed": false
+      "reversed": false,
+	  "officeRunningBalance":0,
+	  "organizationRunningBalance":0
+	  "runningBalanceComputed":false
+
     }
   ]
 }
@@ -19100,6 +19129,46 @@ Request Body:
                 </div>
             </div>
 
+            <a id="journalentries_updatebalance" name="journalentries_updatebalance" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Update Running balances for Journal Entries</h4>
+                    <p>
+                        This API calculates the running balances for office. If office ID not provided this API calculates running balances for all offices.
+                        <br>
+                    </p>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG">
+                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                        </tr>
+                        <tr class=alt>
+                            <td>officeId 
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+POST https://DomainName/api/v1/journalentries?command=updateRunningBalance
+                    </code>
+                    <code class="method-request">
+POST journalentries
+Content-Type: application/json 
+Request Body:
+{
+"officeId": 1,
+}
+                    </code>
+                    <code class="method-response">
+{
+    "officeId": 1,
+}
+                    </code>
+                   
+                </div>
+            </div>
+
+			
             <a id="journalentries_retrieve" name="journalentries_retrieve"
                 class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
@@ -19149,7 +19218,11 @@ GET https://DomainName/api/v1/journalentries/{entryId}
         2
     ],
     "createdByUserName": "mifos",
-    "reversed": false
+    "reversed": false,
+	"officeRunningBalance":0,
+	"organizationRunningBalance":0
+	"runningBalanceComputed":false
+
 }
                     </code>
                 </div>
@@ -19797,7 +19870,8 @@ GET https://DomainName/api/v1/search?query=000000111
 				<tr class="alt">
 					<td><a href="#journalentries">Journal Entries</a></td>
 					<td>journalentries</td>
-					<td><a href="#journalentries_create">Create Journal Entries</a></td>
+					<td><a href="#journalentries_create">Create Journal Entries</a><br>
+					<a href="#journalentries_updatebalance">Update Journal Entries Running Balance</a></td>
 					<td><a href="#journalentries_list">List Journal Entries</a></td>
 					<td></td>
 					<td></td>
