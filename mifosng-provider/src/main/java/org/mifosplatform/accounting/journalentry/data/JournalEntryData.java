@@ -12,14 +12,13 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 /**
  * Immutable object representing a General Ledger Account
- *
+ * 
  * Note: no getter/setters required as google will produce json from fields of
  * object.
  */
 public class JournalEntryData {
 
     private final Long id;
-    @SuppressWarnings("unused")
     private final Long officeId;
     @SuppressWarnings("unused")
     private final String officeName;
@@ -53,13 +52,20 @@ public class JournalEntryData {
     private final Boolean reversed;
     @SuppressWarnings("unused")
     private final String referenceNumber;
+    @SuppressWarnings("unused")
+    private final BigDecimal officeRunningBalance;
+    @SuppressWarnings("unused")
+    private final BigDecimal organizationRunningBalance;
+    @SuppressWarnings("unused")
+    private final Boolean runningBalanceComputed;
 
     public JournalEntryData(final Long id, final Long officeId, final String officeName, final String glAccountName,
             final Long glAccountId, final String glAccountCode, final EnumOptionData glAccountClassification,
             final LocalDate transactionDate, final EnumOptionData entryType, final BigDecimal amount, final String transactionId,
             final Boolean manualEntry, final EnumOptionData entityType, final Long entityId, final Long createdByUserId,
             final LocalDate createdDate, final String createdByUserName, final String comments, final Boolean reversed,
-            final String referenceNumber) {
+            final String referenceNumber, final BigDecimal officeRunningBalance, final BigDecimal organizationRunningBalance,
+            final Boolean runningBalanceComputed) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -80,22 +86,22 @@ public class JournalEntryData {
         this.comments = comments;
         this.reversed = reversed;
         this.referenceNumber = referenceNumber;
+        this.officeRunningBalance = officeRunningBalance;
+        this.organizationRunningBalance = organizationRunningBalance;
+        this.runningBalanceComputed = runningBalanceComputed;
     }
 
+    public Long getId() {
+        return this.id;
+    }
 
-     public Long getId() {
-     return this.id;
-     }
+    public Long getGlAccountId() {
+        return this.glAccountId;
+    }
 
-
-     public Long getGlAccountId() {
-     return this.glAccountId;
-     }
-
-
-     public EnumOptionData getGlAccountType() {
-     return this.glAccountType;
-     }
+    public EnumOptionData getGlAccountType() {
+        return this.glAccountType;
+    }
 
     public BigDecimal getAmount() {
         return this.amount;
@@ -103,5 +109,9 @@ public class JournalEntryData {
 
     public EnumOptionData getEntryType() {
         return this.entryType;
+    }
+
+    public Long getOfficeId() {
+        return this.officeId;
     }
 }

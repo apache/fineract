@@ -262,6 +262,10 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("REVERSE") && this.entityName.equalsIgnoreCase("JOURNALENTRY");
     }
 
+    public boolean isUpdateRunningbalance() {
+        return this.actionName.equalsIgnoreCase("UPDATERUNNINGBALANCE") && this.entityName.equalsIgnoreCase("JOURNALENTRY");
+    }
+    
     public boolean isFundResource() {
         return this.entityName.equalsIgnoreCase("FUND");
     }
