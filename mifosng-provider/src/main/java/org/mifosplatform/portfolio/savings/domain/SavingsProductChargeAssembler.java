@@ -11,6 +11,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeIdPa
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeTimeTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.idParamName;
 
 import java.math.BigDecimal;
@@ -19,6 +20,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
@@ -70,7 +72,8 @@ public class SavingsProductChargeAssembler {
                             savingsChargeElement, locale);
                     final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, savingsChargeElement,
                             dateFormat, locale);
-
+                    final MonthDay feeOnMonthDay = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, savingsChargeElement);
+                    
                     if (id == null) {
                         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeId);
                         final ChargeTimeType chargeTime = null;
@@ -82,7 +85,7 @@ public class SavingsProductChargeAssembler {
                             ChargeCalculationType.fromInt(chargeCalculationType);
                         }
                         final SavingsAccountCharge savingsAccountCharge = SavingsAccountCharge.createNewWithoutSavingsAccount(
-                                chargeDefinition, amount, chargeTime, chargeCalculation, dueDate);
+                                chargeDefinition, amount, chargeTime, chargeCalculation, dueDate, true, feeOnMonthDay);
                         savingsAccountCharges.add(savingsAccountCharge);
                     } else {
                         final Long savingsAccountChargeId = id;
@@ -90,7 +93,7 @@ public class SavingsProductChargeAssembler {
                                 .findOne(savingsAccountChargeId);
                         if (savingsAccountCharge == null) { throw new SavingsAccountChargeNotFoundException(savingsAccountChargeId); }
 
-                        savingsAccountCharge.update(amount, dueDate);
+                        savingsAccountCharge.update(amount, dueDate, null);
 
                         savingsAccountCharges.add(savingsAccountCharge);
                     }

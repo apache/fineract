@@ -11,6 +11,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_AC
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.amountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -20,6 +21,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
@@ -62,7 +64,12 @@ public class SavingsAccountChargeDataValidator {
             final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element); 
             baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate).notNull();
         }
-
+        
+        if (this.fromApiJsonHelper.parameterExists(feeOnMonthDayParamName, element)) {
+            final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, element); 
+            baseDataValidator.reset().parameter(feeOnMonthDayParamName).value(monthDay).notNull();
+        }
+        
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 

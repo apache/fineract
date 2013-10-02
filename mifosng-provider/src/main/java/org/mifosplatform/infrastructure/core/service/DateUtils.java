@@ -64,7 +64,7 @@ public class DateUtils {
         return formattedSqlDate;
     }
     
-    public static boolean isInFuture(final LocalDate date){
-        return date.isAfter(getLocalDateOfTenant());
+    public static boolean isDateInTheFuture(final LocalDate localDate){
+        return localDate.isAfter(getLocalDateOfTenant());
     }
 }

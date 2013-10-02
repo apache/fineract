@@ -57,6 +57,7 @@ import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.mifosplatform.portfolio.savings.SavingsAccountTransactionType;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountChargeDataValidator;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDTO;
@@ -70,7 +71,6 @@ import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepository;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountStatusType;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransaction;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransactionRepository;
-import org.mifosplatform.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.mifosplatform.portfolio.savings.exception.SavingsAccountClosingNotAllowedException;
 import org.mifosplatform.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
 import org.mifosplatform.portfolio.savings.exception.TransactionUpdateNotAllowedException;
@@ -152,6 +152,18 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final Map<String, Object> changes = account.activate(user, command, DateUtils.getLocalDateOfTenant());
         if (!changes.isEmpty()) {
+            
+            final MathContext mc = MathContext.DECIMAL64;
+            if (account.isBeforeLastPostingPeriod(account.getActivationLocalDate())) {
+                final LocalDate today = DateUtils.getLocalDateOfTenant();
+                account.postInterest(mc, today);
+            } else {
+                final LocalDate today = DateUtils.getLocalDateOfTenant();
+                account.calculateInterestUsing(mc, today);
+            }
+
+            account.validateAccountBalanceDoesNotBecomeNegative(SavingsAccountTransactionType.PAY_CHARGE.name());
+
             this.savingAccountRepository.save(account);
         }
 
@@ -236,7 +248,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .build();
     }
 
-    @Transactional
+    /*@Transactional
     @Override
     public CommandProcessingResult applyAnnualFee(final Long savingsId, final LocalDate annualFeeTransactionDate) {
 
@@ -265,7 +277,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withGroupId(account.groupId()) //
                 .withSavingsId(savingsId) //
                 .build();
-    }
+    }*/
 
     @Transactional
     @Override
@@ -356,6 +368,17 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             throwValidationForActiveStatus(SavingsApiConstants.undoTransactionAction);
         }
         account.undoTransaction(transactionId);
+
+        // undoing transaction is withdrawal then undo withdrawal fee
+        // transaction if any
+        if (savingsAccountTransaction.isWithdrawal()) {
+            final SavingsAccountTransaction nextSavingsAccountTransaction = this.savingsAccountTransactionRepository
+                    .findOneByIdAndSavingsAccountId(transactionId + 1, savingsId);
+            if (nextSavingsAccountTransaction != null && nextSavingsAccountTransaction.isWithdrawalFeeAndNotReversed()) {
+                account.undoTransaction(transactionId + 1);
+            }
+        }
+        
         checkClientOrGroupActive(account);
         if (savingsAccountTransaction.isPostInterestCalculationRequired()
                 && account.isBeforeLastPostingPeriod(savingsAccountTransaction.transactionLocalDate())) {
@@ -604,7 +627,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         checkClientOrGroupActive(savingsAccount);
 
         final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final String format = command.dateFormat();
+        final DateTimeFormatter fmt = StringUtils.isNotBlank(format) ? DateTimeFormat.forPattern(format).withLocale(locale) : DateTimeFormat.forPattern("dd MM yyyy");
 
         final Long chargeDefinitionId = command.longValueOfParameterNamed(chargeIdParamName);
         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeDefinitionId);
@@ -810,19 +834,15 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         // always use current date as transaction date for batch job
         final LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
         final List<SavingsAccountCharge> pendingCharges = this.savingsAccountChargeRepository.findPendingCharges(transactionDate.toDate());
-        // final List<SavingsAccountCharge> paidCharges = new
-        // ArrayList<SavingsAccountCharge>(pendingCharges.size());
         final DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MM yyyy");
         for (SavingsAccountCharge savingsAccountCharge : pendingCharges) {
             try {
-                payCharge(savingsAccountCharge, transactionDate, savingsAccountCharge.amoutOutstanding(), fmt);
-            } catch (InsufficientAccountBalanceException isab) {
+            	payCharge(savingsAccountCharge, transactionDate, savingsAccountCharge.amoutOutstanding(), fmt);
+            } catch (Exception exception) {
                 // TODO: AA - provide a meaningful error with failed
                 // transactions list
             }
         }
-
-        // this.savingsAccountChargeRepository.save(paidCharges);
     }
 
     @Transactional
@@ -845,7 +865,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             account.calculateInterestUsing(mc, today);
         }
 
-        account.validateAccountBalanceDoesNotBecomeNegative(amountPaid);
+        account.validateAccountBalanceDoesNotBecomeNegative(SavingsAccountTransactionType.PAY_CHARGE.name());
 
         this.savingAccountRepository.save(account);
 

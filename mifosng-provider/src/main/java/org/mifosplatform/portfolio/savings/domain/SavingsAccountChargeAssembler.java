@@ -12,6 +12,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeIdPa
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeTimeTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.idParamName;
 
 import java.math.BigDecimal;
@@ -22,6 +23,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -61,6 +63,7 @@ public class SavingsAccountChargeAssembler {
         if (element.isJsonObject()) {
             final JsonObject topLevelJsonElement = element.getAsJsonObject();
             final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
+            final String monthDayFormat = this.fromApiJsonHelper.extractMonthDayFormatParameter(topLevelJsonElement);
             final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
             if (topLevelJsonElement.has(chargesParamName) && topLevelJsonElement.get(chargesParamName).isJsonArray()) {
                 final JsonArray array = topLevelJsonElement.get(chargesParamName).getAsJsonArray();
@@ -77,6 +80,8 @@ public class SavingsAccountChargeAssembler {
                             savingsChargeElement, locale);
                     final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, savingsChargeElement,
                             dateFormat, locale);
+
+                    final MonthDay feeOnMonthDay = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, savingsChargeElement, monthDayFormat, locale);
 
                     if (id == null) {
                         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeId);
@@ -95,8 +100,10 @@ public class SavingsAccountChargeAssembler {
                         if (chargeCalculationType != null) {
                             ChargeCalculationType.fromInt(chargeCalculationType);
                         }
+                        
+                        final boolean status = true;
                         final SavingsAccountCharge savingsAccountCharge = SavingsAccountCharge.createNewWithoutSavingsAccount(
-                                chargeDefinition, amount, chargeTime, chargeCalculation, dueDate);
+                                chargeDefinition, amount, chargeTime, chargeCalculation, dueDate, status, feeOnMonthDay);
                         savingsAccountCharges.add(savingsAccountCharge);
                     } else {
                         final Long savingsAccountChargeId = id;
@@ -104,7 +111,7 @@ public class SavingsAccountChargeAssembler {
                                 .findOne(savingsAccountChargeId);
                         if (savingsAccountCharge == null) { throw new SavingsAccountChargeNotFoundException(savingsAccountChargeId); }
 
-                        savingsAccountCharge.update(amount, dueDate);
+                        savingsAccountCharge.update(amount, dueDate, feeOnMonthDay);
 
                         savingsAccountCharges.add(savingsAccountCharge);
                     }
@@ -120,10 +127,26 @@ public class SavingsAccountChargeAssembler {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
-        for (SavingsAccountCharge savingsAccountCharge : charges) {
-            if(!savingsAccountCharge.hasCurrencyCodeOf(productCurrencyCode)){
-                baseDataValidator.reset().parameter("currency").value(savingsAccountCharge.getCharge().getId())
+        boolean isOneWithdrawalPresent = false;
+        boolean isOneAnnualPresent = false;
+        for (SavingsAccountCharge charge : charges) {
+            if(!charge.hasCurrencyCodeOf(productCurrencyCode)){
+                baseDataValidator.reset().parameter("currency").value(charge.getCharge().getId())
                         .failWithCodeNoParameterAddedToErrorCode("currency.and.charge.currency.not.same");
+            }
+            
+            if (charge.isWithdrawalFee()) {
+                if (isOneWithdrawalPresent) {
+                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("multiple.withdrawal.fee.per.account.not.supported");
+                }
+                isOneWithdrawalPresent = true;
+            }
+
+            if (charge.isAnnualFee()) {
+                if (isOneAnnualPresent) {
+                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("multiple.annual.fee.per.account.not.supported");
+                }
+                isOneAnnualPresent = true;
             }
         }
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }

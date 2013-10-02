@@ -57,6 +57,6 @@ public enum ChargeCalculationType {
     }
 
     public boolean isAllowedSavingsChargeCalculationType() {
-        return isFlat();
+        return isFlat() || isPercentageOfAmount();
     }
 }

@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
@@ -176,9 +177,10 @@ public class ChargeData implements Comparable<ChargeData>, Serializable {
         final BigDecimal amountPercentageAppliedTo = BigDecimal.ZERO;
         final Collection<ChargeData> chargeOptions = null;
         final LocalDate dueAsOfDate = null;
+        final MonthDay feeOnMonthDay = null;
 
         return SavingsAccountChargeData.instance(savingsChargeId, this.id, this.name, this.currency, this.amount, amountPaid, amountWaived,
                 amountWrittenOff, amountOutstanding, this.chargeTimeType, dueAsOfDate, this.chargeCalculationType, percentage,
-                amountPercentageAppliedTo, chargeOptions, this.penalty);
+                amountPercentageAppliedTo, chargeOptions, this.penalty, feeOnMonthDay);
     }
 }

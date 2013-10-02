@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
@@ -55,7 +56,9 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
                     + "sc.calculation_percentage as percentageOf, sc.calculation_on_amount as amountPercentageAppliedTo, "
                     + "sc.charge_time_enum as chargeTime, "
                     + "sc.is_penalty as penalty, "
-                    + "sc.due_for_collection_as_of_date as dueAsOfDate, "
+                    + "sc.charge_due_date as dueAsOfDate, "
+                    + "sc.fee_on_month as feeOnMonth, "
+                    + "sc.fee_on_day as feeOnDay, "
                     + "sc.charge_calculation_enum as chargeCalculation, "
                     + "c.currency_code as currencyCode, oc.name as currencyName, "
                     + "oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
@@ -93,7 +96,13 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
             final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(chargeTime);
 
             final LocalDate dueAsOfDate = JdbcSupport.getLocalDate(rs, "dueAsOfDate");
-
+            MonthDay feeOnMonthDay = null;
+            final Integer feeOnMonth = JdbcSupport.getInteger(rs, "feeOnMonth");
+            final Integer feeOnDay = JdbcSupport.getInteger(rs, "feeOnDay");
+            if (feeOnDay != null) {
+                feeOnMonthDay = new MonthDay(feeOnMonth, feeOnDay);
+            }
+            
             final int chargeCalculation = rs.getInt("chargeCalculation");
             final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(chargeCalculation);
             final boolean penalty = rs.getBoolean("penalty");
@@ -102,7 +111,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
 
             return SavingsAccountChargeData.instance(id, chargeId, name, currency, amount, amountPaid, amountWaived, amountWrittenOff,
                     amountOutstanding, chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo,
-                    chargeOptions, penalty);
+                    chargeOptions, penalty, feeOnMonthDay);
         }
     }
 
@@ -148,7 +157,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
         final SavingsAccountChargeMapper rm = new SavingsAccountChargeMapper();
 
         final String sql = "select " + rm.schema() + " where sc.savings_account_id=? "
-                + " order by sc.charge_time_enum ASC, sc.due_for_collection_as_of_date ASC, sc.is_penalty ASC";
+                + " order by sc.charge_time_enum ASC, sc.charge_due_date ASC, sc.is_penalty ASC";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
     }
