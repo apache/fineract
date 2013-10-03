@@ -15,7 +15,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
 public class ProductToGLAccountMappingNotFoundException extends AbstractPlatformResourceNotFoundException {
 
     public ProductToGLAccountMappingNotFoundException(final PortfolioProductType type, final Long productId, final String accountType) {
-        super("error.msg.productTyAccountMapping.not.found", "Mapping for product of type" + type.toString() + " with Id " + productId
+        super("error.msg.productToAccountMapping.not.found", "Mapping for product of type " + type.toString() + " with Id " + productId
                 + " does not exist for an account of type " + accountType, type.toString(), productId, accountType);
     }
 }

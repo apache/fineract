@@ -69,6 +69,13 @@ public class AccountingDropdownReadPlatformServiceImpl implements AccountingDrop
             expenseAccountOptions = null;
         }
         accountOptions.put("expenseAccountOptions", expenseAccountOptions);
+
+        List<GLAccountData> liabilityAccountOptions = this.accountReadPlatformService
+                .retrieveAllEnabledDetailGLAccounts(GLAccountType.LIABILITY);
+        if (liabilityAccountOptions.isEmpty()) {
+            liabilityAccountOptions = null;
+        }
+        accountOptions.put("liabilityAccountOptions", liabilityAccountOptions);
         return accountOptions;
     }
 

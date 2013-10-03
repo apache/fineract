@@ -13,7 +13,7 @@ public class AccountingConstants {
     /*** Accounting placeholders for cash based accounting for loan products ***/
     public static enum CASH_ACCOUNTS_FOR_LOAN {
         FUND_SOURCE(1), LOAN_PORTFOLIO(2), INTEREST_ON_LOANS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), LOSSES_WRITTEN_OFF(6), TRANSFERS_SUSPENSE(
-                10);
+                10), OVERPAYMENT(11);
 
         private final Integer value;
 
@@ -46,7 +46,7 @@ public class AccountingConstants {
     /*** Accounting placeholders for accrual based accounting for loan products ***/
     public static enum ACCRUAL_ACCOUNTS_FOR_LOAN {
         FUND_SOURCE(1), LOAN_PORTFOLIO(2), INTEREST_ON_LOANS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), LOSSES_WRITTEN_OFF(6), INTEREST_RECEIVABLE(
-                7), FEES_RECEIVABLE(8), PENALTIES_RECEIVABLE(9), TRANSFERS_SUSPENSE(10);
+                7), FEES_RECEIVABLE(8), PENALTIES_RECEIVABLE(9), TRANSFERS_SUSPENSE(10), OVERPAYMENT(11);
 
         private final Integer value;
 
@@ -83,12 +83,12 @@ public class AccountingConstants {
      ***/
     public static enum LOAN_PRODUCT_ACCOUNTING_PARAMS {
         FUND_SOURCE("fundSourceAccountId"), LOAN_PORTFOLIO("loanPortfolioAccountId"), INTEREST_ON_LOANS("interestOnLoanAccountId"), INCOME_FROM_FEES(
-                "incomeFromFeeAccountId"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccountId"), LOSSES_WRITTEN_OFF("writeOffAccountId"), INTEREST_RECEIVABLE(
-                "receivableInterestAccountId"), FEES_RECEIVABLE("receivableFeeAccountId"), PENALTIES_RECEIVABLE(
-                "receivablePenaltyAccountId"), TRANSFERS_SUSPENSE("transfersInSuspenseAccountId"), PAYMENT_CHANNEL_FUND_SOURCE_MAPPING(
-                "paymentChannelToFundSourceMappings"), PAYMENT_TYPE("paymentTypeId"), FEE_INCOME_ACCOUNT_MAPPING(
-                "feeToIncomeAccountMappings"), PENALTY_INCOME_ACCOUNT_MAPPING("penaltyToIncomeAccountMappings"), CHARGE_ID("chargeId"), INCOME_ACCOUNT_ID(
-                "incomeAccountId");
+                "incomeFromFeeAccountId"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccountId"), LOSSES_WRITTEN_OFF("writeOffAccountId"), OVERPAYMENT(
+                "overpaymentLiabilityAccountId"), INTEREST_RECEIVABLE("receivableInterestAccountId"), FEES_RECEIVABLE(
+                "receivableFeeAccountId"), PENALTIES_RECEIVABLE("receivablePenaltyAccountId"), TRANSFERS_SUSPENSE(
+                "transfersInSuspenseAccountId"), PAYMENT_CHANNEL_FUND_SOURCE_MAPPING("paymentChannelToFundSourceMappings"), PAYMENT_TYPE(
+                "paymentTypeId"), FEE_INCOME_ACCOUNT_MAPPING("feeToIncomeAccountMappings"), PENALTY_INCOME_ACCOUNT_MAPPING(
+                "penaltyToIncomeAccountMappings"), CHARGE_ID("chargeId"), INCOME_ACCOUNT_ID("incomeAccountId");
 
         private final String value;
 

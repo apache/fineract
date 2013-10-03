@@ -32,6 +32,7 @@ import org.mifosplatform.accounting.journalentry.exception.JournalEntryInvalidEx
 import org.mifosplatform.accounting.producttoaccountmapping.domain.PortfolioProductType;
 import org.mifosplatform.accounting.producttoaccountmapping.domain.ProductToGLAccountMapping;
 import org.mifosplatform.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
+import org.mifosplatform.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingNotFoundException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.office.domain.Office;
@@ -81,11 +82,12 @@ public class AccountingProcessorHelper {
             final BigDecimal interest = (BigDecimal) map.get("interestPortion");
             final BigDecimal fees = (BigDecimal) map.get("feeChargesPortion");
             final BigDecimal penalties = (BigDecimal) map.get("penaltyChargesPortion");
+            final BigDecimal overPayments = (BigDecimal) map.get("overPaymentPortion");
             final boolean reversed = (Boolean) map.get("reversed");
             final Long paymentTypeId = (Long) map.get("paymentTypeId");
 
-            final List<ChargePaymentDTO> feePayments = new ArrayList<ChargePaymentDTO>();
-            final List<ChargePaymentDTO> penaltyPayments = new ArrayList<ChargePaymentDTO>();
+            final List<ChargePaymentDTO> feePaymentDetails = new ArrayList<ChargePaymentDTO>();
+            final List<ChargePaymentDTO> penaltyPaymentDetails = new ArrayList<ChargePaymentDTO>();
             // extract charge payment details (if exists)
             if (map.containsKey("loanChargesPaid")) {
                 @SuppressWarnings("unchecked")
@@ -97,15 +99,16 @@ public class AccountingProcessorHelper {
                     final BigDecimal chargeAmountPaid = (BigDecimal) loanChargePaid.get("amount");
                     final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, loanChargeId, chargeAmountPaid);
                     if (isPenalty) {
-                        penaltyPayments.add(chargePaymentDTO);
+                        penaltyPaymentDetails.add(chargePaymentDTO);
                     } else {
-                        feePayments.add(chargePaymentDTO);
+                        feePaymentDetails.add(chargePaymentDTO);
                     }
                 }
             }
 
             final LoanTransactionDTO transaction = new LoanTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
-                    transactionDate, transactionType, amount, principal, interest, fees, penalties, reversed, feePayments, penaltyPayments);
+                    transactionDate, transactionType, amount, principal, interest, fees, penalties, overPayments, reversed,
+                    feePaymentDetails, penaltyPaymentDetails);
 
             newLoanTransactions.add(transaction);
 
@@ -512,6 +515,9 @@ public class AccountingProcessorHelper {
                 accountMapping = paymentChannelSpecificAccountMapping;
             }
         }
+
+        if (accountMapping == null) { throw new ProductToGLAccountMappingNotFoundException(PortfolioProductType.LOAN, loanProductId,
+                ACCRUAL_ACCOUNTS_FOR_LOAN.OVERPAYMENT.toString()); }
 
         return accountMapping.getGlAccount();
     }

@@ -35,6 +35,7 @@ public class LoanTransactionData {
     private final BigDecimal interestPortion;
     private final BigDecimal feeChargesPortion;
     private final BigDecimal penaltyChargesPortion;
+    private final BigDecimal overpaymentPortion;
     private final String externalId;
     private final AccountTransferData transfer;
 
@@ -46,23 +47,24 @@ public class LoanTransactionData {
         return new LoanTransactionData(loanTransactionData.id, loanTransactionData.officeId, loanTransactionData.officeName,
                 loanTransactionData.type, loanTransactionData.paymentDetailData, loanTransactionData.currency, loanTransactionData.date,
                 loanTransactionData.amount, loanTransactionData.principalPortion, loanTransactionData.interestPortion,
-                loanTransactionData.feeChargesPortion, loanTransactionData.penaltyChargesPortion, paymentTypeOptions,
-                loanTransactionData.externalId, loanTransactionData.transfer);
+                loanTransactionData.feeChargesPortion, loanTransactionData.penaltyChargesPortion, loanTransactionData.overpaymentPortion,
+                paymentTypeOptions, loanTransactionData.externalId, loanTransactionData.transfer);
     }
 
     public LoanTransactionData(final Long id, final Long officeId, final String officeName, final LoanTransactionEnumData transactionType,
             final PaymentDetailData paymentDetailData, final CurrencyData currency, final LocalDate date, final BigDecimal amount,
             final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
-            final BigDecimal penaltyChargesPortion, final String externalId, final AccountTransferData transfer) {
-        this(id, officeId, officeName, transactionType, paymentDetailData, currency, date, amount, principalPortion, interestPortion,
-                feeChargesPortion, penaltyChargesPortion, null, externalId, transfer);
-    }
-
-    public LoanTransactionData(final Long id, final Long officeId, final String officeName, final LoanTransactionEnumData transactionType,
-            final PaymentDetailData paymentDetailData, final CurrencyData currency, final LocalDate date, final BigDecimal amount,
-            final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
-            final BigDecimal penaltyChargesPortion, final Collection<CodeValueData> paymentTypeOptions, final String externalId,
+            final BigDecimal penaltyChargesPortion, final BigDecimal overpaymentPortion, final String externalId,
             final AccountTransferData transfer) {
+        this(id, officeId, officeName, transactionType, paymentDetailData, currency, date, amount, principalPortion, interestPortion,
+                feeChargesPortion, penaltyChargesPortion, overpaymentPortion, null, externalId, transfer);
+    }
+
+    public LoanTransactionData(final Long id, final Long officeId, final String officeName, final LoanTransactionEnumData transactionType,
+            final PaymentDetailData paymentDetailData, final CurrencyData currency, final LocalDate date, final BigDecimal amount,
+            final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
+            final BigDecimal penaltyChargesPortion, final BigDecimal overpaymentPortion,
+            final Collection<CodeValueData> paymentTypeOptions, final String externalId, final AccountTransferData transfer) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -78,6 +80,7 @@ public class LoanTransactionData {
         this.paymentTypeOptions = paymentTypeOptions;
         this.externalId = externalId;
         this.transfer = transfer;
+        this.overpaymentPortion = overpaymentPortion;
     }
 
     public LocalDate dateOf() {
