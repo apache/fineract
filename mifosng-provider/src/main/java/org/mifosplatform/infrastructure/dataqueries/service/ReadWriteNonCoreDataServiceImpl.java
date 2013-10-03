@@ -71,12 +71,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private final static HashMap<String, String> apiTypeToMySQL = new HashMap<String, String>() {
 
         {
-            put("String", "VARCHAR");
-            put("Number", "INT");
-            put("Decimal", "DECIMAL");
-            put("Date", "DATE");
-            put("Text", "TEXT");
-            put("Dropdown", "INT");
+            put("string", "VARCHAR");
+            put("number", "INT");
+            put("decimal", "DECIMAL");
+            put("date", "DATE");
+            put("text", "TEXT");
+            put("dropdown", "INT");
         }
     };
 
@@ -265,15 +265,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         final String deleteRegisteredDatatableSql = "delete from x_registered_table where registered_table_name = '" + datatable + "'";
 
-        String[] sqlArray = null;
-        if (this.configurationDomainService.isConstraintApproachEnabledForDatatables()) {
-            final String deleteColumnCodeSql = "delete from x_table_cloumn_code_mappings where column_alias_name like'"
-                    + datatable.toLowerCase().replaceAll("\\s", "_") + "%'";
-            sqlArray = new String[4];
-            sqlArray[3] = deleteColumnCodeSql;
-        } else {
-            sqlArray = new String[3];
-        }
+        String[] sqlArray = new String[3];
         sqlArray[0] = deleteRolePermissionsSql;
         sqlArray[1] = deletePermissionsSql;
         sqlArray[2] = deleteRegisteredDatatableSql;
@@ -362,7 +354,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final boolean isConstraintApproach) {
 
         String name = (column.has("name")) ? column.get("name").getAsString() : null;
-        final String type = (column.has("type")) ? column.get("type").getAsString() : null;
+        final String type = (column.has("type")) ? column.get("type").getAsString().toLowerCase() : null;
         final Integer length = (column.has("length")) ? column.get("length").getAsInt() : null;
         final Boolean mandatory = (column.has("mandatory")) ? column.get("mandatory").getAsBoolean() : false;
         final String code = (column.has("code")) ? column.get("code").getAsString() : null;
@@ -381,11 +373,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         sqlBuilder = sqlBuilder.append("`" + name + "` " + mysqlType);
 
         if (type != null) {
-            if (type.equals("String")) {
+            if (type.equalsIgnoreCase("String")) {
                 sqlBuilder = sqlBuilder.append("(" + length + ")");
-            } else if (type.equals("Decimal")) {
+            } else if (type.equalsIgnoreCase("Decimal")) {
                 sqlBuilder = sqlBuilder.append("(19,6)");
-            } else if (type.equals("Dropdown")) {
+            } else if (type.equalsIgnoreCase("Dropdown")) {
                 sqlBuilder = sqlBuilder.append("(11)");
             }
         }
@@ -526,14 +518,14 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 } else {
                     if (code != null) {
                         removeMappings.add(dataTableNameAlias + "_" + name);
-                        if (newCode == null) {
+                        if (newCode == null || !StringUtils.equalsIgnoreCase(name, newName)) {
                             constrainBuilder.append(", DROP FOREIGN KEY `fk_").append(dataTableNameAlias).append("_").append(name)
                                     .append("` ");
                         }
                     }
                     if (newCode != null) {
                         codeMappings.put(dataTableNameAlias + "_" + newName, this.codeReadPlatformService.retriveCode(newCode).getCodeId());
-                        if (code == null) {
+                        if (code == null || !StringUtils.equalsIgnoreCase(name, newName)) {
                             constrainBuilder.append(",ADD CONSTRAINT  `fk_").append(dataTableNameAlias).append("_").append(newName)
                                     .append("` ").append("FOREIGN KEY (`" + newName + "`) ").append("REFERENCES `")
                                     .append(CODE_VALUES_TABLE).append("` (`id`)");
@@ -596,7 +588,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final StringBuilder constrainBuilder, final Map<String, Long> codeMappings, final boolean isConstraintApproach) {
 
         String name = (column.has("name")) ? column.get("name").getAsString() : null;
-        final String type = (column.has("type")) ? column.get("type").getAsString() : null;
+        final String type = (column.has("type")) ? column.get("type").getAsString().toLowerCase() : null;
         final Integer length = (column.has("length")) ? column.get("length").getAsInt() : null;
         final Boolean mandatory = (column.has("mandatory")) ? column.get("mandatory").getAsBoolean() : false;
         final String after = (column.has("after")) ? column.get("after").getAsString() : null;
@@ -616,11 +608,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         sqlBuilder = sqlBuilder.append(", ADD `" + name + "` " + mysqlType);
 
         if (type != null) {
-            if (type.equals("String") && length != null) {
+            if (type.equalsIgnoreCase("String") && length != null) {
                 sqlBuilder = sqlBuilder.append("(" + length + ")");
-            } else if (type.equals("Decimal")) {
+            } else if (type.equalsIgnoreCase("Decimal")) {
                 sqlBuilder = sqlBuilder.append("(19,6)");
-            } else if (type.equals("Dropdown")) {
+            } else if (type.equalsIgnoreCase("Dropdown")) {
                 sqlBuilder = sqlBuilder.append("(11)");
             }
         }
@@ -828,8 +820,18 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             if (!isRegisteredDataTable(datatableName)) { throw new DatatableNotFoundException(datatableName); }
             validateDatatableName(datatableName);
             deregisterDatatable(datatableName);
+            String[] sqlArray = null;
+            if (this.configurationDomainService.isConstraintApproachEnabledForDatatables()) {
+                final String deleteColumnCodeSql = "delete from x_table_cloumn_code_mappings where column_alias_name like'"
+                        + datatableName.toLowerCase().replaceAll("\\s", "_") + "_%'";
+                sqlArray = new String[2];
+                sqlArray[1] = deleteColumnCodeSql;
+            }else{
+                sqlArray = new String[1];
+            }
             final String sql = "DROP TABLE `" + datatableName + "`";
-            this.jdbcTemplate.execute(sql);
+            sqlArray[0] = sql;
+            this.jdbcTemplate.batchUpdate(sqlArray);
         } catch (final SQLGrammarException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
