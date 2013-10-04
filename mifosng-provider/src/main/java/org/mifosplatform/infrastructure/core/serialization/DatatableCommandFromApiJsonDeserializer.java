@@ -45,7 +45,7 @@ public class DatatableCommandFromApiJsonDeserializer {
     private final Set<String> supportedParametersForChangeColumns = new HashSet<String>(Arrays.asList("name", "newName", "length",
             "mandatory", "after", "code", "newCode"));
     private final Set<String> supportedParametersForDropColumns = new HashSet<String>(Arrays.asList("name"));
-    private final Object[] supportedColumnTypes = { "String", "Number", "Decimal", "Date", "Text", "Dropdown" };
+    private final Object[] supportedColumnTypes = { "string", "number", "decimal", "date", "text", "dropdown" };
     private final Object[] supportedApptableNames = { "m_loan", "m_savings_account", "m_client", "m_group", "m_center", "m_office",
             "m_savings_product", "m_product_loan" };
 
@@ -58,9 +58,9 @@ public class DatatableCommandFromApiJsonDeserializer {
 
     private void validateType(final DataValidatorBuilder baseDataValidator, final JsonElement column) {
         final String type = this.fromApiJsonHelper.extractStringNamed("type", column);
-        baseDataValidator.reset().parameter("type").value(type).notBlank().isOneOfTheseValues(this.supportedColumnTypes);
+        baseDataValidator.reset().parameter("type").value(type).notBlank().isOneOfTheseStringValues(this.supportedColumnTypes);
 
-        if (type != null && type.equals("String")) {
+        if (type != null && type.equalsIgnoreCase("String")) {
             if (this.fromApiJsonHelper.parameterExists("length", column)) {
                 final String lengthStr = this.fromApiJsonHelper.extractStringNamed("length", column);
                 if (lengthStr != null && !StringUtils.isWhitespace(lengthStr) && StringUtils.isNumeric(lengthStr)
@@ -80,7 +80,7 @@ public class DatatableCommandFromApiJsonDeserializer {
         }
 
         final String code = this.fromApiJsonHelper.extractStringNamed("code", column);
-        if (type != null && type.equals("Dropdown")) {
+        if (type != null && type.equalsIgnoreCase("Dropdown")) {
             if (code != null) {
                 baseDataValidator.reset().parameter("code").value(code).notBlank().matchesRegularExpression(DATATABLE_NAME_REGEX_PATTERN);
             } else {
