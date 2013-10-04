@@ -186,6 +186,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
         if (transactionAmountUnprocessed.isGreaterThanZero()) {
             onLoanOverpayment(loanTransaction, transactionAmountUnprocessed);
+            loanTransaction.updateOverPayments(transactionAmountUnprocessed);
         }
     }
 

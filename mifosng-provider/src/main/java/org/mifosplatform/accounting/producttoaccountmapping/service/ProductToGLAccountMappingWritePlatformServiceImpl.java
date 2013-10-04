@@ -79,9 +79,11 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                         CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.getValue());
 
                 // expenses
-                this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
-                        LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), loanProductId,
-                        CASH_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.getValue());
+                this.loanProductToGLAccountMappingHelper
+                        .saveLoanToLiabilityAccountMapping(element, LOAN_PRODUCT_ACCOUNTING_PARAMS.OVERPAYMENT.getValue(), loanProductId,
+                                CASH_ACCOUNTS_FOR_LOAN.OVERPAYMENT.getValue());
+
+                // liabilities
 
                 // advanced accounting mappings
                 this.loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, null);
@@ -124,6 +126,11 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), loanProductId,
                         ACCRUAL_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.getValue());
+
+                // liabilities
+                this.loanProductToGLAccountMappingHelper.saveLoanToLiabilityAccountMapping(element,
+                        LOAN_PRODUCT_ACCOUNTING_PARAMS.OVERPAYMENT.getValue(), loanProductId,
+                        ACCRUAL_ACCOUNTS_FOR_LOAN.OVERPAYMENT.getValue());
 
                 // advanced accounting mappings
                 this.loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, null);

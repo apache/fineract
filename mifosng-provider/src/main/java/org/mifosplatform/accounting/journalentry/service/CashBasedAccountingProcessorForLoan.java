@@ -55,6 +55,11 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
                     || loanTransactionDTO.getTransactionType().isChargePayment()) {
                 createJournalEntriesForRepayments(loanDTO, loanTransactionDTO, office);
             }
+
+            /** Logic for Refunds of Overpayments **/
+            else if (loanTransactionDTO.getTransactionType().isRefund()) {
+                createJournalEntriesForRefund(loanDTO, loanTransactionDTO, office);
+            }
             /***
              * Only principal write off affects cash based accounting (interest
              * and fee write off need not be considered). Debit losses written
@@ -104,6 +109,35 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
     }
 
     /**
+     * Debit loan Portfolio and credit Fund source for a Disbursement <br/>
+     * 
+     * All debits are turned into credits and vice versa in case of disbursement
+     * reversals
+     * 
+     * 
+     * @param loanDTO
+     * @param loanTransactionDTO
+     * @param office
+     */
+    private void createJournalEntriesForRefund(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO, final Office office) {
+        // loan properties
+        final Long loanProductId = loanDTO.getLoanProductId();
+        final Long loanId = loanDTO.getLoanId();
+        final String currencyCode = loanDTO.getCurrencyCode();
+
+        // transaction properties
+        final String transactionId = loanTransactionDTO.getTransactionId();
+        final Date transactionDate = loanTransactionDTO.getTransactionDate();
+        final BigDecimal refundAmount = loanTransactionDTO.getAmount();
+        final boolean isReversal = loanTransactionDTO.isReversed();
+        final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
+
+        this.helper.createCashBasedJournalEntriesAndReversalsForLoan(office, currencyCode, CASH_ACCOUNTS_FOR_LOAN.OVERPAYMENT,
+                CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE, loanProductId, paymentTypeId, loanId, transactionId, transactionDate, refundAmount,
+                isReversal);
+    }
+
+    /**
      * Create a single Debit to fund source and multiple credits if applicable
      * (loan portfolio for principal repayments, Interest on loans for interest
      * repayments, Income from fees for fees payment and Income from penalties
@@ -125,6 +159,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         final BigDecimal interestAmount = loanTransactionDTO.getInterest();
         final BigDecimal feesAmount = loanTransactionDTO.getFees();
         final BigDecimal penaltiesAmount = loanTransactionDTO.getPenalties();
+        final BigDecimal overPaymentAmount = loanTransactionDTO.getOverPayment();
         final boolean isReversal = loanTransactionDTO.isReversed();
         final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
 
@@ -154,6 +189,12 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
             this.helper.createCreditJournalEntryOrReversalForLoanCharges(office, currencyCode,
                     CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.getValue(), loanProductId, loanId, transactionId, transactionDate,
                     penaltiesAmount, isReversal, loanTransactionDTO.getPenaltyPayments());
+        }
+
+        if (overPaymentAmount != null && !(overPaymentAmount.compareTo(BigDecimal.ZERO) == 0)) {
+            totalDebitAmount = totalDebitAmount.add(overPaymentAmount);
+            this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, CASH_ACCOUNTS_FOR_LOAN.OVERPAYMENT, loanProductId,
+                    paymentTypeId, loanId, transactionId, transactionDate, overPaymentAmount, isReversal);
         }
 
         /*** create a single debit entry (or reversal) for the entire amount **/
