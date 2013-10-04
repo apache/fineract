@@ -19,6 +19,8 @@ import org.mifosplatform.useradministration.domain.PermissionRepository;
 import org.mifosplatform.useradministration.exception.PermissionNotFoundException;
 import org.mifosplatform.useradministration.serialization.PermissionsCommandFromApiJsonDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +39,9 @@ public class PermissionWritePlatformServiceJpaRepositoryImpl implements Permissi
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "users", allEntries = true),
+            @CacheEvict(value = "usersByUsername", allEntries = true)})
     @Transactional
     @Override
     public CommandProcessingResult updateMakerCheckerPermissions(final JsonCommand command) {
