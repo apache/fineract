@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 4 Oct 2013 - 1.10.3.RELEASE
 1. 22 Sep 2013 - 1.10.2.RELEASE
 1. 20 Sep 2013 - 1.10.1.RELEASE
 1. 19 Sep 2013 - 1.10.0.RELEASE
@@ -38,6 +39,23 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.10.3.RELEASE
+=============
+Bug Release
+
+Platform & API
+
+Bug
+ - [MIFOSX-679] - Not able to Create holiday through API
+ - [MIFOSX-694] - Unable to view users when caching is enabled
+ - [MIFOSX-696] - Declining balance - Equal principal payments(Daily) is not working as expected.
+ - [MIFOSX-716] - When updating details related to roles (name, permissions) - the incorrect cached details are returned for cached users
+ - [MIFOSX-717] - Register/Deregister data tables not working with constraint based approach
+
+Reference App
+ - [MIFOSX-698] - Unable to save the created permissions for created Role
+
 
 1.10.2.RELEASE
 =============
