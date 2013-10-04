@@ -5,16 +5,10 @@
  */
 package org.mifosplatform.scheduledjobs.service;
 
-import java.util.Collection;
-import java.util.List;
-
-import org.mifosplatform.infrastructure.core.data.ApiParameterError;
-import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSourceServiceFactory;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
-import org.mifosplatform.portfolio.savings.data.SavingsAccountAnnualFeeData;
 import org.mifosplatform.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.mifosplatform.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.slf4j.Logger;
@@ -30,7 +24,9 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     private final static Logger logger = LoggerFactory.getLogger(ScheduledJobRunnerServiceImpl.class);
 
     private final RoutingDataSourceServiceFactory dataSourceServiceFactory;
+    @SuppressWarnings("unused")
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
+    @SuppressWarnings("unused")
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
 
     @Autowired
@@ -203,7 +199,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     @CronTarget(jobName = JobName.APPLY_ANNUAL_FEE_FOR_SAVINGS)
     public void applyAnnualFeeForSavings() {
 
-        final Collection<SavingsAccountAnnualFeeData> annualFeeData = this.savingsAccountReadPlatformService
+        /*final Collection<SavingsAccountAnnualFeeData> annualFeeData = this.savingsAccountReadPlatformService
                 .retrieveAccountsWithAnnualFeeDue();
 
         for (final SavingsAccountAnnualFeeData savingsAccountReference : annualFeeData) {
@@ -219,6 +215,6 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             }
         }
 
-        logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Savings accounts affected by update: " + annualFeeData.size());
+        logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Savings accounts affected by update: " + annualFeeData.size());*/
     }
 }

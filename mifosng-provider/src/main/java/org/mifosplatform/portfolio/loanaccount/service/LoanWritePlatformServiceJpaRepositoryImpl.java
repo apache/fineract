@@ -523,8 +523,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
          * payment recorded against the loan)
          ***/
         if (changedTransactionDetail != null) {
-            for (final LoanTransaction loanTransaction : changedTransactionDetail.getNewTransactions()) {
-                this.loanTransactionRepository.save(loanTransaction);
+            for(Map.Entry<Long,LoanTransaction> mapEntry:changedTransactionDetail.getNewTransactionMappings().entrySet()){
+                this.loanTransactionRepository.save(mapEntry.getValue());
+                this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
         }
 
@@ -598,8 +599,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
          * recorded against the loan)
          ***/
         if (changedTransactionDetail != null) {
-            for (final LoanTransaction loanTransaction : changedTransactionDetail.getNewTransactions()) {
-                this.loanTransactionRepository.save(loanTransaction);
+            for(Map.Entry<Long,LoanTransaction> mapEntry:changedTransactionDetail.getNewTransactionMappings().entrySet()){
+                this.loanTransactionRepository.save(mapEntry.getValue());
+                this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
         }
 
@@ -819,8 +821,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
              * latest payment recorded against the loan)
              ***/
             if (changedTransactionDetail != null) {
-                for (final LoanTransaction loanTransaction : changedTransactionDetail.getNewTransactions()) {
-                    this.loanTransactionRepository.save(loanTransaction);
+                for(Map.Entry<Long,LoanTransaction> mapEntry:changedTransactionDetail.getNewTransactionMappings().entrySet()){
+                    this.loanTransactionRepository.save(mapEntry.getValue());
+                    this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
                 }
             }
 

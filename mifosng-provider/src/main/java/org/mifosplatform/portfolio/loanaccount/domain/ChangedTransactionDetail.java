@@ -5,8 +5,8 @@
  */
 package org.mifosplatform.portfolio.loanaccount.domain;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Stores details of {@link LoanTransaction}'s that were reversed or newly
@@ -16,16 +16,10 @@ import java.util.List;
  */
 public class ChangedTransactionDetail {
 
-    private final List<LoanTransaction> newTransactions = new ArrayList<LoanTransaction>();
+    private final Map<Long,LoanTransaction> newTransactionMappings = new HashMap<Long, LoanTransaction>();
 
-    private final List<LoanTransaction> reversedTransactions = new ArrayList<LoanTransaction>();
-
-    public List<LoanTransaction> getNewTransactions() {
-        return this.newTransactions;
-    }
-
-    public List<LoanTransaction> getReversedTransactions() {
-        return this.reversedTransactions;
+    public Map<Long, LoanTransaction> getNewTransactionMappings() {
+        return this.newTransactionMappings;
     }
 
 }

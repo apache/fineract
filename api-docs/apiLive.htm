@@ -9159,8 +9159,8 @@ Request Body:
 "toDate": "25 October 2013",
 "repaymentsRescheduledTo": "26 October 2013",
 "offices": [
-	"officeId":"1",
-	"officeId":"2"
+	{"officeId":"1"},
+	{"officeId":"2"}
 ]
 }
 				</code>
@@ -14345,8 +14345,10 @@ POST savingsaccounts/1/charges/2?command=paycharge
 Content-Type: application/json 
 Request Body: 
 {
+  "dateFormat": "dd MMMM yyyy",
   "locale": "en",
   "amount": "60",
+  "dueDate": "12 September 2013"
 }
 					</code>
 					<code class="method-response">

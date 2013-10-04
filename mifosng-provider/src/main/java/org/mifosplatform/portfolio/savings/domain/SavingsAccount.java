@@ -6,14 +6,10 @@
 package org.mifosplatform.portfolio.savings.domain;
 
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeAmountParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeOnMonthDayParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.localeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeAmountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -48,7 +44,6 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
-import org.joda.time.MonthDay;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -75,7 +70,6 @@ import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearT
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
 import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
-import org.mifosplatform.portfolio.savings.SavingsWithdrawalFeesType;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.mifosplatform.portfolio.savings.domain.interest.PostingPeriod;
 import org.mifosplatform.portfolio.savings.exception.InsufficientAccountBalanceException;
@@ -222,27 +216,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "lockedin_until_date_derived", nullable = true)
     private Date lockedInUntilDate;
 
-    @Column(name = "withdrawal_fee_amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal withdrawalFeeAmount;
-
-    @Column(name = "withdrawal_fee_type_enum", nullable = true)
-    private Integer withdrawalFeeType;
-
     @Column(name = "withdrawal_fee_for_transfer", nullable = true)
     private boolean withdrawalFeeApplicableForTransfer;
-
-    @Column(name = "annual_fee_amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal annualFeeAmount;
-
-    @Column(name = "annual_fee_on_month", nullable = true)
-    private Integer annualFeeOnMonth;
-
-    @Column(name = "annual_fee_on_day", nullable = true)
-    private Integer annualFeeOnDay;
-
-    @Temporal(TemporalType.DATE)
-    @Column(name = "annual_fee_next_due_date", nullable = true)
-    private Date annualFeeNextDueDate;
 
     @Embedded
     private SavingsAccountSummary summary;
@@ -274,16 +249,13 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType,
-            final boolean withdrawalFeeApplicableForTransfer, final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay,
-            final Set<SavingsAccountCharge> savingsAccountCharges) {
+            final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges) {
 
         final SavingsAccountStatusType status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
         return new SavingsAccount(client, group, product, fieldOfficer, accountNo, externalId, status, accountType, submittedOnDate,
                 interestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
                 interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
-                withdrawalFeeAmount, withdrawalFeeType, withdrawalFeeApplicableForTransfer, annualFeeAmount, annualFeeOnMonthDay,
-                savingsAccountCharges);
+                withdrawalFeeApplicableForTransfer, savingsAccountCharges);
     }
 
     private SavingsAccount(final Client client, final Group group, final SavingsProduct product, final Staff fieldOfficer,
@@ -293,9 +265,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType,
-            final boolean withdrawalFeeApplicableForTransfer, final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay,
-            final Set<SavingsAccountCharge> savingsAccountCharges) {
+            final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges) {
         this.client = client;
         this.group = group;
         this.product = product;
@@ -321,23 +291,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         if (lockinPeriodFrequencyType != null) {
             this.lockinPeriodFrequencyType = lockinPeriodFrequencyType.getValue();
         }
-        this.withdrawalFeeAmount = withdrawalFeeAmount;
-        if (withdrawalFeeType != null) {
-            this.withdrawalFeeType = withdrawalFeeType.getValue();
-        }
         this.withdrawalFeeApplicableForTransfer = withdrawalFeeApplicableForTransfer;
-
-        this.annualFeeAmount = annualFeeAmount;
-        if (annualFeeOnMonthDay != null) {
-            this.annualFeeOnMonth = annualFeeOnMonthDay.getMonthOfYear();
-            this.annualFeeOnDay = annualFeeOnMonthDay.getDayOfMonth();
-        }
 
         if (!CollectionUtils.isEmpty(savingsAccountCharges)) {
             this.charges = associateChargesWithThisSavingsAccount(savingsAccountCharges);
-            // TODO:Add charges details to savings summary
-            // this.summary =
-            // updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
         }
 
         this.summary = new SavingsAccountSummary();
@@ -378,16 +335,13 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return SavingsAccountStatusType.fromInt(this.status).isClosed();
     }
 
-    public void postInterest(final MathContext mc, final LocalDate interestPostingUpToDate, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds) {
+    public void postInterest(final MathContext mc, final LocalDate interestPostingUpToDate) {
 
         final List<PostingPeriod> postingPeriods = calculateInterestUsing(mc, interestPostingUpToDate);
 
         Money interestPostedToDate = Money.zero(this.currency);
 
         boolean recalucateDailyBalanceDetails = false;
-        existingTransactionIds.addAll(findExistingTransactionIds());
-        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         for (final PostingPeriod interestPostingPeriod : postingPeriods) {
 
@@ -610,9 +564,6 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
         validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_DEPOSIT, transactionDTO.getTransactionDate());
 
-        transactionDTO.getExistingTransactionIds().addAll(findExistingTransactionIds());
-        transactionDTO.getExistingReversedTransactionIds().addAll(findExistingReversedTransactionIds());
-
         final Money amount = Money.of(this.currency, transactionDTO.getTransactionAmount());
 
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, office(), transactionDTO.getPaymentDetail(),
@@ -624,7 +575,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return transaction;
     }
 
-    private LocalDate getActivationLocalDate() {
+    public LocalDate getActivationLocalDate() {
         LocalDate activationLocalDate = null;
         if (this.activatedOnDate != null) {
             activationLocalDate = new LocalDate(this.activatedOnDate);
@@ -685,41 +636,25 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
         validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_WITHDRAWAL, transactionDTO.getTransactionDate());
 
-        transactionDTO.getExistingTransactionIds().addAll(findExistingTransactionIds());
-        transactionDTO.getExistingReversedTransactionIds().addAll(findExistingReversedTransactionIds());
-
         final Money transactionAmountMoney = Money.of(this.currency, transactionDTO.getTransactionAmount());
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, office(),
                 transactionDTO.getPaymentDetail(), transactionDTO.getTransactionDate(), transactionAmountMoney);
         this.transactions.add(transaction);
 
-        if (applyWithdrawFee && isAutomaticWithdrawalFee()) {
-
-            SavingsAccountTransaction withdrawalFeeTransaction = null;
-            Money feeAmount = Money.zero(this.currency);
-            switch (SavingsWithdrawalFeesType.fromInt(this.withdrawalFeeType)) {
-                case INVALID:
-                break;
-                case FLAT:
-                    feeAmount = Money.of(this.currency, this.withdrawalFeeAmount);
-                    withdrawalFeeTransaction = SavingsAccountTransaction
-                            .fee(this, office(), transactionDTO.getTransactionDate(), feeAmount);
-                    this.transactions.add(withdrawalFeeTransaction);
-                break;
-                case PERCENT_OF_AMOUNT:
-                    final BigDecimal feeAmountDecimal = transactionDTO.getTransactionAmount().multiply(this.withdrawalFeeAmount)
-                            .divide(BigDecimal.valueOf(100l));
-                    feeAmount = Money.of(this.currency, feeAmountDecimal);
-                    withdrawalFeeTransaction = SavingsAccountTransaction
-                            .fee(this, office(), transactionDTO.getTransactionDate(), feeAmount);
-                    this.transactions.add(withdrawalFeeTransaction);
-                break;
+        if (applyWithdrawFee){
+            //auto pay withdrawal fee
+            payWithdrawalFee(transactionDTO.getTransactionAmount(), transactionDTO.getTransactionDate());
+        }
+        return transaction;
+    }
+    
+    private void payWithdrawalFee(final BigDecimal transactionAmoount, final LocalDate transactionDate){
+        for (SavingsAccountCharge charge : this.charges()) {
+            if (charge.isWithdrawalFee()){
+                charge.updateWithdralFeeAmount(transactionAmoount);
+                this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate);
             }
         }
-
-        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
-
-        return transaction;
     }
 
     public boolean isBeforeLastPostingPeriod(final LocalDate transactionDate) {
@@ -779,132 +714,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             }
         }
     }
-
-    public SavingsAccountTransaction addAnnualFee(final MathContext mc, final DateTimeFormatter formatter,
-            final LocalDate annualFeeTransactionDate, final LocalDate today, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds) {
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.applyAnnualFeeTransactionAction);
-
-        if (isNotActive()) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.not.active");
-
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-        }
-
-        final LocalDate nextAnnualFeeDueDate = getNextAnnualFeeDueDate();
-        if (nextAnnualFeeDueDate == null || annualFeeSettingsNotSet()) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.annualfee.settings");
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
-        if (nextAnnualFeeDueDate.isBefore(getActivationLocalDate())) {
-
-            baseDataValidator.reset().parameter("annualFeeTransactionDate").value(getActivationLocalDate().toString(formatter))
-                    .failWithCodeNoParameterAddedToErrorCode("before.activationDate");
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
-        if (isDateInTheFuture(annualFeeTransactionDate)) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.in.the.future");
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
-        if (isNotValidAnnualFeeTransactionDate(annualFeeTransactionDate, today)) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("invalid.date");
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
-        Date currentAnnualFeeNextDueDate = findLatestAnnualFeeTransactionDueDate();
-        if (currentAnnualFeeNextDueDate != null && new LocalDate(currentAnnualFeeNextDueDate).isEqual(annualFeeTransactionDate)) {
-            baseDataValidator.reset().parameter("annualFeeTransactionDate").value(annualFeeTransactionDate.toString(formatter))
-                    .failWithCodeNoParameterAddedToErrorCode("transaction.exists.on.date");
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-        validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_PAY_CHARGE, annualFeeTransactionDate);
-
-        existingTransactionIds.addAll(findExistingTransactionIds());
-        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
-
-        final Money annualFee = Money.of(this.currency, this.annualFeeAmount);
-        final SavingsAccountTransaction annualFeeTransaction = SavingsAccountTransaction.annualFee(this, office(),
-                annualFeeTransactionDate, annualFee);
-        this.transactions.add(annualFeeTransaction);
-
-        validateAccountBalanceDoesNotBecomeNegative(SavingsApiConstants.applyAnnualFeeTransactionAction);
-
-        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
-
-        calculateInterestUsing(mc, today);
-
-        currentAnnualFeeNextDueDate = findLatestAnnualFeeTransactionDueDate();
-        if (currentAnnualFeeNextDueDate != null) {
-            final LocalDate newAnnualFeeNextDueDate = new LocalDate(currentAnnualFeeNextDueDate).withMonthOfYear(this.annualFeeOnMonth)
-                    .withDayOfMonth(this.annualFeeOnDay).plusYears(1);
-            this.annualFeeNextDueDate = newAnnualFeeNextDueDate.toDate();
-        } else {
-            updateToNextAnnualFeeDueDateFrom(getActivationLocalDate());
-        }
-
-        return annualFeeTransaction;
-    }
-
-    private boolean isNotValidAnnualFeeTransactionDate(final LocalDate annualFeeTransactionDate, final LocalDate today) {
-        return !isValidAnnualFeeTransactionDate(annualFeeTransactionDate, today);
-    }
-
-    private boolean isValidAnnualFeeTransactionDate(final LocalDate annualFeeTransactionDate, final LocalDate today) {
-
-        LocalDate startingDate = getActivationLocalDate();
-        boolean isValid = false;
-        while (!startingDate.isAfter(today) && !isValid) {
-            LocalDate nextDueLocalDate = startingDate.withMonthOfYear(this.annualFeeOnMonth).withDayOfMonth(this.annualFeeOnDay);
-            if (startingDate.isAfter(nextDueLocalDate)) {
-                nextDueLocalDate = nextDueLocalDate.plusYears(1);
-            }
-            isValid = nextDueLocalDate.isEqual(annualFeeTransactionDate);
-
-            startingDate = nextDueLocalDate.plusYears(1);
-        }
-
-        return isValid;
-    }
-
-    private void updateToNextAnnualFeeDueDateFrom(final LocalDate startingDate) {
-        LocalDate nextDueLocalDate = startingDate.withMonthOfYear(this.annualFeeOnMonth).withDayOfMonth(this.annualFeeOnDay);
-        if (startingDate.isAfter(nextDueLocalDate)) {
-            nextDueLocalDate = nextDueLocalDate.plusYears(1);
-        }
-        this.annualFeeNextDueDate = nextDueLocalDate.toDate();
-    }
-
-    private LocalDate getNextAnnualFeeDueDate() {
-        LocalDate nextAnnualFeeDueDate = null;
-        if (this.annualFeeNextDueDate != null) {
-            nextAnnualFeeDueDate = new LocalDate(this.annualFeeNextDueDate);
-        }
-        return nextAnnualFeeDueDate;
-    }
-
-    private boolean annualFeeSettingsNotSet() {
-        return !annualFeeSettingsSet();
-    }
-
-    private boolean annualFeeSettingsSet() {
-        return this.annualFeeOnDay != null && this.annualFeeOnMonth != null;
-    }
-
-    private boolean isAutomaticWithdrawalFee() {
-        return this.withdrawalFeeType != null;
-    }
-
+    
     private boolean isAccountLocked(final LocalDate transactionDate) {
         boolean isLocked = false;
         final boolean accountHasLockedInSetting = this.lockedInUntilDate != null;
@@ -1052,53 +862,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             this.lockinPeriodFrequencyType = null;
         }
 
-        if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(withdrawalFeeAmountParamName, this.withdrawalFeeAmount)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(withdrawalFeeAmountParamName);
-            actualChanges.put(withdrawalFeeAmountParamName, newValue);
-            actualChanges.put(localeParamName, localeAsInput);
-            this.withdrawalFeeAmount = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamedDefaultingZeroToNull(withdrawalFeeTypeParamName, this.withdrawalFeeType)) {
-            final Integer newValue = command.integerValueOfParameterNamedDefaultToNullIfZero(withdrawalFeeTypeParamName);
-            actualChanges.put(withdrawalFeeTypeParamName, newValue);
-            this.withdrawalFeeType = newValue != null ? SavingsWithdrawalFeesType.fromInt(newValue).getValue() : newValue;
-        }
-
         if (command.isChangeInBooleanParameterNamed(withdrawalFeeForTransfersParamName, this.withdrawalFeeApplicableForTransfer)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(withdrawalFeeForTransfersParamName);
             actualChanges.put(withdrawalFeeForTransfersParamName, newValue);
             this.withdrawalFeeApplicableForTransfer = newValue;
-        }
-
-        // set period type to null if frequency is null
-        if (this.withdrawalFeeAmount == null) {
-            this.withdrawalFeeType = null;
-        }
-
-        if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(annualFeeAmountParamName, this.annualFeeAmount)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(annualFeeAmountParamName);
-            actualChanges.put(annualFeeAmountParamName, newValue);
-            actualChanges.put(localeParamName, localeAsInput);
-            this.annualFeeAmount = newValue;
-        }
-
-        if (command.hasParameter(annualFeeOnMonthDayParamName)) {
-            final MonthDay monthDay = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
-            final String actualValueEntered = command.stringValueOfParameterNamed(annualFeeOnMonthDayParamName);
-            final Integer dayOfMonthValue = monthDay.getDayOfMonth();
-            if (this.annualFeeOnDay != dayOfMonthValue) {
-                actualChanges.put(annualFeeOnMonthDayParamName, actualValueEntered);
-                actualChanges.put(localeParamName, localeAsInput);
-                this.annualFeeOnDay = dayOfMonthValue;
-            }
-
-            final Integer monthOfYear = monthDay.getMonthOfYear();
-            if (this.annualFeeOnMonth != monthOfYear) {
-                actualChanges.put(annualFeeOnMonthDayParamName, actualValueEntered);
-                actualChanges.put(localeParamName, localeAsInput);
-                this.annualFeeOnMonth = monthOfYear;
-            }
         }
 
         // charges
@@ -1110,60 +877,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             }
         }
 
-        // set period type to null if frequency is null
-        if (this.annualFeeAmount == null) {
-            this.annualFeeOnDay = null;
-            this.annualFeeOnMonth = null;
-        }
-
         validateLockinDetails();
-        validateWithdrawalFeeDetails();
-        validateAnnualFeeDetails();
-    }
-
-    private void validateAnnualFeeDetails() {
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
-
-        if (this.annualFeeAmount == null) {
-
-            if (this.annualFeeOnMonth != null || this.annualFeeOnDay != null) {
-                baseDataValidator.reset().parameter(annualFeeAmountParamName).value(this.annualFeeAmount).notNull();
-            }
-        } else {
-
-            if (this.annualFeeOnMonth == null || this.annualFeeOnDay == null) {
-                baseDataValidator.reset().parameter(annualFeeOnMonthDayParamName).value(this.annualFeeOnMonth).notNull();
-            }
-
-            baseDataValidator.reset().parameter(annualFeeAmountParamName).value(this.annualFeeAmount).zeroOrPositiveAmount();
-        }
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-    }
-
-    private void validateWithdrawalFeeDetails() {
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
-
-        if (this.withdrawalFeeAmount == null) {
-            baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(this.withdrawalFeeType).ignoreIfNull()
-                    .isOneOfTheseValues(1, 2);
-
-            if (this.withdrawalFeeType != null) {
-                baseDataValidator.reset().parameter(withdrawalFeeAmountParamName).value(this.withdrawalFeeAmount).notNull();
-            }
-        } else {
-            baseDataValidator.reset().parameter(withdrawalFeeAmountParamName).value(this.withdrawalFeeAmount).zeroOrPositiveAmount();
-            baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(this.withdrawalFeeType).notNull()
-                    .isOneOfTheseValues(1, 2);
-        }
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        
     }
 
     private void validateLockinDetails() {
@@ -1190,8 +905,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
-    public Map<String, Object> deriveAccountingBridgeData(final CurrencyData currencyData, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds) {
+    public Map<String, Object> deriveAccountingBridgeData(final CurrencyData currencyData, final Set<Long> existingTransactionIds,
+            final Set<Long> existingReversedTransactionIds) {
 
         final Map<String, Object> accountingBridgeData = new LinkedHashMap<String, Object>();
         accountingBridgeData.put("savingsId", getId());
@@ -1326,8 +1041,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     public void validateNewApplicationState(final LocalDate todayDateOfTenant) {
 
         validateLockinDetails();
-        validateWithdrawalFeeDetails();
-        validateAnnualFeeDetails();
+        //validateWithdrawalFeeDetails();
+        //validateAnnualFeeDetails();
 
         final LocalDate submittedOn = getSubmittedOnLocalDate();
 
@@ -1468,7 +1183,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
-    public void undoTransaction(final Long transactionId, final List<Long> reversedTransactionIds) {
+    public void undoTransaction(final Long transactionId) {
 
         SavingsAccountTransaction transactionToUndo = null;
         for (final SavingsAccountTransaction transaction : this.transactions) {
@@ -1485,26 +1200,21 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_UNDO_TRANSACTION,
                     transactionToUndo.transactionLocalDate());
             transactionToUndo.reverse();
-            reversedTransactionIds.add(transactionId);
-
-            if (transactionToUndo.isAnnualFee()) {
-                this.annualFeeNextDueDate = findLatestAnnualFeeTransactionDueDate();
-                if (this.annualFeeNextDueDate == null) {
-                    updateToNextAnnualFeeDueDateFrom(getActivationLocalDate());
-                } else {
-                    final LocalDate newAnnualFeeNextDueDate = new LocalDate(this.annualFeeNextDueDate)
-                            .withMonthOfYear(this.annualFeeOnMonth).withDayOfMonth(this.annualFeeOnDay).plusYears(1);
-                    this.annualFeeNextDueDate = newAnnualFeeNextDueDate.toDate();
-                }
-            } else if (transactionToUndo.isCharge()) {
+            if (transactionToUndo.isChargeTransaction() || transactionToUndo.isWaiveCharge()) {
                 // undo charge
                 final Set<SavingsAccountChargePaidBy> chargesPaidBy = transactionToUndo.getSavingsAccountChargesPaid();
                 for (final SavingsAccountChargePaidBy savingsAccountChargePaidBy : chargesPaidBy) {
                     final SavingsAccountCharge chargeToUndo = savingsAccountChargePaidBy.getSavingsAccountCharge();
-                    chargeToUndo.resetPaidAmount(this.currency);
+                    if (transactionToUndo.isChargeTransaction()) {
+                        chargeToUndo.undoPayment(this.getCurrency(), transactionToUndo.getAmount(this.getCurrency()));
+                        if(chargeToUndo.isAnnualFee()){
+                            chargeToUndo.updateToPreviousAnnualFeeDueDate();
+                        }
+                    } else if (transactionToUndo.isWaiveCharge()) {
+                        chargeToUndo.undoWaiver(this.getCurrency(), transactionToUndo.getAmount(this.getCurrency()));
+                    }
                 }
             }
-
         }
     }
 
@@ -1649,8 +1359,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
-    public Map<String, Object> activate(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate,
-            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
+    public Map<String, Object> activate(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
 
@@ -1687,10 +1396,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.activatedBy = currentUser;
         this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivationLocalDate());
 
-        if (annualFeeSettingsSet()) {
+        /*if (annualFeeSettingsSet()) {
             updateToNextAnnualFeeDueDateFrom(getActivationLocalDate());
         }
-
+*/
         if (this.client != null && this.client.isActivatedAfter(activationDate)) {
             final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
             final String dateAsString = formatter.print(this.client.getActivationLocalDate());
@@ -1733,7 +1442,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
         if (minRequiredOpeningBalance.isGreaterThanZero()) {
             final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, activationDate,
-                    minRequiredOpeningBalance.getAmount(), existingTransactionIds, existingReversedTransactionIds, null);
+                    minRequiredOpeningBalance.getAmount(), null);
             deposit(transactionDTO);
 
             // no openingBalance concept supported yet but probably will to
@@ -1745,8 +1454,26 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             // correct.
             recalculateDailyBalances(openingAccountBalance);
         }
-
+        
+        
+        //update annual fee due date
+        for (SavingsAccountCharge charge : this.charges()) {
+            charge.updateToNextAnnualFeeDueDateFrom(getActivationLocalDate());
+        }
+        
+        //auto pay the activation time charges
+        this.payActivationCharges();
+        //TODO : AA add activation charges to actual changes list
+        
         return actualChanges;
+    }
+        
+    private void payActivationCharges() {
+        for (SavingsAccountCharge savingsAccountCharge : this.charges()) {
+            if (savingsAccountCharge.isSavingsActivation()) {
+                payCharge(savingsAccountCharge, savingsAccountCharge.getAmountOutstanding(getCurrency()), getActivationLocalDate());
+            }
+        }
     }
 
     public Map<String, Object> close(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate) {
@@ -1893,21 +1620,33 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public boolean hasCurrencyCodeOf(final String matchingCurrencyCode) {
-        // TODO AA: revisit
         if (this.currency == null) { return false; }
         return this.currency.getCode().equalsIgnoreCase(matchingCurrencyCode);
     }
 
     public void removeCharge(final SavingsAccountCharge charge) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
+
+        if (isClosed()) {
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("delete.transaction.invalid.account.is.closed");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+
+        if (isActive() || isApproved()) {
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("delete.transaction.invalid.account.is.active");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+
         this.charges.remove(charge);
     }
 
-    public void waiveCharge(final Long savingsAccountChargeId, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds) {
+    public void waiveCharge(final Long savingsAccountChargeId) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + "dueDate");
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         if (isClosed()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.closed");
@@ -1921,6 +1660,11 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final SavingsAccountCharge savingsAccountCharge = getCharge(savingsAccountChargeId);
 
+        if (savingsAccountCharge.isWithdrawalFee()){
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.waiver.of.withdrawal.fee.not.supported");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+        
         // validate charge is not already paid or waived
         if (savingsAccountCharge.isWaived()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.charge.is.already.waived");
@@ -1930,43 +1674,20 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
-        existingTransactionIds.addAll(findExistingTransactionIds());
-        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
-
         // waive charge
         final Money amountWaived = savingsAccountCharge.waive(getCurrency());
-        // TODO : AA revisit the code
-        /*
-         * Money feeChargesWaived = amountWaived; Money penaltyChargesWaived =
-         * Money.zero(this.getCurrency()); if
-         * (savingsAccountCharge.isPenaltyCharge()) { penaltyChargesWaived =
-         * amountWaived; feeChargesWaived = Money.zero(this.getCurrency()); }
-         */
 
-        // persist an entry in transaction details
-        final SavingsAccountTransaction chargeTransaction = SavingsAccountTransaction.charge(this, office(),
-                savingsAccountCharge.getDueLocalDate(), amountWaived);
-
-        this.transactions.add(chargeTransaction);
-
-        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
-        final MathContext mc = MathContext.DECIMAL64;
-        calculateInterestUsing(mc, savingsAccountCharge.getDueLocalDate());
+        handleWaiverChargeTransactions(savingsAccountCharge, amountWaived);
     }
 
     public void addCharge(final DateTimeFormatter formatter, final SavingsAccountCharge savingsAccountCharge, final Charge chargeDefinition) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + "dueDate");
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         if (isClosed()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.closed");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-        }
-
-        if (isNotActive()) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.not.active");
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
@@ -1978,25 +1699,72 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final LocalDate chargeDueDate = savingsAccountCharge.getDueLocalDate();
 
-        if (chargeDueDate != null && chargeDueDate.isBefore(getActivationLocalDate())) {
-            baseDataValidator.reset().parameter("dueDate").value(getActivationLocalDate().toString(formatter))
-                    .failWithCodeNoParameterAddedToErrorCode("before.activationDate");
+        if (savingsAccountCharge.isOnSpecifiedDueDate()) {
+            if (getActivationLocalDate() != null && chargeDueDate.isBefore(getActivationLocalDate())) {
+                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(getActivationLocalDate().toString(formatter))
+                        .failWithCodeNoParameterAddedToErrorCode("before.activationDate");
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            } else if (getSubmittedOnLocalDate() != null && chargeDueDate.isBefore(getSubmittedOnLocalDate())) {
+                baseDataValidator.reset().parameter(dueAsOfDateParamName).value(getSubmittedOnLocalDate().toString(formatter))
+                        .failWithCodeNoParameterAddedToErrorCode("before.submittedOnDate");
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+        }
+        
+        if (savingsAccountCharge.isSavingsActivation() && !(isSubmittedAndPendingApproval() || (isApproved() && isNotActive()))) {
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
+                    "not.valid.account.status.cannot.add.activation.time.charge");
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
-        validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_APPLY_CHARGE, chargeDueDate);
-
+      //Only one withdrawal fee is supported per account
+        if(savingsAccountCharge.isWithdrawalFee()){
+            if(this.isWithDrawalFeeExists()){
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
+                        "multiple.withdrawal.fee.per.account.not.supported");
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+        }
+        
+      //Only one annual fee is supported per account
+        if(savingsAccountCharge.isAnnualFee()){
+            if(this.isAnnualFeeExists()){
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
+                        "multiple.annual.fee.per.account.not.supported");
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+        }
+        
+        //activation charge and withdrawal charges not required this validation
+        if(savingsAccountCharge.isOnSpecifiedDueDate()){
+            validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_APPLY_CHARGE, chargeDueDate);
+        }
+        
         // add new charge to savings account
-        getCharges().add(savingsAccountCharge);
+        charges().add(savingsAccountCharge);
 
     }
 
-    public void payCharge(final Long savingsAccountChargeId, final BigDecimal amountPaid, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds) {
+    private boolean isWithDrawalFeeExists() {
+        for (SavingsAccountCharge charge : this.charges()) {
+            if(charge.isWithdrawalFee()) return true;
+        }
+        return false;
+    }
+    
+    private boolean isAnnualFeeExists() {
+        for (SavingsAccountCharge charge : this.charges()) {
+            if(charge.isAnnualFee()) return true;
+        }
+        return false;
+    }
+
+    public void payCharge(final SavingsAccountCharge savingsAccountCharge, final BigDecimal amountPaid, final LocalDate transactionDate,
+            final DateTimeFormatter formatter) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + "dueDate");
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         if (isClosed()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.closed");
@@ -2008,8 +1776,45 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
-        final SavingsAccountCharge savingsAccountCharge = getCharge(savingsAccountChargeId);
+        if (getActivationLocalDate() != null && transactionDate.isBefore(getActivationLocalDate())) {
+            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(getActivationLocalDate().toString(formatter))
+                    .failWithCodeNoParameterAddedToErrorCode("transaction.before.activationDate");
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
+        if (DateUtils.isDateInTheFuture(transactionDate)) {
+            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(getSubmittedOnLocalDate().toString(formatter))
+                    .failWithCodeNoParameterAddedToErrorCode("transaction.is.futureDate");
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+        
+        if (savingsAccountCharge.isSavingsActivation()) {
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
+                    "transaction.not.valid.cannot.pay.activation.time.charge.is.automated");
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+        
+        if (savingsAccountCharge.isAnnualFee()){
+            final LocalDate annualFeeDueDate = savingsAccountCharge.getDueLocalDate();
+            if (annualFeeDueDate == null) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.annualfee.settings");
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+            
+            if (!annualFeeDueDate.equals(transactionDate)) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("invalid.date");
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+
+            Date currentAnnualFeeNextDueDate = findLatestAnnualFeeTransactionDueDate();
+            if (currentAnnualFeeNextDueDate != null && new LocalDate(currentAnnualFeeNextDueDate).isEqual(transactionDate)) {
+                baseDataValidator.reset().parameter("dueDate").value(transactionDate.toString(formatter))
+                        .failWithCodeNoParameterAddedToErrorCode("transaction.exists.on.date");
+
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+        }
+                
         // validate charge is not already paid or waived
         if (savingsAccountCharge.isWaived()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.charge.is.already.waived");
@@ -2019,36 +1824,51 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
-        existingTransactionIds.addAll(findExistingTransactionIds());
-        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
-
-        final Money chargePaid = savingsAccountCharge.pay(getCurrency(), amountPaid);
-
-        // If null reset to current date
-        final LocalDate transactionDate = (savingsAccountCharge.getDueLocalDate() == null) ? DateUtils.getLocalDateOfTenant()
-                : savingsAccountCharge.getDueLocalDate();
-
-        // persist an entry in transaction details
-        final SavingsAccountTransaction chargeTransaction = SavingsAccountTransaction.charge(this, office(), transactionDate, chargePaid);
-
-        final SavingsAccountChargePaidBy chargePaidBy = SavingsAccountChargePaidBy.instance(chargeTransaction, savingsAccountCharge,
-                amountPaid);
-        chargeTransaction.getSavingsAccountChargesPaid().add(chargePaidBy);
-        this.transactions.add(chargeTransaction);
-
-        final MathContext mc = MathContext.DECIMAL64;
-        if (isBeforeLastPostingPeriod(savingsAccountCharge.getDueLocalDate())) {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
-            postInterest(mc, today, existingTransactionIds, existingReversedTransactionIds);
-        } else {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
-            calculateInterestUsing(mc, today);
+        final Money chargePaid = Money.of(currency, amountPaid);
+        if (!savingsAccountCharge.getAmountOutstanding(getCurrency()).isGreaterThanOrEqualTo(chargePaid)) {
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.charge.amount.paid.in.access");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
-        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
+        this.payCharge(savingsAccountCharge, chargePaid, transactionDate);
+        
+        //update next annual fee due date
+        savingsAccountCharge.updateToNextAnnualFeeDueDate();
+    }
 
-        validateAccountBalanceDoesNotBecomeNegative(SavingsApiConstants.payChargeTransactionAction);
+    public void payCharge(final SavingsAccountCharge savingsAccountCharge, final Money amountPaid, final LocalDate transactionDate) {
+        savingsAccountCharge.pay(getCurrency(), amountPaid);
+        handlePayChargeTransactions(savingsAccountCharge, amountPaid, transactionDate);
+    }
+    
+    private void handlePayChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount,
+            final LocalDate transactionDate) {
+        SavingsAccountTransaction chargeTransaction = null;
+        
+        if (savingsAccountCharge.isWithdrawalFee()){
+            chargeTransaction = SavingsAccountTransaction.withdrawalFee(this, office(), transactionDate, transactionAmount);
+        }else if (savingsAccountCharge.isAnnualFee()){
+            chargeTransaction = SavingsAccountTransaction.annualFee(this, office(), transactionDate, transactionAmount);
+        }else {
+            chargeTransaction = SavingsAccountTransaction.charge(this, office(), transactionDate, transactionAmount);
+        }
+        
+        handleChargeTransactions(savingsAccountCharge, chargeTransaction);
+    }
 
+    private void handleWaiverChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount) {
+        final SavingsAccountTransaction chargeTransaction = SavingsAccountTransaction.waiver(this, office(),
+                DateUtils.getLocalDateOfTenant(), transactionAmount);
+        handleChargeTransactions(savingsAccountCharge, chargeTransaction);
+    }
+
+    private void handleChargeTransactions(final SavingsAccountCharge savingsAccountCharge, final SavingsAccountTransaction transaction) {
+        // Provide a link between transaction and savings charge for which
+        // amount is waived.
+        final SavingsAccountChargePaidBy chargePaidBy = SavingsAccountChargePaidBy.instance(transaction, savingsAccountCharge, transaction
+                .getAmount(this.getCurrency()).getAmount());
+        transaction.getSavingsAccountChargesPaid().add(chargePaidBy);
+        this.getTransactions().add(transaction);
     }
 
     private SavingsAccountCharge getCharge(final Long savingsAccountChargeId) {
@@ -2065,7 +1885,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return charge;
     }
 
-    private Set<SavingsAccountCharge> getCharges() {
+    public Set<SavingsAccountCharge> charges() {
         return (this.charges == null) ? new HashSet<SavingsAccountCharge>() : this.charges;
     }
 }

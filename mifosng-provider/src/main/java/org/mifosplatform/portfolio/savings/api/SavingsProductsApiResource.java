@@ -26,6 +26,7 @@ import org.mifosplatform.accounting.common.AccountingDropdownReadPlatformService
 import org.mifosplatform.accounting.common.AccountingEnumerations;
 import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
+import org.mifosplatform.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.mifosplatform.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 import org.mifosplatform.accounting.producttoaccountmapping.service.ProductToGLAccountMappingReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
@@ -159,8 +160,12 @@ public class SavingsProductsApiResource {
                     .fetchAccountMappingDetailsForSavingsProduct(productId, savingProductData.accountingRuleTypeId());
             final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = this.accountMappingReadPlatformService
                     .fetchPaymentTypeToFundSourceMappingsForSavingsProduct(productId);
+            Collection<ChargeToGLAccountMapper> feeToGLAccountMappings = this.accountMappingReadPlatformService
+                    .fetchFeeToIncomeAccountMappingsForSavingsProduct(productId);
+            Collection<ChargeToGLAccountMapper> penaltyToGLAccountMappings = this.accountMappingReadPlatformService
+                    .fetchPenaltyToIncomeAccountMappingsForSavingsProduct(productId);
             savingProductData = SavingsProductData.withAccountingDetails(savingProductData, accountingMappings,
-                    paymentChannelToFundSourceMappings);
+                    paymentChannelToFundSourceMappings, feeToGLAccountMappings, penaltyToGLAccountMappings);
         }
 
         if (settings.isTemplate()) {

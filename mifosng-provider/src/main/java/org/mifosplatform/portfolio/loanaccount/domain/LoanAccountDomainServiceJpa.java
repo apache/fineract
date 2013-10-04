@@ -24,6 +24,8 @@ import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
+import org.mifosplatform.portfolio.account.domain.AccountTransfer;
+import org.mifosplatform.portfolio.account.domain.AccountTransferRepository;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
 import org.mifosplatform.portfolio.group.domain.Group;
@@ -49,6 +51,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final NoteRepository noteRepository;
+    private final AccountTransferRepository accountTransferRepository;
 
     @Autowired
     public LoanAccountDomainServiceJpa(final LoanAssembler loanAccountAssembler, final LoanRepository loanRepository,
@@ -56,7 +59,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final ConfigurationDomainService configurationDomainService, final HolidayRepository holidayRepository,
             final WorkingDaysRepositoryWrapper workingDaysRepository,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService) {
+            final JournalEntryWritePlatformService journalEntryWritePlatformService,
+            final AccountTransferRepository accountTransferRepository) {
         this.loanAccountAssembler = loanAccountAssembler;
         this.loanRepository = loanRepository;
         this.loanTransactionRepository = loanTransactionRepository;
@@ -66,6 +70,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.workingDaysRepository = workingDaysRepository;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
+        this.accountTransferRepository = accountTransferRepository;
     }
 
     @Transactional
@@ -115,8 +120,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
          * recorded against the loan)
          ***/
         if (changedTransactionDetail != null) {
-            for (final LoanTransaction loanTransaction : changedTransactionDetail.getNewTransactions()) {
-                this.loanTransactionRepository.save(loanTransaction);
+            for(Map.Entry<Long,LoanTransaction> mapEntry:changedTransactionDetail.getNewTransactionMappings().entrySet()){
+                this.loanTransactionRepository.save(mapEntry.getValue());
+                updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
         }
         this.loanRepository.save(loan);
@@ -125,6 +131,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final Note note = Note.loanTransactionNote(loan, newRepaymentTransaction, noteText);
             this.noteRepository.save(note);
         }
+        
+        
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
@@ -158,7 +166,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
         if (loanTransactionType.isRepaymentAtDisbursement()) {
-            loan.handlePayDisbursementTransaction(chargeId, newPaymentTransaction);
+            loan.handlePayDisbursementTransaction(chargeId, newPaymentTransaction, existingTransactionIds, existingReversedTransactionIds);
         } else {
             loan.makeChargePayment(chargeId, defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds,
                     allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay, newPaymentTransaction);
@@ -247,4 +255,13 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         loanTransaction.reverse();
         this.loanTransactionRepository.save(loanTransaction);
     }
+    
+    private void updateLoanTransaction(final Long loanTransactionId,final LoanTransaction newLoanTransaction){
+        final AccountTransfer transferTransaction = this.accountTransferRepository.findByToLoanTransactionId(loanTransactionId);
+        if(transferTransaction!=null){
+            transferTransaction.updateToLoanTransaction(newLoanTransaction);
+            this.accountTransferRepository.save(transferTransaction);
+        }
+    }
+
 }

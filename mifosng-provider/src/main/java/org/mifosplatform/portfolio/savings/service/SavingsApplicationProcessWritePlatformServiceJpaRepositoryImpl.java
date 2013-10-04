@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -24,9 +23,6 @@ import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidation
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
-import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
-import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
@@ -75,8 +71,6 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final NoteRepository noteRepository;
     private final StaffRepositoryWrapper staffRepository;
     private final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator;
-    private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
-    private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final SavingsAccountChargeAssembler savingsAccountChargeAssembler;
 
     @Autowired
@@ -87,8 +81,6 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final GroupRepository groupRepository, final SavingsProductRepository savingsProductRepository,
             final NoteRepository noteRepository, final StaffRepositoryWrapper staffRepository,
             final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator,
-            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService,
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
@@ -101,8 +93,6 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.noteRepository = noteRepository;
         this.staffRepository = staffRepository;
         this.savingsAccountApplicationTransitionApiJsonValidator = savingsAccountApplicationTransitionApiJsonValidator;
-        this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
-        this.journalEntryWritePlatformService = journalEntryWritePlatformService;
         this.savingsAccountChargeAssembler = savingsAccountChargeAssembler;
     }
 
@@ -140,8 +130,6 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         try {
             this.savingsAccountDataValidator.validateForSubmit(command.json());
 
-            final List<Long> existingTransactionIds = new ArrayList<Long>();
-            final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
             final SavingsAccount account = this.savingAccountAssembler.assembleFrom(command);
             this.savingAccountRepository.save(account);
 
@@ -152,8 +140,6 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
                 this.savingAccountRepository.save(account);
             }
-
-            postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
 
             final Long savingsId = account.getId();
             return new CommandProcessingResultBuilder() //
@@ -233,10 +219,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 }
 
                 if (changes.containsKey("charges")) {
-                    // final Set<Charge> savingsProductCharges =
-                    // this.savi.assembleListOfSavingsProductCharges(command,
-                    // product.currency().getCode());
-                    final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(command.parsedJson());
+                    final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(command.parsedJson(),
+                            account.getCurrency().getCode());
                     final boolean updated = account.update(charges);
                     if (!updated) {
                         changes.remove("charges");
@@ -427,17 +411,6 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 .withSavingsId(savingsId) //
                 .with(changes) //
                 .build();
-    }
-
-    private void postJournalEntries(final SavingsAccount savingsAccount, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds) {
-
-        final MonetaryCurrency currency = savingsAccount.getCurrency();
-        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepositoryWrapper.findOneWithNotFoundDetection(currency);
-
-        final Map<String, Object> accountingBridgeData = savingsAccount.deriveAccountingBridgeData(applicationCurrency.toData(),
-                existingTransactionIds, existingReversedTransactionIds);
-        this.journalEntryWritePlatformService.createJournalEntriesForSavings(accountingBridgeData);
     }
 
     private void checkClientOrGroupActive(final SavingsAccount account) {

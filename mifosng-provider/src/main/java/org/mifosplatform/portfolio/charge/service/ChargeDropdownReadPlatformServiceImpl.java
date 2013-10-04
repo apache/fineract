@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.charge.service;
 
 import static org.mifosplatform.portfolio.charge.service.ChargeEnumerations.chargeCalculationType;
 import static org.mifosplatform.portfolio.charge.service.ChargeEnumerations.chargePaymentMode;
+import static org.mifosplatform.portfolio.charge.service.ChargeEnumerations.chargeTimeType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,15 +49,7 @@ public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownRead
     public List<EnumOptionData> retrieveCollectionTimeTypes() {
         final List<EnumOptionData> chargeTimeTypes = new ArrayList<EnumOptionData>();
         for (final ChargeTimeType chargeTimeType : ChargeTimeType.values()) {
-            if (ChargeTimeType.INVALID.equals(chargeTimeType) || ChargeTimeType.MONTHLY.equals(chargeTimeType) // To
-                                                                                                               // be
-                                                                                                               // implemented
-                                                                                                               // for
-                                                                                                               // Savings
-                    || ChargeTimeType.YEARLY.equals(chargeTimeType)) {
-                // implemented
-                // for
-                // Savings
+            if (ChargeTimeType.INVALID.equals(chargeTimeType)) {
                 continue;
             }
             chargeTimeTypes.add(ChargeEnumerations.chargeTimeType(chargeTimeType));
@@ -67,5 +60,28 @@ public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownRead
     @Override
     public List<EnumOptionData> retrivePaymentModes() {
         return Arrays.asList(chargePaymentMode(ChargePaymentMode.REGULAR), chargePaymentMode(ChargePaymentMode.ACCOUNT_TRANSFER));
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveLoanCalculationTypes() {
+        return Arrays.asList(chargeCalculationType(ChargeCalculationType.FLAT), chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT));
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveLoanCollectionTimeTypes() {
+        return Arrays.asList(chargeTimeType(ChargeTimeType.DISBURSEMENT), chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE));
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveSavingsCalculationTypes() {
+        return Arrays.asList(chargeCalculationType(ChargeCalculationType.FLAT),
+                chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT));
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveSavingsCollectionTimeTypes() {
+        return Arrays.asList(chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE), chargeTimeType(ChargeTimeType.SAVINGS_ACTIVATION),
+                chargeTimeType(ChargeTimeType.SAVINGS_CLOSURE), chargeTimeType(ChargeTimeType.WITHDRAWAL_FEE),
+                chargeTimeType(ChargeTimeType.ANNUAL_FEE));
     }
 }

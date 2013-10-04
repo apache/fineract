@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ApplyAnnualFeeSavingsAccountCommandHandler implements NewCommandSourceHandler {
 
+    @SuppressWarnings("unused")
     private final SavingsAccountWritePlatformService writePlatformService;
 
     @Autowired
@@ -28,8 +29,10 @@ public class ApplyAnnualFeeSavingsAccountCommandHandler implements NewCommandSou
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
+        @SuppressWarnings("unused")
         final LocalDate annualFeeTransactionDate = command.localDateValueOfParameterNamed("annualFeeTransactionDate");
 
-        return this.writePlatformService.applyAnnualFee(command.getSavingsId(), annualFeeTransactionDate);
+        //return this.writePlatformService.applyAnnualFee(command.getSavingsId(), annualFeeTransactionDate);
+        return null;
     }
 }

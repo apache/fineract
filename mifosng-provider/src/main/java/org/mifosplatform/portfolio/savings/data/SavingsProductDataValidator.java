@@ -7,8 +7,8 @@ package org.mifosplatform.portfolio.savings.data;
 
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeAmountParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeOnMonthDayParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeAmountParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.descriptionParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
@@ -22,9 +22,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeri
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nameParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeAmountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -46,7 +44,6 @@ import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
 import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
-import org.mifosplatform.portfolio.savings.SavingsWithdrawalFeesType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -151,7 +148,7 @@ public class SavingsProductDataValidator {
             }
         }
 
-        if (this.fromApiJsonHelper.parameterExists(withdrawalFeeAmountParamName, element)) {
+        /*if (this.fromApiJsonHelper.parameterExists(withdrawalFeeAmountParamName, element)) {
 
             final BigDecimal withdrawalFeeAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(withdrawalFeeAmountParamName,
                     element);
@@ -176,7 +173,7 @@ public class SavingsProductDataValidator {
                         .zeroOrPositiveAmount();
             }
         }
-
+*/
         if (this.fromApiJsonHelper.parameterExists(withdrawalFeeForTransfersParamName, element)) {
             final Boolean isWithdrawalFeeApplicableForTransfers = this.fromApiJsonHelper.extractBooleanNamed(
                     withdrawalFeeForTransfersParamName, element);
@@ -184,23 +181,23 @@ public class SavingsProductDataValidator {
                     .ignoreIfNull().validateForBooleanValue();
         }
 
-        if (this.fromApiJsonHelper.parameterExists(annualFeeAmountParamName, element)) {
-            final BigDecimal annualFeeAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(annualFeeAmountParamName, element);
-            baseDataValidator.reset().parameter(annualFeeAmountParamName).value(annualFeeAmount).zeroOrPositiveAmount();
+        if (this.fromApiJsonHelper.parameterExists(feeAmountParamName, element)) {
+            final BigDecimal annualFeeAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(feeAmountParamName, element);
+            baseDataValidator.reset().parameter(feeAmountParamName).value(annualFeeAmount).zeroOrPositiveAmount();
 
             if (annualFeeAmount != null) {
-                final MonthDay monthDayOfAnnualFee = this.fromApiJsonHelper.extractMonthDayNamed(annualFeeOnMonthDayParamName, element);
-                baseDataValidator.reset().parameter(annualFeeOnMonthDayParamName).value(monthDayOfAnnualFee).notNull();
+                final MonthDay monthDayOfAnnualFee = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, element);
+                baseDataValidator.reset().parameter(feeOnMonthDayParamName).value(monthDayOfAnnualFee).notNull();
             }
         }
 
-        if (this.fromApiJsonHelper.parameterExists(annualFeeOnMonthDayParamName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(feeOnMonthDayParamName, element)) {
 
-            final MonthDay monthDayOfAnnualFee = this.fromApiJsonHelper.extractMonthDayNamed(annualFeeOnMonthDayParamName, element);
+            final MonthDay monthDayOfAnnualFee = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, element);
             if (monthDayOfAnnualFee != null) {
-                final BigDecimal annualFeeAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(annualFeeAmountParamName,
+                final BigDecimal annualFeeAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(feeAmountParamName,
                         element);
-                baseDataValidator.reset().parameter(annualFeeAmountParamName).value(annualFeeAmount).notNull().zeroOrPositiveAmount();
+                baseDataValidator.reset().parameter(feeAmountParamName).value(annualFeeAmount).notNull().zeroOrPositiveAmount();
             }
         }
 
@@ -235,7 +232,13 @@ public class SavingsProductDataValidator {
             baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue()).value(incomeFromFeeId)
                     .notNull().integerGreaterThanZero();
 
+            final Long incomeFromPenaltyId = this.fromApiJsonHelper.extractLongNamed(
+                    SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), element);
+            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue())
+                    .value(incomeFromPenaltyId).notNull().integerGreaterThanZero();
+
             validatePaymentChannelFundSourceMappings(baseDataValidator, element);
+            validateChargeToIncomeAccountMappings(baseDataValidator, element);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -325,19 +328,6 @@ public class SavingsProductDataValidator {
             baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).inMinMaxRange(0, 3);
         }
 
-        if (this.fromApiJsonHelper.parameterExists(withdrawalFeeAmountParamName, element)) {
-            final BigDecimal withdrawalFeeAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(withdrawalFeeAmountParamName,
-                    element);
-            baseDataValidator.reset().parameter(withdrawalFeeAmountParamName).value(withdrawalFeeAmount).ignoreIfNull()
-                    .zeroOrPositiveAmount();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(withdrawalFeeTypeParamName, element)) {
-            final Integer withdrawalFeeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(withdrawalFeeTypeParamName, element);
-            baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(withdrawalFeeType).ignoreIfNull()
-                    .isOneOfTheseValues(1, 2);
-        }
-
         if (this.fromApiJsonHelper.parameterExists(withdrawalFeeForTransfersParamName, element)) {
             final Boolean isWithdrawalFeeApplicableForTransfers = this.fromApiJsonHelper.extractBooleanNamed(
                     withdrawalFeeForTransfersParamName, element);
@@ -345,14 +335,14 @@ public class SavingsProductDataValidator {
                     .ignoreIfNull().validateForBooleanValue();
         }
 
-        if (this.fromApiJsonHelper.parameterExists(annualFeeAmountParamName, element)) {
-            final BigDecimal annualFeeAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(annualFeeAmountParamName, element);
-            baseDataValidator.reset().parameter(annualFeeAmountParamName).value(annualFeeAmount).ignoreIfNull().zeroOrPositiveAmount();
+        if (this.fromApiJsonHelper.parameterExists(feeAmountParamName, element)) {
+            final BigDecimal annualFeeAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(feeAmountParamName, element);
+            baseDataValidator.reset().parameter(feeAmountParamName).value(annualFeeAmount).ignoreIfNull().zeroOrPositiveAmount();
         }
 
-        if (this.fromApiJsonHelper.parameterExists(annualFeeOnMonthDayParamName, element)) {
-            final MonthDay monthDayOfAnnualFee = this.fromApiJsonHelper.extractMonthDayNamed(annualFeeOnMonthDayParamName, element);
-            baseDataValidator.reset().parameter(annualFeeOnMonthDayParamName).value(monthDayOfAnnualFee).ignoreIfNull();
+        if (this.fromApiJsonHelper.parameterExists(feeOnMonthDayParamName, element)) {
+            final MonthDay monthDayOfAnnualFee = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, element);
+            baseDataValidator.reset().parameter(feeOnMonthDayParamName).value(monthDayOfAnnualFee).ignoreIfNull();
         }
 
         final Long savingsControlAccountId = this.fromApiJsonHelper.extractLongNamed(
@@ -380,7 +370,13 @@ public class SavingsProductDataValidator {
         baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue()).value(incomeFromFeeId)
                 .ignoreIfNull().integerGreaterThanZero();
 
+        final Long incomeFromPenaltyId = this.fromApiJsonHelper.extractLongNamed(
+                SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), element);
+        baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue()).value(incomeFromPenaltyId)
+                .ignoreIfNull().integerGreaterThanZero();
+
         validatePaymentChannelFundSourceMappings(baseDataValidator, element);
+        validateChargeToIncomeAccountMappings(baseDataValidator, element);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -422,6 +418,43 @@ public class SavingsProductDataValidator {
                             .notNull().integerGreaterThanZero();
                     i++;
                 } while (i < paymentChannelMappingArray.size());
+            }
+        }
+    }
+
+    private void validateChargeToIncomeAccountMappings(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        // validate for both fee and penalty charges
+        validateChargeToIncomeAccountMappings(baseDataValidator, element, true);
+        validateChargeToIncomeAccountMappings(baseDataValidator, element, true);
+    }
+
+    private void validateChargeToIncomeAccountMappings(final DataValidatorBuilder baseDataValidator, final JsonElement element,
+            final boolean isPenalty) {
+        String parameterName;
+        if (isPenalty) {
+            parameterName = SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PENALTY_INCOME_ACCOUNT_MAPPING.getValue();
+        } else {
+            parameterName = SAVINGS_PRODUCT_ACCOUNTING_PARAMS.FEE_INCOME_ACCOUNT_MAPPING.getValue();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(parameterName, element)) {
+            final JsonArray chargeToIncomeAccountMappingArray = this.fromApiJsonHelper.extractJsonArrayNamed(parameterName, element);
+            if (chargeToIncomeAccountMappingArray != null && chargeToIncomeAccountMappingArray.size() > 0) {
+                int i = 0;
+                do {
+                    final JsonObject jsonObject = chargeToIncomeAccountMappingArray.get(i).getAsJsonObject();
+                    final Long chargeId = this.fromApiJsonHelper.extractLongNamed(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.CHARGE_ID.getValue(),
+                            jsonObject);
+                    final Long incomeAccountId = this.fromApiJsonHelper.extractLongNamed(
+                            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_ACCOUNT_ID.getValue(), jsonObject);
+                    baseDataValidator.reset()
+                            .parameter(parameterName + "[" + i + "]." + SAVINGS_PRODUCT_ACCOUNTING_PARAMS.CHARGE_ID.getValue())
+                            .value(chargeId).notNull().integerGreaterThanZero();
+                    baseDataValidator.reset()
+                            .parameter(parameterName + "[" + i + "]." + SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_ACCOUNT_ID.getValue())
+                            .value(incomeAccountId).notNull().integerGreaterThanZero();
+                    i++;
+                } while (i < chargeToIncomeAccountMappingArray.size());
             }
         }
     }

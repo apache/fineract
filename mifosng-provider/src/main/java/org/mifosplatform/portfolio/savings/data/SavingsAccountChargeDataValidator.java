@@ -6,10 +6,12 @@
 package org.mifosplatform.portfolio.savings.data;
 
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_CHARGES_ADD_REQUEST_DATA_PARAMETERS;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.amountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -18,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
@@ -57,9 +61,15 @@ public class SavingsAccountChargeDataValidator {
         baseDataValidator.reset().parameter(amountParamName).value(amount).notNull().positiveAmount();
 
         if (this.fromApiJsonHelper.parameterExists(dueAsOfDateParamName, element)) {
-            this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element);
+            final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element); 
+            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate).notNull();
         }
-
+        
+        if (this.fromApiJsonHelper.parameterExists(feeOnMonthDayParamName, element)) {
+            final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, element); 
+            baseDataValidator.reset().parameter(feeOnMonthDayParamName).value(monthDay).notNull();
+        }
+        
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -79,12 +89,34 @@ public class SavingsAccountChargeDataValidator {
         baseDataValidator.reset().parameter(amountParamName).value(amount).notNull().positiveAmount();
 
         if (this.fromApiJsonHelper.parameterExists(dueAsOfDateParamName, element)) {
-            this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element);
+            final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element); 
+            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate).notNull();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
+    public void validatePayCharge(final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SAVINGS_ACCOUNT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(amountParamName, element);
+        baseDataValidator.reset().parameter(amountParamName).value(amount).notNull().positiveAmount();
+
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element); 
+        baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate).notNull();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+    
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }

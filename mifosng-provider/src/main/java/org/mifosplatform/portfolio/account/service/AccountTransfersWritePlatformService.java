@@ -9,6 +9,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.mifosplatform.portfolio.account.data.AccountTransferDTO;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 
 public interface AccountTransfersWritePlatformService {
 
@@ -19,4 +20,6 @@ public interface AccountTransfersWritePlatformService {
     Long transferFunds(AccountTransferDTO accountTransferDTO);
 
     void reverseAllTransactions(Long accountId, PortfolioAccountType accountTypeId);
+
+    void updateLoanTransaction(Long loanTransactionId, LoanTransaction newLoanTransaction);
 }

@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import org.joda.time.MonthDay;
 import org.mifosplatform.accounting.common.AccountingEnumerations;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
@@ -87,12 +86,12 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sqlBuilder.append("sp.min_required_opening_balance as minRequiredOpeningBalance, ");
             sqlBuilder.append("sp.lockin_period_frequency as lockinPeriodFrequency,");
             sqlBuilder.append("sp.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
-            sqlBuilder.append("sp.withdrawal_fee_amount as withdrawalFeeAmount,");
-            sqlBuilder.append("sp.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
+//            sqlBuilder.append("sp.withdrawal_fee_amount as withdrawalFeeAmount,");
+//            sqlBuilder.append("sp.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
             sqlBuilder.append("sp.withdrawal_fee_for_transfer as withdrawalFeeForTransfers, ");
-            sqlBuilder.append("sp.annual_fee_amount as annualFeeAmount,");
-            sqlBuilder.append("sp.annual_fee_on_month as annualFeeOnMonth, ");
-            sqlBuilder.append("sp.annual_fee_on_day as annualFeeOnDay, ");
+//            sqlBuilder.append("sp.annual_fee_amount as annualFeeAmount,");
+//            sqlBuilder.append("sp.annual_fee_on_month as annualFeeOnMonth, ");
+//            sqlBuilder.append("sp.annual_fee_on_day as annualFeeOnDay, ");
             sqlBuilder.append("sp.accounting_type as accountingType ");
             sqlBuilder.append("from m_savings_product sp ");
             sqlBuilder.append("join m_currency curr on curr.code = sp.currency_code ");
@@ -150,17 +149,17 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
                 lockinPeriodFrequencyType = SavingsEnumerations.lockinPeriodFrequencyType(lockinPeriodFrequencyTypeValue);
             }
 
-            final BigDecimal withdrawalFeeAmount = rs.getBigDecimal("withdrawalFeeAmount");
+            /*final BigDecimal withdrawalFeeAmount = rs.getBigDecimal("withdrawalFeeAmount");
 
             EnumOptionData withdrawalFeeType = null;
             final Integer withdrawalFeeTypeValue = JdbcSupport.getInteger(rs, "withdrawalFeeTypeEnum");
             if (withdrawalFeeTypeValue != null) {
                 withdrawalFeeType = SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue);
             }
-
+*/
             final boolean withdrawalFeeForTransfers = rs.getBoolean("withdrawalFeeForTransfers");
 
-            final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
+/*            final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
 
             MonthDay annualFeeOnMonthDay = null;
             final Integer annualFeeOnMonth = JdbcSupport.getInteger(rs, "annualFeeOnMonth");
@@ -168,11 +167,10 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             if (annualFeeAmount != null && annualFeeOnDay != null) {
                 annualFeeOnMonthDay = new MonthDay(annualFeeOnMonth, annualFeeOnDay);
             }
-
+*/
             return SavingsProductData.instance(id, name, description, currency, nominalAnnualInterestRate, compoundingInterestPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, withdrawalFeeForTransfers,
-                    annualFeeAmount, annualFeeOnMonthDay, accountingRuleType);
+                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, accountingRuleType);
         }
     }
 

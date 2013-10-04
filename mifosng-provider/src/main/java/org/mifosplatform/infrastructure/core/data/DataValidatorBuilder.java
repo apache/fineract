@@ -241,6 +241,27 @@ public class DataValidatorBuilder {
         return this;
     }
 
+    public DataValidatorBuilder isOneOfTheseStringValues(final Object... values) {
+        if (this.value == null && this.ignoreNullValue) { return this; }
+
+        final List<Object> valuesList = Arrays.asList(values);
+        final String valuesListStr = StringUtils.join(valuesList, ", ");
+
+        if (this.value == null || !valuesList.contains(this.value.toString().toLowerCase())) {
+            final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
+                    .append(this.parameter).append(".is.not.one.of.expected.enumerations");
+            final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(this.parameter)
+                    .append(" must be one of [ ").append(valuesListStr).append(" ] ").append(".");
+
+            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                    defaultEnglishMessage.toString(), this.parameter, this.value, values);
+
+            this.dataValidationErrors.add(error);
+        }
+
+        return this;
+    }
+
     public DataValidatorBuilder isNotOneOfTheseValues(final Object... values) {
         if (this.value == null && this.ignoreNullValue) { return this; }
 

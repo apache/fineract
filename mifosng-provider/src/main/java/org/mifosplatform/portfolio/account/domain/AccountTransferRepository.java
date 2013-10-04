@@ -19,4 +19,7 @@ public interface AccountTransferRepository extends JpaRepository<AccountTransfer
 
     @Query("from AccountTransfer at where (at.fromLoanAccount.id= :accountNumber or at.toLoanAccount.id=:accountNumber) and at.reversed=false")
     List<AccountTransfer> findAllByLoanId(@Param("accountNumber") Long accountNumber);
+    
+    @Query("from AccountTransfer at where at.toLoanTransaction.id= :loanTransactionId and at.reversed=false")
+    AccountTransfer findByToLoanTransactionId(@Param("loanTransactionId") Long loanTransactionId);
 }

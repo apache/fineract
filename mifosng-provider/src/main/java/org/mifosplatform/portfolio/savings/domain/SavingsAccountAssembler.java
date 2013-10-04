@@ -6,8 +6,6 @@
 package org.mifosplatform.portfolio.savings.domain;
 
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountNoParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeAmountParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeOnMonthDayParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.clientIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.externalIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.fieldOfficerIdParamName;
@@ -22,15 +20,12 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequire
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.productIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeAmountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.math.BigDecimal;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
-import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
@@ -50,7 +45,6 @@ import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearT
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
 import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
-import org.mifosplatform.portfolio.savings.SavingsWithdrawalFeesType;
 import org.mifosplatform.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -199,50 +193,18 @@ public class SavingsAccountAssembler {
         } else {
             lockinPeriodFrequencyType = product.lockinPeriodFrequencyType();
         }
-
-        BigDecimal withdrawalFeeAmount = null;
-        if (command.parameterExists(withdrawalFeeAmountParamName)) {
-            withdrawalFeeAmount = command.bigDecimalValueOfParameterNamed(withdrawalFeeAmountParamName);
-        } else {
-            withdrawalFeeAmount = product.withdrawalFeeAmount();
-        }
-
-        SavingsWithdrawalFeesType withdrawalFeeType = null;
-        if (command.parameterExists(withdrawalFeeAmountParamName)) {
-            final Integer withdrawalFeeTypeValue = command.integerValueOfParameterNamed(withdrawalFeeTypeParamName);
-            if (withdrawalFeeTypeValue != null) {
-                withdrawalFeeType = SavingsWithdrawalFeesType.fromInt(withdrawalFeeTypeValue);
-            }
-        } else {
-            withdrawalFeeType = product.withdrawalFeeType();
-        }
-
         boolean iswithdrawalFeeApplicableForTransfer = false;
         if (command.parameterExists(withdrawalFeeForTransfersParamName)) {
             iswithdrawalFeeApplicableForTransfer = command.booleanPrimitiveValueOfParameterNamed(withdrawalFeeForTransfersParamName);
         }
 
-        BigDecimal annualFeeAmount = null;
-        if (command.parameterExists(annualFeeAmountParamName)) {
-            annualFeeAmount = command.bigDecimalValueOfParameterNamed(annualFeeAmountParamName);
-        } else {
-            annualFeeAmount = product.annualFeeAmount();
-        }
 
-        MonthDay monthDayOfAnnualFee = null;
-        if (command.parameterExists(annualFeeOnMonthDayParamName)) {
-            monthDayOfAnnualFee = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
-        } else {
-            monthDayOfAnnualFee = product.monthDayOfAnnualFee();
-        }
-
-        final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(element);
+        final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(element, product.currency().getCode());
 
         final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer, accountNo,
                 externalId, accountType, submittedOnDate, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
-                lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, iswithdrawalFeeApplicableForTransfer, annualFeeAmount,
-                monthDayOfAnnualFee, charges);
+                lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, charges);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
         account.validateNewApplicationState(DateUtils.getLocalDateOfTenant());

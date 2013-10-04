@@ -7,9 +7,9 @@ package org.mifosplatform.portfolio.savings.domain;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
@@ -49,16 +49,17 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
             final boolean applyWithdrawFee) {
 
-        final List<Long> existingTransactionIds = new ArrayList<Long>();
-        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        final Set<Long> existingTransactionIds = new HashSet<Long>();
+        final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
+        updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                existingTransactionIds, existingReversedTransactionIds, paymentDetail);
+                paymentDetail);
         final SavingsAccountTransaction withdrawal = account.withdraw(transactionDTO, applyWithdrawFee);
 
         final MathContext mc = MathContext.DECIMAL64;
         if (account.isBeforeLastPostingPeriod(transactionDate)) {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.postInterest(mc, today, existingTransactionIds, existingReversedTransactionIds);
+            account.postInterest(mc, today);
         } else {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
             account.calculateInterestUsing(mc, today);
@@ -77,16 +78,17 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     public SavingsAccountTransaction handleDeposit(final SavingsAccount account, final DateTimeFormatter fmt,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail) {
 
-        final List<Long> existingTransactionIds = new ArrayList<Long>();
-        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        final Set<Long> existingTransactionIds = new HashSet<Long>();
+        final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
+        updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                existingTransactionIds, existingReversedTransactionIds, paymentDetail);
+                paymentDetail);
         final SavingsAccountTransaction deposit = account.deposit(transactionDTO);
 
         final MathContext mc = MathContext.DECIMAL64;
         if (account.isBeforeLastPostingPeriod(transactionDate)) {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.postInterest(mc, today, existingTransactionIds, existingReversedTransactionIds);
+            account.postInterest(mc, today);
         } else {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
             account.calculateInterestUsing(mc, today);
@@ -106,8 +108,14 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         return transaction.getId();
     }
 
-    private void postJournalEntries(final SavingsAccount savingsAccount, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds) {
+    private void updateExistingTransactionsDetails(SavingsAccount account, Set<Long> existingTransactionIds,
+            Set<Long> existingReversedTransactionIds) {
+        existingTransactionIds.addAll(account.findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(account.findExistingReversedTransactionIds());
+    }
+
+    private void postJournalEntries(final SavingsAccount savingsAccount, final Set<Long> existingTransactionIds,
+            final Set<Long> existingReversedTransactionIds) {
 
         final MonetaryCurrency currency = savingsAccount.getCurrency();
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepositoryWrapper.findOneWithNotFoundDetection(currency);

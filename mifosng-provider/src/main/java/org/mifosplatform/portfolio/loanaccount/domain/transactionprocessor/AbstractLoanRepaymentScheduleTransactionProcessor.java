@@ -118,8 +118,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                      **/
                     if (!LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)) {
                         loanTransaction.reverse();
-                        changedTransactionDetail.getReversedTransactions().add(loanTransaction);
-                        changedTransactionDetail.getNewTransactions().add(newLoanTransaction);
+                        changedTransactionDetail.getNewTransactionMappings().put(loanTransaction.getId(), newLoanTransaction);
                     }
                 }
 
@@ -187,6 +186,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
         if (transactionAmountUnprocessed.isGreaterThanZero()) {
             onLoanOverpayment(loanTransaction, transactionAmountUnprocessed);
+            loanTransaction.updateOverPayments(transactionAmountUnprocessed);
         }
     }
 

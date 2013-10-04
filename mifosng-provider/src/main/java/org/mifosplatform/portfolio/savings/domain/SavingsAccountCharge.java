@@ -9,6 +9,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.amountPara
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dateFormatParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.localeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -28,6 +29,7 @@ import javax.persistence.TemporalType;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
@@ -53,8 +55,14 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
     private Integer chargeTime;
 
     @Temporal(TemporalType.DATE)
-    @Column(name = "due_for_collection_as_of_date")
+    @Column(name = "charge_due_date")
     private Date dueDate;
+
+    @Column(name = "fee_on_month", nullable = true)
+    private Integer feeOnMonth;
+
+    @Column(name = "fee_on_day", nullable = true)
+    private Integer feeOnDay;
 
     @Column(name = "charge_calculation_enum")
     private Integer chargeCalculation;
@@ -62,6 +70,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
     @Column(name = "calculation_percentage", scale = 6, precision = 19, nullable = true)
     private BigDecimal percentage;
 
+    // TODO AA: This field may not require for savings charges
     @Column(name = "calculation_on_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountPercentageAppliedTo;
 
@@ -89,29 +98,38 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
     @Column(name = "waived", nullable = false)
     private boolean waived = false;
 
+    @Column(name = "is_active", nullable = false)
+    private boolean status = true;
+
     public static SavingsAccountCharge createNewFromJson(final SavingsAccount savingsAccount, final Charge chargeDefinition,
             final JsonCommand command) {
 
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed(amountParamName);
         final LocalDate dueDate = command.localDateValueOfParameterNamed(dueAsOfDateParamName);
+        final MonthDay feeOnMonthDay = command.extractMonthDayNamed(feeOnMonthDayParamName);
         final ChargeTimeType chargeTime = null;
         final ChargeCalculationType chargeCalculation = null;
+        final boolean status = true;
 
-        return new SavingsAccountCharge(savingsAccount, chargeDefinition, amount, chargeTime, chargeCalculation, dueDate);
+        return new SavingsAccountCharge(savingsAccount, chargeDefinition, amount, chargeTime, chargeCalculation, dueDate, status,
+                feeOnMonthDay);
     }
 
     // TODO AA: refactor method signature
-    public static SavingsAccountCharge createNewWithoutSavingsAccount(final Charge chargeDefinition, final BigDecimal amount,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate) {
-        return new SavingsAccountCharge(null, chargeDefinition, amount, chargeTime, chargeCalculation, dueDate);
+    public static SavingsAccountCharge createNewWithoutSavingsAccount(final Charge chargeDefinition, final BigDecimal amountPayable,
+            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate, final boolean status,
+            final MonthDay feeOnMonthDay) {
+        return new SavingsAccountCharge(null, chargeDefinition, amountPayable, chargeTime, chargeCalculation, dueDate, status,
+                feeOnMonthDay);
     }
 
     protected SavingsAccountCharge() {
         //
     }
 
-    public SavingsAccountCharge(final SavingsAccount savingsAccount, final Charge chargeDefinition, final BigDecimal amount,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate) {
+    private SavingsAccountCharge(final SavingsAccount savingsAccount, final Charge chargeDefinition, final BigDecimal amount,
+            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate, final boolean status,
+            final MonthDay feeOnMonthDay) {
 
         this.savingsAccount = savingsAccount;
         this.charge = chargeDefinition;
@@ -127,6 +145,16 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
         }
 
+        if (isAnnualFee()) {
+            if (feeOnMonthDay == null) {
+                final String defaultUserMessage = "Savings Account charge is missing due date.";
+                throw new SavingsAccountChargeWithoutMandatoryFieldException("savingsaccount.charge", dueAsOfDateParamName,
+                        defaultUserMessage, chargeDefinition.getId(), chargeDefinition.getName());
+            }
+            this.feeOnMonth = feeOnMonthDay.getMonthOfYear();
+            this.feeOnDay = feeOnMonthDay.getDayOfMonth();
+        }
+
         this.dueDate = (dueDate == null) ? null : dueDate.toDate();
 
         this.chargeCalculation = chargeDefinition.getChargeCalculation();
@@ -139,13 +167,18 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
             chargeAmount = amount;
         }
 
-        final BigDecimal transactionAmount = new BigDecimal(0);// percentage
-                                                               // based fee is
-                                                               // not yet
-                                                               // supported for
-                                                               // savings
+        final BigDecimal transactionAmount = new BigDecimal(0);
+
         populateDerivedFields(transactionAmount, chargeAmount);
+        resetOutstandingAmount();// reset only if it's withdrawal or annual fee
         this.paid = determineIfFullyPaid();
+        this.status = status;
+    }
+
+    private void resetOutstandingAmount() {
+        if (this.isWithdrawalFee()) {
+            this.amountOutstanding = BigDecimal.ZERO;
+        }
     }
 
     private void populateDerivedFields(final BigDecimal transactionAmount, final BigDecimal chargeAmount) {
@@ -214,31 +247,42 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         this.waived = false;
     }
 
-    public void resetPaidAmount(final MonetaryCurrency currency) {
-        this.amountPaid = BigDecimal.ZERO;
+    public void undoPayment(final MonetaryCurrency currency, final Money transactionAmount) {
+        Money amountPaid = getAmountPaid(currency);
+        amountPaid = amountPaid.minus(transactionAmount);
+        this.amountPaid = amountPaid.getAmount();
         this.amountOutstanding = calculateAmountOutstanding(currency);
+        if (this.isWithdrawalFee()) {
+            this.amountOutstanding = BigDecimal.ZERO;
+        }
         this.paid = false;
     }
 
     public Money waive(final MonetaryCurrency currency) {
         this.amountWaived = this.amountOutstanding;
         this.amountOutstanding = BigDecimal.ZERO;
-        this.paid = false;
         this.waived = true;
         return getAmountWaived(currency);
     }
 
-    public Money pay(final MonetaryCurrency currency, final BigDecimal chargePaid) {
+    public void undoWaiver(final MonetaryCurrency currency, final Money transactionAmount) {
+        Money amountWaived = getAmountWaived(currency);
+        amountWaived = amountWaived.minus(transactionAmount);
+        this.amountWaived = amountWaived.getAmount();
+        this.amountOutstanding = calculateAmountOutstanding(currency);
+        this.waived = false;
+    }
+
+    public Money pay(final MonetaryCurrency currency, final Money amountPaid) {
 
         Money amountPaidToDate = Money.of(currency, this.amountPaid);
-        final Money amountPaid = Money.of(currency, chargePaid);
         Money amountOutstanding = Money.of(currency, this.amountOutstanding);
         amountPaidToDate = amountPaidToDate.plus(amountPaid);
-        amountOutstanding = amountOutstanding.minus(chargePaid);
+        amountOutstanding = amountOutstanding.minus(amountPaid);
         this.amountPaid = amountPaidToDate.getAmount();
         this.amountOutstanding = amountOutstanding.getAmount();
         this.paid = determineIfFullyPaid();
-        return amountPaid;
+        return amountOutstanding;
     }
 
     private BigDecimal calculateAmountOutstanding(final MonetaryCurrency currency) {
@@ -249,14 +293,15 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         this.savingsAccount = savingsAccount;
     }
 
-    public void update(final BigDecimal amount, final LocalDate dueDate) {
-        final BigDecimal transactionAmount = BigDecimal.ZERO;// percentage based
-                                                             // fee calculation
-                                                             // is not yet
-                                                             // supported for
-                                                             // Savings
+    public void update(final BigDecimal amount, final LocalDate dueDate, final MonthDay feeOnMonthDay) {
+        final BigDecimal transactionAmount = BigDecimal.ZERO;
         if (dueDate != null) {
             this.dueDate = dueDate.toDate();
+        }
+
+        if (feeOnMonthDay != null) {
+            this.feeOnMonth = feeOnMonthDay.getMonthOfYear();
+            this.feeOnDay = feeOnMonthDay.getDayOfMonth();
         }
 
         if (amount != null) {
@@ -305,6 +350,24 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
             this.dueDate = newValue.toDate();
         }
 
+        if (command.hasParameter(feeOnMonthDayParamName)) {
+            final MonthDay monthDay = command.extractMonthDayNamed(feeOnMonthDayParamName);
+            final String actualValueEntered = command.stringValueOfParameterNamed(feeOnMonthDayParamName);
+            final Integer dayOfMonthValue = monthDay.getDayOfMonth();
+            if (this.feeOnDay != dayOfMonthValue) {
+                actualChanges.put(feeOnMonthDayParamName, actualValueEntered);
+                actualChanges.put(localeParamName, localeAsInput);
+                this.feeOnDay = dayOfMonthValue;
+            }
+
+            final Integer monthOfYear = monthDay.getMonthOfYear();
+            if (this.feeOnMonth != monthOfYear) {
+                actualChanges.put(feeOnMonthDayParamName, actualValueEntered);
+                actualChanges.put(localeParamName, localeAsInput);
+                this.feeOnMonth = monthOfYear;
+            }
+        }
+
         if (command.isChangeInBigDecimalParameterNamed(amountParamName, this.amount)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountParamName);
             actualChanges.put(amountParamName, newValue);
@@ -314,6 +377,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
                 break;
                 case FLAT:
                     this.amount = newValue;
+                    this.amountOutstanding = calculateOutstanding();
                 break;
                 case PERCENT_OF_AMOUNT:
                     this.percentage = newValue;
@@ -337,10 +401,6 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         }
 
         return actualChanges;
-    }
-
-    public boolean isSpecifiedDueDate() {
-        return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.SPECIFIED_DUE_DATE);
     }
 
     private boolean isGreaterThanZero(final BigDecimal value) {
@@ -398,6 +458,10 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         return this.amount;
     }
 
+    public BigDecimal amoutOutstanding() {
+        return this.amountOutstanding;
+    }
+
     public boolean isFeeCharge() {
         return !this.penaltyCharge;
     }
@@ -438,6 +502,10 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
     public Money getAmountWrittenOff(final MonetaryCurrency currency) {
         return Money.of(currency, this.amountWrittenOff);
+    }
+
+    public Money getAmountOutstanding(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amountOutstanding);
     }
 
     /**
@@ -482,8 +550,33 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         return this.charge;
     }
 
+    public SavingsAccount savingsAccount() {
+        return this.savingsAccount;
+    }
+
     public boolean isOnSpecifiedDueDate() {
         return ChargeTimeType.fromInt(this.chargeTime).isOnSpecifiedDueDate();
+    }
+
+    public boolean isSavingsActivation() {
+        return ChargeTimeType.fromInt(this.chargeTime).isSavingsActivation();
+    }
+
+    public boolean isSavingsClosure() {
+        return ChargeTimeType.fromInt(this.chargeTime).isSavingsClosure();
+    }
+
+    public boolean isWithdrawalFee() {
+        return ChargeTimeType.fromInt(this.chargeTime).isWithdrawalFee();
+    }
+
+    public boolean isAnnualFee() {
+        return ChargeTimeType.fromInt(this.chargeTime).isAnnualFee();
+    }
+
+    public boolean hasCurrencyCodeOf(final String matchingCurrencyCode) {
+        if (this.currencyCode() == null || matchingCurrencyCode == null) { return false; }
+        return this.currencyCode().equalsIgnoreCase(matchingCurrencyCode);
     }
 
     @Override
@@ -507,5 +600,48 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
                 .append(this.charge.getId()) //
                 .append(this.amount).append(getDueLocalDate()) //
                 .toHashCode();
+    }
+
+    public BigDecimal updateWithdralFeeAmount(final BigDecimal transactionAmount) {
+        BigDecimal amountPaybale = BigDecimal.ZERO;
+        if (ChargeCalculationType.fromInt(this.chargeCalculation).isFlat()) {
+            amountPaybale = this.amount;
+        } else if (ChargeCalculationType.fromInt(this.chargeCalculation).isPercentageOfAmount()) {
+            amountPaybale = transactionAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100l));
+        }
+        this.amountOutstanding = amountPaybale;
+        return amountPaybale;
+    }
+
+    public void updateToNextAnnualFeeDueDateFrom(final LocalDate startingDate) {
+        if (isAnnualFee()) {
+            LocalDate nextDueLocalDate = startingDate.withMonthOfYear(this.feeOnMonth).withDayOfMonth(this.feeOnDay);
+            if (startingDate.isAfter(nextDueLocalDate)) {
+                nextDueLocalDate = nextDueLocalDate.plusYears(1);
+            }
+            this.dueDate = nextDueLocalDate.toDate();
+        }
+    }
+    
+    public void updateToNextAnnualFeeDueDate() {
+        if (isAnnualFee()) {
+            LocalDate nextDueLocalDate = new LocalDate(dueDate);
+            this.dueDate = nextDueLocalDate.withMonthOfYear(this.feeOnMonth).withDayOfMonth(this.feeOnDay).plusYears(1).toDate();
+        }
+    }
+
+    public void updateToPreviousAnnualFeeDueDate() {
+        if (isAnnualFee()) {
+            LocalDate previousDueLocalDate = new LocalDate(dueDate);
+            this.dueDate = previousDueLocalDate.withMonthOfYear(this.feeOnMonth).withDayOfMonth(this.feeOnDay).minusYears(1).toDate();
+        }
+    }
+    
+    public boolean feeSettingsNotSet() {
+        return !feeSettingsSet();
+    }
+
+    public boolean feeSettingsSet() {
+        return this.feeOnDay != null && this.feeOnMonth != null;
     }
 }

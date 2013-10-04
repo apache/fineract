@@ -32,6 +32,7 @@ import org.mifosplatform.accounting.journalentry.exception.JournalEntryInvalidEx
 import org.mifosplatform.accounting.producttoaccountmapping.domain.PortfolioProductType;
 import org.mifosplatform.accounting.producttoaccountmapping.domain.ProductToGLAccountMapping;
 import org.mifosplatform.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
+import org.mifosplatform.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingNotFoundException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.office.domain.Office;
@@ -81,31 +82,33 @@ public class AccountingProcessorHelper {
             final BigDecimal interest = (BigDecimal) map.get("interestPortion");
             final BigDecimal fees = (BigDecimal) map.get("feeChargesPortion");
             final BigDecimal penalties = (BigDecimal) map.get("penaltyChargesPortion");
+            final BigDecimal overPayments = (BigDecimal) map.get("overPaymentPortion");
             final boolean reversed = (Boolean) map.get("reversed");
             final Long paymentTypeId = (Long) map.get("paymentTypeId");
 
-            final List<ChargePaymentDTO> feePayments = new ArrayList<ChargePaymentDTO>();
-            final List<ChargePaymentDTO> penaltyPayments = new ArrayList<ChargePaymentDTO>();
+            final List<ChargePaymentDTO> feePaymentDetails = new ArrayList<ChargePaymentDTO>();
+            final List<ChargePaymentDTO> penaltyPaymentDetails = new ArrayList<ChargePaymentDTO>();
             // extract charge payment details (if exists)
             if (map.containsKey("loanChargesPaid")) {
                 @SuppressWarnings("unchecked")
                 final List<Map<String, Object>> loanChargesPaidData = (List<Map<String, Object>>) map.get("loanChargesPaid");
                 for (final Map<String, Object> loanChargePaid : loanChargesPaidData) {
                     final Long chargeId = (Long) loanChargePaid.get("chargeId");
-                    final Long loanChargeId = (Long) loanChargePaid.get("chargeId");
+                    final Long loanChargeId = (Long) loanChargePaid.get("loanChargeId");
                     final boolean isPenalty = (Boolean) loanChargePaid.get("isPenalty");
                     final BigDecimal chargeAmountPaid = (BigDecimal) loanChargePaid.get("amount");
                     final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, loanChargeId, chargeAmountPaid);
                     if (isPenalty) {
-                        penaltyPayments.add(chargePaymentDTO);
+                        penaltyPaymentDetails.add(chargePaymentDTO);
                     } else {
-                        feePayments.add(chargePaymentDTO);
+                        feePaymentDetails.add(chargePaymentDTO);
                     }
                 }
             }
 
             final LoanTransactionDTO transaction = new LoanTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
-                    transactionDate, transactionType, amount, principal, interest, fees, penalties, reversed, feePayments, penaltyPayments);
+                    transactionDate, transactionType, amount, principal, interest, fees, penalties, overPayments, reversed,
+                    feePaymentDetails, penaltyPaymentDetails);
 
             newLoanTransactions.add(transaction);
 
@@ -135,8 +138,28 @@ public class AccountingProcessorHelper {
             final boolean reversed = (Boolean) map.get("reversed");
             final Long paymentTypeId = (Long) map.get("paymentTypeId");
 
+            final List<ChargePaymentDTO> feePayments = new ArrayList<ChargePaymentDTO>();
+            final List<ChargePaymentDTO> penaltyPayments = new ArrayList<ChargePaymentDTO>();
+            // extract charge payment details (if exists)
+            if (map.containsKey("savingsChargesPaid")) {
+                @SuppressWarnings("unchecked")
+                final List<Map<String, Object>> savingsChargesPaidData = (List<Map<String, Object>>) map.get("savingsChargesPaid");
+                for (final Map<String, Object> loanChargePaid : savingsChargesPaidData) {
+                    final Long chargeId = (Long) loanChargePaid.get("chargeId");
+                    final Long loanChargeId = (Long) loanChargePaid.get("savingsChargeId");
+                    final boolean isPenalty = (Boolean) loanChargePaid.get("isPenalty");
+                    final BigDecimal chargeAmountPaid = (BigDecimal) loanChargePaid.get("amount");
+                    final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, loanChargeId, chargeAmountPaid);
+                    if (isPenalty) {
+                        penaltyPayments.add(chargePaymentDTO);
+                    } else {
+                        feePayments.add(chargePaymentDTO);
+                    }
+                }
+            }
+
             final SavingsTransactionDTO transaction = new SavingsTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
-                    transactionDate, transactionType, amount, reversed);
+                    transactionDate, transactionType, amount, reversed, feePayments, penaltyPayments);
 
             newSavingsTransactions.add(transaction);
 
@@ -378,6 +401,61 @@ public class AccountingProcessorHelper {
                 totalCreditedAmount, totalAmount); }
     }
 
+    /**
+     * Convenience method that creates a pair of related Debits and Credits for
+     * Cash Based accounting.
+     * 
+     * The target accounts for debits and credits are switched in case of a
+     * reversal
+     * 
+     * @param office
+     * @param accountTypeToBeDebited
+     *            Enum of the placeholder GLAccount to be debited
+     * @param accountTypeToBeCredited
+     *            Enum of the placeholder of the GLAccount to be credited
+     * @param savingsProductId
+     * @param paymentTypeId
+     * @param loanId
+     * @param transactionId
+     * @param transactionDate
+     * @param amount
+     * @param isReversal
+     */
+    public void createCashBasedJournalEntriesAndReversalsForSavingsCharges(final Office office, final String currencyCode,
+            final CASH_ACCOUNTS_FOR_SAVINGS accountTypeToBeDebited, final CASH_ACCOUNTS_FOR_SAVINGS accountTypeToBeCredited,
+            final Long savingsProductId, final Long paymentTypeId, final Long loanId, final String transactionId,
+            final Date transactionDate, final BigDecimal totalAmount, final Boolean isReversal,
+            final List<ChargePaymentDTO> chargePaymentDTOs) {
+        // TODO Vishwas: Remove this validation, as and when appropriate Junit
+        // tests are written for accounting
+        /**
+         * Accounting module currently supports a single charge per transaction,
+         * throw an error if this is not the case here so any developers
+         * changing the expected portfolio behavior would also take care of
+         * modifying the accounting code appropriately
+         **/
+        if (chargePaymentDTOs.size() != 1) { throw new PlatformDataIntegrityException(
+                "Recent Portfolio changes w.r.t Charges for Savings have Broken the accounting code",
+                "Recent Portfolio changes w.r.t Charges for Savings have Broken the accounting code"); }
+        ChargePaymentDTO chargePaymentDTO = chargePaymentDTOs.get(0);
+
+        final GLAccount chargeSpecificAccount = getLinkedGLAccountForSavingsCharges(savingsProductId, accountTypeToBeCredited.getValue(),
+                chargePaymentDTO.getChargeId());
+        final GLAccount savingsControlAccount = getLinkedGLAccountForSavingsProduct(savingsProductId, accountTypeToBeDebited.getValue(),
+                paymentTypeId);
+        if (isReversal) {
+            createDebitJournalEntryForSavings(office, currencyCode, chargeSpecificAccount, loanId, transactionId, transactionDate,
+                    totalAmount);
+            createCreditJournalEntryForSavings(office, currencyCode, savingsControlAccount, loanId, transactionId, transactionDate,
+                    totalAmount);
+        } else {
+            createDebitJournalEntryForSavings(office, currencyCode, savingsControlAccount, loanId, transactionId, transactionDate,
+                    totalAmount);
+            createCreditJournalEntryForSavings(office, currencyCode, chargeSpecificAccount, loanId, transactionId, transactionDate,
+                    totalAmount);
+        }
+    }
+
     private void createCreditJournalEntryOrReversalForLoan(final Office office, final String currencyCode, final int accountMappingTypeId,
             final Long loanProductId, final Long paymentTypeId, final Long loanId, final String transactionId, final Date transactionDate,
             final BigDecimal amount, final Boolean isReversal) {
@@ -438,6 +516,9 @@ public class AccountingProcessorHelper {
             }
         }
 
+        if (accountMapping == null) { throw new ProductToGLAccountMappingNotFoundException(PortfolioProductType.LOAN, loanProductId,
+                ACCRUAL_ACCOUNTS_FOR_LOAN.OVERPAYMENT.toString()); }
+
         return accountMapping.getGlAccount();
     }
 
@@ -464,6 +545,29 @@ public class AccountingProcessorHelper {
         return accountMapping.getGlAccount();
     }
 
+    private GLAccount getLinkedGLAccountForSavingsCharges(final Long savingsProductId, final int accountMappingTypeId, final Long chargeId) {
+        ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(savingsProductId,
+                PortfolioProductType.SAVING.getValue(), accountMappingTypeId);
+        /*****
+         * Get more specific mappings for Charges and penalties (based on the
+         * actual charge /penalty coupled with the loan product). Note the
+         * income from fees and income from penalties placeholder ID would be
+         * the same for both cash and accrual based accounts
+         *****/
+
+        // Vishwas TODO: remove this condition as it should always be true
+        if (accountMappingTypeId == CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_FEES.getValue()
+                || accountMappingTypeId == CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.getValue()) {
+            final ProductToGLAccountMapping chargeSpecificIncomeAccountMapping = this.accountMappingRepository
+                    .findByProductIdAndProductTypeAndFinancialAccountTypeAndChargeId(savingsProductId,
+                            PortfolioProductType.SAVING.getValue(), accountMappingTypeId, chargeId);
+            if (chargeSpecificIncomeAccountMapping != null) {
+                accountMapping = chargeSpecificIncomeAccountMapping;
+            }
+        }
+        return accountMapping.getGlAccount();
+    }
+
     private GLAccount getLinkedGLAccountForSavingsProduct(final Long savingsProductId, final int accountMappingTypeId,
             final Long paymentTypeId) {
         ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(savingsProductId,
@@ -473,7 +577,7 @@ public class AccountingProcessorHelper {
          * channels). Note that fund source placeholder ID would be same for
          * both cash and accrual accounts
          ***/
-        if (accountMappingTypeId == CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE.getValue()) {
+        if (accountMappingTypeId == CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_REFERENCE.getValue()) {
             final ProductToGLAccountMapping paymentChannelSpecificAccountMapping = this.accountMappingRepository
                     .findByProductIdAndProductTypeAndFinancialAccountTypeAndPaymentTypeId(savingsProductId,
                             PortfolioProductType.SAVING.getValue(), accountMappingTypeId, paymentTypeId);

@@ -63,4 +63,8 @@ public class DateUtils {
         final String formattedSqlDate = df.format(date);
         return formattedSqlDate;
     }
+    
+    public static boolean isDateInTheFuture(final LocalDate localDate){
+        return localDate.isAfter(getLocalDateOfTenant());
+    }
 }

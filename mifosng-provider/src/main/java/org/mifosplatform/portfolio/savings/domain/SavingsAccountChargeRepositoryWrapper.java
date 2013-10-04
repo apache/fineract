@@ -5,6 +5,9 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
+import java.util.Date;
+import java.util.List;
+
 import org.mifosplatform.portfolio.charge.exception.SavingsAccountChargeNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,11 +39,19 @@ public class SavingsAccountChargeRepositoryWrapper {
         if (savingsAccountCharge == null) { throw new SavingsAccountChargeNotFoundException(id); }
         return savingsAccountCharge;
     }
+    
+    public List<SavingsAccountCharge> findPendingCharges(final Date transactionDate){
+        return this.repository.findPendingCharges(transactionDate);
+    }
 
     public void save(final SavingsAccountCharge savingsAccountCharge) {
         this.repository.save(savingsAccountCharge);
     }
 
+    public void save(final Iterable<SavingsAccountCharge> savingsAccountCharges){
+        this.repository.save(savingsAccountCharges);
+    }
+    
     public void saveAndFlush(final SavingsAccountCharge savingsAccountCharge) {
         this.repository.saveAndFlush(savingsAccountCharge);
     }

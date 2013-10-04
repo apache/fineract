@@ -6,9 +6,11 @@
 package org.mifosplatform.portfolio.savings.domain;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -114,7 +116,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
                 amount, isReversed);
     }
 
-    public static SavingsAccountTransaction fee(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
+    public static SavingsAccountTransaction withdrawalFee(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
             final Money amount) {
         final boolean isReversed = false;
         return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue(), date, amount,
@@ -208,12 +210,20 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isWithdrawal();
     }
 
+    public boolean isPostInterestCalculationRequired(){
+        return this.isDeposit() || this.isWithdrawal() || this.isPayCharge();
+    }
+    
     public boolean isInterestPostingAndNotReversed() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isInterestPosting() && isNotReversed();
     }
 
     public boolean isWithdrawalFeeAndNotReversed() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isWithdrawalFee() && isNotReversed();
+    }
+    
+    public boolean isWithdrawalFee() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isWithdrawalFee();
     }
 
     public boolean isAnnualFeeAndNotReversed() {
@@ -313,6 +323,25 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
         if (this.paymentDetail != null) {
             thisTransactionData.put("paymentTypeId", this.paymentDetail.getPaymentType().getId());
+        }
+
+        /***
+         * Sending data in a map, though in savings we currently expect a transaction to
+         * always repay a single charge (or may repay a part of a single charge
+         * too)
+         ***/
+        if (!this.savingsAccountChargesPaid.isEmpty()) {
+            final List<Map<String, Object>> savingsChargesPaidData = new ArrayList<Map<String, Object>>();
+            for (final SavingsAccountChargePaidBy chargePaidBy : this.savingsAccountChargesPaid) {
+                final Map<String, Object> savingChargePaidData = new LinkedHashMap<String, Object>();
+                savingChargePaidData.put("chargeId", chargePaidBy.getSavingsAccountCharge().getCharge().getId());
+                savingChargePaidData.put("isPenalty", chargePaidBy.getSavingsAccountCharge().getCharge().isPenalty());
+                savingChargePaidData.put("savingsChargeId", chargePaidBy.getSavingsAccountCharge().getId());
+                savingChargePaidData.put("amount", chargePaidBy.getAmount());
+
+                savingsChargesPaidData.add(savingChargePaidData);
+            }
+            thisTransactionData.put("savingsChargesPaid", savingsChargesPaidData);
         }
 
         return thisTransactionData;
@@ -431,21 +460,29 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     }
 
     public boolean isDebit() {
-        return isWithdrawal() || isWithdrawalFeeAndNotReversed() || isAnnualFeeAndNotReversed() || isCharge();
+        return isWithdrawal() || isWithdrawalFeeAndNotReversed() || isAnnualFeeAndNotReversed() || isPayCharge();
     }
 
-    public boolean isCharge() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isCharge();
+    public boolean isPayCharge() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isPayCharge();
+    }
+    
+    public boolean isChargeTransaction(){
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isChargeTransaction();
+    }
+    
+    public boolean isWaiveCharge(){
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isWaiveCharge();
     }
 
     public boolean isFeeCharge() {
         final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
-        return (isCharge() && chargePaidBy != null) ? chargePaidBy.isFeeCharge() : false;
+        return (isPayCharge() && chargePaidBy != null) ? chargePaidBy.isFeeCharge() : false;
     }
 
     public boolean isPenaltyCharge() {
         final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
-        return (isCharge() && chargePaidBy != null) ? chargePaidBy.isPenaltyCharge() : false;
+        return (isPayCharge() && chargePaidBy != null) ? chargePaidBy.isPenaltyCharge() : false;
     }
 
     public boolean isFeeChargeAndNotReversed() {
@@ -454,6 +491,24 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
     public boolean isPenaltyChargeAndNotReversed() {
         return isPenaltyCharge() && isNotReversed();
+    }
+
+    public boolean isWaiveFeeCharge() {
+        final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
+        return (isWaiveCharge() && chargePaidBy != null) ? chargePaidBy.isFeeCharge() : false;
+    }
+
+    public boolean isWaivePenaltyCharge() {
+        final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
+        return (isWaiveCharge() && chargePaidBy != null) ? chargePaidBy.isPenaltyCharge() : false;
+    }
+
+    public boolean isWaiveFeeChargeAndNotReversed() {
+        return isWaiveFeeCharge() && isNotReversed();
+    }
+
+    public boolean isWaivePenaltyChargeAndNotReversed() {
+        return isWaivePenaltyCharge() && isNotReversed();
     }
 
     private SavingsAccountChargePaidBy getSavingsAccountChargePaidBy() {

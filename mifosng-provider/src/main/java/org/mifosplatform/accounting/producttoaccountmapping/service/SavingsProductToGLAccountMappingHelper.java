@@ -94,6 +94,20 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
         updatePaymentChannelToFundSourceMappings(command, element, productId, changes, PortfolioProductType.SAVING);
     }
 
+    public void saveChargesToIncomeAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
+            final Map<String, Object> changes) {
+        // save both fee and penalty charges
+        saveChargesToIncomeAccountMappings(command, element, productId, changes, PortfolioProductType.SAVING, true);
+        saveChargesToIncomeAccountMappings(command, element, productId, changes, PortfolioProductType.SAVING, false);
+    }
+
+    public void updateChargesToIncomeAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
+            final Map<String, Object> changes) {
+        // update both fee and penalty charges
+        updateChargeToIncomeAccountMappings(command, element, productId, changes, PortfolioProductType.SAVING, true);
+        updateChargeToIncomeAccountMappings(command, element, productId, changes, PortfolioProductType.SAVING, false);
+    }
+
     public Map<String, Object> populateChangesForNewSavingsProductToGLAccountMappingCreation(final JsonElement element,
             final AccountingRuleType accountingRuleType) {
         final Map<String, Object> changes = new HashMap<String, Object>();
@@ -102,6 +116,8 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
                 SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue(), element);
         final Long incomeFromFeesId = this.fromApiJsonHelper.extractLongNamed(
                 SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), element);
+        final Long incomeFromPenaltiesId = this.fromApiJsonHelper.extractLongNamed(
+                SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), element);
         final Long interestOnSavingsId = this.fromApiJsonHelper.extractLongNamed(
                 SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(), element);
         final Long savingsControlId = this.fromApiJsonHelper.extractLongNamed(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_CONTROL.getValue(),
@@ -117,6 +133,7 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
                 changes.put(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue(), savingsReferenceId);
                 changes.put(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(), interestOnSavingsId);
                 changes.put(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), incomeFromFeesId);
+                changes.put(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), incomeFromPenaltiesId);
                 changes.put(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(), transfersInSuspenseAccountId);
             break;
             case ACCRUAL_BASED:
@@ -149,6 +166,10 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
                 mergeSavingsToIncomeAccountMappingChanges(element, SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),
                         savingsProductId, CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_FEES.getValue(),
                         CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_FEES.toString(), changes);
+
+                mergeSavingsToIncomeAccountMappingChanges(element, SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(),
+                        savingsProductId, CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_PENALTIES.getValue(),
+                        CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_PENALTIES.toString(), changes);
 
                 // expenses
                 mergeSavingsToExpenseAccountMappingChanges(element, SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(),

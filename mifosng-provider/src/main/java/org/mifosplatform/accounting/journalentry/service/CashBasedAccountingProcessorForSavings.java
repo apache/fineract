@@ -7,9 +7,11 @@ package org.mifosplatform.accounting.journalentry.service;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 import org.mifosplatform.accounting.closure.domain.GLClosure;
 import org.mifosplatform.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR_SAVINGS;
+import org.mifosplatform.accounting.journalentry.data.ChargePaymentDTO;
 import org.mifosplatform.accounting.journalentry.data.SavingsDTO;
 import org.mifosplatform.accounting.journalentry.data.SavingsTransactionDTO;
 import org.mifosplatform.organisation.office.domain.Office;
@@ -39,6 +41,8 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
             final Long paymentTypeId = savingsTransactionDTO.getPaymentTypeId();
             final boolean isReversal = savingsTransactionDTO.isReversed();
             final BigDecimal amount = savingsTransactionDTO.getAmount();
+            final List<ChargePaymentDTO> feePayments = savingsTransactionDTO.getFeePayments();
+            final List<ChargePaymentDTO> penaltyPayments = savingsTransactionDTO.getPenaltyPayments();
 
             this.helper.checkForBranchClosures(latestGLClosure, transactionDate);
 
@@ -68,9 +72,16 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
 
             /** Handle Fees Deductions and reversals of Fees Deductions **/
             else if (savingsTransactionDTO.getTransactionType().isFeeDeduction()) {
-                this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
-                        CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL, CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_FEES, savingsProductId,
-                        paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
+                // Is the Charge a penalty?
+                if (penaltyPayments.size() > 0) {
+                    this.helper.createCashBasedJournalEntriesAndReversalsForSavingsCharges(office, currencyCode,
+                            CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL, CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_PENALTIES, savingsProductId,
+                            paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal, penaltyPayments);
+                } else {
+                    this.helper.createCashBasedJournalEntriesAndReversalsForSavingsCharges(office, currencyCode,
+                            CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL, CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_FEES, savingsProductId,
+                            paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal, feePayments);
+                }
             }
 
             /** Handle Transfers proposal **/
