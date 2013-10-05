@@ -63,8 +63,9 @@ public class AccountingScenarioIntegrationTest {
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
-        final Integer loanProductID = createLoanProduct(assetAccount, incomeAccount, expenseAccount);
+        final Integer loanProductID = createLoanProduct(assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, this.DATE_OF_JOINING);
         final Integer loanID = applyForLoanApplication(clientID, loanProductID);
