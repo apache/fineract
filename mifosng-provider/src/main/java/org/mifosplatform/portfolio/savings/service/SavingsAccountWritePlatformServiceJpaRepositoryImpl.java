@@ -248,36 +248,25 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .build();
     }
 
-    /*@Transactional
+    @Transactional
     @Override
-    public CommandProcessingResult applyAnnualFee(final Long savingsId, final LocalDate annualFeeTransactionDate) {
+    public CommandProcessingResult applyAnnualFee(final Long savingsAccountChargeId, final Long accountId) {
 
-        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
-        checkClientOrGroupActive(account);
+        final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository.findOneWithNotFoundDetection(
+                savingsAccountChargeId, accountId);
 
         final DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MM yyyy");
 
-        final Set<Long> existingTransactionIds = new HashSet<Long>();
-        final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
-        updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
-
-        final MathContext mc = MathContext.DECIMAL64;
-        final LocalDate today = DateUtils.getLocalDateOfTenant();
-
-        final SavingsAccountTransaction annualFee = account.addAnnualFee(mc, fmt, annualFeeTransactionDate, today);
-        final Long transactionId = saveTransactionToGenerateTransactionId(annualFee);
-        this.savingAccountRepository.save(account);
-
-        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
+        this.payCharge(savingsAccountCharge, savingsAccountCharge.getDueLocalDate(), savingsAccountCharge.amount(), fmt);
 
         return new CommandProcessingResultBuilder() //
-                .withEntityId(transactionId) //
-                .withOfficeId(account.officeId()) //
-                .withClientId(account.clientId()) //
-                .withGroupId(account.groupId()) //
-                .withSavingsId(savingsId) //
+                .withEntityId(savingsAccountCharge.getId()) //
+                .withOfficeId(savingsAccountCharge.savingsAccount().officeId()) //
+                .withClientId(savingsAccountCharge.savingsAccount().clientId()) //
+                .withGroupId(savingsAccountCharge.savingsAccount().groupId()) //
+                .withSavingsId(savingsAccountCharge.savingsAccount().getId()) //
                 .build();
-    }*/
+    }
 
     @Transactional
     @Override
@@ -828,21 +817,16 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     }
 
+    @Transactional
     @Override
-    @CronTarget(jobName = JobName.PAY_DUE_SAVINGS_CHARGES)
-    public void processDueCharges() {
+    public void applyChargeDue(final Long savingsAccountChargeId, final Long accountId) {
         // always use current date as transaction date for batch job
         final LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
-        final List<SavingsAccountCharge> pendingCharges = this.savingsAccountChargeRepository.findPendingCharges(transactionDate.toDate());
+        final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository.findOneWithNotFoundDetection(
+                savingsAccountChargeId, accountId);
+
         final DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MM yyyy");
-        for (SavingsAccountCharge savingsAccountCharge : pendingCharges) {
-            try {
-            	payCharge(savingsAccountCharge, transactionDate, savingsAccountCharge.amoutOutstanding(), fmt);
-            } catch (Exception exception) {
-                // TODO: AA - provide a meaningful error with failed
-                // transactions list
-            }
-        }
+        payCharge(savingsAccountCharge, transactionDate, savingsAccountCharge.amoutOutstanding(), fmt);
     }
 
     @Transactional
@@ -857,7 +841,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         account.payCharge(savingsAccountCharge, amountPaid, transactionDate, formatter);
 
         final MathContext mc = MathContext.DECIMAL64;
-        if (account.isBeforeLastPostingPeriod(savingsAccountCharge.getDueLocalDate())) {
+        if (account.isBeforeLastPostingPeriod(transactionDate)) {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
             account.postInterest(mc, today);
         } else {

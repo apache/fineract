@@ -117,7 +117,7 @@ public class Charge extends AbstractPersistable<Long> {
             
             if (!ChargeTimeType.fromInt(getChargeTime()).isWithdrawalFee() && ChargeCalculationType.fromInt(getChargeCalculation()).isPercentageOfAmount()) {
                 baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
-                        .failWithCodeNoParameterAddedToErrorCode("charge.calculation.type.percentage.allowed.only.for.withdrawal");
+                        .failWithCodeNoParameterAddedToErrorCode("savings.charge.calculation.type.percentage.allowed.only.for.withdrawal");
             }
 
         } else if (isLoanCharge()) {
