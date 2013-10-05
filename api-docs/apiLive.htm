@@ -8509,7 +8509,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 						<tr class=alt>
 							<td>fundSourceAccountId, loanPortfolioAccountId, interestOnLoanAccountId, 
 								incomeFromFeeAccountId, incomeFromPenaltyAccountId, 
-								writeOffAccountId, transfersInSuspenseAccountId</td>
+								writeOffAccountId, transfersInSuspenseAccountId, overpaymentLiabilityAccountId</td>
 						</tr>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Additional Mandatory Fields for Accrual(3) based accounting</div></td>
@@ -8518,7 +8518,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td>fundSourceAccountId, loanPortfolioAccountId, interestOnLoanAccountId, 
 								incomeFromFeeAccountId, incomeFromPenaltyAccountId, 
 								writeOffAccountId, receivableInterestAccountId, receivableFeeAccountId,
-								receivablePenaltyAccountId, transfersInSuspenseAccountId</td>
+								receivablePenaltyAccountId, transfersInSuspenseAccountId, overpaymentLiabilityAccountId</td>
 						</tr>
 					</table>
 				</div>
@@ -8584,6 +8584,7 @@ Request Body:
     "incomeFromPenaltyAccountId":"35",
     "writeOffAccountId":"41",
     "transfersInSuspenseAccountId":"4",
+    "overpaymentLiabilityAccountId":"2",
     "paymentChannelToFundSourceMappings": [
     {
       "paymentTypeId": "11",
@@ -8643,6 +8644,7 @@ Request Body:
     "interestOnLoanAccountId":"34",
     "incomeFromFeeAccountId":"37",
     "incomeFromPenaltyAccountId":"35",
+    "overpaymentLiabilityAccountId":"2",
     "writeOffAccountId":"41"
 }
 					</code>
@@ -12364,13 +12366,13 @@ Content-Type: application/json
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields for Cash based accounting (accountingRule = 2)</div></td></tr>
                 <tr class=alt>
-                	<td>savingsReferenceAccountId,savingsControlAccountId, interestOnSavingsAccountId, incomeFromFeeAccountId, transfersInSuspenseAccountId</td>
+                	<td>savingsReferenceAccountId, savingsControlAccountId, interestOnSavingsAccountId, incomeFromFeeAccountId, transfersInSuspenseAccountId, incomeFromPenaltyAccountId</td>
                 </tr>
             </table>
             <br/>
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
-                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,withdrawalFeeForTransfers, annualFeeAmount, annualFeeOnMonthDay, monthDayFormat, paymentChannelToFundSourceMappings, charges</tr>
+                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,withdrawalFeeForTransfers, annualFeeAmount, annualFeeOnMonthDay, monthDayFormat, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges</tr>
             </table>
         </div>
         <div class="method-example">
@@ -12429,6 +12431,19 @@ Request Body:
   "savingsControlAccountId": "15",
   "interestOnSavingsAccountId": "18",
   "incomeFromFeeAccountId": "4",
+  "incomeFromPenaltyAccountId": "4",
+  "feeToIncomeAccountMappings":[
+      {
+         "chargeId":"6",
+         "incomeAccountId":"16"
+      }
+   ],
+   "penaltyToIncomeAccountMappings":[
+	  {
+	     "chargeId":"4",
+	     "incomeAccountId":"15"
+	  }
+  ],
   "paymentChannelToFundSourceMappings": [
     {
       "paymentTypeId": "14",
@@ -12516,12 +12531,26 @@ Request Body:
     "code": "accountingRuleType.cash",
     "value": "CASH BASED"
   },
-  "accountingMappings": {
-    "savingsReferenceAccountId": 16,
-    "incomeFromFeeAccountId": 4,
-    "interestOnSavingsAccountId": 18,
-    "savingsControlAccountId": 15
-  },
+  "accountingMappings":{
+      "savingsReferenceAccountId":1,
+      "incomeFromFeeAccountId":5,
+      "interestOnSavingsAccountId":4,
+      "savingsControlAccountId":2,
+      "transfersInSuspenseAccountId":3,
+      "incomeFromPenaltyAccountId":15
+   },
+  "feeToIncomeAccountMappings":[
+      {
+         "chargeId":6,
+         "incomeAccountId":16
+      }
+  ],
+  "penaltyToIncomeAccountMappings":[
+      {
+         "chargeId":4,
+         "incomeAccountId":15
+      }
+  ],
   "paymentChannelToFundSourceMappings": [
     {
       "paymentTypeId": 14,
