@@ -14,4 +14,6 @@ public interface ScheduledJobRunnerService {
     void updateLoanPaidInAdvance();
 
     void applyAnnualFeeForSavings();
+    
+    void applyDueChargesForSavings();
 }

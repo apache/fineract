@@ -19,10 +19,13 @@ import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
+import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
 import org.mifosplatform.portfolio.charge.exception.SavingsAccountChargeNotFoundException;
 import org.mifosplatform.portfolio.charge.service.ChargeDropdownReadPlatformService;
 import org.mifosplatform.portfolio.charge.service.ChargeEnumerations;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountAnnualFeeData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountChargeData;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountStatusType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,6 +38,9 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;
+    
+    //mappers
+    private final SavingsAccountChargeDueMapper chargeDueMapper;
 
     @Autowired
     public SavingsAccountChargeReadPlatformServiceImpl(final PlatformSecurityContext context,
@@ -42,12 +48,13 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
         this.context = context;
         this.chargeDropdownReadPlatformService = chargeDropdownReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.chargeDueMapper = new SavingsAccountChargeDueMapper();
     }
 
     private static final class SavingsAccountChargeMapper implements RowMapper<SavingsAccountChargeData> {
 
         public String schema() {
-            return "sc.id as id, c.id as chargeId, c.name as name, "
+            return "sc.id as id, c.id as chargeId, sc.savings_account_id as accountId, c.name as name, "
                     + "sc.amount as amountDue, "
                     + "sc.amount_paid_derived as amountPaid, "
                     + "sc.amount_waived_derived as amountWaived, "
@@ -72,6 +79,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
 
             final Long id = rs.getLong("id");
             final Long chargeId = rs.getLong("chargeId");
+            final Long accountId = rs.getLong("accountId");
             final String name = rs.getString("name");
             final BigDecimal amount = rs.getBigDecimal("amountDue");
             final BigDecimal amountPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountPaid");
@@ -102,16 +110,16 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
             if (feeOnDay != null) {
                 feeOnMonthDay = new MonthDay(feeOnMonth, feeOnDay);
             }
-            
+
             final int chargeCalculation = rs.getInt("chargeCalculation");
             final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(chargeCalculation);
             final boolean penalty = rs.getBoolean("penalty");
 
             final Collection<ChargeData> chargeOptions = null;
 
-            return SavingsAccountChargeData.instance(id, chargeId, name, currency, amount, amountPaid, amountWaived, amountWrittenOff,
-                    amountOutstanding, chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo,
-                    chargeOptions, penalty, feeOnMonthDay);
+            return SavingsAccountChargeData.instance(id, chargeId, accountId, name, currency, amount, amountPaid, amountWaived,
+                    amountWrittenOff, amountOutstanding, chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf,
+                    amountPercentageAppliedTo, chargeOptions, penalty, feeOnMonthDay);
         }
     }
 
@@ -161,4 +169,56 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
     }
+
+    private static final class SavingsAccountChargeDueMapper implements RowMapper<SavingsAccountAnnualFeeData> {
+
+        private final String schemaSql;
+
+        public SavingsAccountChargeDueMapper() {
+            final StringBuilder sqlBuilder = new StringBuilder(200);
+            sqlBuilder.append("sac.id as id, ");
+            sqlBuilder.append("sa.id as accountId, ");
+            sqlBuilder.append("sa.account_no as accountNo, ");
+            sqlBuilder.append("sac.charge_due_date as dueDate ");
+            sqlBuilder.append("from m_savings_account_charge sac join m_savings_account sa on sac.savings_account_id = sa.id ");
+
+            this.schemaSql = sqlBuilder.toString();
+        }
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        @Override
+        public SavingsAccountAnnualFeeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = rs.getLong("id");
+            final Long accountId = rs.getLong("accountId");
+            final String accountNo = rs.getString("accountNo");
+            final LocalDate annualFeeNextDueDate = JdbcSupport.getLocalDate(rs, "dueDate");
+
+            return SavingsAccountAnnualFeeData.instance(id, accountId, accountNo, annualFeeNextDueDate);
+        }
+    }
+
+    @Override
+    public Collection<SavingsAccountAnnualFeeData> retrieveChargesWithAnnualFeeDue() {
+        final String sql = "select " + this.chargeDueMapper.schema() + " where sac.charge_due_date is not null and sac.charge_time_enum = "
+                + ChargeTimeType.ANNUAL_FEE.getValue() + " and sac.charge_due_date <= NOW() and sa.status_enum = "
+                + SavingsAccountStatusType.ACTIVE.getValue();
+
+        return this.jdbcTemplate.query(sql, this.chargeDueMapper, new Object[] {});
+    }
+
+    @Override
+    public Collection<SavingsAccountAnnualFeeData> retrieveChargesWithDue() {
+        final String sql = "select "
+                + this.chargeDueMapper.schema()
+                + " where sac.charge_due_date is not null and sac.charge_due_date <= NOW() and sac.waived = 0 and sac.is_paid_derived=0 and sac.is_active=1 and sa.status_enum = "
+                + SavingsAccountStatusType.ACTIVE.getValue() + " order by sac.charge_due_date ";
+
+        return this.jdbcTemplate.query(sql, this.chargeDueMapper, new Object[] {});
+
+    }
+
 }

@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.savings.service;
 import java.util.Collection;
 
 import org.mifosplatform.portfolio.charge.data.ChargeData;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountAnnualFeeData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountChargeData;
 
 public interface SavingsAccountChargeReadPlatformService {
@@ -17,4 +18,8 @@ public interface SavingsAccountChargeReadPlatformService {
     Collection<SavingsAccountChargeData> retrieveSavingsAccountCharges(Long savingsAccountId);
 
     SavingsAccountChargeData retrieveSavingsAccountChargeDetails(Long savingsAccountChargeId, Long savingsAccountId);
+    
+    Collection<SavingsAccountAnnualFeeData> retrieveChargesWithAnnualFeeDue();
+    
+    Collection<SavingsAccountAnnualFeeData> retrieveChargesWithDue();
 }

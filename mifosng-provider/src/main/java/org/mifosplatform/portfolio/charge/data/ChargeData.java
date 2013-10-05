@@ -169,6 +169,7 @@ public class ChargeData implements Comparable<ChargeData>, Serializable {
     public SavingsAccountChargeData toSavingsAccountChargeData() {
 
         final Long savingsChargeId = null;
+        final Long savingsAccountId = null;
         final BigDecimal amountPaid = BigDecimal.ZERO;
         final BigDecimal amountWaived = BigDecimal.ZERO;
         final BigDecimal amountWrittenOff = BigDecimal.ZERO;
@@ -179,7 +180,7 @@ public class ChargeData implements Comparable<ChargeData>, Serializable {
         final LocalDate dueAsOfDate = null;
         final MonthDay feeOnMonthDay = null;
 
-        return SavingsAccountChargeData.instance(savingsChargeId, this.id, this.name, this.currency, this.amount, amountPaid, amountWaived,
+        return SavingsAccountChargeData.instance(savingsChargeId, this.id, savingsAccountId, this.name, this.currency, this.amount, amountPaid, amountWaived,
                 amountWrittenOff, amountOutstanding, this.chargeTimeType, dueAsOfDate, this.chargeCalculationType, percentage,
                 amountPercentageAppliedTo, chargeOptions, this.penalty, feeOnMonthDay);
     }

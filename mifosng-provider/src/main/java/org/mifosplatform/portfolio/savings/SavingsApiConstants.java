@@ -164,7 +164,7 @@ public class SavingsApiConstants {
             interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
             lockinPeriodFrequencyTypeParamName, 
             //withdrawalFeeAmountParamName, withdrawalFeeTypeParamName,
-            //withdrawalFeeForTransfersParamName, 
+            withdrawalFeeForTransfersParamName, 
             feeAmountParamName, feeOnMonthDayParamName, chargesParamName));
 
     /**

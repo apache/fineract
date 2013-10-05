@@ -49,7 +49,7 @@ public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownRead
     public List<EnumOptionData> retrieveCollectionTimeTypes() {
         final List<EnumOptionData> chargeTimeTypes = new ArrayList<EnumOptionData>();
         for (final ChargeTimeType chargeTimeType : ChargeTimeType.values()) {
-            if (ChargeTimeType.INVALID.equals(chargeTimeType)) {
+            if (ChargeTimeType.INVALID.equals(chargeTimeType) || ChargeTimeType.SAVINGS_CLOSURE.equals(chargeTimeType)) {
                 continue;
             }
             chargeTimeTypes.add(ChargeEnumerations.chargeTimeType(chargeTimeType));
@@ -81,7 +81,8 @@ public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownRead
     @Override
     public List<EnumOptionData> retrieveSavingsCollectionTimeTypes() {
         return Arrays.asList(chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE), chargeTimeType(ChargeTimeType.SAVINGS_ACTIVATION),
-                chargeTimeType(ChargeTimeType.SAVINGS_CLOSURE), chargeTimeType(ChargeTimeType.WITHDRAWAL_FEE),
+                //chargeTimeType(ChargeTimeType.SAVINGS_CLOSURE), 
+                chargeTimeType(ChargeTimeType.WITHDRAWAL_FEE),
                 chargeTimeType(ChargeTimeType.ANNUAL_FEE));
     }
 }

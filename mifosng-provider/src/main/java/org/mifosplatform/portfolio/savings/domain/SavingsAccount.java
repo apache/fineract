@@ -1212,6 +1212,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                         }
                     } else if (transactionToUndo.isWaiveCharge()) {
                         chargeToUndo.undoWaiver(this.getCurrency(), transactionToUndo.getAmount(this.getCurrency()));
+                        chargeToUndo.updateToPreviousAnnualFeeDueDate();
                     }
                 }
             }
@@ -1678,6 +1679,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final Money amountWaived = savingsAccountCharge.waive(getCurrency());
 
         handleWaiverChargeTransactions(savingsAccountCharge, amountWaived);
+        
+      //update next annual fee due date
+        savingsAccountCharge.updateToNextAnnualFeeDueDate();
     }
 
     public void addCharge(final DateTimeFormatter formatter, final SavingsAccountCharge savingsAccountCharge, final Charge chargeDefinition) {
@@ -1733,13 +1737,21 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                         "multiple.annual.fee.per.account.not.supported");
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
+            
+            if(isActive()){
+                savingsAccountCharge.updateToNextAnnualFeeDueDateFrom(getActivationLocalDate());
+            }else if(isApproved()){
+                savingsAccountCharge.updateToNextAnnualFeeDueDateFrom(getApprovedOnLocalDate());
+            }
+          //if account is in submitted and pending approval state, 
+          //upon account activation annual fee charges due date get updated.
         }
         
         //activation charge and withdrawal charges not required this validation
         if(savingsAccountCharge.isOnSpecifiedDueDate()){
             validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_APPLY_CHARGE, chargeDueDate);
         }
-        
+                
         // add new charge to savings account
         charges().add(savingsAccountCharge);
 

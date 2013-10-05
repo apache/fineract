@@ -211,7 +211,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     }
 
     public boolean isPostInterestCalculationRequired(){
-        return this.isDeposit() || this.isWithdrawal() || this.isPayCharge();
+        return this.isDeposit() || this.isChargeTransaction();
     }
     
     public boolean isInterestPostingAndNotReversed() {
@@ -278,7 +278,14 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     }
 
     public void updateCumulativeBalanceAndDates(final MonetaryCurrency currency, final LocalDate endOfBalanceDate) {
-        this.balanceEndDate = endOfBalanceDate.toDate();
+        //balance end date should not be before transaction date
+        if (endOfBalanceDate != null && endOfBalanceDate.isBefore(this.transactionLocalDate())){
+            this.balanceEndDate = this.transactionLocalDate().toDate();
+        }else if(endOfBalanceDate != null){
+            this.balanceEndDate = endOfBalanceDate.toDate();
+        }else{
+            this.balanceEndDate = null;
+        }
         this.balanceNumberOfDays = LocalDateInterval.create(getTransactionLocalDate(), endOfBalanceDate).daysInPeriodInclusiveOfEndDate();
         this.cumulativeBalance = Money.of(currency, this.runningBalance).multipliedBy(this.balanceNumberOfDays).getAmount();
     }
@@ -374,7 +381,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         Money endOfDayBalance = openingBalance.copy();
         if (isDeposit()) {
             endOfDayBalance = openingBalance.plus(getAmount(currency));
-        } else if (isWithdrawal() || isWithdrawalFeeAndNotReversed()) {
+        } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
             endOfDayBalance = openingBalance.minus(getAmount(currency));
         }
 
@@ -390,7 +397,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         Money endOfDayBalance = openingBalance.copy();
         if (isDeposit()) {
             endOfDayBalance = openingBalance.plus(getAmount(currency));
-        } else if (isWithdrawal() || isWithdrawalFeeAndNotReversed()) {
+        } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
 
             if (openingBalance.isGreaterThanZero()) {
                 endOfDayBalance = openingBalance.minus(getAmount(currency));
@@ -420,7 +427,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
                 // if (endOfDayBalance.isLessThanZero()) {
                 endOfDayBalance = Money.of(currency, this.runningBalance);
                 // }
-            } else if (isWithdrawal() || isWithdrawalFeeAndNotReversed()) {
+            } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
                 // endOfDayBalance = openingBalance.minus(getAmount(currency));
                 // if (endOfDayBalance.isLessThanZero()) {
                 endOfDayBalance = Money.of(currency, this.runningBalance);
@@ -469,6 +476,10 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     
     public boolean isChargeTransaction(){
         return SavingsAccountTransactionType.fromInt(this.typeOf).isChargeTransaction();
+    }
+    
+    public boolean isChargeTransactionAndNotReversed(){
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isChargeTransaction() && isNotReversed();
     }
     
     public boolean isWaiveCharge(){

@@ -10,15 +10,17 @@ import org.joda.time.LocalDate;
 public class SavingsAccountAnnualFeeData {
 
     private final Long id;
+    private final Long accountId;
     private final String accountNo;
     private final LocalDate nextAnnualFeeDueDate;
 
-    public static SavingsAccountAnnualFeeData instance(final Long id, final String accountNo, final LocalDate nextAnnualFeeDueDate) {
-        return new SavingsAccountAnnualFeeData(id, accountNo, nextAnnualFeeDueDate);
+    public static SavingsAccountAnnualFeeData instance(final Long id, final Long accountId, final String accountNo, final LocalDate nextAnnualFeeDueDate) {
+        return new SavingsAccountAnnualFeeData(id, accountId, accountNo, nextAnnualFeeDueDate);
     }
 
-    private SavingsAccountAnnualFeeData(final Long id, final String accountNo, final LocalDate nextAnnualFeeDueDate) {
+    private SavingsAccountAnnualFeeData(final Long id, final Long accountId, final String accountNo, final LocalDate nextAnnualFeeDueDate) {
         this.id = id;
+        this.accountId = accountId;
         this.accountNo = accountNo;
         this.nextAnnualFeeDueDate = nextAnnualFeeDueDate;
     }
@@ -27,11 +29,15 @@ public class SavingsAccountAnnualFeeData {
         return this.id;
     }
 
-    public String getAccountNo() {
-        return this.accountNo;
+    public Long getAccountId() {
+        return this.accountId;
     }
 
     public LocalDate getNextAnnualFeeDueDate() {
         return this.nextAnnualFeeDueDate;
+    }
+    
+    public String getAccountNo() {
+        return this.accountNo;
     }
 }

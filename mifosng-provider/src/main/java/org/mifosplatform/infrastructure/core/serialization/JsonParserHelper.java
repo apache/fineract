@@ -293,8 +293,20 @@ public class JsonParserHelper {
                 final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
                 final String valueAsString = primitive.getAsString();
                 if (StringUtils.isNotBlank(valueAsString)) {
-                    final DateTimeFormatter formatter = DateTimeFormat.forPattern(dateFormat).withLocale(clientApplicationLocale);
-                    value = MonthDay.parse(valueAsString.toLowerCase(clientApplicationLocale), formatter);
+                    try {
+                        final DateTimeFormatter formatter = DateTimeFormat.forPattern(dateFormat).withLocale(clientApplicationLocale);
+                        value = MonthDay.parse(valueAsString.toLowerCase(clientApplicationLocale), formatter);
+                    } catch (final IllegalArgumentException e) {
+                        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+                        final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.month.day",
+                                "The parameter " + parameterName + " is invalid based on the dateFormat: '" + dateFormat
+                                        + "' and locale: '" + clientApplicationLocale + "' provided:", parameterName, valueAsString,
+                                dateFormat);
+                        dataValidationErrors.add(error);
+
+                        throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                                dataValidationErrors);
+                    }
                 }
             }
 
