@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 5 Oct 2013 - 1.11.0.RELEASE
 1. 4 Oct 2013 - 1.10.3.RELEASE
 1. 22 Sep 2013 - 1.10.2.RELEASE
 1. 20 Sep 2013 - 1.10.1.RELEASE
@@ -39,6 +40,33 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.11.0.RELEASE
+=============
+Feature Release
+
+This Feature release ships various improvements to the configurable fees functionality for savings, ability to consolidate running balances for Journal entries (both at a Branch and an Organizational Level) and various bug fixes
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-435] - Capture derived/running balances for Journals
+ - [MIFOSX-656] - Ability to Map specific savings fees to specific income accounts
+ - [MIFOSX-690] - Accounting Not Done for over-payments and related work-flows (transfer overpaid amount to savings)
+ - [MIFOSX-697] - Move existing withdrawal fees and Annual fees for savings into the configurable fees workflow
+
+Bug 
+ - [MIFOSX-687] - In View/Edit Savings Product not able to remove the charge added while defining the product.
+ - [MIFOSX-688] - Transaction Number for accounting needs to have guaranteed uniqueness
+ - [MIFOSX-689] - Ensure account Transfers (Savings to Loans etc) point to the right Loan Transaction
+ - [MIFOSX-691] - Clean up current Configurable Savings Fees functionality
+ - [MIFOSX-692] - Savings account accepting multiple currency charges
+ - [MIFOSX-699] - Duplicate entry in accounting table for disbursement fee through linked savings account
+ - [MIFOSX-718] - Not able to "Pay Annual Fee" and "Post Interest" for savings account through Schedular Jobs
+ - [MIFOSX-719] - Savings account with min. opening balance if Annual fee is deducted on account activation date then interest is not getting posted.
+
+Reference App
+ - [MIFOSX-673] - Receipt number displayed in Client Transactions history table / Journal
 
 1.10.3.RELEASE
 =============
