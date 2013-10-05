@@ -209,6 +209,10 @@ public class LoanProductTestBuilder {
                 final String ID = this.accountList[i].getAccountID().toString();
                 map.put("writeOffAccountId", ID);
             }
+            if (this.accountList[i].getAccountType().equals(Account.AccountType.LIABILITY)) {
+                final String ID = this.accountList[i].getAccountID().toString();
+                map.put("overpaymentLiabilityAccountId", ID);
+            }
         }
         return map;
     }
@@ -235,6 +239,10 @@ public class LoanProductTestBuilder {
             if (this.accountList[i].getAccountType().equals(Account.AccountType.EXPENSE)) {
                 final String ID = this.accountList[i].getAccountID().toString();
                 map.put("writeOffAccountId", ID);
+            }
+            if (this.accountList[i].getAccountType().equals(Account.AccountType.LIABILITY)) {
+                final String ID = this.accountList[i].getAccountID().toString();
+                map.put("overpaymentLiabilityAccountId", ID);
             }
         }
 
