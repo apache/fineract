@@ -11030,13 +11030,19 @@ Request Body:
 						</tr>
 						<tr>
 							<td class=fielddesc>The time at which the charge becomes Due.
-							Refer <a href="#charges_template">Charges Template</a> for additional details</td>
+							Refer <a href="#charges_template">Charges Template</a> for additional details<br/>
+							1 = Disbursement : Applicable for loans and deducted at the time of loan disbursement.<br/>
+							2 = Specified Due Date : Adhoc charge can be applied for loans and savings on a specified due date.<br/>
+							3 = Savings Activation : This charge is applicable for savings account and charged at the time of account activation. This charge will be autodeducted once the account is activated with sufficient opening balance.<br/>
+							5 = Withdrawal fee : Charge applied to every withdrawal of savings account.<br/>
+							6 = Annual Fee : Recurring charge applied annually for savings on a specified Month and day.
+							</td>
 						</tr>
 						<tr class=alt>
 							<td>chargeAppliesTo</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>The Entity for which the charge can be applied (Loans etc).
+							<td class=fielddesc>The Entity for which the charge can be applied (Loans, Savings etc).
 							Refer <a href="#charges_template">Charges Template</a> for additional details</td>
 						</tr>
 						<tr class=alt>
@@ -11152,7 +11158,51 @@ GET https://DomainName/api/v1/charges/template
    			"code":"chargepaymentmode.accounttransfer",
    			"value":"chargepaymentmode.accounttransfer"
    		}
-   	]
+   	],
+   	"loanChargeCalculationTypeOptions" : [ { "code" : "chargeCalculationType.flat",
+        "id" : 1,
+        "value" : "Flat"
+      },
+      { "code" : "chargeCalculationType.percent.of.amount",
+        "id" : 2,
+        "value" : "% Amount"
+      }
+    ],
+  "loanChargeTimeTypeOptions" : [ { "code" : "chargeTimeType.disbursement",
+        "id" : 1,
+        "value" : "Disbursement"
+      },
+      { "code" : "chargeTimeType.specifiedDueDate",
+        "id" : 2,
+        "value" : "Specified due date"
+      }
+    ],
+  "savingsChargeCalculationTypeOptions" : [ { "code" : "chargeCalculationType.flat",
+        "id" : 1,
+        "value" : "Flat"
+      },
+      { "code" : "chargeCalculationType.percent.of.amount",
+        "id" : 2,
+        "value" : "% Amount"
+      }
+    ],
+  "savingsChargeTimeTypeOptions" : [ { "code" : "chargeTimeType.specifiedDueDate",
+        "id" : 2,
+        "value" : "Specified due date"
+      },
+      { "code" : "chargeTimeType.savingsActivation",
+        "id" : 3,
+        "value" : "Savings Activation"
+      },
+      { "code" : "chargeTimeType.withdrawalFee",
+        "id" : 5,
+        "value" : "Withdrawal Fee"
+      },
+      { "code" : "chargeTimeType.annualFee",
+        "id" : 6,
+        "value" : "Annual Fee"
+      }
+    ]
 }
 					</code>
 				</div>
@@ -11162,8 +11212,8 @@ GET https://DomainName/api/v1/charges/template
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Create/Define a Charge</h4>
-					<p>Define a new charge that can later be associated with loan
-						products or loans.</p>
+					<p>Define a new charge specific to loan or saving that can later be associated with loan
+						products, loans Savings product or Savings account.</p>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -11212,6 +11262,28 @@ Request Body:
   "resourceId": 4
 }
 					</code>
+
+					<code class="method-request">
+POST charges
+Content-Type: application/json 
+Request Body:
+{
+  "locale": "en",
+  "name": "Annuaul Fee",
+  "amount": "20",
+  "currencyCode": "USD",
+  "chargeAppliesTo": "2",
+  "chargeTimeType": "6",
+  "chargeCalculationType": "1",
+  "active": "true",
+  "penalty": "false"
+}
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 5
+}
+					</code>					
 				</div>
 			</div>
 
@@ -11849,25 +11921,8 @@ Content-Type: application/json
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>lockinPeriodFrequency</i> to indicate the length of time that the savings account is 'locked in' and withdrawals are not allowed. 0=Days, 1=Weeks, 2=Months, 3=Years
 	            e.g. 6 <b>Months</b></td></tr>
 
-	            <tr class=alt><td>withdrawalFeeAmount</td></tr>
-	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>withdrawalFeeType</i> to indicate the amount to be charged on the account for withdrawing. e.g. <b>5</b> Flat or <b>5</b> % of Amount</td></tr>
-
-	            <tr class=alt><td>withdrawalFeeType</td></tr>
-	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>withdrawalFeeAmount</i> to indicate the amount to be charged on the account for withdrawing. 1=Flat, 2=% of Amount, e.g. 5 <b>Flat</b> or 5 <b>% of Amount</b></td></tr>
-
 	            <tr class=alt><td>withdrawalFeeForTransfers</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: Used along with <i>withdrawalFeeAmount</i> to indicate whether the withdrawal fee should be applied on the account for account transfers .</td></tr>
-
-	            <tr class=alt><td>annualFeeAmount</td></tr>
-	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>annualFeeOnMonthDay</i> to indicate the amount to be charged on the account annually on a given day of month. e.g. <b>10</b> on 10 May. <i>monthDayFormat</i> indicates day and month formatting used e.g. "dd MMM" for 10 May
-	            </td>
-	            </tr>
-
-	            <tr class=alt><td>annualFeeOnMonthDay</td></tr>
-	            <tr>
-	            	<td class=fielddesc><b>Optional</b>: If provided, used along with <i>annualFeeAmount</i> and <i>monthDayFormat</i> to indicate the amount to be charged on the account annually on a given day of month. e.g. 10 on <b>10 May</b>. <i>monthDayFormat</i> indicates day and month formatting used e.g. "dd MMM" for 10 May
-	            	</td>
-	            </tr>
 
 				<tr class=alt><td>accountingRule</td></tr>
 	            <tr>
@@ -12360,7 +12415,66 @@ Content-Type: application/json
         "tagId": {}
       }
     ]
-  }
+  },
+  "chargeOptions" : [ { "active" : true,
+        "amount" : 200,
+        "chargeAppliesTo" : { "code" : "chargeAppliesTo.savings",
+            "id" : 2,
+            "value" : "Savings"
+          },
+        "chargeCalculationType" : { "code" : "chargeCalculationType.flat",
+            "id" : 1,
+            "value" : "Flat"
+          },
+        "chargePaymentMode" : { "code" : "chargepaymentmode.regular",
+            "id" : 0,
+            "value" : "chargepaymentmode.regular"
+          },
+        "chargeTimeType" : { "code" : "chargeTimeType.specifiedDueDate",
+            "id" : 2,
+            "value" : "Specified due date"
+          },
+        "currency" : { "code" : "USD",
+            "decimalPlaces" : 2,
+            "displayLabel" : "US Dollar ($)",
+            "displaySymbol" : "$",
+            "name" : "US Dollar",
+            "nameCode" : "currency.USD"
+          },
+        "id" : 4,
+        "name" : "Savings charge 1",
+        "penalty" : false
+      },
+      { "active" : true,
+        "amount" : 300,
+        "chargeAppliesTo" : { "code" : "chargeAppliesTo.savings",
+            "id" : 2,
+            "value" : "Savings"
+          },
+        "chargeCalculationType" : { "code" : "chargeCalculationType.flat",
+            "id" : 1,
+            "value" : "Flat"
+          },
+        "chargePaymentMode" : { "code" : "chargepaymentmode.regular",
+            "id" : 0,
+            "value" : "chargepaymentmode.regular"
+          },
+        "chargeTimeType" : { "code" : "chargeTimeType.specifiedDueDate",
+            "id" : 2,
+            "value" : "Specified due date"
+          },
+        "currency" : { "code" : "USD",
+            "decimalPlaces" : 2,
+            "displayLabel" : "US Dollar ($)",
+            "displaySymbol" : "$",
+            "name" : "US Dollar",
+            "nameCode" : "currency.USD"
+          },
+        "id" : 5,
+        "name" : "Savings charge 2",
+        "penalty" : false
+      }
+    ]
 }
 			</code>
         </div>
@@ -12387,7 +12501,7 @@ Content-Type: application/json
             <br/>
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
-                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,withdrawalFeeForTransfers, annualFeeAmount, annualFeeOnMonthDay, monthDayFormat, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges</tr>
+                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges</tr>
             </table>
         </div>
         <div class="method-example">
@@ -12434,13 +12548,9 @@ Request Body:
   "minRequiredOpeningBalance": "50",
   "lockinPeriodFrequency": "4",
   "lockinPeriodFrequencyType": "1",
-  "withdrawalFeeAmount": "12",
-  "withdrawalFeeType": "1",
   "withdrawalFeeForTransfers":false,
-  "monthDayFormat": "dd MMM",
-  "annualFeeAmount": "12",
-  "annualFeeOnMonthDay": "01 May",
   "accountingRule": "2",
+  "charges":[{"id":"1"},{"id":3}]
   "savingsReferenceAccountId": "16",
   "transfersInSuspenseAccountId": "16",
   "savingsControlAccountId": "15",
@@ -12529,18 +12639,7 @@ Request Body:
     "code": "savings.lockin.savingsPeriodFrequencyType.weeks",
     "value": "Weeks"
   },
-  "withdrawalFeeAmount": 12.000000,
-  "withdrawalFeeType": {
-    "id": 1,
-    "code": "savingsWithdrawalFeesType.flat",
-    "value": "Flat"
-  },
   "withdrawalFeeForTransfers":true,
-  "annualFeeAmount": 100.000000,
-  "annualFeeOnMonthDay": [
-    5,
-    1
-  ],
   "accountingRule": {
     "id": 2,
     "code": "accountingRuleType.cash",
@@ -12570,6 +12669,78 @@ Request Body:
     {
       "paymentTypeId": 14,
       "fundSourceAccountId": 2
+    }
+  ],
+  "charges": [
+    {
+      "id": 1,
+      "name": "Annual fee",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 50,
+      "chargeTimeType": {
+        "id": 6,
+        "code": "chargeTimeType.annualFee",
+        "value": "Annual Fee"
+      },
+      "chargeAppliesTo": {
+        "id": 2,
+        "code": "chargeAppliesTo.savings",
+        "value": "Savings"
+      },
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      },
+      "chargePaymentMode": {
+        "id": 0,
+        "code": "chargepaymentmode.regular",
+        "value": "Regular"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Withdrawal fee percentage",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 0.25,
+      "chargeTimeType": {
+        "id": 5,
+        "code": "chargeTimeType.withdrawalFee",
+        "value": "Withdrawal Fee"
+      },
+      "chargeAppliesTo": {
+        "id": 2,
+        "code": "chargeAppliesTo.savings",
+        "value": "Savings"
+      },
+      "chargeCalculationType": {
+        "id": 2,
+        "code": "chargeCalculationType.percent.of.amount",
+        "value": "% Amount"
+      },
+      "chargePaymentMode": {
+        "id": 0,
+        "code": "chargepaymentmode.regular",
+        "value": "Regular"
+      }
     }
   ]
 }	
@@ -12770,25 +12941,8 @@ Content-Type: application/json
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>lockinPeriodFrequency</i> to indicate the length of time that the savings account is 'locked in' and withdrawals are not allowed. 0=Days, 1=Weeks, 2=Months, 3=Years
 	            e.g. 6 <b>Months</b></td></tr>
 
-	            <tr class=alt><td>withdrawalFeeAmount</td></tr>
-	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>withdrawalFeeType</i> to indicate the amount to be charged on the account for withdrawing. e.g. <b>5</b> Flat or <b>5</b> % of Amount</td></tr>
-
-	            <tr class=alt><td>withdrawalFeeType</td></tr>
-	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>withdrawalFeeAmount</i> to indicate the amount to be charged on the account for withdrawing. 1=Flat, 2=% of Amount, e.g. 5 <b>Flat</b> or 5 <b>% of Amount</b></td></tr>
-
 	            <tr class=alt><td>withdrawalFeeForTransfers</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: Used along with <i>withdrawalFeeAmount</i> to indicate whether the withdrawal fee should be applied on the account for account transfers .</td></tr>
-
-	            <tr class=alt><td>annualFeeAmount</td></tr>
-	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>annualFeeOnMonthDay</i> to indicate the amount to be charged on the account annually on a given day of month. e.g. <b>10</b> on 10 May. <i>monthDayFormat</i> indicates day and month formatting used e.g. "dd MMM" for 10 May
-	            </td>
-	            </tr>
-
-	            <tr class=alt><td>annualFeeOnMonthDay</td></tr>
-	            <tr>
-	            	<td class=fielddesc><b>Optional</b>: If provided, used along with <i>annualFeeAmount</i> and <i>monthDayFormat</i> to indicate the amount to be charged on the account annually on a given day of month. e.g. 10 on <b>10 May</b>. <i>monthDayFormat</i> indicates day and month formatting used e.g. "dd MMM" for 10 May
-	            	</td>
-	            </tr>
 	        </table>
 	    </div>
 	</div>
@@ -13053,6 +13207,41 @@ Content-Type: application/json
         "code": "chargepaymentmode.regular",
         "value": "chargepaymentmode.regular"
       }
+    },
+    {
+      "id": 6,
+      "name": "Annual fee",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 50,
+      "chargeTimeType": {
+        "id": 6,
+        "code": "chargeTimeType.annualFee",
+        "value": "Annual Fee"
+      },
+      "chargeAppliesTo": {
+        "id": 2,
+        "code": "chargeAppliesTo.savings",
+        "value": "Savings"
+      },
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      },
+      "chargePaymentMode": {
+        "id": 0,
+        "code": "chargepaymentmode.regular",
+        "value": "Regular"
+      }
     }
   ]
 }
@@ -13077,7 +13266,7 @@ Content-Type: application/json
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Inherited from Product (if not provided)</div></td></tr>
-	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,withdrawalFeeForTransfers, annualFeeAmount, annualFeeOnMonthDay</td>
+	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers</td>
 	       		</tr>
 	        </table>
 	    </div>
@@ -13129,7 +13318,8 @@ Request Body:
   "interestCalculationDaysInYearType": 365,
   "minRequiredOpeningBalance": "1,000", 
   "lockinPeriodFrequency": 6,
-  "lockinPeriodFrequencyType": 2
+  "lockinPeriodFrequencyType": 2,
+  "charges":[{"id":"1"}]
 }
 			</code>
 	        <code class="method-response">
@@ -14029,7 +14219,7 @@ No Request Body:
 				class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>List Loan Charges</h4>
+					<h4>List Savings Charges</h4>
 					<p>Example Requests:</p>
 					<div class=apiClick>savingsaccounts/1/charges</div>
 					<br>
@@ -14045,6 +14235,7 @@ GET https://DomainName/api/v1/savingsaccounts/{accountId}/charges
   {
     "id": 1,
     "chargeId": 3,
+    "accountId": 57,
     "name": "Savings account maintenance fee",
     "chargeTimeType": {
       "id": 1,
@@ -14077,6 +14268,7 @@ GET https://DomainName/api/v1/savingsaccounts/{accountId}/charges
   {
     "id": 2,
     "chargeId": 4,
+    "accountId": 57,
     "name": "Pass book Fee",
     "chargeTimeType": {
       "id": 2,
@@ -14109,6 +14301,76 @@ GET https://DomainName/api/v1/savingsaccounts/{accountId}/charges
     "amountWrittenOff": 0,
     "amountOutstanding": 100,
     "amountOrPercentage": 100,
+    "penalty": false
+  },
+  {
+    "id": 9,
+    "chargeId": 4,
+    "accountId": 57,
+    "name": "Withdrawal fee percentage",
+    "chargeTimeType": {
+      "id": 5,
+      "code": "chargeTimeType.withdrawalFee",
+      "value": "Withdrawal Fee"
+    },
+    "chargeCalculationType": {
+      "id": 2,
+      "code": "chargeCalculationType.percent.of.amount",
+      "value": "% Amount"
+    },
+    "percentage": 0.25,
+    "amountPercentageAppliedTo": 0,
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "amount": 0,
+    "amountPaid": 0,
+    "amountWaived": 0,
+    "amountWrittenOff": 0,
+    "amountOutstanding": 0,
+    "amountOrPercentage": 0.25,
+    "penalty": false
+  },
+  {
+    "id": 10,
+    "chargeId": 6,
+    "accountId": 57,
+    "name": "Annual fee - INR",
+    "chargeTimeType": {
+      "id": 6,
+      "code": "chargeTimeType.annualFee",
+      "value": "Annual Fee"
+    },
+    "feeOnMonthDay": [
+      10,
+      9
+    ],
+    "chargeCalculationType": {
+      "id": 1,
+      "code": "chargeCalculationType.flat",
+      "value": "Flat"
+    },
+    "percentage": 0,
+    "amountPercentageAppliedTo": 0,
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "amount": 50,
+    "amountPaid": 0,
+    "amountWaived": 0,
+    "amountWrittenOff": 0,
+    "amountOutstanding": 50,
+    "amountOrPercentage": 50,
     "penalty": false
   }
 ]
@@ -14202,6 +14464,41 @@ GET https://DomainName/api/v1/savingsaccounts/{accountId}/charges/template
         "code": "chargeCalculationType.flat",
         "value": "Flat"
       }
+    },
+    {
+      "id": 6,
+      "name": "Annual fee",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 50,
+      "chargeTimeType": {
+        "id": 6,
+        "code": "chargeTimeType.annualFee",
+        "value": "Annual Fee"
+      },
+      "chargeAppliesTo": {
+        "id": 2,
+        "code": "chargeAppliesTo.savings",
+        "value": "Savings"
+      },
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      },
+      "chargePaymentMode": {
+        "id": 0,
+        "code": "chargepaymentmode.regular",
+        "value": "Regular"
+      }
     }
   ],
   "penalty": false
@@ -14271,7 +14568,21 @@ GET https://DomainName/api/v1/savingsaccounts/{accountId}/charges/{savingsAccoun
 								for Savings account Charges</div></td>
 						</tr>
 						<tr class=alt>
-							<td>chargeId, amount, dueDate</td>
+							<td>chargeId, amount</td>
+						</tr>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields
+								for Savings account Charges of Specified due date type</div></td>
+						</tr>
+						<tr class=alt>
+							<td>chargeId, amount, dueDate, dateFormat, locale</td>
+						</tr>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields
+								for Savings account Charges of Annual fee type</div></td>
+						</tr>
+						<tr class=alt>
+							<td>chargeId, amount, feeOnMonthDay, monthDayFormat, locale</td>
 						</tr>
                     </table>
                 </div>
@@ -14299,6 +14610,26 @@ Request Body:
   "resourceId": 6
 }
 	                </code>
+	                <code class="method-request">
+POST /savingsaccounts/1/charges
+Content-Type: application/json 
+Request Body:
+{
+  "chargeId": "2",
+  "locale": "en",
+  "amount": "25",
+  "monthDayFormat": "dd MMMM",
+  "feeOnMonthDay": "09 October"
+}
+				</code>
+                <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "savingsId": 1,
+  "resourceId": 7
+}                
+				</code>
                 </div>
             </div>
 
