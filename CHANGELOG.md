@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 7 Oct 2013 - 1.11.1.RELEASE
 1. 5 Oct 2013 - 1.11.0.RELEASE
 1. 4 Oct 2013 - 1.10.3.RELEASE
 1. 22 Sep 2013 - 1.10.2.RELEASE
@@ -40,6 +41,18 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.11.1.RELEASE
+=============
+Bug Release
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-726] - Add missing savings charges details to api doc
+
+Bug
+ - [MIFOSX-727] - Loan Write off account not being persisted on creating a new Loan Product
 
 1.11.0.RELEASE
 =============
