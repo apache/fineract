@@ -23,6 +23,15 @@ public class SavingsAccountTransactionComparator implements Comparator<SavingsAc
                 compareResult = -1;
             } else if (!o1.isInterestPostingAndNotReversed() && o2.isInterestPostingAndNotReversed()) {
                 compareResult = 1;
+            } else if (!o1.isDepositAndNotReversed() && o2.isDepositAndNotReversed()) {
+                // push all deposit transactions before charge/withdrawal transactions on same day.
+                // activation charge is charged on account activation date, any
+                // adjustments with deposit amount
+                // resulting into negative balance, to fix this push deposit
+                // transactions before charge/withdrawal charges transactions.
+                compareResult = 1;
+            } else if (o1.isDepositAndNotReversed() && !o2.isDepositAndNotReversed()) {
+                compareResult = -1;
             } else {
                 compareResult = 0;
             }
