@@ -18,6 +18,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
@@ -56,6 +57,15 @@ public class Charge extends AbstractPersistable<Long> {
     @Column(name = "charge_payment_mode_enum")
     private Integer chargePaymentMode;
 
+    @Column(name = "fee_on_day", nullable = true)
+    private Integer feeOnDay;
+    
+    @Column(name = "fee_interval", nullable = true)
+    private Integer feeInterval;
+    
+    @Column(name = "fee_on_month", nullable = true)
+    private Integer feeOnMonth;
+    
     @Column(name = "is_penalty", nullable = false)
     private boolean penalty;
 
@@ -79,8 +89,11 @@ public class Charge extends AbstractPersistable<Long> {
 
         final boolean penalty = command.booleanPrimitiveValueOfParameterNamed("penalty");
         final boolean active = command.booleanPrimitiveValueOfParameterNamed("active");
+        final MonthDay feeOnMonthDay = command.extractMonthDayNamed("feeOnMonthDay");
+        final Integer feeInterval = command.integerValueOfParameterNamed("feeInterval");
 
-        return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculationType, penalty, active, paymentMode);
+        return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculationType, penalty, active, paymentMode,
+                feeOnMonthDay, feeInterval);
     }
 
     protected Charge() {
@@ -89,7 +102,7 @@ public class Charge extends AbstractPersistable<Long> {
 
     private Charge(final String name, final BigDecimal amount, final String currencyCode, final ChargeAppliesTo chargeAppliesTo,
             final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean penalty,
-            final boolean active, final ChargePaymentMode paymentMode) {
+            final boolean active, final ChargePaymentMode paymentMode, final MonthDay feeOnMonthDay, final Integer feeInterval) {
         this.name = name;
         this.amount = amount;
         this.currencyCode = currencyCode;
@@ -103,6 +116,12 @@ public class Charge extends AbstractPersistable<Long> {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charges");
 
+        if (isMonthlyFee()) {
+            this.feeOnMonth = feeOnMonthDay.getMonthOfYear();
+            this.feeOnDay = feeOnMonthDay.getDayOfMonth();
+            this.feeInterval = feeInterval;
+        }
+        
         if (isSavingsCharge()) {
 
             if (!isAllowedSavingsChargeTime()) {
@@ -129,7 +148,7 @@ public class Charge extends AbstractPersistable<Long> {
                         .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
             }
         }
-
+        
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
@@ -246,13 +265,20 @@ public class Charge extends AbstractPersistable<Long> {
                     baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTime)
                             .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.savings");
                 }
+              //if charge time is changed to monthly then validate for feeOnMonthDay and feeInterval
+                if(isMonthlyFee()){
+                    final MonthDay monthDay = command.extractMonthDayNamed("feeOnMonthDay"); 
+                    baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay).notNull();
+                    
+                    final Integer feeInterval = command.integerValueOfParameterNamed("feeInterval");
+                    baseDataValidator.reset().parameter("feeInterval").value(feeInterval).notNull().inMinMaxRange(1, 12);
+                }
             } else if (isLoanCharge()) {
                 if (!isAllowedLoanChargeTime()) {
                     baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTime)
                             .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
                 }
             }
-
         }
 
         final String chargeAppliesToParamName = "chargeAppliesTo";
@@ -297,7 +323,33 @@ public class Charge extends AbstractPersistable<Long> {
             actualChanges.put("locale", localeAsInput);
             this.chargePaymentMode = ChargePaymentMode.fromInt(newValue).getValue();
         }
+        
+        if (command.hasParameter("feeOnMonthDay")) {
+            final MonthDay monthDay = command.extractMonthDayNamed("feeOnMonthDay");
+            final String actualValueEntered = command.stringValueOfParameterNamed("feeOnMonthDay");
+            final Integer dayOfMonthValue = monthDay.getDayOfMonth();
+            if (this.feeOnDay != dayOfMonthValue) {
+                actualChanges.put("feeOnMonthDay", actualValueEntered);
+                actualChanges.put("locale", localeAsInput);
+                this.feeOnDay = dayOfMonthValue;
+            }
 
+            final Integer monthOfYear = monthDay.getMonthOfYear();
+            if (this.feeOnMonth != monthOfYear) {
+                actualChanges.put("feeOnMonthDay", actualValueEntered);
+                actualChanges.put("locale", localeAsInput);
+                this.feeOnMonth = monthOfYear;
+            }
+        }
+        
+        final String feeInterval = "feeInterval";
+        if (command.isChangeInIntegerParameterNamed(feeInterval, this.feeInterval)) {
+            final Integer newValue = command.integerValueOfParameterNamed(feeInterval);
+            actualChanges.put(feeInterval, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.feeInterval = newValue;
+        }
+        
         final String penaltyParamName = "penalty";
         if (command.isChangeInBooleanParameterNamed(penaltyParamName, this.penalty)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(penaltyParamName);
@@ -339,10 +391,26 @@ public class Charge extends AbstractPersistable<Long> {
         final EnumOptionData chargePaymentmode = ChargeEnumerations.chargePaymentMode(this.chargePaymentMode);
         final CurrencyData currency = new CurrencyData(this.currencyCode, null, 0, 0, null, null);
         return ChargeData.instance(getId(), this.name, this.amount, currency, chargeTimeType, chargeAppliesTo, chargeCalculationType,
-                chargePaymentmode, this.penalty, this.active);
+                chargePaymentmode, this.getFeeOnMonthDay(), this.feeInterval, this.penalty, this.active);
     }
 
     public Integer getChargePaymentMode() {
         return this.chargePaymentMode;
+    }
+    
+    public boolean isMonthlyFee() {
+        return ChargeTimeType.fromInt(this.chargeTime).isMonthlyFee();
+    }
+    
+    public MonthDay getFeeOnMonthDay(){
+        MonthDay feeOnMonthDay = null;
+        if (feeOnDay != null && feeOnMonth != null) {
+            feeOnMonthDay = new MonthDay(feeOnMonth, feeOnDay);
+        }
+        return feeOnMonthDay;
+    }
+    
+    public Integer feeInterval(){
+        return this.feeInterval;
     }
 }

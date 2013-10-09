@@ -11035,7 +11035,8 @@ Request Body:
 							2 = Specified Due Date : Adhoc charge can be applied for loans and savings on a specified due date.<br/>
 							3 = Savings Activation : This charge is applicable for savings account and charged at the time of account activation. This charge will be autodeducted once the account is activated with sufficient opening balance.<br/>
 							5 = Withdrawal fee : Charge applied to every withdrawal of savings account.<br/>
-							6 = Annual Fee : Recurring charge applied annually for savings on a specified Month and day.
+							6 = Annual Fee : Recurring charge applied annually for savings on a specified Month and day.<br/>
+							7 = Monthly Fee : Recurring charge applied on regular interval of months for savings.
 							</td>
 						</tr>
 						<tr class=alt>
@@ -11052,6 +11053,22 @@ Request Body:
 							<td class=fielddesc>Rules for calculating the amount for a particular Charge.
 							Refer <a href="#charges_template">Charges Template</a> for additional details</td>
 						</tr>
+						<tr class=alt>
+							<td>feeOnMonthDay</td>
+						</tr>
+						<tr>
+			            	<td class=fielddesc>Used along with <i>monthDayFormat</i> to indicate the recurring charge due date starting on a given day of the month and follow specified <i>feeInterval</i>. e.g. fee due date starting on <b>10 May</b> with <i>feeInterval</i> of two (2) months then a recurring fee on 10th of every two months is applied to savings account. <i>monthDayFormat</i> indicates day and month formatting used e.g. "dd MMM" for 10 May <br/>
+			            		This field is mandatory if <i>chargeTimeType</i> is of type <b>Monthly Fee</b> 
+			            	</td>
+			            </tr>
+			            <tr class=alt>
+							<td>feeInterval</td>
+						</tr>
+						<tr>
+			            	<td class=fielddesc>Fee to be applied on a specified interval (number of months).<br/>
+			            		This field is mandatory if <i>chargeTimeType</i> is of type <b>Monthly Fee</b>
+			            	</td>
+			            </tr>
 					</table>
 				</div>
 			</div>
@@ -11144,6 +11161,11 @@ GET https://DomainName/api/v1/charges/template
        	    "id": 6,
        	    "code": "chargeTimeType.annualFee",
        	    "value": "Annual Fee"
+       },
+       {
+       	    "id": 7,
+       	    "code": "chargeTimeType.monthlyFee",
+       	    "value": "Monthly Fee"
        }
    ],
    "chargePaymetModeOptions":
@@ -11201,6 +11223,10 @@ GET https://DomainName/api/v1/charges/template
       { "code" : "chargeTimeType.annualFee",
         "id" : 6,
         "value" : "Annual Fee"
+      },
+      { "code" : "chargeTimeType.monthlyFee",
+        "id" : 7,
+        "value" : "Monthly Fee"
       }
     ]
 }
@@ -11283,7 +11309,31 @@ Request Body:
 {
   "resourceId": 5
 }
-					</code>					
+					</code>
+					<code class="method-request">
+POST charges
+Content-Type: application/json 
+Request Body:
+{
+  "locale": "en",
+  "name": "Quarterly Fee",
+  "amount": "5",
+  "currencyCode": "USD",
+  "chargeAppliesTo": "2",
+  "chargeTimeType": "7",
+  "feeOnMonthDay": "10 May",
+  "monthDayFormat": "dd MMM",
+  "feeInterval": "4",
+  "chargeCalculationType": "1",
+  "active": "true",
+  "penalty": "false"
+}
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 6
+}
+					</code>										
 				</div>
 			</div>
 
@@ -13242,6 +13292,46 @@ Content-Type: application/json
         "code": "chargepaymentmode.regular",
         "value": "Regular"
       }
+    },
+    {
+      "id": 7,
+      "name": "Quarterly fee",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 5,
+      "chargeTimeType": {
+        "id": 7,
+        "code": "chargeTimeType.monthlyFee",
+        "value": "Monthly Fee"
+      },
+      "chargeAppliesTo": {
+        "id": 2,
+        "code": "chargeAppliesTo.savings",
+        "value": "Savings"
+      },
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      },
+      "chargePaymentMode": {
+        "id": 0,
+        "code": "chargepaymentmode.regular",
+        "value": "Regular"
+      },
+      "feeOnMonthDay": [
+        10,
+        5
+      ],
+      "feeInterval": 4
     }
   ]
 }

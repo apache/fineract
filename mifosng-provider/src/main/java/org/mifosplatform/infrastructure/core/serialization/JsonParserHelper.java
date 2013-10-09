@@ -299,7 +299,7 @@ public class JsonParserHelper {
                     } catch (final IllegalArgumentException e) {
                         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
                         final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.month.day",
-                                "The parameter " + parameterName + " is invalid based on the dateFormat: '" + dateFormat
+                                "The parameter " + parameterName + " is invalid based on the monthDayFormat: '" + dateFormat
                                         + "' and locale: '" + clientApplicationLocale + "' provided:", parameterName, valueAsString,
                                 dateFormat);
                         dataValidationErrors.add(error);

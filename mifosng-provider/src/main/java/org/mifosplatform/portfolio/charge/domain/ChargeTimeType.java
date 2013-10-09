@@ -13,7 +13,8 @@ public enum ChargeTimeType {
     SAVINGS_ACTIVATION(3, "chargeTimeType.savingsActivation"), // only for savings
     SAVINGS_CLOSURE(4, "chargeTimeType.savingsClosure"), // only for savings
     WITHDRAWAL_FEE(5, "chargeTimeType.withdrawalFee"), // only for savings
-    ANNUAL_FEE(6, "chargeTimeType.annualFee"); // only for savings
+    ANNUAL_FEE(6, "chargeTimeType.annualFee"), // only for savings
+    MONTHLY_FEE(7, "chargeTimeType.monthlyFee"); // only for savings
 
     private final Integer value;
     private final String code;
@@ -64,6 +65,9 @@ public enum ChargeTimeType {
             case 6:
                 chargeTimeType = ANNUAL_FEE;
             break;
+            case 7:
+                chargeTimeType = MONTHLY_FEE;
+            break;
             default:
                 chargeTimeType = INVALID;
             break;
@@ -95,11 +99,16 @@ public enum ChargeTimeType {
         return this.value.equals(ChargeTimeType.ANNUAL_FEE.getValue());
     }
 
+    public boolean isMonthlyFee() {
+        return this.value.equals(ChargeTimeType.MONTHLY_FEE.getValue());
+    }
+    
     public boolean isAllowedLoanChargeTime() {
         return isTimeOfDisbursement() || isOnSpecifiedDueDate();
     }
 
     public boolean isAllowedSavingsChargeTime() {
-        return isOnSpecifiedDueDate() || isSavingsActivation() || isSavingsClosure() || isWithdrawalFee() || isAnnualFee();
+        return isOnSpecifiedDueDate() || isSavingsActivation() || isSavingsClosure() || isWithdrawalFee() || isAnnualFee()
+                || isMonthlyFee();
     }
 }

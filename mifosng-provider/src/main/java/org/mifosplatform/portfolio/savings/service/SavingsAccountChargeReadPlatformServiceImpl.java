@@ -65,7 +65,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
                     + "sc.is_penalty as penalty, "
                     + "sc.charge_due_date as dueAsOfDate, "
                     + "sc.fee_on_month as feeOnMonth, "
-                    + "sc.fee_on_day as feeOnDay, "
+                    + "sc.fee_on_day as feeOnDay, sc.fee_interval as feeInterval, "
                     + "sc.charge_calculation_enum as chargeCalculation, "
                     + "c.currency_code as currencyCode, oc.name as currencyName, "
                     + "oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
@@ -104,6 +104,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
             final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(chargeTime);
 
             final LocalDate dueAsOfDate = JdbcSupport.getLocalDate(rs, "dueAsOfDate");
+            final Integer feeInterval = JdbcSupport.getInteger(rs, "feeInterval");
             MonthDay feeOnMonthDay = null;
             final Integer feeOnMonth = JdbcSupport.getInteger(rs, "feeOnMonth");
             final Integer feeOnDay = JdbcSupport.getInteger(rs, "feeOnDay");
@@ -119,7 +120,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
 
             return SavingsAccountChargeData.instance(id, chargeId, accountId, name, currency, amount, amountPaid, amountWaived,
                     amountWrittenOff, amountOutstanding, chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf,
-                    amountPercentageAppliedTo, chargeOptions, penalty, feeOnMonthDay);
+                    amountPercentageAppliedTo, chargeOptions, penalty, feeOnMonthDay, feeInterval);
         }
     }
 
