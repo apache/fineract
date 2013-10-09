@@ -11,7 +11,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeIdPa
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.clientIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.externalIdParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeAmountParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeIntervalParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.fieldOfficerIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.groupIdParamName;
@@ -196,6 +196,7 @@ public class SavingsAccountDataValidator {
         if (element.isJsonObject()) {
             final JsonObject topLevelJsonElement = element.getAsJsonObject();
             final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+            final String monthDayFormat = this.fromApiJsonHelper.extractMonthDayFormatParameter(topLevelJsonElement);
             if (topLevelJsonElement.has(chargesParamName) && topLevelJsonElement.get(chargesParamName).isJsonArray()) {
                 final JsonArray array = topLevelJsonElement.get(chargesParamName).getAsJsonArray();
                 for (int i = 0; i < array.size(); i++) {
@@ -209,6 +210,16 @@ public class SavingsAccountDataValidator {
 
                     final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(amountParamName, savingsChargeElement, locale);
                     baseDataValidator.reset().parameter(amountParamName).value(amount).notNull().positiveAmount();
+                    
+                    if (this.fromApiJsonHelper.parameterExists(feeOnMonthDayParamName, savingsChargeElement)) {
+                        final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, savingsChargeElement, monthDayFormat, locale); 
+                        baseDataValidator.reset().parameter(feeOnMonthDayParamName).value(monthDay).notNull();
+                    }
+                    
+                    if (this.fromApiJsonHelper.parameterExists(feeIntervalParamName, savingsChargeElement)) {
+                        final Integer feeInterval = this.fromApiJsonHelper.extractIntegerNamed(feeIntervalParamName, savingsChargeElement, Locale.getDefault());
+                        baseDataValidator.reset().parameter(feeIntervalParamName).value(feeInterval).notNull().inMinMaxRange(1, 12);
+                    }
                 }
             }
         }
@@ -348,18 +359,7 @@ public class SavingsAccountDataValidator {
                     .ignoreIfNull().validateForBooleanValue();
         }
 
-        if (this.fromApiJsonHelper.parameterExists(feeAmountParamName, element)) {
-            final BigDecimal annualFeeAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(feeAmountParamName, element);
-            baseDataValidator.reset().parameter(feeAmountParamName).value(annualFeeAmount).ignoreIfNull().zeroOrPositiveAmount();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(feeOnMonthDayParamName, element)) {
-            final MonthDay monthDayOfAnnualFee = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, element);
-            baseDataValidator.reset().parameter(feeOnMonthDayParamName).value(monthDayOfAnnualFee).ignoreIfNull();
-        }
-
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
-
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {

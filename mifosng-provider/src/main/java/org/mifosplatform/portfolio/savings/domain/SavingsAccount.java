@@ -1207,12 +1207,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                     final SavingsAccountCharge chargeToUndo = savingsAccountChargePaidBy.getSavingsAccountCharge();
                     if (transactionToUndo.isChargeTransaction()) {
                         chargeToUndo.undoPayment(this.getCurrency(), transactionToUndo.getAmount(this.getCurrency()));
-                        if(chargeToUndo.isAnnualFee()){
-                            chargeToUndo.updateToPreviousAnnualFeeDueDate();
-                        }
                     } else if (transactionToUndo.isWaiveCharge()) {
                         chargeToUndo.undoWaiver(this.getCurrency(), transactionToUndo.getAmount(this.getCurrency()));
-                        chargeToUndo.updateToPreviousAnnualFeeDueDate();
                     }
                 }
             }
@@ -1459,7 +1455,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         
         //update annual fee due date
         for (SavingsAccountCharge charge : this.charges()) {
-            charge.updateToNextAnnualFeeDueDateFrom(getActivationLocalDate());
+            charge.updateToNextDueDateFrom(getActivationLocalDate());
         }
         
         //auto pay the activation time charges
@@ -1677,11 +1673,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         // waive charge
         final Money amountWaived = savingsAccountCharge.waive(getCurrency());
-
         handleWaiverChargeTransactions(savingsAccountCharge, amountWaived);
-        
-      //update next annual fee due date
-        savingsAccountCharge.updateToNextAnnualFeeDueDate();
+      
     }
 
     public void addCharge(final DateTimeFormatter formatter, final SavingsAccountCharge savingsAccountCharge, final Charge chargeDefinition) {
@@ -1738,13 +1731,15 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
             
+        }
+        
+        if(savingsAccountCharge.isAnnualFee() || savingsAccountCharge.isMonthlyFee()){
+            //update due date
             if(isActive()){
-                savingsAccountCharge.updateToNextAnnualFeeDueDateFrom(getActivationLocalDate());
+                savingsAccountCharge.updateToNextDueDateFrom(getActivationLocalDate());
             }else if(isApproved()){
-                savingsAccountCharge.updateToNextAnnualFeeDueDateFrom(getApprovedOnLocalDate());
-            }
-          //if account is in submitted and pending approval state, 
-          //upon account activation annual fee charges due date get updated.
+                savingsAccountCharge.updateToNextDueDateFrom(getApprovedOnLocalDate());
+            }          
         }
         
         //activation charge and withdrawal charges not required this validation
@@ -1843,9 +1838,6 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
 
         this.payCharge(savingsAccountCharge, chargePaid, transactionDate);
-        
-        //update next annual fee due date
-        savingsAccountCharge.updateToNextAnnualFeeDueDate();
     }
 
     public void payCharge(final SavingsAccountCharge savingsAccountCharge, final Money amountPaid, final LocalDate transactionDate) {

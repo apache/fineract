@@ -83,6 +83,7 @@ public class SavingsApiConstants {
     public static final String withdrawalFeeForTransfersParamName = "withdrawalFeeForTransfers";
     public static final String feeAmountParamName = "feeAmount";//to be deleted
     public static final String feeOnMonthDayParamName = "feeOnMonthDay";
+    public static final String feeIntervalParamName = "feeInterval";
     public static final String accountingRuleParamName = "accountingRule";
     public static final String paymentTypeIdParamName = "paymentTypeId";
     public static final String transactionAccountNumberParamName = "accountNumber";
@@ -203,7 +204,7 @@ public class SavingsApiConstants {
             amountPaidParamName, chargeOptionsParamName));
 
     public static final Set<String> SAVINGS_ACCOUNT_CHARGES_ADD_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
-            chargeIdParamName, amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName, feeOnMonthDayParamName, monthDayFormatParamName));
+            chargeIdParamName, amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName, feeOnMonthDayParamName, monthDayFormatParamName, feeIntervalParamName));
 
     public static final Set<String> SAVINGS_ACCOUNT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
             amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName));

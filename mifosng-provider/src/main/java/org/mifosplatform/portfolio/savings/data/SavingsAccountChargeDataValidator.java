@@ -12,11 +12,13 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.amountPara
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeIntervalParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -91,6 +93,18 @@ public class SavingsAccountChargeDataValidator {
         if (this.fromApiJsonHelper.parameterExists(dueAsOfDateParamName, element)) {
             final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element); 
             baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate).notNull();
+        }
+        
+        if (this.fromApiJsonHelper.parameterExists(feeOnMonthDayParamName, element)) {
+            final String monthDayFormat = this.fromApiJsonHelper.extractMonthDayFormatParameter(element.getAsJsonObject());
+            final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject());
+            final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, element.getAsJsonObject(), monthDayFormat, locale); 
+            baseDataValidator.reset().parameter(feeOnMonthDayParamName).value(monthDay).notNull();
+        }
+        
+        if (this.fromApiJsonHelper.parameterExists(feeIntervalParamName, element)) {
+            final Integer feeInterval = this.fromApiJsonHelper.extractIntegerNamed(feeIntervalParamName, element, Locale.getDefault());
+            baseDataValidator.reset().parameter(feeIntervalParamName).value(feeInterval).notNull().inMinMaxRange(1, 12);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
