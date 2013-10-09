@@ -444,10 +444,10 @@ public class Loan extends AbstractPersistable<Long> {
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(),
                     allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, setOfLoanCharges());
-            for(Map.Entry<Long,LoanTransaction> mapEntry:changedTransactionDetail.getNewTransactionMappings().entrySet()){
+            for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                 mapEntry.getValue().updateLoan(this);
             }
-            this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
+            // this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
         } else {
             // just reprocess the loan schedule only for now.
             final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
@@ -1454,7 +1454,7 @@ public class Loan extends AbstractPersistable<Long> {
          **/
         Money disbursentMoney = Money.zero(getCurrency());
         final LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(getOffice(), disbursentMoney, null, disbursedOn,
-                txnExternalId);
+                null);
         for (final LoanCharge charge : setOfLoanCharges()) {
             if (charge.isDueAtDisbursement()) {
                 if (totalFeeChargesDueAtDisbursement.isGreaterThanZero() && !charge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
@@ -1493,8 +1493,8 @@ public class Loan extends AbstractPersistable<Long> {
         return disbursementTransaction;
     }
 
-    public LoanTransaction handlePayDisbursementTransaction(final Long chargeId, final LoanTransaction chargesPayment, 
-            final List<Long> existingTransactionIds,final List<Long> existingReversedTransactionIds) {
+    public LoanTransaction handlePayDisbursementTransaction(final Long chargeId, final LoanTransaction chargesPayment,
+            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
         existingTransactionIds.addAll(findExistingTransactionIds());
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
         LoanCharge charge = null;
@@ -1713,10 +1713,15 @@ public class Loan extends AbstractPersistable<Long> {
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(),
                     allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, setOfLoanCharges());
-            for(Map.Entry<Long,LoanTransaction> mapEntry:changedTransactionDetail.getNewTransactionMappings().entrySet()){
+            for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                 mapEntry.getValue().updateLoan(this);
             }
-            this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
+            /***
+             * Commented since throwing exception if external id present for one
+             * of the transactions. for this need to save the reversed
+             * transactions first and then new transactions.
+             */
+            // this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
         }
 
         updateLoanSummaryDerivedFields();

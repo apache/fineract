@@ -136,21 +136,21 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return new LoanTransaction(loan, office, LoanTransactionType.INITIATE_TRANSFER.getValue(), transferDate.toDateMidnight().toDate(),
                 loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(), loan.getSummary()
                         .getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(), loan.getSummary()
-                        .getTotalPenaltyChargesOutstanding(), null, false, null);
+                        .getTotalPenaltyChargesOutstanding(), null, false, null,null);
     }
 
     public static LoanTransaction approveTransfer(final Office office, final Loan loan, final LocalDate transferDate) {
         return new LoanTransaction(loan, office, LoanTransactionType.APPROVE_TRANSFER.getValue(), transferDate.toDateMidnight().toDate(),
                 loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(), loan.getSummary()
                         .getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(), loan.getSummary()
-                        .getTotalPenaltyChargesOutstanding(), null, false, null);
+                        .getTotalPenaltyChargesOutstanding(), null, false, null,null);
     }
 
     public static LoanTransaction withdrawTransfer(final Office office, final Loan loan, final LocalDate transferDate) {
         return new LoanTransaction(loan, office, LoanTransactionType.WITHDRAW_TRANSFER.getValue(), transferDate.toDateMidnight().toDate(),
                 loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(), loan.getSummary()
                         .getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(), loan.getSummary()
-                        .getTotalPenaltyChargesOutstanding(), null, false, null);
+                        .getTotalPenaltyChargesOutstanding(), null, false, null,null);
     }
 
     public static LoanTransaction refund(final Office office, final Money amount, final PaymentDetail paymentDetail,
@@ -162,7 +162,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return new LoanTransaction(loanTransaction.loan, loanTransaction.office, loanTransaction.typeOf, loanTransaction.dateOf,
                 loanTransaction.amount, loanTransaction.principalPortion, loanTransaction.interestPortion,
                 loanTransaction.feeChargesPortion, loanTransaction.penaltyChargesPortion, loanTransaction.overPaymentPortion,
-                loanTransaction.reversed, loanTransaction.paymentDetail);
+                loanTransaction.reversed, loanTransaction.paymentDetail,loanTransaction.externalId);
     }
 
     public static LoanTransaction applyLoanCharge(final Loan loan, final Office office, final Money amount, final LocalDate applyDate,
@@ -187,7 +187,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     private LoanTransaction(final Loan loan, final Office office, final Integer typeOf, final Date dateOf, final BigDecimal amount,
             final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
             final BigDecimal penaltyChargesPortion, final BigDecimal overPaymentPortion, final boolean reversed,
-            final PaymentDetail paymentDetail) {
+            final PaymentDetail paymentDetail,String externalId) {
         super();
         this.loan = loan;
         this.typeOf = typeOf;
@@ -201,6 +201,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         this.reversed = reversed;
         this.paymentDetail = paymentDetail;
         this.office = office;
+        this.externalId = externalId;
     }
 
     public static LoanTransaction waiveLoanCharge(final Loan loan, final Office office, final Money waived, final LocalDate waiveDate,
@@ -500,6 +501,11 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     public boolean isRefund() {
         return LoanTransactionType.REFUND.equals(getTypeOf()) && isNotReversed();
+    }
+
+    
+    public void updateExternalId(String externalId) {
+        this.externalId = externalId;
     }
 
 }

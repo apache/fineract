@@ -23,8 +23,10 @@ import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
@@ -106,6 +108,7 @@ import org.mifosplatform.portfolio.paymentdetail.service.PaymentDetailWritePlatf
 import org.mifosplatform.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -234,7 +237,18 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 workingDays, allowTransactionsOnHoliday, allowTransactionsOnNonWorkingDay);
 
         if (!changes.isEmpty()) {
-            this.loanRepository.saveAndFlush(loan);
+            try {
+                this.loanRepository.saveAndFlush(loan);
+            } catch (DataIntegrityViolationException e) {
+                final Throwable realCause = e.getCause();
+                final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+                final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
+                if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
+                    baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
+                }
+                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(
+                        "validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors); }
+            }
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
@@ -346,7 +360,19 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     allowTransactionsOnHoliday, allowTransactionsOnNonWorkingDay);
 
             if (!changes.isEmpty()) {
-                this.loanRepository.save(loan);
+                try {
+                    this.loanRepository.save(loan);
+                } catch (DataIntegrityViolationException e) {
+                    final Throwable realCause = e.getCause();
+                    final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+                    final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                            .resource("loan.transaction");
+                    if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
+                        baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
+                    }
+                    if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(
+                            "validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors); }
+                }
 
                 final String noteText = command.stringValueOfParameterNamed("note");
                 if (StringUtils.isNotBlank(noteText)) {
@@ -522,14 +548,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
          * only in edge cases (when a adjustment is made before the latest
          * payment recorded against the loan)
          ***/
+        this.loanRepository.saveAndFlush(loan);
         if (changedTransactionDetail != null) {
-            for(Map.Entry<Long,LoanTransaction> mapEntry:changedTransactionDetail.getNewTransactionMappings().entrySet()){
+            for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                 this.loanTransactionRepository.save(mapEntry.getValue());
                 this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
         }
 
-        this.loanRepository.save(loan);
+        
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
@@ -598,14 +625,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
          * only in edge cases (when a waiver is made before the latest payment
          * recorded against the loan)
          ***/
+        this.loanRepository.saveAndFlush(loan);
         if (changedTransactionDetail != null) {
-            for(Map.Entry<Long,LoanTransaction> mapEntry:changedTransactionDetail.getNewTransactionMappings().entrySet()){
+            for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                 this.loanTransactionRepository.save(mapEntry.getValue());
                 this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
         }
 
-        this.loanRepository.save(loan);
+        
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
@@ -820,14 +848,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
              * entered only in edge cases (when a payment is made before the
              * latest payment recorded against the loan)
              ***/
+            this.loanRepository.saveAndFlush(loan);
             if (changedTransactionDetail != null) {
-                for(Map.Entry<Long,LoanTransaction> mapEntry:changedTransactionDetail.getNewTransactionMappings().entrySet()){
+                for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                     this.loanTransactionRepository.save(mapEntry.getValue());
                     this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
                 }
             }
 
-            this.loanRepository.save(loan);
+            
             // we post Journal entries only for loans in active status
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         }
