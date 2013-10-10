@@ -92,13 +92,18 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter("active").value(active).notNull();
         }
         
-        boolean isMonthlyFee = ChargeTimeType.fromInt(chargeTimeType).isMonthlyFee();
-        if(isMonthlyFee){
+        final ChargeTimeType ctt = ChargeTimeType.fromInt(chargeTimeType);
+        if(ctt.isMonthlyFee()){
             final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed("feeOnMonthDay", element); 
             baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay).notNull();
             
             final Integer feeInterval = this.fromApiJsonHelper.extractIntegerNamed("feeInterval", element, Locale.getDefault());
             baseDataValidator.reset().parameter("feeInterval").value(feeInterval).notNull().inMinMaxRange(1, 12);
+        }
+        
+        if(ctt.isAnnualFee()){
+            final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed("feeOnMonthDay", element); 
+            baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay).notNull();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
