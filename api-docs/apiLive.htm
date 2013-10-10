@@ -6083,7 +6083,10 @@ POST https://DomainName/api/v1/loans/{loanId}?command=undoDisbursal
 					</code>
 					<code class="method-request">
 POST loans/1?command=undoDisbursal
-Content-Type: application/json 
+Content-Type: application/json
+{
+  "note": "Some comment"
+}
 					</code>
 					<code class="method-response">
 {
