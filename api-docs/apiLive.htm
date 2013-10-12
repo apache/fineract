@@ -19863,8 +19863,11 @@ GET https://DomainName/api/v1/search?query=000000111
 		<div class="method-section">
 			<div class="method-description">
 				<h3>Templates</h3>
-				<p>Templates are for custom document generation.</p>
-				<p>Templates can be assigned to an entity like <b>client</b> or <b>loan</b> and be of a typ like <b>document</b> .</p>
+				<p>Templates are used for end-user features such as custom user defined document generation (AKA UGD).  They are based on <a href="http://mustache.github.io/">{{ moustache }} templates</a>. Think of them as a sort of built-in "mail merge" functionality.</p>
+
+				<p>User Generated Documents (and other types of templates) can aggregate data from several Mifos X back-end API calls via <b>mappers</b>.  Mappers can even access non-Mifos X REST services from other servers.  UGDs can render such data in tables, show images, etc. <i>TBD: Please have a look at some of the Example UGDs included in Mifos X (or <a href="https://mifosforge.jira.com/wiki/display/RES/UGD_FinalDoc">the Wiki page</a>, for now.).</i></p>
+
+				<p>Templates can be assigned to an entity like <b>client</b> or <b>loan</b> and be of a typ like <b>document</b>.  The entity and type of a template is only there for the convenience of user agents (UIs), in order to know where to show templates for the user (i.e. which tab).  The Template Engine back-end runner does not actually need this metadata.</p>
 				<table class=matrixHeading>
 					<tr class="matrixHeadingBG">
 						<td><div class="mifosXHeading2">Field Descriptions</div></td>
@@ -19963,7 +19966,7 @@ GET https://DomainName/api/v1/templates/template
   "name": "Test",
   "entity": "loan",
   "type": "Document",
-  "text": "This is a text with a {{mustache.tag}} ",
+  "text": "This is a loan for {{loan.clientName}}",
   "mappers": [
     {
     "mapperorder": 0,
@@ -20007,7 +20010,7 @@ Request Body:
   "name": "Test",
   "entity": "loan",
   "type": "Document",
-  "text": "This is a text with a {{mustache.tag}} ",
+  "text": "This is a loan for {{loan.clientName}}",
   "mappers": [
     {
       "mapperorder": 0,
@@ -20078,7 +20081,7 @@ GET https://DomainName/api/v1/templates
     "name": "Test",
     "entity": "loan",
     "type": "Document",
-    "text": "This is a text with a {{mustache.tag}} ",
+    "text": "This is a loan for {{loan.clientName}}",
     "mappers": [
       {
         "mapperorder": 0,
@@ -20111,7 +20114,7 @@ GET https://DomainName/api/v1/templates/{Id}
   "name": "Test",
   "entity": "loan",
   "type": "Document",
-  "text": "This is a text with a {{mustache.tag}} ",
+  "text": "This is a loan for {{loan.clientName}}",
   "mappers": [
     {
       "mapperorder": 0,
@@ -20144,7 +20147,7 @@ Request Body:
   "name": "Test",
   "entity": "loan",
   "type": "Document",
-  "text": "This is a text with a {{mustache.tag}} ",
+  "text": "This is a loan for {{loan.clientName}}",
   "mappers": [
     {
       "mapperorder": 0,
