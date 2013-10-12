@@ -54,7 +54,7 @@ public class Charge extends AbstractPersistable<Long> {
     @Column(name = "charge_calculation_enum")
     private Integer chargeCalculation;
 
-    @Column(name = "charge_payment_mode_enum")
+    @Column(name = "charge_payment_mode_enum", nullable = true)
     private Integer chargePaymentMode;
 
     @Column(name = "fee_on_day", nullable = true)
@@ -85,7 +85,9 @@ public class Charge extends AbstractPersistable<Long> {
         final ChargeTimeType chargeTimeType = ChargeTimeType.fromInt(command.integerValueOfParameterNamed("chargeTimeType"));
         final ChargeCalculationType chargeCalculationType = ChargeCalculationType.fromInt(command
                 .integerValueOfParameterNamed("chargeCalculationType"));
-        final ChargePaymentMode paymentMode = ChargePaymentMode.fromInt(command.integerValueOfParameterNamed("chargePaymentMode"));
+        final Integer chargePaymentMode = command.integerValueOfParameterNamed("chargePaymentMode");
+        
+        final ChargePaymentMode paymentMode = (chargePaymentMode == null) ? null : ChargePaymentMode.fromInt(chargePaymentMode);
 
         final boolean penalty = command.booleanPrimitiveValueOfParameterNamed("penalty");
         final boolean active = command.booleanPrimitiveValueOfParameterNamed("active");
@@ -111,7 +113,7 @@ public class Charge extends AbstractPersistable<Long> {
         this.chargeCalculation = chargeCalculationType.getValue();
         this.penalty = penalty;
         this.active = active;
-        this.chargePaymentMode = paymentMode.getValue();
+        this.chargePaymentMode = (paymentMode == null) ? null : paymentMode.getValue();
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charges");
@@ -316,14 +318,16 @@ public class Charge extends AbstractPersistable<Long> {
             }
         }
 
-        final String paymentModeParamName = "chargePaymentMode";
-        if (command.isChangeInIntegerParameterNamed(paymentModeParamName, this.chargePaymentMode)) {
-            final Integer newValue = command.integerValueOfParameterNamed(paymentModeParamName);
-            actualChanges.put(paymentModeParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.chargePaymentMode = ChargePaymentMode.fromInt(newValue).getValue();
+        if (this.isLoanCharge()) {// validate only for loan charge
+            final String paymentModeParamName = "chargePaymentMode";
+            if (command.isChangeInIntegerParameterNamed(paymentModeParamName, this.chargePaymentMode)) {
+                final Integer newValue = command.integerValueOfParameterNamed(paymentModeParamName);
+                actualChanges.put(paymentModeParamName, newValue);
+                actualChanges.put("locale", localeAsInput);
+                this.chargePaymentMode = ChargePaymentMode.fromInt(newValue).getValue();
+            }
         }
-        
+
         if (command.hasParameter("feeOnMonthDay")) {
             final MonthDay monthDay = command.extractMonthDayNamed("feeOnMonthDay");
             final String actualValueEntered = command.stringValueOfParameterNamed("feeOnMonthDay");
