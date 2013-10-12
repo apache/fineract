@@ -116,7 +116,7 @@ public class Charge extends AbstractPersistable<Long> {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charges");
 
-        if (isMonthlyFee()) {
+        if (isMonthlyFee() || isAnnualFee()) {
             this.feeOnMonth = feeOnMonthDay.getMonthOfYear();
             this.feeOnDay = feeOnMonthDay.getDayOfMonth();
             this.feeInterval = feeInterval;
@@ -400,6 +400,10 @@ public class Charge extends AbstractPersistable<Long> {
     
     public boolean isMonthlyFee() {
         return ChargeTimeType.fromInt(this.chargeTime).isMonthlyFee();
+    }
+    
+    public boolean isAnnualFee() {
+        return ChargeTimeType.fromInt(this.chargeTime).isAnnualFee();
     }
     
     public MonthDay getFeeOnMonthDay(){
