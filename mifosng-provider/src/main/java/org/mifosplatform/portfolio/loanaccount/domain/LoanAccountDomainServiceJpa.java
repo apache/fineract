@@ -15,7 +15,10 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.holiday.domain.HolidayRepository;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
@@ -35,6 +38,7 @@ import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -110,7 +114,18 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds, allowTransactionsOnHoliday,
                 holidays, workingDays, allowTransactionsOnNonWorkingDay);
 
-        this.loanTransactionRepository.save(newRepaymentTransaction);
+        try {
+            this.loanTransactionRepository.save(newRepaymentTransaction);
+        } catch (DataIntegrityViolationException e) {
+            final Throwable realCause = e.getCause();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
+            if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
+                baseDataValidator.reset().parameter("externalId").value(newRepaymentTransaction.getExternalId()).failWithCode("value.must.be.unique");
+            }
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                    "Validation errors exist.", dataValidationErrors); }
+        }
 
         /***
          * TODO Vishwas Batch save is giving me a
@@ -119,20 +134,20 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
          * only in edge cases (when a payment is made before the latest payment
          * recorded against the loan)
          ***/
+        
+        this.loanRepository.saveAndFlush(loan);
+
         if (changedTransactionDetail != null) {
-            for(Map.Entry<Long,LoanTransaction> mapEntry:changedTransactionDetail.getNewTransactionMappings().entrySet()){
+            for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                 this.loanTransactionRepository.save(mapEntry.getValue());
                 updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
         }
-        this.loanRepository.save(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, newRepaymentTransaction, noteText);
             this.noteRepository.save(note);
         }
-        
-        
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
@@ -255,10 +270,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         loanTransaction.reverse();
         this.loanTransactionRepository.save(loanTransaction);
     }
-    
-    private void updateLoanTransaction(final Long loanTransactionId,final LoanTransaction newLoanTransaction){
+
+    private void updateLoanTransaction(final Long loanTransactionId, final LoanTransaction newLoanTransaction) {
         final AccountTransfer transferTransaction = this.accountTransferRepository.findByToLoanTransactionId(loanTransactionId);
-        if(transferTransaction!=null){
+        if (transferTransaction != null) {
             transferTransaction.updateToLoanTransaction(newLoanTransaction);
             this.accountTransferRepository.save(transferTransaction);
         }

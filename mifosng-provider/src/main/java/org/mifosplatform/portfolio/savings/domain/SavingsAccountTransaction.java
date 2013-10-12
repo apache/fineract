@@ -205,6 +205,10 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     public boolean isDeposit() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isDeposit();
     }
+    
+    public boolean isDepositAndNotReversed() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isDeposit() && isNotReversed();
+    }
 
     public boolean isWithdrawal() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isWithdrawal();
