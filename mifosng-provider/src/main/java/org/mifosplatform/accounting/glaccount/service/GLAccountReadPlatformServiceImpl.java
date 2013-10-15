@@ -45,7 +45,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
                     + "classification_enum as classification, account_usage as accountUsage, gl.description as description, "
                     + nameDecoratedBaseOnHierarchy
                     + "as nameDecorated, "
-                    + "cv.id as codeId, cv.code_value as codeValue,gl_j.office_running_balance as officeRunningBalance,gl_j.organization_running_balance as organizationRunningBalance "
+                    + "cv.id as codeId, cv.code_value as codeValue,gl_j.organization_running_balance as organizationRunningBalance "
                     + "from acc_gl_account gl left join m_code_value cv on tag_id=cv.id "
                     + "left outer Join acc_gl_journal_entry gl_j on gl_j.account_id = gl.id";
 
@@ -69,10 +69,9 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             final Long codeId = rs.wasNull() ? null : rs.getLong("codeId");
             final String codeValue = rs.getString("codeValue");
             final CodeValueData tagId = CodeValueData.instance(codeId, codeValue);
-            final Long officeRunningBalance = rs.getLong("officeRunningBalance");
             final Long organizationRunningBalance =  rs.getLong("organizationRunningBalance");
             return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, accountType, usage, description,
-                    nameDecorated, tagId, officeRunningBalance,organizationRunningBalance);
+                    nameDecorated, tagId,organizationRunningBalance);
         }
     }
 
