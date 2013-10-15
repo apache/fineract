@@ -40,6 +40,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
     }
 
     private static final class GLAccountMapper implements RowMapper<GLAccountData> {
+
         public String schema() {
             return " gl.id as id, name as name, parent_id as parentId, gl_code as glCode, disabled as disabled, manual_journal_entries_allowed as manualEntriesAllowed, "
                     + "classification_enum as classification, account_usage as accountUsage, gl.description as description, "
@@ -69,9 +70,9 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             final Long codeId = rs.wasNull() ? null : rs.getLong("codeId");
             final String codeValue = rs.getString("codeValue");
             final CodeValueData tagId = CodeValueData.instance(codeId, codeValue);
-            final Long organizationRunningBalance =  rs.getLong("organizationRunningBalance");
+            final Long organizationRunningBalance = rs.getLong("organizationRunningBalance");
             return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, accountType, usage, description,
-                    nameDecorated, tagId,organizationRunningBalance);
+                    nameDecorated, tagId, organizationRunningBalance);
         }
     }
 
@@ -88,6 +89,9 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
         final GLAccountMapper rm = new GLAccountMapper();
         String sql = "select " + rm.schema();
+        // append SQL statement for fetching account totals
+        sql = sql + " and gl_j.id in (select t1.id from (SELECT t2.id , max(concat(t2.entry_date,t2.id)) "
+                + "FROM acc_gl_journal_entry t2 GROUP BY t2.account_id DESC) t1)";
         final Object[] paramaterArray = new Object[3];
         int arrayPos = 0;
         boolean filtersPresent = false;
@@ -152,9 +156,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
                 firstWhereConditionAdded = true;
             }
         }
-        sql = sql + " and gl_j.id in (select t1.id from (SELECT t2.id , max(concat(t2.entry_date,t2.id)) " +
-                "FROM acc_gl_journal_entry t2 " +
-                "GROUP BY t2.account_id DESC) t1)";
+
         final Object[] finalObjectArray = Arrays.copyOf(paramaterArray, arrayPos);
         return this.jdbcTemplate.query(sql, rm, finalObjectArray);
     }
@@ -164,9 +166,10 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
         try {
 
             final GLAccountMapper rm = new GLAccountMapper();
-            final String sql = "select " + rm.schema() + " where gl.id = gl_j.account_id and gl.id = ? ORDER BY entry_date DESC,id DESC LIMIT 1";
+            final String sql = "select " + rm.schema()
+                    + " where gl.id = gl_j.account_id and gl.id = ? ORDER BY entry_date DESC,id DESC LIMIT 1";
 
-            final GLAccountData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glAccountId});
+            final GLAccountData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glAccountId });
 
             return glAccountData;
         } catch (final EmptyResultDataAccessException e) {
