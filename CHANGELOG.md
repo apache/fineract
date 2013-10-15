@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 16 Oct 2013 - 1.12.0.RELEASE
 1. 7 Oct 2013 - 1.11.1.RELEASE
 1. 5 Oct 2013 - 1.11.0.RELEASE
 1. 4 Oct 2013 - 1.10.3.RELEASE
@@ -41,6 +42,24 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.12.0.RELEASE
+=============
+Feature Release
+
+This Feature Release adds support for Monthly fees for savings along with minor bug fixes
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-728] - Extend Recurring fees for Savings
+ - [MIFOSX-735] - add organizationRunningBalance and runningBalanceComputed to /glaccounts API output
+
+Bug 
+ - [MIFOSX-639] - loan transactions - externalId duplicates not being caught by exception
+ - [MIFOSX-723] - In Savings, not able to adjust the transaction for the amount deposited as "Minimum opening balance"
+ - [MIFOSX-732] - Payment type need not be specified for charges for savings products
+
 
 1.11.1.RELEASE
 =============
