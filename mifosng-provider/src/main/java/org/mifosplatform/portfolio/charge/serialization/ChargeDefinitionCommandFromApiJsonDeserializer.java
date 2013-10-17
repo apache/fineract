@@ -38,7 +38,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("name", "amount", "locale", "currencyCode",
             "currencyOptions", "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions", "penalty",
-            "active", "chargePaymentMode", "feeOnMonthDay", "feeInterval", "monthDayFormat"));
+            "active", "chargePaymentMode", "feeOnMonthDay", "feeInterval", "monthDayFormat","minCap","maxCap"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -84,7 +84,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final Integer chargePaymentMode = this.fromApiJsonHelper.extractIntegerNamed("chargePaymentMode", element, Locale.getDefault());
             baseDataValidator.reset().parameter("chargePaymentMode").value(chargePaymentMode).notNull().inMinMaxRange(0, 1);
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists("penalty", element)) {
             final Boolean penalty = this.fromApiJsonHelper.extractBooleanNamed("penalty", element);
             baseDataValidator.reset().parameter("penalty").value(penalty).notNull();
@@ -107,6 +107,15 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         if(ctt.isAnnualFee()){
             final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed("feeOnMonthDay", element); 
             baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay).notNull();
+        }
+
+        if(this.fromApiJsonHelper.parameterExists("minCap",element)){
+            final BigDecimal minCap = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("minCap", element.getAsJsonObject());
+            baseDataValidator.reset().parameter("minCap").value(minCap).notNull().positiveAmount();
+        }
+        if(this.fromApiJsonHelper.parameterExists("maxCap",element)){
+            final BigDecimal maxCap = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maxCap", element.getAsJsonObject());
+            baseDataValidator.reset().parameter("maxCap").value(maxCap).notNull().positiveAmount();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -135,6 +144,16 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         if (this.fromApiJsonHelper.parameterExists("amount", element)) {
             final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amount", element.getAsJsonObject());
             baseDataValidator.reset().parameter("amount").value(amount).notNull().positiveAmount();
+        }
+
+        if(this.fromApiJsonHelper.parameterExists("minCap",element)){
+            final BigDecimal minCap = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("minCap", element.getAsJsonObject());
+            baseDataValidator.reset().parameter("minCap").value(minCap).notNull().positiveAmount();
+        }
+
+        if(this.fromApiJsonHelper.parameterExists("maxCap",element)){
+            final BigDecimal maxCap = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maxCap", element.getAsJsonObject());
+            baseDataValidator.reset().parameter("maxCap").value(maxCap).notNull().positiveAmount();
         }
 
         if (this.fromApiJsonHelper.parameterExists("chargeAppliesTo", element)) {
@@ -178,6 +197,14 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         if (this.fromApiJsonHelper.parameterExists("active", element)) {
             final Boolean active = this.fromApiJsonHelper.extractBooleanNamed("active", element);
             baseDataValidator.reset().parameter("active").value(active).notNull();
+        }
+        if(this.fromApiJsonHelper.parameterExists("minCap",element)){
+            final BigDecimal minCap = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("minCap", element.getAsJsonObject());
+            baseDataValidator.reset().parameter("minCap").value(minCap).notNull().positiveAmount();
+        }
+        if(this.fromApiJsonHelper.parameterExists("maxCap",element)){
+            final BigDecimal maxCap = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maxCap", element.getAsJsonObject());
+            baseDataValidator.reset().parameter("maxCap").value(maxCap).notNull().positiveAmount();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

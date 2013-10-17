@@ -11283,7 +11283,9 @@ Request Body:
   "chargeCalculationType": "2",
   "chargePaymentMode": "1",
   "active": "true",
-  "penalty": "true"
+  "penalty": "true",
+  "minCap": 50.00,
+  "maxCap": 100.00
 }
 					</code>
 					<code class="method-response">
@@ -11389,7 +11391,49 @@ GET https://DomainName/api/v1/charges
         	"code":"chargepaymentmode.accounttransfer",
         	"value":"Account transfer"
         }
-    }
+    },
+	{
+    "id": 54,
+    "chargeId": 12,
+    "name": "Loan service fee 2",
+    "chargeTimeType": {
+      "id": 1,
+      "code": "chargeTimeType.disbursement",
+      "value": "Disbursement"
+    },
+    "chargeCalculationType": {
+      "id": 2,
+      "code": "chargeCalculationType.percent.of.amount",
+      "value": "% Amount"
+    },
+    "percentage": 2.000000,
+    "amountPercentageAppliedTo": 14000.000000,
+    "currency": {
+      "code": "KES",
+      "name": "Kenyan Shilling",
+      "decimalPlaces": 2,
+      "displaySymbol": "KSh",
+      "nameCode": "currency.KES",
+      "displayLabel": "Kenyan Shilling (KSh)"
+    },
+    "amount": 500.000000,
+    "amountPaid": 0,
+    "amountWaived": 0,
+    "amountWrittenOff": 0,
+    "amountOutstanding": 500.000000,
+    "amountOrPercentage": 2.000000,
+    "penalty": false,
+    "chargePaymentMode": {
+      "id": 1,
+      "code": "chargepaymentmode.accounttransfer",
+      "value": "Account transfer"
+    },
+    "paid": false,
+    "waived": false,
+    "chargePayable": true,
+    "minCap": 500.000000,
+    "maxCap": 1000.000000
+  },
 ]
 					</code>
 				</div>

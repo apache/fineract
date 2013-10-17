@@ -75,6 +75,13 @@ public class Charge extends AbstractPersistable<Long> {
     @Column(name = "is_deleted", nullable = false)
     private boolean deleted = false;
 
+    @Column(name = "min_cap", scale = 6, precision = 19, nullable = true)
+    private BigDecimal minCap;
+
+    @Column(name = "max_cap", scale = 6, precision = 19, nullable = true)
+    private BigDecimal maxCap;
+
+
     public static Charge fromJson(final JsonCommand command) {
 
         final String name = command.stringValueOfParameterNamed("name");
@@ -93,9 +100,11 @@ public class Charge extends AbstractPersistable<Long> {
         final boolean active = command.booleanPrimitiveValueOfParameterNamed("active");
         final MonthDay feeOnMonthDay = command.extractMonthDayNamed("feeOnMonthDay");
         final Integer feeInterval = command.integerValueOfParameterNamed("feeInterval");
+        final BigDecimal minCap = command.bigDecimalValueOfParameterNamed("minCap");
+        final BigDecimal maxCap  = command.bigDecimalValueOfParameterNamed("maxCap");
 
         return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculationType, penalty, active, paymentMode,
-                feeOnMonthDay, feeInterval);
+                feeOnMonthDay, feeInterval,minCap,maxCap);
     }
 
     protected Charge() {
@@ -104,7 +113,8 @@ public class Charge extends AbstractPersistable<Long> {
 
     private Charge(final String name, final BigDecimal amount, final String currencyCode, final ChargeAppliesTo chargeAppliesTo,
             final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean penalty,
-            final boolean active, final ChargePaymentMode paymentMode, final MonthDay feeOnMonthDay, final Integer feeInterval) {
+            final boolean active, final ChargePaymentMode paymentMode, final MonthDay feeOnMonthDay, final Integer feeInterval,
+            final BigDecimal minCap, final BigDecimal maxCap) {
         this.name = name;
         this.amount = amount;
         this.currencyCode = currencyCode;
@@ -114,6 +124,8 @@ public class Charge extends AbstractPersistable<Long> {
         this.penalty = penalty;
         this.active = active;
         this.chargePaymentMode = (paymentMode == null) ? null : paymentMode.getValue();
+        this.minCap = minCap;
+        this.maxCap = maxCap;
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charges");
@@ -222,6 +234,19 @@ public class Charge extends AbstractPersistable<Long> {
 
     public boolean isAllowedSavingsChargeCalculationType() {
         return ChargeCalculationType.fromInt(this.chargeCalculation).isAllowedSavingsChargeCalculationType();
+    }
+
+    public boolean isPercentageOfAmount(){
+        return ChargeCalculationType.fromInt(this.chargeCalculation).isPercentageOfAmount();
+    }
+
+    public BigDecimal getMinCap() {
+        return this.minCap;
+    }
+
+
+    public BigDecimal getMaxCap() {
+        return this.maxCap;
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -367,6 +392,25 @@ public class Charge extends AbstractPersistable<Long> {
             actualChanges.put(activeParamName, newValue);
             this.active = newValue;
         }
+        //allow min and max cap to be only added to PERCENT_OF_AMOUNT for now
+        if(isPercentageOfAmount()){
+            final String minCapParamName = "minCap";
+            if (command.isChangeInBigDecimalParameterNamed(minCapParamName, this.minCap)) {
+                final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(minCapParamName);
+                actualChanges.put(minCapParamName, newValue);
+                actualChanges.put("locale", localeAsInput);
+                this.minCap = newValue;
+            }
+            final String maxCapParamName = "maxCap";
+            if (command.isChangeInBigDecimalParameterNamed(maxCapParamName, this.maxCap)) {
+                final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(maxCapParamName);
+                actualChanges.put(maxCapParamName, newValue);
+                actualChanges.put("locale", localeAsInput);
+                this.maxCap = newValue;
+            }
+        }
+
+
 
         if (this.penalty && ChargeTimeType.fromInt(this.chargeTime).isTimeOfDisbursement()) { throw new ChargeDueAtDisbursementCannotBePenaltyException(
                 this.name); }
@@ -395,7 +439,7 @@ public class Charge extends AbstractPersistable<Long> {
         final EnumOptionData chargePaymentmode = ChargeEnumerations.chargePaymentMode(this.chargePaymentMode);
         final CurrencyData currency = new CurrencyData(this.currencyCode, null, 0, 0, null, null);
         return ChargeData.instance(getId(), this.name, this.amount, currency, chargeTimeType, chargeAppliesTo, chargeCalculationType,
-                chargePaymentmode, this.getFeeOnMonthDay(), this.feeInterval, this.penalty, this.active);
+                chargePaymentmode, this.getFeeOnMonthDay(), this.feeInterval, this.penalty, this.active,this.minCap,this.maxCap);
     }
 
     public Integer getChargePaymentMode() {

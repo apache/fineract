@@ -89,6 +89,12 @@ public class LoanCharge extends AbstractPersistable<Long> {
     @Column(name = "waived", nullable = false)
     private boolean waived = false;
 
+    @Column(name = "min_cap", scale = 6, precision = 19, nullable = true)
+    private BigDecimal minCap;
+
+    @Column(name = "max_cap", scale = 6, precision = 19, nullable = true)
+    private BigDecimal maxCap;
+
     public static LoanCharge createNewFromJson(final Loan loan, final Charge chargeDefinition, final JsonCommand command) {
 
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
@@ -121,6 +127,8 @@ public class LoanCharge extends AbstractPersistable<Long> {
         this.loan = loan;
         this.charge = chargeDefinition;
         this.penaltyCharge = chargeDefinition.isPenalty();
+        this.minCap = chargeDefinition.getMinCap();
+        this.maxCap = chargeDefinition.getMaxCap();
 
         this.chargeTime = chargeDefinition.getChargeTime();
         if (chargeTime != null) {
@@ -155,7 +163,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
             this.chargePaymentMode = chargePaymentMode.getValue();
         }
 
-        populateDerivedFields(loanPrincipal, chargeAmount);
+        populateDerivedFields(loanPrincipal,chargeAmount);
         this.paid = determineIfFullyPaid();
     }
 
@@ -183,7 +191,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
             case PERCENT_OF_AMOUNT:
                 this.percentage = chargeAmount;
                 this.amountPercentageAppliedTo = loanPrincipal;
-                this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
+                this.amount = minimumAndMaximumCap(percentageOf(this.amountPercentageAppliedTo, this.percentage));
                 this.amountPaid = null;
                 this.amountOutstanding = calculateOutstanding();
                 this.amountWaived = null;
@@ -262,7 +270,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
                 case PERCENT_OF_AMOUNT:
                     this.percentage = amount;
                     this.amountPercentageAppliedTo = loanPrincipal;
-                    this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
+                    this.amount = minimumAndMaximumCap(percentageOf(this.amountPercentageAppliedTo, this.percentage));
                     this.amountOutstanding = calculateOutstanding();
                 break;
                 case PERCENT_OF_AMOUNT_AND_INTEREST:
@@ -313,7 +321,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
                 case PERCENT_OF_AMOUNT:
                     this.percentage = newValue;
                     this.amountPercentageAppliedTo = loanPrincipal;
-                    this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
+                    this.amount = minimumAndMaximumCap(percentageOf(this.amountPercentageAppliedTo, this.percentage));
                     this.amountOutstanding = calculateOutstanding();
                 break;
                 case PERCENT_OF_AMOUNT_AND_INTEREST:
@@ -393,8 +401,32 @@ public class LoanCharge extends AbstractPersistable<Long> {
             final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100l), mc);
             percentageOf = value.multiply(multiplicand, mc);
         }
-
         return percentageOf;
+    }
+
+    /**
+     * @param percentageOf
+     * @returns a minimum cap or maximum cap set on charges if the criteria fits
+     * else it returns the percentageOf if the amount is within min and max cap
+     */
+    private BigDecimal minimumAndMaximumCap(BigDecimal percentageOf){
+        BigDecimal minMaxCap = BigDecimal.ZERO;
+        if(this.minCap !=null){
+            int minimumCap = percentageOf.compareTo(minCap);
+            if(minimumCap == -1){
+                minMaxCap = this.minCap;
+                return minMaxCap;
+            }
+        }
+        if(this.maxCap !=null){
+            int maximumCap = percentageOf.compareTo(maxCap);
+            if(maximumCap == 1)  {
+               minMaxCap = this.maxCap;
+               return minMaxCap;
+            }
+        }
+        minMaxCap = percentageOf;
+        return minMaxCap;
     }
 
     public BigDecimal amount() {
@@ -441,6 +473,14 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     public boolean isWaived() {
         return this.waived;
+    }
+
+    public BigDecimal getMinCap() {
+        return this.minCap;
+    }
+
+    public BigDecimal getMaxCap() {
+        return this.maxCap;
     }
 
     public boolean isPaidOrPartiallyPaid(final MonetaryCurrency currency) {
