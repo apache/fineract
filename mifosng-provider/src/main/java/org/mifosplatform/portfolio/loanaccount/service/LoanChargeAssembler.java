@@ -47,6 +47,7 @@ public class LoanChargeAssembler {
         final Set<LoanCharge> loanCharges = new HashSet<LoanCharge>();
 
         final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
+        final Integer numberOfRepayments = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("numberOfRepayments", element);
 
         if (element.isJsonObject()) {
             final JsonObject topLevelJsonElement = element.getAsJsonObject();
@@ -83,14 +84,14 @@ public class LoanChargeAssembler {
                             chargePaymentModeEnum = ChargePaymentMode.fromInt(chargePaymentMode);
                         }
                         final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition, principal, amount, chargeTime,
-                                chargeCalculation, dueDate, chargePaymentModeEnum);
+                                chargeCalculation, dueDate, chargePaymentModeEnum,numberOfRepayments);
                         loanCharges.add(loanCharge);
                     } else {
                         final Long loanChargeId = id;
                         final LoanCharge loanCharge = this.loanChargeRepository.findOne(loanChargeId);
                         if (loanCharge == null) { throw new LoanChargeNotFoundException(loanChargeId); }
 
-                        loanCharge.update(amount, dueDate, principal);
+                        loanCharge.update(amount, dueDate, principal, numberOfRepayments);
 
                         loanCharges.add(loanCharge);
                     }

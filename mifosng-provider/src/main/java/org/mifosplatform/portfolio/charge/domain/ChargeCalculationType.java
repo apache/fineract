@@ -56,11 +56,23 @@ public enum ChargeCalculationType {
         return this.value.equals(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue());
     }
 
+    public boolean isPercentageOfAmountAndInterest() {
+        return this.value.equals(ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue());
+    }
+
+    public boolean isPercentageOfInterest() {
+        return this.value.equals(ChargeCalculationType.PERCENT_OF_INTEREST.getValue());
+    }
+
     public boolean isFlat() {
         return this.value.equals(ChargeCalculationType.FLAT.getValue());
     }
 
     public boolean isAllowedSavingsChargeCalculationType() {
         return isFlat() || isPercentageOfAmount();
+    }
+    
+    public boolean isPercentageBased(){
+        return isPercentageOfAmount() || isPercentageOfAmountAndInterest() || isPercentageOfInterest();
     }
 }

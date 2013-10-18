@@ -925,7 +925,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (loanCharge.isWaived()) {
             throw new LoanChargeCannotBeWaivedException(LOAN_CHARGE_CANNOT_BE_WAIVED_REASON.ALREADY_WAIVED, loanCharge.getId());
         } else if (loanCharge.isPaid()) { throw new LoanChargeCannotBeWaivedException(LOAN_CHARGE_CANNOT_BE_WAIVED_REASON.ALREADY_PAID,
-                loanCharge.getId()); }
+                loanCharge.getId()); 
+        } else if (loanCharge.isInstalmentFee()){
+            throw new LoanChargeCannotBeWaivedException(LOAN_CHARGE_CANNOT_BE_WAIVED_REASON.WAIVE_NOT_ALLOWED_FOR_CHARGE,
+                    loanCharge.getId()); 
+        }
 
         final Map<String, Object> changes = new LinkedHashMap<String, Object>(3);
 
@@ -1001,7 +1005,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (loanCharge.isWaived()) {
             throw new LoanChargeCannotBePayedException(LOAN_CHARGE_CANNOT_BE_PAYED_REASON.ALREADY_WAIVED, loanCharge.getId());
         } else if (loanCharge.isPaid()) { throw new LoanChargeCannotBePayedException(LOAN_CHARGE_CANNOT_BE_PAYED_REASON.ALREADY_PAID,
-                loanCharge.getId()); }
+                loanCharge.getId()); 
+        }else if (loanCharge.isInstalmentFee()){
+            throw new LoanChargeCannotBePayedException(LOAN_CHARGE_CANNOT_BE_PAYED_REASON.CHARGE_NOT_PAYABLE,
+                    loanCharge.getId()); 
+        }
 
         if (!loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()) { throw new LoanChargeCannotBePayedException(
                 LOAN_CHARGE_CANNOT_BE_PAYED_REASON.CHARGE_NOT_ACCOUNT_TRANSFER, loanCharge.getId()); }
