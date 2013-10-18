@@ -11072,6 +11072,26 @@ Request Body:
 			            		This field is mandatory if <i>chargeTimeType</i> is of type <b>Monthly Fee</b>
 			            	</td>
 			            </tr>
+						<tr class=alt>
+							<td>minCap</td>
+                        </tr>	
+                        <tr> 
+							<td class=fielddesc>minimum cap: a 2% fee with a minimum cap of 500<br/>
+							    In case of a 5000 loan, the 2% is 100, and therefore automatically 500 is used as the value of the charge.<br/>
+								This field is optional and can be used along when ChargeCalculationType equals (2) PERCENT_OF_AMOUNT  
+							</td>
+							 
+
+                        </tr>	
+                        <tr class=alt>
+							<td>maxCap</td>
+                        </tr>	
+                        <tr>
+							<td class=fielddesc>maximum cap: A 2% fee, with a maximum of 2000.  <br/>
+							    In case of a 150000 loan, the 2% adds up to 3000 charge, and therefore the maximum cap of 2000 will be used. <br />
+								This field is optional and can be used along when ChargeCalculationType equals (2) PERCENT_OF_AMOUNT 
+							</td>
+                        </tr>						
 					</table>
 				</div>
 			</div>

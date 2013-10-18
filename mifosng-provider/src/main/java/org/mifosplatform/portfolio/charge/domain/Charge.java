@@ -123,8 +123,7 @@ public class Charge extends AbstractPersistable<Long> {
         this.penalty = penalty;
         this.active = active;
         this.chargePaymentMode = paymentMode == null ? null : paymentMode.getValue();
-        this.minCap = minCap;
-        this.maxCap = maxCap;
+
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charges");
@@ -161,6 +160,10 @@ public class Charge extends AbstractPersistable<Long> {
                 baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTime)
                         .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
             }
+        }
+        if(isPercentageOfAmount()){
+            this.minCap = minCap;
+            this.maxCap = maxCap;
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
