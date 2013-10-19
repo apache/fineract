@@ -32,7 +32,7 @@ The two ways to get up and running with mifos platform is:
 
 ## 1. Amazon Public AMI
 
-  Use AWS Wizard to launch instance by using this link: <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=eu-west-1#launchAmi=ami-2b2d3f5f" title="Mifos Platform Public AMI 1.13.0.RELEASE">ami-2b2d3f5f</a>
+  Use AWS Wizard to launch instance by using this link: <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=eu-west-1#launchAmi=ami-948b6be3" title="Mifos Platform Public AMI 1.13.0.RELEASE">Mifos Platform AMI (ami-948b6be3)</a>
 
   *Note:* Read through the following as you step through the AWS Wizard
   
@@ -49,11 +49,11 @@ The two ways to get up and running with mifos platform is:
 
   *Name:* Mifos Platform 1.13.0.RELEASE Public AMI
   
- - AMI ID: ami-2b2d3f5f
+ - AMI ID: ami-948b6be3
  - Kernel ID: aki-71665e05
  - Name: Mifos Platform 1.13.0.RELEASE Public AMI
  - Owner: 476083131096
- - Source: 476083131096/Mifos Platform 1.4.0.RELEASE Public AMI
+ - Source: 476083131096/Mifos Platform 1.13.0.RELEASE Public AMI
  - Architecture: Ubuntu12.04 LTS x86_64
  - Built starting from Ubuntu AMI ami-35acbb41
  - Java 1.6_45 32 bit JVM
