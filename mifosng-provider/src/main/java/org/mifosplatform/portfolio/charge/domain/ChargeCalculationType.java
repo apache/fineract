@@ -29,6 +29,10 @@ public enum ChargeCalculationType {
         return this.code;
     }
 
+    public static Object[] validValues() {
+        return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue() };
+    }
+
     public static ChargeCalculationType fromInt(final Integer chargeCalculation) {
         ChargeCalculationType chargeCalculationType = ChargeCalculationType.INVALID;
         switch (chargeCalculation) {

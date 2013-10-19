@@ -8,9 +8,11 @@ package org.mifosplatform.portfolio.charge.domain;
 public enum ChargeTimeType {
 
     INVALID(0, "chargeTimeType.invalid"), //
-    DISBURSEMENT(1, "chargeTimeType.disbursement"), //only for loan charges
-    SPECIFIED_DUE_DATE(2, "chargeTimeType.specifiedDueDate"), // for loan and savings charges
-    SAVINGS_ACTIVATION(3, "chargeTimeType.savingsActivation"), // only for savings
+    DISBURSEMENT(1, "chargeTimeType.disbursement"), // only for loan charges
+    SPECIFIED_DUE_DATE(2, "chargeTimeType.specifiedDueDate"), // for loan and
+                                                              // savings charges
+    SAVINGS_ACTIVATION(3, "chargeTimeType.savingsActivation"), // only for
+                                                               // savings
     SAVINGS_CLOSURE(4, "chargeTimeType.savingsClosure"), // only for savings
     WITHDRAWAL_FEE(5, "chargeTimeType.withdrawalFee"), // only for savings
     ANNUAL_FEE(6, "chargeTimeType.annualFee"), // only for savings
@@ -32,45 +34,45 @@ public enum ChargeTimeType {
         return this.code;
     }
 
-    public static int minValue() {
-        return 1;
+    public static Object[] validLoanValues() {
+        return new Integer[] { ChargeTimeType.DISBURSEMENT.getValue(), ChargeTimeType.SPECIFIED_DUE_DATE.getValue() };
     }
 
-    public static int maxValue() {
-        int max = 1;// Default it to one (1)
-        for (ChargeTimeType chargeTimeType : ChargeTimeType.values()) {
-            max = (chargeTimeType.getValue() > max) ? chargeTimeType.getValue() : max;
-        }
-        return max;
+    public static Object[] validSavingsValues() {
+        return new Integer[] { ChargeTimeType.SPECIFIED_DUE_DATE.getValue(), ChargeTimeType.SAVINGS_ACTIVATION.getValue(),
+                ChargeTimeType.SAVINGS_CLOSURE.getValue(), ChargeTimeType.WITHDRAWAL_FEE.getValue(), ChargeTimeType.ANNUAL_FEE.getValue(),
+                ChargeTimeType.MONTHLY_FEE.getValue() };
     }
 
     public static ChargeTimeType fromInt(final Integer chargeTime) {
         ChargeTimeType chargeTimeType = ChargeTimeType.INVALID;
-        switch (chargeTime) {
-            case 1:
-                chargeTimeType = DISBURSEMENT;
-            break;
-            case 2:
-                chargeTimeType = SPECIFIED_DUE_DATE;
-            break;
-            case 3:
-                chargeTimeType = SAVINGS_ACTIVATION;
-            break;
-            case 4:
-                chargeTimeType = SAVINGS_CLOSURE;
-            break;
-            case 5:
-                chargeTimeType = WITHDRAWAL_FEE;
-            break;
-            case 6:
-                chargeTimeType = ANNUAL_FEE;
-            break;
-            case 7:
-                chargeTimeType = MONTHLY_FEE;
-            break;
-            default:
-                chargeTimeType = INVALID;
-            break;
+        if (chargeTime != null) {
+            switch (chargeTime) {
+                case 1:
+                    chargeTimeType = DISBURSEMENT;
+                break;
+                case 2:
+                    chargeTimeType = SPECIFIED_DUE_DATE;
+                break;
+                case 3:
+                    chargeTimeType = SAVINGS_ACTIVATION;
+                break;
+                case 4:
+                    chargeTimeType = SAVINGS_CLOSURE;
+                break;
+                case 5:
+                    chargeTimeType = WITHDRAWAL_FEE;
+                break;
+                case 6:
+                    chargeTimeType = ANNUAL_FEE;
+                break;
+                case 7:
+                    chargeTimeType = MONTHLY_FEE;
+                break;
+                default:
+                    chargeTimeType = INVALID;
+                break;
+            }
         }
         return chargeTimeType;
     }
@@ -90,11 +92,11 @@ public enum ChargeTimeType {
     public boolean isSavingsClosure() {
         return this.value.equals(ChargeTimeType.SAVINGS_CLOSURE.getValue());
     }
-    
+
     public boolean isWithdrawalFee() {
         return this.value.equals(ChargeTimeType.WITHDRAWAL_FEE.getValue());
     }
-    
+
     public boolean isAnnualFee() {
         return this.value.equals(ChargeTimeType.ANNUAL_FEE.getValue());
     }
@@ -102,7 +104,7 @@ public enum ChargeTimeType {
     public boolean isMonthlyFee() {
         return this.value.equals(ChargeTimeType.MONTHLY_FEE.getValue());
     }
-    
+
     public boolean isAllowedLoanChargeTime() {
         return isTimeOfDisbursement() || isOnSpecifiedDueDate();
     }

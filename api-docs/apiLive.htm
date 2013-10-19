@@ -1507,6 +1507,10 @@
 								<td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Transaction Template</a></td>
 							</tr>
 							<tr>
+								<td>charges/template</td>
+								<td><a href="#charges_template">Retrieve Charge Template</a></td>
+							</tr>
+							<tr>
 								<td>offices/template</td>
 								<td><a href="#offices_template">Retrieve Office Template</a></td>
 							</tr>
@@ -10980,388 +10984,413 @@ Request Body:
 			</div>
 
 <!--Charges section starts here-->
-			<a id="charges" name="charges" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h3>Charges</h3>
-					<p>
-						Its typical for MFIs to add extra costs for their financial
-						products. There are typically <b>Fees</b> or <b>Penalties</b>.
-					</p>
-					<p>Charges is what we use to model both fees and penalties.
-						For now charges can only be associated with loan products / loans.</p>
-					<table class=matrixHeading>
-						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
-						</tr>
-						<tr class=alt>
-							<td>name</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Name associated with this charge.</td>
-						</tr>
-						<tr class=alt>
-							<td>active</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Boolean flag determines if the Charge is currently active.</td>
-						</tr>
-						<tr class=alt>
-							<td>penalty</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Boolean flag determines if the Charge is a penalty.</td>
-						</tr>
-						<tr class=alt>
-							<td>currency</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Details of the currency associated with this charge.
-							Refer <a href="#charges_template">Charges Template</a> for additional details</td>
-						</tr>
-						<tr class=alt>
-							<td>amount</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Field holds the details of the actual amount to be collected 
-								in the case of "Flat Charges" or the percentage amount to be collected in
-								case of "Percentage Amount Charges". Refer <a href="#charges_template">Charges Template</a>
-								for details of the Available Charge Types</td>
-						</tr>
-						<tr class=alt>
-							<td>chargeTimeType</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>The time at which the charge becomes Due.
-							Refer <a href="#charges_template">Charges Template</a> for additional details<br/>
-							1 = Disbursement : Applicable for loans and deducted at the time of loan disbursement.<br/>
-							2 = Specified Due Date : Adhoc charge can be applied for loans and savings on a specified due date.<br/>
-							3 = Savings Activation : This charge is applicable for savings account and charged at the time of account activation. This charge will be autodeducted once the account is activated with sufficient opening balance.<br/>
-							5 = Withdrawal fee : Charge applied to every withdrawal of savings account.<br/>
-							6 = Annual Fee : Recurring charge applied annually for savings on a specified Month and day.<br/>
-							7 = Monthly Fee : Recurring charge applied on regular interval of months for savings.
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>chargeAppliesTo</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>The Entity for which the charge can be applied (Loans, Savings etc).
-							Refer <a href="#charges_template">Charges Template</a> for additional details</td>
-						</tr>
-						<tr class=alt>
-							<td>chargeCalculationType</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Rules for calculating the amount for a particular Charge.
-							Refer <a href="#charges_template">Charges Template</a> for additional details</td>
-						</tr>
-						<tr class=alt>
-							<td>feeOnMonthDay</td>
-						</tr>
-						<tr>
-			            	<td class=fielddesc>Used along with <i>monthDayFormat</i> to indicate the recurring charge due date starting on a given day of the month and follow specified <i>feeInterval</i>. e.g. fee due date starting on <b>10 May</b> with <i>feeInterval</i> of two (2) months then a recurring fee on 10th of every two months is applied to savings account. <i>monthDayFormat</i> indicates day and month formatting used e.g. "dd MMM" for 10 May <br/>
-			            		This field is mandatory if <i>chargeTimeType</i> is of type <b>Monthly Fee</b> 
-			            	</td>
-			            </tr>
-			            <tr class=alt>
-							<td>feeInterval</td>
-						</tr>
-						<tr>
-			            	<td class=fielddesc>Fee to be applied on a specified interval (number of months).<br/>
-			            		This field is mandatory if <i>chargeTimeType</i> is of type <b>Monthly Fee</b>
-			            	</td>
-			            </tr>
-						<tr class=alt>
-							<td>minCap</td>
-                        </tr>	
-                        <tr> 
-							<td class=fielddesc>minimum cap: a 2% fee with a minimum cap of 500<br/>
-							    In case of a 5000 loan, the 2% is 100, and therefore automatically 500 is used as the value of the charge.<br/>
-								This field is optional and can be used along when ChargeCalculationType equals (2) PERCENT_OF_AMOUNT  
-							</td>
-							 
+<a id="charges" name="charges" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+	<div class="method-description">
+		<h3>Charges</h3>
+		<p>
+			Its typical for MFIs to add extra costs for their financial
+			products. These are typically <b>Fees</b> or <b>Penalties</b>.
+		</p>
+		<p>A <strong><i>Charge</i></strong> on mifos platform is what we use to model both <b>Fees</b> and <b>Penalties</b>.</p>
+		<p>At present we support defining charges for use in both loan and saving products.</p>
+		<table class=matrixHeading>
+			<tr class="matrixHeadingBG">
+				<td><div class="mifosXHeading2">Field Descriptions</div></td>
+			</tr>
+			<tr class=alt>
+				<td>name</td>
+			</tr>
+			<tr>
+				<td class=fielddesc>Name associated with this charge.</td>
+			</tr>
+			<tr class=alt>
+				<td>chargeAppliesTo</td>
+			</tr>
+			<tr>
+				<td class=fielddesc>Enumeration for indicating whether charge is to be applicable for loans or savings.<br/>
+					1=Loans,
+					2=Savings
+				<p>Once a charge definiton has been created, this attribute cannot be changed at any point.</p>
+				</td>
+			</tr>
+			<tr class=alt>
+				<td>active</td>
+			</tr>
+			<tr>
+				<td class=fielddesc>Boolean flag determines if the charge is currently active.</td>
+			</tr>
+			<tr class=alt>
+				<td>penalty</td>
+			</tr>
+			<tr>
+				<td class=fielddesc>Boolean flag determines if the charge is a <b>penalty</b>. If false the charge is considered a <b>Fee</b></td>
+			</tr>
+			<tr class=alt>
+				<td>currencyCode</td>
+			</tr>
+			<tr>
+				<td class=fielddesc>A three letter ISO code of currency.</td>
+			</tr>
+			<tr class=alt>
+				<td>chargeCalculationType</td>
+			</tr>
+			<tr>
+				<td class=fielddesc>Enumeration for indicating whether charge amount is <b>flat</b> or <b>percentage</b> based:<br/>
+					1=Flat,
+					2=% of Amount
+				<p>Used in combination with <i>amount</i> parameter e.g 1 <b>% of Amount</b> or 3.50 <b>Flat</b></p>
+				<p>For loans, % of Amount refers to the loan principal disbursed.</p>
+				<p>For savings, % of Amount can be used with 'withrawal fees' and refers to the amount withdrawn.</p>
+				</td>
+			</tr>
+			<tr class=alt>
+				<td>amount</td>
+			</tr>
+			<tr>
+				<td class=fielddesc>The charge amount. Used in combination with <i>chargeCalculationType</i> parameter. e.g <b>1</b> % of Amount or <b>3.50</b> Flat</td>
+			</tr>
+			<tr class=alt>
+				<td>minCap</td>
+            </tr>	
+            <tr> 
+				<td class=fielddesc><b>Optional</b>: Can be used when a '% of Amount' value is used for <i>chargeCalculationType</i>.
+				<p>Used to enforce a minimum charge amount in cases where the calculated amount is less than the minimum amount provided.</p>
+				<p>e.g. A 2% fee with a minimum cap of 500:</br>
+				In case of a 5000 loan, the 2% is 100, and therefore automatically 500 is used as the value of the charge.
+				</p>  
+				</td>
+            </tr>	
+            <tr class=alt>
+				<td>maxCap</td>
+            </tr>	
+            <tr>
+            	<td class=fielddesc><b>Optional</b>: Can be used when a '% of Amount' value is used for <i>chargeCalculationType</i>.
+				<p>Used to enforce a maximum charge amount in cases where the calculated amount is greater than the maximum amount provided.</p>
+				<p>e.g. A 2% fee, with a maximum of 2000.:</br>
+				In case of a 150000 loan, the 2% adds up to 3000 charge, and therefore the maximum cap of 2000 will be used.
+				</p>  
+				</td>
+            </tr>
+			<tr class=alt>
+				<td>chargeTimeType</td>
+			</tr>
+			<tr>
+				<td class=fielddesc>An enumeration indicating the time at which the charge becomes due:<br/>
+				<p>
+				1 = Disbursement : Applicable for loans and deducted at the time of loan disbursement.<br/>
+				2 = Specified Due Date : Adhoc charge can be applied for loans and savings on a specified due date.<br/>
+				3 = Savings Activation : This charge is applicable for savings account and charged at the time of account activation. This charge will be autodeducted once the account is activated with sufficient opening balance.<br/>
+				5 = Withdrawal fee : Charge applied to every withdrawal of savings account.<br/>
+				6 = Annual Fee : Recurring charge applied annually for savings on a specified Month and day. see <i>feeOnMonthDay</i><br/>
+				7 = Monthly Fee : Recurring charge applied on regular interval of months for savings. see <i>feeOnMonthDay</i> and <i>feeInterval</i>
+				</p>
+				</td>
+			</tr>
+			<tr class=alt>
+				<td>chargePaymentMode</td>
+			</tr>
+			<tr>
+				<td class=fielddesc><b>Applicable to loan charges only:</b> Enumeration for indicating whether charge is to be paid through an <i>Account Transfer</i> from savings or through <i>Regular</i> payment mode.<br/>
+					0=Regular,
+					1=Account Transfer
+				</td>
+			</tr>
+			
+			<tr class=alt>
+				<td>feeOnMonthDay</td>
+			</tr>
+			<tr>
+            	<td class=fielddesc>Used along with <i>monthDayFormat</i> to indicate the recurring charge due date starting on a given day of the month and follow specified <i>feeInterval</i>. e.g. fee due date starting on <b>10 May</b> with <i>feeInterval</i> of two (2) months then a recurring fee on 10th of every two months is applied to savings account. <i>monthDayFormat</i> indicates day and month formatting used e.g. "dd MMM" for 10 May <br/>
+            	This field is mandatory if <i>chargeTimeType</i> is of type <b>Monthly Fee</b> 
+            	</td>
+            </tr>
+            <tr class=alt>
+				<td>feeInterval</td>
+			</tr>
+			<tr>
+            	<td class=fielddesc>Fee to be applied on a specified interval (number of months).<br/>
+            		This field is mandatory if <i>chargeTimeType</i> is of type <b>Monthly Fee</b>
+            	</td>
+            </tr>						
+		</table>
+	</div>
+</div>
 
-                        </tr>	
-                        <tr class=alt>
-							<td>maxCap</td>
-                        </tr>	
-                        <tr>
-							<td class=fielddesc>maximum cap: A 2% fee, with a maximum of 2000.  <br/>
-							    In case of a 150000 loan, the 2% adds up to 3000 charge, and therefore the maximum cap of 2000 will be used. <br />
-								This field is optional and can be used along when ChargeCalculationType equals (2) PERCENT_OF_AMOUNT 
-							</td>
-                        </tr>						
-					</table>
-				</div>
-			</div>
-
-			<a id="charges_template" name="charges_template"
-				class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Retrieve Charges Details Template</h4>
-					<p>This is a convenience resource. It can be useful when
-						building maintenance user interface screens for client
-						applications. The template data returned consists of any or all
-						of:
-					<ul>
-						<li class=normalli>Field Defaults</li>
-						<li class=normalli>Allowed Value Lists</li>
-					</ul>
-					</p>
-					<p>Example Request:</p>
-					<div class=apiClick>charges/template</div>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
+	<a id="charges_template" name="charges_template" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+			<h4>Retrieve Charge Template</h4>
+			<p>This is a convenience resource. It can be useful when
+				building maintenance user interface screens for client
+				applications. The template data returned consists of any or all
+				of:
+			<ul>
+				<li class=normalli>Field Defaults</li>
+				<li class=normalli>Allowed Value Lists</li>
+			</ul>
+			</p>
+			<p>Example Request:</p>
+			<div class=apiClick>charges/template</div>
+		</div>
+		<div class="method-example">
+			<code class="method-declaration">
 GET https://DomainName/api/v1/charges/template
-					</code>
-					<code class="method-response">
+			</code>
+			<code class="method-response">
 {
-   "active": false,
-   "penalty": false,
-   "currencyOptions":
-   [
-       {
-           "code": "USD",
-           "name": "US Dollar",
-           "decimalPlaces": 2,
-           "displaySymbol": "$",
-           "nameCode": "currency.USD",
-           "displayLabel": "US Dollar ($)"
-       }
-   ],
-   "chargeCalculationTypeOptions":
-   [
-       {
-           "id": 1,
-           "code": "chargeCalculationType.flat",
-           "value": "Flat"
-       },
-       {
-           "id": 2,
-           "code": "chargeCalculationType.percent.of.amount",
-           "value": "% Amount"
-       }
-   ],
-   "chargeAppliesToOptions":
-   [
-       {
-           "id": 1,
-           "code": "chargeAppliesTo.loan",
-           "value": "Loan"
-       },
-       {
-           "id": 2,
-           "code": "chargeAppliesTo.savings",
-           "value": "Savings"
-       }
-   ],
-   "chargeTimeTypeOptions":
-   [
-       {
-           "id": 1,
-           "code": "chargeTimeType.disbursement",
-           "value": "Disbursement"
-       },
-       {
-           "id": 2,
-           "code": "chargeTimeType.specifiedDueDate",
-           "value": "Specified due date"
-       },
-       {
-       	    "id": 3,
-       	    "code": "chargeTimeType.savingsActivation",
-       	    "value": "Savings Activation"
-       },
-       {
-       	    "id": 5,
-       	    "code": "chargeTimeType.withdrawalFee",
-       	    "value": "Withdrawal Fee"
-       },
-       {
-       	    "id": 6,
-       	    "code": "chargeTimeType.annualFee",
-       	    "value": "Annual Fee"
-       },
-       {
-       	    "id": 7,
-       	    "code": "chargeTimeType.monthlyFee",
-       	    "value": "Monthly Fee"
-       }
-   ],
-   "chargePaymetModeOptions":
-   [
-   		{
-   			"id":0,
-   			"code":"chargepaymentmode.regular",
-   			"value":"chargepaymentmode.regular"
-   		},
-   		{
-   			"id":1,
-   			"code":"chargepaymentmode.accounttransfer",
-   			"value":"chargepaymentmode.accounttransfer"
-   		}
-   	],
-   	"loanChargeCalculationTypeOptions" : [ { "code" : "chargeCalculationType.flat",
-        "id" : 1,
-        "value" : "Flat"
-      },
-      { "code" : "chargeCalculationType.percent.of.amount",
-        "id" : 2,
-        "value" : "% Amount"
-      }
-    ],
-  "loanChargeTimeTypeOptions" : [ { "code" : "chargeTimeType.disbursement",
-        "id" : 1,
-        "value" : "Disbursement"
-      },
-      { "code" : "chargeTimeType.specifiedDueDate",
-        "id" : 2,
-        "value" : "Specified due date"
-      }
-    ],
-  "savingsChargeCalculationTypeOptions" : [ { "code" : "chargeCalculationType.flat",
-        "id" : 1,
-        "value" : "Flat"
-      },
-      { "code" : "chargeCalculationType.percent.of.amount",
-        "id" : 2,
-        "value" : "% Amount"
-      }
-    ],
-  "savingsChargeTimeTypeOptions" : [ { "code" : "chargeTimeType.specifiedDueDate",
-        "id" : 2,
-        "value" : "Specified due date"
-      },
-      { "code" : "chargeTimeType.savingsActivation",
-        "id" : 3,
-        "value" : "Savings Activation"
-      },
-      { "code" : "chargeTimeType.withdrawalFee",
-        "id" : 5,
-        "value" : "Withdrawal Fee"
-      },
-      { "code" : "chargeTimeType.annualFee",
-        "id" : 6,
-        "value" : "Annual Fee"
-      },
-      { "code" : "chargeTimeType.monthlyFee",
-        "id" : 7,
-        "value" : "Monthly Fee"
-      }
-    ]
+  "active": false,
+  "penalty": false,
+  "currencyOptions": [
+    {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    }
+  ],
+  "chargeCalculationTypeOptions": [
+    {
+      "id": 1,
+      "code": "chargeCalculationType.flat",
+      "value": "Flat"
+    },
+    {
+      "id": 2,
+      "code": "chargeCalculationType.percent.of.amount",
+      "value": "% Amount"
+    }
+  ],
+  "chargeAppliesToOptions": [
+    {
+      "id": 1,
+      "code": "chargeAppliesTo.loan",
+      "value": "Loan"
+    },
+    {
+      "id": 2,
+      "code": "chargeAppliesTo.savings",
+      "value": "Savings"
+    }
+  ],
+  "chargeTimeTypeOptions": [
+    {
+      "id": 1,
+      "code": "chargeTimeType.disbursement",
+      "value": "Disbursement"
+    },
+    {
+      "id": 2,
+      "code": "chargeTimeType.specifiedDueDate",
+      "value": "Specified due date"
+    },
+    {
+      "id": 3,
+      "code": "chargeTimeType.savingsActivation",
+      "value": "Savings Activation"
+    },
+    {
+      "id": 5,
+      "code": "chargeTimeType.withdrawalFee",
+      "value": "Withdrawal Fee"
+    },
+    {
+      "id": 6,
+      "code": "chargeTimeType.annualFee",
+      "value": "Annual Fee"
+    },
+    {
+      "id": 7,
+      "code": "chargeTimeType.monthlyFee",
+      "value": "Monthly Fee"
+    }
+  ],
+  "chargePaymetModeOptions": [
+    {
+      "id": 0,
+      "code": "chargepaymentmode.regular",
+      "value": "Regular"
+    },
+    {
+      "id": 1,
+      "code": "chargepaymentmode.accounttransfer",
+      "value": "Account transfer"
+    }
+  ],
+  "loanChargeCalculationTypeOptions": [
+    {
+      "id": 1,
+      "code": "chargeCalculationType.flat",
+      "value": "Flat"
+    },
+    {
+      "id": 2,
+      "code": "chargeCalculationType.percent.of.amount",
+      "value": "% Amount"
+    }
+  ],
+  "loanChargeTimeTypeOptions": [
+    {
+      "id": 1,
+      "code": "chargeTimeType.disbursement",
+      "value": "Disbursement"
+    },
+    {
+      "id": 2,
+      "code": "chargeTimeType.specifiedDueDate",
+      "value": "Specified due date"
+    }
+  ],
+  "savingsChargeCalculationTypeOptions": [
+    {
+      "id": 1,
+      "code": "chargeCalculationType.flat",
+      "value": "Flat"
+    },
+    {
+      "id": 2,
+      "code": "chargeCalculationType.percent.of.amount",
+      "value": "% Amount"
+    }
+  ],
+  "savingsChargeTimeTypeOptions": [
+    {
+      "id": 2,
+      "code": "chargeTimeType.specifiedDueDate",
+      "value": "Specified due date"
+    },
+    {
+      "id": 3,
+      "code": "chargeTimeType.savingsActivation",
+      "value": "Savings Activation"
+    },
+    {
+      "id": 5,
+      "code": "chargeTimeType.withdrawalFee",
+      "value": "Withdrawal Fee"
+    },
+    {
+      "id": 6,
+      "code": "chargeTimeType.annualFee",
+      "value": "Annual Fee"
+    },
+    {
+      "id": 7,
+      "code": "chargeTimeType.monthlyFee",
+      "value": "Monthly Fee"
+    }
+  ]
 }
-					</code>
-				</div>
-			</div>
+			</code>
+		</div>
+	</div>
 
-			<a id="charges_create" name="charges_create" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Create/Define a Charge</h4>
-					<p>Define a new charge specific to loan or saving that can later be associated with loan
-						products, loans Savings product or Savings account.</p>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
+	<a id="charges_create" name="charges_create" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+			<h4>Create/Define a Charge</h4>
+			<p>Define a new charge that can later be associated with loans and savings through their respective product definitions or directly on each account instance.</p>
+		</div>
+		<div class="method-example">
+			<code class="method-declaration">
 POST https://DomainName/api/v1/charges
-					</code>
-					<code class="method-request">
+			</code>
+			<code class="method-request">
 POST charges
 Content-Type: application/json 
 Request Body:
 {
-    "name": "Loan service fee",
-    "chargeAppliesTo": 1,
-    "currencyCode": "USD",
-    "locale": "en",
-    "amount": "230.56",
-    "chargeTimeType": "1",
-    "chargeCalculationType": "1",
-    "chargePaymentMode": "1",
-    "active": true
+"name": "Loan service fee",
+"chargeAppliesTo": 1,
+"currencyCode": "USD",
+"locale": "en",
+"amount": "230.56",
+"chargeTimeType": "1",
+"chargeCalculationType": "1",
+"chargePaymentMode": "1",
+"active": true
 }
-					</code>
-					<code class="method-response">
+			</code>
+			<code class="method-response">
 {
-  "resourceId": 1
+"resourceId": 1
 }
-					</code>
-					<code class="method-request">
+			</code>
+			<code class="method-request">
 POST charges
 Content-Type: application/json 
 Request Body:
 {
-  "locale": "en",
-  "name": "Default Penalty",
-  "amount": "2",
-  "currencyCode": "USD",
-  "chargeAppliesTo": "1",
-  "chargeTimeType": "2",
-  "chargeCalculationType": "2",
-  "chargePaymentMode": "1",
-  "active": "true",
-  "penalty": "true",
-  "minCap": 50.00,
-  "maxCap": 100.00
+"locale": "en",
+"name": "Default Penalty",
+"amount": "2",
+"currencyCode": "USD",
+"chargeAppliesTo": "1",
+"chargeTimeType": "2",
+"chargeCalculationType": "2",
+"chargePaymentMode": "1",
+"active": "true",
+"penalty": "true",
+"minCap": 50.00,
+"maxCap": 100.00
 }
-					</code>
-					<code class="method-response">
+			</code>
+			<code class="method-response">
 {
-  "resourceId": 4
+"resourceId": 4
 }
-					</code>
+			</code>
 
-					<code class="method-request">
+			<code class="method-request">
 POST charges
 Content-Type: application/json 
 Request Body:
 {
-  "locale": "en",
-  "name": "Annuaul Fee",
-  "amount": "20",
-  "currencyCode": "USD",
-  "chargeAppliesTo": "2",
-  "chargeTimeType": "6",
-  "chargeCalculationType": "1",
-  "chargePaymentMode": "1",
-  "active": "true",
-  "penalty": "false"
+"locale": "en",
+"name": "Annuaul Fee",
+"amount": "20",
+"currencyCode": "USD",
+"chargeAppliesTo": "2",
+"chargeTimeType": "6",
+"chargeCalculationType": "1",
+"chargePaymentMode": "1",
+"active": "true",
+"penalty": "false"
 }
-					</code>
-					<code class="method-response">
+			</code>
+			<code class="method-response">
 {
-  "resourceId": 5
+"resourceId": 5
 }
-					</code>
-					<code class="method-request">
+			</code>
+			<code class="method-request">
 POST charges
 Content-Type: application/json 
 Request Body:
 {
-  "locale": "en",
-  "name": "Quarterly Fee",
-  "amount": "5",
-  "currencyCode": "USD",
-  "chargeAppliesTo": "2",
-  "chargeTimeType": "7",
-  "feeOnMonthDay": "10 May",
-  "monthDayFormat": "dd MMM",
-  "feeInterval": "4",
-  "chargeCalculationType": "1",
-  "active": "true",
-  "penalty": "false"
+"locale": "en",
+"name": "Quarterly Fee",
+"amount": "5",
+"currencyCode": "USD",
+"chargeAppliesTo": "2",
+"chargeTimeType": "7",
+"feeOnMonthDay": "10 May",
+"monthDayFormat": "dd MMM",
+"feeInterval": "4",
+"chargeCalculationType": "1",
+"active": "true",
+"penalty": "false"
 }
-					</code>
-					<code class="method-response">
+			</code>
+			<code class="method-response">
 {
-  "resourceId": 6
+"resourceId": 6
 }
-					</code>										
-				</div>
-			</div>
+			</code>										
+		</div>
+	</div>
 
 			<a id="charges_list" name="charges_list" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">

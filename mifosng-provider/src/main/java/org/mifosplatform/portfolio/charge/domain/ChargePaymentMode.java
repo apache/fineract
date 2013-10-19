@@ -21,6 +21,10 @@ public enum ChargePaymentMode {
         return this.code;
     }
 
+    public static Object[] validValues() {
+        return new Integer[] { ChargePaymentMode.REGULAR.getValue(), ChargePaymentMode.ACCOUNT_TRANSFER.getValue() };
+    }
+
     public static ChargePaymentMode fromInt(final Integer paymentMode) {
         ChargePaymentMode chargeAppliesToType = ChargePaymentMode.REGULAR;
         switch (paymentMode) {
