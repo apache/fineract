@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 19 Oct 2013 - 1.13.0.RELEASE
 1. 16 Oct 2013 - 1.12.0.RELEASE
 1. 7 Oct 2013 - 1.11.1.RELEASE
 1. 5 Oct 2013 - 1.11.0.RELEASE
@@ -42,6 +43,20 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.13.0.RELEASE
+=============
+Feature Release
+
+This Feature Release adds support for min and maximum caps on % based charges for loans.
+
+Platform & API
+
+New Features & Improvements
+
+ - [MIFOSX-437] - Minimum and maximimum caps on % based charges
+ - [MIFOSX-747] - Update AMI and AMI related docs on readme
+ - [MIFOSX-748] - Improve API documentation around charges
 
 1.12.0.RELEASE
 =============
