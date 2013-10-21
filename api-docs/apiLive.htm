@@ -96,18 +96,19 @@
 				<div class="flybar-menu-overview">
 					<div class="toc-column1">
 						<div class="toc-section">
-							<ul>
-								<li><a href="#top">Mifos X API Documentation</a></li>
-								<li><a href="#interact">Try The API From Your Browser</a></li>
-								<li><a href="#genopts">Generic Options</a></li>
-								<li><a href="#creates_and_updates">Creating and Updating</a></li>
-								<li><a href="#dates_and_numbers">Updating Dates and Numbers</a></li>
-								<li><a href="#field_descriptions">Field Descriptions</a></li>
-								<li><a href="#authentication_overview">Authentication Overview</a></li>
-								<li><a href="#errors">Errors</a></li>
-								<li><a href="#fullapi_matrix">Full API Matrix</a></li>
-								<li><a href="#betaapi_matrix">Beta API Matrix</a></li>
-							</ul>
+<ul>
+	<li><a href="#top">Mifos X API Documentation</a></li>
+	<li><a href="#interact">Try The API From Your Browser</a></li>
+	<li><a href="#genopts">Generic Options</a></li>
+	<li><a href="#creates_and_updates">Creating and Updating</a></li>
+	<li><a href="#dates_and_numbers">Updating Dates and Numbers</a></li>
+	<li><a href="#field_descriptions">Field Descriptions</a></li>
+	<li><a href="#authentication_overview">Authentication Overview</a></li>
+	<li><a href="#errors">Errors</a></li>
+	<li><a href="#fullapi_matrix">Full API Matrix</a></li>
+	<li><a href="#betaapi_matrix">Beta API Matrix</a></li>
+	<li><a href="#paymentapplicationlogic">Payment Application Logic / Transaction Processing Strategies</a></li>
+</ul>
 						</div>
 					</div>
 				</div>
@@ -4727,24 +4728,28 @@ GET https://DomainName/mifosng-provider/api/v1/groups
 								loan is in arrears.
 							</td>
 						</tr>
-						<tr class=alt>
-							<td>transactionProcessingStrategyId</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>The type of transaction processing strategy to be used.<br>
-								At present some MFI specific ones exist. This is an important point of change for many MFIs.
-								<br>Responsible for things like payment order and how early or late repayments should be processed.<br>
-								Out of the box options available are:
-								<ol>
-									<li>id=1, code=mifos-standard-strategy, name=Mifos style</li>
-									<li>id=2, code=heavensfamily-strategy, name=Heavensfamily</li>
-									<li>id=3, code=creocore-strategy, name=Creocore</li>
-									<li>id=4, code=rbi-india-strategy, name=RBI (India)</li>
-									<li>id=5, code=principal-interest-penalties-fees-order-strategy, name=Principal Interest Penalties Fees Order</li>
-									<li>id=6, code=interest-principal-penalties-fees-order-strategy, name=Interest Principal Penalties Fees Order</li>
-								</ol>
-							</td>
-						</tr>
+<tr class=alt>
+	<td>transactionProcessingStrategyId</td>
+</tr>
+<tr>
+	<td class=fielddesc>
+An enumeration that indicates the type of transaction processing strategy to be used. This relates to functionality that is also known as <b>Payment Application Logic</b>.
+	
+<p>A number of out of the box appraches exist, some are custom to specific MFIs, some are more general and indicate the order in which payments are processed.</p>
+
+<p>Refer to the <a href="#paymentapplicationlogic">Payment Application Logic / Transaction Processing Strategy<a> section in the appendix for more detailed overview of each available <b>payment application logic</b> provided out of the box.</p>
+
+<i>List of current approaches</i>:<br/>
+<ul>
+	<li>1 = Mifos style (Similiar to Old Mifos)</li>
+	<li>2 = Heavensfamily (Custom MFI approach)</li>
+	<li>3 = Creocore (Custom MFI approach)</li>
+	<li>4 = RBI (India)</li>
+	<li>5 = Principal Interest Penalties Fees Order</li>
+	<li>6 = Interest Principal Penalties Fees Order</li>
+</ul>
+	</td>
+</tr>
 						<tr class=alt>
 							<td>loanType</td>
 						</tr>
@@ -7903,24 +7908,28 @@ Request Body:
 								loan is in arrears.
 							</td>
 						</tr>
-						<tr class=alt>
-							<td>transactionProcessingStrategyId</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>The type of transaction processing strategy to be used.<br>
-								At present some MFI specific ones exist. This is an important point of change for many MFIs.
-								<br>Responsible for things like payment order and how early or late repayments should be processed.<br>
-								Out of the box options available are:
-								<ol>
-									<li>id=1, code=mifos-standard-strategy, name=Mifos style</li>
-									<li>id=2, code=heavensfamily-strategy, name=Heavensfamily</li>
-									<li>id=3, code=creocore-strategy, name=Creocore</li>
-									<li>id=4, code=rbi-india-strategy, name=RBI (India)</li>
-									<li>id=5, code=principal-interest-penalties-fees-order-strategy, name=Principal Interest Penalties Fees Order</li>
-									<li>id=6, code=interest-principal-penalties-fees-order-strategy, name=Interest Principal Penalties Fees Order</li>
-								</ol>
-							</td>
-						</tr>
+<tr class=alt>
+	<td>transactionProcessingStrategyId</td>
+</tr>
+<tr>
+	<td class=fielddesc>
+An enumeration that indicates the type of transaction processing strategy to be used. This relates to functionality that is also known as <b>Payment Application Logic</b>.
+	
+<p>A number of out of the box appraches exist, some are custom to specific MFIs, some are more general and indicate the order in which payments are processed.</p>
+
+<p>Refer to the <a href="#paymentapplicationlogic">Payment Application Logic / Transaction Processing Strategy<a> section in the appendix for more detailed overview of each available <b>payment application logic</b> provided out of the box.</p>
+
+<i>List of current approaches</i>:<br/>
+<ul>
+	<li>1 = Mifos style (Similiar to Old Mifos)</li>
+	<li>2 = Heavensfamily (Custom MFI approach)</li>
+	<li>3 = Creocore (Custom MFI approach)</li>
+	<li>4 = RBI (India)</li>
+	<li>5 = Principal Interest Penalties Fees Order</li>
+	<li>6 = Interest Principal Penalties Fees Order</li>
+</ul>
+	</td>
+</tr>
 						<tr class=alt>
 							<td>graceOnPrincipalPayment</td>
 						</tr>
@@ -21566,7 +21575,97 @@ No Request Body:
 				</tr>
 			</table>
 		</div>
+
+<a 	id="paymentapplicationlogic" 
+	name="paymentapplicationlogic" 
+	class="old-syle-anchor">&nbsp;</a>
+<div class="fullMatrixOuter">
+	<h3>Payment Application Logic / Transaction Processing Strategy</h3>
+	
+<p>The way payments (transactions) are handled and the effect they have on the loan is an area that can differ widely from MFI to MFI. Mifos allows for <strong>transaction processing strategies</strong> to be developed that are associated with a loan product. Several approaches are provided out-of-the-box. If these approaches dont meet exactly your needs a custom approach can be developed and released with the platform.</p>
+
+<p>In general the the following areas are handled by any given <strong>transaction processing strategy</strong>:
+	<ul>
+		<li><strong>Payment order</strong>: What component of a loan installment should be paid of frist interest, principal, fees, penalties?</li>
+		<li><strong>Early payment</strong>: What qualifies a payment as an early payment and what impact should this have on the loan schedule?</li>
+		<li><strong>On time payment</strong>: What qualifies a payment as on time?</li>
+		<li><strong>Late payment</strong>: What qualifies a payment as a late payment and what impact should this have on the loan schedule?</li>
+	</ul>
+</p>
+
+	<h4>Mifos Style</h4>
+	<p>Replicates the same payment order of our previous legacy mifos software.</p>
+	<p>
+		<strong>Payment order</strong>:
+		<ol>
+			<li>Overdue and due penalties</li>
+			<li>Overdue and due fees</li>
+			<li>Overdue and due interest</li>
+			<li>Overdue and due principal</li>
+		</ol>
+	</p>
+	<p><strong>Early payment</strong>: Any payment that pays off an installment that occurs before the due date of the installment. There is no incentive/advantage to making an early payment as theres no decrease in cost of the loan.</p>
+
+	<p><strong>On time payment</strong>: Any payment that pays off an installment that occurs exactly on the due date of the installment.</p>
+
+	<p><strong>Late payment</strong>: Any payment that pays off an installment that occurs after the due date of the installment. There is no penalization for late payment. The total cost of the loan does not automatically increase, no penalties are automatically applied to the loan.</p>
+
+	<h4>Principal Interest Penalties Fees Order</h4>
+	<p>The key aspect of this strategy is the payment order.</p>
+	<p>
+		<strong>Payment order</strong>:
+		<ol>
+			<li>Overdue and due principal</li>
+			<li>Overdue and due interest</li>
+			<li>Overdue and due penalties</li>
+			<li>Overdue and due fees</li>
+		</ol>
+	</p>
+	<p><strong>Early payment</strong>: Any payment that pays off an installment that occurs before the due date of the installment. There is no incentive/advantage to making an early payment as theres no decrease in cost of the loan.</p>
+
+	<p><strong>On time payment</strong>: Any payment that pays off an installment that occurs exactly on the due date of the installment.</p>
+
+	<p><strong>Late payment</strong>: Any payment that pays off an installment that occurs after the due date of the installment. There is no penalization for late payment. The total cost of the loan does not automatically increase, no penalties are automatically applied to the loan.</p>
+	
+	<h4>Interest Principal Penalties Fees Order</h4>
+	<p>The key aspect of this strategy is the payment order.</p>
+	<p>
+		<strong>Payment order</strong>:
+		<ol>
+			<li>Overdue and due interest</li>
+			<li>Overdue and due principal</li>
+			<li>Overdue and due penalties</li>
+			<li>Overdue and due fees</li>
+		</ol>
+	</p>
+	<p><strong>Early payment</strong>: Any payment that pays off an installment that occurs before the due date of the installment. There is no incentive/advantage to making an early payment as theres no decrease in cost of the loan.</p>
+
+	<p><strong>On time payment</strong>: Any payment that pays off an installment that occurs exactly on the due date of the installment.</p>
+
+	<p><strong>Late payment</strong>: Any payment that pays off an installment that occurs after the due date of the installment. There is no penalization for late payment. The total cost of the loan does not automatically increase, no penalties are automatically applied to the loan.</p>
+
+	<h4>RBI (India)</h4>
+	<p>Per RBI regulations, all interest must be paid (both current and overdue) before principal is paid.</p>
+	<p>For example taking a loan with two installments due (one current and one overdue) of 220 each (200 principal + 20 interest) - A partial payment of 40 results in payment been broken up as 20 interest on installment #1 (200 principal remaining) and 20 payment to interest on installment #2 (200 principal remaining)</p>
+	<p>
+		<strong>Payment order</strong>:
+		<ol>
+			<li>Overdue and due interest</li>
+			<li>Overdue and due principal</li>
+			<li>Overdue and due penalties</li>
+			<li>Overdue and due fees</li>
+		</ol>
+	</p>
+	<p><strong>Early payment</strong>: Any payment that pays off an installment that occurs before the due date of the installment. There is no incentive/advantage to making an early payment as theres no decrease in cost of the loan.</p>
+
+	<p><strong>On time payment</strong>: Any payment that pays off an installment that occurs exactly on the due date of the installment.</p>
+
+	<p><strong>Late payment</strong>: Any payment that pays off an installment that occurs after the due date of the installment. There is no penalization for late payment. The total cost of the loan does not automatically increase, no penalties are automatically applied to the loan.</p>
+</div>
+
+	<!-- end of page-wrapper div -->
 	</div>
+
 
 	<script>
 		$(document).ready(function() {
