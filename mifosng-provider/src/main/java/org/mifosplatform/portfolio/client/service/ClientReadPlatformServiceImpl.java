@@ -93,14 +93,18 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     @Override
     public Page<ClientData> retrieveAll(final SearchParameters searchParameters) {
 
-        final AppUser currentUser = this.context.authenticatedUser();
-        final String hierarchy = currentUser.getOffice().getHierarchy();
-        final String hierarchySearchString = hierarchy + "%";
+        final String hierarchy = this.context.officeHierarcy();
+        String hierarchySearchString = hierarchy + "%";
+
+        if (searchParameters.isScopedByOfficeHierarchy()) {
+            this.context.validateAccessRights(searchParameters.getHierarchy());
+            hierarchySearchString = searchParameters.getHierarchy();
+        }
 
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(this.clientMapper.schema());
-        sqlBuilder.append(" where o.hierarchy like ? or transferToOffice.hierarchy like ?");
+        sqlBuilder.append(" where (o.hierarchy like ? or transferToOffice.hierarchy like ?) ");
 
         final String extraCriteria = buildSqlStringFromClientCriteria(searchParameters);
 
@@ -136,7 +140,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final String displayName = searchParameters.getName();
         final String firstname = searchParameters.getFirstname();
         final String lastname = searchParameters.getLastname();
-        final String hierarchy = searchParameters.getHierarchy();
 
         String extraCriteria = "";
         if (sqlSearch != null) {
@@ -166,8 +169,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             extraCriteria += " and lastname like " + ApiParameterHelper.sqlEncodeString(lastname);
         }
 
-        if (hierarchy != null) {
-            extraCriteria += " and o.hierarchy like " + ApiParameterHelper.sqlEncodeString(hierarchy + "%");
+        if (searchParameters.isScopedByOfficeHierarchy()) {
+            extraCriteria += " and o.hierarchy like " + ApiParameterHelper.sqlEncodeString(searchParameters.getHierarchy() + "%");
         }
 
         if (StringUtils.isNotBlank(extraCriteria)) {
