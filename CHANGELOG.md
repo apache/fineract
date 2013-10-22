@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 22 Oct 2013 - 1.13.1.RELEASE
 1. 19 Oct 2013 - 1.13.0.RELEASE
 1. 16 Oct 2013 - 1.12.0.RELEASE
 1. 7 Oct 2013 - 1.11.1.RELEASE
@@ -44,6 +45,15 @@ Releases
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
 
+1.13.1.RELEASE
+=============
+Bug Release
+
+Bugs
+ - [MIFOSX-715] - NPE getting client image
+ - [MIFOSX-733] - 500 exception when not passing a note during undo of disbursement
+ - [MIFOSX-734] - Add further detail on the 'repayment strategies' concept
+ 
 1.13.0.RELEASE
 =============
 Feature Release
