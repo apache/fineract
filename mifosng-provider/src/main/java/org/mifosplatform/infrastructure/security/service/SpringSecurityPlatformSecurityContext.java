@@ -46,4 +46,9 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
                 "The user doesn't have enough permissions to access the resource."); }
 
     }
+
+    @Override
+    public String officeHierarcy() {
+        return authenticatedUser().getOffice().getHierarchy();
+    }
 }

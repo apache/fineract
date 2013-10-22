@@ -112,6 +112,18 @@ public final class SearchParameters {
         return this.officeId != null && this.officeId != 0;
     }
 
+    public boolean isLimited() {
+        return this.limit != null && this.limit.intValue() > 0;
+    }
+
+    public boolean isOffset() {
+        return this.offset != null;
+    }
+
+    public boolean isScopedByOfficeHierarchy() {
+        return StringUtils.isNotBlank(this.hierarchy);
+    }
+
     public String getSqlSearch() {
         return this.sqlSearch;
     }
@@ -154,13 +166,5 @@ public final class SearchParameters {
 
     public String getSortOrder() {
         return this.sortOrder;
-    }
-
-    public boolean isLimited() {
-        return this.limit != null && this.limit.intValue() > 0;
-    }
-
-    public boolean isOffset() {
-        return this.offset != null;
     }
 }
