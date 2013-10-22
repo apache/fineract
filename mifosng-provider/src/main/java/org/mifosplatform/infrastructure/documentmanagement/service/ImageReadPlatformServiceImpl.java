@@ -71,7 +71,13 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
 
             final ImageData imageData = this.jdbcTemplate.queryForObject(sql, imageMapper, new Object[] { clientId });
             final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(imageData.storageType());
-            return contentRepository.fetchImage(imageData);
+            final ImageData result = contentRepository.fetchImage(imageData);
+
+            if (result.getContent() == null) {
+                throw new ImageNotFoundException("clients", clientId);
+            }
+
+            return result;
         } catch (final EmptyResultDataAccessException e) {
             throw new ImageNotFoundException("clients", clientId);
         }
