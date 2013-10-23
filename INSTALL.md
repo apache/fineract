@@ -67,7 +67,7 @@ The two ways to get up and running with mifos platform is:
 ### 2.1 Prerequisite Software
 
   Before running mifos platform you must have the following software installed:
-  - Oracle Java - JDK/JRE 1.6 (NOT 1.7) (http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+  - Oracle Java - JDK 7 (http://www.oracle.com/technetwork/java/javase/downloads/index.html)
   - Oracle MySQL - (http://dev.mysql.com/downloads/)
   - Apache Tomcat 7 - (http://tomcat.apache.org/download-70.cgi)
 
