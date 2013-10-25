@@ -15,14 +15,14 @@ public class FlatInterestLoanScheduleGenerator extends AbstractLoanScheduleGener
     public PrincipalInterest calculatePrincipalInterestComponentsForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
             final double interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
             final Money totalCumulativeInterest, final Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
-            final int daysInPeriod, final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms,
+            final int daysInPeriodApplicableForInterest, final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms,
             final int periodNumber, final MathContext mc) {
 
-        Money principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator, daysInPeriod,
+        Money principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator, daysInPeriodApplicableForInterest,
                 outstandingBalance, periodNumber, mc);
 
         final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
-                interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestPaymentDueToGrace, daysInPeriod,
+                interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestPaymentDueToGrace, daysInPeriodApplicableForInterest,
                 outstandingBalance);
         Money interestForThisInstallment = result.interest();
 
