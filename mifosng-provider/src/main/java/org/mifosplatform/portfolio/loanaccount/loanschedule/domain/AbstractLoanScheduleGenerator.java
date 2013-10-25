@@ -65,10 +65,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 this.paymentPeriodsInOneYearCalculator, mc);
 
         // 5. loop over the known set of 'scheduled due dates'
-        LocalDate repaymentPeriodStartDate = this.scheduledDateGenerator.idealDisbursementDateBasedOnFirstRepaymentDate(
+        final LocalDate idealDisbursementDate = this.scheduledDateGenerator.idealDisbursementDateBasedOnFirstRepaymentDate(
                 loanApplicationTerms.getLoanTermPeriodFrequencyType(), loanApplicationTerms.getRepaymentEvery(), scheduledDates);
 
-        LocalDate startDate = loanApplicationTerms.getExpectedDisbursementDate();
+        LocalDate periodStartDate = loanApplicationTerms.getExpectedDisbursementDate();
+        LocalDate periodStartDateApplicableForInterest = periodStartDate;
         int periodNumber = 1;
         Money totalCumulativePrincipal = principalDisbursed.zero();
         Money totalCumulativeInterest = principalDisbursed.zero();
@@ -76,18 +77,24 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         Money outstandingBalance = principalDisbursed;
         for (final LocalDate scheduledDueDate : scheduledDates) {
 
-            final int daysInPeriod = Days.daysBetween(startDate, scheduledDueDate).getDays();
+            final int daysInPeriod = Days.daysBetween(periodStartDate, scheduledDueDate).getDays();
+            int daysInPeriodApplicableForInterest = daysInPeriod;
+
+            if (periodStartDate.isBefore(idealDisbursementDate)) {
+                periodStartDateApplicableForInterest = idealDisbursementDate;
+                daysInPeriodApplicableForInterest = Days.daysBetween(periodStartDateApplicableForInterest, scheduledDueDate).getDays();
+            }
 
             final double interestCalculationGraceOnRepaymentPeriodFraction = this.paymentPeriodsInOneYearCalculator
-                    .calculatePortionOfRepaymentPeriodInterestChargingGrace(repaymentPeriodStartDate, scheduledDueDate,
+                    .calculatePortionOfRepaymentPeriodInterestChargingGrace(periodStartDateApplicableForInterest, scheduledDueDate,
                             loanApplicationTerms.getInterestChargedFromLocalDate(), loanApplicationTerms.getLoanTermPeriodFrequencyType(),
                             loanApplicationTerms.getRepaymentEvery());
 
             // 5 determine principal,interest of repayment period
             final PrincipalInterest principalInterestForThisPeriod = calculatePrincipalInterestComponentsForPeriod(
                     this.paymentPeriodsInOneYearCalculator, interestCalculationGraceOnRepaymentPeriodFraction, totalCumulativePrincipal,
-                    totalCumulativeInterest, totalInterestChargedForFullLoanTerm, totalOutstandingInterestPaymentDueToGrace, daysInPeriod,
-                    outstandingBalance, loanApplicationTerms, periodNumber, mc);
+                    totalCumulativeInterest, totalInterestChargedForFullLoanTerm, totalOutstandingInterestPaymentDueToGrace,
+                    daysInPeriodApplicableForInterest, outstandingBalance, loanApplicationTerms, periodNumber, mc);
 
             // update cumulative fields for principal & interest
             totalCumulativePrincipal = totalCumulativePrincipal.plus(principalInterestForThisPeriod.principal());
@@ -98,8 +105,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             outstandingBalance = outstandingBalance.minus(principalInterestForThisPeriod.principal());
 
             // 7. determine fees and penalties
-            final Money feeChargesForInstallment = cumulativeFeeChargesDueWithin(startDate, scheduledDueDate, loanCharges, currency);
-            final Money penaltyChargesForInstallment = cumulativePenaltyChargesDueWithin(startDate, scheduledDueDate, loanCharges, currency);
+            final Money feeChargesForInstallment = cumulativeFeeChargesDueWithin(periodStartDate, scheduledDueDate, loanCharges, currency);
+            final Money penaltyChargesForInstallment = cumulativePenaltyChargesDueWithin(periodStartDate, scheduledDueDate, loanCharges,
+                    currency);
 
             // 8. sum up real totalInstallmentDue from components
             final Money totalInstallmentDue = principalInterestForThisPeriod.principal() //
@@ -108,7 +116,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     .plus(penaltyChargesForInstallment);
 
             // 9. create repayment period from parts
-            final LoanScheduleModelPeriod installment = LoanScheduleModelRepaymentPeriod.repayment(periodNumber, startDate,
+            final LoanScheduleModelPeriod installment = LoanScheduleModelRepaymentPeriod.repayment(periodNumber, periodStartDate,
                     scheduledDueDate, principalInterestForThisPeriod.principal(), outstandingBalance,
                     principalInterestForThisPeriod.interest(), feeChargesForInstallment, penaltyChargesForInstallment, totalInstallmentDue);
             periods.add(installment);
@@ -120,8 +128,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             totalFeeChargesCharged = totalFeeChargesCharged.add(feeChargesForInstallment.getAmount());
             totalPenaltyChargesCharged = totalPenaltyChargesCharged.add(penaltyChargesForInstallment.getAmount());
             totalRepaymentExpected = totalRepaymentExpected.add(totalInstallmentDue.getAmount());
-            startDate = scheduledDueDate;
-            repaymentPeriodStartDate = startDate;
+            periodStartDate = scheduledDueDate;
+            periodStartDateApplicableForInterest = periodStartDate;
 
             periodNumber++;
         }
@@ -133,7 +141,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
     public abstract PrincipalInterest calculatePrincipalInterestComponentsForPeriod(PaymentPeriodsInOneYearCalculator calculator,
             double interestCalculationGraceOnRepaymentPeriodFraction, Money totalCumulativePrincipal, Money totalCumulativeInterest,
-            Money totalInterestDueForLoan, Money cumulatingInterestPaymentDueToGrace, int daysInPeriod, Money outstandingBalance,
+            Money totalInterestDueForLoan, Money cumulatingInterestPaymentDueToGrace, int daysInPeriodApplicableForInterest, Money outstandingBalance,
             LoanApplicationTerms loanApplicationTerms, int periodNumber, MathContext mc);
 
     protected final boolean isLastRepaymentPeriod(final int numberOfRepayments, final int periodNumber) {

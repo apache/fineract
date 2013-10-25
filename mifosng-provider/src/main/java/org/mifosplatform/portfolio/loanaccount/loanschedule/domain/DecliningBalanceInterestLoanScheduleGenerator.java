@@ -19,14 +19,14 @@ import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
  * <li>Equal installment payments</li>
  * </ol>
  * </p>
- * 
+ *
  * <p>
  * When amortized using <i>equal principal payments</i>, the <b>principal
  * component</b> of each installment is fixed and <b>interest due</b> is
  * calculated from the <b>outstanding principal balance</b> resulting in a
  * different <b>total payment due</b> for each installment.
  * </p>
- * 
+ *
  * <p>
  * When amortized using <i>equal installments</i>, the <b>total payment due</b>
  * for each installment is fixed and is calculated using the excel like
@@ -42,17 +42,17 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
             final double interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
             @SuppressWarnings("unused") final Money totalCumulativeInterest,
             @SuppressWarnings("unused") final Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
-            final int daysInPeriod, final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms,
+            final int daysInPeriodApplicableForInterest, final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms,
             final int periodNumber, final MathContext mc) {
 
         final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
-                interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestPaymentDueToGrace, daysInPeriod,
-                outstandingBalance);
+                interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestPaymentDueToGrace,
+                daysInPeriodApplicableForInterest, outstandingBalance);
 
         final Money interestForThisInstallment = result.interest();
 
-        Money principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator, daysInPeriod,
-                outstandingBalance, periodNumber, mc);
+        Money principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator,
+                daysInPeriodApplicableForInterest, outstandingBalance, periodNumber, mc);
 
         // update cumulative fields for principal & interest
         final Money interestBroughtFowardDueToGrace = result.interestPaymentDueToGrace();

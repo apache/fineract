@@ -288,7 +288,7 @@ public final class LoanApplicationTerms {
 
     public PrincipalInterest calculateTotalInterestForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
             final double interestCalculationGraceOnRepaymentPeriodFraction, final int periodNumber, final MathContext mc,
-            final Money cumulatingInterestPaymentDueToGrace, final int daysInPeriod, final Money outstandingBalance) {
+            final Money cumulatingInterestPaymentDueToGrace, final int daysInPeriodApplicableForInterest, final Money outstandingBalance) {
 
         Money interestForInstallment = this.principal.zero();
         Money interestBroughtForwardDueToGrace = cumulatingInterestPaymentDueToGrace.copy();
@@ -318,10 +318,10 @@ public final class LoanApplicationTerms {
             case DECLINING_BALANCE:
 
                 final Money interestForThisInstallmentBeforeGrace = calculateDecliningInterestDueForInstallmentBeforeApplyingGrace(
-                        calculator, mc, daysInPeriod, outstandingBalance);
+                        calculator, mc, daysInPeriodApplicableForInterest, outstandingBalance);
 
                 final Money interestForThisInstallmentAfterGrace = calculateDecliningInterestDueForInstallmentAfterApplyingGrace(
-                        calculator, interestCalculationGraceOnRepaymentPeriodFraction, mc, daysInPeriod, outstandingBalance, periodNumber);
+                        calculator, interestCalculationGraceOnRepaymentPeriodFraction, mc, daysInPeriodApplicableForInterest, outstandingBalance, periodNumber);
 
                 interestForInstallment = interestForThisInstallmentAfterGrace;
                 if (interestForThisInstallmentAfterGrace.isGreaterThanZero()) {
