@@ -93,13 +93,13 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     @Override
     public Page<ClientData> retrieveAll(final SearchParameters searchParameters) {
 
-        final String hierarchy = this.context.officeHierarcy();
-        String hierarchySearchString = hierarchy + "%";
+        final String userOfficeHierarchy = this.context.OfficeHierarchy();
+        final String underHierarchySearchString = userOfficeHierarchy + "%";
 
-        if (searchParameters.isScopedByOfficeHierarchy()) {
-            this.context.validateAccessRights(searchParameters.getHierarchy());
-            hierarchySearchString = searchParameters.getHierarchy();
-        }
+//        if (searchParameters.isScopedByOfficeHierarchy()) {
+//            this.context.validateAccessRights(searchParameters.getHierarchy());
+//            underHierarchySearchString = searchParameters.getHierarchy() + "%";
+//        }
 
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
@@ -129,7 +129,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), new Object[] {
-                hierarchySearchString, hierarchySearchString }, this.clientMapper);
+                underHierarchySearchString, underHierarchySearchString }, this.clientMapper);
     }
 
     private String buildSqlStringFromClientCriteria(final SearchParameters searchParameters) {
