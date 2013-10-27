@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Date;
 
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
@@ -50,7 +51,7 @@ public final class LoanApplicationTerms {
      * Integer representing the number of 'repayment frequencies' or
      * installments where 'grace' should apply to the payment of interest in a
      * loans repayment period (installment).
-     * 
+     *
      * <b>Note:</b> Interest is still calculated taking into account the full
      * loan term, the interest is simply offset to a later period.
      */
@@ -60,7 +61,7 @@ public final class LoanApplicationTerms {
      * Integer representing the number of 'repayment frequencies' or
      * installments where 'grace' should apply to the charging of interest in a
      * loans repayment period (installment).
-     * 
+     *
      * <b>Note:</b> The loan is <i>interest-free</i> for the period of time
      * indicated.
      */
@@ -68,7 +69,7 @@ public final class LoanApplicationTerms {
 
     /**
      * Legacy method of support 'grace' on the charging of interest on a loan.
-     * 
+     *
      * <p>
      * For the typical structured loan, its reasonable to use an integer to
      * indicate the number of 'repayment frequency' periods the 'grace' should
@@ -81,6 +82,9 @@ public final class LoanApplicationTerms {
      */
     private final LocalDate interestChargedFromDate;
     private final Money inArrearsTolerance;
+
+    // added
+    private LocalDate loanEndDate;
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
@@ -216,7 +220,7 @@ public final class LoanApplicationTerms {
     /**
      * Calculates the total interest to be charged on loan taking into account
      * grace settings.
-     * 
+     *
      */
     public Money calculateTotalInterestCharged(final PaymentPeriodsInOneYearCalculator calculator, final MathContext mc) {
 
@@ -224,7 +228,7 @@ public final class LoanApplicationTerms {
 
         switch (this.interestMethod) {
             case FLAT:
-                final Money totalInterestChargedForLoanTerm = calculateTotalInterestDueWithoutGrace(calculator, mc);
+                final Money totalInterestChargedForLoanTerm = calculateTotalFlatInterestDueWithoutGrace(calculator, mc);
 
                 final Money totalInterestPerInstallment = calculateTotalInterestPerInstallmentWithoutGrace(calculator, mc);
 
@@ -321,7 +325,8 @@ public final class LoanApplicationTerms {
                         calculator, mc, daysInPeriodApplicableForInterest, outstandingBalance);
 
                 final Money interestForThisInstallmentAfterGrace = calculateDecliningInterestDueForInstallmentAfterApplyingGrace(
-                        calculator, interestCalculationGraceOnRepaymentPeriodFraction, mc, daysInPeriodApplicableForInterest, outstandingBalance, periodNumber);
+                        calculator, interestCalculationGraceOnRepaymentPeriodFraction, mc, daysInPeriodApplicableForInterest,
+                        outstandingBalance, periodNumber);
 
                 interestForInstallment = interestForThisInstallmentAfterGrace;
                 if (interestForThisInstallmentAfterGrace.isGreaterThanZero()) {
@@ -359,7 +364,7 @@ public final class LoanApplicationTerms {
      * general method to calculate totalInterestDue discounting any grace
      * settings
      */
-    private Money calculateTotalInterestDueWithoutGrace(final PaymentPeriodsInOneYearCalculator calculator, final MathContext mc) {
+    private Money calculateTotalFlatInterestDueWithoutGrace(final PaymentPeriodsInOneYearCalculator calculator, final MathContext mc) {
 
         Money totalInterestDue = this.principal.zero();
 
@@ -385,15 +390,43 @@ public final class LoanApplicationTerms {
         final long loanTermPeriodsInOneYear = calculatePeriodsInOneYear(calculator);
         final BigDecimal loanTermPeriodsInYearBigDecimal = BigDecimal.valueOf(loanTermPeriodsInOneYear);
 
-        final BigDecimal loanTermFrequencyBigDecimal = BigDecimal.valueOf(this.loanTermFrequency);
+        final BigDecimal loanTermFrequencyBigDecimal = calculatePeriodsInLoanTerm();
 
         return this.annualNominalInterestRate.divide(loanTermPeriodsInYearBigDecimal, mc).divide(divisor, mc)
                 .multiply(loanTermFrequencyBigDecimal);
     }
 
+    private BigDecimal calculatePeriodsInLoanTerm() {
+
+        BigDecimal periodsInLoanTerm = BigDecimal.valueOf(this.loanTermFrequency);
+        switch (this.interestCalculationPeriodMethod) {
+            case DAILY:
+                // number of days from 'ideal disbursement' to final date
+
+                LocalDate loanStartDate = getExpectedDisbursementDate();
+                if (getInterestChargedFromDate() != null && loanStartDate.isBefore(getInterestChargedFromLocalDate())) {
+                    loanStartDate = getInterestChargedFromLocalDate();
+                }
+
+                final int periodsInLoanTermInteger = Days.daysBetween(loanStartDate, this.loanEndDate).getDays();
+                periodsInLoanTerm = BigDecimal.valueOf(periodsInLoanTermInteger);
+            break;
+            case INVALID:
+            break;
+            case SAME_AS_REPAYMENT_PERIOD:
+            break;
+        }
+
+        return periodsInLoanTerm;
+    }
+
+    public void updateLoanEndDate(final LocalDate loanEndDate) {
+        this.loanEndDate = loanEndDate;
+    }
+
     private Money calculateTotalInterestPerInstallmentWithoutGrace(final PaymentPeriodsInOneYearCalculator calculator, final MathContext mc) {
 
-        final Money totalInterestForLoanTerm = calculateTotalInterestDueWithoutGrace(calculator, mc);
+        final Money totalInterestForLoanTerm = calculateTotalFlatInterestDueWithoutGrace(calculator, mc);
 
         return totalInterestForLoanTerm.dividedBy(Long.valueOf(this.numberOfRepayments), mc.getRoundingMode());
     }
@@ -439,7 +472,7 @@ public final class LoanApplicationTerms {
             interestForInstallment = interestForInstallment.zero();
         } else {
 
-            final Money totalInterestForLoanTerm = calculateTotalInterestDueWithoutGrace(calculator, mc);
+            final Money totalInterestForLoanTerm = calculateTotalFlatInterestDueWithoutGrace(calculator, mc);
 
             final Money interestPerGracePeriod = calculateTotalInterestPerInstallmentWithoutGrace(calculator, mc);
 
@@ -469,7 +502,19 @@ public final class LoanApplicationTerms {
     }
 
     private long calculatePeriodsInOneYear(final PaymentPeriodsInOneYearCalculator calculator) {
-        return calculator.calculate(this.repaymentPeriodFrequencyType).longValue();
+
+        long periodsInOneYear = calculator.calculate(this.repaymentPeriodFrequencyType).longValue();
+        switch (this.interestCalculationPeriodMethod) {
+            case DAILY:
+                periodsInOneYear = calculator.calculate(PeriodFrequencyType.DAYS).longValue();
+            break;
+            case INVALID:
+            break;
+            case SAME_AS_REPAYMENT_PERIOD:
+            break;
+        }
+
+        return periodsInOneYear;
     }
 
     private int calculateNumberOfRepaymentsWithPrincipalPayment() {
