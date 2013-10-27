@@ -495,10 +495,45 @@ public final class LoanApplicationTerms {
         final BigDecimal divisor = BigDecimal.valueOf(Double.valueOf("100.0"));
         final BigDecimal loanTermPeriodsInYearBigDecimal = BigDecimal.valueOf(loanTermPeriodsInOneYear);
 
-        final BigDecimal loanTermFrequencyBigDecimal = BigDecimal.valueOf(this.repaymentEvery);
+        BigDecimal periodicInterestRate = BigDecimal.ZERO;
 
-        return this.annualNominalInterestRate.divide(loanTermPeriodsInYearBigDecimal, mc).divide(divisor, mc)
-                .multiply(loanTermFrequencyBigDecimal);
+        switch (this.interestCalculationPeriodMethod) {
+            case INVALID:
+            break;
+            case DAILY:
+                // For daily work out number of days in the period
+                int numberOfDaysInPeriod = this.repaymentEvery;
+                final BigDecimal oneDayOfYearInterestRate = this.annualNominalInterestRate.divide(loanTermPeriodsInYearBigDecimal, mc).divide(divisor, mc);
+
+                switch (this.repaymentPeriodFrequencyType) {
+                    case INVALID:
+                        break;
+                    case DAYS:
+                        final BigDecimal loanTermFrequencyBigDecimal = BigDecimal.valueOf(numberOfDaysInPeriod);
+                        periodicInterestRate = oneDayOfYearInterestRate.multiply(loanTermFrequencyBigDecimal, mc);
+                        break;
+                    case WEEKS:
+                        numberOfDaysInPeriod = this.repaymentEvery * 7;
+                        periodicInterestRate = oneDayOfYearInterestRate.multiply(BigDecimal.valueOf(numberOfDaysInPeriod), mc);
+                        break;
+                    case MONTHS:
+                        numberOfDaysInPeriod = this.repaymentEvery * 30;
+                        periodicInterestRate = oneDayOfYearInterestRate.multiply(BigDecimal.valueOf(numberOfDaysInPeriod), mc);
+                        break;
+                    case YEARS:
+                        numberOfDaysInPeriod = this.repaymentEvery * 365;
+                        periodicInterestRate = oneDayOfYearInterestRate.multiply(BigDecimal.valueOf(numberOfDaysInPeriod), mc);
+                        break;
+                }
+            break;
+            case SAME_AS_REPAYMENT_PERIOD:
+                final BigDecimal loanTermFrequencyBigDecimal = BigDecimal.valueOf(this.repaymentEvery);
+                periodicInterestRate = this.annualNominalInterestRate.divide(loanTermPeriodsInYearBigDecimal, mc).divide(divisor, mc)
+                        .multiply(loanTermFrequencyBigDecimal);
+            break;
+        }
+
+        return periodicInterestRate;
     }
 
     private long calculatePeriodsInOneYear(final PaymentPeriodsInOneYearCalculator calculator) {
