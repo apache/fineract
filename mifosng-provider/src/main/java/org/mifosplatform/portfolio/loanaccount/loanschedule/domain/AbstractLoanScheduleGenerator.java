@@ -38,6 +38,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         final List<LocalDate> scheduledDates = this.scheduledDateGenerator.generate(loanApplicationTerms, isHolidayEnabled, holidays,
                 workingDays);
 
+        final LocalDate loanEndDate = scheduledDates.get(scheduledDates.size() - 1);
+        loanApplicationTerms.updateLoanEndDate(loanEndDate);
+
         // 2. determine the total charges due at time of disbursement
         final BigDecimal chargesDueAtTimeOfDisbursement = deriveTotalChargesDueAtTimeOfDisbursement(loanCharges);
 
@@ -141,8 +144,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
     public abstract PrincipalInterest calculatePrincipalInterestComponentsForPeriod(PaymentPeriodsInOneYearCalculator calculator,
             double interestCalculationGraceOnRepaymentPeriodFraction, Money totalCumulativePrincipal, Money totalCumulativeInterest,
-            Money totalInterestDueForLoan, Money cumulatingInterestPaymentDueToGrace, int daysInPeriodApplicableForInterest, Money outstandingBalance,
-            LoanApplicationTerms loanApplicationTerms, int periodNumber, MathContext mc);
+            Money totalInterestDueForLoan, Money cumulatingInterestPaymentDueToGrace, int daysInPeriodApplicableForInterest,
+            Money outstandingBalance, LoanApplicationTerms loanApplicationTerms, int periodNumber, MathContext mc);
 
     protected final boolean isLastRepaymentPeriod(final int numberOfRepayments, final int periodNumber) {
         return periodNumber == numberOfRepayments;
