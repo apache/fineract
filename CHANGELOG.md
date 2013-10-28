@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 28 Oct 2013 - 1.13.2.RELEASE
 1. 22 Oct 2013 - 1.13.1.RELEASE
 1. 19 Oct 2013 - 1.13.0.RELEASE
 1. 16 Oct 2013 - 1.12.0.RELEASE
@@ -44,6 +45,17 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.13.2.RELEASE
+=============
+Bug Release
+
+Bugs
+ - [MIFOSX-721] - "Interest charged from" is not working as per expected
+ - [MIFOSX-722] - Due amount in Repayment installments are not equal
+ - [MIFOSX-729] - Flat - Daily is not working as expected
+ - [MIFOSX-749] - Scoping of clients by office hierarchy no longer works
+ - [MIFOSX-750] - Scoping of clients by search term (to search any name part) no longer works
 
 1.13.1.RELEASE
 =============
