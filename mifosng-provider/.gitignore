@@ -7,3 +7,4 @@ repos
 .settings
 .gradle
 *.log
+!gradle/wrapper/gradle-wrapper.jar
