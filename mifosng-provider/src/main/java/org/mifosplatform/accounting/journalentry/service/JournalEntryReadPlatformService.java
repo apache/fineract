@@ -16,6 +16,6 @@ public interface JournalEntryReadPlatformService {
     JournalEntryData retrieveGLJournalEntryById(long glJournalEntryId);
 
     Page<JournalEntryData> retrieveAll(SearchParameters searchParameters, Long glAccountId, Boolean onlyManualEntries, Date fromDate,
-            Date toDate, String transactionId);
+            Date toDate, String transactionId, Integer entityType);
 
 }
