@@ -76,7 +76,7 @@ public class JournalEntriesApiResource {
     public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId,
             @QueryParam("glAccountId") final Long glAccountId, @QueryParam("manualEntriesOnly") final Boolean onlyManualEntries,
             @QueryParam("fromDate") final DateParam fromDateParam, @QueryParam("toDate") final DateParam toDateParam,
-            @QueryParam("transactionId") final String transactionId, @QueryParam("offset") final Integer offset,
+            @QueryParam("transactionId") final String transactionId, @QueryParam("entityType") final Integer entityType, @QueryParam("offset") final Integer offset,
             @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
             @QueryParam("sortOrder") final String sortOrder, @QueryParam("locale") final String locale,
             @QueryParam("dateFormat") final String dateFormat) {
@@ -95,7 +95,7 @@ public class JournalEntriesApiResource {
         final SearchParameters searchParameters = SearchParameters.forJournalEntries(officeId, offset, limit, orderBy, sortOrder);
 
         final Page<JournalEntryData> glJournalEntries = this.journalEntryReadPlatformService.retrieveAll(searchParameters, glAccountId,
-                onlyManualEntries, fromDate, toDate, transactionId);
+                onlyManualEntries, fromDate, toDate, transactionId, entityType);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, glJournalEntries, RESPONSE_DATA_PARAMETERS);
     }

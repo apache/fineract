@@ -104,7 +104,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
     @Override
     public Page<JournalEntryData> retrieveAll(final SearchParameters searchParameters, final Long glAccountId,
-            final Boolean onlyManualEntries, final Date fromDate, final Date toDate, final String transactionId) {
+            final Boolean onlyManualEntries, final Date fromDate, final Date toDate, final String transactionId, final Integer entityType) {
 
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
@@ -116,6 +116,12 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         if (StringUtils.isNotBlank(transactionId)) {
             sqlBuilder.append(" and journalEntry.transaction_id = ?");
             objectArray[arrayPos] = transactionId;
+            arrayPos = arrayPos + 1;
+        }
+        
+        if (entityType != null && entityType != 0 && (onlyManualEntries == null)) {
+            sqlBuilder.append(" and journalEntry.entity_type_enum = ?");
+            objectArray[arrayPos] = entityType;
             arrayPos = arrayPos + 1;
         }
 
