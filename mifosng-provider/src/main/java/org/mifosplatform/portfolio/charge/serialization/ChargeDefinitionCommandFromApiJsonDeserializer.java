@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -186,8 +187,15 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         if (this.fromApiJsonHelper.parameterExists("chargeTimeType", element)) {
 
             final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
+
+            final Collection<Object> validLoanValues = Arrays.asList(ChargeTimeType.validLoanValues());
+            final Collection<Object> validSavingsValues = Arrays.asList(ChargeTimeType.validSavingsValues());
+
+            final Collection<Object> allValidValues = new ArrayList<Object>(validLoanValues);
+            allValidValues.addAll(validSavingsValues);
+
             baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull()
-                    .isOneOfTheseValues(ChargeTimeType.validLoanValues(), ChargeTimeType.validSavingsValues());
+                    .isOneOfTheseValues(allValidValues.toArray(new Object[allValidValues.size()]));
         }
 
         if (this.fromApiJsonHelper.parameterExists("feeOnMonthDay", element)) {
