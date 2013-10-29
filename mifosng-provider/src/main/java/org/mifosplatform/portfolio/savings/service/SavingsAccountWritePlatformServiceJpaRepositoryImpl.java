@@ -826,7 +826,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 savingsAccountChargeId, accountId);
 
         final DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MM yyyy");
-        payCharge(savingsAccountCharge, transactionDate, savingsAccountCharge.amoutOutstanding(), fmt);
+
+        while (transactionDate.isAfter(savingsAccountCharge.getDueLocalDate())) {
+            payCharge(savingsAccountCharge, transactionDate, savingsAccountCharge.amoutOutstanding(), fmt);
+        }
     }
 
     @Transactional
