@@ -50,6 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.JsonElement;
+import org.mifosplatform.useradministration.domain.AppUser;
 
 @Service
 public class SavingsAccountAssembler {
@@ -85,10 +86,10 @@ public class SavingsAccountAssembler {
      * request inheriting details where relevant from chosen
      * {@link SavingsProduct}.
      */
-    public SavingsAccount assembleFrom(final JsonCommand command) {
+    public SavingsAccount assembleFrom(final JsonCommand command, final AppUser submittedBy) {
 
         final JsonElement element = command.parsedJson();
-
+        
         final String accountNo = this.fromApiJsonHelper.extractStringNamed(accountNoParamName, element);
         final String externalId = this.fromApiJsonHelper.extractStringNamed(externalIdParamName, element);
         final Long productId = this.fromApiJsonHelper.extractLongNamed(productIdParamName, element);
@@ -200,9 +201,9 @@ public class SavingsAccountAssembler {
 
 
         final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(element, product.currency().getCode());
-
+        
         final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer, accountNo,
-                externalId, accountType, submittedOnDate, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
+                externalId, accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
                 lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, charges);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
