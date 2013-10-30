@@ -337,19 +337,21 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
         if (repeating) {
             final StringBuilder recurrenceBuilder = new StringBuilder(200);
-            final String repeats = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS.getValue());
+            final Integer frequency = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.FREQUENCY.getValue());
+            final CalendarFrequencyType frequencyType = CalendarFrequencyType.fromInt(frequency);
             recurrenceBuilder.append("FREQ=");
-            recurrenceBuilder.append(repeats.toUpperCase());
-            final Integer repeatsEvery = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_EVERY.getValue());
-            if (repeatsEvery > 1) {
+            recurrenceBuilder.append(frequencyType.toString().toUpperCase());
+            final Integer interval = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue());
+            if (interval > 1) {
                 recurrenceBuilder.append(";INTERVAL=");
-                recurrenceBuilder.append(repeatsEvery);
+                recurrenceBuilder.append(interval);
             }
-            if (repeats.equalsIgnoreCase("Weekly")) {
-                final String repeatsOnDay = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue());
-                if (repeatsOnDay != null && repeatsOnDay != "") {
+            if (frequencyType.isWeekly()) {
+                final Integer repeatsOnDay = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue());
+                final CalendarWeekDaysType weekDays = CalendarWeekDaysType.fromInt(repeatsOnDay);
+                if (!weekDays.isInvalid()) {
                     recurrenceBuilder.append(";BYDAY=");
-                    recurrenceBuilder.append(repeatsOnDay);
+                    recurrenceBuilder.append(weekDays.toString().toUpperCase());
                 }
             }
             return recurrenceBuilder.toString();

@@ -67,6 +67,9 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             final EnumOptionData type = CalendarEnumerations.calendarType(typeId);
             final boolean repeating = rs.getBoolean("repeating");
             final String recurrence = rs.getString("recurrence");
+            final EnumOptionData frequency = CalendarEnumerations.calendarFrequencyType(CalendarUtils.getFrequency(recurrence));
+            final Integer interval = new Integer(CalendarUtils.getInterval(recurrence));
+            final EnumOptionData repeatsOnDay = CalendarEnumerations.calendarWeekDaysType(CalendarUtils.getRepeatsOnDay(recurrence));
             final Integer remindById = rs.getInt("remindById");
             EnumOptionData remindBy = null;
             if (remindById != null && remindById != 0) {
@@ -86,10 +89,8 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             final Long lastUpdatedByUserId = rs.getLong("updatingUserId");
             final String lastUpdatedByUserName = rs.getString("updatingUserName");
 
-            final LocalDate recentEligibleMeetingDate = null;
-
-            return new CalendarData(id, entityId, entityType, title, description, location, startDate, endDate, duration, type, repeating,
-                    recurrence, remindBy, firstReminder, secondReminder, humanReadable, recentEligibleMeetingDate, createdDate,
+            return CalendarData.instance(id, entityId, entityType, title, description, location, startDate, endDate, duration, type,
+                    repeating, recurrence, frequency, interval, repeatsOnDay, remindBy, firstReminder, secondReminder, humanReadable, createdDate,
                     lastUpdatedDate, createdByUserId, createdByUserName, lastUpdatedByUserId, lastUpdatedByUserName);
         }
     }
@@ -216,7 +217,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         final Collection<LocalDate> recurringDates = CalendarUtils.getRecurringDates(rrule, seedDate, startDate, endDate, -1);
         final Collection<LocalDate> nextTenRecurringDates = CalendarUtils.getRecurringDates(rrule, seedDate, endDate);
         final LocalDate recentEligibleMeetingDate = CalendarUtils.getRecentEligibleMeetingDate(rrule, seedDate);
-        return new CalendarData(calendarData, recurringDates, nextTenRecurringDates, recentEligibleMeetingDate);
+        return CalendarData.withRecurringDates(calendarData, recurringDates, nextTenRecurringDates, recentEligibleMeetingDate);
 
     }
 

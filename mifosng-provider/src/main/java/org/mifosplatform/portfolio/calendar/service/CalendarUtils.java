@@ -32,6 +32,8 @@ import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.organisation.workingdays.service.WorkingDaysUtil;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
+import org.mifosplatform.portfolio.calendar.domain.CalendarFrequencyType;
+import org.mifosplatform.portfolio.calendar.domain.CalendarWeekDaysType;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 public class CalendarUtils {
@@ -283,6 +285,20 @@ public class CalendarUtils {
     public static int getInterval(final String recurringRule) {
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         return recur.getInterval();
+    }
+    
+    public static CalendarFrequencyType getFrequency(final String recurringRule){
+        final Recur recur = CalendarUtils.getICalRecur(recurringRule);
+        return CalendarFrequencyType.fromString(recur.getFrequency());
+    }
+    
+    public static CalendarWeekDaysType getRepeatsOnDay(final String recurringRule){
+        final Recur recur = CalendarUtils.getICalRecur(recurringRule);
+        final WeekDayList weekDays = recur.getDayList();
+        if(weekDays.isEmpty()) return CalendarWeekDaysType.INVALID;
+        //supports only one day        
+        WeekDay weekDay = (WeekDay) weekDays.get(0);
+        return CalendarWeekDaysType.fromString(weekDay.getDay());
     }
 
     public static LocalDate getFirstRepaymentMeetingDate(final Calendar calendar, final LocalDate disbursementDate,
