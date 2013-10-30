@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 30 Oct 2013 - 1.13.3.RELEASE
 1. 28 Oct 2013 - 1.13.2.RELEASE
 1. 22 Oct 2013 - 1.13.1.RELEASE
 1. 19 Oct 2013 - 1.13.0.RELEASE
@@ -45,6 +46,17 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.13.3.RELEASE
+=============
+Bug Release
+
+Bugs
+ - [MIFOSX-740] - In Savings account monthly charge Recurrence Start month should be after activation of the account
+ - [MIFOSX-757] - updating charges
+ - [MIFOSX-759] - Retrieving journal entry information by transactionId is not gauranteed to return journal entries from same transaction
+ - [MIFOSX-760] - Updating a charge does not evict the cache resulting in incorrect data returned from platform
+ - [MIFOSX-762] - SubmittedBy User not stored when creating savings accounts
 
 1.13.2.RELEASE
 =============
