@@ -2238,7 +2238,7 @@ public class Loan extends AbstractPersistable<Long> {
         return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.submittedOnDate), null);
     }
 
-    private LocalDate getApprovedOnDate() {
+    public LocalDate getApprovedOnDate() {
         LocalDate date = null;
         if (this.approvedOnDate != null) {
             date = new LocalDate(this.approvedOnDate);

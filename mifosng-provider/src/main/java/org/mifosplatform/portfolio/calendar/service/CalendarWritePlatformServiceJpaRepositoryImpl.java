@@ -5,13 +5,22 @@
  */
 package org.mifosplatform.portfolio.calendar.service;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.portfolio.calendar.CalendarConstants.CALENDAR_SUPPORTED_PARAMETERS;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
@@ -19,6 +28,12 @@ import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.mifosplatform.portfolio.calendar.domain.CalendarRepository;
 import org.mifosplatform.portfolio.calendar.exception.CalendarNotFoundException;
 import org.mifosplatform.portfolio.calendar.serialization.CalendarCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
+import org.mifosplatform.portfolio.group.domain.Group;
+import org.mifosplatform.portfolio.group.domain.GroupRepository;
+import org.mifosplatform.portfolio.loanaccount.domain.Loan;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
 import org.mifosplatform.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,17 +47,24 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final LoanWritePlatformService loanWritePlatformService;
     private final ConfigurationDomainService configurationDomainService;
+    private final GroupRepository groupRepository;
+    private final LoanRepository loanRepository;
+    private final ClientRepositoryWrapper clientRepository;
 
     @Autowired
     public CalendarWritePlatformServiceJpaRepositoryImpl(final CalendarRepository calendarRepository,
             final CalendarCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final CalendarInstanceRepository calendarInstanceRepository, final LoanWritePlatformService loanWritePlatformService,
-            final ConfigurationDomainService configurationDomainService) {
+            final ConfigurationDomainService configurationDomainService, final GroupRepository groupRepository,
+            final LoanRepository loanRepository, final ClientRepositoryWrapper clientRepository) {
         this.calendarRepository = calendarRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.loanWritePlatformService = loanWritePlatformService;
         this.configurationDomainService = configurationDomainService;
+        this.groupRepository = groupRepository;
+        this.loanRepository = loanRepository;
+        this.clientRepository = clientRepository;
     }
 
     @Override
@@ -50,7 +72,25 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
 
         this.fromApiJsonDeserializer.validateForCreate(command.json());
 
+        final LocalDate entityActivationDate = getEntityActivationDate(command);
+        final CalendarEntityType entityType = CalendarEntityType.valueOf(command.getSupportedEntityType().toUpperCase());
+        
         final Calendar newCalendar = Calendar.fromJson(command);
+        
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource("calendar");
+        if(entityActivationDate == null || newCalendar.getStartDateLocalDate().isBefore(entityActivationDate)){
+            final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
+            String dateAsString = "";
+            if(entityActivationDate != null) dateAsString = formatter.print(entityActivationDate);
+            
+            final String errorMessage = "cannot.be.before." + entityType.name().toLowerCase() + ".activation.date";
+            baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.START_DATE.getValue()).value(dateAsString)
+                    .failWithCodeNoParameterAddedToErrorCode(errorMessage);
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+        
         this.calendarRepository.save(newCalendar);
 
         final CalendarInstance newCalendarInstance = CalendarInstance.fromJson(newCalendar, command);
@@ -61,6 +101,25 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
                 .withEntityId(newCalendar.getId()) //
                 .build();
 
+    }
+
+    private LocalDate getEntityActivationDate(JsonCommand command) {
+        final Long entityId = command.getSupportedEntityId();
+        final CalendarEntityType entityType = CalendarEntityType.valueOf(command.getSupportedEntityType().toUpperCase());
+        LocalDate entityActivationDate = null;
+
+        if(entityType.isCenter() || entityType.isGroup()){
+            final Group centerOrGroup = this.groupRepository.findOne(entityId);
+            entityActivationDate = centerOrGroup.getActivationLocalDate();
+        } else if (entityType.isLoan()){
+            final Loan loan = this.loanRepository.findOne(entityId);
+            entityActivationDate = (loan.getApprovedOnDate() == null) ? loan.getSubmittedOnDate() : loan.getApprovedOnDate();
+        } else if (entityType.isLoan()){
+            final Client client = this.clientRepository.findOneWithNotFoundDetection(entityId);
+            entityActivationDate = client.getActivationLocalDate();
+        }
+        
+        return entityActivationDate;
     }
 
     @Override
