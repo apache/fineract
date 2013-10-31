@@ -91,7 +91,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
         String sql = "select " + rm.schema();
         // append SQL statement for fetching account totals
         sql = sql + " and gl_j.id in (select t1.id from (SELECT t2.id , max(concat(t2.entry_date,t2.id)) "
-                + "FROM acc_gl_journal_entry t2 GROUP BY t2.account_id DESC) t1)";
+                + "FROM acc_gl_journal_entry t2 WHERE is_running_balance_caculated = 1 GROUP BY t2.account_id DESC) t1)";
         final Object[] paramaterArray = new Object[3];
         int arrayPos = 0;
         boolean filtersPresent = false;
@@ -167,7 +167,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
             final GLAccountMapper rm = new GLAccountMapper();
             final String sql = "select " + rm.schema()
-                    + " where gl.id = gl_j.account_id and gl.id = ? ORDER BY entry_date DESC,id DESC LIMIT 1";
+                    + " and gl_j.is_running_balance_caculated = 1 where gl.id = ? ORDER BY gl_j.entry_date DESC,gl_j.id DESC LIMIT 1";
 
             final GLAccountData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glAccountId });
 
