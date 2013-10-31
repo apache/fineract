@@ -439,7 +439,8 @@ public class Loan extends AbstractPersistable<Long> {
         // transactions
         existingTransactionIds.addAll(findExistingTransactionIds());
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
-
+        final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
+        wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, setOfLoanCharges());
         if (!loanCharge.isDueAtDisbursement()) {
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(),
@@ -448,11 +449,7 @@ public class Loan extends AbstractPersistable<Long> {
                 mapEntry.getValue().updateLoan(this);
             }
             // this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
-        } else {
-            // just reprocess the loan schedule only for now.
-            final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
-            wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, setOfLoanCharges());
-        }
+        } 
 
         updateLoanSummaryDerivedFields();
         return changedTransactionDetail;
@@ -569,6 +566,8 @@ public class Loan extends AbstractPersistable<Long> {
 
         final boolean removed = setOfLoanCharges().remove(loanCharge);
         if (removed) {
+            final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
+            wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, setOfLoanCharges());
             updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
         }
 
