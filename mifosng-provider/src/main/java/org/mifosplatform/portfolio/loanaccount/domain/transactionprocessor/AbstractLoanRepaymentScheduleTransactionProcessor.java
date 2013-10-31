@@ -257,13 +257,20 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     private LoanCharge findEarliestUnpaidChargeFromUnOrderedSet(final Set<LoanCharge> charges) {
         LoanCharge earliestUnpaidCharge = null;
-
+        LoanCharge installemntCharge = null;
         for (final LoanCharge loanCharge : charges) {
             if (loanCharge.isNotFullyPaid() && !loanCharge.isDueAtDisbursement()) {
-                if (earliestUnpaidCharge == null || loanCharge.getDueLocalDate().isBefore(earliestUnpaidCharge.getDueLocalDate())) {
+                if(loanCharge.isInstalmentFee()){
+                    if(installemntCharge == null){
+                        installemntCharge = loanCharge;
+                    }
+                }else if (earliestUnpaidCharge == null || loanCharge.getDueLocalDate().isBefore(earliestUnpaidCharge.getDueLocalDate())) {
                     earliestUnpaidCharge = loanCharge;
                 }
             }
+        }
+        if(earliestUnpaidCharge == null || earliestUnpaidCharge.getDueLocalDate().isAfter(new LocalDate())){
+            earliestUnpaidCharge = installemntCharge;
         }
 
         return earliestUnpaidCharge;
