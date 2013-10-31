@@ -175,6 +175,10 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
             }
         }
+        else
+        {
+            sqlBuilder.append(" order by journalEntry.entry_date, journalEntry.id");
+        }
 
         if (searchParameters.isLimited()) {
             sqlBuilder.append(" limit ").append(searchParameters.getLimit());
