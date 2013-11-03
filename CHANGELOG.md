@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 03 Nov 2013 - 1.13.4.RELEASE
 1. 30 Oct 2013 - 1.13.3.RELEASE
 1. 28 Oct 2013 - 1.13.2.RELEASE
 1. 22 Oct 2013 - 1.13.1.RELEASE
@@ -47,6 +48,15 @@ Releases
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
 
+1.13.4.RELEASE
+=============
+Bug Release
+
+Bugs
+ - [MIFOSX-763] - Organization Running balance on /glaccounts is incorrect for uncalculated entries
+ - [MIFOSX-764] - Journal entries are not returned in correct order making running blance nonsensical
+ - [MIFOSX-766] - Add and delete charge is not reflecting the schedule till loan disburse
+ 
 1.13.3.RELEASE
 =============
 Bug Release
