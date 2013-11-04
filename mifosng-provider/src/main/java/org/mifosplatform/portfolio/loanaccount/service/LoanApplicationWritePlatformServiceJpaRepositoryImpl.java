@@ -325,12 +325,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 existingLoanApplication.updateTransactionProcessingStrategy(strategy);
             }
 
-            final String chargesParamName = "charges";
-            if (changes.containsKey(chargesParamName)) {
-                final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(command.parsedJson());
-                existingLoanApplication.updateLoanCharges(loanCharges);
-            }
-
             final String collateralParamName = "collateral";
             if (changes.containsKey(collateralParamName)) {
                 final Set<LoanCollateral> loanCollateral = this.loanCollateralAssembler.fromParsedJson(command.parsedJson());
@@ -345,6 +339,12 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
                 final LoanScheduleModel loanSchedule = this.calculationPlatformService.calculateLoanSchedule(query);
                 existingLoanApplication.updateLoanSchedule(loanSchedule);
+            }
+            
+            final String chargesParamName = "charges";
+            if (changes.containsKey(chargesParamName)) {
+                final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(command.parsedJson());
+                existingLoanApplication.updateLoanCharges(loanCharges);
             }
 
             this.loanRepository.saveAndFlush(existingLoanApplication);

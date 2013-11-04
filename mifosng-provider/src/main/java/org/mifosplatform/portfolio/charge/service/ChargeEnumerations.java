@@ -43,6 +43,9 @@ public class ChargeEnumerations {
             case MONTHLY_FEE:
                 optionData = new EnumOptionData(ChargeTimeType.MONTHLY_FEE.getValue().longValue(), ChargeTimeType.MONTHLY_FEE.getCode(), "Monthly Fee");
             break;
+            case INSTALMENT_FEE:
+                optionData = new EnumOptionData(ChargeTimeType.INSTALMENT_FEE.getValue().longValue(), ChargeTimeType.INSTALMENT_FEE.getCode(), "Instalment Fee");
+            break;
             default:
                 optionData = new EnumOptionData(ChargeTimeType.INVALID.getValue().longValue(), ChargeTimeType.INVALID.getCode(), "Invalid");
             break;
