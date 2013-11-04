@@ -58,6 +58,7 @@ import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.organisation.workingdays.service.WorkingDaysUtil;
 import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
+import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeAddedException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.collateral.data.CollateralData;
@@ -452,15 +453,19 @@ public class Loan extends AbstractPersistable<Long> {
         loanCharge.update(this);
         BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
         BigDecimal chargeAmt = BigDecimal.ZERO;
+        BigDecimal totalChargeAmt = BigDecimal.ZERO;
         if(loanCharge.getChargeCalculation().isPercentageBased()){
             chargeAmt = loanCharge.getPercentage();
+            if(loanCharge.isInstalmentFee()){
+                totalChargeAmt = calculatePerInstallmentChargeAmount(loanCharge);
+            }
         }else{
             chargeAmt = loanCharge.amount();
             if(loanCharge.isInstalmentFee()){
                 chargeAmt = chargeAmt.divide(BigDecimal.valueOf(this.repaymentScheduleDetail().getNumberOfRepayments()));
             }
         }
-        loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, this.repaymentScheduleDetail().getNumberOfRepayments());
+        loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, this.repaymentScheduleDetail().getNumberOfRepayments(), totalChargeAmt);
         setOfLoanCharges().add(loanCharge);
         return changedTransactionDetail;
     }
@@ -636,7 +641,11 @@ public class Loan extends AbstractPersistable<Long> {
         validateLoanIsNotClosed(loanCharge);
         if (setOfLoanCharges().contains(loanCharge)) {
             BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
-            final Map<String, Object> loanChargeChanges = loanCharge.update(command, amount);
+            BigDecimal totalChargeAmt = BigDecimal.ZERO;
+            if(loanCharge.isInstalmentFee()){
+                totalChargeAmt = calculatePerInstallmentChargeAmount(loanCharge);
+            }
+            final Map<String, Object> loanChargeChanges = loanCharge.update(command, amount, totalChargeAmt);
             actualChanges.putAll(loanChargeChanges);
             updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
         }
@@ -688,6 +697,32 @@ public class Loan extends AbstractPersistable<Long> {
             break;
         }
         return amount;
+    }
+    
+    private BigDecimal calculatePerInstallmentChargeAmount(final LoanCharge loanCharge){
+        return calculatePerInstallmentChargeAmount(loanCharge.getChargeCalculation(), loanCharge.getPercentage());
+    }
+    
+    public BigDecimal calculatePerInstallmentChargeAmount(ChargeCalculationType calculationType,BigDecimal percentage){
+        Money amount = Money.zero(getCurrency());
+        for(final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments){
+            Money percentOf = Money.zero(getCurrency());
+            switch (calculationType) {
+                case PERCENT_OF_AMOUNT:
+                    percentOf = installment.getPrincipal(getCurrency());
+                break;
+                case PERCENT_OF_AMOUNT_AND_INTEREST:
+                    percentOf = installment.getPrincipal(getCurrency()).plus(installment.getInterestCharged(getCurrency()));
+                break;
+                case PERCENT_OF_INTEREST:
+                    percentOf = installment.getInterestCharged(getCurrency());
+                break;
+                default:
+                break;
+            }
+            amount = amount.plus(LoanCharge.percentageOf(percentOf.getAmount(),percentage));
+        }
+        return amount.getAmount();
     }
 
     public LoanTransaction waiveLoanCharge(final LoanCharge loanCharge, final LoanLifecycleStateMachine loanLifecycleStateMachine,
@@ -803,15 +838,19 @@ public class Loan extends AbstractPersistable<Long> {
             loanCharge.update(this);
             BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
             BigDecimal chargeAmt = BigDecimal.ZERO;
+            BigDecimal totalChargeAmt = BigDecimal.ZERO;
             if(loanCharge.getChargeCalculation().isPercentageBased()){
                 chargeAmt = loanCharge.getPercentage();
+                if(loanCharge.isInstalmentFee()){
+                    totalChargeAmt = calculatePerInstallmentChargeAmount(loanCharge);
+                }
             }else{
                 chargeAmt = loanCharge.amount();
                 if(loanCharge.isInstalmentFee()){
                     chargeAmt = chargeAmt.divide(BigDecimal.valueOf(this.repaymentScheduleDetail().getNumberOfRepayments()));
                 }
             }
-            loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, this.repaymentScheduleDetail().getNumberOfRepayments());
+            loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, this.repaymentScheduleDetail().getNumberOfRepayments(), totalChargeAmt);
         }
         setOfLoanCharges().addAll(loanCharges);
         updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
@@ -1062,15 +1101,19 @@ public class Loan extends AbstractPersistable<Long> {
                 for (final LoanCharge loanCharge : possiblyModifedLoanCharges) {
                     BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
                     BigDecimal chargeAmt = BigDecimal.ZERO;
+                    BigDecimal totalChargeAmt = BigDecimal.ZERO;
                     if(loanCharge.getChargeCalculation().isPercentageBased()){
                         chargeAmt = loanCharge.getPercentage();
+                        if(loanCharge.isInstalmentFee()){
+                            totalChargeAmt = calculatePerInstallmentChargeAmount(loanCharge);
+                        }
                     }else{
                         chargeAmt = loanCharge.amount();
                         if(loanCharge.isInstalmentFee()){
                             chargeAmt = chargeAmt.divide(BigDecimal.valueOf(this.repaymentScheduleDetail().getNumberOfRepayments()));
                         }
                     }
-                    loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, this.repaymentScheduleDetail().getNumberOfRepayments());
+                    loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, this.repaymentScheduleDetail().getNumberOfRepayments(), totalChargeAmt);
                     validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
                 }
             }
@@ -1204,15 +1247,19 @@ public class Loan extends AbstractPersistable<Long> {
         for (final LoanCharge loanCharge : setOfLoanCharges()) {
             BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
             BigDecimal chargeAmt = BigDecimal.ZERO;
+            BigDecimal totalChargeAmt = BigDecimal.ZERO;
             if(loanCharge.getChargeCalculation().isPercentageBased()){
                 chargeAmt = loanCharge.getPercentage();
+                if(loanCharge.isInstalmentFee()){
+                    totalChargeAmt = calculatePerInstallmentChargeAmount(loanCharge);
+                }
             }else{
                 chargeAmt = loanCharge.amount();
                 if(loanCharge.isInstalmentFee()){
                     chargeAmt = chargeAmt.divide(BigDecimal.valueOf(this.repaymentScheduleDetail().getNumberOfRepayments()));
                 }
             }
-            loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, this.repaymentScheduleDetail().getNumberOfRepayments());
+            loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, this.repaymentScheduleDetail().getNumberOfRepayments(), totalChargeAmt);
             validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
         }
 
