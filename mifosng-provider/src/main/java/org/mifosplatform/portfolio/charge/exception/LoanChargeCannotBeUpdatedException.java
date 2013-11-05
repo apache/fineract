@@ -11,14 +11,19 @@ public class LoanChargeCannotBeUpdatedException extends AbstractPlatformDomainRu
 
     /*** enum of reasons of why Loan Charge cannot be waived **/
     public static enum LOAN_CHARGE_CANNOT_BE_UPDATED_REASON {
-        ALREADY_PAID, ALREADY_WAIVED, LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE;
+        ALREADY_PAID, ALREADY_WAIVED, LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE,CHARGE_INSTALLMENT_FEE;
 
         public String errorMessage() {
             if (name().toString().equalsIgnoreCase("ALREADY_PAID")) {
                 return "This loan charge has been partially/completely paid";
             } else if (name().toString().equalsIgnoreCase("ALREADY_WAIVED")) {
                 return "This loan charge has already been waived";
-            } else if (name().toString().equalsIgnoreCase("LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE")) { return "This charge cannot be updated as the loan it is associated with is not in submitted and pending approval stage"; }
+            } else if (name().toString().equalsIgnoreCase("LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE")) { 
+                return "This charge cannot be updated as the loan it is associated with is not in submitted and pending approval stage"; 
+            } else if(name().toString().equalsIgnoreCase("CHARGE_INSTALLMENT_FEE")){
+                return "Installment charge update is not allowed";
+            }
+            
             return name().toString();
         }
 
@@ -27,7 +32,11 @@ public class LoanChargeCannotBeUpdatedException extends AbstractPlatformDomainRu
                 return "error.msg.loan.charge.already.paid";
             } else if (name().toString().equalsIgnoreCase("ALREADY_WAIVED")) {
                 return "error.msg.loan.charge.already.waived";
-            } else if (name().toString().equalsIgnoreCase("LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE")) { return "error.msg.loan.charge.associated.loan.not.in.submitted.and.pending.approval.stage"; }
+            } else if (name().toString().equalsIgnoreCase("LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE")) {
+                return "error.msg.loan.charge.associated.loan.not.in.submitted.and.pending.approval.stage"; 
+            } else if(name().toString().equalsIgnoreCase("CHARGE_INSTALLMENT_FEE")){
+                return "error.msg.loan.charge.installment.fee.update.not.allowed"; 
+            }
             return name().toString();
         }
     }

@@ -890,6 +890,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         // yet to be approved (are in submitted and pending status)
         if (!loan.status().isSubmittedAndPendingApproval()) { throw new LoanChargeCannotBeUpdatedException(
                 LOAN_CHARGE_CANNOT_BE_UPDATED_REASON.LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE, loanCharge.getId()); }
+        
+        if(loanCharge.isInstalmentFee()){
+            throw new LoanChargeCannotBeUpdatedException(
+                    LOAN_CHARGE_CANNOT_BE_UPDATED_REASON.CHARGE_INSTALLMENT_FEE, loanCharge.getId()); 
+        }
 
         final Map<String, Object> changes = loan.updateLoanCharge(loanCharge, command);
 
