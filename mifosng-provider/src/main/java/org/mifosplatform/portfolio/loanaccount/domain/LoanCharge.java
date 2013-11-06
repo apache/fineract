@@ -65,6 +65,10 @@ public class LoanCharge extends AbstractPersistable<Long> {
     @Column(name = "calculation_on_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountPercentageAppliedTo;
 
+    @SuppressWarnings("unused")
+    @Column(name = "charge_amount_or_percentage", scale = 6, precision = 19, nullable = false)
+    private BigDecimal amountOrPercentage;
+    
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
 
@@ -232,6 +236,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
                 this.amountWrittenOff = null;
             break;
         }
+        this.amountOrPercentage = chargeAmount;
     }
 
     public void markAsFullyPaid() {
@@ -302,10 +307,11 @@ public class LoanCharge extends AbstractPersistable<Long> {
                     this.amountOutstanding = calculateOutstanding();
                break;
             }
+            this.amountOrPercentage = amount;
         }
     }
 
-    public Map<String, Object> update(final JsonCommand command, final BigDecimal amount, BigDecimal loanCharge) {
+    public Map<String, Object> update(final JsonCommand command, final BigDecimal amount) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
 
@@ -343,6 +349,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
                 case PERCENT_OF_INTEREST:
                     this.percentage = newValue;
                     this.amountPercentageAppliedTo = amount;
+                    BigDecimal loanCharge = loan.calculatePerInstallmentChargeAmount(ChargeCalculationType.fromInt(this.chargeCalculation),percentage);
                     if(loanCharge.compareTo(BigDecimal.ZERO) == 0){
                         loanCharge = percentageOf(this.amountPercentageAppliedTo);
                     }
@@ -350,8 +357,8 @@ public class LoanCharge extends AbstractPersistable<Long> {
                     this.amountOutstanding = calculateOutstanding();
                 break;
             }
+            this.amountOrPercentage = newValue;
         }
-
         return actualChanges;
     }
 

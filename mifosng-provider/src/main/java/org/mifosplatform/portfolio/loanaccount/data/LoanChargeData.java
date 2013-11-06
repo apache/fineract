@@ -80,7 +80,7 @@ public class LoanChargeData {
 
     public static LoanChargeData template(final Collection<ChargeData> chargeOptions) {
         return new LoanChargeData(null, null, null, null, null, null, null, null, chargeOptions, false, null, false, false, null, null,
-                null);
+                null,null);
     }
 
     /**
@@ -92,7 +92,7 @@ public class LoanChargeData {
             final EnumOptionData chargeCalculationType, final boolean penalty, final EnumOptionData chargePaymentMode,
             final BigDecimal minCap, final BigDecimal maxCap) {
         return new LoanChargeData(null, chargeId, name, currency, amount, percentage, chargeTimeType, chargeCalculationType, null, penalty,
-                chargePaymentMode, false, false, null, minCap, maxCap);
+                chargePaymentMode, false, false, null, minCap, maxCap,null);
     }
 
     public LoanChargeData(final Long id, final Long chargeId, final String name, final CurrencyData currency, final BigDecimal amount,
@@ -100,7 +100,7 @@ public class LoanChargeData {
             final BigDecimal amountOutstanding, final EnumOptionData chargeTimeType, final LocalDate dueDate,
             final EnumOptionData chargeCalculationType, final BigDecimal percentage, final BigDecimal amountPercentageAppliedTo,
             final boolean penalty, final EnumOptionData chargePaymentMode, final boolean paid, final boolean waived, final Long loanId,
-            final BigDecimal minCap, final BigDecimal maxCap) {
+            final BigDecimal minCap, final BigDecimal maxCap,final BigDecimal amountOrPercentage) {
         this.id = id;
         this.chargeId = chargeId;
         this.name = name;
@@ -121,11 +121,14 @@ public class LoanChargeData {
         this.waived = waived;
         this.minCap = minCap;
         this.maxCap = maxCap;
-
-        if (chargeCalculationType != null && chargeCalculationType.getId().intValue() > 1) {
-            this.amountOrPercentage = this.percentage;
-        } else {
-            this.amountOrPercentage = amount;
+        if(amountOrPercentage == null){
+            if (chargeCalculationType != null && chargeCalculationType.getId().intValue() > 1) {
+                this.amountOrPercentage = this.percentage;
+            } else {
+                this.amountOrPercentage = amount;
+            }
+        }else{
+            this.amountOrPercentage = amountOrPercentage;
         }
 
         this.chargeOptions = null;
@@ -136,7 +139,7 @@ public class LoanChargeData {
     private LoanChargeData(final Long id, final Long chargeId, final String name, final CurrencyData currency, final BigDecimal amount,
             final BigDecimal percentage, final EnumOptionData chargeTimeType, final EnumOptionData chargeCalculationType,
             final Collection<ChargeData> chargeOptions, final boolean penalty, final EnumOptionData chargePaymentMode, final boolean paid,
-            final boolean waived, final Long loanId, final BigDecimal minCap, final BigDecimal maxCap) {
+            final boolean waived, final Long loanId, final BigDecimal minCap, final BigDecimal maxCap,final BigDecimal amountOrPercentage) {
         this.id = id;
         this.chargeId = chargeId;
         this.name = name;
@@ -156,10 +159,14 @@ public class LoanChargeData {
         this.paid = paid;
         this.waived = waived;
 
-        if (chargeCalculationType != null && chargeCalculationType.getId().intValue() > 1) {
-            this.amountOrPercentage = this.percentage;
-        } else {
-            this.amountOrPercentage = amount;
+        if(amountOrPercentage == null){
+            if (chargeCalculationType != null && chargeCalculationType.getId().intValue() > 1) {
+                this.amountOrPercentage = this.percentage;
+            } else {
+                this.amountOrPercentage = amount;
+            }
+        }else{
+            this.amountOrPercentage = amountOrPercentage;
         }
 
         this.chargeOptions = chargeOptions;
