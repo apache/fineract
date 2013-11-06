@@ -641,11 +641,7 @@ public class Loan extends AbstractPersistable<Long> {
         validateLoanIsNotClosed(loanCharge);
         if (setOfLoanCharges().contains(loanCharge)) {
             BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
-            BigDecimal totalChargeAmt = BigDecimal.ZERO;
-            if(loanCharge.isInstalmentFee()){
-                totalChargeAmt = calculatePerInstallmentChargeAmount(loanCharge);
-            }
-            final Map<String, Object> loanChargeChanges = loanCharge.update(command, amount, totalChargeAmt);
+            final Map<String, Object> loanChargeChanges = loanCharge.update(command, amount);
             actualChanges.putAll(loanChargeChanges);
             updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
         }

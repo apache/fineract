@@ -59,6 +59,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
                     + "lc.is_paid_derived as paid, "
                     + "lc.waived as waied, "
                     + "lc.min_cap as minCap, lc.max_cap as maxCap, "
+                    + "lc.charge_amount_or_percentage as amountOrPercentage, "
                     + "c.currency_code as currencyCode, oc.name as currencyName, "
                     + "oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
                     + "oc.internationalized_name_code as currencyNameCode from m_charge c "
@@ -105,10 +106,11 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final boolean waived = rs.getBoolean("waied");
             final BigDecimal minCap  = rs.getBigDecimal("minCap");
             final BigDecimal maxCap  = rs.getBigDecimal("maxCap");
+            final BigDecimal amountOrPercentage = rs.getBigDecimal("amountOrPercentage");
 
             return new LoanChargeData(id, chargeId, name, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding,
                     chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo, penalty, paymentMode,
-                    paid, waived, null,minCap,maxCap);
+                    paid, waived, null,minCap,maxCap,amountOrPercentage);
         }
     }
 
