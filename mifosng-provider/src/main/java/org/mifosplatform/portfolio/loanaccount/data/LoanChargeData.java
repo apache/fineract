@@ -92,7 +92,7 @@ public class LoanChargeData {
             final EnumOptionData chargeCalculationType, final boolean penalty, final EnumOptionData chargePaymentMode,
             final BigDecimal minCap, final BigDecimal maxCap) {
         return new LoanChargeData(null, chargeId, name, currency, amount, percentage, chargeTimeType, chargeCalculationType, null, penalty,
-                chargePaymentMode, false, false, null, minCap, maxCap,amount);
+                chargePaymentMode, false, false, null, minCap, maxCap,null);
     }
 
     public LoanChargeData(final Long id, final Long chargeId, final String name, final CurrencyData currency, final BigDecimal amount,
