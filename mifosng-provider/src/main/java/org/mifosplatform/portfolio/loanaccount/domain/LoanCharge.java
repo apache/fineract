@@ -65,10 +65,9 @@ public class LoanCharge extends AbstractPersistable<Long> {
     @Column(name = "calculation_on_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountPercentageAppliedTo;
 
-    @SuppressWarnings("unused")
     @Column(name = "charge_amount_or_percentage", scale = 6, precision = 19, nullable = false)
     private BigDecimal amountOrPercentage;
-    
+
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
 
@@ -121,7 +120,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
             default:
                break;
         }
-        
+
         BigDecimal loanCharge = BigDecimal.ZERO;
         if(ChargeTimeType.fromInt(chargeDefinition.getChargeTime()).equals(ChargeTimeType.INSTALMENT_FEE)){
             BigDecimal percentage = amount;
@@ -134,7 +133,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
         return new LoanCharge(loan, chargeDefinition, amountPercentageAppliedTo, amount, chargeTime, chargeCalculation, dueDate,
                 chargePaymentMode, null, loanCharge);
     }
-    
+
     /*
      * loanPrincipal is required for charges that are percentage based
      */
@@ -150,7 +149,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     public LoanCharge(final Loan loan, final Charge chargeDefinition, final BigDecimal loanPrincipal, final BigDecimal amount,
             final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate,
-            final ChargePaymentMode chargePaymentMode, Integer numberOfRepayments, BigDecimal loanCharge) {
+            final ChargePaymentMode chargePaymentMode, final Integer numberOfRepayments, final BigDecimal loanCharge) {
         this.loan = loan;
         this.charge = chargeDefinition;
         this.penaltyCharge = chargeDefinition.isPenalty();
@@ -209,7 +208,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
                 this.percentage = null;
                 this.amountPercentageAppliedTo = null;
                 this.amountPaid = null;
-                if(this.isInstalmentFee()){
+                if(isInstalmentFee()){
                     if(numberOfRepayments == null){
                         numberOfRepayments = this.loan.repaymentScheduleDetail().getNumberOfRepayments();
                     }
@@ -286,7 +285,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
                 case INVALID:
                 break;
                 case FLAT:
-                    if(this.isInstalmentFee()){
+                    if(isInstalmentFee()){
                         if(numberOfRepayments == null){
                             numberOfRepayments = this.loan.repaymentScheduleDetail().getNumberOfRepayments();
                         }
@@ -338,7 +337,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
                 case INVALID:
                 break;
                 case FLAT:
-                    if(this.isInstalmentFee()){
+                    if(isInstalmentFee()){
                         this.amount =  newValue.multiply(BigDecimal.valueOf(this.loan.repaymentScheduleDetail().getNumberOfRepayments()));
                     }else{
                         this.amount = newValue;
@@ -349,7 +348,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
                 case PERCENT_OF_INTEREST:
                     this.percentage = newValue;
                     this.amountPercentageAppliedTo = amount;
-                    BigDecimal loanCharge = loan.calculatePerInstallmentChargeAmount(ChargeCalculationType.fromInt(this.chargeCalculation),percentage);
+                    BigDecimal loanCharge = this.loan.calculatePerInstallmentChargeAmount(ChargeCalculationType.fromInt(this.chargeCalculation),this.percentage);
                     if(loanCharge.compareTo(BigDecimal.ZERO) == 0){
                         loanCharge = percentageOf(this.amountPercentageAppliedTo);
                     }
@@ -369,7 +368,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
     public boolean isSpecifiedDueDate() {
         return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.SPECIFIED_DUE_DATE);
     }
-    
+
     public boolean isInstalmentFee() {
         return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.INSTALMENT_FEE);
     }
@@ -424,8 +423,8 @@ public class LoanCharge extends AbstractPersistable<Long> {
     public BigDecimal percentageOf(final BigDecimal value) {
         return percentageOf(value, this.percentage);
     }
-    
-    public static BigDecimal percentageOf(final BigDecimal value,BigDecimal percentage) {
+
+    public static BigDecimal percentageOf(final BigDecimal value,final BigDecimal percentage) {
 
         BigDecimal percentageOf = BigDecimal.ZERO;
 
@@ -442,17 +441,17 @@ public class LoanCharge extends AbstractPersistable<Long> {
      * @returns a minimum cap or maximum cap set on charges if the criteria fits
      * else it returns the percentageOf if the amount is within min and max cap
      */
-    private BigDecimal minimumAndMaximumCap(BigDecimal percentageOf){
+    private BigDecimal minimumAndMaximumCap(final BigDecimal percentageOf){
         BigDecimal minMaxCap = BigDecimal.ZERO;
         if(this.minCap !=null){
-            int minimumCap = percentageOf.compareTo(minCap);
+            final int minimumCap = percentageOf.compareTo(this.minCap);
             if(minimumCap == -1){
                 minMaxCap = this.minCap;
                 return minMaxCap;
             }
         }
         if(this.maxCap !=null){
-            int maximumCap = percentageOf.compareTo(maxCap);
+            final int maximumCap = percentageOf.compareTo(this.maxCap);
             if(maximumCap == 1)  {
                minMaxCap = this.maxCap;
                return minMaxCap;
@@ -607,18 +606,18 @@ public class LoanCharge extends AbstractPersistable<Long> {
         return ChargePaymentMode.fromInt(this.chargePaymentMode);
     }
 
-    
+
     public ChargeCalculationType getChargeCalculation() {
         return ChargeCalculationType.fromInt(this.chargeCalculation);
     }
 
-    
+
     public BigDecimal getPercentage() {
         return this.percentage;
     }
 
-    
-    public void updateAmount(BigDecimal amount) {
+
+    public void updateAmount(final BigDecimal amount) {
         this.amount = amount;
         calculateOutstanding();
     }

@@ -143,7 +143,7 @@ public class CommandWrapper {
     public String getTransactionId() {
         return this.transactionId;
     }
-    
+
     public Long getTemplateId() {
         return this.templateId;
     }
@@ -230,6 +230,10 @@ public class CommandWrapper {
         return this.entityName.equalsIgnoreCase("CURRENCY");
     }
 
+    public boolean isSmsResource() {
+        return this.entityName.equalsIgnoreCase("SMS");
+    }
+
     public boolean isCodeResource() {
         return this.entityName.equalsIgnoreCase("CODE");
     }
@@ -265,7 +269,7 @@ public class CommandWrapper {
     public boolean isUpdateRunningbalance() {
         return this.actionName.equalsIgnoreCase("UPDATERUNNINGBALANCE") && this.entityName.equalsIgnoreCase("JOURNALENTRY");
     }
-    
+
     public boolean isFundResource() {
         return this.entityName.equalsIgnoreCase("FUND");
     }
@@ -329,7 +333,7 @@ public class CommandWrapper {
     public boolean isCollateralResource() {
         return this.entityName.equalsIgnoreCase("COLLATERAL");
     }
-    
+
     public boolean isTemplateRessource() {
         return this.entityName.equalsIgnoreCase("Template");
     }
