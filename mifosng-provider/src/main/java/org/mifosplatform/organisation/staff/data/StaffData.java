@@ -15,33 +15,37 @@ import org.mifosplatform.organisation.office.data.OfficeData;
 public class StaffData {
 
     private final Long id;
+    private final String externalId;
+
     private final String firstname;
     private final String lastname;
     private final String displayName;
+    private final String mobileNo;
+
     private final Long officeId;
     private final String officeName;
     private final Boolean isLoanOfficer;
-    private final String externalId;
 
     @SuppressWarnings("unused")
     private final Collection<OfficeData> allowedOffices;
 
     public static StaffData templateData(final StaffData staff, final Collection<OfficeData> allowedOffices) {
         return new StaffData(staff.id, staff.firstname, staff.lastname, staff.displayName, staff.officeId, staff.officeName,
-                staff.isLoanOfficer, staff.externalId, allowedOffices);
+                staff.isLoanOfficer, staff.externalId, staff.mobileNo, allowedOffices);
     }
 
     public static StaffData lookup(final Long id, final String displayName) {
-        return new StaffData(id, null, null, displayName, null, null, null, null, null);
+        return new StaffData(id, null, null, displayName, null, null, null, null, null, null);
     }
 
     public static StaffData instance(final Long id, final String firstname, final String lastname, final String displayName,
-            final Long officeId, final String officeName, final Boolean isLoanOfficer, final String externalId) {
-        return new StaffData(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, externalId, null);
+            final Long officeId, final String officeName, final Boolean isLoanOfficer, final String externalId, final String mobileNo) {
+        return new StaffData(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, externalId, mobileNo, null);
     }
 
     private StaffData(final Long id, final String firstname, final String lastname, final String displayName, final Long officeId,
-            final String officeName, final Boolean isLoanOfficer, final String externalId, final Collection<OfficeData> allowedOffices) {
+            final String officeName, final Boolean isLoanOfficer, final String externalId, final String mobileNo,
+            final Collection<OfficeData> allowedOffices) {
         this.id = id;
         this.firstname = firstname;
         this.lastname = lastname;
@@ -50,6 +54,7 @@ public class StaffData {
         this.isLoanOfficer = isLoanOfficer;
         this.externalId = externalId;
         this.officeId = officeId;
+        this.mobileNo = mobileNo;
         this.allowedOffices = allowedOffices;
     }
 

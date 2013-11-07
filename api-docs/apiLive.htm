@@ -1934,6 +1934,13 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 								structure.</td>
 						</tr>
 						<tr class=alt>
+							<td>mobileNo</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: unique mobile number that is used by SMS or Mobile Money functionality.
+							</td>
+						</tr>
+						<tr class=alt>
 							<td>staffId</td>
 						</tr>
 						<tr>
@@ -2027,7 +2034,7 @@ GET https://DomainName/api/v1/clients/template
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>groupId, externalId, accountNo, staffId</td>
+							<td>groupId, externalId, accountNo, staffId, mobileNo</td>
 						</tr>
 					</table>
 				</div>
@@ -10894,7 +10901,8 @@ Request Body:
     "firstname": "John",
     "lastname": "Doe",
     "isLoanOfficer": "true",
-    "externalId": "17H"
+    "externalId": "17H",
+    "mobileNo": "+353851239876"
 }
 					</code>
 					<code class="method-response">

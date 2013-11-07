@@ -13,5 +13,5 @@ public interface PlatformSecurityContext {
 
     void validateAccessRights(String resourceOfficeHierarchy);
 
-    String OfficeHierarchy();
+    String officeHierarchy();
 }

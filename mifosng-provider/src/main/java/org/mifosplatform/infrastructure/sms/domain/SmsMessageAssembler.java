@@ -52,21 +52,20 @@ public class SmsMessageAssembler {
         if (this.fromApiJsonHelper.parameterExists(SmsApiConstants.groupIdParamName, element)) {
             final Long groupId = this.fromApiJsonHelper.extractLongNamed(SmsApiConstants.groupIdParamName, element);
             group = this.groupRepository.findOneWithNotFoundDetection(groupId);
-            mobileNo = "+353 87 3455667";
         }
 
         Client client = null;
         if (this.fromApiJsonHelper.parameterExists(SmsApiConstants.clientIdParamName, element)) {
             final Long clientId = this.fromApiJsonHelper.extractLongNamed(SmsApiConstants.clientIdParamName, element);
             client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-            mobileNo = "+353 87 3455667"; // get from entity
+            mobileNo = client.mobileNo();
         }
 
         Staff staff = null;
         if (this.fromApiJsonHelper.parameterExists(SmsApiConstants.staffIdParamName, element)) {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed(SmsApiConstants.staffIdParamName, element);
             staff = this.staffRepository.findOneWithNotFoundDetection(staffId);
-            mobileNo = "+353 87 3455667"; // get from entity
+            mobileNo = staff.mobileNo();
         }
 
         final String message = this.fromApiJsonHelper.extractStringNamed(SmsApiConstants.messageParamName, element);

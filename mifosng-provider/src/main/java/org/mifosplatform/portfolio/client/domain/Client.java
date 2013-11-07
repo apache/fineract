@@ -47,7 +47,8 @@ import org.mifosplatform.portfolio.group.domain.Group;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "m_client", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "account_no_UNIQUE") })
+@Table(name = "m_client", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "account_no_UNIQUE"), //
+        @UniqueConstraint(columnNames = { "mobile_no" }, name = "mobile_no_UNIQUE") })
 public final class Client extends AbstractPersistable<Long> {
 
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
@@ -94,6 +95,9 @@ public final class Client extends AbstractPersistable<Long> {
     @Column(name = "display_name", length = 100, nullable = false)
     private String displayName;
 
+    @Column(name = "mobile_no", length = 50, nullable = false, unique = true)
+    private String mobileNo;
+
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;
 
@@ -121,6 +125,7 @@ public final class Client extends AbstractPersistable<Long> {
 
         final String accountNo = command.stringValueOfParameterNamed(ClientApiConstants.accountNoParamName);
         final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
+        final String mobileNo = command.stringValueOfParameterNamed(ClientApiConstants.mobileNoParamName);
 
         final String firstname = command.stringValueOfParameterNamed(ClientApiConstants.firstnameParamName);
         final String middlename = command.stringValueOfParameterNamed(ClientApiConstants.middlenameParamName);
@@ -142,7 +147,7 @@ public final class Client extends AbstractPersistable<Long> {
         }
 
         return new Client(status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname, activationDate,
-                officeJoiningDate, externalId, staff);
+                officeJoiningDate, externalId, mobileNo, staff);
     }
 
     protected Client() {
@@ -151,7 +156,7 @@ public final class Client extends AbstractPersistable<Long> {
 
     private Client(final ClientStatus status, final Office office, final Group clientParentGroup, final String accountNo,
             final String firstname, final String middlename, final String lastname, final String fullname, final LocalDate activationDate,
-            final LocalDate officeJoiningDate, final String externalId, final Staff staff) {
+            final LocalDate officeJoiningDate, final String externalId, final String mobileNo, final Staff staff) {
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
             this.accountNumberRequiresAutoGeneration = true;
@@ -165,6 +170,13 @@ public final class Client extends AbstractPersistable<Long> {
         } else {
             this.externalId = null;
         }
+
+        if (StringUtils.isNotBlank(mobileNo)) {
+            this.mobileNo = mobileNo.trim();
+        } else {
+            this.mobileNo = null;
+        }
+
         if (activationDate != null) {
             this.activationDate = activationDate.toDateMidnight().toDate();
         }
@@ -323,6 +335,12 @@ public final class Client extends AbstractPersistable<Long> {
             this.externalId = StringUtils.defaultIfEmpty(newValue, null);
         }
 
+        if (command.isChangeInStringParameterNamed(ClientApiConstants.mobileNoParamName, this.mobileNo)) {
+            final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.mobileNoParamName);
+            actualChanges.put(ClientApiConstants.mobileNoParamName, newValue);
+            this.mobileNo = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
         if (command.isChangeInStringParameterNamed(ClientApiConstants.firstnameParamName, this.firstname)) {
             final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.firstnameParamName);
             actualChanges.put(ClientApiConstants.firstnameParamName, newValue);
@@ -461,6 +479,14 @@ public final class Client extends AbstractPersistable<Long> {
 
     public Image getImage() {
         return this.image;
+    }
+
+    public String mobileNo() {
+        return this.mobileNo;
+    }
+
+    public void setMobileNo(final String mobileNo) {
+        this.mobileNo = mobileNo;
     }
 
     public String getDisplayName() {

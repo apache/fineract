@@ -136,8 +136,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     public CommandProcessingResult createClient(final JsonCommand command) {
 
         try {
-            this.context.authenticatedUser();
-
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
             final Long officeId = command.longValueOfParameterNamed(ClientApiConstants.officeIdParamName);
@@ -188,8 +186,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     public CommandProcessingResult updateClient(final Long clientId, final JsonCommand command) {
 
         try {
-            this.context.authenticatedUser();
-
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
             final Client clientForUpdate = this.clientRepository.findOneWithNotFoundDetection(clientId);

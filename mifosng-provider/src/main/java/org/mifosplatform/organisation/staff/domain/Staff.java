@@ -23,7 +23,8 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_staff", uniqueConstraints = { @UniqueConstraint(columnNames = { "display_name" }, name = "display_name"),
-        @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE") })
+        @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE"),
+        @UniqueConstraint(columnNames = { "mobile_no" }, name = "mobile_no_UNIQUE") })
 public class Staff extends AbstractPersistable<Long> {
 
     @Column(name = "firstname", length = 50)
@@ -35,15 +36,16 @@ public class Staff extends AbstractPersistable<Long> {
     @Column(name = "display_name", length = 100)
     private String displayName;
 
+    @Column(name = "mobile_no", length = 50, nullable = false, unique = true)
+    private String mobileNo;
+
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;
 
-    // Office to which this employee belongs
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
 
-    // Flag determines if employee is a loan Officer
     @Column(name = "is_loan_officer ", nullable = false)
     private boolean loanOfficer;
 
@@ -65,27 +67,26 @@ public class Staff extends AbstractPersistable<Long> {
         final String externalIdParamName = "externalId";
         final String externalId = command.stringValueOfParameterNamedAllowingNull(externalIdParamName);
 
+        final String mobileNoParamName = "mobileNo";
+        final String mobileNo = command.stringValueOfParameterNamedAllowingNull(mobileNoParamName);
+
         final String isLoanOfficerParamName = "isLoanOfficer";
         final boolean isLoanOfficer = command.booleanPrimitiveValueOfParameterNamed(isLoanOfficerParamName);
 
-        return new Staff(staffOffice, firstname, lastname, externalId, isLoanOfficer);
-    }
-
-    public static Staff createNew(final Office staffOffice, final String firstname, final String lastname, final String externalId,
-            final boolean isLoanOfficer) {
-        return new Staff(staffOffice, firstname, lastname, externalId, isLoanOfficer);
+        return new Staff(staffOffice, firstname, lastname, externalId, mobileNo, isLoanOfficer);
     }
 
     protected Staff() {
         //
     }
 
-    private Staff(final Office staffOffice, final String firstname, final String lastname, final String externalId,
+    private Staff(final Office staffOffice, final String firstname, final String lastname, final String externalId, final String mobileNo,
             final boolean isLoanOfficer) {
         this.office = staffOffice;
         this.firstname = StringUtils.defaultIfEmpty(firstname, null);
         this.lastname = StringUtils.defaultIfEmpty(lastname, null);
-        this.externalId = externalId;
+        this.externalId = StringUtils.defaultIfEmpty(externalId, null);
+        this.mobileNo = StringUtils.defaultIfEmpty(mobileNo, null);
         this.loanOfficer = isLoanOfficer;
         deriveDisplayName(firstname);
     }
@@ -141,6 +142,13 @@ public class Staff extends AbstractPersistable<Long> {
             this.externalId = newValue;
         }
 
+        final String mobileNoParamName = "mobileNo";
+        if (command.isChangeInStringParameterNamed(mobileNoParamName, this.mobileNo)) {
+            final String newValue = command.stringValueOfParameterNamed(mobileNoParamName);
+            actualChanges.put(mobileNoParamName, newValue);
+            this.mobileNo = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
         final String isLoanOfficerParamName = "isLoanOfficer";
         if (command.isChangeInBooleanParameterNamed(isLoanOfficerParamName, this.loanOfficer)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isLoanOfficerParamName);
@@ -177,6 +185,10 @@ public class Staff extends AbstractPersistable<Long> {
 
     public String displayName() {
         return this.displayName;
+    }
+
+    public String mobileNo() {
+        return this.mobileNo;
     }
 
     public Office office() {
