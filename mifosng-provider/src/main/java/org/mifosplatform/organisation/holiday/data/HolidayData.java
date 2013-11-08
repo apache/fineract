@@ -13,17 +13,17 @@ public class HolidayData {
     @SuppressWarnings("unused")
     private final LocalDate toDate;
     @SuppressWarnings("unused")
-    private final LocalDate repaymentsScheduleTO;
+    private final LocalDate repaymentsRescheduledTo;
     @SuppressWarnings("unused")
     private final Long officeId;
 
     public HolidayData(final Long id, final String name, final LocalDate fromDate, final LocalDate toDate,
-            final LocalDate repaymentsScheduleTO) {
+            final LocalDate repaymentsRescheduledTo) {
         this.id = id;
         this.name = name;
         this.fromDate = fromDate;
         this.toDate = toDate;
-        this.repaymentsScheduleTO = repaymentsScheduleTO;
+        this.repaymentsRescheduledTo = repaymentsRescheduledTo;
         this.officeId = null;
 
     }
