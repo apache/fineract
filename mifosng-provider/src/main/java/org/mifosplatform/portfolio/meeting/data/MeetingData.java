@@ -66,4 +66,9 @@ public class MeetingData {
         this.calendarData = calendarData;
         this.attendanceTypeOptions = attendanceTypeOptions;
     }
+
+    public LocalDate getMeetingDate() {
+        return this.meetingDate;
+    }
+     
 }

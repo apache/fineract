@@ -66,4 +66,8 @@ public enum CalendarType {
     public String toString() {
         return name().toString();
     }
+    
+    public boolean isCollection(){
+        return this.value.equals(CalendarType.COLLECTION.value);
+    }
 }

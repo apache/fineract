@@ -74,15 +74,12 @@ public final class LoanEventApiJsonValidator {
     public void validateDisbursementDateWithMeetingDate(final LocalDate actualDisbursementDate, final CalendarInstance calendarInstance) {
         if (null != calendarInstance) {
             final Calendar calendar = calendarInstance.getCalendar();
-            if (calendar != null && actualDisbursementDate != null) {
+            if (!calendar.isValidRecurringDate(actualDisbursementDate)) {
                 // Disbursement date should fall on a meeting date
-                if (!CalendarUtils.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), actualDisbursementDate)) {
                     final String errorMessage = "Expected disbursement date '" + actualDisbursementDate.toString()
                             + "' does not fall on a meeting date.";
                     throw new NotValidRecurringDateException("loan.actual.disbursement.date", errorMessage,
                             actualDisbursementDate.toString(), calendar.getTitle());
-                }
-
             }
         }
     }
