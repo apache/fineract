@@ -1,9 +1,14 @@
 Mifos Platform Apps
 ======
 
-Community created apps built on top of mifosplatform are stored in source control repository @ https://github.com/openMF/mifosx-community-apps
+Some community created apps built on top of mifosplatform are stored in source control repository @ https://github.com/openMF/mifosx-community-apps
 
-The Reference App
+The new Community App (AngularJS-based)
+===============
+
+https://github.com/openMF/community-app
+
+The original Reference App
 ===============
 
 https://github.com/openMF/mifosx-community-apps/tree/master/IndividualLendingGeneralJavaScript
