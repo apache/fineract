@@ -77,11 +77,13 @@ import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
 import org.mifosplatform.portfolio.loanaccount.command.LoanUpdateCommand;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanInstallmentChargeData;
 import org.mifosplatform.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanChargeRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
@@ -272,7 +274,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final PortfolioAccountData savingAccountData = this.accountAssociationsReadPlatformService.retriveLoanAssociation(loanId);
             final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(actualDisbursementDate, entrySet.getValue(),
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN, savingAccountData.accountId(), loanId, "Loan Charge Payment",
-                    locale, fmt, null, null, LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue(), entrySet.getKey());
+                    locale, fmt, null, null, LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue(), entrySet.getKey(), null);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
         }
 
@@ -914,6 +916,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
+        this.loanEventApiJsonValidator.validateInstallmentChargeTransaction(command.json());
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
 
         // Charges may be waived only when the loan associated with them are
@@ -926,9 +929,26 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             throw new LoanChargeCannotBeWaivedException(LOAN_CHARGE_CANNOT_BE_WAIVED_REASON.ALREADY_WAIVED, loanCharge.getId());
         } else if (loanCharge.isPaid()) { throw new LoanChargeCannotBeWaivedException(LOAN_CHARGE_CANNOT_BE_WAIVED_REASON.ALREADY_PAID,
                 loanCharge.getId()); 
-        } else if (loanCharge.isInstalmentFee()){
-            throw new LoanChargeCannotBeWaivedException(LOAN_CHARGE_CANNOT_BE_WAIVED_REASON.WAIVE_NOT_ALLOWED_FOR_CHARGE,
-                    loanCharge.getId()); 
+        } 
+        Integer loanInstallmentNumber = null; 
+        if (loanCharge.isInstalmentFee()){
+            LoanInstallmentCharge chargePerInstallment = null;
+            final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
+            final Integer installmentNumber = command.integerValueOfParameterNamed("installmentNumber");
+            if(dueDate !=null){
+                chargePerInstallment = loanCharge.getInstallmentLoanCharge(dueDate);
+            }else if(installmentNumber!=null){
+                chargePerInstallment = loanCharge.getInstallmentLoanCharge(installmentNumber);
+            }
+            if(chargePerInstallment == null){
+                chargePerInstallment = loanCharge.getUnpaidInstallmentLoanCharge();
+            }
+            if(chargePerInstallment.isWaived()){
+                throw new LoanChargeCannotBePayedException(LOAN_CHARGE_CANNOT_BE_PAYED_REASON.ALREADY_WAIVED, loanCharge.getId());
+            }else if(chargePerInstallment.isPaid()){
+                throw new LoanChargeCannotBePayedException(LOAN_CHARGE_CANNOT_BE_PAYED_REASON.ALREADY_PAID, loanCharge.getId());
+            }
+            loanInstallmentNumber = chargePerInstallment.getRepaymentInstallment().getInstallmentNumber();
         }
 
         final Map<String, Object> changes = new LinkedHashMap<String, Object>(3);
@@ -937,7 +957,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
 
         final LoanTransaction waiveTransaction = loan.waiveLoanCharge(loanCharge, defaultLoanLifecycleStateMachine(), changes,
-                existingTransactionIds, existingReversedTransactionIds);
+                existingTransactionIds, existingReversedTransactionIds, loanInstallmentNumber);
 
         this.loanTransactionRepository.save(waiveTransaction);
         this.loanRepository.save(loan);
@@ -1006,9 +1026,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             throw new LoanChargeCannotBePayedException(LOAN_CHARGE_CANNOT_BE_PAYED_REASON.ALREADY_WAIVED, loanCharge.getId());
         } else if (loanCharge.isPaid()) { throw new LoanChargeCannotBePayedException(LOAN_CHARGE_CANNOT_BE_PAYED_REASON.ALREADY_PAID,
                 loanCharge.getId()); 
-        }else if (loanCharge.isInstalmentFee()){
-            throw new LoanChargeCannotBePayedException(LOAN_CHARGE_CANNOT_BE_PAYED_REASON.CHARGE_NOT_PAYABLE,
-                    loanCharge.getId()); 
         }
 
         if (!loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()) { throw new LoanChargeCannotBePayedException(
@@ -1018,15 +1035,37 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
-
+        Integer loanInstallmentNumber = null; 
+        BigDecimal amount = loanCharge.amountOutstanding();
+        if (loanCharge.isInstalmentFee()){
+            LoanInstallmentCharge chargePerInstallment = null;
+            final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
+            final Integer installmentNumber = command.integerValueOfParameterNamed("installmentNumber");
+            if(dueDate !=null){
+                chargePerInstallment = loanCharge.getInstallmentLoanCharge(dueDate);
+            }else if(installmentNumber!=null){
+                chargePerInstallment = loanCharge.getInstallmentLoanCharge(installmentNumber);
+            }
+            if(chargePerInstallment == null){
+                chargePerInstallment = loanCharge.getUnpaidInstallmentLoanCharge();
+            }
+            if(chargePerInstallment.isWaived()){
+                throw new LoanChargeCannotBePayedException(LOAN_CHARGE_CANNOT_BE_PAYED_REASON.ALREADY_WAIVED, loanCharge.getId());
+            }else if(chargePerInstallment.isPaid()){
+                throw new LoanChargeCannotBePayedException(LOAN_CHARGE_CANNOT_BE_PAYED_REASON.ALREADY_PAID, loanCharge.getId());
+            }
+            loanInstallmentNumber = chargePerInstallment.getRepaymentInstallment().getInstallmentNumber();
+            amount= chargePerInstallment.getAmountOutstanding();
+        }
+        
         final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService.retriveLoanAssociation(loanId);
         if (portfolioAccountData == null) {
             final String errorMessage = "Charge with id:" + loanChargeId + " requires linked savings account for payment";
             throw new LinkedAccountRequiredException("loanCharge.pay", errorMessage, loanChargeId);
         }
-        final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, loanCharge.amountOutstanding(),
+        final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, amount,
                 PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN, portfolioAccountData.accountId(), loanId, "Loan Charge Payment",
-                locale, fmt, null, null, LoanTransactionType.CHARGE_PAYMENT.getValue(), loanChargeId);
+                locale, fmt, null, null, LoanTransactionType.CHARGE_PAYMENT.getValue(), loanChargeId, loanInstallmentNumber);
         this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
 
         return new CommandProcessingResultBuilder() //
@@ -1047,27 +1086,51 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final StringBuilder sb = new StringBuilder();
         if (chargeDatas != null) {
             for (final LoanChargeData chargeData : chargeDatas) {
-                if (chargeData.getDueDate() != null && !chargeData.getDueDate().isAfter(new LocalDate())) {
+                if(chargeData.isInstallmentFee()){
+                    Collection<LoanInstallmentChargeData> chargePerInstallments = this.LoanChargeReadPlatformService.retrieveInstallmentLoanCharges(chargeData.getId(), true);
+                    PortfolioAccountData portfolioAccountData = null;
+                    for(LoanInstallmentChargeData installmentChargeData : chargePerInstallments){
+                        if(installmentChargeData.getDueDate().isAfter(new LocalDate())){
+                            if(portfolioAccountData == null){
+                                portfolioAccountData = this.accountAssociationsReadPlatformService
+                                        .retriveLoanAssociation(chargeData.getLoanId());
+                            }
+                            final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(new LocalDate(),
+                                    installmentChargeData.getAmountOutstanding(), PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN,
+                                    portfolioAccountData.accountId(), chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
+                                    LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(), installmentChargeData.getInstallmentNumber());
+                            transferFeeCharge(sb, accountTransferDTO);
+                        }
+                    }
+                }else if (chargeData.getDueDate() != null && !chargeData.getDueDate().isAfter(new LocalDate())) {
                     final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService
                             .retriveLoanAssociation(chargeData.getLoanId());
                     final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(new LocalDate(),
                             chargeData.getAmountOutstanding(), PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN,
                             portfolioAccountData.accountId(), chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
-                            LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId());
-                    try {
-                        this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
-                    } catch (final PlatformApiDataValidationException e) {
-                        sb.append("Validation exception while paying charge ").append(chargeData.getId()).append(" for loan id:")
-                                .append(chargeData.getLoanId()).append("--------");
-                    } catch (final InsufficientAccountBalanceException e) {
-                        sb.append("InsufficientAccountBalance Exception while paying charge ").append(chargeData.getId())
-                                .append("for loan id:").append(chargeData.getLoanId()).append("--------");
-
-                    }
+                            LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(), null);
+                    transferFeeCharge(sb, accountTransferDTO);
                 }
             }
         }
         if (sb.length() > 0) { throw new JobExecutionException(sb.toString()); }
+    }
+
+    /**
+     * @param sb
+     * @param accountTransferDTO
+     */
+    private void transferFeeCharge(final StringBuilder sb, final AccountTransferDTO accountTransferDTO) {
+        try {
+            this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+        } catch (final PlatformApiDataValidationException e) {
+            sb.append("Validation exception while paying charge ").append(accountTransferDTO.getChargeId()).append(" for loan id:")
+                    .append(accountTransferDTO.getToAccountId()).append("--------");
+        } catch (final InsufficientAccountBalanceException e) {
+            sb.append("InsufficientAccountBalance Exception while paying charge ").append(accountTransferDTO.getChargeId())
+                    .append("for loan id:").append(accountTransferDTO.getToAccountId()).append("--------");
+
+        }
     }
 
     private LoanCharge retrieveLoanChargeBy(final Long loanId, final Long loanChargeId) {

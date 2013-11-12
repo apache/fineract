@@ -163,7 +163,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Transactional
     public LoanTransaction makeChargePayment(final Loan loan, final Long chargeId, final LocalDate transactionDate,
             final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText, final String txnExternalId,
-            final Integer transactionType) {
+            final Integer transactionType, Integer installmentNumber) {
 
         checkClientOrGroupActive(loan);
 
@@ -184,7 +184,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             loan.handlePayDisbursementTransaction(chargeId, newPaymentTransaction, existingTransactionIds, existingReversedTransactionIds);
         } else {
             loan.makeChargePayment(chargeId, defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds,
-                    allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay, newPaymentTransaction);
+                    allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay, newPaymentTransaction, installmentNumber);
         }
         this.loanTransactionRepository.save(newPaymentTransaction);
         this.loanRepository.saveAndFlush(loan);

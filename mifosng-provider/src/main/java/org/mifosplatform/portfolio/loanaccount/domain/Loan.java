@@ -520,7 +520,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     private void handleChargePaidTransaction(final LoanCharge charge, final LoanTransaction chargesPayment,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+            final LoanLifecycleStateMachine loanLifecycleStateMachine, Integer installmentNumber) {
         chargesPayment.updateLoan(this);
         final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge, chargesPayment.getAmount(getCurrency())
                 .getAmount());
@@ -535,7 +535,10 @@ public class Loan extends AbstractPersistable<Long> {
         final List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<LoanRepaymentScheduleInstallment>();
         LocalDate startDate = getDisbursementDate();
         for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
-            if (charge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())) {
+            if (installmentNumber == null && charge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())) {
+                chargePaymentInstallments.add(installment);
+                break;
+            }else if(installmentNumber != null && installment.getInstallmentNumber().equals(installmentNumber)){
                 chargePaymentInstallments.add(installment);
                 break;
             }
@@ -708,31 +711,45 @@ public class Loan extends AbstractPersistable<Long> {
     public BigDecimal calculatePerInstallmentChargeAmount(final ChargeCalculationType calculationType, final BigDecimal percentage) {
         Money amount = Money.zero(getCurrency());
         for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
-            Money percentOf = Money.zero(getCurrency());
-            switch (calculationType) {
-                case PERCENT_OF_AMOUNT:
-                    percentOf = installment.getPrincipal(getCurrency());
-                break;
-                case PERCENT_OF_AMOUNT_AND_INTEREST:
-                    percentOf = installment.getPrincipal(getCurrency()).plus(installment.getInterestCharged(getCurrency()));
-                break;
-                case PERCENT_OF_INTEREST:
-                    percentOf = installment.getInterestCharged(getCurrency());
-                break;
-                default:
-                break;
-            }
-            amount = amount.plus(LoanCharge.percentageOf(percentOf.getAmount(), percentage));
+            amount = amount.plus(calculateInstallmentChargeAmount(calculationType, percentage, installment));
         }
         return amount.getAmount();
     }
 
+    /**
+     * @param calculationType
+     * @param percentage
+     * @param installment
+     * @return
+     */
+    private Money calculateInstallmentChargeAmount(final ChargeCalculationType calculationType, final BigDecimal percentage, 
+            final LoanRepaymentScheduleInstallment installment) {
+        Money amount = Money.zero(getCurrency());
+        Money percentOf = Money.zero(getCurrency());
+        switch (calculationType) {
+            case PERCENT_OF_AMOUNT:
+                percentOf = installment.getPrincipal(getCurrency());
+            break;
+            case PERCENT_OF_AMOUNT_AND_INTEREST:
+                percentOf = installment.getPrincipal(getCurrency()).plus(installment.getInterestCharged(getCurrency()));
+            break;
+            case PERCENT_OF_INTEREST:
+                percentOf = installment.getInterestCharged(getCurrency());
+            break;
+            default:
+            break;
+        }
+        amount = amount.plus(LoanCharge.percentageOf(percentOf.getAmount(), percentage));
+        return amount;
+    }
+
     public LoanTransaction waiveLoanCharge(final LoanCharge loanCharge, final LoanLifecycleStateMachine loanLifecycleStateMachine,
-            final Map<String, Object> changes, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
+            final Map<String, Object> changes, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds, 
+            Integer loanInstallmentNumber) {
 
         validateLoanIsNotClosed(loanCharge);
 
-        final Money amountWaived = loanCharge.waive(loanCurrency());
+        final Money amountWaived = loanCharge.waive(loanCurrency(), loanInstallmentNumber);
 
         changes.put("amount", amountWaived.getAmount());
 
@@ -1723,7 +1740,7 @@ public class Loan extends AbstractPersistable<Long> {
     public void makeChargePayment(final Long chargeId, final LoanLifecycleStateMachine loanLifecycleStateMachine,
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
             final boolean allowTransactionsOnHoliday, final List<Holiday> holidays, final WorkingDays workingDays,
-            final boolean allowTransactionsOnNonWorkingDay, final LoanTransaction paymentTransaction) {
+            final boolean allowTransactionsOnNonWorkingDay, final LoanTransaction paymentTransaction, Integer installmentNumber) {
 
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_CHARGE_PAYMENT, paymentTransaction.getTransactionDate());
         validateRepaymentDateIsOnHoliday(paymentTransaction.getTransactionDate(), allowTransactionsOnHoliday, holidays);
@@ -1742,7 +1759,7 @@ public class Loan extends AbstractPersistable<Long> {
                 charge = loanCharge;
             }
         }
-        handleChargePaidTransaction(charge, paymentTransaction, loanLifecycleStateMachine);
+        handleChargePaidTransaction(charge, paymentTransaction, loanLifecycleStateMachine, installmentNumber);
     }
 
     public void makeRefund(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine,
@@ -2960,5 +2977,22 @@ public class Loan extends AbstractPersistable<Long> {
 
     public Set<LoanCharge> charges() {
         return this.charges;
+    }
+    
+    public Set<LoanInstallmentCharge> createInstallmentLoanCharges(final LoanCharge loanCharge){
+        Set<LoanInstallmentCharge> loanChargePerInstallments = new HashSet<LoanInstallmentCharge>();
+        if(loanCharge.isInstalmentFee()){
+            for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
+                BigDecimal amount = BigDecimal.ZERO;;
+                if(loanCharge.getChargeCalculation().isFlat()){
+                   amount =   loanCharge.amount();
+                }else{
+                    amount = calculateInstallmentChargeAmount(loanCharge.getChargeCalculation(), loanCharge.getPercentage(), installment).getAmount();
+                }
+                LoanInstallmentCharge loanChargePerInstallment = new LoanInstallmentCharge(amount, loanCharge, installment);
+                loanChargePerInstallments.add(loanChargePerInstallment);
+            }
+        }
+        return loanChargePerInstallments;
     }
 }

@@ -229,7 +229,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
 
             final LoanTransaction loanRepaymentTransaction = this.loanAccountDomainService.makeChargePayment(toLoanAccount,
                     accountTransferDTO.getChargeId(), accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
-                    accountTransferDTO.getPaymentDetail(), null, null, accountTransferDTO.getToTransferType());
+                    accountTransferDTO.getPaymentDetail(), null, null, accountTransferDTO.getToTransferType(), accountTransferDTO.getLoanInstallmentNumber());
 
             final AccountTransfer transferTransaction = this.accountTransferAssembler.assembleSavingsToLoanTransfer(accountTransferDTO,
                     fromSavingsAccount, toLoanAccount, withdrawal, loanRepaymentTransaction);

@@ -198,7 +198,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     } else {
                         cumulative = cumulative.plus(loanCharge.amount().divide(BigDecimal.valueOf(numberOfRepayments)));
                     }
-                } else if (loanCharge.getChargeCalculation().isPercentageBased()) {
+                } else if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd) 
+                        && loanCharge.getChargeCalculation().isPercentageBased()) {
                     BigDecimal amount = BigDecimal.ZERO;
                     if (loanCharge.getChargeCalculation().isPercentageOfAmountAndInterest()) {
                         amount = amount.add(principalDisbursed.getAmount()).add(totalInterestChargedForFullLoanTerm.getAmount());
@@ -243,7 +244,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     } else {
                         cumulative = cumulative.plus(loanCharge.amount().divide(BigDecimal.valueOf(numberOfRepayments)));
                     }
-                } else if (loanCharge.getChargeCalculation().isPercentageBased()) {
+                } else if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd) 
+                        && loanCharge.getChargeCalculation().isPercentageBased()) {
                     BigDecimal amount = BigDecimal.ZERO;
                     if (loanCharge.getChargeCalculation().isPercentageOfAmountAndInterest()) {
                         amount = amount.add(principalDisbursed.getAmount()).add(totalInterestChargedForFullLoanTerm.getAmount());
