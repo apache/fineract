@@ -172,7 +172,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
             this.chargeTime = chargeTime.getValue();
         }
 
-        if (ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.SPECIFIED_DUE_DATE)) {
+        if (ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.SPECIFIED_DUE_DATE) || ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.OVERDUE_INSTALLMENT) ) {
 
             if (dueDate == null) {
                 final String defaultUserMessage = "Loan charge is missing due date.";

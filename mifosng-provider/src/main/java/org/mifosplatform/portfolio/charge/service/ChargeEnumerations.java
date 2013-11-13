@@ -46,6 +46,9 @@ public class ChargeEnumerations {
             case INSTALMENT_FEE:
                 optionData = new EnumOptionData(ChargeTimeType.INSTALMENT_FEE.getValue().longValue(), ChargeTimeType.INSTALMENT_FEE.getCode(), "Instalment Fee");
             break;
+            case OVERDUE_INSTALLMENT:
+                optionData = new EnumOptionData(ChargeTimeType.OVERDUE_INSTALLMENT.getValue().longValue(),ChargeTimeType.OVERDUE_INSTALLMENT.getCode(),"overdue fees") ;
+            break;
             default:
                 optionData = new EnumOptionData(ChargeTimeType.INVALID.getValue().longValue(), ChargeTimeType.INVALID.getCode(), "Invalid");
             break;

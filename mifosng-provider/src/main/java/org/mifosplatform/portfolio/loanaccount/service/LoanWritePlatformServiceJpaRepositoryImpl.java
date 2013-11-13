@@ -5,17 +5,7 @@
  */
 package org.mifosplatform.portfolio.loanaccount.service;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.gson.JsonElement;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -29,6 +19,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformServiceUnavailableException;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.exception.JobExecutionException;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
@@ -58,15 +49,11 @@ import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargePaymentMode;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
-import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeDeletedException;
+import org.mifosplatform.portfolio.charge.exception.*;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeDeletedException.LOAN_CHARGE_CANNOT_BE_DELETED_REASON;
-import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBePayedException;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBePayedException.LOAN_CHARGE_CANNOT_BE_PAYED_REASON;
-import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeUpdatedException;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeUpdatedException.LOAN_CHARGE_CANNOT_BE_UPDATED_REASON;
-import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedException;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedException.LOAN_CHARGE_CANNOT_BE_WAIVED_REASON;
-import org.mifosplatform.portfolio.charge.exception.LoanChargeNotFoundException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
@@ -78,23 +65,12 @@ import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
 import org.mifosplatform.portfolio.loanaccount.command.LoanUpdateCommand;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanInstallmentChargeData;
-import org.mifosplatform.portfolio.loanaccount.domain.ChangedTransactionDetail;
-import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
-import org.mifosplatform.portfolio.loanaccount.domain.Loan;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanAccountDomainService;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanInstallmentCharge;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanChargeRepository;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
+import org.mifosplatform.portfolio.loanaccount.domain.*;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanDisbursalException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerUnassignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanEventApiJsonValidator;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanUpdateCommandFromApiJsonDeserializer;
@@ -109,14 +85,23 @@ import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.mifosplatform.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.mifosplatform.useradministration.domain.AppUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.math.BigDecimal;
+import java.util.*;
+
+
 @Service
 public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatformService {
+    private final static Logger logger = LoggerFactory.getLogger(LoanWritePlatformServiceJpaRepositoryImpl.class);
+
+
 
     private final PlatformSecurityContext context;
     private final LoanEventApiJsonValidator loanEventApiJsonValidator;
@@ -141,6 +126,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
     private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
     private final LoanChargeReadPlatformService LoanChargeReadPlatformService;
+    private final LoanReadPlatformService loanReadPlatformService;
+    private final FromJsonHelper fromApiJsonHelper;
+
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -158,7 +146,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
             final AccountTransfersReadPlatformService accountTransfersReadPlatformService,
             final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
-            final LoanChargeReadPlatformService loanChargeReadPlatformService) {
+            final LoanChargeReadPlatformService loanChargeReadPlatformService,final LoanReadPlatformService loanReadPlatformService,
+            final FromJsonHelper fromApiJsonHelper ) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
@@ -182,6 +171,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.accountTransfersReadPlatformService = accountTransfersReadPlatformService;
         this.accountAssociationsReadPlatformService = accountAssociationsReadPlatformService;
         this.LoanChargeReadPlatformService = loanChargeReadPlatformService;
+        this.loanReadPlatformService = loanReadPlatformService;
+        this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -1607,4 +1598,82 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
     }
 
+    @Override
+    @CronTarget(jobName = JobName.APPLY_CHARGE_TO_OVERDUE_LOAN_INSTALLMENT)
+    public void applyChargeForOverdueLoans() throws JobExecutionException {
+        final Collection<OverdueLoanScheduleData> overdueLoanScheduleData =  this.loanReadPlatformService.retrieveAllOverdueLoans();
+        if(!overdueLoanScheduleData.isEmpty()) {
+            for(OverdueLoanScheduleData overdueLoanScheduleData1 : overdueLoanScheduleData){
+                try{
+
+                    final JsonElement parsedCommand = fromApiJsonHelper.parse(overdueLoanScheduleData1.toString());
+
+                    final JsonCommand command = JsonCommand.from(overdueLoanScheduleData1.toString(),parsedCommand,this.fromApiJsonHelper,null,null,
+                            null,null,null,overdueLoanScheduleData1.getLoanId(),null,null,null,null,null,null,null);
+                    this.applyChargeToOverdueLoanInstallment(overdueLoanScheduleData1.getLoanId(),overdueLoanScheduleData1.getChargeId(),command);
+
+                }catch(final PlatformApiDataValidationException e){
+                    final List<ApiParameterError> errors = e.getErrors();
+                    for (final ApiParameterError error : errors) {
+                        logger.error("Apply Charges due for overdue loans failed for account:" + overdueLoanScheduleData1.getLoanId() + " with message "
+                                + error.getDeveloperMessage());
+                    }
+                }
+            }
+        }
+    }
+
+    @Transactional
+    public void applyChargeToOverdueLoanInstallment(Long loanId, Long loanChargeId,JsonCommand command) {
+        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        checkClientOrGroupActive(loan);
+
+        final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(loanChargeId);
+
+        final LoanCharge loanCharge = LoanCharge.createNewFromJson(loan, chargeDefinition, command);
+
+        if (!loan.hasCurrencyCodeOf(chargeDefinition.getCurrencyCode())) {
+            final String errorMessage = "Charge and Loan must have the same currency.";
+            throw new InvalidCurrencyException("loanCharge", "attach.to.loan", errorMessage);
+        }
+        if (loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
+            final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService.retriveLoanAssociation(loanId);
+            if (portfolioAccountData == null) {
+                final String errorMessage = loanCharge.name() + "Charge  requires linked savings account for payment";
+                throw new LinkedAccountRequiredException("loanCharge.add", errorMessage, loanCharge.name());
+            }
+        }
+
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        this.loanChargeRepository.save(loanCharge);
+
+        final ChangedTransactionDetail changedTransactionDetail = loan.addLoanCharge(loanCharge, existingTransactionIds,
+                existingReversedTransactionIds);
+
+        // we want to apply charge transactions only for those loans charges
+        // that are applied when a loan is active
+        if (loan.status().isActive()) {
+            final LoanTransaction applyLoanChargeTransaction = loan.handleChargeAppliedTransaction(loanCharge, null);
+            this.loanTransactionRepository.save(applyLoanChargeTransaction);
+            /***
+             * TODO Vishwas Batch save is giving me a
+             * HibernateOptimisticLockingFailureException, looping and saving
+             * for the time being, not a major issue for now as this loop is
+             * entered only in edge cases (when a payment is made before the
+             * latest payment recorded against the loan)
+             ***/
+            this.loanRepository.saveAndFlush(loan);
+            if (changedTransactionDetail != null) {
+                for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+                    this.loanTransactionRepository.save(mapEntry.getValue());
+                    this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+                }
+            }
+
+
+            // we post Journal entries only for loans in active status
+            postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+        }
+    }
 }

@@ -5,9 +5,6 @@
  */
 package org.mifosplatform.portfolio.loanaccount.service;
 
-import java.util.Collection;
-import java.util.Map;
-
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -19,6 +16,9 @@ import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
+
+import java.util.Collection;
+import java.util.Map;
 
 public interface LoanWritePlatformService {
 
@@ -71,5 +71,9 @@ public interface LoanWritePlatformService {
     CommandProcessingResult payLoanCharge(Long loanId, Long loanChargeId, JsonCommand command, boolean isChargeIdIncludedInJson);
 
     void transferFeeCharges() throws JobExecutionException;
+
+    void applyChargeForOverdueLoans() throws JobExecutionException;
+
+
 
 }

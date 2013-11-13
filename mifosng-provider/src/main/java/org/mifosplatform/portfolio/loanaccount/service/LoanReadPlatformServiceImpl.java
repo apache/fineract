@@ -5,13 +5,6 @@
  */
 package org.mifosplatform.portfolio.loanaccount.service;
 
-import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -47,23 +40,13 @@ import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.data.GroupRoleData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
-import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanApplicationTimelineData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanSummaryData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
-import org.mifosplatform.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
-import org.mifosplatform.portfolio.loanaccount.domain.Loan;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
+import org.mifosplatform.portfolio.loanaccount.data.*;
+import org.mifosplatform.portfolio.loanaccount.domain.*;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanDropdownReadPlatformService;
@@ -80,6 +63,13 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 
 @Service
 public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
@@ -688,6 +678,39 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     feeChargesDueAtDisbursementCharged, syncDisbursementWithMeeting, loanCounter, loanProductCounter);
         }
     }
+    private static final class OverdueLoanSchedule implements RowMapper<OverdueLoanScheduleData>{
+
+        public String schema(){
+            return " ls.loan_id as loanId, ls.installment as period, ls.fromdate as fromDate, ls.duedate as dueDate, ls.obligations_met_on_date as obligationsMetOnDate, ls.completed_derived as complete,"
+                    + " ls.principal_amount as principalDue, ls.principal_completed_derived as principalPaid, ls.principal_writtenoff_derived as principalWrittenOff, "
+                    + " ls.interest_amount as interestDue, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived, ls.interest_writtenoff_derived as interestWrittenOff, "
+                    + " ls.fee_charges_amount as feeChargesDue, ls.fee_charges_completed_derived as feeChargesPaid, ls.fee_charges_waived_derived as feeChargesWaived, ls.fee_charges_writtenoff_derived as feeChargesWrittenOff, "
+                    + " ls.penalty_charges_amount as penaltyChargesDue, ls.penalty_charges_completed_derived as penaltyChargesPaid, ls.penalty_charges_waived_derived as penaltyChargesWaived, ls.penalty_charges_writtenoff_derived as penaltyChargesWrittenOff, "
+                    + " ls.total_paid_in_advance_derived as totalPaidInAdvanceForPeriod, ls.total_paid_late_derived as totalPaidLateForPeriod, "
+                    + " mc.amount,mc.id as chargeId "
+                    + " from m_loan_repayment_schedule ls "
+                    + " inner join m_loan ml on ml.id = ls.loan_id "
+                    + " join m_product_loan_charge plc on plc.product_loan_id = ml.product_id "
+                    + " join m_charge mc on mc.id = plc.charge_id ";
+
+        }
+
+        @Override
+        public OverdueLoanScheduleData mapRow(ResultSet rs, int rowNum) throws SQLException {
+            final Long chargeId = rs.getLong("chargeId");
+            final Long loanId = rs.getLong("loanId");
+            final BigDecimal amount = rs.getBigDecimal("amount");
+            final String dateFormat  = "yyyy-MM-dd";
+            final String dueDate = rs.getString("dueDate");
+            final String locale  = "en_GB";
+
+
+            OverdueLoanScheduleData  overdueLoanScheduleData = new OverdueLoanScheduleData(loanId,chargeId,dueDate,
+                    amount,dateFormat,locale) ;
+
+            return overdueLoanScheduleData;
+        }
+    }
 
     private static final class LoanScheduleResultSetExtractor implements ResultSetExtractor<LoanScheduleData> {
 
@@ -1105,4 +1128,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         return allowedLoanOfficers;
     }
 
+    @Override
+    public Collection<OverdueLoanScheduleData> retrieveAllOverdueLoans() {
+        final OverdueLoanSchedule rm = new OverdueLoanSchedule();
+        final String sql = "select " + rm.schema() +
+                " where CURDATE() > ls.duedate "+
+                " and ls.completed_derived <> 1 and mc.charge_applies_to_enum =1 "+
+                " and mc.charge_time_enum = 9 and ml.loan_status_id = 300 "+
+                " and plc.charge_id not in (SELECT charge_id from m_loan_charge as mlc where mlc.loan_id = ml.id and mlc.charge_id = plc.charge_id and mlc.due_for_collection_as_of_date > fromdate AND mlc.due_for_collection_as_of_date <= duedate) ";
+        return this.jdbcTemplate.query(sql,rm,new Object[] {});
+    }
 }
