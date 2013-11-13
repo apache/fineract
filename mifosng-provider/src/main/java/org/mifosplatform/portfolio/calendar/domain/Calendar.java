@@ -80,13 +80,13 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
         this.location = StringUtils.defaultIfEmpty(location, null);
 
         if (null != startDate) {
-            this.startDate = startDate.toDateMidnight().toDate();
+            this.startDate = startDate.toDateTimeAtStartOfDay().toDate();
         } else {
             this.startDate = null;
         }
 
         if (null != endDate) {
-            this.endDate = endDate.toDateMidnight().toDate();
+            this.endDate = endDate.toDateTimeAtStartOfDay().toDate();
         } else {
             this.endDate = null;
         }

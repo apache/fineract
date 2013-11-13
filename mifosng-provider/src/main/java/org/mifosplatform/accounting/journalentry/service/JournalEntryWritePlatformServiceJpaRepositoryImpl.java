@@ -267,10 +267,10 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                 .getTransactionId());
 
         if (journalEntries.size() <= 1) { throw new JournalEntriesNotFoundException(command.getTransactionId()); }
-        Long officeId = journalEntries.get(0).getOffice().getId();
+        final Long officeId = journalEntries.get(0).getOffice().getId();
         final String reversalTransactionId = generateTransactionId(officeId);
         final boolean manualEntry = true;
-        
+
         for (final JournalEntry journalEntry : journalEntries) {
             JournalEntry reversalJournalEntry;
             final String reversalComment = "Reversal entry for Journal Entry with Entry Id  :" + journalEntry.getId()
@@ -330,7 +330,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private void validateBusinessRulesForJournalEntries(final JournalEntryCommand command) {
         /** check if date of Journal entry is valid ***/
         final LocalDate entryLocalDate = command.getTransactionDate();
-        final Date transactionDate = entryLocalDate.toDateMidnight().toDate();
+        final Date transactionDate = entryLocalDate.toDateTimeAtStartOfDay().toDate();
         // shouldn't be in the future
         final Date todaysDate = new Date();
         if (transactionDate.after(todaysDate)) { throw new JournalEntryInvalidException(GL_JOURNAL_ENTRY_INVALID_REASON.FUTURE_DATE,
@@ -347,7 +347,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         final SingleDebitOrCreditEntryCommand[] debits = command.getDebits();
 
         // atleast one debit or credit must be present
-        if ((credits == null || credits.length <= 0) || (debits == null || debits.length <= 0)) { throw new JournalEntryInvalidException(
+        if (credits == null || credits.length <= 0 || debits == null || debits.length <= 0) { throw new JournalEntryInvalidException(
                 GL_JOURNAL_ENTRY_INVALID_REASON.NO_DEBITS_OR_CREDITS, null, null, null); }
 
         checkDebitAndCreditAmounts(credits, debits);
@@ -381,11 +381,11 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
      * TODO: Need a better implementation with guaranteed uniqueness (but not a
      * long UUID)...maybe something tied to system clock..
      */
-    private String generateTransactionId(Long officeId) {
-        AppUser user = this.context.authenticatedUser();
-        Long time = System.currentTimeMillis();
-        String uniqueVal = String.valueOf(time) + user.getId() + officeId;
-        String transactionId = Long.toHexString(Long.parseLong(uniqueVal)); 
+    private String generateTransactionId(final Long officeId) {
+        final AppUser user = this.context.authenticatedUser();
+        final Long time = System.currentTimeMillis();
+        final String uniqueVal = String.valueOf(time) + user.getId() + officeId;
+        final String transactionId = Long.toHexString(Long.parseLong(uniqueVal));
         return transactionId;
     }
 

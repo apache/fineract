@@ -7,22 +7,15 @@ package org.mifosplatform.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
@@ -105,7 +98,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     @Temporal(TemporalType.DATE)
     @Column(name = "obligations_met_on_date")
     private Date obligationsMetOnDate;
-    
+
     protected LoanRepaymentScheduleInstallment() {
         this.installmentNumber = null;
         this.fromDate = null;
@@ -118,8 +111,8 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
             final BigDecimal penaltyCharges) {
         this.loan = loan;
         this.installmentNumber = installmentNumber;
-        this.fromDate = fromDate.toDateMidnight().toDate();
-        this.dueDate = dueDate.toDateMidnight().toDate();
+        this.fromDate = fromDate.toDateTimeAtStartOfDay().toDate();
+        this.dueDate = dueDate.toDateTimeAtStartOfDay().toDate();
         this.principal = defaultToNullIfZero(principal);
         this.interestCharged = defaultToNullIfZero(interest);
         this.feeChargesCharged = defaultToNullIfZero(feeCharges);

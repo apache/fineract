@@ -133,21 +133,21 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     }
 
     public static LoanTransaction initiateTransfer(final Office office, final Loan loan, final LocalDate transferDate) {
-        return new LoanTransaction(loan, office, LoanTransactionType.INITIATE_TRANSFER.getValue(), transferDate.toDateMidnight().toDate(),
+        return new LoanTransaction(loan, office, LoanTransactionType.INITIATE_TRANSFER.getValue(), transferDate.toDateTimeAtStartOfDay().toDate(),
                 loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(), loan.getSummary()
                         .getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(), loan.getSummary()
                         .getTotalPenaltyChargesOutstanding(), null, false, null,null);
     }
 
     public static LoanTransaction approveTransfer(final Office office, final Loan loan, final LocalDate transferDate) {
-        return new LoanTransaction(loan, office, LoanTransactionType.APPROVE_TRANSFER.getValue(), transferDate.toDateMidnight().toDate(),
+        return new LoanTransaction(loan, office, LoanTransactionType.APPROVE_TRANSFER.getValue(), transferDate.toDateTimeAtStartOfDay().toDate(),
                 loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(), loan.getSummary()
                         .getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(), loan.getSummary()
                         .getTotalPenaltyChargesOutstanding(), null, false, null,null);
     }
 
     public static LoanTransaction withdrawTransfer(final Office office, final Loan loan, final LocalDate transferDate) {
-        return new LoanTransaction(loan, office, LoanTransactionType.WITHDRAW_TRANSFER.getValue(), transferDate.toDateMidnight().toDate(),
+        return new LoanTransaction(loan, office, LoanTransactionType.WITHDRAW_TRANSFER.getValue(), transferDate.toDateTimeAtStartOfDay().toDate(),
                 loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(), loan.getSummary()
                         .getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(), loan.getSummary()
                         .getTotalPenaltyChargesOutstanding(), null, false, null,null);
@@ -176,18 +176,18 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     public static boolean transactionAmountsMatch(final MonetaryCurrency currency, final LoanTransaction loanTransaction,
             final LoanTransaction newLoanTransaction) {
         if (loanTransaction.getAmount(currency).isEqualTo(newLoanTransaction.getAmount(currency))
-                && (loanTransaction.getPrincipalPortion(currency).isEqualTo(newLoanTransaction.getPrincipalPortion(currency)))
-                && (loanTransaction.getInterestPortion(currency).isEqualTo(newLoanTransaction.getInterestPortion(currency)))
-                && (loanTransaction.getFeeChargesPortion(currency).isEqualTo(newLoanTransaction.getFeeChargesPortion(currency)))
-                && (loanTransaction.getPenaltyChargesPortion(currency).isEqualTo(newLoanTransaction.getPenaltyChargesPortion(currency)))
-                && (loanTransaction.getOverPaymentPortion(currency).isEqualTo(newLoanTransaction.getOverPaymentPortion(currency)))) { return true; }
+                && loanTransaction.getPrincipalPortion(currency).isEqualTo(newLoanTransaction.getPrincipalPortion(currency))
+                && loanTransaction.getInterestPortion(currency).isEqualTo(newLoanTransaction.getInterestPortion(currency))
+                && loanTransaction.getFeeChargesPortion(currency).isEqualTo(newLoanTransaction.getFeeChargesPortion(currency))
+                && loanTransaction.getPenaltyChargesPortion(currency).isEqualTo(newLoanTransaction.getPenaltyChargesPortion(currency))
+                && loanTransaction.getOverPaymentPortion(currency).isEqualTo(newLoanTransaction.getOverPaymentPortion(currency))) { return true; }
         return false;
     }
 
     private LoanTransaction(final Loan loan, final Office office, final Integer typeOf, final Date dateOf, final BigDecimal amount,
             final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
             final BigDecimal penaltyChargesPortion, final BigDecimal overPaymentPortion, final boolean reversed,
-            final PaymentDetail paymentDetail,String externalId) {
+            final PaymentDetail paymentDetail,final String externalId) {
         super();
         this.loan = loan;
         this.typeOf = typeOf;
@@ -222,7 +222,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         this.loan = loan;
         this.typeOf = type.getValue();
         this.amount = amount;
-        this.dateOf = date.toDateMidnight().toDate();
+        this.dateOf = date.toDateTimeAtStartOfDay().toDate();
         this.externalId = externalId;
         this.office = office;
     }
@@ -233,7 +233,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         this.typeOf = type.getValue();
         this.paymentDetail = paymentDetail;
         this.amount = amount;
-        this.dateOf = date.toDateMidnight().toDate();
+        this.dateOf = date.toDateTimeAtStartOfDay().toDate();
         this.externalId = externalId;
         this.office = office;
     }
@@ -256,7 +256,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     /**
      * This updates the derived fields of a loan transaction for the principal,
      * interest and interest waived portions.
-     * 
+     *
      * This accumulates the values passed to the already existent values for
      * each of the portions.
      */
@@ -503,8 +503,8 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return LoanTransactionType.REFUND.equals(getTypeOf()) && isNotReversed();
     }
 
-    
-    public void updateExternalId(String externalId) {
+
+    public void updateExternalId(final String externalId) {
         this.externalId = externalId;
     }
 

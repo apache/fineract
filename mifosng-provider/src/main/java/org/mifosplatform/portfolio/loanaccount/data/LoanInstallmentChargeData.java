@@ -10,7 +10,6 @@ public class LoanInstallmentChargeData {
     private final LocalDate dueDate;
     @SuppressWarnings("unused")
     private final BigDecimal amount;
-    @SuppressWarnings("unused")
     private final BigDecimal amountOutstanding;
     private final boolean paid;
     private final boolean waived;
@@ -32,15 +31,15 @@ public class LoanInstallmentChargeData {
     public LocalDate getDueDate() {
         return this.dueDate;
     }
-    
+
     public boolean isPaymentPending(){
-        return !(paid || waived); 
+        return !(this.paid || this.waived);
     }
 
-    
+
     public BigDecimal getAmountOutstanding() {
         return this.amountOutstanding;
     }
-    
+
 
 }

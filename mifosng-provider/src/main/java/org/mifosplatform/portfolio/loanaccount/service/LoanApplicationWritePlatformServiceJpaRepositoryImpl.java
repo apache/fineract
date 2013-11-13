@@ -5,10 +5,8 @@
  */
 package org.mifosplatform.portfolio.loanaccount.service;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -151,7 +149,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.savingsAccountAssembler = savingsAccountAssembler;
         this.accountAssociationsRepository = accountAssociationsRepository;
-        this.loanChargeRepository  = loanChargeRepository;
+        this.loanChargeRepository = loanChargeRepository;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -340,14 +338,14 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             if (changes.containsKey("recalculateLoanSchedule")) {
                 changes.remove("recalculateLoanSchedule");
-                
+
                 final JsonElement parsedQuery = this.fromJsonHelper.parse(command.json());
                 final JsonQuery query = JsonQuery.from(command.json(), parsedQuery, this.fromJsonHelper);
 
                 final LoanScheduleModel loanSchedule = this.calculationPlatformService.calculateLoanSchedule(query);
                 existingLoanApplication.updateLoanSchedule(loanSchedule);
             }
-            
+
             final String chargesParamName = "charges";
             if (changes.containsKey(chargesParamName)) {
                 final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(command.parsedJson());
@@ -361,10 +359,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 final Note note = Note.loanNote(existingLoanApplication, submittedOnNote);
                 this.noteRepository.save(note);
             }
-            
+
             for (final LoanCharge loanCharge : existingLoanApplication.charges()) {
-                if(loanCharge.isInstalmentFee() && loanCharge.hasNoLoanInstallmentCharges()){
-                    Set<LoanInstallmentCharge> chargePerInstallments = existingLoanApplication.generateInstallmentLoanCharges(loanCharge);
+                if (loanCharge.isInstalmentFee() && loanCharge.hasNoLoanInstallmentCharges()) {
+                    final Set<LoanInstallmentCharge> chargePerInstallments = existingLoanApplication.generateInstallmentLoanCharges(loanCharge);
                     loanCharge.addLoanInstallmentCharges(chargePerInstallments);
                     this.loanChargeRepository.save(loanCharge);
                 }

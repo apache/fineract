@@ -76,7 +76,7 @@ public class Office extends AbstractPersistable<Long> {
 
     private Office(final Office parent, final String name, final LocalDate openingDate, final String externalId) {
         this.parent = parent;
-        this.openingDate = openingDate.toDateMidnight().toDate();
+        this.openingDate = openingDate.toDateTimeAtStartOfDay().toDate();
         if (parent != null) {
             this.parent.addChild(this);
         }

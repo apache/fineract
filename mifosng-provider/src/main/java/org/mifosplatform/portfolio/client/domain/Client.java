@@ -178,10 +178,10 @@ public final class Client extends AbstractPersistable<Long> {
         }
 
         if (activationDate != null) {
-            this.activationDate = activationDate.toDateMidnight().toDate();
+            this.activationDate = activationDate.toDateTimeAtStartOfDay().toDate();
         }
         if (officeJoiningDate != null) {
-            this.officeJoiningDate = officeJoiningDate.toDateMidnight().toDate();
+            this.officeJoiningDate = officeJoiningDate.toDateTimeAtStartOfDay().toDate();
         }
         if (StringUtils.isNotBlank(firstname)) {
             this.firstname = firstname.trim();
