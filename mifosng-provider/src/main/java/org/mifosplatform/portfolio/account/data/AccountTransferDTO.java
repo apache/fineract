@@ -23,11 +23,12 @@ public class AccountTransferDTO {
     private final Integer fromTransferType;
     private final Integer toTransferType;
     private final Long chargeId;
+    private final Integer loanInstallmentNumber;
 
     public AccountTransferDTO(final LocalDate transactionDate, final BigDecimal transactionAmount,
             final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType, final Long fromAccountId,
             final Long toAccountId, final String description, final Locale locale, final DateTimeFormatter fmt,
-            final PaymentDetail paymentDetail, final Integer fromTransferType, final Integer toTransferType, final Long chargeId) {
+            final PaymentDetail paymentDetail, final Integer fromTransferType, final Integer toTransferType, final Long chargeId, Integer loanInstallmentNumber) {
         this.transactionDate = transactionDate;
         this.transactionAmount = transactionAmount;
         this.fromAccountType = fromAccountType;
@@ -41,6 +42,7 @@ public class AccountTransferDTO {
         this.fromTransferType = fromTransferType;
         this.toTransferType = toTransferType;
         this.chargeId = chargeId;
+        this.loanInstallmentNumber = loanInstallmentNumber;
     }
 
     public LocalDate getTransactionDate() {
@@ -93,6 +95,11 @@ public class AccountTransferDTO {
 
     public Long getChargeId() {
         return this.chargeId;
+    }
+
+    
+    public Integer getLoanInstallmentNumber() {
+        return this.loanInstallmentNumber;
     }
 
 }

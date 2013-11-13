@@ -300,9 +300,9 @@ public final class LoanEventApiJsonValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
         Set<String> transactionParameters = null;
         if (isChargeIdIncluded) {
-            transactionParameters = new HashSet<String>(Arrays.asList("transactionDate", "locale", "dateFormat", "chargeId"));
+            transactionParameters = new HashSet<String>(Arrays.asList("transactionDate", "locale", "dateFormat", "chargeId","dueDate","installmentNumber"));
         } else {
-            transactionParameters = new HashSet<String>(Arrays.asList("transactionDate", "locale", "dateFormat"));
+            transactionParameters = new HashSet<String>(Arrays.asList("transactionDate", "locale", "dateFormat","dueDate","installmentNumber"));
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -319,6 +319,28 @@ public final class LoanEventApiJsonValidator {
             baseDataValidator.reset().parameter("chargeId").value(chargeId).notNull().integerGreaterThanZero();
         }
         baseDataValidator.reset().parameter("transactionDate").value(transactionDate).notNull();
+        final Integer installmentNumber = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("installmentNumber", element);
+        baseDataValidator.reset().parameter("installmentNumber").value(installmentNumber).ignoreIfNull().integerGreaterThanZero();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+    
+    public void validateInstallmentChargeTransaction(final String json) {
+
+        if (StringUtils.isBlank(json)) { return;}
+        Set<String> transactionParameters = new HashSet<String>(Arrays.asList("dueDate", "locale", "dateFormat", "installmentNumber"));
+       
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource("loan.charge.waive.transaction");
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        
+        final Integer installmentNumber = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("installmentNumber", element);
+        baseDataValidator.reset().parameter("installmentNumber").value(installmentNumber).ignoreIfNull().integerGreaterThanZero();
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 

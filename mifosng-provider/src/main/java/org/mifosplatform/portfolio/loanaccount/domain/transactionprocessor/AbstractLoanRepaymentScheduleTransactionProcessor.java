@@ -16,6 +16,7 @@ import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanChargePaidBy;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
@@ -68,12 +69,24 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         final List<LoanTransaction> transactionstoBeProcessed = new ArrayList<LoanTransaction>();
         for (final LoanTransaction loanTransaction : transactionsPostDisbursement) {
             if (loanTransaction.isChargePayment()) {
+                final List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<LoanRepaymentScheduleInstallment>();
                 final Set<LoanChargePaidBy> chargePaidBies = loanTransaction.getLoanChargesPaid();
                 final Set<LoanCharge> transferCharges = new HashSet<LoanCharge>();
                 for (final LoanChargePaidBy chargePaidBy : chargePaidBies) {
-                    transferCharges.add(chargePaidBy.getLoanCharge());
+                    LoanCharge loanCharge = chargePaidBy.getLoanCharge();
+                    transferCharges.add(loanCharge);
+                    if(loanCharge.isInstalmentFee()){
+                        LoanRepaymentScheduleInstallment installment = null;
+                        if(loanCharge.isFeeCharge()){
+                            installment = loanCharge.fetchRepaymentInstallment(loanTransaction.getFeeChargesPortion(currency));
+                        }else{
+                            installment = loanCharge.fetchRepaymentInstallment(loanTransaction.getPenaltyChargesPortion(currency));
+                        }
+                        if(installment !=null){
+                            chargePaymentInstallments.add(installment);
+                        }
+                    }
                 }
-                final List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<LoanRepaymentScheduleInstallment>();
                 LocalDate startDate = disbursementDate;
                 for (final LoanRepaymentScheduleInstallment installment : installments) {
                     for (final LoanCharge loanCharge : transferCharges) {
@@ -172,16 +185,20 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
         final Set<LoanCharge> loanFees = extractFeeCharges(charges);
         final Set<LoanCharge> loanPenalties = extractPenaltyCharges(charges);
+        Integer installmentNumber = null;
+        if(loanTransaction.isChargePayment() && installments.size() == 1){
+            installmentNumber = installments.get(0).getInstallmentNumber();
+        }
 
         if (loanTransaction.isNotWaiver()) {
             final Money feeCharges = loanTransaction.getFeeChargesPortion(currency);
             if (feeCharges.isGreaterThanZero()) {
-                updateFeeChargesPaidAmountBy(loanTransaction, feeCharges, loanFees);
+                updateChargesPaidAmountBy(loanTransaction, feeCharges, loanFees,installmentNumber);
             }
 
             final Money penaltyCharges = loanTransaction.getPenaltyChargesPortion(currency);
             if (penaltyCharges.isGreaterThanZero()) {
-                updatePenaltyChargesPaidAmountBy(loanTransaction, penaltyCharges, loanPenalties);
+                updateChargesPaidAmountBy(loanTransaction, penaltyCharges, loanPenalties,installmentNumber);
             }
         }
 
@@ -211,65 +228,46 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         return penaltyCharges;
     }
 
-    private void updateFeeChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money feeCharges, final Set<LoanCharge> charges) {
+    private void updateChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money feeCharges, final Set<LoanCharge> charges,final Integer installmentNumber) {
 
         Money amountRemaining = feeCharges;
-        for (final LoanCharge loanCharge : charges) {
-            if (!loanCharge.isDueAtDisbursement()) {
-                if (loanCharge.isFeeCharge() && loanCharge.isNotFullyPaid() && amountRemaining.isGreaterThanZero()) {
-                    final LoanCharge unpaidCharge = findEarliestUnpaidChargeFromUnOrderedSet(charges);
-                    final Money amountPaidTowardsCharge = unpaidCharge.updatePaidAmountBy(amountRemaining);
-                    if (!amountPaidTowardsCharge.isZero()) {
-                        if (!loanTransaction.isChargePayment()) {
-                            final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(loanTransaction, loanCharge,
-                                    amountPaidTowardsCharge.getAmount());
-                            loanTransaction.getLoanChargesPaid().add(loanChargePaidBy);
-                        }
-                        amountRemaining = amountRemaining.minus(amountPaidTowardsCharge);
-                    }
+        while(amountRemaining.isGreaterThanZero()) {
+            final LoanCharge unpaidCharge = findEarliestUnpaidChargeFromUnOrderedSet(charges);
+            Money  feeAmount = feeCharges.zero();
+            if(loanTransaction.isChargePayment()){
+                feeAmount = feeCharges;
+            }
+            final Money amountPaidTowardsCharge = unpaidCharge.updatePaidAmountBy(amountRemaining,installmentNumber, feeAmount);
+            if (!amountPaidTowardsCharge.isZero()) {
+                if (!loanTransaction.isChargePayment()) {
+                    final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(loanTransaction, unpaidCharge,
+                            amountPaidTowardsCharge.getAmount());
+                    loanTransaction.getLoanChargesPaid().add(loanChargePaidBy);
                 }
+                amountRemaining = amountRemaining.minus(amountPaidTowardsCharge);
             }
         }
-    }
-
-    private void updatePenaltyChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money feeCharges,
-            final Set<LoanCharge> charges) {
-
-        Money amountRemaining = feeCharges;
-        for (final LoanCharge loanCharge : charges) {
-            if (!loanCharge.isDueAtDisbursement()) {
-
-                if (loanCharge.isPenaltyCharge() && loanCharge.isNotFullyPaid() && amountRemaining.isGreaterThanZero()) {
-                    final LoanCharge unpaidCharge = findEarliestUnpaidChargeFromUnOrderedSet(charges);
-                    final Money amountPaidTowardsCharge = unpaidCharge.updatePaidAmountBy(amountRemaining);
-                    if (!amountPaidTowardsCharge.isZero()) {
-                        if (!loanTransaction.isChargePayment()) {
-                            final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(loanTransaction, loanCharge,
-                                    amountPaidTowardsCharge.getAmount());
-                            loanTransaction.getLoanChargesPaid().add(loanChargePaidBy);
-                        }
-                        amountRemaining = amountRemaining.minus(amountPaidTowardsCharge);
-                    }
-                }
-            }
-        }
+           
     }
 
     private LoanCharge findEarliestUnpaidChargeFromUnOrderedSet(final Set<LoanCharge> charges) {
         LoanCharge earliestUnpaidCharge = null;
         LoanCharge installemntCharge = null;
+        LoanInstallmentCharge chargePerInstallment = null;
         for (final LoanCharge loanCharge : charges) {
             if (loanCharge.isNotFullyPaid() && !loanCharge.isDueAtDisbursement()) {
                 if(loanCharge.isInstalmentFee()){
-                    if(installemntCharge == null){
+                    LoanInstallmentCharge  unpaidLoanChargePerInstallment = loanCharge.getUnpaidInstallmentLoanCharge();
+                    if(chargePerInstallment == null || chargePerInstallment.getRepaymentInstallment().getDueDate().isAfter(unpaidLoanChargePerInstallment.getRepaymentInstallment().getDueDate())){
                         installemntCharge = loanCharge;
+                        chargePerInstallment = unpaidLoanChargePerInstallment;
                     }
                 }else if (earliestUnpaidCharge == null || loanCharge.getDueLocalDate().isBefore(earliestUnpaidCharge.getDueLocalDate())) {
                     earliestUnpaidCharge = loanCharge;
                 }
             }
         }
-        if(earliestUnpaidCharge == null || earliestUnpaidCharge.getDueLocalDate().isAfter(new LocalDate())){
+        if(earliestUnpaidCharge == null || (chargePerInstallment!=null && earliestUnpaidCharge.getDueLocalDate().isAfter(chargePerInstallment.getRepaymentInstallment().getDueDate()))){
             earliestUnpaidCharge = installemntCharge;
         }
 

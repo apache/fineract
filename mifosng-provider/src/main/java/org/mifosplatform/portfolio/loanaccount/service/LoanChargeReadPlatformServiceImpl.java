@@ -21,6 +21,7 @@ import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.service.ChargeDropdownReadPlatformService;
 import org.mifosplatform.portfolio.charge.service.ChargeEnumerations;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanInstallmentChargeData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -104,13 +105,13 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final EnumOptionData paymentMode = ChargeEnumerations.chargePaymentMode(chargePaymentMode);
             final boolean paid = rs.getBoolean("paid");
             final boolean waived = rs.getBoolean("waied");
-            final BigDecimal minCap  = rs.getBigDecimal("minCap");
-            final BigDecimal maxCap  = rs.getBigDecimal("maxCap");
+            final BigDecimal minCap = rs.getBigDecimal("minCap");
+            final BigDecimal maxCap = rs.getBigDecimal("maxCap");
             final BigDecimal amountOrPercentage = rs.getBigDecimal("amountOrPercentage");
 
             return new LoanChargeData(id, chargeId, name, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding,
                     chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo, penalty, paymentMode,
-                    paid, waived, null,minCap,maxCap,amountOrPercentage);
+                    paid, waived, null, minCap, maxCap, amountOrPercentage, null);
         }
     }
 
@@ -127,7 +128,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
                 .retrieveSavingsCalculationTypes();
         final List<EnumOptionData> savingsChargeTimeTypeOptions = this.chargeDropdownReadPlatformService
                 .retrieveSavingsCollectionTimeTypes();
-        
+
         return ChargeData.template(null, allowedChargeCalculationTypeOptions, null, allowedChargeTimeOptions, null,
                 loansChargeCalculationTypeOptions, loansChargeTimeTypeOptions, savingsChargeCalculationTypeOptions,
                 savingsChargeTimeTypeOptions);
@@ -168,7 +169,10 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
         public String schema() {
             return "lc.id as id, lc.due_for_collection_as_of_date as dueAsOfDate, "
-                    + "lc.amount_outstanding_derived as amountOutstanding, " + "loan.id as loanId " + "from  m_loan_charge lc "
+                    + "lc.amount_outstanding_derived as amountOutstanding, "
+                    + "lc.charge_time_enum as chargeTime, "
+                    + "loan.id as loanId " 
+                    + "from  m_loan_charge lc "
                     + "join m_loan loan on loan.id = lc.loan_id ";
         }
 
@@ -179,7 +183,46 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final LocalDate dueAsOfDate = JdbcSupport.getLocalDate(rs, "dueAsOfDate");
             final Long loanId = rs.getLong("loanId");
             final BigDecimal amountOutstanding = rs.getBigDecimal("amountOutstanding");
-            return new LoanChargeData(id, dueAsOfDate, amountOutstanding, loanId);
+            final int chargeTime = rs.getInt("chargeTime");
+            final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(chargeTime);
+ 
+            return new LoanChargeData(id, dueAsOfDate, amountOutstanding, chargeTimeType, loanId, null);
+        }
+    }
+
+    @Override
+    public Collection<LoanInstallmentChargeData> retrieveInstallmentLoanCharges(Long loanChargeId,boolean onlyPaymentPendingCharges) {
+        final LoanInstallmentChargeMapper rm = new LoanInstallmentChargeMapper();
+        String sql = "select " + rm.schema()
+                + "where lic.loan_charge_id= ? ";
+        if(onlyPaymentPendingCharges){
+            sql = sql +"and lic.waived =0 and lic.is_paid_derived=0";
+        }
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanChargeId });
+    }
+
+    private static final class LoanInstallmentChargeMapper implements RowMapper<LoanInstallmentChargeData> {
+
+        public String schema() {
+            return " lsi.installment as installmentNumber, lsi.duedate as dueAsOfDate, "
+                    + "lic.amount_outstanding_derived as amountOutstanding," 
+                    + "lic.amount as  amount, " 
+                    + "lic.is_paid_derived as paid, "
+                    + "lic.waived as waied " 
+                    + "from  m_loan_installment_charge lic "
+                    + "join m_loan_repayment_schedule lsi on lsi.id = lic.loan_schedule_id ";
+        }
+
+        @Override
+        public LoanInstallmentChargeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+            final Integer installmentNumber = rs.getInt("installmentNumber");
+            final LocalDate dueAsOfDate = JdbcSupport.getLocalDate(rs, "dueAsOfDate");
+            final BigDecimal amountOutstanding = rs.getBigDecimal("amountOutstanding");
+            final BigDecimal amount = rs.getBigDecimal("amount");
+            final boolean paid = rs.getBoolean("paid");
+            final boolean waived = rs.getBoolean("waied");
+
+            return new LoanInstallmentChargeData(installmentNumber, dueAsOfDate, amount, amountOutstanding, paid, waived);
         }
     }
 }
