@@ -672,7 +672,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 final EnumOptionData groupStatus = ClientEnumerations.status(groupStatusEnum);
                 final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
                 groupData = GroupGeneralData.instance(groupId, groupName, groupExternalId, groupStatus, activationDate, groupOfficeId,
-                        null, groupParentId, null, groupStaffId, null, groupHierarchy);
+                        null, groupParentId, null, groupStaffId, null, groupHierarchy,null);
             }
 
             final Integer loanCounter = JdbcSupport.getInteger(rs, "loanCounter");

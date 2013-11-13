@@ -27,6 +27,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -44,6 +45,7 @@ import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.mifosplatform.portfolio.group.domain.Group;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -121,7 +123,27 @@ public final class Client extends AbstractPersistable<Long> {
     @Temporal(TemporalType.DATE)
     private Date closureDate;
 
-    public static Client createNew(final Office clientOffice, final Group clientParentGroup, final Staff staff, final JsonCommand command) {
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "closedon_userid", nullable = true)
+    private AppUser closeddBy;
+
+    @Column(name = "submittedon_date", nullable = true)
+    @Temporal(TemporalType.DATE)
+    private Date submittedOnDate;
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "submittedon_userid", nullable = true)
+    private AppUser submittedBy;
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "activatedon_userid", nullable = true)
+    private AppUser activatedBy;
+
+
+
+
+
+    public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff, final JsonCommand command) {
 
         final String accountNo = command.stringValueOfParameterNamed(ClientApiConstants.accountNoParamName);
         final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
@@ -132,11 +154,22 @@ public final class Client extends AbstractPersistable<Long> {
         final String lastname = command.stringValueOfParameterNamed(ClientApiConstants.lastnameParamName);
         final String fullname = command.stringValueOfParameterNamed(ClientApiConstants.fullnameParamName);
 
+
+        LocalDate submittedOnDate = new LocalDate();
+
+        if (command.hasParameter(ClientApiConstants.submittedOnDateParamName)) {
+
+            submittedOnDate = command.localDateValueOfParameterNamed(ClientApiConstants.submittedOnDateParamName);
+
+        }
+
         ClientStatus status = ClientStatus.PENDING;
         boolean active = false;
         if (command.hasParameter("active")) {
             active = command.booleanPrimitiveValueOfParameterNamed(ClientApiConstants.activeParamName);
         }
+
+
 
         LocalDate activationDate = null;
         LocalDate officeJoiningDate = null;
@@ -146,23 +179,48 @@ public final class Client extends AbstractPersistable<Long> {
             officeJoiningDate = activationDate;
         }
 
-        return new Client(status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname, activationDate,
-                officeJoiningDate, externalId, mobileNo, staff);
+
+        return new Client(currentUser,status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname, activationDate,
+                officeJoiningDate, externalId, mobileNo, staff,submittedOnDate);
+
+
     }
 
     protected Client() {
         //
     }
 
-    private Client(final ClientStatus status, final Office office, final Group clientParentGroup, final String accountNo,
+    private Client(final AppUser currentUser,final ClientStatus status, final Office office, final Group clientParentGroup, final String accountNo,
             final String firstname, final String middlename, final String lastname, final String fullname, final LocalDate activationDate,
-            final LocalDate officeJoiningDate, final String externalId, final String mobileNo, final Staff staff) {
+            final LocalDate officeJoiningDate, final String externalId, final String mobileNo, final Staff staff,final LocalDate submittedOnDate) {
+
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
             this.accountNumberRequiresAutoGeneration = true;
         } else {
             this.accountNumber = accountNo;
         }
+
+        this.submittedBy =  currentUser;
+
+        if (isDateInTheFuture(submittedOnDate)) {
+
+            final String defaultUserMessage = "submitted date cannot be in the future.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.submittedOnDate.in.the.future",
+                    defaultUserMessage, ClientApiConstants.submittedOnDateParamName,submittedOnDate);
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        this.submittedOnDate = submittedOnDate.toDate();
+
+
+
+
+
         this.status = status.getValue();
         this.office = office;
         if (StringUtils.isNotBlank(externalId)) {
@@ -246,7 +304,7 @@ public final class Client extends AbstractPersistable<Long> {
         this.accountNumberRequiresAutoGeneration = false;
     }
 
-    public void activate(final DateTimeFormatter formatter, final LocalDate activationLocalDate) {
+    public void activate(final AppUser currentUser,final DateTimeFormatter formatter, final LocalDate activationLocalDate) {
         if (isActive()) {
             final String defaultUserMessage = "Cannot activate client. Client is already active.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.already.active", defaultUserMessage,
@@ -271,6 +329,7 @@ public final class Client extends AbstractPersistable<Long> {
         }
 
         this.activationDate = activationLocalDate.toDate();
+        this.activatedBy = currentUser;
         this.officeJoiningDate = this.activationDate;
         this.status = ClientStatus.ACTIVE.getValue();
 
@@ -449,6 +508,10 @@ public final class Client extends AbstractPersistable<Long> {
         this.displayName = nameBuilder.toString();
     }
 
+    public LocalDate getSubmittedOnDate() {
+        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.submittedOnDate), null);
+    }
+
     public LocalDate getActivationLocalDate() {
         LocalDate activationLocalDate = null;
         if (this.activationDate != null) {
@@ -545,9 +608,10 @@ public final class Client extends AbstractPersistable<Long> {
         return this.groups;
     }
 
-    public void close(final CodeValue closureReason, final Date closureDate) {
+    public void close(final AppUser currentUser, final CodeValue closureReason, final Date closureDate) {
         this.closureReason = closureReason;
         this.closureDate = closureDate;
+        this.closeddBy = currentUser;
         this.status = ClientStatus.CLOSED.getValue();
     }
 
