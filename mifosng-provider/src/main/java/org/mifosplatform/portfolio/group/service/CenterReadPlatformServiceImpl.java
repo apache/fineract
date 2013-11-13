@@ -239,13 +239,21 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     }
 
     @Override
-    public CenterData retrieveTemplate(final Long officeId) {
+    public CenterData retrieveTemplate(final Long officeId, final boolean staffInSelectedOfficeOnly) {
 
         final Long officeIdDefaulted = defaultToUsersOfficeIfNull(officeId);
 
         final Collection<OfficeData> officeOptions = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
+        
+        final boolean loanOfficersOnly = false;
+        Collection<StaffData> staffOptions = null;
+        if (staffInSelectedOfficeOnly) {
+            staffOptions = this.staffReadPlatformService.retrieveAllStaffForDropdown(officeIdDefaulted);
+        } else {
+            staffOptions = this.staffReadPlatformService.retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(officeIdDefaulted,
+                    loanOfficersOnly);
+        }
 
-        Collection<StaffData> staffOptions = this.staffReadPlatformService.retrieveAllStaffForDropdown(officeIdDefaulted);
         if (CollectionUtils.isEmpty(staffOptions)) {
             staffOptions = null;
         }
