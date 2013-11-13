@@ -144,6 +144,18 @@ public final class Client extends AbstractPersistable<Long> {
             status = ClientStatus.ACTIVE;
             activationDate = command.localDateValueOfParameterNamed(ClientApiConstants.activationDateParamName);
             officeJoiningDate = activationDate;
+            if (activationDate.isAfter(DateUtils.getLocalDateOfTenant())) {
+
+                final String defaultUserMessage = "Activation date cannot be in the future.";
+                final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.activationDate.in.the.future",
+                        defaultUserMessage, ClientApiConstants.activationDateParamName, activationDate);
+
+                final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+                dataValidationErrors.add(error);
+
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+
         }
 
         return new Client(status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname, activationDate,
