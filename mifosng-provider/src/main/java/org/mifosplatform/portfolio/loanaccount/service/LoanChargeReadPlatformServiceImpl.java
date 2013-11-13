@@ -169,7 +169,10 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
         public String schema() {
             return "lc.id as id, lc.due_for_collection_as_of_date as dueAsOfDate, "
-                    + "lc.amount_outstanding_derived as amountOutstanding, " + "loan.id as loanId " + "from  m_loan_charge lc "
+                    + "lc.amount_outstanding_derived as amountOutstanding, "
+                    + "lc.charge_time_enum as chargeTime, "
+                    + "loan.id as loanId " 
+                    + "from  m_loan_charge lc "
                     + "join m_loan loan on loan.id = lc.loan_id ";
         }
 
@@ -180,7 +183,10 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final LocalDate dueAsOfDate = JdbcSupport.getLocalDate(rs, "dueAsOfDate");
             final Long loanId = rs.getLong("loanId");
             final BigDecimal amountOutstanding = rs.getBigDecimal("amountOutstanding");
-            return new LoanChargeData(id, dueAsOfDate, amountOutstanding, loanId, null);
+            final int chargeTime = rs.getInt("chargeTime");
+            final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(chargeTime);
+ 
+            return new LoanChargeData(id, dueAsOfDate, amountOutstanding, chargeTimeType, loanId, null);
         }
     }
 
@@ -190,7 +196,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
         String sql = "select " + rm.schema()
                 + "where lic.loan_charge_id= ? ";
         if(onlyPaymentPendingCharges){
-            sql = sql +"and lc.waived =0 and lc.is_paid_derived=0";
+            sql = sql +"and lic.waived =0 and lic.is_paid_derived=0";
         }
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanChargeId });
     }
@@ -200,7 +206,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
         public String schema() {
             return " lsi.installment as installmentNumber, lsi.duedate as dueAsOfDate, "
                     + "lic.amount_outstanding_derived as amountOutstanding," 
-                    + "lic.amount as  amount" 
+                    + "lic.amount as  amount, " 
                     + "lic.is_paid_derived as paid, "
                     + "lic.waived as waied " 
                     + "from  m_loan_installment_charge lic "

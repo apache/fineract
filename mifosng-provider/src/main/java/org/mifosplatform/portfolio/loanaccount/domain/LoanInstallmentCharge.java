@@ -44,6 +44,9 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
 
     @Column(name = "amount_outstanding_derived", scale = 6, precision = 19, nullable = false)
     private BigDecimal amountOutstanding;
+    
+    @Column(name = "amount_through_charge_payment", scale = 6, precision = 19, nullable = true)
+    private BigDecimal amountThroughChargePayment;
 
     @Column(name = "is_paid_derived", nullable = false)
     private boolean paid = false;
@@ -122,11 +125,23 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
     public BigDecimal getAmount() {
         return this.amount;
     }
-
     
+    public Money getAmount(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amount);
+    }
+
+    private Money getAmountPaid(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amountPaid);
+    }
+
     public BigDecimal getAmountOutstanding() {
         return this.amountOutstanding;
     }
+    
+    private BigDecimal calculateAmountOutstanding(final MonetaryCurrency currency) {
+        return getAmount(currency).minus(getAmountWaived(currency)).minus(getAmountPaid(currency)).getAmount();
+    }
+
     
     public boolean isPaid() {
         return this.paid;
@@ -145,7 +160,7 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
         return this.installment;
     }
     
-    public Money updatePaidAmountBy(final Money incrementBy) {
+    public Money updatePaidAmountBy(final Money incrementBy, Money feeAmount) {
         
         Money amountPaidToDate = Money.of(incrementBy.getCurrency(), this.amountPaid);
         final Money amountOutstanding = Money.of(incrementBy.getCurrency(), this.amountOutstanding);
@@ -160,11 +175,9 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
             amountPaidOnThisCharge = incrementBy;
             amountPaidToDate = amountPaidToDate.plus(incrementBy);
             this.amountPaid = amountPaidToDate.getAmount();
-
-            final Money amountExpected = Money.of(incrementBy.getCurrency(), this.amount);
-            this.amountOutstanding = amountExpected.minus(amountPaidToDate).getAmount();
+            this.amountOutstanding = calculateAmountOutstanding(incrementBy.getCurrency());
         }
-
+        this.amountThroughChargePayment = feeAmount.getAmount();
         this.paid = determineIfFullyPaid();
 
         return amountPaidOnThisCharge;
@@ -174,4 +187,25 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
     public Money getAmountWrittenOff(final MonetaryCurrency currency) {
         return Money.of(currency, this.amountWrittenOff);
     }
+    
+    public void resetPaidAmount(final MonetaryCurrency currency) {
+        this.amountPaid = BigDecimal.ZERO;
+        this.amountOutstanding = calculateAmountOutstanding(currency);
+        this.paid = false;
+    }
+    
+    public void resetToOriginal(final MonetaryCurrency currency) {
+        this.amountPaid = BigDecimal.ZERO;
+        this.amountWaived = BigDecimal.ZERO;
+        this.amountWrittenOff = BigDecimal.ZERO;
+        this.amountOutstanding = calculateAmountOutstanding(currency);
+        this.paid = false;
+        this.waived = false;
+    }
+
+    
+    public Money getAmountThroughChargePayment(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amountThroughChargePayment);
+    }
+
 }

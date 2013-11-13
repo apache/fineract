@@ -266,6 +266,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isDueAtDisbursement() && loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
                 disBuLoanCharges.put(loanCharge.getId(), loanCharge.amount());
+            }else if(loanCharge.isInstalmentFee() && loanCharge.hasNoLoanInstallmentCharges()){
+                Set<LoanInstallmentCharge> chargePerInstallments = loan.generateInstallmentLoanCharges(loanCharge);
+                loanCharge.addLoanInstallmentCharges(chargePerInstallments);
+                this.loanChargeRepository.save(loanCharge);
             }
         }
         final Locale locale = command.extractLocale();
@@ -383,6 +387,26 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 }
 
                 postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+            }
+            final Set<LoanCharge> loanCharges = loan.charges();
+            final Map<Long, BigDecimal> disBuLoanCharges = new HashMap<Long, BigDecimal>();
+            for (final LoanCharge loanCharge : loanCharges) {
+                if (loanCharge.isDueAtDisbursement() && loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
+                    disBuLoanCharges.put(loanCharge.getId(), loanCharge.amount());
+                }else if(loanCharge.isInstalmentFee() && loanCharge.hasNoLoanInstallmentCharges()){
+                    Set<LoanInstallmentCharge> chargePerInstallments = loan.generateInstallmentLoanCharges(loanCharge);
+                    loanCharge.addLoanInstallmentCharges(chargePerInstallments);
+                    this.loanChargeRepository.save(loanCharge);
+                }
+            }
+            final Locale locale = command.extractLocale();
+            final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+            for (final Map.Entry<Long, BigDecimal> entrySet : disBuLoanCharges.entrySet()) {
+                final PortfolioAccountData savingAccountData = this.accountAssociationsReadPlatformService.retriveLoanAssociation(loan.getId());
+                final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(actualDisbursementDate, entrySet.getValue(),
+                        PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN, savingAccountData.accountId(), loan.getId(), "Loan Charge Payment",
+                        locale, fmt, null, null, LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue(), entrySet.getKey(), null);
+                this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             }
         }
         return changes;
@@ -933,12 +957,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         Integer loanInstallmentNumber = null; 
         if (loanCharge.isInstalmentFee()){
             LoanInstallmentCharge chargePerInstallment = null;
-            final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
-            final Integer installmentNumber = command.integerValueOfParameterNamed("installmentNumber");
-            if(dueDate !=null){
-                chargePerInstallment = loanCharge.getInstallmentLoanCharge(dueDate);
-            }else if(installmentNumber!=null){
-                chargePerInstallment = loanCharge.getInstallmentLoanCharge(installmentNumber);
+            if(!StringUtils.isBlank(command.json())){
+                final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
+                final Integer installmentNumber = command.integerValueOfParameterNamed("installmentNumber");
+                if(dueDate !=null){
+                    chargePerInstallment = loanCharge.getInstallmentLoanCharge(dueDate);
+                }else if(installmentNumber!=null){
+                    chargePerInstallment = loanCharge.getInstallmentLoanCharge(installmentNumber);
+                }
             }
             if(chargePerInstallment == null){
                 chargePerInstallment = loanCharge.getUnpaidInstallmentLoanCharge();
@@ -1090,7 +1116,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     Collection<LoanInstallmentChargeData> chargePerInstallments = this.LoanChargeReadPlatformService.retrieveInstallmentLoanCharges(chargeData.getId(), true);
                     PortfolioAccountData portfolioAccountData = null;
                     for(LoanInstallmentChargeData installmentChargeData : chargePerInstallments){
-                        if(installmentChargeData.getDueDate().isAfter(new LocalDate())){
+                        if(!installmentChargeData.getDueDate().isAfter(new LocalDate())){
                             if(portfolioAccountData == null){
                                 portfolioAccountData = this.accountAssociationsReadPlatformService
                                         .retriveLoanAssociation(chargeData.getLoanId());

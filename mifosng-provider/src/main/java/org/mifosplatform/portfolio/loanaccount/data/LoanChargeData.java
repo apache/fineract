@@ -21,45 +21,32 @@ import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
 public class LoanChargeData {
 
     private final Long id;
-    @SuppressWarnings("unused")
     private final Long chargeId;
-    @SuppressWarnings("unused")
     private final String name;
-    @SuppressWarnings("unused")
     private final EnumOptionData chargeTimeType;
 
     private final LocalDate dueDate;
 
-    @SuppressWarnings("unused")
     private final EnumOptionData chargeCalculationType;
 
     private final BigDecimal percentage;
 
-    @SuppressWarnings("unused")
     private final BigDecimal amountPercentageAppliedTo;
 
-    @SuppressWarnings("unused")
     private final CurrencyData currency;
 
-    @SuppressWarnings("unused")
     private final BigDecimal amount;
 
-    @SuppressWarnings("unused")
     private final BigDecimal amountPaid;
-    @SuppressWarnings("unused")
     private final BigDecimal amountWaived;
-    @SuppressWarnings("unused")
     private final BigDecimal amountWrittenOff;
 
     private final BigDecimal amountOutstanding;
 
-    @SuppressWarnings("unused")
     private final BigDecimal amountOrPercentage;
 
-    @SuppressWarnings("unused")
     private final Collection<ChargeData> chargeOptions;
 
-    @SuppressWarnings("unused")
     private final boolean penalty;
 
     private final EnumOptionData chargePaymentMode;
@@ -68,17 +55,15 @@ public class LoanChargeData {
 
     private final boolean waived;
 
-    @SuppressWarnings("unused")
     private final boolean chargePayable;
 
     private final Long loanId;
 
-    @SuppressWarnings("unused")
     private final BigDecimal minCap;
 
-    @SuppressWarnings("unused")
     private final BigDecimal maxCap;
     
+    @SuppressWarnings("unused")
     private final Collection<LoanInstallmentChargeData> installmentChargeData;
 
     public static LoanChargeData template(final Collection<ChargeData> chargeOptions) {
@@ -181,7 +166,7 @@ public class LoanChargeData {
         this.installmentChargeData = installmentChargeData;
     }
 
-    public LoanChargeData(final Long id, final LocalDate dueAsOfDate, final BigDecimal amountOutstanding, final Long loanId, Collection<LoanInstallmentChargeData> installmentChargeData) {
+    public LoanChargeData(final Long id, final LocalDate dueAsOfDate, final BigDecimal amountOutstanding, EnumOptionData chargeTimeType, final Long loanId, Collection<LoanInstallmentChargeData> installmentChargeData) {
         this.id = id;
         this.chargeId = null;
         this.name = null;
@@ -191,7 +176,7 @@ public class LoanChargeData {
         this.amountWaived = null;
         this.amountWrittenOff = null;
         this.amountOutstanding = amountOutstanding;
-        this.chargeTimeType = null;
+        this.chargeTimeType = chargeTimeType;
         this.dueDate = dueAsOfDate;
         this.chargeCalculationType = null;
         this.percentage = null;

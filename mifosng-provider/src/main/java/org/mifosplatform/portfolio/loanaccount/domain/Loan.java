@@ -885,8 +885,9 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public void updateLoanSchedule(final LoanScheduleModel modifiedLoanSchedule) {
+        clearInstallmentLoanCharge();
         this.repaymentScheduleInstallments.clear();
-
+        
         for (final LoanScheduleModelPeriod scheduledLoanInstallment : modifiedLoanSchedule.getPeriods()) {
 
             if (scheduledLoanInstallment.isRepaymentPeriod()) {
@@ -901,6 +902,15 @@ public class Loan extends AbstractPersistable<Long> {
 
         updateLoanScheduleDependentDerivedFields();
         updateLoanSummaryDerivedFields();
+        
+    }
+    
+    private void clearInstallmentLoanCharge(){
+        for(LoanCharge loanCharge:this.charges){
+            if(loanCharge.isInstalmentFee()){
+                loanCharge.clearLoanInstallmentCharges();
+            }
+        }
     }
 
     private void updateLoanScheduleDependentDerivedFields() {
@@ -2979,20 +2989,21 @@ public class Loan extends AbstractPersistable<Long> {
         return this.charges;
     }
     
-    public Set<LoanInstallmentCharge> createInstallmentLoanCharges(final LoanCharge loanCharge){
+    public Set<LoanInstallmentCharge> generateInstallmentLoanCharges(final LoanCharge loanCharge){
         Set<LoanInstallmentCharge> loanChargePerInstallments = new HashSet<LoanInstallmentCharge>();
         if(loanCharge.isInstalmentFee()){
             for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
-                BigDecimal amount = BigDecimal.ZERO;;
+                BigDecimal amount = BigDecimal.ZERO;
                 if(loanCharge.getChargeCalculation().isFlat()){
-                   amount =   loanCharge.amount();
+                   amount =   loanCharge.amount().divide(BigDecimal.valueOf(repaymentScheduleDetail().getNumberOfRepayments()));
                 }else{
                     amount = calculateInstallmentChargeAmount(loanCharge.getChargeCalculation(), loanCharge.getPercentage(), installment).getAmount();
                 }
-                LoanInstallmentCharge loanChargePerInstallment = new LoanInstallmentCharge(amount, loanCharge, installment);
-                loanChargePerInstallments.add(loanChargePerInstallment);
+                LoanInstallmentCharge loanInstallmentCharge = new LoanInstallmentCharge(amount, loanCharge, installment);
+                loanChargePerInstallments.add(loanInstallmentCharge);
             }
         }
         return loanChargePerInstallments;
     }
+    
 }

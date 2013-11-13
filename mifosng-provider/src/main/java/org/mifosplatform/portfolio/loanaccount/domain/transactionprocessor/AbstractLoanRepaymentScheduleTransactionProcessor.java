@@ -69,12 +69,24 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         final List<LoanTransaction> transactionstoBeProcessed = new ArrayList<LoanTransaction>();
         for (final LoanTransaction loanTransaction : transactionsPostDisbursement) {
             if (loanTransaction.isChargePayment()) {
+                final List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<LoanRepaymentScheduleInstallment>();
                 final Set<LoanChargePaidBy> chargePaidBies = loanTransaction.getLoanChargesPaid();
                 final Set<LoanCharge> transferCharges = new HashSet<LoanCharge>();
                 for (final LoanChargePaidBy chargePaidBy : chargePaidBies) {
-                    transferCharges.add(chargePaidBy.getLoanCharge());
+                    LoanCharge loanCharge = chargePaidBy.getLoanCharge();
+                    transferCharges.add(loanCharge);
+                    if(loanCharge.isInstalmentFee()){
+                        LoanRepaymentScheduleInstallment installment = null;
+                        if(loanCharge.isFeeCharge()){
+                            installment = loanCharge.fetchRepaymentInstallment(loanTransaction.getFeeChargesPortion(currency));
+                        }else{
+                            installment = loanCharge.fetchRepaymentInstallment(loanTransaction.getPenaltyChargesPortion(currency));
+                        }
+                        if(installment !=null){
+                            chargePaymentInstallments.add(installment);
+                        }
+                    }
                 }
-                final List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<LoanRepaymentScheduleInstallment>();
                 LocalDate startDate = disbursementDate;
                 for (final LoanRepaymentScheduleInstallment installment : installments) {
                     for (final LoanCharge loanCharge : transferCharges) {
@@ -221,7 +233,11 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         Money amountRemaining = feeCharges;
         while(amountRemaining.isGreaterThanZero()) {
             final LoanCharge unpaidCharge = findEarliestUnpaidChargeFromUnOrderedSet(charges);
-            final Money amountPaidTowardsCharge = unpaidCharge.updatePaidAmountBy(amountRemaining,installmentNumber);
+            Money  feeAmount = feeCharges.zero();
+            if(loanTransaction.isChargePayment()){
+                feeAmount = feeCharges;
+            }
+            final Money amountPaidTowardsCharge = unpaidCharge.updatePaidAmountBy(amountRemaining,installmentNumber, feeAmount);
             if (!amountPaidTowardsCharge.isZero()) {
                 if (!loanTransaction.isChargePayment()) {
                     final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(loanTransaction, unpaidCharge,
