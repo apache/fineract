@@ -13,7 +13,7 @@ import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 
 public interface CenterReadPlatformService {
 
-    CenterData retrieveTemplate(Long officeId);
+    CenterData retrieveTemplate(Long officeId, boolean staffInSelectedOfficeOnly);
 
     CenterData retrieveOne(Long centerId);
 
