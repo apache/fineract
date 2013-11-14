@@ -313,18 +313,6 @@ public final class Client extends AbstractPersistable<Long> {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
-        if (isDateInTheFuture(activationLocalDate)) {
-
-            final String defaultUserMessage = "Activation date cannot be in the future.";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.activationDate.in.the.future",
-                    defaultUserMessage, ClientApiConstants.activationDateParamName, activationLocalDate);
-
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-            dataValidationErrors.add(error);
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
         this.activationDate = activationLocalDate.toDate();
         this.activatedBy = currentUser;
         this.officeJoiningDate = this.activationDate;
@@ -472,6 +460,16 @@ public final class Client extends AbstractPersistable<Long> {
     }
 
     private void validateActivationDate(final List<ApiParameterError> dataValidationErrors) {
+
+        if (getActivationLocalDate() != null && isDateInTheFuture(getActivationLocalDate())) {
+
+            final String defaultUserMessage = "Activation date cannot be in the future.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.activationDate.in.the.future",
+                    defaultUserMessage, ClientApiConstants.activationDateParamName, getActivationLocalDate());
+
+            dataValidationErrors.add(error);
+        }
+
         if (this.activationDate != null) {
             if (this.office.isOpeningDateAfter(getActivationLocalDate())) {
                 final String defaultUserMessage = "Client activation date cannot be a date before the office opening date.";
