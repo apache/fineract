@@ -906,7 +906,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
     
     private void clearInstallmentLoanCharge(){
-        for(LoanCharge loanCharge:this.charges){
+        for(LoanCharge loanCharge:setOfLoanCharges()){
             if(loanCharge.isInstalmentFee()){
                 loanCharge.clearLoanInstallmentCharges();
             }
