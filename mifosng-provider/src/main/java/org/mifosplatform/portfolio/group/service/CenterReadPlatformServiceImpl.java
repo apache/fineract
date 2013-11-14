@@ -187,7 +187,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             final String hierarchy = rs.getString("hierarchy");
 
             return GroupGeneralData.instance(id, name, externalId, status, activationDate, officeId, officeName, null, null, staffId,
-                    staffName, hierarchy);
+                    staffName, hierarchy,null);
         }
     }
 

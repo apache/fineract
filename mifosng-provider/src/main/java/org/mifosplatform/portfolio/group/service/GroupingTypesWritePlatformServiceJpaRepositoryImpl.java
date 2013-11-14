@@ -51,6 +51,7 @@ import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepository;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +103,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final String name = command.stringValueOfParameterNamed(GroupingTypesApiConstants.nameParamName);
             final String externalId = command.stringValueOfParameterNamed(GroupingTypesApiConstants.externalIdParamName);
 
+            final AppUser currentUser = this.context.authenticatedUser();
             Long officeId = null;
             Group parentGroup = null;
 
@@ -130,9 +132,16 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
             final Set<Group> groupMembers = assembleSetOfChildGroups(officeId, command);
 
+            LocalDate submittedOnDate = new LocalDate();
+
+            if(command.hasParameter(GroupingTypesApiConstants.submittedOnDateParamName)){
+
+                submittedOnDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.submittedOnDateParamName);
+            }
+
             final boolean active = command.booleanPrimitiveValueOfParameterNamed(GroupingTypesApiConstants.activeParamName);
             final Group newGroup = Group.newGroup(groupOffice, staff, parentGroup, groupLevel, name, externalId, active, activationDate,
-                    clientMembers, groupMembers);
+                    clientMembers, groupMembers,submittedOnDate,currentUser);
 
             // pre-save to generate id for use in group hierarchy
             this.groupRepository.save(newGroup);
@@ -184,6 +193,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         try {
             this.fromApiJsonDeserializer.validateForActivation(command, GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
 
+            AppUser currentUser = this.context.authenticatedUser();
+
             final Group group = this.groupRepository.findOneWithNotFoundDetection(groupId);
 
             final Locale locale = command.extractLocale();
@@ -191,7 +202,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final LocalDate activationDate = command.localDateValueOfParameterNamed("activationDate");
 
             validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(group.getOffice(), group.getGroupLevel(), activationDate);
-            group.activate(fmt, activationDate);
+            group.activate(currentUser,fmt, activationDate);
 
             this.groupRepository.saveAndFlush(group);
 
@@ -416,6 +427,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         final LocalDate closureDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.closureDateParamName);
         final Long closureReasonId = command.longValueOfParameterNamed(GroupingTypesApiConstants.closureReasonIdParamName);
 
+        final AppUser currentUser = this.context.authenticatedUser();
+
         final CodeValue closureReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
                 GroupingTypesApiConstants.GROUP_CLOSURE_REASON, closureReasonId);
 
@@ -428,7 +441,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         validateLoansAndSavingsForGroupOrCenterClose(group, closureDate);
 
-        group.close(closureReason, closureDate);
+        group.close(currentUser,closureReason, closureDate);
 
         this.groupRepository.saveAndFlush(group);
 
@@ -489,6 +502,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         final CodeValue closureReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
                 GroupingTypesApiConstants.GROUP_CLOSURE_REASON, closureReasonId);
 
+        final AppUser  currentUser = this.context.authenticatedUser();
+
         if (center.hasActiveGroups()) {
             final String errorMessage = center.getGroupLevel().getLevelName()
                     + " cannot be closed because of active groups associated with it.";
@@ -498,7 +513,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         validateLoansAndSavingsForGroupOrCenterClose(center, closureDate);
 
-        center.close(closureReason, closureDate);
+        center.close(currentUser,closureReason, closureDate);
 
         this.groupRepository.saveAndFlush(center);
 
