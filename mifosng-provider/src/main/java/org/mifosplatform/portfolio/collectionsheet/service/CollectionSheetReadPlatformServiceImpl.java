@@ -317,7 +317,10 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper();
 
         final StringBuilder sql = new StringBuilder(mapper.collectionSheetSchema());
-        sql.append(" WHERE gp.id = :groupId GROUP BY gp.id ,cl.id , ln.id ORDER BY gp.id , cl.id , ln.id ");
+        sql.append(" WHERE gp.id = :groupId ")
+        .append(" and (gp.status_enum = 300 or (gp.status_enum = 600 and gp.closedon_date >= :dueDate)) ")
+        .append(" and (cl.status_enum = 300 or (cl.status_enum = 600 and cl.closedon_date >= :dueDate)) ")
+        .append(" GROUP BY gp.id ,cl.id , ln.id ORDER BY gp.id , cl.id , ln.id ");
 
         // entityType should be center if it's within a center
         final CalendarEntityType entityType = (group.isChildGroup()) ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
@@ -349,14 +352,17 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper();
 
-        String sql = mapper.collectionSheetSchema();
-        sql += "WHERE gp.parent_id = :centerId GROUP BY gp.id ,cl.id , ln.id ORDER BY gp.id , cl.id , ln.id";
+        StringBuilder sql = new StringBuilder(mapper.collectionSheetSchema());
+        sql.append(" WHERE gp.parent_id = :centerId ")
+        .append(" and (gp.status_enum = 300 or (gp.status_enum = 600 and gp.closedon_date >= :dueDate)) ")
+        .append(" and (cl.status_enum = 300 or (cl.status_enum = 600 and cl.closedon_date >= :dueDate)) ")
+        .append(" GROUP BY gp.id ,cl.id , ln.id ORDER BY gp.id , cl.id , ln.id");
 
         final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("dueDate", dueDateStr)
                 .addValue("centerId", center.getId()).addValue("officeHierarchy", officeHierarchy)
                 .addValue("entityTypeId", CalendarEntityType.CENTERS.getValue());
 
-        final Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.namedParameterjdbcTemplate.query(sql, namedParameters,
+        final Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.namedParameterjdbcTemplate.query(sql.toString(), namedParameters,
                 mapper);
 
         return buildJLGCollectionSheet(transactionDate, collectionSheetFlatDatas);
