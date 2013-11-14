@@ -2053,7 +2053,8 @@ Content-Type: application/json Request Body:
 	"dateFormat": "dd MMMM yyyy", 
 	"locale": "en", 
 	"active": true,
-	"activationDate": "04 March 2009"
+	"activationDate": "04 March 2009",
+    "submittedOnDate":"04 March 2009"
 } 
 					</code>
 					<code class="method-response">
@@ -2378,6 +2379,16 @@ GET https://DomainName/api/v1/clients/{clientId}
   "displayName": "Client of group",
   "officeId": 1,
   "officeName": "Head Office",
+  "timeline": {
+    "activatedOnDate": [
+        2009,
+        3,
+        4
+    ],
+    "activatedByUsername": "mifos",
+    "activatedByFirstname": "App",
+    "activatedByLastname": "Administrator"
+  },
   "groups": [
     {
       "id": 1,
@@ -3908,7 +3919,8 @@ Content-Type: application/json Request Body:
 	"dateFormat": "dd MMMM yyyy", 
 	"locale": "en", 
 	"active": true, 
-	"activationDate": "04 March 2009"
+	"activationDate": "04 March 2009",
+      "submittedOnDate":"04 March 2009"
 }
 					</code>
 					<code class="method-response">
@@ -4127,7 +4139,17 @@ GET https://DomainName/mifosng-provider/api/v1/groups/1
   "externalId": "000-1A",
   "officeId": 1,
   "officeName": "Head Office",
-  "hierarchy": ".1."
+  "hierarchy": ".1.",
+  "timeline": {
+    "activatedOnDate": [
+    2013,
+    11,
+    14
+    ],
+    "activatedByUsername": "mifos",
+    "activatedByFirstname": "App",
+    "activatedByLastname": "Administrator"
+    }
 }
 					</code>
 				</div>
@@ -4144,6 +4166,16 @@ GET https://DomainName/mifosng-provider/api/v1/groups/1?associations=clientMembe
   "officeId": 1,
   "officeName": "Head Office",
   "hierarchy": ".1.",
+  "timeline": {
+    "activatedOnDate": [
+    2013,
+    11,
+    14
+    ],
+    "activatedByUsername": "mifos",
+    "activatedByFirstname": "App",
+    "activatedByLastname": "Administrator"
+   },
   "clientMembers": [
     {
       "id": 1,

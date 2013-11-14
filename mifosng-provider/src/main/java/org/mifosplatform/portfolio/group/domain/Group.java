@@ -188,6 +188,18 @@ public final class Group extends AbstractPersistable<Long> {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
+        if(activationDate != null && submittedOnDate.isAfter(activationDate))  {
+
+            final String defaultUserMessage = "submitted date cannot be after the activation date";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.group.submittedOnDate.after.activation.date",
+                    defaultUserMessage, GroupingTypesApiConstants.submittedOnDateParamName, submittedOnDate);
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
         this.submittedOnDate = submittedOnDate.toDate();
         this.submittedBy = currentUser;
     }

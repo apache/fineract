@@ -214,6 +214,18 @@ public final class Client extends AbstractPersistable<Long> {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
+        if(activationDate !=null && submittedOnDate.isAfter(activationDate))  {
+
+            final String defaultUserMessage = "submitted date cannot be after the activation date";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.submittedOnDate.after.activation.date",
+                    defaultUserMessage, ClientApiConstants.submittedOnDateParamName, submittedOnDate);
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
         this.submittedOnDate = submittedOnDate.toDate();
         this.submittedBy = currentUser;
 
@@ -324,6 +336,7 @@ public final class Client extends AbstractPersistable<Long> {
 
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
+
 
         this.activationDate = activationLocalDate.toDate();
         this.activatedBy = currentUser;
