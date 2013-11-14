@@ -26,6 +26,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -94,7 +95,12 @@ public class CalendarsApiResource {
         CalendarData calendarData = this.readPlatformService.retrieveCalendar(calendarId, entityId, entityTypeId);
 
         // Include recurring date details
-        calendarData = this.readPlatformService.generateRecurringDate(calendarData);
+        final boolean withHistory = true;
+        final LocalDate tillDate = null;
+        final Collection<LocalDate> recurringDates = this.readPlatformService.generateRecurringDates(calendarData, withHistory, tillDate);
+        final Collection<LocalDate> nextTenRecurringDates = this.readPlatformService.generateNextTenRecurringDates(calendarData);
+        final LocalDate recentEligibleMeetingDate = null;
+        calendarData = CalendarData.withRecurringDates(calendarData, recurringDates, nextTenRecurringDates, recentEligibleMeetingDate);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
@@ -135,7 +141,7 @@ public class CalendarsApiResource {
                 CalendarEntityType.valueOf(entityType.toUpperCase()).getValue(), calendarTypeOptions));
 
         // Add recurring dates
-        calendarsData = this.readPlatformService.generateRecurringDates(calendarsData);
+        calendarsData = this.readPlatformService.updateWithRecurringDates(calendarsData);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, calendarsData, this.RESPONSE_DATA_PARAMETERS);

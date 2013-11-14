@@ -30,7 +30,6 @@ import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarRepositoryWrapper;
 import org.mifosplatform.portfolio.calendar.exception.NotValidRecurringDateException;
-import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.portfolio.collectionsheet.data.JLGClientData;
 import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetData;
 import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetFlatData;
@@ -304,9 +303,11 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         final String transactionDateStr = df.format(transactionDate.toDate());
 
         final Calendar calendar = this.calendarRepositoryWrapper.findOneWithNotFoundDetection(calendarId);
-        if (!CalendarUtils.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), transactionDate)) { throw new NotValidRecurringDateException(
-                "collectionsheet", "The date '" + transactionDate + "' is not a valid meeting date.", transactionDate); }
+        // check if transaction against calendar effective from date
 
+        if (!calendar.isValidRecurringDate(transactionDate)) { throw new NotValidRecurringDateException("collectionsheet", "The date '"
+                + transactionDate + "' is not a valid meeting date.", transactionDate); }        
+        
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String officeHierarchy = hierarchy + "%";
@@ -360,5 +361,4 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         return buildJLGCollectionSheet(transactionDate, collectionSheetFlatDatas);
     }
-
 }

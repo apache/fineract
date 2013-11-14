@@ -24,6 +24,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -107,7 +108,11 @@ public class MeetingsApiResource {
 
         if (calendarId != null) {
             calendarData = this.calendarReadPlatformService.retrieveCalendar(calendarId, entityId, entityTypeId);
-            calendarData = this.calendarReadPlatformService.generateRecurringDate(calendarData, DateUtils.getLocalDateOfTenant());
+            final boolean withHistory = true;
+            final Collection<LocalDate> recurringDates = this.calendarReadPlatformService.generateRecurringDates(calendarData, withHistory, DateUtils.getLocalDateOfTenant());
+            final Collection<LocalDate> nextTenRecurringDates = this.calendarReadPlatformService.generateNextTenRecurringDates(calendarData);
+            final LocalDate recentEligibleMeetingDate = null;
+            calendarData = CalendarData.withRecurringDates(calendarData, recurringDates, nextTenRecurringDates, recentEligibleMeetingDate);
         }
 
         final MeetingData meetingData = MeetingData.template(clients, calendarData,

@@ -36,7 +36,8 @@ public class MeetingReadPlatformServiceImpl implements MeetingReadPlatformServic
 
         public String schema() {
 
-            return " select m.id as id, m.meeting_date as meetingDate from m_meeting m inner join m_calendar_instance ci on m.calendar_instance_id = ci.id ";
+            return " select m.id as id, m.meeting_date as meetingDate from m_meeting m " +
+            		"inner join m_calendar_instance ci on m.calendar_instance_id = ci.id ";
         }
 
         @Override
@@ -84,6 +85,19 @@ public class MeetingReadPlatformServiceImpl implements MeetingReadPlatformServic
                 + sqlCalendarTypeOptions + ") order by c.start_date ";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
+    }
+
+    @Override
+    public MeetingData retrieveLastMeeting(Long calendarInstanceId) {
+        try {
+            final MeetingDataMapper rm = new MeetingDataMapper();
+
+            final String sql = rm.schema() + " where ci.id = ? order by m.meeting_date desc, m.id desc limit 1";
+
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { calendarInstanceId });
+        } catch (final EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
 }

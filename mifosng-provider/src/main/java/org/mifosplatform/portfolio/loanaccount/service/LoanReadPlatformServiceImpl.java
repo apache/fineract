@@ -1080,7 +1080,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 CalendarEntityType.GROUPS.getValue(), null));
         calendarsData
                 .addAll(this.calendarReadPlatformService.retrieveCalendarsByEntity(groupId, CalendarEntityType.GROUPS.getValue(), null));
-        calendarsData = this.calendarReadPlatformService.generateRecurringDates(calendarsData);
+        calendarsData = this.calendarReadPlatformService.updateWithRecurringDates(calendarsData);
         return calendarsData;
     }
 

@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
+import org.mifosplatform.portfolio.meeting.data.MeetingData;
 
 public interface CalendarReadPlatformService {
 
@@ -24,14 +25,16 @@ public interface CalendarReadPlatformService {
 
     CalendarData retrieveNewCalendarDetails();
 
-    CalendarData generateRecurringDate(final CalendarData calendarData);
+    Collection<LocalDate> generateRecurringDates(final CalendarData calendarData, final boolean withHistory, final LocalDate tillDate);
 
-    CalendarData generateRecurringDate(final CalendarData calendarData, final LocalDate tillDate);
+    Collection<LocalDate> generateNextTenRecurringDates(final CalendarData calendarData);
 
-    Collection<CalendarData> generateRecurringDates(final Collection<CalendarData> calendarsData);
+    Collection<CalendarData> updateWithRecurringDates(final Collection<CalendarData> calendarsData);
 
     CalendarData retrieveLoanCalendar(final Long loanId);
 
     CalendarData retrieveCollctionCalendarByEntity(final Long entityId, final Integer entityTypeId);
+    
+    LocalDate generateNextEligibleMeetingDateForCollection(CalendarData calendarData, MeetingData lastMeetingData);
 
 }
