@@ -81,10 +81,6 @@ public final class Group extends AbstractPersistable<Long> {
     @JoinColumn(name = "parent_id")
     private Group parent;
 
-    /*
-     * TODO - kw - it might be possible to just move this to be a java enum type
-     * rather than 'levels' table.
-     */
     @ManyToOne
     @JoinColumn(name = "level_id", nullable = false)
     private GroupLevel groupLevel;
@@ -131,7 +127,7 @@ public final class Group extends AbstractPersistable<Long> {
 
     public static Group newGroup(final Office office, final Staff staff, final Group parent, final GroupLevel groupLevel,
             final String name, final String externalId, final boolean active, final LocalDate activationDate,
-            final Set<Client> clientMembers, final Set<Group> groupMembers,final LocalDate submittedOnDate,final AppUser currentUser) {
+            final Set<Client> clientMembers, final Set<Group> groupMembers, final LocalDate submittedOnDate, final AppUser currentUser) {
 
         GroupingTypeStatus status = GroupingTypeStatus.PENDING;
         LocalDate groupActivationDate = null;
@@ -141,14 +137,13 @@ public final class Group extends AbstractPersistable<Long> {
                                                  // group is made active
         }
 
-
-
-        return new Group(office, staff, parent, groupLevel, name, externalId, status, groupActivationDate, clientMembers, groupMembers,submittedOnDate,currentUser);
+        return new Group(office, staff, parent, groupLevel, name, externalId, status, groupActivationDate, clientMembers, groupMembers,
+                submittedOnDate, currentUser);
     }
 
     public Group(final Office office, final Staff staff, final Group parent, final GroupLevel groupLevel, final String name,
             final String externalId, final GroupingTypeStatus status, final LocalDate activationDate, final Set<Client> clientMembers,
-            final Set<Group> groupMembers,final LocalDate submittedOnDate,final AppUser currentUser) {
+            final Set<Group> groupMembers, final LocalDate submittedOnDate, final AppUser currentUser) {
         this.office = office;
         this.staff = staff;
         this.groupLevel = groupLevel;
@@ -161,6 +156,7 @@ public final class Group extends AbstractPersistable<Long> {
         this.status = status.getValue();
         if (activationDate != null) {
             this.activationDate = activationDate.toDate();
+            this.activatedBy = currentUser;
         }
 
         if (StringUtils.isNotBlank(name)) {
@@ -180,13 +176,11 @@ public final class Group extends AbstractPersistable<Long> {
             this.groupMembers.addAll(groupMembers);
         }
 
-        this.submittedBy =  currentUser;
-
         if (isDateInTheFuture(submittedOnDate)) {
 
             final String defaultUserMessage = "submitted date cannot be in the future.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.group.submittedOnDate.in.the.future",
-                    defaultUserMessage,"SubmittedOnDate");
+                    defaultUserMessage, "SubmittedOnDate");
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
             dataValidationErrors.add(error);
@@ -195,9 +189,10 @@ public final class Group extends AbstractPersistable<Long> {
         }
 
         this.submittedOnDate = submittedOnDate.toDate();
+        this.submittedBy = currentUser;
     }
 
-    public void activate(final AppUser currentUser,final DateTimeFormatter formatter, final LocalDate activationLocalDate) {
+    public void activate(final AppUser currentUser, final DateTimeFormatter formatter, final LocalDate activationLocalDate) {
         if (isActive()) {
             final String defaultUserMessage = "Cannot activate group. Group is already active.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.group.already.active", defaultUserMessage,
@@ -401,7 +396,6 @@ public final class Group extends AbstractPersistable<Long> {
         return clientIds;
     }
 
-    // TODO - kw - look into removing usage of these getters/setters
     public GroupLevel getGroupLevel() {
         return this.groupLevel;
     }
@@ -452,7 +446,7 @@ public final class Group extends AbstractPersistable<Long> {
     }
 
     public boolean isChildGroup() {
-        return (this.parent == null) ? false : true;
+        return this.parent == null ? false : true;
 
     }
 
@@ -460,7 +454,7 @@ public final class Group extends AbstractPersistable<Long> {
         return GroupingTypeStatus.fromInt(this.status).isClosed();
     }
 
-    public void close(final AppUser currentUser,final CodeValue closureReason, final LocalDate closureDate) {
+    public void close(final AppUser currentUser, final CodeValue closureReason, final LocalDate closureDate) {
 
         if (isClosed()) {
             final String errorMessage = "Group with identifier " + getId() + " is alread closed.";

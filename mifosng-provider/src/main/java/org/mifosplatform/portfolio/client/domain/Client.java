@@ -139,11 +139,8 @@ public final class Client extends AbstractPersistable<Long> {
     @JoinColumn(name = "activatedon_userid", nullable = true)
     private AppUser activatedBy;
 
-
-
-
-
-    public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff, final JsonCommand command) {
+    public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
+            final JsonCommand command) {
 
         final String accountNo = command.stringValueOfParameterNamed(ClientApiConstants.accountNoParamName);
         final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
@@ -154,13 +151,9 @@ public final class Client extends AbstractPersistable<Long> {
         final String lastname = command.stringValueOfParameterNamed(ClientApiConstants.lastnameParamName);
         final String fullname = command.stringValueOfParameterNamed(ClientApiConstants.fullnameParamName);
 
-
         LocalDate submittedOnDate = new LocalDate();
-
         if (command.hasParameter(ClientApiConstants.submittedOnDateParamName)) {
-
             submittedOnDate = command.localDateValueOfParameterNamed(ClientApiConstants.submittedOnDateParamName);
-
         }
 
         ClientStatus status = ClientStatus.PENDING;
@@ -168,8 +161,6 @@ public final class Client extends AbstractPersistable<Long> {
         if (command.hasParameter("active")) {
             active = command.booleanPrimitiveValueOfParameterNamed(ClientApiConstants.activeParamName);
         }
-
-
 
         LocalDate activationDate = null;
         LocalDate officeJoiningDate = null;
@@ -179,20 +170,18 @@ public final class Client extends AbstractPersistable<Long> {
             officeJoiningDate = activationDate;
         }
 
-
-        return new Client(currentUser,status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname, activationDate,
-                officeJoiningDate, externalId, mobileNo, staff,submittedOnDate);
-
-
+        return new Client(currentUser, status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname,
+                activationDate, officeJoiningDate, externalId, mobileNo, staff, submittedOnDate);
     }
 
     protected Client() {
         //
     }
 
-    private Client(final AppUser currentUser,final ClientStatus status, final Office office, final Group clientParentGroup, final String accountNo,
-            final String firstname, final String middlename, final String lastname, final String fullname, final LocalDate activationDate,
-            final LocalDate officeJoiningDate, final String externalId, final String mobileNo, final Staff staff,final LocalDate submittedOnDate) {
+    private Client(final AppUser currentUser, final ClientStatus status, final Office office, final Group clientParentGroup,
+            final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
+            final LocalDate activationDate, final LocalDate officeJoiningDate, final String externalId, final String mobileNo,
+            final Staff staff, final LocalDate submittedOnDate) {
 
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
@@ -201,13 +190,11 @@ public final class Client extends AbstractPersistable<Long> {
             this.accountNumber = accountNo;
         }
 
-        this.submittedBy =  currentUser;
-
         if (isDateInTheFuture(submittedOnDate)) {
 
             final String defaultUserMessage = "submitted date cannot be in the future.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.submittedOnDate.in.the.future",
-                    defaultUserMessage, ClientApiConstants.submittedOnDateParamName,submittedOnDate);
+                    defaultUserMessage, ClientApiConstants.submittedOnDateParamName, submittedOnDate);
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
             dataValidationErrors.add(error);
@@ -216,10 +203,7 @@ public final class Client extends AbstractPersistable<Long> {
         }
 
         this.submittedOnDate = submittedOnDate.toDate();
-
-
-
-
+        this.submittedBy = currentUser;
 
         this.status = status.getValue();
         this.office = office;
@@ -237,6 +221,7 @@ public final class Client extends AbstractPersistable<Long> {
 
         if (activationDate != null) {
             this.activationDate = activationDate.toDateTimeAtStartOfDay().toDate();
+            this.activatedBy = currentUser;
         }
         if (officeJoiningDate != null) {
             this.officeJoiningDate = officeJoiningDate.toDateTimeAtStartOfDay().toDate();
@@ -304,7 +289,7 @@ public final class Client extends AbstractPersistable<Long> {
         this.accountNumberRequiresAutoGeneration = false;
     }
 
-    public void activate(final AppUser currentUser,final DateTimeFormatter formatter, final LocalDate activationLocalDate) {
+    public void activate(final AppUser currentUser, final DateTimeFormatter formatter, final LocalDate activationLocalDate) {
         if (isActive()) {
             final String defaultUserMessage = "Cannot activate client. Client is already active.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.already.active", defaultUserMessage,
