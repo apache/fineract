@@ -74,13 +74,14 @@ public class GroupHelper {
         map.put("officeId", "1");
         map.put("name", randomNameGenerator("Group_Name_", 5));
         map.put("externalId", randomIDGenerator("ID_", 7));
-        if (active == true) {
+        if (active) {
             map.put("active", "true");
             map.put("dateFormat", "dd MMMM yyyy");
             map.put("locale", "en");
             map.put("activationDate", activationDate);
         } else {
             map.put("active", "false");
+            map.put("submittedOnDate", "04 March 2011");
         }
 
         System.out.println("map : " + map);
