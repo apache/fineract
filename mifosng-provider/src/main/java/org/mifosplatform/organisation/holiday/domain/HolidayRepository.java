@@ -15,9 +15,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface HolidayRepository extends JpaRepository<Holiday, Long>, JpaSpecificationExecutor<Holiday> {
 
-    @Query("select holiday from Holiday holiday, IN(holiday.offices) office where (holiday.fromDate >= :date OR :date <= holiday.toDate) and office.id = :officeId")
-    List<Holiday> findByOfficeIdAndGreaterThanDate(@Param("officeId") Long officeId, @Param("date") Date date);
+    @Query("select holiday from Holiday holiday, IN(holiday.offices) office where (holiday.fromDate >= :date OR :date <= holiday.toDate) and holiday.status = :status and office.id = :officeId")
+    List<Holiday> findByOfficeIdAndGreaterThanDate(@Param("officeId") Long officeId, @Param("date") Date date, @Param("status") Integer status);
 
-    @Query("from Holiday holiday where holiday.processed = false")
-    List<Holiday> findUnprocessed();
+    @Query("from Holiday holiday where holiday.processed = false and holiday.status = :status")
+    List<Holiday> findUnprocessed(@Param("status") Integer status);
 }

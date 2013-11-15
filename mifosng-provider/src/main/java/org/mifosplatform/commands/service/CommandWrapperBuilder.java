@@ -1311,6 +1311,30 @@ public class CommandWrapperBuilder {
         this.href = "/holidays/template";
         return this;
     }
+    
+    public CommandWrapperBuilder activateHoliday(final Long holidayId) {
+        this.actionName = "ACTIVATE";
+        this.entityName = "HOLIDAY";
+        this.entityId = holidayId;
+        this.href = "/holidays/" + holidayId + "command=activate";
+        return this;
+    }
+    
+    public CommandWrapperBuilder updateHoliday(final Long holidayId) {
+        this.actionName = "UPDATE";
+        this.entityName = "HOLIDAY";
+        this.entityId = holidayId;
+        this.href = "/holidays/" + holidayId ;
+        return this;
+    }
+    
+    public CommandWrapperBuilder deleteHoliday(final Long holidayId) {
+        this.actionName = "DELETE";
+        this.entityName = "HOLIDAY";
+        this.entityId = holidayId;
+        this.href = "/holidays/" + holidayId + "command=delete";
+        return this;
+    }
 
     public CommandWrapperBuilder assignRole(final Long groupId) {
         this.actionName = "ASSIGNROLE";

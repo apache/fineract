@@ -13,7 +13,9 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.holiday.data.HolidayData;
+import org.mifosplatform.organisation.holiday.exception.HolidayNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -38,7 +40,7 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
             final StringBuilder sqlBuilder = new StringBuilder(200);
             sqlBuilder.append("h.id as id, h.name as name, h.from_date as fromDate, h.to_date as toDate, ");
             sqlBuilder.append("h.repayments_rescheduled_to as repaymentsScheduleTO ");
-            sqlBuilder.append("from m_holiday h join m_holiday_office hf on h.id = hf.holiday_id and ");
+            sqlBuilder.append("from m_holiday h ");
             this.schema = sqlBuilder.toString();
         }
 
@@ -69,7 +71,7 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
         int arrayPos = 0;
 
         final HolidayMapper rm = new HolidayMapper();
-        String sql = "select " + rm.schema() + " hf.office_id = ? ";
+        String sql = "select " + rm.schema() + " join m_holiday_office hf on h.id = hf.holiday_id and hf.office_id = ? ";
 
         objectArray[arrayPos] = officeId;
         arrayPos = arrayPos + 1;
@@ -97,4 +99,17 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
         return this.jdbcTemplate.query(sql, rm, finalObjectArray);
     }
 
+    @Override
+    public HolidayData retrieveHoliday(Long holidayId) {
+        try {
+            final HolidayMapper rm = new HolidayMapper();
+
+            final String sql = rm.schema() + " where h.id = ?";
+
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { holidayId });
+        } catch (final EmptyResultDataAccessException e) {
+            throw new HolidayNotFoundException(holidayId);
+        }
+    }
+    
 }
