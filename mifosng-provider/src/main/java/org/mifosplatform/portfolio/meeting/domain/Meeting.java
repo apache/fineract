@@ -37,7 +37,6 @@ import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.calendar.exception.NotValidRecurringDateException;
-import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.portfolio.meeting.attendance.domain.ClientAttendance;
 import org.mifosplatform.portfolio.meeting.exception.MeetingDateException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -163,7 +162,7 @@ public class Meeting extends AbstractPersistable<Long> {
     }
 
     public boolean isMeetingDateBefore(final LocalDate newStartDate) {
-        return (this.meetingDate != null && newStartDate != null && getMeetingDateLocalDate().isBefore(newStartDate)) ? true : false;
+        return this.meetingDate != null && newStartDate != null && getMeetingDateLocalDate().isBefore(newStartDate) ? true : false;
     }
 
     private static boolean isValidMeetingDate(final CalendarInstance calendarInstance, final Date meetingDate) {
@@ -173,8 +172,7 @@ public class Meeting extends AbstractPersistable<Long> {
             meetingDateLocalDate = LocalDate.fromDateFields(meetingDate);
         }
 
-        if (meetingDateLocalDate == null
-                || !calendar.isValidRecurringDate(meetingDateLocalDate)) { return false; }
+        if (meetingDateLocalDate == null || !calendar.isValidRecurringDate(meetingDateLocalDate)) { return false; }
         return true;
     }
 

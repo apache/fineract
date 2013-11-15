@@ -38,7 +38,7 @@ import org.springframework.stereotype.Service;
  * Service class to create and load batch jobs to Scheduler using
  * {@link SchedulerFactoryBean} ,{@link MethodInvokingJobDetailFactoryBean} and
  * {@link CronTriggerFactoryBean}
- * 
+ *
  */
 @Service
 public class JobRegisterServiceImpl implements JobRegisterService {
@@ -351,10 +351,6 @@ public class JobRegisterServiceImpl implements JobRegisterService {
         return cronTriggerFactoryBean.getObject();
     }
 
-    /**
-     * @param throwable
-     * @return
-     */
     private String getStackTraceAsString(final Throwable throwable) {
         final StackTraceElement[] stackTraceElements = throwable.getStackTrace();
         final StringBuffer sb = new StringBuffer(throwable.toString());

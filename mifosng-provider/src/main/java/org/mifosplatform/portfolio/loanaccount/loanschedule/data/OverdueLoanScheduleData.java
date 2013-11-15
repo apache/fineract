@@ -2,14 +2,8 @@ package org.mifosplatform.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
 
-/**
- * Created with IntelliJ IDEA.
- * User: andrew
- * Date: 13-11-13
- * Time: 11:53
- * To change this template use File | Settings | File Templates.
- */
 public class OverdueLoanScheduleData {
+
     private final Long loanId;
     private final Long chargeId;
     private final String locale;
@@ -17,9 +11,8 @@ public class OverdueLoanScheduleData {
     private final String dateFormat;
     private final String dueDate;
 
-
-
-    public OverdueLoanScheduleData(Long loanId, Long chargeId, String dueDate, BigDecimal amount, String dateFormat, String locale) {
+    public OverdueLoanScheduleData(final Long loanId, final Long chargeId, final String dueDate, final BigDecimal amount,
+            final String dateFormat, final String locale) {
         this.loanId = loanId;
         this.chargeId = chargeId;
         this.dueDate = dueDate;
@@ -54,12 +47,7 @@ public class OverdueLoanScheduleData {
 
     @Override
     public String toString() {
-        return "{" +
-                "chargeId:" + chargeId +
-                ", locale:'" + locale + '\'' +
-                ", amount:" + amount +
-                ", dateFormat:'" + dateFormat + '\'' +
-                ", dueDate:'" + dueDate + '\'' +
-                '}';
+        return "{" + "chargeId:" + this.chargeId + ", locale:'" + this.locale + '\'' + ", amount:" + this.amount + ", dateFormat:'"
+                + this.dateFormat + '\'' + ", dueDate:'" + this.dueDate + '\'' + '}';
     }
 }
