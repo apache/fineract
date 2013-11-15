@@ -132,14 +132,15 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
             final Set<Group> groupMembers = assembleSetOfChildGroups(officeId, command);
 
+            final boolean active = command.booleanPrimitiveValueOfParameterNamed(GroupingTypesApiConstants.activeParamName);
             LocalDate submittedOnDate = new LocalDate();
-
+            if (active && submittedOnDate.isAfter(activationDate)) {
+                submittedOnDate = activationDate;
+            }
             if(command.hasParameter(GroupingTypesApiConstants.submittedOnDateParamName)){
-
                 submittedOnDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.submittedOnDateParamName);
             }
 
-            final boolean active = command.booleanPrimitiveValueOfParameterNamed(GroupingTypesApiConstants.activeParamName);
             final Group newGroup = Group.newGroup(groupOffice, staff, parentGroup, groupLevel, name, externalId, active, activationDate,
                     clientMembers, groupMembers,submittedOnDate,currentUser);
 
@@ -193,7 +194,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         try {
             this.fromApiJsonDeserializer.validateForActivation(command, GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
 
-            AppUser currentUser = this.context.authenticatedUser();
+            final AppUser currentUser = this.context.authenticatedUser();
 
             final Group group = this.groupRepository.findOneWithNotFoundDetection(groupId);
 

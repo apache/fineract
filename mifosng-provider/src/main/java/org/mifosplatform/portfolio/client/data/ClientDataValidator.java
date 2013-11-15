@@ -132,6 +132,12 @@ public final class ClientDataValidator {
             baseDataValidator.reset().parameter(ClientApiConstants.activeParamName).value(active).trueOrFalseRequired(false);
         }
 
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.submittedOnDateParamName, element))
+        {
+            final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.submittedOnDateParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.submittedOnDateParamName).value(submittedOnDate).notNull();
+        }
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 

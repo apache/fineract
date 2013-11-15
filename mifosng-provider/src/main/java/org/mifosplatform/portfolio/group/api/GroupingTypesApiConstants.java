@@ -65,7 +65,7 @@ public class GroupingTypesApiConstants {
 
     public static final Set<String> CENTER_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, idParamName, nameParamName, externalIdParamName, officeIdParamName, staffIdParamName, activeParamName,
-            activationDateParamName, groupMembersParamName));
+            activationDateParamName, groupMembersParamName,submittedOnDateParamName));
 
     public static final Set<String> GROUP_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName, dateFormatParamName,
             idParamName, nameParamName, externalIdParamName, centerIdParamName, officeIdParamName, staffIdParamName, activeParamName,

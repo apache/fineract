@@ -151,11 +151,6 @@ public final class Client extends AbstractPersistable<Long> {
         final String lastname = command.stringValueOfParameterNamed(ClientApiConstants.lastnameParamName);
         final String fullname = command.stringValueOfParameterNamed(ClientApiConstants.fullnameParamName);
 
-        LocalDate submittedOnDate = new LocalDate();
-        if (command.hasParameter(ClientApiConstants.submittedOnDateParamName)) {
-            submittedOnDate = command.localDateValueOfParameterNamed(ClientApiConstants.submittedOnDateParamName);
-        }
-
         ClientStatus status = ClientStatus.PENDING;
         boolean active = false;
         if (command.hasParameter("active")) {
@@ -168,18 +163,14 @@ public final class Client extends AbstractPersistable<Long> {
             status = ClientStatus.ACTIVE;
             activationDate = command.localDateValueOfParameterNamed(ClientApiConstants.activationDateParamName);
             officeJoiningDate = activationDate;
-            if (activationDate.isAfter(DateUtils.getLocalDateOfTenant())) {
+        }
 
-                final String defaultUserMessage = "Activation date cannot be in the future.";
-                final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.activationDate.in.the.future",
-                        defaultUserMessage, ClientApiConstants.activationDateParamName, activationDate);
-
-                final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-                dataValidationErrors.add(error);
-
-                throw new PlatformApiDataValidationException(dataValidationErrors);
-            }
-
+        LocalDate submittedOnDate = new LocalDate();
+        if (active && submittedOnDate.isAfter(activationDate)) {
+            submittedOnDate = activationDate;
+        }
+        if (command.hasParameter(ClientApiConstants.submittedOnDateParamName)) {
+            submittedOnDate = command.localDateValueOfParameterNamed(ClientApiConstants.submittedOnDateParamName);
         }
 
         return new Client(currentUser, status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname,
@@ -200,18 +191,6 @@ public final class Client extends AbstractPersistable<Long> {
             this.accountNumberRequiresAutoGeneration = true;
         } else {
             this.accountNumber = accountNo;
-        }
-
-        if (isDateInTheFuture(submittedOnDate)) {
-
-            final String defaultUserMessage = "submitted date cannot be in the future.";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.submittedOnDate.in.the.future",
-                    defaultUserMessage, ClientApiConstants.submittedOnDateParamName, submittedOnDate);
-
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-            dataValidationErrors.add(error);
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
         this.submittedOnDate = submittedOnDate.toDate();
@@ -302,6 +281,7 @@ public final class Client extends AbstractPersistable<Long> {
     }
 
     public void activate(final AppUser currentUser, final DateTimeFormatter formatter, final LocalDate activationLocalDate) {
+
         if (isActive()) {
             final String defaultUserMessage = "Cannot activate client. Client is already active.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.already.active", defaultUserMessage,
@@ -461,6 +441,24 @@ public final class Client extends AbstractPersistable<Long> {
 
     private void validateActivationDate(final List<ApiParameterError> dataValidationErrors) {
 
+        if (getSubmittedOnDate() != null && isDateInTheFuture(getSubmittedOnDate())) {
+
+            final String defaultUserMessage = "submitted date cannot be in the future.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.submittedOnDate.in.the.future",
+                    defaultUserMessage, ClientApiConstants.submittedOnDateParamName, this.submittedOnDate);
+
+            dataValidationErrors.add(error);
+        }
+
+        if (getActivationLocalDate() != null && getSubmittedOnDate() != null && getSubmittedOnDate().isAfter(getActivationLocalDate())) {
+
+            final String defaultUserMessage = "submitted date cannot be after the activation date";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.submittedOnDate.after.activation.date",
+                    defaultUserMessage, ClientApiConstants.submittedOnDateParamName, this.submittedOnDate);
+
+            dataValidationErrors.add(error);
+        }
+
         if (getActivationLocalDate() != null && isDateInTheFuture(getActivationLocalDate())) {
 
             final String defaultUserMessage = "Activation date cannot be in the future.";
@@ -470,7 +468,7 @@ public final class Client extends AbstractPersistable<Long> {
             dataValidationErrors.add(error);
         }
 
-        if (this.activationDate != null) {
+        if (getActivationLocalDate() != null) {
             if (this.office.isOpeningDateAfter(getActivationLocalDate())) {
                 final String defaultUserMessage = "Client activation date cannot be a date before the office opening date.";
                 final ApiParameterError error = ApiParameterError.parameterError(
