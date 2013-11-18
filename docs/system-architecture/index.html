@@ -1,0 +1,587 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Mifos Platform Docs: System Architecture</title>
+        <meta name="description" content="mifos platform documentation">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link rel="stylesheet" href="css/bootstrap-3.0.0/bootstrap.min.css">
+        <link href="css/bootstrap-3.0.0/bootstrap-theme.min.css" rel="stylesheet">
+<style>
+#wrapper {
+    margin: 0 20px 0 220px;
+}
+a {
+    color: #336699;
+}
+body {
+    font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    margin: 0;
+    padding: 0;
+}
+h1, h2, h3, #toc a {
+    font-family: 'Voces',sans-serif;
+}
+p, ul {
+    margin-bottom: 24px;
+    margin-top: 0;
+}
+small {
+    font-size: 10px;
+}
+code {
+    word-wrap: break-word;
+}
+.repo-stats iframe {
+    float: right;
+    margin-left: 5px;
+}
+#toc {
+    background: none repeat scroll 0 0 #333333;
+    box-shadow: -5px 0 5px 0 #000000 inset;
+    color: #FFFFFF;
+    height: 100%;
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 215px;
+}
+#toc ul {
+    list-style: none outside none;
+    margin: 0;
+    padding: 0;
+}
+#toc li {
+    padding: 5px 10px;
+}
+#toc a {
+    color: #FFFFFF;
+    display: block;
+    text-decoration: none;
+}
+#toc .toc-h2 {
+    padding-left: 10px;
+}
+#toc .toc-h3 {
+    padding-left: 20px;
+}
+#toc .toc-active {
+    background: none repeat scroll 0 0 #336699;
+    box-shadow: -5px 0 10px -5px #000000 inset;
+}
+pre {
+    background: none repeat scroll 0 0 #333333;
+    color: #F8F8F8;
+    display: block;
+    padding: 0.5em;
+}
+pre .shebang, pre .comment, pre .template_comment, pre .javadoc {
+    color: #7C7C7C;
+}
+pre .keyword, pre .tag, pre .ruby .function .keyword, pre .tex .command {
+    color: #96CBFE;
+}
+pre .function .keyword, pre .sub .keyword, pre .method, pre .list .title {
+    color: #FFFFB6;
+}
+pre .string, pre .tag .value, pre .cdata, pre .filter .argument, pre .attr_selector, pre .apache .cbracket, pre .date {
+    color: #A8FF60;
+}
+pre .subst {
+    color: #DAEFA3;
+}
+pre .regexp {
+    color: #E9C062;
+}
+pre .function .title, pre .sub .identifier, pre .pi, pre .decorator, pre .ini .title, pre .tex .special {
+    color: #FFFFB6;
+}
+pre .class .title, pre .haskell .label, pre .constant, pre .smalltalk .class, pre .javadoctag, pre .yardoctag, pre .phpdoc, pre .nginx .built_in {
+    color: #FFFFB6;
+}
+pre .symbol, pre .ruby .symbol .string, pre .ruby .symbol .keyword, pre .ruby .symbol .keymethods, pre .number, pre .variable, pre .vbscript, pre .literal {
+    color: #C6C5FE;
+}
+pre .css .tag {
+    color: #96CBFE;
+}
+pre .css .rules .property, pre .css .id {
+    color: #FFFFB6;
+}
+pre .css .class {
+    color: #FFFFFF;
+}
+pre .hexcolor {
+    color: #C6C5FE;
+}
+pre .number {
+    color: #FF73FD;
+}
+pre .tex .formula {
+    opacity: 0.7;
+}
+.github-repo {
+    background: url("images/Octocat.png") no-repeat scroll right bottom rgba(0, 0, 0, 0);
+    border: 1px solid #CCCCCC;
+    border-radius: 5px;
+    box-shadow: 0 0 3px #333333;
+    font-family: Helvetica,Arial,sans-serif;
+    font-size: 14px;
+    letter-spacing: 1px;
+    position: relative;
+}
+.github-repo a {
+    text-decoration: none;
+}
+.github-repo a:hover {
+    text-decoration: underline;
+}
+.github-repo .repo-header {
+    background: none repeat scroll 0 0 rgba(240, 240, 240, 0.7);
+}
+.github-repo .repo-header .repo-stats {
+    float: right;
+    font-size: 12px;
+    line-height: 20px;
+    margin: 5px 10px 0 0;
+}
+.github-repo .repo-header .repo-stats span, .github-repo .repo-header .repo-stats a {
+    color: #000000;
+    padding: 0 5px 0 25px;
+}
+.github-repo .repo-header .repo-stats .repo-watchers {
+    background: url("images/repostat.png") no-repeat scroll 5px -5px rgba(0, 0, 0, 0);
+}
+.github-repo .repo-header .repo-stats .repo-forks {
+    background: url("images/repostat.png") no-repeat scroll 5px -55px rgba(0, 0, 0, 0);
+}
+.github-repo .repo-header .repo-stats .repo-twitter {
+    float: right;
+    margin-left: 5px;
+}
+.github-repo .repo-header .repo-name {
+    display: block;
+    font-size: 18px;
+    letter-spacing: 2px;
+    padding: 5px 10px;
+}
+.github-repo .repo-commit {
+    padding: 10px;
+}
+.github-repo .repo-commit .repo-commit-message {
+    color: #000000;
+}
+.github-repo .repo-commit .repo-commit-date {
+    color: #333333;
+    display: block;
+    font-size: 12px;
+    font-style: italic;
+    letter-spacing: 0;
+    margin-top: 10px;
+}
+</style>
+
+        <script src="js/vendor/modernizr-2.6.2.min.js"></script>
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+        <script src="js/vendor/bootstrap-3.0.0/assets/html5shiv.js"></script>
+        <script src="js/vendor/bootstrap-3.0.0/assets/respond.min.js"></script>
+        <![endif]-->
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+        <![endif]-->
+<div id="toc">
+</div>
+<div id="wrapper">
+<aside>
+    <h1>Mifos Platform Software Architecture Document</h1>
+    <section>
+        <h2>Summary</h2>
+        <p>
+            This document captures the major architectural decisions in platform. The purpose of the document is to provide a guide to the overall structure of the platform; where it fits in the overall context of an MIS solution and its internals so that contributors can more effectively understand how changes that they are considering can be made, and the consequences of those changes.
+        </p>
+        <p>
+            The target audience for this report is both system integrators (who will use the document to gain an understanding of the structure of the platform and its design rationale) and platform contributors who will use the document to reason about future changes and who will update the document as the system evolves.
+        </p>
+    </section>
+
+  <section>
+    <h2>Introduction</h2>
+    <section>
+        <h4>The Idea</h4>
+        <p>Mifos was an idea born out of a wish to create and deploy technology that allows the microfinance industry to scale. The goal is to:
+            <ul>
+                <li>Produce a gold standard management information system suitable for microfinance operations</li>
+                <li>Acts as the basis of a <strong>platform for microfinance</strong></li>
+                <li>Open source, owned and driven by member organisations in the community</li>
+                <li>Enabling potential for eco-system of providers located near to MFIs</li>
+            </ul>
+        </p>
+
+        <h4>History</h4>
+        <p>
+            <ul>
+                <li>2006: Project intiated by <a href="http://www.grameenfoundation.org/" target="_blank">Grameen Foundation</a></li>
+                <li>Late 2011: Grameen Foundation handed over full responsibility to open source community.</li>
+                <li>2012: Mifos X platform started. Previous members of project come together under the name of Community for Open Source Microfinance (COSM / <a href="http://www.openmf.org" target="_blank">OpenMF</a>)</li>
+                <li>2013: COSM / OpenMF officially rebranded to <strong>Mifos Initiative</strong> and receive US 501c3 status.</li>
+            </ul>
+        </p>
+
+        <h4>Project Related</h4>
+        <p>
+            <ul>
+                <li>Project url is <a href="https://github.com/openMF/mifosx" target="_blank">https://github.com/openMF/mifosx</a>
+                </li>
+                <li>Download from <a href="https://sourceforge.net/projects/mifos/" target="_blank">https://sourceforge.net/projects/mifos/</a>
+                </li>
+                <li><a href="https://sourceforge.net/projects/mifos/files/Mifos%20X/stats/timeline?dates=2012-04-25+to+2013-11-16" target="_blank">Download stats</a>
+                </li>
+            </ul>
+        </p>
+    </section>
+  </section>
+
+    <section>
+        <h2>System Overview</h2>
+        <img src="diagrams/platform-systemview.png" alt="System view diagram" />
+        <p>
+            Financial institutions deliver their services to customers through a variety of means today.
+            <ul>
+                <li>Customers can call direct into branches (teller model)</li>
+                <li>Customers can organise into groups (or centers) and agree to meetup at a location and time with FI staff (traditional microfinance).</li>
+                <li>An FI might have a public facing information portal that customers can use for variety of reasons including account management (online banking).</li>
+                <li>An FI might be integrated into a ATM/POS/Card services network that the customer can use.</li>
+                <li>An FI might be integrated with a mobile money operator and support mobile money services for customer (present/future microfinance).</li>
+                <li>An FI might use third party agents to sell on products/services from other banks/FIs.</li>
+            </ul>
+        </p>
+        <p>
+            As illustrated in the above diagram, the various stakeholders leverage <strong>business apps</strong> to perform specific customer or FI related actions. The functionality contained in these business apps can be bundled up and packaged in any way. In the diagram, several of the apps may be combined into one app or any one of the blocks representing an app could be further broken up as needed.
+        </p>
+        <p>
+            The platform is the <strong>core engine of the MIS</strong>. It hides alot of the complexity that exists in the business and technical domains needed for an MIS in FIs behind a relatively simple API. It is this API that <strong>frees up app developers to innovate and produce apps</strong> that can be as general or as bespoke as FIs need them to be.
+        </p>
+    </section>
+
+    <section>
+        <h2>Functional Overview</h2>
+        <p>As ALL capabilities of the platform are exposed through an API, The API docs are the best place to view a detailed breakdown of what the platform does. See <a href="https://demo.openmf.org/api-docs/apiLive.htm" target="_blank">online API Documentation</a>.
+        </p>
+        <img    src="diagrams/platform-categories.png" 
+                alt="platform functionality view" />
+        <p>At a higher level though we see the capabilities fall into the following categories:
+            <ul>
+                <li>
+                    Infrastructure
+                    <ul>
+                        <li>Codes</li>
+                        <li>Extensible Data Tables</li>
+                        <li>Reporting</li>
+                    </ul>
+                </li>
+                <li>
+                    User Administration
+                    <ul>
+                        <li>Users</li>
+                        <li>Roles</li>
+                        <li>Permissions</li>
+                    </ul>
+                </li>
+                <li>Organisation Modelling
+                    <ul>
+                        <li>Offices</li>
+                        <li>Staff</li>
+                        <li>Currency</li>
+                    </ul>
+                </li>
+                <li>Product Configuration
+                    <ul>
+                        <li>Charges</li>
+                        <li>Loan Products</li>
+                        <li>Deposit Products</li>
+                    </ul>
+                </li>
+                <li>
+                    Client Data
+                     <ul>
+                        <li>Know Your Client (KYC)</li>
+                    </ul>
+                </li>
+                <li>Portfolio Management
+                    <ul>
+                        <li>Loan Accounts</li>
+                        <li>Deposit Accounts</li>
+                        <li>Client/Groups</li>
+                    </ul>
+                </li>
+                <li>GL Account Management 
+                    <ul>
+                        <li>Chart of Accounts</li>
+                        <li>General Ledger</li>
+                    </ul>
+                </li>
+            </ul>
+        </p>
+    </section>
+
+    <section>
+        <h2>Technology</h2>
+        <p>
+            <ul>
+                <li>Java 7: <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html" target="_blank">http://www.oracle.com/technetwork/java/javase/downloads/index.html</a></li>
+
+                <li>JAX-RS 1.0: <a href="https://wikis.oracle.com/display/Jersey/Overview+of+JAX-RS+1.0+Features" target="_blank">using Jersey (1.17.x)</a></li>
+
+                <li><a href="http://www.json.org/" target="_blank">JSON</a> using <a href="http://code.google.com/p/google-gson/" target="_blank">Google GSON</a></li>
+
+                <li>
+                    Spring I/O Platform: <a href="http://spring.io/platform" target="_blank">http://spring.io/platform</a>
+                    <ul>
+                        <li><a  href="http://projects.spring.io/spring-framework"
+                                target="_blank">Spring Framework</a></li>
+                        <li><a  href="http://projects.spring.io/spring-security"
+                                target="_blank">Spring Security</a></li>
+                        <li><a  href="http://projects.spring.io/spring-data/"
+                                target="_blank">Spring Data (JPA) backed by Hibernate</a></li>
+                    </ul>
+                </li>
+                
+                <li>MySQL: <a href="http://www.oracle.com/us/products/mysql/overview/index.html" target="_blank">http://www.oracle.com/us/products/mysql/overview/index.html</a></li>
+            </ul>
+        </p>
+    </section>
+
+    <section>
+        <h2>Principals</h2>
+        <h3>RESTful API</h3>
+        <p>
+            The platform exposes all its functionality via a <strong>practically-RESTful API</strong>, that communicates using JSON.<p>
+        <p>
+            We use the term <strong>practically-RESTful</strong> in order to make it clear we are not trying to be <a href="http://en.wikipedia.org/wiki/Representational_state_transfer" target="_blank">fully REST compliant</a> but still maintain important RESTful attributes like:
+            <ul>
+                <li>
+                    Stateless: platform maintains no conversational or session-based state. The result of this is ability to scale horizontally with ease.
+                </li>
+                <li>
+                    Resource-oriented: API is focussed around set of resources using HTTP vocabulary and conventions e.g GET, PUT, POST, DELETE, HTTP status codes. This results in a simple and consistent API for clients.
+                </li>
+            </ul>
+
+            See <a href="https://demo.openmf.org/api-docs/apiLive.htm" target="_blank">online API Documentation</a> for more detail.
+        </p>
+        <h3>Multi-tenanted</h3>
+        <p>
+            The mifos platform has been developed with support for multi-tenancy at the core of its design. This means that it is just as easy to use the platform for Software-as-a-Service (SaaS) type offerings as it is for local installations.
+        </p>
+        <p>
+            The platform uses an approach that isolates an FIs data per database/schema (<a href="http://msdn.microsoft.com/en-us/library/aa479086.aspx#mlttntda_topic2" target="_blank">See Separate Databases and Shared Database, Separate Schemas</a>). 
+        </p>
+        <h3>Extensible</h3>
+        <p>
+            Whilst each tenant will have a set of core tables, the platform tables can be extended in different ways for each tenant through the use of <a href="#datatables">Data tables</a> functionality.
+        </p>
+
+        <h3>Command Query Seperation</h3>
+        <p>We seperate <strong>commands</strong> (that change data) from <strong>queries</strong> (that read data).</p>
+        <p>Why? There are numerous reasons for choosing this approach which at present is not an attempt at full blown CQRS. The main advantages at present are:
+            <ul>
+                <li>State changing commands are persisted providing an audit of all state changes.</li>
+                <li>Used to support a general approach to <strong>maker-checker</strong>.</li>
+                <li>State changing commands use the Object-Oriented paradign (and hence ORM) whilst querys can stay in the data paradigm.</li>
+            </ul>
+        </p>
+
+        <h3>Maker-Checker</h3>
+        <p>Also known as <strong>four-eyes principal</strong>. Enables apps to support a maker-checker style workflow process. Commands that pass validation will be persisted. Maker-checker can be enabled/disabled at fine-grained level for any state changing API.</p>
+
+        <h3>Fine grained access control</h3>
+        <p>A fine grained permission is associated with each API. Administrators have fine grained control over what roles or users have access to.</p>
+    </section>
+
+    <section>
+        <h2>Code Packaging</h2>
+        <p>
+            The intention is for platform code to be packaged in a vertical slice way (as opposed to layers).<br>
+            Source code starts from <a href="https://github.com/openMF/mifosx/tree/master/mifosng-provider/src/main/java/org/mifosplatform">mifosng-provider/src/main/java/org/mifosplatform</a><br>
+            
+            <ul><strong>org.mifosplatform.</strong>
+                <li>accounting</li>
+                <li>useradministration</li>
+                <li>infrastructure</li>
+                <li>portfolio
+                     <ul>
+                        <li>charge</li>
+                        <li>client</li>
+                        <li>fund</li>
+                        <li>loanaccount</li>
+                    </ul>
+                </li>
+                <li>accounting</li>
+            </ul>
+
+            Within each vertical slice is some common packaging structure:
+
+             <ul><strong>org.mifosplatform.useradministration.</strong>
+                <li>api - XXXApiResource.java - REST api implementation files</li>
+                <li>handler - XXXCommandHandler.java - specific handlers invoked</li>
+                <li>service - contains read + write services for functional area</li>
+                <li>domain - OO concepts for the functional area</li>
+                <li>data - Data concepts for the area</li>
+                <li>serialization - ability to convert from/to API JSON for functional area</li>
+            </ul>
+        </p>
+    </section>
+
+    <section>
+        <h2>Design Overview</h2>
+        <p><strong>Note</strong>: The implementation of the platform code to process commands through handlers whilst supporting maker-checker and authorisation checks is a little bit convoluted at present and is an area pin-pointed for clean up to make it easier to on board new platform developers. In the mean time below content is used to explain its workings at present.</p>
+        <img src="diagrams/command-query.png" alt="Command-Query Overview" />
+        <p>
+            Taking into account example shown above for the <strong>users</strong> resource.
+            <ol>
+                <li>Query: GET /users</li>
+                <li>HTTPS API: retrieveAll method on org.mifosplatform.useradministration.api.UsersApiResource invoked</li>
+                <li>UsersApiResource.retrieveAll: Check user has permission to access this resources data.</li>
+                <li>UsersApiResource.retrieveAll: Use 'read service' to fetch all users data ('read services' execute simple SQL queries against Database using JDBC)</li>
+                <li>UsersApiResource.retrieveAll: Data returned to coverted into JSON response</li>
+            </ol>
+
+            <ol>
+                <li>Command: POST /users (Note: data passed in request body)</li>
+                <li>HTTPS API: <strong>create</strong> method on <strong>org.mifosplatform.useradministration.api.UsersApiResource</strong> invoked</li>
+            </ol>
+
+<pre><code>@POST
+@Consumes({ MediaType.APPLICATION_JSON })
+@Produces({ MediaType.APPLICATION_JSON })
+public String create(final String apiRequestBodyAsJson) {
+
+    final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+            .createUser() //
+            .withJson(apiRequestBodyAsJson) //
+            .build();
+
+    final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+    return this.toApiJsonSerializer.serialize(result);
+}
+</code></pre>
+<p><em>Description:</em> Create a CommandWrapper object that represents this create user command and JSON request body. Pass off responsiblity for processing to <strong>PortfolioCommandSourceWritePlatformService.logCommandSource</strong>.</p>
+
+<pre><code>
+@Override
+public CommandProcessingResult logCommandSource(final CommandWrapper wrapper) {
+
+    boolean isApprovedByChecker = false;
+    // check if is update of own account details
+    if (wrapper.isUpdateOfOwnUserDetails(this.context.authenticatedUser().getId())) {
+        // then allow this operation to proceed.
+        // maker checker doesnt mean anything here.
+        isApprovedByChecker = true; // set to true in case permissions have
+                                    // been maker-checker enabled by
+                                    // accident.
+    } else {
+        // if not user changing their own details - check user has
+        // permission to perform specific task.
+        this.context.authenticatedUser().validateHasPermissionTo(wrapper.getTaskPermissionName());
+    }
+    validateIsUpdateAllowed();
+
+    final String json = wrapper.getJson();
+    CommandProcessingResult result = null;
+    try {
+        final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
+        final JsonCommand command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(),
+                wrapper.getEntityId(), wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(),
+                wrapper.getSavingsId(), wrapper.getCodeId(), wrapper.getSupportedEntityType(), wrapper.getSupportedEntityId(),
+                wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId());
+
+        result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
+    } catch (final RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
+
+        result = this.processAndLogCommandService.logCommand(e.getCommandSourceResult());
+    }
+
+    return result;
+}
+</code></pre>
+<p><em>Description:</em> check user has permission for this action. if ok, a) parse the json request body, b) create a JsonCommand object to wrap the command details, c) use <strong>CommandProcessingService</strong> to handle command.</p>
+<p><strong>Note</strong>: if a RollbackTransactionAsCommandIsNotApprovedByCheckerException occurs at this point. The original transaction will of been aborted and we only log an entry for the command in the audit table setting its status as 'Pending'.</p>
+
+<pre><code>@Transactional
+@Override
+public CommandProcessingResult processAndLogCommand(final CommandWrapper wrapper, final JsonCommand command, final boolean isApprovedByChecker) {
+
+    final boolean rollbackTransaction = this.configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName())
+            && !isApprovedByChecker;
+
+    final NewCommandSourceHandler handler = findCommandHandler(wrapper);
+    final CommandProcessingResult result = handler.processCommand(command);
+
+    final AppUser maker = this.context.authenticatedUser();
+
+    CommandSource commandSourceResult = null;
+    if (command.commandId() != null) {
+        commandSourceResult = this.commandSourceRepository.findOne(command.commandId());
+        commandSourceResult.markAsChecked(maker, DateTime.now());
+    } else {
+        commandSourceResult = CommandSource.fullEntryFrom(wrapper, command, maker);
+    }
+    commandSourceResult.updateResourceId(result.resourceId());
+    commandSourceResult.updateForAudit(result.getOfficeId(), result.getGroupId(), result.getClientId(), result.getLoanId(),
+            result.getSavingsId(), result.getProductId());
+
+    String changesOnlyJson = null;
+    if (result.hasChanges()) {
+        changesOnlyJson = this.toApiJsonSerializer.serializeResult(result.getChanges());
+        commandSourceResult.updateJsonTo(changesOnlyJson);
+    }
+
+    if (!result.hasChanges() && wrapper.isUpdateOperation() && !wrapper.isUpdateDatatable()) {
+        commandSourceResult.updateJsonTo(null);
+    }
+
+    if (commandSourceResult.hasJson()) {
+        this.commandSourceRepository.save(commandSourceResult);
+    }
+
+    if (rollbackTransaction) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(commandSourceResult); }
+
+    return result;
+}
+</code></pre>
+        <ol>
+            <li>Check that if maker-checker configuration enabled for this action. If yes and this is not a 'checker' approving the command - rollback at the end. We rollback at the end in order to test if the command will pass 'domain validation' which requires commit to database for full check.</li>
+            <li>findCommandHandler - Find the correct <strong>Hanlder</strong> to process this command.</li>
+            <li>Process command using handler (In transactional scope).</li>
+            <li>CommandSource object created/updated with all details for logging to 'm_portfolio_command_source' table.</li>
+            <li>In update scenario, we check to see if there where really any changes/updates. If so only JSON for changes is stored in audit log.</li>
+        </ol>
+        </p>
+    </section>
+
+</aside>
+<!-- end of wrapper -->
+</div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
+    <script src="js/plugins.js"></script>
+    <script src="js/vendor/bootstrap-3.0.0/bootstrap.min.js"></script>
+    <script src="js/vendor/toc-0.1.2/jquery.toc.min.js"></script>
+    <script>
+        $('#toc').toc();
+    </script>
+    </body>
+</html>
