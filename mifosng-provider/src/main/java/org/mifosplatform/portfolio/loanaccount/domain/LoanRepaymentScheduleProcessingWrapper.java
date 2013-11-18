@@ -22,18 +22,22 @@ public class LoanRepaymentScheduleProcessingWrapper {
     public void reprocess(final MonetaryCurrency currency, final LocalDate disbursementDate,
             final List<LoanRepaymentScheduleInstallment> repaymentPeriods, final Set<LoanCharge> loanCharges) {
 
+        Money totalInterest = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentPeriods) {
+            totalInterest = totalInterest.plus(installment.getInterestCharged(currency));
+        }
         LocalDate startDate = disbursementDate;
         for (final LoanRepaymentScheduleInstallment period : repaymentPeriods) {
 
             final Money feeChargesDueForRepaymentPeriod = cumulativeFeeChargesDueWithin(startDate, period.getDueDate(), loanCharges,
-                    currency,period,repaymentPeriods.size());
+                    currency,period,repaymentPeriods.size(), totalInterest);
             final Money feeChargesWaivedForRepaymentPeriod = cumulativeFeeChargesWaivedWithin(startDate, period.getDueDate(), loanCharges,
                     currency);
             final Money feeChargesWrittenOffForRepaymentPeriod = cumulativeFeeChargesWrittenOffWithin(startDate, period.getDueDate(),
                     loanCharges, currency);
 
             final Money penaltyChargesDueForRepaymentPeriod = cumulativePenaltyChargesDueWithin(startDate, period.getDueDate(),
-                    loanCharges, currency,period,repaymentPeriods.size());
+                    loanCharges, currency,period,repaymentPeriods.size(), totalInterest);
             final Money penaltyChargesWaivedForRepaymentPeriod = cumulativePenaltyChargesWaivedWithin(startDate, period.getDueDate(),
                     loanCharges, currency);
             final Money penaltyChargesWrittenOffForRepaymentPeriod = cumulativePenaltyChargesWrittenOffWithin(startDate,
@@ -48,7 +52,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
     }
 
     private Money cumulativeFeeChargesDueWithin(final LocalDate periodStart, final LocalDate periodEnd, final Set<LoanCharge> loanCharges,
-            final MonetaryCurrency monetaryCurrency,LoanRepaymentScheduleInstallment period,int numberOfRepayments) {
+            final MonetaryCurrency monetaryCurrency,LoanRepaymentScheduleInstallment period,int numberOfRepayments,final Money totalInterest) {
 
         Money cumulative = Money.zero(monetaryCurrency);
 
@@ -74,11 +78,11 @@ public class LoanRepaymentScheduleProcessingWrapper {
                         loanCharge.getChargeCalculation().isPercentageBased()) {
                     BigDecimal amount = BigDecimal.ZERO;
                     if (loanCharge.getChargeCalculation().isPercentageOfAmountAndInterest()) {
-                        amount = amount.add(period.getLoan().getSummary().getTotalPrincipalDisbursed()).add(period.getLoan().getSummary().getTotalInterestCharged());
+                        amount = amount.add(period.getLoan().getPrincpal().getAmount()).add(totalInterest.getAmount());
                     } else if (loanCharge.getChargeCalculation().isPercentageOfInterest()) {
-                        amount = amount.add(period.getLoan().getSummary().getTotalInterestCharged());
+                        amount = amount.add(totalInterest.getAmount());
                     } else {
-                        amount = amount.add(period.getLoan().getSummary().getTotalPrincipalDisbursed());
+                        amount = amount.add(period.getLoan().getPrincpal().getAmount());
                     }
                     BigDecimal loanChargeAmt = amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100));
                     cumulative = cumulative.plus(loanChargeAmt);
@@ -130,7 +134,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
     }
 
     private Money cumulativePenaltyChargesDueWithin(final LocalDate periodStart, final LocalDate periodEnd,
-            final Set<LoanCharge> loanCharges, final MonetaryCurrency currency,LoanRepaymentScheduleInstallment period,int numberOfRepayments) {
+            final Set<LoanCharge> loanCharges, final MonetaryCurrency currency,LoanRepaymentScheduleInstallment period,int numberOfRepayments, Money totalInterest) {
 
         Money cumulative = Money.zero(currency);
 
@@ -156,11 +160,11 @@ public class LoanRepaymentScheduleProcessingWrapper {
                         loanCharge.getChargeCalculation().isPercentageBased()) {
                     BigDecimal amount = BigDecimal.ZERO;
                     if (loanCharge.getChargeCalculation().isPercentageOfAmountAndInterest()) {
-                        amount = amount.add(period.getLoan().getSummary().getTotalPrincipalDisbursed()).add(period.getLoan().getSummary().getTotalInterestCharged());
+                        amount = amount.add(period.getLoan().getPrincpal().getAmount()).add(totalInterest.getAmount());
                     } else if (loanCharge.getChargeCalculation().isPercentageOfInterest()) {
-                        amount = amount.add(period.getLoan().getSummary().getTotalInterestCharged());
+                        amount = amount.add(totalInterest.getAmount());
                     } else {
-                        amount = amount.add(period.getLoan().getSummary().getTotalPrincipalDisbursed());
+                        amount = amount.add(period.getLoan().getPrincpal().getAmount());
                     }
                     BigDecimal loanChargeAmt = amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100));
                     cumulative = cumulative.plus(loanChargeAmt);

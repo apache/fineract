@@ -72,6 +72,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
     @Column(name = "calculation_on_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountPercentageAppliedTo;
 
+    @SuppressWarnings("unused")
     @Column(name = "charge_amount_or_percentage", scale = 6, precision = 19, nullable = false)
     private BigDecimal amountOrPercentage;
 
@@ -123,10 +124,10 @@ public class LoanCharge extends AbstractPersistable<Long> {
                 amountPercentageAppliedTo = loan.getPrincpal().getAmount();
                 break;
             case PERCENT_OF_AMOUNT_AND_INTEREST:
-                amountPercentageAppliedTo = loan.getPrincpal().getAmount().add(loan.getSummary().getTotalInterestCharged());
+                amountPercentageAppliedTo = loan.getPrincpal().getAmount().add(loan.getTotalInterest());
                 break;
             case PERCENT_OF_INTEREST:
-                amountPercentageAppliedTo = loan.getSummary().getTotalInterestCharged();
+                amountPercentageAppliedTo = loan.getTotalInterest();
             break;
             default:
                break;
@@ -366,6 +367,26 @@ public class LoanCharge extends AbstractPersistable<Long> {
                 }
             }
         }
+    }
+    
+    public void update(final BigDecimal amount, final LocalDate dueDate, Integer numberOfRepayments){
+        BigDecimal amountPercentageAppliedTo = BigDecimal.ZERO;
+        if(this.loan!=null){
+            switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
+                case PERCENT_OF_AMOUNT:
+                    amountPercentageAppliedTo = loan.getPrincpal().getAmount();
+                    break;
+                case PERCENT_OF_AMOUNT_AND_INTEREST:
+                    amountPercentageAppliedTo = loan.getPrincpal().getAmount().add(loan.getTotalInterest());
+                    break;
+                case PERCENT_OF_INTEREST:
+                    amountPercentageAppliedTo = loan.getTotalInterest();
+                break;
+                default:
+                   break;
+            }
+        }
+        update(amount, dueDate, amountPercentageAppliedTo, numberOfRepayments, BigDecimal.ZERO);
     }
 
     public Map<String, Object> update(final JsonCommand command, final BigDecimal amount) {

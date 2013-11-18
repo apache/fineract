@@ -67,6 +67,9 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter("chargeAppliesTo").value(chargeAppliesTo).isOneOfTheseValues(ChargeAppliesTo.validValues());
         }
 
+        final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeCalculationType", element);
+        baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).notNull();
+
         final ChargeAppliesTo appliesTo = ChargeAppliesTo.fromInt(chargeAppliesTo);
         if (appliesTo.isLoanCharge()) {
             // loan applicable validation
@@ -80,6 +83,10 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter("chargePaymentMode").value(chargePaymentMode).notNull().isOneOfTheseValues(ChargePaymentMode.validValues());
             if (chargePaymentMode != null) {
                 baseDataValidator.reset().parameter("chargePaymentMode").value(chargePaymentMode).isOneOfTheseValues(ChargePaymentMode.validValues());
+            }
+            
+            if (chargeCalculationType != null) {
+                baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).isOneOfTheseValues(ChargeCalculationType.validValuesForLoan());
             }
 
         } else if (appliesTo.isSavingsCharge()) {
@@ -103,6 +110,10 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                 final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed("feeOnMonthDay", element);
                 baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay).notNull();
             }
+            
+            if (chargeCalculationType != null) {
+                baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).isOneOfTheseValues(ChargeCalculationType.validValuesForSavings());
+            }
         }
 
         final String name = this.fromApiJsonHelper.extractStringNamed("name", element);
@@ -122,12 +133,6 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         if (this.fromApiJsonHelper.parameterExists("active", element)) {
             final Boolean active = this.fromApiJsonHelper.extractBooleanNamed("active", element);
             baseDataValidator.reset().parameter("active").value(active).notNull();
-        }
-
-        final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeCalculationType", element);
-        baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).notNull();
-        if (chargeCalculationType != null) {
-            baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).isOneOfTheseValues(ChargeCalculationType.validValues());
         }
 
         if (this.fromApiJsonHelper.parameterExists("minCap", element)) {

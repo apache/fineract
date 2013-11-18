@@ -91,7 +91,7 @@ public class LoanChargeAssembler {
                         final LoanCharge loanCharge = this.loanChargeRepository.findOne(loanChargeId);
                         if (loanCharge == null) { throw new LoanChargeNotFoundException(loanChargeId); }
 
-                        loanCharge.update(amount, dueDate, principal, numberOfRepayments, BigDecimal.ZERO);
+                        loanCharge.update(amount, dueDate, numberOfRepayments);
 
                         loanCharges.add(loanCharge);
                     }
