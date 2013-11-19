@@ -29,7 +29,12 @@ public enum ChargeCalculationType {
         return this.code;
     }
 
-    public static Object[] validValues() {
+    public static Object[] validValuesForLoan() {
+        return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue(),
+                ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue(),ChargeCalculationType.PERCENT_OF_INTEREST.getValue() };
+    }
+    
+    public static Object[] validValuesForSavings() {
         return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue() };
     }
 

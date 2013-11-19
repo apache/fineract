@@ -691,17 +691,24 @@ public class Loan extends AbstractPersistable<Long> {
                 amount = getPrincpal().getAmount();
             break;
             case PERCENT_OF_AMOUNT_AND_INTEREST:
-                final BigDecimal totalInterestCharged = this.loanSummaryWrapper.calculateTotalInterestCharged(
-                        this.repaymentScheduleInstallments, getCurrency()).getAmount();
+                final BigDecimal totalInterestCharged = getTotalInterest();
                 amount = getPrincpal().getAmount().add(totalInterestCharged);
             break;
             case PERCENT_OF_INTEREST:
-                amount = getSummary().getTotalInterestCharged();
+                amount = getTotalInterest();
             break;
             default:
             break;
         }
         return amount;
+    }
+
+    /**
+     * @return
+     */
+    public BigDecimal getTotalInterest() {
+        return this.loanSummaryWrapper.calculateTotalInterestCharged(
+                this.repaymentScheduleInstallments, getCurrency()).getAmount();
     }
 
     private BigDecimal calculatePerInstallmentChargeAmount(final LoanCharge loanCharge) {
