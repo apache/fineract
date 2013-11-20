@@ -5,12 +5,6 @@
  */
 package org.mifosplatform.useradministration.service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Set;
-
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -27,6 +21,10 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 @Service
 public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformService {
@@ -81,6 +79,22 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         final Collection<RoleData> availableRoles = this.roleReadPlatformService.retrieveAll();
 
         return AppUserData.template(offices, availableRoles);
+    }
+
+    @Override
+    public Collection<AppUserData> retrieveAllUsersWithRoles() {
+        this.context.authenticatedUser();
+        final Collection<AppUser>  users = this.appUserRepository.findAll();
+        Collection<AppUserData> appUserData = new HashSet<AppUserData>();
+        for(final AppUser user : users){
+            final Set<RoleData>  selectedUserRoles = new HashSet<RoleData>();
+            for(final Role role : user.getRoles()){
+                  selectedUserRoles.add(role.toData()) ;
+            }
+            appUserData.add(AppUserData.instance(user.getId(), user.getUsername(), user.getEmail(), user.getOffice().getId(),
+                    user.getOffice().getName(), user.getFirstname(), user.getLastname(),null,selectedUserRoles)) ;
+        }
+        return appUserData;
     }
 
     @Override
