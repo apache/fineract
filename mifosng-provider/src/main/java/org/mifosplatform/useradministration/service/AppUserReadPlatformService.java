@@ -5,9 +5,9 @@
  */
 package org.mifosplatform.useradministration.service;
 
-import org.mifosplatform.useradministration.data.AppUserData;
-
 import java.util.Collection;
+
+import org.mifosplatform.useradministration.data.AppUserData;
 
 public interface AppUserReadPlatformService {
 
