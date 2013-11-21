@@ -9,6 +9,7 @@ import java.util.Collection;
 
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanInstallmentChargeData;
 
 public interface LoanChargeReadPlatformService {
 
@@ -19,4 +20,6 @@ public interface LoanChargeReadPlatformService {
     LoanChargeData retrieveLoanChargeDetails(Long loanChargeId, Long loanId);
 
     Collection<LoanChargeData> retrieveLoanChargesForFeePayment(Integer paymentMode, Integer loanStatus);
+    
+    Collection<LoanInstallmentChargeData> retrieveInstallmentLoanCharges(Long loanChargeId,boolean onlyPaymentPendingCharges);
 }

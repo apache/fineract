@@ -64,6 +64,7 @@ import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanDropdownReadPlatformService;
@@ -672,7 +673,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 final EnumOptionData groupStatus = ClientEnumerations.status(groupStatusEnum);
                 final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
                 groupData = GroupGeneralData.instance(groupId, groupName, groupExternalId, groupStatus, activationDate, groupOfficeId,
-                        null, groupParentId, null, groupStaffId, null, groupHierarchy);
+                        null, groupParentId, null, groupStaffId, null, groupHierarchy, null);
             }
 
             final Integer loanCounter = JdbcSupport.getInteger(rs, "loanCounter");
@@ -686,6 +687,39 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     interestType, interestCalculationPeriodType, expectedFirstRepaymentOnDate, graceOnPrincipalPayment,
                     graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, timeline, loanSummary,
                     feeChargesDueAtDisbursementCharged, syncDisbursementWithMeeting, loanCounter, loanProductCounter);
+        }
+    }
+
+    private static final class MusoniOverdueLoanScheduleMapper implements RowMapper<OverdueLoanScheduleData> {
+
+        public String schema() {
+            return " ls.loan_id as loanId, ls.installment as period, ls.fromdate as fromDate, ls.duedate as dueDate, ls.obligations_met_on_date as obligationsMetOnDate, ls.completed_derived as complete,"
+                    + " ls.principal_amount as principalDue, ls.principal_completed_derived as principalPaid, ls.principal_writtenoff_derived as principalWrittenOff, "
+                    + " ls.interest_amount as interestDue, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived, ls.interest_writtenoff_derived as interestWrittenOff, "
+                    + " ls.fee_charges_amount as feeChargesDue, ls.fee_charges_completed_derived as feeChargesPaid, ls.fee_charges_waived_derived as feeChargesWaived, ls.fee_charges_writtenoff_derived as feeChargesWrittenOff, "
+                    + " ls.penalty_charges_amount as penaltyChargesDue, ls.penalty_charges_completed_derived as penaltyChargesPaid, ls.penalty_charges_waived_derived as penaltyChargesWaived, ls.penalty_charges_writtenoff_derived as penaltyChargesWrittenOff, "
+                    + " ls.total_paid_in_advance_derived as totalPaidInAdvanceForPeriod, ls.total_paid_late_derived as totalPaidLateForPeriod, "
+                    + " mc.amount,mc.id as chargeId "
+                    + " from m_loan_repayment_schedule ls "
+                    + " inner join m_loan ml on ml.id = ls.loan_id "
+                    + " join m_product_loan_charge plc on plc.product_loan_id = ml.product_id "
+                    + " join m_charge mc on mc.id = plc.charge_id ";
+
+        }
+
+        @Override
+        public OverdueLoanScheduleData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+            final Long chargeId = rs.getLong("chargeId");
+            final Long loanId = rs.getLong("loanId");
+            final BigDecimal amount = rs.getBigDecimal("amount");
+            final String dateFormat = "yyyy-MM-dd";
+            final String dueDate = rs.getString("dueDate");
+            final String locale = "en_GB";
+
+            final OverdueLoanScheduleData overdueLoanScheduleData = new OverdueLoanScheduleData(loanId, chargeId, dueDate, amount,
+                    dateFormat, locale);
+
+            return overdueLoanScheduleData;
         }
     }
 
@@ -1080,7 +1114,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 CalendarEntityType.GROUPS.getValue(), null));
         calendarsData
                 .addAll(this.calendarReadPlatformService.retrieveCalendarsByEntity(groupId, CalendarEntityType.GROUPS.getValue(), null));
-        calendarsData = this.calendarReadPlatformService.generateRecurringDates(calendarsData);
+        calendarsData = this.calendarReadPlatformService.updateWithRecurringDates(calendarsData);
         return calendarsData;
     }
 
@@ -1105,4 +1139,15 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         return allowedLoanOfficers;
     }
 
+    @Override
+    public Collection<OverdueLoanScheduleData> retrieveAllLoansWithOverdueInstallmentsNotAlreadyPenalized() {
+        final MusoniOverdueLoanScheduleMapper rm = new MusoniOverdueLoanScheduleMapper();
+        final String sql = "select "
+                + rm.schema()
+                + " where CURDATE() > ls.duedate "
+                + " and ls.completed_derived <> 1 and mc.charge_applies_to_enum =1 "
+                + " and mc.charge_time_enum = 9 and ml.loan_status_id = 300 "
+                + " and plc.charge_id not in (SELECT charge_id from m_loan_charge as mlc where mlc.loan_id = ml.id and mlc.charge_id = plc.charge_id and mlc.due_for_collection_as_of_date > fromdate AND mlc.due_for_collection_as_of_date <= duedate) ";
+        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+    }
 }

@@ -274,4 +274,9 @@ public final class LoanSummary {
                 .plus(this.totalFeeChargesOutstanding).plus(this.totalPenaltyChargesOutstanding);
         this.totalOutstanding = totalOutstanding.getAmount();
     }
+
+    
+    public BigDecimal getTotalPrincipalDisbursed() {
+        return this.totalPrincipalDisbursed;
+    }
 }

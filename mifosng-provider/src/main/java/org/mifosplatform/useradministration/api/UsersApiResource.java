@@ -39,6 +39,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Path("/users")
+@Consumes({ MediaType.APPLICATION_JSON })
+@Produces({ MediaType.APPLICATION_JSON })
 @Component
 @Scope("singleton")
 public class UsersApiResource {
@@ -73,13 +75,11 @@ public class UsersApiResource {
     }
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final Collection<AppUserData> users = this.readPlatformService.retrieveAllUsers();
+        final Collection<AppUserData> users = this.readPlatformService.retrieveAllUsers(); // this.readPlatformService.retrieveAllUsersWithRoles();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, users, this.RESPONSE_DATA_PARAMETERS);
@@ -87,8 +87,6 @@ public class UsersApiResource {
 
     @GET
     @Path("{userId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveOne(@PathParam("userId") final Long userId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions, userId);
@@ -106,8 +104,6 @@ public class UsersApiResource {
 
     @GET
     @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
     public String template(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
@@ -119,8 +115,6 @@ public class UsersApiResource {
     }
 
     @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
     public String create(final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
@@ -135,8 +129,6 @@ public class UsersApiResource {
 
     @PUT
     @Path("{userId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
     public String update(@PathParam("userId") final Long userId, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
@@ -151,8 +143,6 @@ public class UsersApiResource {
 
     @DELETE
     @Path("{userId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
     public String delete(@PathParam("userId") final Long userId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //

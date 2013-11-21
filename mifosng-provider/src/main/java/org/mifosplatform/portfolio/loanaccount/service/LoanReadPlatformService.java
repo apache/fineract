@@ -15,6 +15,7 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 
 public interface LoanReadPlatformService {
 
@@ -53,4 +54,11 @@ public interface LoanReadPlatformService {
     Page<LoanAccountData> retrieveAll(SearchParameters searchParameters);
 
     Collection<StaffData> retrieveAllowedLoanOfficers(Long selectedOfficeId, boolean staffInSelectedOfficeOnly);
+
+    /*
+     * musoni-specific at present - will find overdue scheduled installments that have a special 'overdue charge' associated with the loan product.
+     *
+     * The 'overdue-charge' is only ever applied once to an installment and as a result overdue installments with this charge already applied are not returned.
+     */
+    Collection<OverdueLoanScheduleData> retrieveAllLoansWithOverdueInstallmentsNotAlreadyPenalized();
 }

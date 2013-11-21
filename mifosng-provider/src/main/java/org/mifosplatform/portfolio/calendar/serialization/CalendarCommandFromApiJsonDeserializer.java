@@ -22,7 +22,9 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.calendar.CalendarConstants.CALENDAR_SUPPORTED_PARAMETERS;
 import org.mifosplatform.portfolio.calendar.command.CalendarCommand;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
+import org.mifosplatform.portfolio.calendar.domain.CalendarFrequencyType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarRemindBy;
+import org.mifosplatform.portfolio.calendar.domain.CalendarWeekDaysType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -141,22 +143,22 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
             baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATING.getValue()).value(repeating).notNull();
 
             if (repeating) {
-                final String repeats = this.fromApiJsonHelper.extractStringNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS.getValue(), element);
-                baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATS.getValue()).value(repeats).notBlank()
-                        .notExceedingLengthOf(20);
+                final Integer frequency = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+                        CALENDAR_SUPPORTED_PARAMETERS.FREQUENCY.getValue(), element);
+                baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.FREQUENCY.getValue()).value(frequency).notBlank()
+                        .inMinMaxRange(CalendarFrequencyType.getMinValue(), CalendarFrequencyType.getMaxValue());
 
-                if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_EVERY.getValue(), element)) {
-                    final Integer repeatsEvery = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                            CALENDAR_SUPPORTED_PARAMETERS.REPEATS_EVERY.getValue(), element);
-                    baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_EVERY.getValue()).value(repeatsEvery)
+                if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue(), element)) {
+                    final Integer interval = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+                            CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue(), element);
+                    baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue()).value(interval)
                             .notNull().integerGreaterThanZero();
                 }
-
-                if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue(), element)) {
-                    final String repeatsOnDay = this.fromApiJsonHelper.extractStringNamed(
+                if (CalendarFrequencyType.fromInt(frequency).isWeekly()) {
+                    final Integer repeatsOnDay = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
                             CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue(), element);
                     baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue()).value(repeatsOnDay)
-                            .notBlank().notNull();
+                            .notBlank().inMinMaxRange(CalendarWeekDaysType.getMinValue(), CalendarWeekDaysType.getMaxValue());
                 }
             }
         }
@@ -251,22 +253,23 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
             baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATING.getValue()).value(repeating).notNull();
 
             if (repeating) {
-                final String repeats = this.fromApiJsonHelper.extractStringNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS.getValue(), element);
-                baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATS.getValue()).value(repeats).ignoreIfNull()
-                        .notBlank().notExceedingLengthOf(20);
+                final Integer frequency = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+                        CALENDAR_SUPPORTED_PARAMETERS.FREQUENCY.getValue(), element);
+                baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.FREQUENCY.getValue()).value(frequency).notBlank()
+                        .inMinMaxRange(CalendarFrequencyType.getMinValue(), CalendarFrequencyType.getMaxValue());
 
-                if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_EVERY.getValue(), element)) {
-                    final Integer repeatsEvery = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                            CALENDAR_SUPPORTED_PARAMETERS.REPEATS_EVERY.getValue(), element);
-                    baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_EVERY.getValue()).value(repeatsEvery)
+                if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue(), element)) {
+                    final Integer interval = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+                            CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue(), element);
+                    baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue()).value(interval)
                             .notNull().integerGreaterThanZero();
                 }
 
                 if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue(), element)) {
-                    final String repeatsOnDay = this.fromApiJsonHelper.extractStringNamed(
+                    final Integer repeatsOnDay = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
                             CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue(), element);
                     baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue()).value(repeatsOnDay)
-                            .notBlank();
+                            .notBlank().inMinMaxRange(CalendarWeekDaysType.getMinValue(), CalendarWeekDaysType.getMaxValue());
                 }
             }
         }

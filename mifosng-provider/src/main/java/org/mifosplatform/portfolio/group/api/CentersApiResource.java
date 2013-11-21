@@ -12,6 +12,7 @@ import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -24,6 +25,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -48,6 +50,8 @@ import org.mifosplatform.portfolio.group.data.CenterData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.CenterReadPlatformService;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.portfolio.meeting.data.MeetingData;
+import org.mifosplatform.portfolio.meeting.service.MeetingReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -70,6 +74,7 @@ public class CentersApiResource {
     private final FromJsonHelper fromJsonHelper;
     private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
+    private final MeetingReadPlatformService meetingReadPlatformService;
 
     @Autowired
     public CentersApiResource(final PlatformSecurityContext context, final CenterReadPlatformService centerReadPlatformService,
@@ -79,7 +84,7 @@ public class CentersApiResource {
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final CollectionSheetReadPlatformService collectionSheetReadPlatformService, final FromJsonHelper fromJsonHelper,
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
-            final CalendarReadPlatformService calendarReadPlatformService) {
+            final CalendarReadPlatformService calendarReadPlatformService, final MeetingReadPlatformService meetingReadPlatformService) {
         this.context = context;
         this.centerReadPlatformService = centerReadPlatformService;
         this.centerApiJsonSerializer = centerApiJsonSerializer;
@@ -91,6 +96,7 @@ public class CentersApiResource {
         this.fromJsonHelper = fromJsonHelper;
         this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
         this.calendarReadPlatformService = calendarReadPlatformService;
+        this.meetingReadPlatformService = meetingReadPlatformService;
     }
 
     @GET
@@ -98,7 +104,8 @@ public class CentersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveTemplate(@Context final UriInfo uriInfo, @QueryParam("command") final String commandParam,
-            @QueryParam("officeId") final Long officeId) {
+            @QueryParam("officeId") final Long officeId,
+            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.CENTER_RESOURCE_NAME);
 
@@ -109,7 +116,7 @@ public class CentersApiResource {
                     GroupingTypesApiConstants.CENTER_RESPONSE_DATA_PARAMETERS);
         }
 
-        final CenterData template = this.centerReadPlatformService.retrieveTemplate(officeId);
+        final CenterData template = this.centerReadPlatformService.retrieveTemplate(officeId, staffInSelectedOfficeOnly);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.centerApiJsonSerializer.serialize(settings, template, GroupingTypesApiConstants.CENTER_RESPONSE_DATA_PARAMETERS);
@@ -138,7 +145,8 @@ public class CentersApiResource {
     @Path("{centerId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveOne(@Context final UriInfo uriInfo, @PathParam("centerId") final Long centerId) {
+    public String retrieveOne(@Context final UriInfo uriInfo, @PathParam("centerId") final Long centerId,
+            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.CENTER_RESOURCE_NAME);
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -148,7 +156,7 @@ public class CentersApiResource {
 
         final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
         if (template) {
-            final CenterData templateCenter = this.centerReadPlatformService.retrieveTemplate(center.officeId());
+            final CenterData templateCenter = this.centerReadPlatformService.retrieveTemplate(center.officeId(), staffInSelectedOfficeOnly);
             center = CenterData.withTemplate(templateCenter, center);
         }
 
@@ -161,7 +169,13 @@ public class CentersApiResource {
                 collectionMeetingCalendar = this.calendarReadPlatformService.retrieveCollctionCalendarByEntity(centerId,
                         CalendarEntityType.CENTERS.getValue());
                 if (collectionMeetingCalendar != null) {
-                    collectionMeetingCalendar = this.calendarReadPlatformService.generateRecurringDate(collectionMeetingCalendar);
+                    final boolean withHistory = true;
+                    final LocalDate tillDate = null;
+                    final Collection<LocalDate> recurringDates = this.calendarReadPlatformService.generateRecurringDates(collectionMeetingCalendar, withHistory, tillDate);
+                    final Collection<LocalDate> nextTenRecurringDates = this.calendarReadPlatformService.generateNextTenRecurringDates(collectionMeetingCalendar);
+                    final MeetingData lastMeeting = this.meetingReadPlatformService.retrieveLastMeeting(collectionMeetingCalendar.getCalendarInstanceId());
+                    final LocalDate recentEligibleMeetingDate = this.calendarReadPlatformService.generateNextEligibleMeetingDateForCollection(collectionMeetingCalendar, lastMeeting);
+                    collectionMeetingCalendar = CalendarData.withRecurringDates(collectionMeetingCalendar, recurringDates, nextTenRecurringDates, recentEligibleMeetingDate);
                 }
             }
 

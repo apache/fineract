@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
@@ -81,6 +82,22 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         final Collection<RoleData> availableRoles = this.roleReadPlatformService.retrieveAll();
 
         return AppUserData.template(offices, availableRoles);
+    }
+
+    @Override
+    public Collection<AppUserData> retrieveAllUsersWithRoles() {
+
+        final Collection<AppUser>  users = this.appUserRepository.findAll();
+        final Collection<AppUserData> appUserData = new HashSet<AppUserData>();
+        for(final AppUser user : users){
+            final Set<RoleData>  selectedUserRoles = new HashSet<RoleData>();
+            for(final Role role : user.getRoles()){
+                  selectedUserRoles.add(role.toData()) ;
+            }
+            appUserData.add(AppUserData.instance(user.getId(), user.getUsername(), user.getEmail(), user.getOffice().getId(),
+                    user.getOffice().getName(), user.getFirstname(), user.getLastname(),null,selectedUserRoles)) ;
+        }
+        return appUserData;
     }
 
     @Override

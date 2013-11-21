@@ -26,6 +26,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -55,6 +56,8 @@ import org.mifosplatform.portfolio.group.service.CenterReadPlatformService;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.group.service.GroupRolesReadPlatformService;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.portfolio.meeting.data.MeetingData;
+import org.mifosplatform.portfolio.meeting.service.MeetingReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -81,6 +84,7 @@ public class GroupsApiResource {
     private final GroupRolesReadPlatformService groupRolesReadPlatformService;
     private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
+    private final MeetingReadPlatformService meetingReadPlatformService;
 
     @Autowired
     public GroupsApiResource(final PlatformSecurityContext context, final GroupReadPlatformService groupReadPlatformService,
@@ -93,7 +97,7 @@ public class GroupsApiResource {
             final CollectionSheetReadPlatformService collectionSheetReadPlatformService, final FromJsonHelper fromJsonHelper,
             final GroupRolesReadPlatformService groupRolesReadPlatformService,
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
-            final CalendarReadPlatformService calendarReadPlatformService) {
+            final CalendarReadPlatformService calendarReadPlatformService, final MeetingReadPlatformService meetingReadPlatformService) {
 
         this.context = context;
         this.groupReadPlatformService = groupReadPlatformService;
@@ -109,6 +113,7 @@ public class GroupsApiResource {
         this.groupRolesReadPlatformService = groupRolesReadPlatformService;
         this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
         this.calendarReadPlatformService = calendarReadPlatformService;
+        this.meetingReadPlatformService = meetingReadPlatformService;
     }
 
     @GET
@@ -216,7 +221,13 @@ public class GroupsApiResource {
                             CalendarEntityType.GROUPS.getValue());
                 }
                 if (collectionMeetingCalendar != null) {
-                    collectionMeetingCalendar = this.calendarReadPlatformService.generateRecurringDate(collectionMeetingCalendar);
+                    final boolean withHistory = true;
+                    final LocalDate tillDate = null;
+                    final Collection<LocalDate> recurringDates = this.calendarReadPlatformService.generateRecurringDates(collectionMeetingCalendar, withHistory, tillDate);
+                    final Collection<LocalDate> nextTenRecurringDates = this.calendarReadPlatformService.generateNextTenRecurringDates(collectionMeetingCalendar);
+                    final MeetingData lastMeeting = this.meetingReadPlatformService.retrieveLastMeeting(collectionMeetingCalendar.getCalendarInstanceId());
+                    final LocalDate recentEligibleMeetingDate = this.calendarReadPlatformService.generateNextEligibleMeetingDateForCollection(collectionMeetingCalendar, lastMeeting);
+                    collectionMeetingCalendar = CalendarData.withRecurringDates(collectionMeetingCalendar, recurringDates, nextTenRecurringDates, recentEligibleMeetingDate);
                 }
             }
 

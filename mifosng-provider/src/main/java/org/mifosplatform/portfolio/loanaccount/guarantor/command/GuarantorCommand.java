@@ -73,7 +73,7 @@ public class GuarantorCommand {
     }
 
     public Date getDobAsDate() {
-        return this.dob.toDateMidnight().toDate();
+        return this.dob.toDateTimeAtStartOfDay().toDate();
     }
 
     public void validateForCreate() {

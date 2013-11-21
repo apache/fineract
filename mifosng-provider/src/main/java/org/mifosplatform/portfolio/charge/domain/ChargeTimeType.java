@@ -16,7 +16,9 @@ public enum ChargeTimeType {
     SAVINGS_CLOSURE(4, "chargeTimeType.savingsClosure"), // only for savings
     WITHDRAWAL_FEE(5, "chargeTimeType.withdrawalFee"), // only for savings
     ANNUAL_FEE(6, "chargeTimeType.annualFee"), // only for savings
-    MONTHLY_FEE(7, "chargeTimeType.monthlyFee"); // only for savings
+    MONTHLY_FEE(7, "chargeTimeType.monthlyFee"), // only for savings
+    INSTALMENT_FEE(8, "chargeTimeType.instalmentFee"),// only for loan charges
+    OVERDUE_INSTALLMENT(9, "chargeTimeType.overdueInstallment"); // only for loan charges
 
     private final Integer value;
     private final String code;
@@ -35,7 +37,8 @@ public enum ChargeTimeType {
     }
 
     public static Object[] validLoanValues() {
-        return new Integer[] { ChargeTimeType.DISBURSEMENT.getValue(), ChargeTimeType.SPECIFIED_DUE_DATE.getValue() };
+        return new Integer[] { ChargeTimeType.DISBURSEMENT.getValue(), ChargeTimeType.SPECIFIED_DUE_DATE.getValue(),
+                ChargeTimeType.INSTALMENT_FEE.getValue(),ChargeTimeType.OVERDUE_INSTALLMENT.getValue() };
     }
 
     public static Object[] validSavingsValues() {
@@ -68,6 +71,12 @@ public enum ChargeTimeType {
                 break;
                 case 7:
                     chargeTimeType = MONTHLY_FEE;
+                break;
+                case 8:
+                    chargeTimeType = INSTALMENT_FEE;
+                break;
+                case 9:
+                    chargeTimeType = OVERDUE_INSTALLMENT;
                 break;
                 default:
                     chargeTimeType = INVALID;
@@ -105,8 +114,16 @@ public enum ChargeTimeType {
         return this.value.equals(ChargeTimeType.MONTHLY_FEE.getValue());
     }
 
+    public boolean isInstalmentFee() {
+        return this.value.equals(ChargeTimeType.INSTALMENT_FEE.getValue());
+    }
+
+    public boolean isOverdueInstallment(){
+        return this.value.equals(ChargeTimeType.OVERDUE_INSTALLMENT.getValue());
+    }
+
     public boolean isAllowedLoanChargeTime() {
-        return isTimeOfDisbursement() || isOnSpecifiedDueDate();
+        return isTimeOfDisbursement() || isOnSpecifiedDueDate() || isInstalmentFee() || isOverdueInstallment();
     }
 
     public boolean isAllowedSavingsChargeTime() {

@@ -27,6 +27,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -44,10 +45,12 @@ import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.mifosplatform.portfolio.group.domain.Group;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "m_client", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "account_no_UNIQUE") })
+@Table(name = "m_client", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "account_no_UNIQUE"), //
+        @UniqueConstraint(columnNames = { "mobile_no" }, name = "mobile_no_UNIQUE") })
 public final class Client extends AbstractPersistable<Long> {
 
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
@@ -94,6 +97,9 @@ public final class Client extends AbstractPersistable<Long> {
     @Column(name = "display_name", length = 100, nullable = false)
     private String displayName;
 
+    @Column(name = "mobile_no", length = 50, nullable = false, unique = true)
+    private String mobileNo;
+
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;
 
@@ -117,10 +123,28 @@ public final class Client extends AbstractPersistable<Long> {
     @Temporal(TemporalType.DATE)
     private Date closureDate;
 
-    public static Client createNew(final Office clientOffice, final Group clientParentGroup, final Staff staff, final JsonCommand command) {
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "closedon_userid", nullable = true)
+    private AppUser closeddBy;
+
+    @Column(name = "submittedon_date", nullable = true)
+    @Temporal(TemporalType.DATE)
+    private Date submittedOnDate;
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "submittedon_userid", nullable = true)
+    private AppUser submittedBy;
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "activatedon_userid", nullable = true)
+    private AppUser activatedBy;
+
+    public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
+            final JsonCommand command) {
 
         final String accountNo = command.stringValueOfParameterNamed(ClientApiConstants.accountNoParamName);
         final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
+        final String mobileNo = command.stringValueOfParameterNamed(ClientApiConstants.mobileNoParamName);
 
         final String firstname = command.stringValueOfParameterNamed(ClientApiConstants.firstnameParamName);
         final String middlename = command.stringValueOfParameterNamed(ClientApiConstants.middlenameParamName);
@@ -141,23 +165,37 @@ public final class Client extends AbstractPersistable<Long> {
             officeJoiningDate = activationDate;
         }
 
-        return new Client(status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname, activationDate,
-                officeJoiningDate, externalId, staff);
+        LocalDate submittedOnDate = new LocalDate();
+        if (active && submittedOnDate.isAfter(activationDate)) {
+            submittedOnDate = activationDate;
+        }
+        if (command.hasParameter(ClientApiConstants.submittedOnDateParamName)) {
+            submittedOnDate = command.localDateValueOfParameterNamed(ClientApiConstants.submittedOnDateParamName);
+        }
+
+        return new Client(currentUser, status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname,
+                activationDate, officeJoiningDate, externalId, mobileNo, staff, submittedOnDate);
     }
 
     protected Client() {
         //
     }
 
-    private Client(final ClientStatus status, final Office office, final Group clientParentGroup, final String accountNo,
-            final String firstname, final String middlename, final String lastname, final String fullname, final LocalDate activationDate,
-            final LocalDate officeJoiningDate, final String externalId, final Staff staff) {
+    private Client(final AppUser currentUser, final ClientStatus status, final Office office, final Group clientParentGroup,
+            final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
+            final LocalDate activationDate, final LocalDate officeJoiningDate, final String externalId, final String mobileNo,
+            final Staff staff, final LocalDate submittedOnDate) {
+
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
             this.accountNumberRequiresAutoGeneration = true;
         } else {
             this.accountNumber = accountNo;
         }
+
+        this.submittedOnDate = submittedOnDate.toDate();
+        this.submittedBy = currentUser;
+
         this.status = status.getValue();
         this.office = office;
         if (StringUtils.isNotBlank(externalId)) {
@@ -165,11 +203,19 @@ public final class Client extends AbstractPersistable<Long> {
         } else {
             this.externalId = null;
         }
+
+        if (StringUtils.isNotBlank(mobileNo)) {
+            this.mobileNo = mobileNo.trim();
+        } else {
+            this.mobileNo = null;
+        }
+
         if (activationDate != null) {
-            this.activationDate = activationDate.toDateMidnight().toDate();
+            this.activationDate = activationDate.toDateTimeAtStartOfDay().toDate();
+            this.activatedBy = currentUser;
         }
         if (officeJoiningDate != null) {
-            this.officeJoiningDate = officeJoiningDate.toDateMidnight().toDate();
+            this.officeJoiningDate = officeJoiningDate.toDateTimeAtStartOfDay().toDate();
         }
         if (StringUtils.isNotBlank(firstname)) {
             this.firstname = firstname.trim();
@@ -234,7 +280,8 @@ public final class Client extends AbstractPersistable<Long> {
         this.accountNumberRequiresAutoGeneration = false;
     }
 
-    public void activate(final DateTimeFormatter formatter, final LocalDate activationLocalDate) {
+    public void activate(final AppUser currentUser, final DateTimeFormatter formatter, final LocalDate activationLocalDate) {
+
         if (isActive()) {
             final String defaultUserMessage = "Cannot activate client. Client is already active.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.already.active", defaultUserMessage,
@@ -246,19 +293,8 @@ public final class Client extends AbstractPersistable<Long> {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
-        if (isDateInTheFuture(activationLocalDate)) {
-
-            final String defaultUserMessage = "Activation date cannot be in the future.";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.activationDate.in.the.future",
-                    defaultUserMessage, ClientApiConstants.activationDateParamName, activationLocalDate);
-
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-            dataValidationErrors.add(error);
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
         this.activationDate = activationLocalDate.toDate();
+        this.activatedBy = currentUser;
         this.officeJoiningDate = this.activationDate;
         this.status = ClientStatus.ACTIVE.getValue();
 
@@ -321,6 +357,12 @@ public final class Client extends AbstractPersistable<Long> {
             final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
             actualChanges.put(ClientApiConstants.externalIdParamName, newValue);
             this.externalId = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
+        if (command.isChangeInStringParameterNamed(ClientApiConstants.mobileNoParamName, this.mobileNo)) {
+            final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.mobileNoParamName);
+            actualChanges.put(ClientApiConstants.mobileNoParamName, newValue);
+            this.mobileNo = StringUtils.defaultIfEmpty(newValue, null);
         }
 
         if (command.isChangeInStringParameterNamed(ClientApiConstants.firstnameParamName, this.firstname)) {
@@ -398,7 +440,35 @@ public final class Client extends AbstractPersistable<Long> {
     }
 
     private void validateActivationDate(final List<ApiParameterError> dataValidationErrors) {
-        if (this.activationDate != null) {
+
+        if (getSubmittedOnDate() != null && isDateInTheFuture(getSubmittedOnDate())) {
+
+            final String defaultUserMessage = "submitted date cannot be in the future.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.submittedOnDate.in.the.future",
+                    defaultUserMessage, ClientApiConstants.submittedOnDateParamName, this.submittedOnDate);
+
+            dataValidationErrors.add(error);
+        }
+
+        if (getActivationLocalDate() != null && getSubmittedOnDate() != null && getSubmittedOnDate().isAfter(getActivationLocalDate())) {
+
+            final String defaultUserMessage = "submitted date cannot be after the activation date";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.submittedOnDate.after.activation.date",
+                    defaultUserMessage, ClientApiConstants.submittedOnDateParamName, this.submittedOnDate);
+
+            dataValidationErrors.add(error);
+        }
+
+        if (getActivationLocalDate() != null && isDateInTheFuture(getActivationLocalDate())) {
+
+            final String defaultUserMessage = "Activation date cannot be in the future.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.activationDate.in.the.future",
+                    defaultUserMessage, ClientApiConstants.activationDateParamName, getActivationLocalDate());
+
+            dataValidationErrors.add(error);
+        }
+
+        if (getActivationLocalDate() != null) {
             if (this.office.isOpeningDateAfter(getActivationLocalDate())) {
                 final String defaultUserMessage = "Client activation date cannot be a date before the office opening date.";
                 final ApiParameterError error = ApiParameterError.parameterError(
@@ -431,6 +501,10 @@ public final class Client extends AbstractPersistable<Long> {
         this.displayName = nameBuilder.toString();
     }
 
+    public LocalDate getSubmittedOnDate() {
+        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.submittedOnDate), null);
+    }
+
     public LocalDate getActivationLocalDate() {
         LocalDate activationLocalDate = null;
         if (this.activationDate != null) {
@@ -461,6 +535,14 @@ public final class Client extends AbstractPersistable<Long> {
 
     public Image getImage() {
         return this.image;
+    }
+
+    public String mobileNo() {
+        return this.mobileNo;
+    }
+
+    public void setMobileNo(final String mobileNo) {
+        this.mobileNo = mobileNo;
     }
 
     public String getDisplayName() {
@@ -519,9 +601,10 @@ public final class Client extends AbstractPersistable<Long> {
         return this.groups;
     }
 
-    public void close(final CodeValue closureReason, final Date closureDate) {
+    public void close(final AppUser currentUser, final CodeValue closureReason, final Date closureDate) {
         this.closureReason = closureReason;
         this.closureDate = closureDate;
+        this.closeddBy = currentUser;
         this.status = ClientStatus.CLOSED.getValue();
     }
 

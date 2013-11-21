@@ -5,6 +5,8 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+
+1. 21 Nov 2013 - 1.14.0.RELEASE
 1. 03 Nov 2013 - 1.13.4.RELEASE
 1. 30 Oct 2013 - 1.13.3.RELEASE
 1. 28 Oct 2013 - 1.13.2.RELEASE
@@ -47,6 +49,29 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+
+1.14.0.RELEASE
+=============
+Feature Release
+
+This feature release adds support for per installment fees for loans, introduces the ability to edit/delete existing holidays and other improvements around Calendar (recurring meetings) functionality.
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-693] - Holidays cannot be edited or removed
+ - [MIFOSX-730] - Implement "per installment fee" for Loans
+ - [MIFOSX-649] - (Meeting) Calendar Improvements
+ - [MIFOSX-682] - Data Validation & Helpful Developer Messages for Meetings
+ - [MIFOSX-754] - Mobile phone number(s?) fields on Client & Staff on core database (not custom data tables)
+ - [MIFOSX-765] - Add Timeline to the clients and groups api
+ - [MIFOSX-119] - Spike: Produce boilerplate shell on platform/API for Outbound SMS Integration
+
+Bug 
+ - [MIFOSX-769] - Loans product: Min & max are not working as expected for Principal, No. of repayments & interest
+ - [MIFOSX-784] - API - Client under pending status doesn't allow future activation date
+
 
 1.13.4.RELEASE
 =============

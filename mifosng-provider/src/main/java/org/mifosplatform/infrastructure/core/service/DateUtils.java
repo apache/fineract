@@ -23,7 +23,7 @@ import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidation
 public class DateUtils {
 
     public static Date getDateOfTenant() {
-        return getLocalDateOfTenant().toDateMidnight().toDate();
+        return getLocalDateOfTenant().toDateTimeAtStartOfDay().toDate();
     }
 
     public static LocalDate getLocalDateOfTenant() {
@@ -63,7 +63,7 @@ public class DateUtils {
         final String formattedSqlDate = df.format(date);
         return formattedSqlDate;
     }
-    
+
     public static boolean isDateInTheFuture(final LocalDate localDate){
         return localDate.isAfter(getLocalDateOfTenant());
     }

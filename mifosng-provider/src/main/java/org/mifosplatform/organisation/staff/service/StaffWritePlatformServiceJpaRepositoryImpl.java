@@ -12,7 +12,6 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
@@ -32,16 +31,13 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
 
     private final static Logger logger = LoggerFactory.getLogger(StaffWritePlatformServiceJpaRepositoryImpl.class);
 
-    private final PlatformSecurityContext context;
     private final StaffCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final StaffRepository staffRepository;
     private final OfficeRepository officeRepository;
 
     @Autowired
-    public StaffWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final StaffCommandFromApiJsonDeserializer fromApiJsonDeserializer, final StaffRepository staffRepository,
-            final OfficeRepository officeRepository) {
-        this.context = context;
+    public StaffWritePlatformServiceJpaRepositoryImpl(final StaffCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final StaffRepository staffRepository, final OfficeRepository officeRepository) {
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.staffRepository = staffRepository;
         this.officeRepository = officeRepository;
@@ -52,8 +48,6 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
     public CommandProcessingResult createStaff(final JsonCommand command) {
 
         try {
-            this.context.authenticatedUser();
-
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
             final Long officeId = command.longValueOfParameterNamed("officeId");
@@ -80,8 +74,6 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
     public CommandProcessingResult updateStaff(final Long staffId, final JsonCommand command) {
 
         try {
-            this.context.authenticatedUser();
-
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
             final Staff staffForUpdate = this.staffRepository.findOne(staffId);

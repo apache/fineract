@@ -9,8 +9,10 @@ import java.util.List;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
+import org.mifosplatform.portfolio.calendar.domain.CalendarFrequencyType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarRemindBy;
 import org.mifosplatform.portfolio.calendar.domain.CalendarType;
+import org.mifosplatform.portfolio.calendar.domain.CalendarWeekDaysType;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,4 +33,13 @@ public class CalendarDropdownReadPlatformServiceImpl implements CalendarDropdown
         return CalendarEnumerations.calendarRemindBy(CalendarRemindBy.values());
     }
 
+    @Override
+    public List<EnumOptionData> retrieveCalendarFrequencyTypeOptions() {
+        return CalendarEnumerations.calendarFrequencyType(CalendarFrequencyType.values());
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveCalendarWeekDaysTypeOptions() {
+        return CalendarEnumerations.calendarWeekDaysType(CalendarWeekDaysType.values());
+    }    
 }

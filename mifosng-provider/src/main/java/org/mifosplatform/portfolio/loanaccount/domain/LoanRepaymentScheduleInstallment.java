@@ -111,8 +111,8 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
             final BigDecimal penaltyCharges) {
         this.loan = loan;
         this.installmentNumber = installmentNumber;
-        this.fromDate = fromDate.toDateMidnight().toDate();
-        this.dueDate = dueDate.toDateMidnight().toDate();
+        this.fromDate = fromDate.toDateTimeAtStartOfDay().toDate();
+        this.dueDate = dueDate.toDateTimeAtStartOfDay().toDate();
         this.principal = defaultToNullIfZero(principal);
         this.interestCharged = defaultToNullIfZero(interest);
         this.feeChargesCharged = defaultToNullIfZero(feeCharges);

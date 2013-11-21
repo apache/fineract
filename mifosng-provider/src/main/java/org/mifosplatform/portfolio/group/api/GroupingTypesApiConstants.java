@@ -42,6 +42,8 @@ public class GroupingTypesApiConstants {
     public static final String activationDateParamName = "activationDate";
     public static final String groupMembersParamName = "groupMembers";
 
+    public static final String submittedOnDateParamName = "submittedOnDate";
+
     // group parameters
     public static final String centerIdParamName = "centerId";
     public static final String clientMembersParamName = "clientMembers";
@@ -55,6 +57,7 @@ public class GroupingTypesApiConstants {
     public static final String staffOptionsParamName = "staffOptions";
     public static final String clientOptionsParamName = "clientOptions";
     public static final String collectionMeetingCalendar = "collectionMeetingCalendar";
+    public static final String timeLine ="timeline";
 
     // group close parameters
     public static final String closureDateParamName = "closureDate";
@@ -62,11 +65,11 @@ public class GroupingTypesApiConstants {
 
     public static final Set<String> CENTER_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, idParamName, nameParamName, externalIdParamName, officeIdParamName, staffIdParamName, activeParamName,
-            activationDateParamName, groupMembersParamName));
+            activationDateParamName, groupMembersParamName,submittedOnDateParamName));
 
     public static final Set<String> GROUP_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName, dateFormatParamName,
             idParamName, nameParamName, externalIdParamName, centerIdParamName, officeIdParamName, staffIdParamName, activeParamName,
-            activationDateParamName, clientMembersParamName, collectionMeetingCalendar));
+            activationDateParamName, clientMembersParamName, collectionMeetingCalendar,submittedOnDateParamName));
 
     public static final Set<String> GROUP_ROLES_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(roleParamName,
             clientIdParamName));
@@ -86,7 +89,7 @@ public class GroupingTypesApiConstants {
 
     public static final Set<String> GROUP_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName, nameParamName,
             externalIdParamName, officeIdParamName, officeNameParamName, "parentId", "parentName", staffIdParamName, staffNameParamName,
-            hierarchyParamName, officeOptionsParamName, staffOptionsParamName, clientOptionsParamName));
+            hierarchyParamName, officeOptionsParamName, staffOptionsParamName, clientOptionsParamName,timeLine));
 
     public static final Set<String> ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, activationDateParamName));

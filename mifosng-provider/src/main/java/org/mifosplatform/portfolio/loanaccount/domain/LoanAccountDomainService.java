@@ -22,5 +22,5 @@ public interface LoanAccountDomainService {
     void reverseTransfer(LoanTransaction loanTransaction);
 
     LoanTransaction makeChargePayment(Loan loan, Long chargeId, LocalDate transactionDate, BigDecimal transactionAmount,
-            PaymentDetail paymentDetail, String noteText, String txnExternalId, Integer transactionType);
+            PaymentDetail paymentDetail, String noteText, String txnExternalId, Integer transactionType, Integer installmentNumber);
 }

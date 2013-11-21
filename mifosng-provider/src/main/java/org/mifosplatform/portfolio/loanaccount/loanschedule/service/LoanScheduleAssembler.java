@@ -16,6 +16,7 @@ import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomain
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.holiday.domain.HolidayRepository;
+import org.mifosplatform.organisation.holiday.domain.HolidayStatusType;
 import org.mifosplatform.organisation.holiday.service.HolidayUtil;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
@@ -207,7 +208,7 @@ public class LoanScheduleAssembler {
 
     private void validateDisbursementDateWithMeetingDates(final LocalDate expectedDisbursementDate, final Calendar calendar) {
         // disbursement date should fall on a meeting date
-        if (!CalendarUtils.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), expectedDisbursementDate)) {
+        if (!calendar.isValidRecurringDate(expectedDisbursementDate)) {
             final String errorMessage = "Expected disbursement date '" + expectedDisbursementDate + "' do not fall on a meeting date";
             throw new LoanApplicationDateException("disbursement.date.do.not.match.meeting.date", errorMessage, expectedDisbursementDate);
         }
@@ -229,7 +230,7 @@ public class LoanScheduleAssembler {
                 if (repaymentInterval % meetingInterval != 0) {
                     // throw exception: Loan product frequency/interval
                     throw new MeetingFrequencyMismatchException("loanapplication.repayment.interval",
-                            "Loan repayment repaid every # must equal or multiple of meeting interval", repaymentInterval);
+                            "Loan repayment repaid every # must equal or multiple of meeting interval " + meetingInterval, meetingInterval, repaymentInterval);
                 }
             }
         }
@@ -261,7 +262,8 @@ public class LoanScheduleAssembler {
         }
 
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed("expectedDisbursementDate", element);
-        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId, expectedDisbursementDate.toDate());
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId, expectedDisbursementDate.toDate(),
+                HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
 
         validateDisbursementDateIsOnNonWorkingDay(loanApplicationTerms.getExpectedDisbursementDate(), workingDays);

@@ -58,6 +58,7 @@ import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.organisation.workingdays.service.WorkingDaysUtil;
 import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
+import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeAddedException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.collateral.data.CollateralData;
@@ -427,10 +428,29 @@ public class Loan extends AbstractPersistable<Long> {
 
         validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
 
-        loanCharge.update(this);
-        setOfLoanCharges().add(loanCharge);
-
         this.summary = updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
+
+        loanCharge.update(this);
+
+        final BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
+        BigDecimal chargeAmt = BigDecimal.ZERO;
+        BigDecimal totalChargeAmt = BigDecimal.ZERO;
+        if (loanCharge.getChargeCalculation().isPercentageBased()) {
+            chargeAmt = loanCharge.getPercentage();
+            if (loanCharge.isInstalmentFee()) {
+                totalChargeAmt = calculatePerInstallmentChargeAmount(loanCharge);
+            }
+        } else {
+            chargeAmt = loanCharge.amount();
+            if (loanCharge.isInstalmentFee()) {
+                chargeAmt = chargeAmt.divide(BigDecimal.valueOf(repaymentScheduleDetail().getNumberOfRepayments()));
+            }
+        }
+        loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, repaymentScheduleDetail().getNumberOfRepayments(),
+                totalChargeAmt);
+
+        // NOTE: must add new loan charge to set of loan charges before reporcessing the repayment schedule.
+        setOfLoanCharges().add(loanCharge);
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategy);
@@ -445,13 +465,14 @@ public class Loan extends AbstractPersistable<Long> {
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(),
                     allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, setOfLoanCharges());
-            for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+            for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                 mapEntry.getValue().updateLoan(this);
             }
             // this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
-        } 
+        }
 
         updateLoanSummaryDerivedFields();
+
         return changedTransactionDetail;
     }
 
@@ -459,11 +480,11 @@ public class Loan extends AbstractPersistable<Long> {
      * Creates a loanTransaction for "Apply Charge Event" with transaction date
      * set to "suppliedTransactionDate". The newly created transaction is also
      * added to the Loan on which this method is called.
-     * 
+     *
      * If "suppliedTransactionDate" is not passed Id, the transaction date is
      * set to the loans due date if the due date is lesser than todays date. If
      * not, the transaction date is set to todays date
-     * 
+     *
      * @param loanCharge
      * @param suppliedTransactionDate
      * @return
@@ -499,7 +520,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     private void handleChargePaidTransaction(final LoanCharge charge, final LoanTransaction chargesPayment,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+            final LoanLifecycleStateMachine loanLifecycleStateMachine, Integer installmentNumber) {
         chargesPayment.updateLoan(this);
         final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge, chargesPayment.getAmount(getCurrency())
                 .getAmount());
@@ -514,7 +535,10 @@ public class Loan extends AbstractPersistable<Long> {
         final List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<LoanRepaymentScheduleInstallment>();
         LocalDate startDate = getDisbursementDate();
         for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
-            if (charge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())) {
+            if (installmentNumber == null && charge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())) {
+                chargePaymentInstallments.add(installment);
+                break;
+            }else if(installmentNumber != null && installment.getInstallmentNumber().equals(installmentNumber)){
                 chargePaymentInstallments.add(installment);
                 break;
             }
@@ -580,7 +604,7 @@ public class Loan extends AbstractPersistable<Long> {
              * TODO Vishwas Currently we do not allow removing a loan charge
              * after a loan is approved (hence there is no need to adjust any
              * loan transactions).
-             * 
+             *
              * Consider removing this block of code or logically completing it
              * for the future by getting the list of affected Transactions
              ***/
@@ -624,9 +648,9 @@ public class Loan extends AbstractPersistable<Long> {
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(3);
 
         validateLoanIsNotClosed(loanCharge);
-
         if (setOfLoanCharges().contains(loanCharge)) {
-            final Map<String, Object> loanChargeChanges = loanCharge.update(command, getPrincpal().getAmount());
+            final BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
+            final Map<String, Object> loanChargeChanges = loanCharge.update(command, amount);
             actualChanges.putAll(loanChargeChanges);
             updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
         }
@@ -638,7 +662,7 @@ public class Loan extends AbstractPersistable<Long> {
              * TODO Vishwas Currently we do not allow waiving updating loan
              * charge after a loan is approved (hence there is no need to adjust
              * any loan transactions).
-             * 
+             *
              * Consider removing this block of code or logically completing it
              * for the future by getting the list of affected Transactions
              ***/
@@ -656,12 +680,83 @@ public class Loan extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
+    /**
+     * @param loanCharge
+     * @return
+     */
+    private BigDecimal calculateAmountPercentageAppliedTo(final LoanCharge loanCharge) {
+        BigDecimal amount = BigDecimal.ZERO;
+        switch (loanCharge.getChargeCalculation()) {
+            case PERCENT_OF_AMOUNT:
+                amount = getPrincpal().getAmount();
+            break;
+            case PERCENT_OF_AMOUNT_AND_INTEREST:
+                final BigDecimal totalInterestCharged = getTotalInterest();
+                amount = getPrincpal().getAmount().add(totalInterestCharged);
+            break;
+            case PERCENT_OF_INTEREST:
+                amount = getTotalInterest();
+            break;
+            default:
+            break;
+        }
+        return amount;
+    }
+
+    /**
+     * @return
+     */
+    public BigDecimal getTotalInterest() {
+        return this.loanSummaryWrapper.calculateTotalInterestCharged(
+                this.repaymentScheduleInstallments, getCurrency()).getAmount();
+    }
+
+    private BigDecimal calculatePerInstallmentChargeAmount(final LoanCharge loanCharge) {
+        return calculatePerInstallmentChargeAmount(loanCharge.getChargeCalculation(), loanCharge.getPercentage());
+    }
+
+    public BigDecimal calculatePerInstallmentChargeAmount(final ChargeCalculationType calculationType, final BigDecimal percentage) {
+        Money amount = Money.zero(getCurrency());
+        for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
+            amount = amount.plus(calculateInstallmentChargeAmount(calculationType, percentage, installment));
+        }
+        return amount.getAmount();
+    }
+
+    /**
+     * @param calculationType
+     * @param percentage
+     * @param installment
+     * @return
+     */
+    private Money calculateInstallmentChargeAmount(final ChargeCalculationType calculationType, final BigDecimal percentage, 
+            final LoanRepaymentScheduleInstallment installment) {
+        Money amount = Money.zero(getCurrency());
+        Money percentOf = Money.zero(getCurrency());
+        switch (calculationType) {
+            case PERCENT_OF_AMOUNT:
+                percentOf = installment.getPrincipal(getCurrency());
+            break;
+            case PERCENT_OF_AMOUNT_AND_INTEREST:
+                percentOf = installment.getPrincipal(getCurrency()).plus(installment.getInterestCharged(getCurrency()));
+            break;
+            case PERCENT_OF_INTEREST:
+                percentOf = installment.getInterestCharged(getCurrency());
+            break;
+            default:
+            break;
+        }
+        amount = amount.plus(LoanCharge.percentageOf(percentOf.getAmount(), percentage));
+        return amount;
+    }
+
     public LoanTransaction waiveLoanCharge(final LoanCharge loanCharge, final LoanLifecycleStateMachine loanLifecycleStateMachine,
-            final Map<String, Object> changes, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
+            final Map<String, Object> changes, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds, 
+            Integer loanInstallmentNumber) {
 
         validateLoanIsNotClosed(loanCharge);
 
-        final Money amountWaived = loanCharge.waive(loanCurrency());
+        final Money amountWaived = loanCharge.waive(loanCurrency(), loanInstallmentNumber);
 
         changes.put("amount", amountWaived.getAmount());
 
@@ -695,7 +790,7 @@ public class Loan extends AbstractPersistable<Long> {
              * TODO Vishwas Currently we do not allow waiving fully paid loan
              * charge and waiving partially paid loan charges only waives the
              * remaining amount.
-             * 
+             *
              * Consider removing this block of code or logically completing it
              * for the future by getting the list of affected Transactions
              ***/
@@ -765,7 +860,26 @@ public class Loan extends AbstractPersistable<Long> {
 
     public void updateLoanCharges(final Set<LoanCharge> loanCharges) {
         setOfLoanCharges().clear();
-        setOfLoanCharges().addAll(associateChargesWithThisLoan(loanCharges));
+        for (final LoanCharge loanCharge : loanCharges) {
+            loanCharge.update(this);
+            final BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
+            BigDecimal chargeAmt = BigDecimal.ZERO;
+            BigDecimal totalChargeAmt = BigDecimal.ZERO;
+            if (loanCharge.getChargeCalculation().isPercentageBased()) {
+                chargeAmt = loanCharge.getPercentage();
+                if (loanCharge.isInstalmentFee()) {
+                    totalChargeAmt = calculatePerInstallmentChargeAmount(loanCharge);
+                }
+            } else {
+                chargeAmt = loanCharge.amount();
+                if (loanCharge.isInstalmentFee()) {
+                    chargeAmt = chargeAmt.divide(BigDecimal.valueOf(repaymentScheduleDetail().getNumberOfRepayments()));
+                }
+            }
+            loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, repaymentScheduleDetail().getNumberOfRepayments(),
+                    totalChargeAmt);
+        }
+        setOfLoanCharges().addAll(loanCharges);
         updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
     }
 
@@ -778,8 +892,9 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public void updateLoanSchedule(final LoanScheduleModel modifiedLoanSchedule) {
+        clearInstallmentLoanCharge();
         this.repaymentScheduleInstallments.clear();
-
+        
         for (final LoanScheduleModelPeriod scheduledLoanInstallment : modifiedLoanSchedule.getPeriods()) {
 
             if (scheduledLoanInstallment.isRepaymentPeriod()) {
@@ -794,6 +909,15 @@ public class Loan extends AbstractPersistable<Long> {
 
         updateLoanScheduleDependentDerivedFields();
         updateLoanSummaryDerivedFields();
+        
+    }
+    
+    private void clearInstallmentLoanCharge(){
+        for(LoanCharge loanCharge:setOfLoanCharges()){
+            if(loanCharge.isInstalmentFee()){
+                loanCharge.clearLoanInstallmentCharges();
+            }
+        }
     }
 
     private void updateLoanScheduleDependentDerivedFields() {
@@ -1012,6 +1136,22 @@ public class Loan extends AbstractPersistable<Long> {
                 actualChanges.put("recalculateLoanSchedule", true);
 
                 for (final LoanCharge loanCharge : possiblyModifedLoanCharges) {
+                    final BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
+                    BigDecimal chargeAmt = BigDecimal.ZERO;
+                    BigDecimal totalChargeAmt = BigDecimal.ZERO;
+                    if (loanCharge.getChargeCalculation().isPercentageBased()) {
+                        chargeAmt = loanCharge.getPercentage();
+                        if (loanCharge.isInstalmentFee()) {
+                            totalChargeAmt = calculatePerInstallmentChargeAmount(loanCharge);
+                        }
+                    } else {
+                        chargeAmt = loanCharge.amount();
+                        if (loanCharge.isInstalmentFee()) {
+                            chargeAmt = chargeAmt.divide(BigDecimal.valueOf(repaymentScheduleDetail().getNumberOfRepayments()));
+                        }
+                    }
+                    loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, repaymentScheduleDetail().getNumberOfRepayments(),
+                            totalChargeAmt);
                     validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
                 }
             }
@@ -1143,6 +1283,22 @@ public class Loan extends AbstractPersistable<Long> {
 
         // charges are optional
         for (final LoanCharge loanCharge : setOfLoanCharges()) {
+            final BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
+            BigDecimal chargeAmt = BigDecimal.ZERO;
+            BigDecimal totalChargeAmt = BigDecimal.ZERO;
+            if (loanCharge.getChargeCalculation().isPercentageBased()) {
+                chargeAmt = loanCharge.getPercentage();
+                if (loanCharge.isInstalmentFee()) {
+                    totalChargeAmt = calculatePerInstallmentChargeAmount(loanCharge);
+                }
+            } else {
+                chargeAmt = loanCharge.amount();
+                if (loanCharge.isInstalmentFee()) {
+                    chargeAmt = chargeAmt.divide(BigDecimal.valueOf(repaymentScheduleDetail().getNumberOfRepayments()));
+                }
+            }
+            loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, repaymentScheduleDetail().getNumberOfRepayments(),
+                    totalChargeAmt);
             validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
         }
 
@@ -1601,7 +1757,7 @@ public class Loan extends AbstractPersistable<Long> {
     public void makeChargePayment(final Long chargeId, final LoanLifecycleStateMachine loanLifecycleStateMachine,
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
             final boolean allowTransactionsOnHoliday, final List<Holiday> holidays, final WorkingDays workingDays,
-            final boolean allowTransactionsOnNonWorkingDay, final LoanTransaction paymentTransaction) {
+            final boolean allowTransactionsOnNonWorkingDay, final LoanTransaction paymentTransaction, Integer installmentNumber) {
 
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_CHARGE_PAYMENT, paymentTransaction.getTransactionDate());
         validateRepaymentDateIsOnHoliday(paymentTransaction.getTransactionDate(), allowTransactionsOnHoliday, holidays);
@@ -1620,7 +1776,7 @@ public class Loan extends AbstractPersistable<Long> {
                 charge = loanCharge;
             }
         }
-        handleChargePaidTransaction(charge, paymentTransaction, loanLifecycleStateMachine);
+        handleChargePaidTransaction(charge, paymentTransaction, loanLifecycleStateMachine, installmentNumber);
     }
 
     public void makeRefund(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine,
@@ -1712,7 +1868,7 @@ public class Loan extends AbstractPersistable<Long> {
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(),
                     allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, setOfLoanCharges());
-            for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+            for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                 mapEntry.getValue().updateLoan(this);
             }
             /***
@@ -2237,7 +2393,7 @@ public class Loan extends AbstractPersistable<Long> {
         return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.submittedOnDate), null);
     }
 
-    private LocalDate getApprovedOnDate() {
+    public LocalDate getApprovedOnDate() {
         LocalDate date = null;
         if (this.approvedOnDate != null) {
             date = new LocalDate(this.approvedOnDate);
@@ -2839,4 +2995,22 @@ public class Loan extends AbstractPersistable<Long> {
     public Set<LoanCharge> charges() {
         return this.charges;
     }
+    
+    public Set<LoanInstallmentCharge> generateInstallmentLoanCharges(final LoanCharge loanCharge){
+        Set<LoanInstallmentCharge> loanChargePerInstallments = new HashSet<LoanInstallmentCharge>();
+        if(loanCharge.isInstalmentFee()){
+            for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
+                BigDecimal amount = BigDecimal.ZERO;
+                if(loanCharge.getChargeCalculation().isFlat()){
+                   amount =   loanCharge.amount().divide(BigDecimal.valueOf(repaymentScheduleDetail().getNumberOfRepayments()));
+                }else{
+                    amount = calculateInstallmentChargeAmount(loanCharge.getChargeCalculation(), loanCharge.getPercentage(), installment).getAmount();
+                }
+                LoanInstallmentCharge loanInstallmentCharge = new LoanInstallmentCharge(amount, loanCharge, installment);
+                loanChargePerInstallments.add(loanInstallmentCharge);
+            }
+        }
+        return loanChargePerInstallments;
+    }
+    
 }

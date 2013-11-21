@@ -47,6 +47,8 @@ import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanChargeRepository;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
@@ -109,6 +111,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final SavingsAccountAssembler savingsAccountAssembler;
     private final AccountAssociationsRepository accountAssociationsRepository;
+    private final LoanChargeRepository loanChargeRepository;
 
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
@@ -122,7 +125,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanSummaryWrapper loanSummaryWrapper, final GroupRepositoryWrapper groupRepository,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             final CalendarRepository calendarRepository, final CalendarInstanceRepository calendarInstanceRepository,
-            final SavingsAccountAssembler savingsAccountAssembler, final AccountAssociationsRepository accountAssociationsRepository) {
+            final SavingsAccountAssembler savingsAccountAssembler, final AccountAssociationsRepository accountAssociationsRepository,
+            final LoanChargeRepository loanChargeRepository) {
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
@@ -145,6 +149,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.savingsAccountAssembler = savingsAccountAssembler;
         this.accountAssociationsRepository = accountAssociationsRepository;
+        this.loanChargeRepository = loanChargeRepository;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -325,12 +330,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 existingLoanApplication.updateTransactionProcessingStrategy(strategy);
             }
 
-            final String chargesParamName = "charges";
-            if (changes.containsKey(chargesParamName)) {
-                final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(command.parsedJson());
-                existingLoanApplication.updateLoanCharges(loanCharges);
-            }
-
             final String collateralParamName = "collateral";
             if (changes.containsKey(collateralParamName)) {
                 final Set<LoanCollateral> loanCollateral = this.loanCollateralAssembler.fromParsedJson(command.parsedJson());
@@ -347,12 +346,26 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 existingLoanApplication.updateLoanSchedule(loanSchedule);
             }
 
+            final String chargesParamName = "charges";
+            if (changes.containsKey(chargesParamName)) {
+                final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(command.parsedJson());
+                existingLoanApplication.updateLoanCharges(loanCharges);
+            }
+
             this.loanRepository.saveAndFlush(existingLoanApplication);
 
             final String submittedOnNote = command.stringValueOfParameterNamed("submittedOnNote");
             if (StringUtils.isNotBlank(submittedOnNote)) {
                 final Note note = Note.loanNote(existingLoanApplication, submittedOnNote);
                 this.noteRepository.save(note);
+            }
+
+            for (final LoanCharge loanCharge : existingLoanApplication.charges()) {
+                if (loanCharge.isInstalmentFee() && loanCharge.hasNoLoanInstallmentCharges()) {
+                    final Set<LoanInstallmentCharge> chargePerInstallments = existingLoanApplication.generateInstallmentLoanCharges(loanCharge);
+                    loanCharge.addLoanInstallmentCharges(chargePerInstallments);
+                    this.loanChargeRepository.save(loanCharge);
+                }
             }
 
             final Long calendarId = command.longValueOfParameterNamed("calendarId");

@@ -27,6 +27,7 @@ import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientData;
+import org.mifosplatform.portfolio.client.data.ClientTimelineData;
 import org.mifosplatform.portfolio.client.domain.ClientEnumerations;
 import org.mifosplatform.portfolio.client.domain.ClientStatus;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
@@ -93,7 +94,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     @Override
     public Page<ClientData> retrieveAll(final SearchParameters searchParameters) {
 
-        final String userOfficeHierarchy = this.context.OfficeHierarchy();
+        final String userOfficeHierarchy = this.context.officeHierarchy();
         final String underHierarchySearchString = userOfficeHierarchy + "%";
 
 //        if (searchParameters.isScopedByOfficeHierarchy()) {
@@ -183,8 +184,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     @Override
     public ClientData retrieveOne(final Long clientId) {
         try {
-            final AppUser currentUser = this.context.authenticatedUser();
-            final String hierarchy = currentUser.getOffice().getHierarchy();
+            final String hierarchy = this.context.officeHierarchy();
             final String hierarchySearchString = hierarchy + "%";
 
             final String sql = "select " + this.clientMapper.schema()
@@ -262,13 +262,33 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlBuilder.append("c.transfer_to_office_id as transferToOfficeId, transferToOffice.name as transferToOfficeName, ");
             sqlBuilder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, ");
             sqlBuilder.append("c.fullname as fullname, c.display_name as displayName, ");
+            sqlBuilder.append("c.mobile_no as mobileNo, ");
             sqlBuilder.append("c.activation_date as activationDate, c.image_id as imageId, ");
-            sqlBuilder.append("c.staff_id as staffId, s.display_name as staffName ");
+            sqlBuilder.append("c.staff_id as staffId, s.display_name as staffName,");
+
+            sqlBuilder.append("c.submittedon_date as submittedOnDate, ");
+            sqlBuilder.append("sbu.username as submittedByUsername, ");
+            sqlBuilder.append("sbu.firstname as submittedByFirstname, ");
+            sqlBuilder.append("sbu.lastname as submittedByLastname, ");
+
+            sqlBuilder.append("c.closedon_date as closedOnDate, ");
+            sqlBuilder.append("clu.username as closedByUsername, ");
+            sqlBuilder.append("clu.firstname as closedByFirstname, ");
+            sqlBuilder.append("clu.lastname as closedByLastname, ");
+
+            sqlBuilder.append("acu.username as activatedByUsername, ");
+            sqlBuilder.append("acu.firstname as activatedByFirstname, ");
+            sqlBuilder.append("acu.lastname as activatedByLastname ");
+
             sqlBuilder.append("from m_client c ");
             sqlBuilder.append("join m_office o on o.id = c.office_id ");
             sqlBuilder.append("join m_group_client pgc on pgc.client_id = c.id ");
             sqlBuilder.append("left join m_staff s on s.id = c.staff_id ");
             sqlBuilder.append("left join m_office transferToOffice on transferToOffice.id = c.transfer_to_office_id ");
+
+            sqlBuilder.append("left join m_appuser sbu on sbu.id = c.submittedon_userid ");
+            sqlBuilder.append("left join m_appuser acu on acu.id = c.activatedon_userid ");
+            sqlBuilder.append("left join m_appuser clu on clu.id = c.closedon_userid ");
 
             this.schema = sqlBuilder.toString();
         }
@@ -298,13 +318,35 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String fullname = rs.getString("fullname");
             final String displayName = rs.getString("displayName");
             final String externalId = rs.getString("externalId");
+            final String mobileNo = rs.getString("mobileNo");
+
             final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
             final Long imageId = JdbcSupport.getLong(rs, "imageId");
             final Long staffId = JdbcSupport.getLong(rs, "staffId");
             final String staffName = rs.getString("staffName");
 
+            final LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedOnDate");
+            final String closedByUsername = rs.getString("closedByUsername");
+            final String closedByFirstname = rs.getString("closedByFirstname");
+            final String closedByLastname = rs.getString("closedByLastname");
+
+            final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
+            final String submittedByUsername = rs.getString("submittedByUsername");
+            final String submittedByFirstname = rs.getString("submittedByFirstname");
+            final String submittedByLastname = rs.getString("submittedByLastname");
+
+
+            final String activatedByUsername = rs.getString("activatedByUsername");
+            final String activatedByFirstname = rs.getString("activatedByFirstname");
+            final String activatedByLastname = rs.getString("activatedByLastname");
+
+            final ClientTimelineData timeline = new ClientTimelineData (submittedOnDate, submittedByUsername, submittedByFirstname, submittedByLastname,
+                    activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate, closedByUsername,
+                    closedByFirstname, closedByLastname);
+
             return ClientData.instance(accountNo, status, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
-                    middlename, lastname, fullname, displayName, externalId, activationDate, imageId, staffId, staffName);
+                    middlename, lastname, fullname, displayName, externalId, mobileNo, activationDate, imageId, staffId, staffName,timeline);
+
         }
     }
 
@@ -335,12 +377,35 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("c.transfer_to_office_id as transferToOfficeId, transferToOffice.name as transferToOfficeName, ");
             builder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, ");
             builder.append("c.fullname as fullname, c.display_name as displayName, ");
+            builder.append("c.mobile_no as mobileNo, ");
+
+
+            builder.append("c.submittedon_date as submittedOnDate, ");
+            builder.append("sbu.username as submittedByUsername, ");
+            builder.append("sbu.firstname as submittedByFirstname, ");
+            builder.append("sbu.lastname as submittedByLastname, ");
+
+            builder.append("c.closedon_date as closedOnDate, ");
+            builder.append("clu.username as closedByUsername, ");
+            builder.append("clu.firstname as closedByFirstname, ");
+            builder.append("clu.lastname as closedByLastname, ");
+
+           // builder.append("c.submittedon as submittedOnDate, ");
+            builder.append("acu.username as activatedByUsername, ");
+            builder.append("acu.firstname as activatedByFirstname, ");
+            builder.append("acu.lastname as activatedByLastname, ");
+
+
             builder.append("c.activation_date as activationDate, c.image_id as imageId, ");
             builder.append("c.staff_id as staffId, s.display_name as staffName ");
             builder.append("from m_client c ");
             builder.append("join m_office o on o.id = c.office_id ");
             builder.append("left join m_staff s on s.id = c.staff_id ");
             builder.append("left join m_office transferToOffice on transferToOffice.id = c.transfer_to_office_id ");
+            builder.append("left join m_appuser sbu on sbu.id = c.submittedon_userid ");
+            builder.append("left join m_appuser acu on acu.id = c.activatedon_userid ");
+            builder.append("left join m_appuser clu on clu.id = c.closedon_userid ");
+
             this.schema = builder.toString();
         }
 
@@ -369,13 +434,33 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String fullname = rs.getString("fullname");
             final String displayName = rs.getString("displayName");
             final String externalId = rs.getString("externalId");
+            final String mobileNo = rs.getString("mobileNo");
             final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
             final Long imageId = JdbcSupport.getLong(rs, "imageId");
             final Long staffId = JdbcSupport.getLong(rs, "staffId");
             final String staffName = rs.getString("staffName");
 
+            final LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedOnDate");
+            final String closedByUsername = rs.getString("closedByUsername");
+            final String closedByFirstname = rs.getString("closedByFirstname");
+            final String closedByLastname = rs.getString("closedByLastname");
+
+            final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
+            final String submittedByUsername = rs.getString("submittedByUsername");
+            final String submittedByFirstname = rs.getString("submittedByFirstname");
+            final String submittedByLastname = rs.getString("submittedByLastname");
+
+            final String activatedByUsername = rs.getString("activatedByUsername");
+            final String activatedByFirstname = rs.getString("activatedByFirstname");
+            final String activatedByLastname = rs.getString("activatedByLastname");
+
+            final ClientTimelineData timeline = new ClientTimelineData (submittedOnDate, submittedByUsername, submittedByFirstname, submittedByLastname,
+                    activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate, closedByUsername,
+                    closedByFirstname, closedByLastname);
+
             return ClientData.instance(accountNo, status, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
-                    middlename, lastname, fullname, displayName, externalId, activationDate, imageId, staffId, staffName);
+                    middlename, lastname, fullname, displayName, externalId, mobileNo, activationDate, imageId, staffId, staffName,timeline);
+
         }
     }
 

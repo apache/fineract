@@ -1,7 +1,10 @@
 package org.mifosplatform.organisation.holiday.service;
 
+import static org.mifosplatform.organisation.holiday.api.HolidayApiConstants.officesParamName;
+
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
@@ -15,7 +18,7 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.holiday.api.HolidayApiConstants;
 import org.mifosplatform.organisation.holiday.data.HolidayDataValidator;
 import org.mifosplatform.organisation.holiday.domain.Holiday;
-import org.mifosplatform.organisation.holiday.domain.HolidayRepository;
+import org.mifosplatform.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.mifosplatform.organisation.holiday.exception.HolidayDateException;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
@@ -39,7 +42,7 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
     private final static Logger logger = LoggerFactory.getLogger(HolidayWritePlatformServiceJpaRepositoryImpl.class);
 
     private final HolidayDataValidator fromApiJsonDeserializer;
-    private final HolidayRepository holidayRepository;
+    private final HolidayRepositoryWrapper holidayRepository;
     private final WorkingDaysRepositoryWrapper daysRepositoryWrapper;
     private final ConfigurationDomainService configurationDomainService;
     private final PlatformSecurityContext context;
@@ -48,7 +51,7 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
 
     @Autowired
     public HolidayWritePlatformServiceJpaRepositoryImpl(final HolidayDataValidator fromApiJsonDeserializer,
-            final HolidayRepository holidayRepository, final PlatformSecurityContext context, final OfficeRepository officeRepository,
+            final HolidayRepositoryWrapper holidayRepository, final PlatformSecurityContext context, final OfficeRepository officeRepository,
             final FromJsonHelper fromApiJsonHelper, final WorkingDaysRepositoryWrapper daysRepositoryWrapper, final ConfigurationDomainService configurationDomainService) {
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.holidayRepository = holidayRepository;
@@ -81,17 +84,70 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
             return CommandProcessingResult.empty();
         }
     }
+    
+    @Transactional
+    @Override
+    public CommandProcessingResult updateHoliday(final JsonCommand command) {
+
+        try {
+            this.context.authenticatedUser();
+            this.fromApiJsonDeserializer.validateForUpdate(command.json());
+
+            final Holiday holiday = this.holidayRepository.findOneWithNotFoundDetection(command.entityId());
+            Map<String, Object> changes = holiday.update(command);
+
+            validateInputDates(holiday.getFromDateLocalDate(), holiday.getToDateLocalDate(), holiday.getRepaymentsRescheduledToLocalDate());
+
+            if (changes.containsKey(officesParamName)) {
+                final Set<Office> offices = getSelectedOffices(command);
+                final boolean updated = holiday.update(offices);
+                if (!updated) {
+                    changes.remove(officesParamName);
+                }
+            }
+
+            this.holidayRepository.saveAndFlush(holiday);
+
+            return new CommandProcessingResultBuilder().withEntityId(holiday.getId()).with(changes).build();
+        } catch (final DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve);
+            return CommandProcessingResult.empty();
+        }
+    }
+    
+    @Transactional
+    @Override
+    public CommandProcessingResult activateHoliday(final Long holidayId) {
+        this.context.authenticatedUser();
+        final Holiday holiday = this.holidayRepository.findOneWithNotFoundDetection(holidayId);
+        
+        holiday.activate();
+        this.holidayRepository.saveAndFlush(holiday);
+        return new CommandProcessingResultBuilder()
+        .withEntityId(holiday.getId()).build();
+    }
+    
+    @Transactional
+    @Override
+    public CommandProcessingResult deleteHoliday(final Long holidayId) {
+        this.context.authenticatedUser();
+        final Holiday holiday = this.holidayRepository.findOneWithNotFoundDetection(holidayId);
+        holiday.delete();
+        this.holidayRepository.saveAndFlush(holiday);
+        return new CommandProcessingResultBuilder()
+        .withEntityId(holidayId).build();
+    }
 
     private Set<Office> getSelectedOffices(final JsonCommand command) {
         Set<Office> offices = null;
         final JsonObject topLevelJsonElement = this.fromApiJsonHelper.parse(command.json()).getAsJsonObject();
-        if (topLevelJsonElement.has(HolidayApiConstants.offices) && topLevelJsonElement.get(HolidayApiConstants.offices).isJsonArray()) {
+        if (topLevelJsonElement.has(HolidayApiConstants.officesParamName) && topLevelJsonElement.get(HolidayApiConstants.officesParamName).isJsonArray()) {
 
-            final JsonArray array = topLevelJsonElement.get(HolidayApiConstants.offices).getAsJsonArray();
+            final JsonArray array = topLevelJsonElement.get(HolidayApiConstants.officesParamName).getAsJsonArray();
             offices = new HashSet<Office>(array.size());
             for (int i = 0; i < array.size(); i++) {
                 final JsonObject officeElement = array.get(i).getAsJsonObject();
-                final Long officeId = this.fromApiJsonHelper.extractLongNamed(HolidayApiConstants.officeId, officeElement);
+                final Long officeId = this.fromApiJsonHelper.extractLongNamed(HolidayApiConstants.officeIdParamName, officeElement);
                 final Office office = this.officeRepository.findOne(officeId);
                 if (office == null) { throw new OfficeNotFoundException(officeId); }
                 offices.add(office);
@@ -114,9 +170,13 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
     }
 
     private void validateInputDates(final JsonCommand command) {
-        final LocalDate fromDate = command.localDateValueOfParameterNamed(HolidayApiConstants.fromDate);
-        final LocalDate toDate = command.localDateValueOfParameterNamed(HolidayApiConstants.toDate);
-        final LocalDate repaymentsRescheduledTo = command.localDateValueOfParameterNamed(HolidayApiConstants.repaymentsRescheduledTo);
+        final LocalDate fromDate = command.localDateValueOfParameterNamed(HolidayApiConstants.fromDateParamName);
+        final LocalDate toDate = command.localDateValueOfParameterNamed(HolidayApiConstants.toDateParamName);
+        final LocalDate repaymentsRescheduledTo = command.localDateValueOfParameterNamed(HolidayApiConstants.repaymentsRescheduledToParamName);
+        this.validateInputDates(fromDate, toDate, repaymentsRescheduledTo);
+    }
+    private void validateInputDates(final LocalDate fromDate, final LocalDate toDate, final LocalDate repaymentsRescheduledTo) {
+        
         String defaultUserMessage = "";
 
         if (toDate.isBefore(fromDate)) {

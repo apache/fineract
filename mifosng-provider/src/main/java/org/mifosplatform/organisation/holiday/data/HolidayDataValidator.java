@@ -38,7 +38,7 @@ public class HolidayDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, HolidayApiConstants.HOLIDAY_CREATE_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, HolidayApiConstants.HOLIDAY_CREATE_OR_UPDATE_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
@@ -46,37 +46,93 @@ public class HolidayDataValidator {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(HolidayApiConstants.HOLIDAY_RESOURCE_NAME);
 
-        final String name = this.fromApiJsonHelper.extractStringNamed(HolidayApiConstants.name, element);
-        baseDataValidator.reset().parameter(HolidayApiConstants.name).value(name).notNull().notExceedingLengthOf(100);
+        final String name = this.fromApiJsonHelper.extractStringNamed(HolidayApiConstants.nameParamName, element);
+        baseDataValidator.reset().parameter(HolidayApiConstants.nameParamName).value(name).notNull().notExceedingLengthOf(100);
 
-        final LocalDate fromDate = this.fromApiJsonHelper.extractLocalDateNamed(HolidayApiConstants.fromDate, element);
-        baseDataValidator.reset().parameter(HolidayApiConstants.fromDate).value(fromDate).notNull();
+        final LocalDate fromDate = this.fromApiJsonHelper.extractLocalDateNamed(HolidayApiConstants.fromDateParamName, element);
+        baseDataValidator.reset().parameter(HolidayApiConstants.fromDateParamName).value(fromDate).notNull();
 
-        final LocalDate toDate = this.fromApiJsonHelper.extractLocalDateNamed(HolidayApiConstants.toDate, element);
-        baseDataValidator.reset().parameter(HolidayApiConstants.toDate).value(toDate).notNull();
+        final LocalDate toDate = this.fromApiJsonHelper.extractLocalDateNamed(HolidayApiConstants.toDateParamName, element);
+        baseDataValidator.reset().parameter(HolidayApiConstants.toDateParamName).value(toDate).notNull();
 
-        final LocalDate repaymentsRescheduledTo = this.fromApiJsonHelper.extractLocalDateNamed(HolidayApiConstants.repaymentsRescheduledTo,
+        final LocalDate repaymentsRescheduledTo = this.fromApiJsonHelper.extractLocalDateNamed(HolidayApiConstants.repaymentsRescheduledToParamName,
                 element);
-        baseDataValidator.reset().parameter(HolidayApiConstants.repaymentsRescheduledTo).value(repaymentsRescheduledTo).notNull();
+        baseDataValidator.reset().parameter(HolidayApiConstants.repaymentsRescheduledToParamName).value(repaymentsRescheduledTo).notNull();
 
         Set<Long> offices = null;
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
 
-        if (topLevelJsonElement.has(HolidayApiConstants.offices) && topLevelJsonElement.get(HolidayApiConstants.offices).isJsonArray()) {
+        if (topLevelJsonElement.has(HolidayApiConstants.officesParamName) && topLevelJsonElement.get(HolidayApiConstants.officesParamName).isJsonArray()) {
 
-            final JsonArray array = topLevelJsonElement.get(HolidayApiConstants.offices).getAsJsonArray();
+            final JsonArray array = topLevelJsonElement.get(HolidayApiConstants.officesParamName).getAsJsonArray();
             if (array.size() > 0) {
                 offices = new HashSet<Long>(array.size());
                 for (int i = 0; i < array.size(); i++) {
                     final JsonObject officeElement = array.get(i).getAsJsonObject();
-                    final Long officeId = this.fromApiJsonHelper.extractLongNamed(HolidayApiConstants.officeId, officeElement);
-                    baseDataValidator.reset().parameter(HolidayApiConstants.offices).value(officeId).notNull();
+                    final Long officeId = this.fromApiJsonHelper.extractLongNamed(HolidayApiConstants.officeIdParamName, officeElement);
+                    baseDataValidator.reset().parameter(HolidayApiConstants.officesParamName).value(officeId).notNull();
                     offices.add(officeId);
                 }
             }
         }
-        baseDataValidator.reset().parameter(HolidayApiConstants.offices).value(offices).notNull();
+        baseDataValidator.reset().parameter(HolidayApiConstants.officesParamName).value(offices).notNull();
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+    
+    public void validateForUpdate(final String json) {
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                HolidayApiConstants.HOLIDAY_CREATE_OR_UPDATE_REQUEST_DATA_PARAMETERS);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(HolidayApiConstants.HOLIDAY_RESOURCE_NAME);
+
+        if (this.fromApiJsonHelper.parameterExists(HolidayApiConstants.nameParamName, element)) {
+            final String name = this.fromApiJsonHelper.extractStringNamed(HolidayApiConstants.nameParamName, element);
+            baseDataValidator.reset().parameter(HolidayApiConstants.nameParamName).value(name).notNull().notExceedingLengthOf(100);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(HolidayApiConstants.fromDateParamName, element)) {
+            final LocalDate fromDate = this.fromApiJsonHelper.extractLocalDateNamed(HolidayApiConstants.fromDateParamName, element);
+            baseDataValidator.reset().parameter(HolidayApiConstants.fromDateParamName).value(fromDate).notNull();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(HolidayApiConstants.toDateParamName, element)) {
+            final LocalDate toDate = this.fromApiJsonHelper.extractLocalDateNamed(HolidayApiConstants.toDateParamName, element);
+            baseDataValidator.reset().parameter(HolidayApiConstants.toDateParamName).value(toDate).notNull();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(HolidayApiConstants.repaymentsRescheduledToParamName, element)) {
+            final LocalDate repaymentsRescheduledTo = this.fromApiJsonHelper.extractLocalDateNamed(
+                    HolidayApiConstants.repaymentsRescheduledToParamName, element);
+            baseDataValidator.reset().parameter(HolidayApiConstants.repaymentsRescheduledToParamName).value(repaymentsRescheduledTo).notNull();
+        }
+
+        Set<Long> offices = null;
+        final JsonObject topLevelJsonElement = element.getAsJsonObject();
+        if (this.fromApiJsonHelper.parameterExists(HolidayApiConstants.officesParamName, element)) {
+            if (topLevelJsonElement.has(HolidayApiConstants.officesParamName) && topLevelJsonElement.get(HolidayApiConstants.officesParamName).isJsonArray()) {
+
+                final JsonArray array = topLevelJsonElement.get(HolidayApiConstants.officesParamName).getAsJsonArray();
+                if (array.size() > 0) {
+                    offices = new HashSet<Long>(array.size());
+                    for (int i = 0; i < array.size(); i++) {
+                        final JsonObject officeElement = array.get(i).getAsJsonObject();
+                        final Long officeId = this.fromApiJsonHelper.extractLongNamed(HolidayApiConstants.officeIdParamName, officeElement);
+                        baseDataValidator.reset().parameter(HolidayApiConstants.officesParamName).value(officeId).notNull();
+                        offices.add(officeId);
+                    }
+                }
+            }
+            baseDataValidator.reset().parameter(HolidayApiConstants.officesParamName).value(offices).notNull();
+            throwExceptionIfValidationWarningsExist(dataValidationErrors);
+        }
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {

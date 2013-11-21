@@ -49,7 +49,7 @@ public class StaffApiResource {
      * {@link StaffData}.
      */
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "firstname", "lastname", "displayName",
-            "officeId", "officeName", "loanOfficerFlag", "externalId", "allowedOffices"));
+            "officeId", "officeName", "loanOfficerFlag", "externalId", "mobileNo", "allowedOffices"));
 
     private final String resourceNameForPermissions = "STAFF";
 

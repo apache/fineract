@@ -28,7 +28,7 @@ import com.google.gson.reflect.TypeToken;
 
 /**
  * Immutable representation of a command.
- * 
+ *
  * Wraps the provided JSON with convenience functions for extracting parameter
  * values and checking for changes against an existing value.
  */
@@ -295,7 +295,7 @@ public final class JsonCommand {
     public Date DateValueOfParameterNamed(final String parameterName) {
         final LocalDate localDate = this.fromApiJsonHelper.extractLocalDateNamed(parameterName, this.parsedCommand);
         if (localDate == null) { return null; }
-        return localDate.toDateMidnight().toDate();
+        return localDate.toDateTimeAtStartOfDay().toDate();
     }
 
     public boolean isChangeInStringParameterNamed(final String parameterName, final String existingValue) {

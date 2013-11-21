@@ -19,6 +19,7 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +33,7 @@ public final class StaffCommandFromApiJsonDeserializer {
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("firstname", "lastname", "officeId", "externalId",
-            "isLoanOfficer"));
+            "mobileNo", "isLoanOfficer"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -60,6 +61,12 @@ public final class StaffCommandFromApiJsonDeserializer {
 
         final String lastname = this.fromApiJsonHelper.extractStringNamed("lastname", element);
         baseDataValidator.reset().parameter("lastname").value(lastname).notBlank().notExceedingLengthOf(50);
+
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.mobileNoParamName, element)) {
+            final String mobileNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.mobileNoParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.mobileNoParamName).value(mobileNo).ignoreIfNull()
+                    .notExceedingLengthOf(50);
+        }
 
         if (this.fromApiJsonHelper.parameterExists("isLoanOfficer", element)) {
             final Boolean loanOfficerFlag = this.fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
@@ -92,6 +99,11 @@ public final class StaffCommandFromApiJsonDeserializer {
         if (this.fromApiJsonHelper.parameterExists("lastname", element)) {
             final String lastname = this.fromApiJsonHelper.extractStringNamed("lastname", element);
             baseDataValidator.reset().parameter("lastname").value(lastname).notBlank().notExceedingLengthOf(50);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.mobileNoParamName, element)) {
+            final String mobileNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.mobileNoParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.mobileNoParamName).value(mobileNo).notExceedingLengthOf(50);
         }
 
         if (this.fromApiJsonHelper.parameterExists("isLoanOfficer", element)) {

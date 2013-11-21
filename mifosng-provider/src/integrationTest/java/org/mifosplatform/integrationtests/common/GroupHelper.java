@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
@@ -74,13 +76,15 @@ public class GroupHelper {
         map.put("officeId", "1");
         map.put("name", randomNameGenerator("Group_Name_", 5));
         map.put("externalId", randomIDGenerator("ID_", 7));
-        if (active == true) {
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("locale", "en");
+        if (active) {
             map.put("active", "true");
-            map.put("dateFormat", "dd MMMM yyyy");
-            map.put("locale", "en");
             map.put("activationDate", activationDate);
         } else {
             map.put("active", "false");
+            map.put("submittedOnDate", "04 March 2011");
+            System.out.println("defaulting to inactive group: 04 March 2011");
         }
 
         System.out.println("map : " + map);
@@ -100,10 +104,11 @@ public class GroupHelper {
         final HashMap<String, String> map = new HashMap<String, String>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
-        if (activationDate != "") {
+        if (StringUtils.isNotEmpty(activationDate)) {
             map.put("activationDate", activationDate);
         } else {
             map.put("activationDate", "04 March 2011");
+            System.out.println("defaulting to fixed date: 04 March 2011");
         }
         System.out.println("map : " + map);
         return new Gson().toJson(map);

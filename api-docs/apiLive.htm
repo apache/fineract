@@ -90,7 +90,7 @@
 <body>
 	<div id="page-wrapper">
 		<div id="flybar">
-			<div id="nav-logo">1.13.4.RELEASE</div>
+			<div id="nav-logo">1.14.0.RELEASE</div>
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Overview</h2>
 				<div class="flybar-menu-overview">
@@ -1934,6 +1934,13 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 								structure.</td>
 						</tr>
 						<tr class=alt>
+							<td>mobileNo</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: unique mobile number that is used by SMS or Mobile Money functionality.
+							</td>
+						</tr>
+						<tr class=alt>
 							<td>staffId</td>
 						</tr>
 						<tr>
@@ -2027,7 +2034,7 @@ GET https://DomainName/api/v1/clients/template
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>groupId, externalId, accountNo, staffId</td>
+							<td>groupId, externalId, accountNo, staffId, mobileNo</td>
 						</tr>
 					</table>
 				</div>
@@ -2046,7 +2053,8 @@ Content-Type: application/json Request Body:
 	"dateFormat": "dd MMMM yyyy", 
 	"locale": "en", 
 	"active": true,
-	"activationDate": "04 March 2009"
+	"activationDate": "04 March 2009",
+    "submittedOnDate":"04 March 2009"
 } 
 					</code>
 					<code class="method-response">
@@ -2371,6 +2379,16 @@ GET https://DomainName/api/v1/clients/{clientId}
   "displayName": "Client of group",
   "officeId": 1,
   "officeName": "Head Office",
+  "timeline": {
+    "activatedOnDate": [
+        2009,
+        3,
+        4
+    ],
+    "activatedByUsername": "mifos",
+    "activatedByFirstname": "App",
+    "activatedByLastname": "Administrator"
+  },
   "groups": [
     {
       "id": 1,
@@ -3901,7 +3919,8 @@ Content-Type: application/json Request Body:
 	"dateFormat": "dd MMMM yyyy", 
 	"locale": "en", 
 	"active": true, 
-	"activationDate": "04 March 2009"
+	"activationDate": "04 March 2009",
+      "submittedOnDate":"04 March 2009"
 }
 					</code>
 					<code class="method-response">
@@ -4120,7 +4139,17 @@ GET https://DomainName/mifosng-provider/api/v1/groups/1
   "externalId": "000-1A",
   "officeId": 1,
   "officeName": "Head Office",
-  "hierarchy": ".1."
+  "hierarchy": ".1.",
+  "timeline": {
+    "activatedOnDate": [
+    2013,
+    11,
+    14
+    ],
+    "activatedByUsername": "mifos",
+    "activatedByFirstname": "App",
+    "activatedByLastname": "Administrator"
+    }
 }
 					</code>
 				</div>
@@ -4137,6 +4166,16 @@ GET https://DomainName/mifosng-provider/api/v1/groups/1?associations=clientMembe
   "officeId": 1,
   "officeName": "Head Office",
   "hierarchy": ".1.",
+  "timeline": {
+    "activatedOnDate": [
+    2013,
+    11,
+    14
+    ],
+    "activatedByUsername": "mifos",
+    "activatedByFirstname": "App",
+    "activatedByLastname": "Administrator"
+   },
   "clientMembers": [
     {
       "id": 1,
@@ -10894,7 +10933,8 @@ Request Body:
     "firstname": "John",
     "lastname": "Doe",
     "isLoanOfficer": "true",
-    "externalId": "17H"
+    "externalId": "17H",
+    "mobileNo": "+353851239876"
 }
 					</code>
 					<code class="method-response">
@@ -17869,7 +17909,14 @@ GET https://DomainName/api/v1/users
         "officeName": "Head Office",
         "firstname": "App",
         "lastname": "Administrator",
-        "email": "demomfi@mifos.org"
+        "email": "demomfi@mifos.org",
+	"selectedRoles": [
+            {
+                "id": 1,
+                "name": "Super user",
+                "description": "This role provides all application permissions."
+            }
+        ]
     }
 ]
 					</code>

@@ -238,6 +238,30 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createSms() {
+        this.actionName = "CREATE";
+        this.entityName = "SMS";
+        this.entityId = null;
+        this.href = "/sms/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateSms(final Long resourceId) {
+        this.actionName = "UPDATE";
+        this.entityName = "SMS";
+        this.entityId = resourceId;
+        this.href = "/sms/" + resourceId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteSms(final Long resourceId) {
+        this.actionName = "DELETE";
+        this.entityName = "SMS";
+        this.entityId = resourceId;
+        this.href = "/sms/" + resourceId;
+        return this;
+    }
+
     public CommandWrapperBuilder createCode() {
         this.actionName = "CREATE";
         this.entityName = "CODE";
@@ -362,7 +386,7 @@ public class CommandWrapperBuilder {
         this.href = "/clientId/" + clientId + "?command=proposeTransfer";
         return this;
     }
-    
+
     public CommandWrapperBuilder proposeAndAcceptClientTransfer(final Long clientId) {
         this.actionName = "PROPOSEANDACCEPTTRANSFER";
         this.entityName = "CLIENT";
@@ -773,7 +797,7 @@ public class CommandWrapperBuilder {
         this.href = "/journalentries/" + transactionId;
         return this;
     }
-    
+
     public CommandWrapperBuilder updateRunningBalanceForJournalEntry() {
         this.actionName = "UPDATERUNNINGBALANCE";
         this.entityName = "JOURNALENTRY";
@@ -1285,6 +1309,30 @@ public class CommandWrapperBuilder {
         this.entityName = "HOLIDAY";
         this.entityId = null;
         this.href = "/holidays/template";
+        return this;
+    }
+    
+    public CommandWrapperBuilder activateHoliday(final Long holidayId) {
+        this.actionName = "ACTIVATE";
+        this.entityName = "HOLIDAY";
+        this.entityId = holidayId;
+        this.href = "/holidays/" + holidayId + "command=activate";
+        return this;
+    }
+    
+    public CommandWrapperBuilder updateHoliday(final Long holidayId) {
+        this.actionName = "UPDATE";
+        this.entityName = "HOLIDAY";
+        this.entityId = holidayId;
+        this.href = "/holidays/" + holidayId ;
+        return this;
+    }
+    
+    public CommandWrapperBuilder deleteHoliday(final Long holidayId) {
+        this.actionName = "DELETE";
+        this.entityName = "HOLIDAY";
+        this.entityId = holidayId;
+        this.href = "/holidays/" + holidayId + "command=delete";
         return this;
     }
 

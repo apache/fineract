@@ -40,10 +40,10 @@ import com.google.gson.JsonArray;
 /**
  * Loan products allow for categorisation of an organisations loans into
  * something meaningful to them.
- * 
+ *
  * They provide a means of simplifying creation/maintenance of loans. They can
  * also allow for product comparison to take place when reporting.
- * 
+ *
  * They allow for constraints to be added at product level.
  */
 @Entity
@@ -193,11 +193,11 @@ public class LoanProduct extends AbstractPersistable<Long> {
         this.includeInBorrowerCycle = includeInBorrowerCycle;
 
         if (startDate != null) {
-            this.startDate = startDate.toDateMidnight().toDate();
+            this.startDate = startDate.toDateTimeAtStartOfDay().toDate();
         }
 
         if (closeDate != null) {
-            this.closeDate = closeDate.toDateMidnight().toDate();
+            this.closeDate = closeDate.toDateTimeAtStartOfDay().toDate();
         }
 
         this.externalId = externalId;
@@ -227,7 +227,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final Set<Charge> currentSetOfCharges = new HashSet<Charge>(this.charges);
             final Set<Charge> newSetOfCharges = new HashSet<Charge>(newProductCharges);
 
-            if (!(currentSetOfCharges.equals(newSetOfCharges))) {
+            if (!currentSetOfCharges.equals(newSetOfCharges)) {
                 updated = true;
                 this.charges = newProductCharges;
             }
@@ -401,7 +401,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         // If all min and max fields are null then loanProductMinMaxConstraints
         // initialising to null
         // Reset LoanProductMinMaxConstraints with null values.
-        this.loanProductMinMaxConstraints = (this.loanProductMinMaxConstraints == null) ? new LoanProductMinMaxConstraints(null, null,
+        this.loanProductMinMaxConstraints = this.loanProductMinMaxConstraints == null ? new LoanProductMinMaxConstraints(null, null,
                 null, null, null, null) : this.loanProductMinMaxConstraints;
         return this.loanProductMinMaxConstraints;
     }

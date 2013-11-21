@@ -18,4 +18,6 @@ public interface AppUserReadPlatformService {
     AppUserData retrieveNewUserDetails();
 
     AppUserData retrieveUser(Long userId);
+
+    Collection<AppUserData> retrieveAllUsersWithRoles();
 }

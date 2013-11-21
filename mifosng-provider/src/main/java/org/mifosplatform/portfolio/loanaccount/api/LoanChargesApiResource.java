@@ -36,6 +36,7 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanInstallmentChargeData;
 import org.mifosplatform.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -48,7 +49,7 @@ public class LoanChargesApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "chargeId", "name", "penalty",
             "chargeTimeType", "dueAsOfDate", "chargeCalculationType", "percentage", "amountPercentageAppliedTo", "currency",
-            "amountWaived", "amountWrittenOff", "amountOutstanding", "amountOrPercentage", "amount", "amountPaid", "chargeOptions"));
+            "amountWaived", "amountWrittenOff", "amountOutstanding", "amountOrPercentage", "amount", "amountPaid", "chargeOptions","installmentChargeData"));
 
     private final String resourceNameForPermissions = "LOAN";
 
@@ -116,9 +117,13 @@ public class LoanChargesApiResource {
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         final LoanChargeData loanCharge = this.loanChargeReadPlatformService.retrieveLoanChargeDetails(loanChargeId, loanId);
+        
+        final Collection<LoanInstallmentChargeData> installmentChargeData = this.loanChargeReadPlatformService.retrieveInstallmentLoanCharges(loanChargeId, true);
+        
+        final LoanChargeData loanChargeData  = new LoanChargeData(loanCharge, installmentChargeData);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, loanCharge, this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, loanChargeData, this.RESPONSE_DATA_PARAMETERS);
     }
 
     @POST

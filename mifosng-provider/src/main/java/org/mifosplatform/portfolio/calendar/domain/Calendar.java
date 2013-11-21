@@ -6,12 +6,21 @@
 
 package org.mifosplatform.portfolio.calendar.domain;
 
+import static org.mifosplatform.portfolio.calendar.CalendarConstants.CALENDAR_RESOURCE_NAME;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -19,7 +28,11 @@ import javax.persistence.TemporalType;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.portfolio.calendar.CalendarConstants.CALENDAR_SUPPORTED_PARAMETERS;
 import org.mifosplatform.portfolio.calendar.exception.CalendarDateException;
 import org.mifosplatform.portfolio.calendar.exception.CalendarParameterUpdateNotSupportedException;
@@ -68,6 +81,10 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "second_reminder", nullable = true)
     private Integer secondReminder;
 
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "calendar_id")
+    private Set<CalendarHistory> calendarHistory = new HashSet<CalendarHistory>();
+    
     protected Calendar() {
 
     }
@@ -75,18 +92,29 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
     public Calendar(final String title, final String description, final String location, final LocalDate startDate,
             final LocalDate endDate, final Integer duration, final Integer typeId, final boolean repeating, final String recurrence,
             final Integer remindById, final Integer firstReminder, final Integer secondReminder) {
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(CALENDAR_RESOURCE_NAME);
+
+        final CalendarType calendarType = CalendarType.fromInt(typeId);
+        if (calendarType.isCollection() && !repeating) {
+            baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATING.getValue())
+                    .failWithCodeNoParameterAddedToErrorCode("must.repeat.for.collection.calendar");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+
         this.title = StringUtils.defaultIfEmpty(title, null);
         this.description = StringUtils.defaultIfEmpty(description, null);
         this.location = StringUtils.defaultIfEmpty(location, null);
 
         if (null != startDate) {
-            this.startDate = startDate.toDateMidnight().toDate();
+            this.startDate = startDate.toDateTimeAtStartOfDay().toDate();
         } else {
             this.startDate = null;
         }
 
         if (null != endDate) {
-            this.endDate = endDate.toDateMidnight().toDate();
+            this.endDate = endDate.toDateTimeAtStartOfDay().toDate();
         } else {
             this.endDate = null;
         }
@@ -153,17 +181,22 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
             final String valueAsInput = command.stringValueOfParameterNamed(startDateParamName);
             final LocalDate newValue = command.localDateValueOfParameterNamed(startDateParamName);
-            if (isStartDateBefore(newValue)) {
+            final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+            
+            if (newValue.isBefore(currentDate)) {
+                final String defaultUserMessage = "New meeting effective from date cannot be in past";
+                throw new CalendarDateException("new.start.date.cannot.be.in.past", defaultUserMessage, newValue,
+                        getStartDateLocalDate());
+            }else if (isStartDateAfter(newValue) && isStartDateBeforeOrEqual(currentDate)) {
+              //new meeting date should be on or after start date or current date
+                final String defaultUserMessage = "New meeting effective from date cannot be a date before existing meeting start date";
+                throw new CalendarDateException("new.start.date.before.existing.date", defaultUserMessage, newValue,
+                        getStartDateLocalDate());
+            } else {
                 actualChanges.put(startDateParamName, valueAsInput);
                 actualChanges.put("dateFormat", dateFormatAsInput);
                 actualChanges.put("locale", localeAsInput);
                 this.startDate = newValue.toDate();
-            } else {
-                // new meeting start date should be greater than existing
-                // meeting start date
-                final String defaultUserMessage = "New meeting start on or after date cannot be a date before existing meeting start date";
-                throw new CalendarDateException("new.start.date.before.existing.date", defaultUserMessage, newValue,
-                        getStartDateLocalDate());
             }
         }
 
@@ -211,8 +244,21 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
             this.repeating = newValue;
         }
 
+        //if repeating is false then update recurrence to NULL
+        if(!this.repeating) this.recurrence = null;
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(CALENDAR_RESOURCE_NAME);
+
+        final CalendarType calendarType = CalendarType.fromInt(this.typeId);
+        if (calendarType.isCollection() && !this.repeating) {
+            baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATING.getValue())
+                    .failWithCodeNoParameterAddedToErrorCode("must.repeat.for.collection.calendar");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+        
         final String newRecurrence = Calendar.constructRecurrence(command, this);
-        if (this.recurrence != null && !newRecurrence.equalsIgnoreCase(this.recurrence)) {
+        if (!StringUtils.isBlank(this.recurrence) && !newRecurrence.equalsIgnoreCase(this.recurrence)) {
 
             // FIXME: AA - Is this restriction required only for collection type
             // meetings or for all?.
@@ -319,9 +365,48 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
         }
         return endDateLocalDate;
     }
+    
+    public Set<CalendarHistory> history() {
+        return this.calendarHistory;
+    }
 
-    public boolean isStartDateBefore(final LocalDate newStartDate) {
-        if (this.startDate != null && newStartDate != null && getStartDateLocalDate().isBefore(newStartDate)) { return true; }
+    public boolean isStartDateBefore(final LocalDate compareDate) {
+        if (this.startDate != null && compareDate != null && getStartDateLocalDate().isBefore(compareDate)) { return true; }
+        return false;
+    }
+    
+    public boolean isStartDateBeforeOrEqual(final LocalDate compareDate) {
+        if (this.startDate != null && compareDate != null) {
+            if (getStartDateLocalDate().isBefore(compareDate) || getStartDateLocalDate().equals(compareDate)) { return true; }
+        }
+        return false;
+    }
+    
+    public boolean isStartDateAfter(final LocalDate compareDate) {
+        if (this.startDate != null && compareDate != null && getStartDateLocalDate().isAfter(compareDate)) { return true; }
+        return false;
+    }
+    
+    public boolean isStartDateAfterOrEqual(final LocalDate compareDate) {
+        if (this.startDate != null && compareDate != null) {
+            if (getStartDateLocalDate().isAfter(compareDate) || getStartDateLocalDate().isEqual(compareDate)) { return true; }
+        }
+        return false;
+    }
+    
+    public boolean isEndDateAfterOrEqual(final LocalDate compareDate) {
+        if (this.endDate != null && compareDate != null) {
+            if (getEndDateLocalDate().isAfter(compareDate) || getEndDateLocalDate().isEqual(compareDate)) { return true; }
+        }
+        return false;
+    }
+    
+    public boolean isBetweenStartAndEndDate(final LocalDate compareDate){
+        if (isStartDateBeforeOrEqual(compareDate)){
+            if (getEndDateLocalDate() == null || isEndDateAfterOrEqual(compareDate)){
+                return true;
+            }
+        }
         return false;
     }
 
@@ -337,23 +422,39 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
         if (repeating) {
             final StringBuilder recurrenceBuilder = new StringBuilder(200);
-            final String repeats = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS.getValue());
+            final Integer frequency = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.FREQUENCY.getValue());
+            final CalendarFrequencyType frequencyType = CalendarFrequencyType.fromInt(frequency);
             recurrenceBuilder.append("FREQ=");
-            recurrenceBuilder.append(repeats.toUpperCase());
-            final Integer repeatsEvery = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_EVERY.getValue());
-            if (repeatsEvery > 1) {
+            recurrenceBuilder.append(frequencyType.toString().toUpperCase());
+            final Integer interval = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue());
+            if (interval > 1) {
                 recurrenceBuilder.append(";INTERVAL=");
-                recurrenceBuilder.append(repeatsEvery);
+                recurrenceBuilder.append(interval);
             }
-            if (repeats.equalsIgnoreCase("Weekly")) {
-                final String repeatsOnDay = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue());
-                if (repeatsOnDay != null && repeatsOnDay != "") {
+            if (frequencyType.isWeekly()) {
+                final Integer repeatsOnDay = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue());
+                final CalendarWeekDaysType weekDays = CalendarWeekDaysType.fromInt(repeatsOnDay);
+                if (!weekDays.isInvalid()) {
                     recurrenceBuilder.append(";BYDAY=");
-                    recurrenceBuilder.append(repeatsOnDay);
+                    recurrenceBuilder.append(weekDays.toString().toUpperCase());
                 }
             }
             return recurrenceBuilder.toString();
         }
         return "";
+    }
+    
+    public boolean isValidRecurringDate(final LocalDate compareDate) {
+
+        if (isBetweenStartAndEndDate(compareDate)) { return CalendarUtils.isValidRedurringDate(getRecurrence(), getStartDateLocalDate(),
+                compareDate); }
+
+        // validate with history details.
+        for (CalendarHistory history : history()) {
+            if (history.isBetweenStartAndEndDate(compareDate)) { return CalendarUtils.isValidRedurringDate(history.getRecurrence(),
+                    history.getStartDateLocalDate(), compareDate); }
+        }
+
+        return false;
     }
 }

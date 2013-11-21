@@ -44,6 +44,7 @@ import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepository;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,7 +137,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     public CommandProcessingResult createClient(final JsonCommand command) {
 
         try {
-            this.context.authenticatedUser();
+            final AppUser currentUser = this.context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
@@ -159,7 +160,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, clientOffice.getHierarchy());
             }
 
-            final Client newClient = Client.createNew(clientOffice, clientParentGroup, staff, command);
+            final Client newClient = Client.createNew(currentUser,clientOffice, clientParentGroup, staff, command);
 
             this.clientRepository.save(newClient);
 
@@ -188,8 +189,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     public CommandProcessingResult updateClient(final Long clientId, final JsonCommand command) {
 
         try {
-            this.context.authenticatedUser();
-
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
             final Client clientForUpdate = this.clientRepository.findOneWithNotFoundDetection(clientId);
@@ -239,7 +238,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
             final LocalDate activationDate = command.localDateValueOfParameterNamed("activationDate");
 
-            client.activate(fmt, activationDate);
+            final AppUser currentUser = this.context.authenticatedUser();
+            client.activate(currentUser, fmt, activationDate);
 
             this.clientRepository.saveAndFlush(client);
 
@@ -332,6 +332,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     @Override
     public CommandProcessingResult closeClient(final Long clientId, final JsonCommand command) {
         try {
+
+            final AppUser currentUser = this.context.authenticatedUser();
             this.fromApiJsonDeserializer.validateClose(command);
 
             final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
@@ -389,7 +391,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 }
             }
 
-            client.close(closureReason, closureDate.toDate());
+            client.close(currentUser,closureReason, closureDate.toDate());
             this.clientRepository.saveAndFlush(client);
 
             return new CommandProcessingResultBuilder() //

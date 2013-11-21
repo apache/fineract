@@ -1,0 +1,10 @@
+#jQuery Dependencies
+- $.extend
+- bind
+- addClass
+- removeClass
+- animate
+- attr
+- text
+- append
+- createElement
