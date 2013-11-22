@@ -12,7 +12,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 /**
  * Immutable object representing a General Ledger Account
- * 
+ *
  * Note: no getter/setters required as google will produce json from fields of
  * object.
  */
@@ -59,6 +59,7 @@ public class JournalEntryData {
     @SuppressWarnings("unused")
     private final Boolean runningBalanceComputed;
 
+    @SuppressWarnings("unused")
     private final PaymentDetails paymentDetails;
 
     public JournalEntryData(final Long id, final Long officeId, final String officeName, final String glAccountName,

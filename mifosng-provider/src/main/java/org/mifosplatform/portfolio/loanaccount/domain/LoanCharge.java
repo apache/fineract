@@ -72,7 +72,6 @@ public class LoanCharge extends AbstractPersistable<Long> {
     @Column(name = "calculation_on_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountPercentageAppliedTo;
 
-    @SuppressWarnings("unused")
     @Column(name = "charge_amount_or_percentage", scale = 6, precision = 19, nullable = false)
     private BigDecimal amountOrPercentage;
 
@@ -368,19 +367,19 @@ public class LoanCharge extends AbstractPersistable<Long> {
             }
         }
     }
-    
-    public void update(final BigDecimal amount, final LocalDate dueDate, Integer numberOfRepayments){
+
+    public void update(final BigDecimal amount, final LocalDate dueDate, final Integer numberOfRepayments){
         BigDecimal amountPercentageAppliedTo = BigDecimal.ZERO;
         if(this.loan!=null){
             switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
                 case PERCENT_OF_AMOUNT:
-                    amountPercentageAppliedTo = loan.getPrincpal().getAmount();
+                    amountPercentageAppliedTo = this.loan.getPrincpal().getAmount();
                     break;
                 case PERCENT_OF_AMOUNT_AND_INTEREST:
-                    amountPercentageAppliedTo = loan.getPrincpal().getAmount().add(loan.getTotalInterest());
+                    amountPercentageAppliedTo = this.loan.getPrincpal().getAmount().add(this.loan.getTotalInterest());
                     break;
                 case PERCENT_OF_INTEREST:
-                    amountPercentageAppliedTo = loan.getTotalInterest();
+                    amountPercentageAppliedTo = this.loan.getTotalInterest();
                 break;
                 default:
                    break;

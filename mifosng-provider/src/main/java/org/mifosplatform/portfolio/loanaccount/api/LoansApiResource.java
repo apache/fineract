@@ -207,7 +207,7 @@ public class LoansApiResource {
 
                 officeId = loanAccountClientDetails.officeId();
 
-                newLoanAccount = (newLoanAccount == null) ? loanAccountClientDetails : LoanAccountData.populateClientDefaults(
+                newLoanAccount = newLoanAccount == null ? loanAccountClientDetails : LoanAccountData.populateClientDefaults(
                         newLoanAccount, loanAccountClientDetails);
 
                 // if it's JLG loan add group details
@@ -222,7 +222,7 @@ public class LoansApiResource {
                 final LoanAccountData loanAccountGroupData = this.loanReadPlatformService.retrieveGroupDetailsTemplate(groupId);
                 officeId = loanAccountGroupData.groupOfficeId();
                 calendarOptions = this.loanReadPlatformService.retrieveCalendars(groupId);
-                newLoanAccount = (newLoanAccount == null) ? loanAccountGroupData : LoanAccountData.populateGroupDefaults(newLoanAccount,
+                newLoanAccount = newLoanAccount == null ? loanAccountGroupData : LoanAccountData.populateGroupDefaults(newLoanAccount,
                         loanAccountGroupData);
 
             } else if (templateType.equals("jlgbulk")) {
@@ -230,7 +230,7 @@ public class LoansApiResource {
                 final LoanAccountData loanAccountGroupData = this.loanReadPlatformService.retrieveGroupAndMembersDetailsTemplate(groupId);
                 officeId = loanAccountGroupData.groupOfficeId();
                 calendarOptions = this.loanReadPlatformService.retrieveCalendars(groupId);
-                newLoanAccount = (newLoanAccount == null) ? loanAccountGroupData : LoanAccountData.populateGroupDefaults(newLoanAccount,
+                newLoanAccount = newLoanAccount == null ? loanAccountGroupData : LoanAccountData.populateGroupDefaults(newLoanAccount,
                         loanAccountGroupData);
             } else {
                 final String errorMsg = "Loan template type '" + templateType + "' is not supported";
@@ -422,7 +422,8 @@ public class LoansApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
-            @QueryParam("externalId") final String externalId, @QueryParam("underHierarchy") final String hierarchy,
+            @QueryParam("externalId") final String externalId,
+//            @QueryParam("underHierarchy") final String hierarchy,
             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
             @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
 
