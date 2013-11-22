@@ -18,10 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.template.domain.Template;
 import org.mifosplatform.template.domain.TemplateFunctions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -32,13 +30,13 @@ import com.github.mustachejava.MustacheFactory;
 @Service
 public class TemplateMergeService {
 
-    private final FromJsonHelper fromApiJsonHelper;
+//    private final FromJsonHelper fromApiJsonHelper;
     private Map<String, Object> scopes;
 
-    @Autowired
-    public TemplateMergeService(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-    }
+//    @Autowired
+//    public TemplateMergeService(final FromJsonHelper fromApiJsonHelper) {
+//        this.fromApiJsonHelper = fromApiJsonHelper;
+//    }
 
     public String compile(final Template template, final Map<String, Object> scopes) throws MalformedURLException, IOException {
 

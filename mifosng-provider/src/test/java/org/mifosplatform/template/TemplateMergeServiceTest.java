@@ -13,7 +13,6 @@ import org.joda.time.LocalDate;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.loanaccount.LoanScheduleTestDataHelper;
 import org.mifosplatform.portfolio.loanaccount.MonetaryCurrencyBuilder;
@@ -29,7 +28,9 @@ public class TemplateMergeServiceTest {
 
     @BeforeClass
     public static void init() {
-        tms = new TemplateMergeService(new FromJsonHelper());
+        tms = new TemplateMergeService(
+//                new FromJsonHelper()
+                );
     }
 
     @Ignore
