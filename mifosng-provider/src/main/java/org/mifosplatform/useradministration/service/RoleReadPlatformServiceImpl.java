@@ -5,10 +5,6 @@
  */
 package org.mifosplatform.useradministration.service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
-
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.useradministration.data.RoleData;
@@ -18,6 +14,10 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
 
 @Service
 public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
@@ -65,5 +65,13 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
         public String schema() {
             return " r.id as id, r.name as name, r.description as description from m_role r";
         }
+    }
+
+    @Override
+    public Collection<RoleData> retrieveClientRoles(Long clientId) {
+        final String sql = "select " + this.roleRowMapper.schema() + " inner join m_appuser_role"
+                + " ar on ar.role_id = r.id where ar.appuser_id= ?";
+
+        return this.jdbcTemplate.query(sql,this.roleRowMapper,new Object[]{clientId});
     }
 }

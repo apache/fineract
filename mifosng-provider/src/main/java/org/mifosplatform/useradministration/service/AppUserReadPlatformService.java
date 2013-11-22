@@ -5,9 +5,9 @@
  */
 package org.mifosplatform.useradministration.service;
 
-import java.util.Collection;
-
 import org.mifosplatform.useradministration.data.AppUserData;
+
+import java.util.Collection;
 
 public interface AppUserReadPlatformService {
 
@@ -18,6 +18,4 @@ public interface AppUserReadPlatformService {
     AppUserData retrieveNewUserDetails();
 
     AppUserData retrieveUser(Long userId);
-
-    Collection<AppUserData> retrieveAllUsersWithRoles();
 }

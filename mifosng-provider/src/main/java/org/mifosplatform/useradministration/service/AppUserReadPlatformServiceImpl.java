@@ -5,13 +5,6 @@
  */
 package org.mifosplatform.useradministration.service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -28,6 +21,12 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Set;
 
 @Service
 public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformService {
@@ -57,7 +56,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
 
-        final AppUserMapper mapper = new AppUserMapper();
+        final AppUserMapper mapper = new AppUserMapper(this.roleReadPlatformService);
         final String sql = "select " + mapper.schema();
 
         return this.jdbcTemplate.query(sql, mapper, new Object[] { hierarchySearchString });
@@ -84,21 +83,6 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         return AppUserData.template(offices, availableRoles);
     }
 
-    @Override
-    public Collection<AppUserData> retrieveAllUsersWithRoles() {
-
-        final Collection<AppUser>  users = this.appUserRepository.findAll();
-        final Collection<AppUserData> appUserData = new HashSet<AppUserData>();
-        for(final AppUser user : users){
-            final Set<RoleData>  selectedUserRoles = new HashSet<RoleData>();
-            for(final Role role : user.getRoles()){
-                  selectedUserRoles.add(role.toData()) ;
-            }
-            appUserData.add(AppUserData.instance(user.getId(), user.getUsername(), user.getEmail(), user.getOffice().getId(),
-                    user.getOffice().getName(), user.getFirstname(), user.getLastname(),null,selectedUserRoles)) ;
-        }
-        return appUserData;
-    }
 
     @Override
     public AppUserData retrieveUser(final Long userId) {
@@ -124,6 +108,11 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 
     private static final class AppUserMapper implements RowMapper<AppUserData> {
 
+        private final RoleReadPlatformService roleReadPlatformService;
+
+        public AppUserMapper(final RoleReadPlatformService roleReadPlatformService){
+            this.roleReadPlatformService = roleReadPlatformService;
+        }
         @Override
         public AppUserData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
@@ -135,7 +124,10 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
             final Long officeId = JdbcSupport.getLong(rs, "officeId");
             final String officeName = rs.getString("officeName");
 
-            return AppUserData.instance(id, username, email, officeId, officeName, firstname, lastname, null, null);
+            //pass the client id to retrieve the clients assigned roles
+            final Collection<RoleData> selectedRoles  = this.roleReadPlatformService.retrieveClientRoles(id);
+
+            return AppUserData.instance(id, username, email, officeId, officeName, firstname, lastname, null, selectedRoles);
         }
 
         public String schema() {
