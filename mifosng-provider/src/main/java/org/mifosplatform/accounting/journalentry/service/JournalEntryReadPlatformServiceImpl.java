@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.accounting.journalentry.service;
 
+
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,6 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.common.AccountingEnumerations;
 import org.mifosplatform.accounting.journalentry.data.JournalEntryData;
+import org.mifosplatform.accounting.journalentry.data.PaymentDetails;
 import org.mifosplatform.accounting.journalentry.exception.JournalEntriesNotFoundException;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
@@ -47,7 +49,8 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
         public String schema() {
             return " journalEntry.id as id, glAccount.classification_enum as classification ,"
-                    + " glAccount.name as glAccountName, glAccount.gl_code as glAccountCode, journalEntry.account_id as glAccountId,"
+                    + "journalEntry.transaction_id,"
+                    + " glAccount.name as glAccountName, glAccount.gl_code as glAccountCode,glAccount.id as glAccountId, "
                     + " journalEntry.office_id as officeId, office.name as officeName, journalEntry.ref_num as referenceNumber, "
                     + " journalEntry.manual_entry as manualEntry,journalEntry.entry_date as transactionDate, "
                     + " journalEntry.type_enum as entryType,journalEntry.amount as amount, journalEntry.transaction_id as transactionId,"
@@ -56,10 +59,23 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                     + " journalEntry.created_date as createdDate, journalEntry.reversed as reversed, "
                     + " journalEntry.is_running_balance_caculated as runningBalanceComputed, "
                     + " journalEntry.office_running_balance as officeRunningBalance, "
-                    + " journalEntry.organization_running_balance as organizationRunningBalance "
-                    + " from acc_gl_journal_entry journalEntry, acc_gl_account glAccount, m_office office, m_appuser creatingUser "
-                    + " where journalEntry.account_id = glAccount.id "
-                    + " and journalEntry.office_id = office.id and journalEntry.createdby_id = creatingUser.id ";
+                    + " journalEntry.organization_running_balance as organizationRunningBalance, "
+                    + " pd.receipt_number as receiptNumber, "
+                    + " pd.check_number as checkNumber, "
+                    + " pd.account_number as accountNumber, "
+                    + " cdv.code_value as paymentType, "
+                    + " pd.bank_number as bankNumber, "
+                    + " pd.routing_code as routingCode, "
+                    + " pd.check_number as checkNumber "
+                    + " from acc_gl_journal_entry as journalEntry "
+                    + " left join acc_gl_account as glAccount on glAccount.id = journalEntry.account_id"
+                    + " left join m_office as office on office.id = journalEntry.office_id"
+                    + " left join m_appuser as creatingUser on creatingUser.id = journalEntry.createdby_id "
+                    + " left join m_loan_transaction as lt on journalEntry.transaction_id = lt.id "
+                    + " left join m_payment_detail as pd on lt.payment_detail_id = pd.id "
+                    + " left join m_code_value as cdv on cdv.id = pd.payment_type_cv_id " ;
+
+
         }
 
         @Override
@@ -96,9 +112,18 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             final BigDecimal organizationRunningBalance = rs.getBigDecimal("organizationRunningBalance");
             final Boolean runningBalanceComputed = rs.getBoolean("runningBalanceComputed");
 
+            final PaymentDetails paymentDetail = new PaymentDetails(
+                    rs.getString("accountNumber"),
+                    rs.getString("checkNumber"),
+                    rs.getString("receiptNumber"),
+                    rs.getString("bankNumber"),
+                    rs.getString("routingCode"),
+                    rs.getString("paymentType")
+            );
+
             return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glCode, accountType, transactionDate,
                     entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, createdDate, createdByUserName,
-                    comments, reversed, referenceNumber,officeRunningBalance,organizationRunningBalance,runningBalanceComputed);
+                    comments, reversed, referenceNumber,officeRunningBalance,organizationRunningBalance,runningBalanceComputed,paymentDetail);
         }
     }
 
@@ -112,29 +137,40 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
         final Object[] objectArray = new Object[5];
         int arrayPos = 0;
+        String whereClose  = " where ";
 
         if (StringUtils.isNotBlank(transactionId)) {
-            sqlBuilder.append(" and journalEntry.transaction_id = ?");
+            sqlBuilder.append(whereClose+" journalEntry.transaction_id = ?");
             objectArray[arrayPos] = transactionId;
             arrayPos = arrayPos + 1;
+
+            whereClose =" and ";
         }
         
         if (entityType != null && entityType != 0 && (onlyManualEntries == null)) {
-            sqlBuilder.append(" and journalEntry.entity_type_enum = ?");
+
+            sqlBuilder.append(whereClose+" journalEntry.entity_type_enum = ?");
+
             objectArray[arrayPos] = entityType;
             arrayPos = arrayPos + 1;
+
+            whereClose =" and ";
         }
 
         if (searchParameters.isOfficeIdPassed()) {
-            sqlBuilder.append(" and journalEntry.office_id = ?");
+            sqlBuilder.append(whereClose+" journalEntry.office_id = ?");
             objectArray[arrayPos] = searchParameters.getOfficeId();
             arrayPos = arrayPos + 1;
+
+            whereClose =" and ";
         }
 
         if (glAccountId != null && glAccountId != 0) {
-            sqlBuilder.append(" and journalEntry.account_id = ?");
+            sqlBuilder.append(whereClose+" journalEntry.account_id = ?");
             objectArray[arrayPos] = glAccountId;
             arrayPos = arrayPos + 1;
+
+            whereClose =" and ";
         }
 
         if (fromDate != null || toDate != null) {
@@ -142,7 +178,10 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             String fromDateString = null;
             String toDateString = null;
             if (fromDate != null && toDate != null) {
-                sqlBuilder.append(" and journalEntry.entry_date between ? and ? ");
+                sqlBuilder.append(whereClose+" journalEntry.entry_date between ? and ? ");
+
+                whereClose =" and ";
+
                 fromDateString = df.format(fromDate);
                 toDateString = df.format(toDate);
                 objectArray[arrayPos] = fromDateString;
@@ -150,21 +189,27 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 objectArray[arrayPos] = toDateString;
                 arrayPos = arrayPos + 1;
             } else if (fromDate != null) {
-                sqlBuilder.append(" and journalEntry.entry_date >= ? ");
+                sqlBuilder.append(whereClose+" journalEntry.entry_date >= ? ");
                 fromDateString = df.format(fromDate);
                 objectArray[arrayPos] = fromDateString;
                 arrayPos = arrayPos + 1;
+                whereClose =" and ";
+
             } else if (toDate != null) {
-                sqlBuilder.append(" and journalEntry.entry_date <= ? ");
+                sqlBuilder.append(whereClose+" journalEntry.entry_date <= ? ");
                 toDateString = df.format(toDate);
                 objectArray[arrayPos] = toDateString;
                 arrayPos = arrayPos + 1;
+
+                whereClose =" and ";
             }
         }
 
         if (onlyManualEntries != null) {
             if (onlyManualEntries) {
-                sqlBuilder.append(" and journalEntry.manual_entry = 1");
+                sqlBuilder.append(whereClose+" journalEntry.manual_entry = 1");
+
+                whereClose =" and ";
             }
         }
 
@@ -198,7 +243,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         try {
 
             final GLJournalEntryMapper rm = new GLJournalEntryMapper();
-            final String sql = "select " + rm.schema() + " and journalEntry.id = ?";
+            final String sql = "select " + rm.schema() + " where journalEntry.id = ?";
 
             final JournalEntryData glJournalEntryData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glJournalEntryId });
 
