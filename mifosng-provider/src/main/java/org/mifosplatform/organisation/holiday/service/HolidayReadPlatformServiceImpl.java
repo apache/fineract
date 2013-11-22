@@ -38,7 +38,7 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
 
         public HolidayMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(200);
-            sqlBuilder.append("h.id as id, h.name as name, h.from_date as fromDate, h.to_date as toDate, ");
+            sqlBuilder.append("h.id as id, h.name as name, h.description as description, h.from_date as fromDate, h.to_date as toDate, ");
             sqlBuilder.append("h.repayments_rescheduled_to as repaymentsScheduleTO ");
             sqlBuilder.append("from m_holiday h ");
             this.schema = sqlBuilder.toString();
@@ -52,11 +52,12 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
         public HolidayData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
             final String name = rs.getString("name");
+            final String description = rs.getString("description");
             final LocalDate fromDate = JdbcSupport.getLocalDate(rs, "fromDate");
             final LocalDate toDate = JdbcSupport.getLocalDate(rs, "toDate");
             final LocalDate repaymentsScheduleTO = JdbcSupport.getLocalDate(rs, "repaymentsScheduleTO");
 
-            return new HolidayData(id, name, fromDate, toDate, repaymentsScheduleTO);
+            return new HolidayData(id, name, description, fromDate, toDate, repaymentsScheduleTO);
         }
 
     }
@@ -104,7 +105,7 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
         try {
             final HolidayMapper rm = new HolidayMapper();
 
-            final String sql = rm.schema() + " where h.id = ?";
+            final String sql = " select " + rm.schema() + " where h.id = ?";
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { holidayId });
         } catch (final EmptyResultDataAccessException e) {
