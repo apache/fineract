@@ -5,6 +5,12 @@
  */
 package org.mifosplatform.useradministration.service;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Set;
+
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -21,12 +27,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Set;
 
 @Service
 public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformService {
@@ -46,6 +46,13 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         this.roleReadPlatformService = roleReadPlatformService;
         this.appUserRepository = appUserRepository;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    /*
+     * used for caching in spring expression language.
+     */
+    public PlatformSecurityContext getContext() {
+        return this.context;
     }
 
     @Override
@@ -83,7 +90,6 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         return AppUserData.template(offices, availableRoles);
     }
 
-
     @Override
     public AppUserData retrieveUser(final Long userId) {
 
@@ -110,9 +116,10 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 
         private final RoleReadPlatformService roleReadPlatformService;
 
-        public AppUserMapper(final RoleReadPlatformService roleReadPlatformService){
+        public AppUserMapper(final RoleReadPlatformService roleReadPlatformService) {
             this.roleReadPlatformService = roleReadPlatformService;
         }
+
         @Override
         public AppUserData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
@@ -124,8 +131,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
             final Long officeId = JdbcSupport.getLong(rs, "officeId");
             final String officeName = rs.getString("officeName");
 
-            //pass the client id to retrieve the clients assigned roles
-            final Collection<RoleData> selectedRoles  = this.roleReadPlatformService.retrieveClientRoles(id);
+            final Collection<RoleData> selectedRoles = this.roleReadPlatformService.retrieveAppUserRoles(id);
 
             return AppUserData.instance(id, username, email, officeId, officeName, firstname, lastname, null, selectedRoles);
         }
@@ -153,9 +159,5 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
             return " u.id as id, u.username as username from m_appuser u "
                     + " join m_office o on o.id = u.office_id where o.hierarchy like ? and u.is_deleted=0 order by u.username";
         }
-    }
-
-    public PlatformSecurityContext getContext() {
-        return this.context;
     }
 }
