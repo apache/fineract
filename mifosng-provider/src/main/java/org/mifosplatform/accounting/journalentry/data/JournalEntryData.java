@@ -59,13 +59,15 @@ public class JournalEntryData {
     @SuppressWarnings("unused")
     private final Boolean runningBalanceComputed;
 
+    private final PaymentDetails paymentDetails;
+
     public JournalEntryData(final Long id, final Long officeId, final String officeName, final String glAccountName,
             final Long glAccountId, final String glAccountCode, final EnumOptionData glAccountClassification,
             final LocalDate transactionDate, final EnumOptionData entryType, final BigDecimal amount, final String transactionId,
             final Boolean manualEntry, final EnumOptionData entityType, final Long entityId, final Long createdByUserId,
             final LocalDate createdDate, final String createdByUserName, final String comments, final Boolean reversed,
             final String referenceNumber, final BigDecimal officeRunningBalance, final BigDecimal organizationRunningBalance,
-            final Boolean runningBalanceComputed) {
+            final Boolean runningBalanceComputed,final PaymentDetails paymentDetails) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -89,6 +91,7 @@ public class JournalEntryData {
         this.officeRunningBalance = officeRunningBalance;
         this.organizationRunningBalance = organizationRunningBalance;
         this.runningBalanceComputed = runningBalanceComputed;
+        this.paymentDetails = paymentDetails;
     }
 
     public Long getId() {
