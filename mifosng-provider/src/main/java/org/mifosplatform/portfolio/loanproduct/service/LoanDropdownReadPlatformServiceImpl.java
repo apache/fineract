@@ -11,6 +11,7 @@ import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.i
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.loanTermFrequencyType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyType;
+import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.loanCycleValueConditionType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +24,7 @@ import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrateg
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductValueConditionType;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,5 +102,14 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
 
         return strategyOptions;
     }
+    
+    @Override
+    public List<EnumOptionData> retrieveLoanCycleValueConditionTypeOptions() {
+
+        final List<EnumOptionData> repaymentFrequencyOptions = Arrays.asList(loanCycleValueConditionType(LoanProductValueConditionType.EQUAL),
+                loanCycleValueConditionType(LoanProductValueConditionType.GRETERTHAN));
+        return repaymentFrequencyOptions;
+    }
+
 
 }

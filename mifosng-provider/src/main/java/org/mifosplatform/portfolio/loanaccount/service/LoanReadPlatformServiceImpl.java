@@ -32,6 +32,7 @@ import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
 import org.mifosplatform.portfolio.account.data.AccountTransferData;
+import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.accountdetails.service.AccountEnumerations;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
@@ -1039,7 +1040,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-    public LoanAccountData retrieveLoanProductDetailsTemplate(final Long productId) {
+    public LoanAccountData retrieveLoanProductDetailsTemplate(final Long productId, Long clientId, Long groupId) {
 
         this.context.authenticatedUser();
 
@@ -1063,10 +1064,17 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 .retrieveCodeValuesByCode("LoanCollateral");
         final boolean feeChargesOnly = false;
         final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
-
+        Integer loanCycleCounter = null;
+        if(loanProduct.useBorrowerCycle()){
+            if(clientId == null){
+                loanCycleCounter = retriveLoanCounter(groupId,AccountType.GROUP.getValue());
+            }else{
+                loanCycleCounter = retriveLoanCounter(clientId);
+            }
+        }
         return LoanAccountData.loanProductWithTemplateDefaults(loanProduct, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
-                interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, loanPurposeOptions, loanCollateralOptions);
+                interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, loanPurposeOptions, loanCollateralOptions, loanCycleCounter);
     }
 
     @Override
@@ -1149,5 +1157,18 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 + " and mc.charge_time_enum = 9 and ml.loan_status_id = 300 "
                 + " and plc.charge_id not in (SELECT charge_id from m_loan_charge as mlc where mlc.loan_id = ml.id and mlc.charge_id = plc.charge_id and mlc.due_for_collection_as_of_date > fromdate AND mlc.due_for_collection_as_of_date <= duedate) ";
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
+    }
+    
+    @Override
+    public Integer retriveLoanCounter(Long groupId,Integer loanType){
+        final String sql = "Select MAX(l.loan_counter) from m_loan l where l.group_id = ? "
+                + " and l.loan_type_enum = ?";
+        return this.jdbcTemplate.queryForInt(sql,groupId,loanType);
+    }
+    
+    @Override
+    public Integer retriveLoanCounter(Long clientId){
+        final String sql = "Select MAX(l.loan_counter) from m_loan l where l.client_id = ?";
+        return this.jdbcTemplate.queryForInt(sql,clientId);
     }
 }

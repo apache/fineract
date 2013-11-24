@@ -27,4 +27,6 @@ public interface LoanDropdownReadPlatformService {
 
     Collection<TransactionProcessingStrategyData> retreiveTransactionProcessingStrategies();
 
+    List<EnumOptionData> retrieveLoanCycleValueConditionTypeOptions();
+
 }
