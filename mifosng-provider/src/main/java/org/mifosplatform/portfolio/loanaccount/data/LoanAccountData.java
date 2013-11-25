@@ -29,8 +29,10 @@ import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.loanaccount.guarantor.data.GuarantorData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
+import org.mifosplatform.portfolio.loanproduct.data.LoanProductBorrowerCycleVariationData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductValueConditionType;
 import org.mifosplatform.portfolio.note.data.NoteData;
 import org.springframework.util.CollectionUtils;
 
@@ -449,7 +451,8 @@ public class LoanAccountData {
             final Collection<EnumOptionData> interestRateFrequencyTypeOptions, final Collection<EnumOptionData> amortizationTypeOptions,
             final Collection<EnumOptionData> interestTypeOptions, final Collection<EnumOptionData> interestCalculationPeriodTypeOptions,
             final Collection<FundData> fundOptions, final Collection<ChargeData> chargeOptions,
-            final Collection<CodeValueData> loanPurposeOptions, final Collection<CodeValueData> loanCollateralOptions) {
+            final Collection<CodeValueData> loanPurposeOptions, final Collection<CodeValueData> loanCollateralOptions,
+            final Integer loanCycleNumber) {
 
         final Long id = null;
         final String accountNo = null;
@@ -468,16 +471,16 @@ public class LoanAccountData {
         final Long loanOfficerId = null;
         final String loanOfficerName = null;
         final CurrencyData currencyData = null;
-        final BigDecimal principal = null;
+
         final BigDecimal totalOverpaid = null;
         final BigDecimal inArrearsTolerance = null;
-        final Integer numberOfRepayments = null;
+
         final Integer repaymentEvery = null;
         final EnumOptionData repaymentFrequencyType = null;
         final Long transactionProcessingStrategyId = null;
         final String transactionProcessingStrategyName = null;
         final EnumOptionData amortizationType = null;
-        final BigDecimal interestRatePerPeriod = null;
+
         final EnumOptionData interestRateFrequencyType = null;
         final BigDecimal annualInterestRate = null;
         final EnumOptionData interestType = null;
@@ -500,7 +503,6 @@ public class LoanAccountData {
         final Collection<CalendarData> calendarOptions = null;
         final Collection<StaffData> loanOfficerOptions = null;
 
-        final Integer termFrequency = product.getNumberOfRepayments() * product.getRepaymentEvery();
         final EnumOptionData termPeriodFrequencyType = product.getRepaymentFrequencyType();
 
         final Collection<LoanChargeData> charges = new ArrayList<LoanChargeData>();
@@ -512,21 +514,50 @@ public class LoanAccountData {
         final Integer loanProductCounter = null;
         final PortfolioAccountData linkedAccount = null;
         final Collection<PortfolioAccountData> accountLinkingOptions = null;
+        BigDecimal principal = null;
+        BigDecimal interestRatePerPeriod = null;
+        Integer numberOfRepayments = null;
+        if (product.useBorrowerCycle() && loanCycleNumber > 0) {
+            Collection<LoanProductBorrowerCycleVariationData> principalVariationsForBorrowerCycle = product
+                    .getPrincipalVariationsForBorrowerCycle();
+            Collection<LoanProductBorrowerCycleVariationData> interestForVariationsForBorrowerCycle = product
+                    .getInterestRateVariationsForBorrowerCycle();
+            Collection<LoanProductBorrowerCycleVariationData> repaymentVariationsForBorrowerCycle = product
+                    .getNumberOfRepaymentVariationsForBorrowerCycle();
+            principal = fetchLoanCycleDefaultValue(principalVariationsForBorrowerCycle, loanCycleNumber);
+            interestRatePerPeriod = fetchLoanCycleDefaultValue(interestForVariationsForBorrowerCycle, loanCycleNumber);
+            BigDecimal numberofRepaymentval = fetchLoanCycleDefaultValue(repaymentVariationsForBorrowerCycle, loanCycleNumber);
+            if (numberofRepaymentval != null) {
+                numberOfRepayments = numberofRepaymentval.intValue();
+            }
+        }
+        if (principal == null) {
+            principal = product.getPrincipal();
+        }
+        if (interestRatePerPeriod == null) {
+            interestRatePerPeriod = product.getInterestRatePerPeriod();
+        }
+        if (numberOfRepayments == null) {
+            numberOfRepayments = product.getNumberOfRepayments();
+        }
+        
+        final Integer termFrequency = numberOfRepayments * product.getRepaymentEvery();
+        
 
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, loanType,
                 product.getId(), product.getName(), product.getDescription(), product.getFundId(), product.getFundName(), loanPurposeId,
-                loanPurposeName, loanOfficerId, loanOfficerName, product.getCurrency(), product.getPrincipal(), totalOverpaid,
-                product.getInArrearsTolerance(), termFrequency, termPeriodFrequencyType, product.getNumberOfRepayments(),
-                product.getRepaymentEvery(), product.getRepaymentFrequencyType(), product.getTransactionProcessingStrategyId(),
-                transactionProcessingStrategyName, product.getAmortizationType(), product.getInterestRatePerPeriod(),
-                product.getInterestRateFrequencyType(), product.getAnnualInterestRate(), product.getInterestType(),
-                product.getInterestCalculationPeriodType(), expectedFirstRepaymentOnDate, product.getGraceOnPrincipalPayment(),
-                product.getGraceOnInterestPayment(), product.getGraceOnInterestCharged(), interestChargedFromDate, timeline, summary,
-                feeChargesDueAtDisbursementCharged, repaymentSchedule, transactions, charges, collateral, guarantors, calendarData,
-                productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions, repaymentStrategyOptions,
-                interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions,
-                fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions, calendarOptions,
-                syncDisbursementWithMeeting, loancounter, loanProductCounter, notes, accountLinkingOptions, linkedAccount);
+                loanPurposeName, loanOfficerId, loanOfficerName, product.getCurrency(), principal, totalOverpaid,
+                product.getInArrearsTolerance(), termFrequency, termPeriodFrequencyType, numberOfRepayments, product.getRepaymentEvery(),
+                product.getRepaymentFrequencyType(), product.getTransactionProcessingStrategyId(), transactionProcessingStrategyName,
+                product.getAmortizationType(), interestRatePerPeriod, product.getInterestRateFrequencyType(),
+                product.getAnnualInterestRate(), product.getInterestType(), product.getInterestCalculationPeriodType(),
+                expectedFirstRepaymentOnDate, product.getGraceOnPrincipalPayment(), product.getGraceOnInterestPayment(),
+                product.getGraceOnInterestCharged(), interestChargedFromDate, timeline, summary, feeChargesDueAtDisbursementCharged,
+                repaymentSchedule, transactions, charges, collateral, guarantors, calendarData, productOptions, termFrequencyTypeOptions,
+                repaymentFrequencyTypeOptions, repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions,
+                interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions,
+                loanPurposeOptions, loanCollateralOptions, calendarOptions, syncDisbursementWithMeeting, loancounter, loanProductCounter,
+                notes, accountLinkingOptions, linkedAccount);
     }
 
     public static LoanAccountData populateLoanProductDefaults(final LoanAccountData acc, final LoanProductData product) {
@@ -895,4 +926,31 @@ public class LoanAccountData {
     public Long clientId() {
         return this.clientId;
     }
+    
+    private static BigDecimal fetchLoanCycleDefaultValue(Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationData,
+            Integer loanCycleNumber) {
+        BigDecimal defaultValue = null;
+        Integer cycleNumberSelected = 0;
+        for (LoanProductBorrowerCycleVariationData data : borrowerCycleVariationData) {
+            if (isLoanCycleValuesWhenConditionEqual(loanCycleNumber, data)
+                    || isLoanCycleValuesWhenConditionGreterthan(loanCycleNumber, cycleNumberSelected, data)) {
+                cycleNumberSelected = data.getBorrowerCycleNumber();
+                defaultValue = data.getDefaultValue();
+            }
+        }
+
+        return defaultValue;
+    }
+
+    private static boolean isLoanCycleValuesWhenConditionGreterthan(Integer loanCycleNumber, Integer cycleNumberSelected,
+            LoanProductBorrowerCycleVariationData data) {
+        return data.getBorrowerCycleNumber() < loanCycleNumber
+                && data.getValueConditionType().equals(LoanProductValueConditionType.GRETERTHAN)
+                && cycleNumberSelected < data.getBorrowerCycleNumber();
+    }
+
+    private static boolean isLoanCycleValuesWhenConditionEqual(Integer loanCycleNumber, LoanProductBorrowerCycleVariationData data) {
+        return data.getBorrowerCycleNumber() == loanCycleNumber && data.getValueConditionType().equals(LoanProductValueConditionType.EQUAL);
+    }
+
 }

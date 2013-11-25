@@ -190,7 +190,7 @@ public class LoansApiResource {
         Long officeId = null;
 
         if (productId != null) {
-            newLoanAccount = this.loanReadPlatformService.retrieveLoanProductDetailsTemplate(productId);
+            newLoanAccount = this.loanReadPlatformService.retrieveLoanProductDetailsTemplate(productId, clientId, groupId);
         }
 
         if (templateType == null) {

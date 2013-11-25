@@ -264,11 +264,13 @@ public class LoanProductsApiResource {
 
         final List<EnumOptionData> accountingRuleTypeOptions = this.accountingDropdownReadPlatformService
                 .retrieveAccountingRuleTypeOptions();
+        
+        final List<EnumOptionData> loanCycleValueConditionTypeOptions = this.dropdownReadPlatformService.retrieveLoanCycleValueConditionTypeOptions();
 
         return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions,
                 amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions,
                 interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions, accountOptions,
-                accountingRuleTypeOptions);
+                accountingRuleTypeOptions,loanCycleValueConditionTypeOptions);
     }
 
 }

@@ -14,6 +14,8 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductParamType;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductValueConditionType;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 public class LoanEnumerations {
@@ -369,4 +371,50 @@ public class LoanEnumerations {
 
         return optionData;
     }
+    
+    public static EnumOptionData loanCycleValueConditionType(final int id) {
+        return loanCycleValueConditionType(LoanProductValueConditionType.fromInt(id));
+    }
+
+    public static EnumOptionData loanCycleValueConditionType(final LoanProductValueConditionType type) {
+        EnumOptionData optionData = null;
+        switch (type) {
+            case EQUAL:
+                optionData = new EnumOptionData(LoanProductValueConditionType.EQUAL.getValue().longValue(), LoanProductValueConditionType.EQUAL.getCode(), "equals");
+            break;
+            case GRETERTHAN:
+                optionData = new EnumOptionData(LoanProductValueConditionType.GRETERTHAN.getValue().longValue(), LoanProductValueConditionType.GRETERTHAN.getCode(), "greter than");
+            break;
+            default:
+                optionData = new EnumOptionData(LoanProductValueConditionType.INVALID.getValue().longValue(), LoanProductValueConditionType.INVALID.getCode(),
+                        "Invalid");
+            break;
+        }
+        return optionData;
+    }
+
+    public static EnumOptionData loanCycleParamType(final int id) {
+        return loanCycleParamType(LoanProductParamType.fromInt(id));
+    }
+
+    public static EnumOptionData loanCycleParamType(final LoanProductParamType type) {
+        EnumOptionData optionData = null;
+        switch (type) {
+            case PRINCIPAL:
+                optionData = new EnumOptionData(LoanProductParamType.PRINCIPAL.getValue().longValue(), LoanProductParamType.PRINCIPAL.getCode(), "principal");
+            break;
+            case INTERESTRATE:
+                optionData = new EnumOptionData(LoanProductParamType.INTERESTRATE.getValue().longValue(),LoanProductParamType.INTERESTRATE.getCode(), "Interest rate");
+            break;
+            case REPAYMENT:
+                optionData = new EnumOptionData(LoanProductParamType.REPAYMENT.getValue().longValue(),LoanProductParamType.REPAYMENT.getCode(), "repayment");
+            break;
+            default:
+                optionData = new EnumOptionData(LoanProductParamType.INVALID.getValue().longValue(), LoanProductParamType.INVALID.getCode(),
+                        "Invalid");
+            break;
+        }
+        return optionData;
+    }
+
 }

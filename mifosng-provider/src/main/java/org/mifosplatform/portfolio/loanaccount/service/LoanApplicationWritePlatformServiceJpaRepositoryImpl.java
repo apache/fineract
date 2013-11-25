@@ -27,6 +27,7 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.account.domain.AccountAssociations;
 import org.mifosplatform.portfolio.account.domain.AccountAssociationsRepository;
+import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
@@ -112,6 +113,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final SavingsAccountAssembler savingsAccountAssembler;
     private final AccountAssociationsRepository accountAssociationsRepository;
     private final LoanChargeRepository loanChargeRepository;
+    private final LoanReadPlatformService loanReadPlatformService;
 
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
@@ -126,7 +128,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             final CalendarRepository calendarRepository, final CalendarInstanceRepository calendarInstanceRepository,
             final SavingsAccountAssembler savingsAccountAssembler, final AccountAssociationsRepository accountAssociationsRepository,
-            final LoanChargeRepository loanChargeRepository) {
+            final LoanChargeRepository loanChargeRepository, final LoanReadPlatformService loanReadPlatformService) {
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
@@ -150,6 +152,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.savingsAccountAssembler = savingsAccountAssembler;
         this.accountAssociationsRepository = accountAssociationsRepository;
         this.loanChargeRepository = loanChargeRepository;
+        this.loanReadPlatformService = loanReadPlatformService;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -172,9 +175,21 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final Long productId = this.fromJsonHelper.extractLongNamed("productId", command.parsedJson());
             final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
             if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
-
-            this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(command.parsedJson(), baseDataValidator, loanProduct);
-
+            if (loanProduct.useBorrowerCycle()) {
+                final Long clientId = this.fromJsonHelper.extractLongNamed("clientId", command.parsedJson());
+                final Long groupId = this.fromJsonHelper.extractLongNamed("groupId", command.parsedJson());
+                Integer cycleNumber = 0;
+                if (clientId != null) {
+                    cycleNumber = this.loanReadPlatformService.retriveLoanCounter(clientId);
+                } else if (groupId != null) {
+                    cycleNumber = this.loanReadPlatformService.retriveLoanCounter(groupId, AccountType.GROUP.getValue());
+                }
+                this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(command.parsedJson(), baseDataValidator,
+                        loanProduct, cycleNumber);
+            } else {
+                this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(command.parsedJson(), baseDataValidator,
+                        loanProduct);
+            }
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
 
             final Loan newLoanApplication = this.loanAssembler.assembleFrom(command, currentUser);
@@ -292,6 +307,24 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 if (!changes.containsKey("interestRateFrequencyType")) {
                     existingLoanApplication.updateInterestRateFrequencyType();
                 }
+                final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+                final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
+                if (loanProduct.useBorrowerCycle()) {
+                    final Long clientId = this.fromJsonHelper.extractLongNamed("clientId", command.parsedJson());
+                    final Long groupId = this.fromJsonHelper.extractLongNamed("groupId", command.parsedJson());
+                    Integer cycleNumber = 0;
+                    if (clientId != null) {
+                        cycleNumber = this.loanReadPlatformService.retriveLoanCounter(clientId);
+                    } else if (groupId != null) {
+                        cycleNumber = this.loanReadPlatformService.retriveLoanCounter(groupId, AccountType.GROUP.getValue());
+                    }
+                    this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(command.parsedJson(), baseDataValidator,
+                            loanProduct, cycleNumber);
+                } else {
+                    this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(command.parsedJson(), baseDataValidator,
+                            loanProduct);
+                }
+                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
             }
 
             validateSubmittedOnDate(existingLoanApplication);
@@ -362,7 +395,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             for (final LoanCharge loanCharge : existingLoanApplication.charges()) {
                 if (loanCharge.isInstalmentFee() && loanCharge.hasNoLoanInstallmentCharges()) {
-                    final Set<LoanInstallmentCharge> chargePerInstallments = existingLoanApplication.generateInstallmentLoanCharges(loanCharge);
+                    final Set<LoanInstallmentCharge> chargePerInstallments = existingLoanApplication
+                            .generateInstallmentLoanCharges(loanCharge);
                     loanCharge.addLoanInstallmentCharges(chargePerInstallments);
                     this.loanChargeRepository.save(loanCharge);
                 }
