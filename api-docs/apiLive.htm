@@ -918,6 +918,22 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>holidays/{holidayId}</td>
+								<td></td>
+								<td><a href="#holidays_retrieve">Retrieve a Holiday</a></td>
+								<td><a href="#holidays_update">Update a Holiday</a></td>
+								<td><a href="#holidays_delete">Delete a Holiday</a></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>holidays/{holidayId}?command=activate</td>
+								<td><a href="#holidays_activate">Activate a Holiday</a></td>
+								<td></td>								
+								<td></td>
+								<td></td>
+							</tr>
 							<tr>
 								<td><a href="#workingdays">Working days</a></td>
 								<td></td>
@@ -9187,7 +9203,7 @@ GET https://DomainName/api/v1/holidays?officeId=1
 			</div>
 		</div>
 
-		<a id="holidays_create" name="offices_create" class="old-syle-anchor">&nbsp;</a>
+		<a id="holidays_create" name="holiday_create" class="old-syle-anchor">&nbsp;</a>
 		<div class="method-section">
 			<div class="method-description">
 				<h4>Create a Holiday</h4>
@@ -9196,7 +9212,7 @@ GET https://DomainName/api/v1/holidays?officeId=1
 						<td><div class="mifosXHeading2">Mandatory Fields</div></td>
 					</tr>
 					<tr class=alt>
-						<td>name, fromDate, toDate, repaymentsRescheduledTo, offices</td>
+						<td>name, description, fromDate, toDate, repaymentsRescheduledTo, offices</td>
 					</tr>
 				</table>
 			</div>
@@ -9210,6 +9226,7 @@ Content-Type: application/json
 Request Body: 
 {
 "name": "Good Friday",
+"description": "Good Friday",
 "dateFormat": "dd MMMM yyyy",
 "locale": "en",
 "fromDate": "25 October 2013",
@@ -9224,6 +9241,125 @@ Request Body:
 				<code class="method-response">
 {
 "resourceId": 1
+}
+				</code>
+			</div>
+		</div>
+
+		<a id="holidays_activate" name="holidays_activate" class="old-syle-anchor">&nbsp;</a>
+		<div class="method-section">
+			<div class="method-description">
+				<h4>Activate a Holiday</h4>
+				<p>Always Holidays are created in pending state. This API allows to activate a holiday.</p>
+				<p>Only the active holidays are considered for rescheduling the loan repayment.</p>
+			</div>
+			<div class="method-example">
+				<code class="method-declaration">
+POST https://DomainName/api/v1/holidays/{holidayId}?command=activate
+				</code>
+				<code class="method-request">
+POST holidays
+Content-Type: application/json 
+Request Body: 
+{
+}
+				</code>
+				<code class="method-response">
+{
+"resourceId": 1
+}
+				</code>
+			</div>
+		</div>
+
+		<a id="holidays_retrieve" name="holidays_retrieve"
+			class="old-syle-anchor">&nbsp;</a>
+		<div class="method-section">
+			<div class="method-description">
+				<h4>Retrieve a Holiday</h4>
+				<p>Example Requests:</p>
+				<div class=apiClick>holidays/1</div>
+				<br>
+			</div>
+			<div class="method-example">
+				<code class="method-declaration">
+GET https://DomainName/api/v1/holidays/{holidayId}
+				</code>
+				<code class="method-response">
+{
+  "id": 1,
+  "name": "Good Friday",
+  "fromDate": [
+    2013,
+    10,
+    25
+  ],
+  "toDate": [
+    2013,
+    10,
+    25
+  ],
+  "repaymentsRescheduledTo": [
+    2013,
+    10,
+    26
+  ]
+}
+				</code>
+			</div>
+		</div>
+
+		<a id="holidays_update" name="holidays_update" class="old-syle-anchor">&nbsp;</a>
+		<div class="method-section">
+			<div class="method-description">
+				<h4>Update a Holiday</h4>
+				<p>If a holiday is in pending state (created and not activated) then all fields are allowed to modify. Once holidays become active only name and descriptions are allowed to modify.</p>
+			</div>
+			<div class="method-example">
+				<code class="method-declaration">
+PUT https://DomainName/api/v1/holidays/{holidayId}
+				</code>
+				<code class="method-request">
+PUT holidays/1
+Content-Type: application/json 
+Request Body: 
+{
+	name:"Independence day",
+	description: "Holiday for Independence day celebration"
+}
+				</code>
+				<code class="method-response">
+{
+  "resourceId": 1,
+  "changes": {
+    "name": "Independence day",
+    "description": "Holiday for Independence day celebration"
+  }
+}
+				</code>
+			</div>
+		</div>
+
+		<a id="holidays_delete" name="holidays_delete" class="old-syle-anchor">&nbsp;</a>
+		<div class="method-section">
+			<div class="method-description">
+				<h4>Delete a Holiday</h4>
+				<p>This API allows to delete a holiday. This is a soft delete the deleted holiday status is marked as deleted.</p>
+			</div>
+			<div class="method-example">
+				<code class="method-declaration">
+DELETE https://DomainName/api/v1/holidays/{holidayId}
+				</code>
+				<code class="method-request">
+DELETE holidays/1
+Content-Type: application/json 
+Request Body: 
+{
+}
+				</code>
+				<code class="method-response">
+{
+  "resourceId": 1
 }
 				</code>
 			</div>
