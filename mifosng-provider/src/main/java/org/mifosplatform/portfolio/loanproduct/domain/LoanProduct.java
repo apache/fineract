@@ -232,11 +232,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
                         defaultValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.defaultValueParameterName).getAsBigDecimal();
                     }
                     if (jsonObject.has(LoanProductConstants.minValueParameterName)
-                            && jsonObject.get(LoanProductConstants.minValueParameterName).isJsonPrimitive()) {
+                            && jsonObject.get(LoanProductConstants.minValueParameterName).isJsonPrimitive()
+                            && StringUtils.isNotBlank((jsonObject.get(LoanProductConstants.minValueParameterName).getAsString()))) {
                         minValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.minValueParameterName).getAsBigDecimal();
                     }
                     if (jsonObject.has(LoanProductConstants.maxValueParameterName)
-                            && jsonObject.get(LoanProductConstants.maxValueParameterName).isJsonPrimitive()) {
+                            && jsonObject.get(LoanProductConstants.maxValueParameterName).isJsonPrimitive()
+                            && StringUtils.isNotBlank((jsonObject.get(LoanProductConstants.maxValueParameterName).getAsString()))) {
                         maxValue = jsonObject.getAsJsonPrimitive(LoanProductConstants.maxValueParameterName).getAsBigDecimal();
                     }
                     if (jsonObject.has(LoanProductConstants.borrowerCycleNumberParamName)
