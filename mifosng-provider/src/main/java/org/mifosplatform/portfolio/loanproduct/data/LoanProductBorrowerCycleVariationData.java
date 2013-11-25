@@ -8,7 +8,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.LoanProductValueConditionT
 
 
 public class LoanProductBorrowerCycleVariationData {
-    
+
     @SuppressWarnings("unused")
     private final Long id;
     private final Integer borrowerCycleNumber;
@@ -19,34 +19,34 @@ public class LoanProductBorrowerCycleVariationData {
     @SuppressWarnings("unused")
     private final BigDecimal maxValue;
     private final BigDecimal defaultValue;
-    
-    
+
+
     public LoanProductBorrowerCycleVariationData(final Long id,final Integer borrowerCycleNumber,final EnumOptionData paramType,final EnumOptionData valueConditionType,final BigDecimal defaultValue,final BigDecimal minValue,
             final BigDecimal maxValue) {
         this.id = id;
         this.borrowerCycleNumber = borrowerCycleNumber;
         this.paramType = paramType;
-        this.valueConditionType = valueConditionType;;
+        this.valueConditionType = valueConditionType;
         this.minValue = minValue;
         this.maxValue = maxValue;
         this.defaultValue = defaultValue;
     }
-    
+
     public LoanProductParamType getParamType(){
         return LoanProductParamType.fromInt(this.paramType.getId().intValue());
     }
 
-    
+
     public Integer getBorrowerCycleNumber() {
         return this.borrowerCycleNumber;
     }
 
-    
+
     public LoanProductValueConditionType getValueConditionType() {
         return LoanProductValueConditionType.fromInt(this.valueConditionType.getId().intValue());
     }
 
-    
+
     public BigDecimal getDefaultValue() {
         return this.defaultValue;
     }

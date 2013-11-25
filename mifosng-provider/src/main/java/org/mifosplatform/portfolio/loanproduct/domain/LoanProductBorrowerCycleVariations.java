@@ -19,7 +19,6 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_product_loan_variations_borrower_cycle")
 public class LoanProductBorrowerCycleVariations extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "loan_product_id", nullable = false)
     private LoanProduct loanProduct;
@@ -69,30 +68,29 @@ public class LoanProductBorrowerCycleVariations extends AbstractPersistable<Long
     }
 
     @Override
-    public boolean equals(Object obj) {
-        LoanProductBorrowerCycleVariations borrowerCycleVariations = (LoanProductBorrowerCycleVariations) obj;
+    public boolean equals(final Object obj) {
+        final LoanProductBorrowerCycleVariations borrowerCycleVariations = (LoanProductBorrowerCycleVariations) obj;
         boolean minValequal = false;
-        if(borrowerCycleVariations.minValue == null && this.minValue == null){
+        if (borrowerCycleVariations.minValue == null && this.minValue == null) {
             minValequal = true;
-        }else if(borrowerCycleVariations.minValue != null && this.minValue != null){
+        } else if (borrowerCycleVariations.minValue != null && this.minValue != null) {
             minValequal = borrowerCycleVariations.minValue.equals(this.minValue);
         }
-        
+
         boolean maxValequal = false;
-        if(borrowerCycleVariations.maxValue == null && this.maxValue == null){
+        if (borrowerCycleVariations.maxValue == null && this.maxValue == null) {
             maxValequal = true;
-        }else if(borrowerCycleVariations.maxValue != null && this.maxValue != null){
+        } else if (borrowerCycleVariations.maxValue != null && this.maxValue != null) {
             maxValequal = borrowerCycleVariations.maxValue.equals(this.maxValue);
         }
         if (borrowerCycleVariations.borrowerCycleNumber.equals(this.borrowerCycleNumber)
-                && borrowerCycleVariations.defaultValue.equals(this.defaultValue) 
-                && minValequal && maxValequal
+                && borrowerCycleVariations.defaultValue.equals(this.defaultValue) && minValequal && maxValequal
                 && borrowerCycleVariations.valueConditionType.equals(this.valueConditionType)
                 && borrowerCycleVariations.paramType.equals(this.paramType)) { return true; }
         return false;
     }
-    
-    public void copy(LoanProductBorrowerCycleVariations borrowerCycleVariations){
+
+    public void copy(final LoanProductBorrowerCycleVariations borrowerCycleVariations) {
         this.defaultValue = borrowerCycleVariations.defaultValue;
         this.minValue = borrowerCycleVariations.minValue;
         this.maxValue = borrowerCycleVariations.maxValue;
@@ -100,22 +98,18 @@ public class LoanProductBorrowerCycleVariations extends AbstractPersistable<Long
         this.borrowerCycleNumber = borrowerCycleVariations.borrowerCycleNumber;
     }
 
-    
     public Integer getBorrowerCycleNumber() {
         return this.borrowerCycleNumber;
     }
 
-    
     public BigDecimal getMinValue() {
         return this.minValue;
     }
 
-    
     public BigDecimal getMaxValue() {
         return this.maxValue;
     }
 
-    
     public BigDecimal getDefaultValue() {
         return this.defaultValue;
     }

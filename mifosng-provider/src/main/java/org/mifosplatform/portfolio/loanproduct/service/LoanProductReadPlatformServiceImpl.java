@@ -51,8 +51,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         try {
             final Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveLoanProductCharges(loanProductId);
-            final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas = this.retrieveLoanProductBorrowerCycleVariations(loanProductId);
-            final LoanProductMapper rm = new LoanProductMapper(charges,borrowerCycleVariationDatas);
+            final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas = retrieveLoanProductBorrowerCycleVariations(loanProductId);
+            final LoanProductMapper rm = new LoanProductMapper(charges, borrowerCycleVariationDatas);
             final String sql = "select " + rm.loanProductSchema() + " where lp.id = ?";
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId });
@@ -61,11 +61,11 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             throw new LoanProductNotFoundException(loanProductId);
         }
     }
-    
+
     @Override
     public Collection<LoanProductBorrowerCycleVariationData> retrieveLoanProductBorrowerCycleVariations(final Long loanProductId) {
-        LoanProductBorrowerCycleMapper rm = new LoanProductBorrowerCycleMapper();
-        String sql = "select " + rm.schema() +" where bc.loan_product_id=?  order by bc.borrower_cycle_number,bc.value_condition";
+        final LoanProductBorrowerCycleMapper rm = new LoanProductBorrowerCycleMapper();
+        final String sql = "select " + rm.schema() + " where bc.loan_product_id=?  order by bc.borrower_cycle_number,bc.value_condition";
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId });
     }
 
@@ -74,7 +74,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         this.context.authenticatedUser();
 
-        final LoanProductMapper rm = new LoanProductMapper(null,null);
+        final LoanProductMapper rm = new LoanProductMapper(null, null);
 
         final String sql = "select " + rm.loanProductSchema();
 
@@ -101,10 +101,11 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     private static final class LoanProductMapper implements RowMapper<LoanProductData> {
 
         private final Collection<ChargeData> charges;
-        
+
         private final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas;
 
-        public LoanProductMapper(final Collection<ChargeData> charges,final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas) {
+        public LoanProductMapper(final Collection<ChargeData> charges,
+                final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas) {
             this.charges = charges;
             this.borrowerCycleVariationDatas = borrowerCycleVariationDatas;
         }
@@ -196,29 +197,30 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                 status = "loanProduct.active";
             }
             final String externalId = rs.getString("externalId");
-            Collection<LoanProductBorrowerCycleVariationData> principalVariationsForBorrowerCycle = new ArrayList<LoanProductBorrowerCycleVariationData>();;
-            Collection<LoanProductBorrowerCycleVariationData> interestRateVariationsForBorrowerCycle = new ArrayList<LoanProductBorrowerCycleVariationData>();;
-            Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<LoanProductBorrowerCycleVariationData>();;
-            if(this.borrowerCycleVariationDatas!=null){
-                for(LoanProductBorrowerCycleVariationData borrowerCycleVariationData:this.borrowerCycleVariationDatas){
-                    LoanProductParamType loanProductParamType =borrowerCycleVariationData.getParamType();  
-                    if(loanProductParamType.isParamTypePrincipal()){
+            final Collection<LoanProductBorrowerCycleVariationData> principalVariationsForBorrowerCycle = new ArrayList<LoanProductBorrowerCycleVariationData>();
+            final Collection<LoanProductBorrowerCycleVariationData> interestRateVariationsForBorrowerCycle = new ArrayList<LoanProductBorrowerCycleVariationData>();
+            final Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<LoanProductBorrowerCycleVariationData>();
+            if (this.borrowerCycleVariationDatas != null) {
+                for (final LoanProductBorrowerCycleVariationData borrowerCycleVariationData : this.borrowerCycleVariationDatas) {
+                    final LoanProductParamType loanProductParamType = borrowerCycleVariationData.getParamType();
+                    if (loanProductParamType.isParamTypePrincipal()) {
                         principalVariationsForBorrowerCycle.add(borrowerCycleVariationData);
-                    }else if(loanProductParamType.isParamTypeInterestTate()){
+                    } else if (loanProductParamType.isParamTypeInterestTate()) {
                         interestRateVariationsForBorrowerCycle.add(borrowerCycleVariationData);
-                    }else if(loanProductParamType.isParamTypeRepayment()){
+                    } else if (loanProductParamType.isParamTypeRepayment()) {
                         numberOfRepaymentVariationsForBorrowerCycle.add(borrowerCycleVariationData);
                     }
                 }
             }
-            
+
             return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                     minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType,
                     interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, fundId, fundName,
                     transactionStrategyId, transactionStrategyName, graceOnPrincipalPayment, graceOnInterestPayment,
-                    graceOnInterestCharged, this.charges, accountingRuleType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate,
-                    status, externalId, principalVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle, numberOfRepaymentVariationsForBorrowerCycle);
+                    graceOnInterestCharged, this.charges, accountingRuleType, includeInBorrowerCycle, useBorrowerCycle, startDate,
+                    closeDate, status, externalId, principalVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle,
+                    numberOfRepaymentVariationsForBorrowerCycle);
         }
 
     }
@@ -251,16 +253,18 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             return LoanProductData.lookup(id, name);
         }
     }
-    
+
     private static final class LoanProductBorrowerCycleMapper implements RowMapper<LoanProductBorrowerCycleVariationData> {
-        public String schema(){
-            return "bc.id as id,bc.borrower_cycle_number as cycleNumber,bc.value_condition as conditionType,bc.param_type as paramType," +
-            		"bc.default_value as defaultValue,bc.max_value as maxVal,bc.min_value as minVal "+
-            		"from m_product_loan_variations_borrower_cycle bc";
+
+        public String schema() {
+            return "bc.id as id,bc.borrower_cycle_number as cycleNumber,bc.value_condition as conditionType,bc.param_type as paramType,"
+                    + "bc.default_value as defaultValue,bc.max_value as maxVal,bc.min_value as minVal "
+                    + "from m_product_loan_variations_borrower_cycle bc";
         }
-        
+
         @Override
-        public LoanProductBorrowerCycleVariationData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+        public LoanProductBorrowerCycleVariationData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+                throws SQLException {
             final Long id = rs.getLong("id");
             final Integer cycleNumber = JdbcSupport.getInteger(rs, "cycleNumber");
             final Integer conditionType = JdbcSupport.getInteger(rs, "conditionType");
@@ -270,11 +274,12 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final BigDecimal defaultValue = rs.getBigDecimal("defaultValue");
             final BigDecimal maxValue = rs.getBigDecimal("maxVal");
             final BigDecimal minValue = rs.getBigDecimal("minVal");
-            
-            LoanProductBorrowerCycleVariationData borrowerCycleVariationData = new LoanProductBorrowerCycleVariationData(id,cycleNumber, paramTypeData, conditionTypeData, defaultValue, minValue, maxValue);
+
+            final LoanProductBorrowerCycleVariationData borrowerCycleVariationData = new LoanProductBorrowerCycleVariationData(id,
+                    cycleNumber, paramTypeData, conditionTypeData, defaultValue, minValue, maxValue);
             return borrowerCycleVariationData;
         }
-        
+
     }
 
     @Override
