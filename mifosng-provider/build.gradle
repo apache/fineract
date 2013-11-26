@@ -28,7 +28,7 @@ sourceCompatibility = JavaVersion.VERSION_1_6
 /* define binary compatiblity version */
 targetCompatibility = JavaVersion.VERSION_1_6
 
-project.ext.springVersion = '3.2.4.RELEASE'
+project.ext.springVersion = '3.2.5.RELEASE'
 project.ext.springSecurityVersion = '3.1.4.RELEASE'
 project.ext.hibernateCoreVersion = '4.1.9.Final'
 project.ext.jerseyVersion = '1.17'
@@ -55,7 +55,7 @@ configurations {
 }
 
 dependencies {
-        def tomcatVersion = '7.0.42'
+        def tomcatVersion = '7.0.47'
 	    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
 	           "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
 	    tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
@@ -105,8 +105,8 @@ dependencies {
 	            [group: 'ch.qos.logback', name: 'logback-core', version: '1.0.13'],
 	            [group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.13'],
 
-	            [group: 'mysql', name: 'mysql-connector-java', version: '5.1.26'],
-	            [group: 'org.apache.tomcat', name: 'tomcat-jdbc', version: '7.0.42'],
+	            [group: 'mysql', name: 'mysql-connector-java', version: '5.1.27'],
+	            [group: 'org.apache.tomcat', name: 'tomcat-jdbc', version: '7.0.47'],
 
 	            [group: 'pentaho-reporting-engine', name: 'pentaho-reporting-engine-classic-core', version: '3.9.1.1'],
 	            [group: 'pentaho-reporting-engine', name: 'pentaho-reporting-engine-classic-extensions', version: '3.9.1-GA'],
