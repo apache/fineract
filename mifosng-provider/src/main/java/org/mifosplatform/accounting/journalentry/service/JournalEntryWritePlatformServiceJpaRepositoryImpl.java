@@ -278,11 +278,13 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             if (journalEntry.isDebitEntry()) {
                 reversalJournalEntry = JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getGlAccount(),
                         journalEntry.getCurrencyCode(), reversalTransactionId, manualEntry, journalEntry.getTransactionDate(),
-                        JournalEntryType.CREDIT, journalEntry.getAmount(), reversalComment, null, null, journalEntry.getReferenceNumber());
+                        JournalEntryType.CREDIT, journalEntry.getAmount(), reversalComment, null, null, journalEntry.getReferenceNumber(), 
+                        journalEntry.getLoanTransaction(), journalEntry.getSavingsTransaction());
             } else {
                 reversalJournalEntry = JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getGlAccount(),
                         journalEntry.getCurrencyCode(), reversalTransactionId, manualEntry, journalEntry.getTransactionDate(),
-                        JournalEntryType.DEBIT, journalEntry.getAmount(), reversalComment, null, null, journalEntry.getReferenceNumber());
+                        JournalEntryType.DEBIT, journalEntry.getAmount(), reversalComment, null, null, journalEntry.getReferenceNumber(), 
+                        journalEntry.getLoanTransaction(), journalEntry.getSavingsTransaction());
             }
             // save the reversal entry
             this.glJournalEntryRepository.saveAndFlush(reversalJournalEntry);
@@ -372,7 +374,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             this.organisationCurrencyRepository.findOneWithNotFoundDetection(currencyCode);
 
             final JournalEntry glJournalEntry = JournalEntry.createNew(office, glAccount, currencyCode, transactionId, manualEntry,
-                    transactionDate, type, singleDebitOrCreditEntryCommand.getAmount(), comments, null, null, referenceNumber);
+                    transactionDate, type, singleDebitOrCreditEntryCommand.getAmount(), comments, null, null, referenceNumber, null, null);
             this.glJournalEntryRepository.saveAndFlush(glJournalEntry);
         }
     }

@@ -19516,6 +19516,13 @@ No Request Body:
                             <td class=fielddesc>Describes whether account balances computed for the journal entry.
                         	</td>
                         </tr>
+                        <tr class=alt>
+                            <td>transactionDetails</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Additional details of transaction like payment details and notes .
+                        	</td>
+                        </tr>
                     </table>
                 </div>
             </div>
@@ -19589,6 +19596,20 @@ No Request Body:
                         <dt>transactionId</dt>
                         <dd>
                             String <span>optional</span>
+                        </dd>
+                        <dt>transactionDetails</dt>
+                        <dd>
+                            Boolean <span>optional</span>
+                        </dd>
+                        <dd>Flag determines if additional transactional details 
+                        	to be returned(like payment details and notes).
+                        </dd>
+                        <dt>runningBalance</dt>
+                        <dd>
+                            Boolean <span>optional</span>
+                        </dd>
+                        <dd>Flag determines whether running balances 
+                        	to be returned 
                         </dd>				
 					</dl>
 					<p>Example Requests:</p>
@@ -19603,6 +19624,10 @@ No Request Body:
 					<div class=apiClick>journalentries?offset=10&limit=50</div>
 					<br>
 					<div class=apiClick>journalentries?orderBy=transactionId,sortOrder=DESC</div>
+					<br>
+					<div class=apiClick>journalentries?runningBalance=true</div>
+					<br>
+					<div class=apiClick>journalentries?transactionDetails=true</div>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
@@ -19651,17 +19676,6 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
       ],
       "createdByUserName": "mifos",
       "reversed": false,
-	  "officeRunningBalance":0,
-	  "organizationRunningBalance":0
-	  "runningBalanceComputed":false ,
-       "paymentDetails": {
-        "accountNumber": "",
-        "checkNumber": "",
-        "receiptNumber": "ddddd",
-        "bankNumber": "",
-        "routineCode": "",
-        "paymentType": "Cash"
-        }
     },
     {
       "id": 2,
@@ -19702,17 +19716,6 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
       ],
       "createdByUserName": "mifos",
       "reversed": false,
-	  "officeRunningBalance":0,
-	  "organizationRunningBalance":0
-	  "runningBalanceComputed":false,
-      "paymentDetails": {
-        "accountNumber": "",
-        "checkNumber": "",
-        "receiptNumber": "ddddd",
-        "bankNumber": "",
-        "routineCode": "",
-        "paymentType": "Cash"
-       }
 
     }
   ]
@@ -19955,6 +19958,10 @@ Request Body:
                     <br>
                     <br>
                     <div class=apiClick>journalentries/1?fields=officeName,glAccountId,entryType,amount</div>
+                    <br>
+                    <div class=apiClick>journalentries/1?runningBalance=true</div>
+                    <br>
+                    <div class=apiClick>journalentries/1?transactionDetails=true</div>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
@@ -19994,10 +20001,6 @@ GET https://DomainName/api/v1/journalentries/{entryId}
     ],
     "createdByUserName": "mifos",
     "reversed": false,
-	"officeRunningBalance":0,
-	"organizationRunningBalance":0
-	"runningBalanceComputed":false
-
 }
                     </code>
                 </div>
