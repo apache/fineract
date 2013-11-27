@@ -17,15 +17,19 @@ import java.util.Date;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.common.AccountingEnumerations;
+import org.mifosplatform.accounting.journalentry.data.JournalEntryAssociationParametersData;
 import org.mifosplatform.accounting.journalentry.data.JournalEntryData;
-import org.mifosplatform.accounting.journalentry.data.PaymentDetails;
+import org.mifosplatform.accounting.journalentry.data.TransactionDetailData;
 import org.mifosplatform.accounting.journalentry.exception.JournalEntriesNotFoundException;
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.portfolio.note.data.NoteData;
+import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -37,7 +41,6 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final GLJournalEntryMapper journalEntryMapper = new GLJournalEntryMapper();
     private final PaginationHelper<JournalEntryData> paginationHelper = new PaginationHelper<JournalEntryData>();
 
     @Autowired
@@ -47,34 +50,56 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
     private static final class GLJournalEntryMapper implements RowMapper<JournalEntryData> {
 
+        
+        private final JournalEntryAssociationParametersData associationParametersData ;
+                
+        public GLJournalEntryMapper(final JournalEntryAssociationParametersData associationParametersData ) {
+            if(associationParametersData == null){
+                this.associationParametersData = new JournalEntryAssociationParametersData();
+            }else{
+                this.associationParametersData = associationParametersData;
+            }
+        }
+        
         public String schema() {
-            return " journalEntry.id as id, glAccount.classification_enum as classification ,"
-                    + "journalEntry.transaction_id,"
-                    + " glAccount.name as glAccountName, glAccount.gl_code as glAccountCode,glAccount.id as glAccountId, "
-                    + " journalEntry.office_id as officeId, office.name as officeName, journalEntry.ref_num as referenceNumber, "
-                    + " journalEntry.manual_entry as manualEntry,journalEntry.entry_date as transactionDate, "
-                    + " journalEntry.type_enum as entryType,journalEntry.amount as amount, journalEntry.transaction_id as transactionId,"
-                    + " journalEntry.entity_type_enum as entityType, journalEntry.entity_id as entityId, creatingUser.id as createdByUserId, "
-                    + " creatingUser.username as createdByUserName, journalEntry.description as comments, "
-                    + " journalEntry.created_date as createdDate, journalEntry.reversed as reversed, "
-                    + " journalEntry.is_running_balance_caculated as runningBalanceComputed, "
-                    + " journalEntry.office_running_balance as officeRunningBalance, "
-                    + " journalEntry.organization_running_balance as organizationRunningBalance, "
-                    + " pd.receipt_number as receiptNumber, "
-                    + " pd.check_number as checkNumber, "
-                    + " pd.account_number as accountNumber, "
-                    + " cdv.code_value as paymentType, "
-                    + " pd.bank_number as bankNumber, "
-                    + " pd.routing_code as routingCode, "
-                    + " pd.check_number as checkNumber "
-                    + " from acc_gl_journal_entry as journalEntry "
-                    + " left join acc_gl_account as glAccount on glAccount.id = journalEntry.account_id"
-                    + " left join m_office as office on office.id = journalEntry.office_id"
-                    + " left join m_appuser as creatingUser on creatingUser.id = journalEntry.createdby_id "
-                    + " left join m_loan_transaction as lt on journalEntry.transaction_id = lt.id "
-                    + " left join m_payment_detail as pd on lt.payment_detail_id = pd.id "
-                    + " left join m_code_value as cdv on cdv.id = pd.payment_type_cv_id " ;
-
+            StringBuilder sb = new StringBuilder();
+              sb.append(" journalEntry.id as id, glAccount.classification_enum as classification ,")
+                .append("journalEntry.transaction_id,")
+                .append(" glAccount.name as glAccountName, glAccount.gl_code as glAccountCode,glAccount.id as glAccountId, ")
+                .append(" journalEntry.office_id as officeId, office.name as officeName, journalEntry.ref_num as referenceNumber, ")
+                .append(" journalEntry.manual_entry as manualEntry,journalEntry.entry_date as transactionDate, ")
+                .append(" journalEntry.type_enum as entryType,journalEntry.amount as amount, journalEntry.transaction_id as transactionId,")
+                .append(" journalEntry.entity_type_enum as entityType, journalEntry.entity_id as entityId, creatingUser.id as createdByUserId, ")
+                .append(" creatingUser.username as createdByUserName, journalEntry.description as comments, ")
+                .append(" journalEntry.created_date as createdDate, journalEntry.reversed as reversed ");
+              if(associationParametersData.isRunningBalanceRequired()){
+                  sb.append(" ,journalEntry.is_running_balance_caculated as runningBalanceComputed, ")
+                    .append(" journalEntry.office_running_balance as officeRunningBalance, ")
+                    .append(" journalEntry.organization_running_balance as organizationRunningBalance ");
+              }
+              if(associationParametersData.isTransactionDetailsRequired()){
+                  sb.append(" ,pd.receipt_number as receiptNumber, ")
+                    .append(" pd.check_number as checkNumber, ")
+                    .append(" pd.account_number as accountNumber, ")
+                    .append(" cdv.code_value as paymentTypeName, ")
+                    .append(" pd.payment_type_cv_id as paymentTypeId,")
+                    .append(" pd.bank_number as bankNumber, ")
+                    .append(" pd.routing_code as routingCode, ")
+                    .append(" note.id as noteId, ")
+                    .append(" note.note as transactionNote ");
+              }
+              sb.append(" from acc_gl_journal_entry as journalEntry ")
+                .append(" left join acc_gl_account as glAccount on glAccount.id = journalEntry.account_id")
+                .append(" left join m_office as office on office.id = journalEntry.office_id")
+                .append(" left join m_appuser as creatingUser on creatingUser.id = journalEntry.createdby_id ");
+              if(associationParametersData.isTransactionDetailsRequired()){
+                  sb.append(" left join m_loan_transaction as lt on journalEntry.loan_transaction_id = lt.id ")
+                    .append(" left join m_savings_account_transaction as st on journalEntry.savings_transaction_id = st.id ")
+                    .append(" left join m_payment_detail as pd on lt.payment_detail_id = pd.id or st.payment_detail_id = pd.id")
+                    .append(" left join m_code_value as cdv on cdv.id = pd.payment_type_cv_id ")
+                    .append(" left join m_note as note on lt.id = note.loan_transaction_id or st.id = note.savings_account_transaction_id ");
+              }
+                return sb.toString();
 
         }
 
@@ -108,32 +133,57 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             final String comments = rs.getString("comments");
             final Boolean reversed = rs.getBoolean("reversed");
             final String referenceNumber = rs.getString("referenceNumber");
-            final BigDecimal officeRunningBalance = rs.getBigDecimal("officeRunningBalance");
-            final BigDecimal organizationRunningBalance = rs.getBigDecimal("organizationRunningBalance");
-            final Boolean runningBalanceComputed = rs.getBoolean("runningBalanceComputed");
-
-            final PaymentDetails paymentDetail = new PaymentDetails(
-                    rs.getString("accountNumber"),
-                    rs.getString("checkNumber"),
-                    rs.getString("receiptNumber"),
-                    rs.getString("bankNumber"),
-                    rs.getString("routingCode"),
-                    rs.getString("paymentType")
-            );
-
+            BigDecimal officeRunningBalance = null;
+            BigDecimal organizationRunningBalance =null;
+            Boolean runningBalanceComputed =null;
+            if(associationParametersData.isRunningBalanceRequired()){
+                officeRunningBalance = rs.getBigDecimal("officeRunningBalance");
+                organizationRunningBalance = rs.getBigDecimal("organizationRunningBalance");
+                runningBalanceComputed = rs.getBoolean("runningBalanceComputed");
+            }
+            TransactionDetailData transactionDetailData = null;
+            
+            if(associationParametersData.isTransactionDetailsRequired()){
+                PaymentDetailData paymentDetailData = null;
+                final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentTypeId");
+                if (paymentTypeId != null) {
+                    final String typeName = rs.getString("paymentTypeName");
+                    final CodeValueData paymentType = CodeValueData.instance(paymentTypeId, typeName);
+                    final String accountNumber = rs.getString("accountNumber");
+                    final String checkNumber = rs.getString("checkNumber");
+                    final String routingCode = rs.getString("routingCode");
+                    final String receiptNumber = rs.getString("receiptNumber");
+                    final String bankNumber = rs.getString("bankNumber");
+                    paymentDetailData = new PaymentDetailData(id, paymentType, accountNumber, checkNumber, routingCode, receiptNumber,
+                            bankNumber);
+                }
+                NoteData noteData =null;
+                final Long noteId = JdbcSupport.getLong(rs, "noteId");
+                if(noteId!=null){
+                    final String note = rs.getString("transactionNote");  
+                    noteData = new NoteData(noteId, null, null, null, null, null, null, null, note, null, null, null, null, null, null);
+                }
+                Long transaction = null;
+                if(entityType!=null){
+                    transaction = Long.parseLong(transactionId.substring(1).trim());
+                }
+                transactionDetailData = new TransactionDetailData(transaction, paymentDetailData, noteData);
+            }
             return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glCode, accountType, transactionDate,
                     entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, createdDate, createdByUserName,
-                    comments, reversed, referenceNumber,officeRunningBalance,organizationRunningBalance,runningBalanceComputed,paymentDetail);
+                    comments, reversed, referenceNumber,officeRunningBalance,organizationRunningBalance,runningBalanceComputed,transactionDetailData);
         }
     }
 
     @Override
     public Page<JournalEntryData> retrieveAll(final SearchParameters searchParameters, final Long glAccountId,
-            final Boolean onlyManualEntries, final Date fromDate, final Date toDate, final String transactionId, final Integer entityType) {
+            final Boolean onlyManualEntries, final Date fromDate, final Date toDate, final String transactionId, final Integer entityType, 
+            final JournalEntryAssociationParametersData associationParametersData) {
 
+        GLJournalEntryMapper rm = new GLJournalEntryMapper(associationParametersData);
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
-        sqlBuilder.append(this.journalEntryMapper.schema());
+        sqlBuilder.append(rm.schema());
 
         final Object[] objectArray = new Object[5];
         int arrayPos = 0;
@@ -235,14 +285,14 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), finalObjectArray,
-                this.journalEntryMapper);
+                rm);
     }
 
     @Override
-    public JournalEntryData retrieveGLJournalEntryById(final long glJournalEntryId) {
+    public JournalEntryData retrieveGLJournalEntryById(final long glJournalEntryId, JournalEntryAssociationParametersData  associationParametersData) {
         try {
 
-            final GLJournalEntryMapper rm = new GLJournalEntryMapper();
+            final GLJournalEntryMapper rm = new GLJournalEntryMapper(associationParametersData);
             final String sql = "select " + rm.schema() + " where journalEntry.id = ?";
 
             final JournalEntryData glJournalEntryData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glJournalEntryId });

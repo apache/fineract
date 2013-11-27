@@ -22,6 +22,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.accounting.journalentry.data.JournalEntryAssociationParametersData;
 import org.mifosplatform.accounting.journalentry.data.JournalEntryData;
 import org.mifosplatform.accounting.journalentry.service.JournalEntryReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
@@ -79,7 +80,8 @@ public class JournalEntriesApiResource {
             @QueryParam("transactionId") final String transactionId, @QueryParam("entityType") final Integer entityType, @QueryParam("offset") final Integer offset,
             @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
             @QueryParam("sortOrder") final String sortOrder, @QueryParam("locale") final String locale,
-            @QueryParam("dateFormat") final String dateFormat) {
+            @QueryParam("dateFormat") final String dateFormat,@QueryParam("runningBalance") final boolean runningBalance, 
+            @QueryParam("transactionDetails") final boolean transactionDetails) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
@@ -93,9 +95,10 @@ public class JournalEntriesApiResource {
         }
 
         final SearchParameters searchParameters = SearchParameters.forJournalEntries(officeId, offset, limit, orderBy, sortOrder);
+        JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(transactionDetails, runningBalance);
 
         final Page<JournalEntryData> glJournalEntries = this.journalEntryReadPlatformService.retrieveAll(searchParameters, glAccountId,
-                onlyManualEntries, fromDate, toDate, transactionId, entityType);
+                onlyManualEntries, fromDate, toDate, transactionId, entityType, associationParametersData);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, glJournalEntries, RESPONSE_DATA_PARAMETERS);
     }
@@ -104,10 +107,12 @@ public class JournalEntriesApiResource {
     @Path("{journalEntryId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retreiveJournalEntryById(@PathParam("journalEntryId") final Long journalEntryId, @Context final UriInfo uriInfo) {
+    public String retreiveJournalEntryById(@PathParam("journalEntryId") final Long journalEntryId, @Context final UriInfo uriInfo,
+            @QueryParam("runningBalance") final boolean runningBalance, @QueryParam("transactionDetails") final boolean transactionDetails) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
-        final JournalEntryData glJournalEntryData = this.journalEntryReadPlatformService.retrieveGLJournalEntryById(journalEntryId);
+        JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(transactionDetails, runningBalance);
+        final JournalEntryData glJournalEntryData = this.journalEntryReadPlatformService.retrieveGLJournalEntryById(journalEntryId, associationParametersData);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, glJournalEntryData, RESPONSE_DATA_PARAMETERS);
