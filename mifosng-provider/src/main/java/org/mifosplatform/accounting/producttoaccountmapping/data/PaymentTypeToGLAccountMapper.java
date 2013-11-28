@@ -5,16 +5,19 @@
  */
 package org.mifosplatform.accounting.producttoaccountmapping.data;
 
+import org.mifosplatform.accounting.glaccount.data.GLAccountData;
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
+
 public class PaymentTypeToGLAccountMapper {
 
     @SuppressWarnings("unused")
-    private final long paymentTypeId;
+    private final CodeValueData paymentType;
     @SuppressWarnings("unused")
-    private final long fundSourceAccountId;
+    private final GLAccountData fundSourceAccount;
 
-    public PaymentTypeToGLAccountMapper(final long paymentTypeId, final long fundSourceAccountId) {
-        this.paymentTypeId = paymentTypeId;
-        this.fundSourceAccountId = fundSourceAccountId;
+    public PaymentTypeToGLAccountMapper(final CodeValueData paymentType, final GLAccountData fundSourceAccount) {
+        this.paymentType = paymentType;
+        this.fundSourceAccount = fundSourceAccount;
     }
 
 }

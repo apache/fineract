@@ -106,6 +106,30 @@ public class AccountingConstants {
         }
     }
 
+    public static enum LOAN_PRODUCT_ACCOUNTING_DATA_PARAMS {
+        FUND_SOURCE("fundSourceAccount"), LOAN_PORTFOLIO("loanPortfolioAccount"), INTEREST_ON_LOANS("interestOnLoanAccount"), INCOME_FROM_FEES(
+                "incomeFromFeeAccount"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccount"), LOSSES_WRITTEN_OFF("writeOffAccount"), OVERPAYMENT(
+                "overpaymentLiabilityAccount"), INTEREST_RECEIVABLE("receivableInterestAccount"), FEES_RECEIVABLE(
+                "receivableFeeAccount"), PENALTIES_RECEIVABLE("receivablePenaltyAccount"), TRANSFERS_SUSPENSE(
+                "transfersInSuspenseAccount"), INCOME_ACCOUNT_ID("incomeAccount");
+
+        private final String value;
+
+        private LOAN_PRODUCT_ACCOUNTING_DATA_PARAMS(final String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return name().toString().replaceAll("_", " ");
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    }
+
+    
     /*** Accounting placeholders for cash based accounting for savings products ***/
     public static enum CASH_ACCOUNTS_FOR_SAVINGS {
         SAVINGS_REFERENCE(1), SAVINGS_CONTROL(2), INTEREST_ON_SAVINGS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), TRANSFERS_SUSPENSE(

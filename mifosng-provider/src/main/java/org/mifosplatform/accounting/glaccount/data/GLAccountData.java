@@ -26,8 +26,8 @@ public class GLAccountData {
     private final String name;
     private final Long parentId;
     private final String glCode;
-    private final boolean disabled;
-    private final boolean manualEntriesAllowed;
+    private final Boolean disabled;
+    private final Boolean manualEntriesAllowed;
     private final EnumOptionData type;
     private final EnumOptionData usage;
     private final String description;
@@ -139,8 +139,8 @@ public class GLAccountData {
         this.name = name;
         this.parentId = null;
         this.glCode = glCode;
-        this.disabled = false;
-        this.manualEntriesAllowed = false;
+        this.disabled = null;
+        this.manualEntriesAllowed = null;
         this.type = null;
         this.usage = null;
         this.description = null;
