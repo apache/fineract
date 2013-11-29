@@ -13520,8 +13520,8 @@ Request Body:
 			<code class="method-response">
 {
   "id": 1,
-  "name": "First Product",
-  "description": "A cool saving product",
+  "name": "savings product",
+  "description": "gtasga",
   "currency": {
     "code": "USD",
     "name": "US Dollar",
@@ -13530,15 +13530,15 @@ Request Body:
     "nameCode": "currency.USD",
     "displayLabel": "US Dollar ($)"
   },
-  "nominalAnnualInterestRate": 50.000000,
+  "nominalAnnualInterestRate": 5.000000,
   "interestCompoundingPeriodType": {
-    "id": 4,
-    "code": "savings.interest.period.savingsCompoundingInterestPeriodType.monthly",
-    "value": "Monthly"
+    "id": 1,
+    "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+    "value": "Daily"
   },
   "interestPostingPeriodType": {
     "id": 4,
-    "code": "savings.interest.posting.period.savingsInterestPostingPeriodType.monthly",
+    "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
     "value": "Monthly"
   },
   "interestCalculationType": {
@@ -13551,117 +13551,88 @@ Request Body:
     "code": "savingsInterestCalculationDaysInYearType.days365",
     "value": "365 Days"
   },
-  "minRequiredOpeningBalance": 20.000000,
-  "lockinPeriodFrequency": 1,
-  "lockinPeriodFrequencyType": {
-    "id": 1,
-    "code": "savings.lockin.savingsPeriodFrequencyType.weeks",
-    "value": "Weeks"
-  },
-  "withdrawalFeeForTransfers":true,
+  "withdrawalFeeForTransfers": false,
   "accountingRule": {
     "id": 2,
     "code": "accountingRuleType.cash",
     "value": "CASH BASED"
   },
-  "accountingMappings":{
-      "savingsReferenceAccountId":1,
-      "incomeFromFeeAccountId":5,
-      "interestOnSavingsAccountId":4,
-      "savingsControlAccountId":2,
-      "transfersInSuspenseAccountId":3,
-      "incomeFromPenaltyAccountId":15
-   },
-  "feeToIncomeAccountMappings":[
-      {
-         "chargeId":6,
-         "incomeAccountId":16
-      }
-  ],
-  "penaltyToIncomeAccountMappings":[
-      {
-         "chargeId":4,
-         "incomeAccountId":15
-      }
-  ],
+  "accountingMappings": {
+    "savingsReferenceAccount": {
+      "id": 12,
+      "name": "savings ref",
+      "glCode": "20"
+    },
+    "incomeFromFeeAccount": {
+      "id": 16,
+      "name": "income from savings fee",
+      "glCode": "24"
+    },
+    "incomeFromPenaltyAccount": {
+      "id": 17,
+      "name": "income from sav penalites",
+      "glCode": "25"
+    },
+    "interestOnSavingsAccount": {
+      "id": 15,
+      "name": "interest on savings",
+      "glCode": "23"
+    },
+    "savingsControlAccount": {
+      "id": 13,
+      "name": "savings ref tool kit",
+      "glCode": "21"
+    },
+    "transfersInSuspenseAccount": {
+      "id": 14,
+      "name": "saving transfers",
+      "glCode": "22"
+    }
+  },
   "paymentChannelToFundSourceMappings": [
     {
-      "paymentTypeId": 14,
-      "fundSourceAccountId": 2
+      "paymentType": {
+        "id": 10,
+        "name": "check"
+      },
+      "fundSourceAccount": {
+        "id": 12,
+        "name": "savings ref",
+        "glCode": "20"
+      }
     }
   ],
-  "charges": [
+  "feeToIncomeAccountMappings": [
     {
-      "id": 1,
-      "name": "Annual fee",
-      "active": true,
-      "penalty": false,
-      "currency": {
-        "code": "USD",
-        "name": "US Dollar",
-        "decimalPlaces": 2,
-        "displaySymbol": "$",
-        "nameCode": "currency.USD",
-        "displayLabel": "US Dollar ($)"
+      "charge": {
+        "id": 11,
+        "name": "sav charge",
+        "active": false,
+        "penalty": false
       },
-      "amount": 50,
-      "chargeTimeType": {
-        "id": 6,
-        "code": "chargeTimeType.annualFee",
-        "value": "Annual Fee"
-      },
-      "chargeAppliesTo": {
-        "id": 2,
-        "code": "chargeAppliesTo.savings",
-        "value": "Savings"
-      },
-      "chargeCalculationType": {
-        "id": 1,
-        "code": "chargeCalculationType.flat",
-        "value": "Flat"
-      },
-      "chargePaymentMode": {
-        "id": 0,
-        "code": "chargepaymentmode.regular",
-        "value": "Regular"
-      }
-    },
-    {
-      "id": 2,
-      "name": "Withdrawal fee percentage",
-      "active": true,
-      "penalty": false,
-      "currency": {
-        "code": "USD",
-        "name": "US Dollar",
-        "decimalPlaces": 2,
-        "displaySymbol": "$",
-        "nameCode": "currency.USD",
-        "displayLabel": "US Dollar ($)"
-      },
-      "amount": 0.25,
-      "chargeTimeType": {
-        "id": 5,
-        "code": "chargeTimeType.withdrawalFee",
-        "value": "Withdrawal Fee"
-      },
-      "chargeAppliesTo": {
-        "id": 2,
-        "code": "chargeAppliesTo.savings",
-        "value": "Savings"
-      },
-      "chargeCalculationType": {
-        "id": 2,
-        "code": "chargeCalculationType.percent.of.amount",
-        "value": "% Amount"
-      },
-      "chargePaymentMode": {
-        "id": 0,
-        "code": "chargepaymentmode.regular",
-        "value": "Regular"
+      "incomeAccount": {
+        "id": 16,
+        "name": "income from savings fee",
+        "glCode": "24"
       }
     }
-  ]
+  ],
+  "penaltyToIncomeAccountMappings": [
+    {
+      "charge": {
+        "id": 12,
+        "name": "sav 2",
+        "active": false,
+        "penalty": true
+      },
+      "incomeAccount": {
+        "id": 17,
+        "name": "income from sav penalites",
+        "glCode": "25"
+      }
+    }
+  ],
+  "charges": []
 }	
 			</code>
         </div>
@@ -13730,37 +13701,47 @@ Content-Type: application/json
             <code class="method-declaration">GET https://Domain Name/api/v1/savingsproducts</code>
             <code class="method-response">
 [
- {
-  "id": 1,
-  "name": "Passbook Savings",
-  "description": "Daily compounding using Daily Balance, 5% per year, 365 days in year",
-  "currency": {
-    "code": "USD",
-    "name": "US Dollar",
-    "decimalPlaces": 2,
-    "displaySymbol": "$",
-    "nameCode": "currency.USD",
-    "displayLabel": "US Dollar ($)"
-  },
-  "nominalAnnualInterestRate": 5,
-  "interestCompoundingPeriodType": {
+  {
     "id": 1,
-    "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
-    "value": "Daily"
-  },
-  "interestCalculationType": {
-    "id": 1,
-    "code": "savingsInterestCalculationType.dailybalance",
-    "value": "Daily Balance"
-  },
-  "interestCalculationDaysInYearType": {
-    "id": 365,
-    "code": "savingsInterestCalculationDaysInYearType.days365",
-    "value": "365 Days"
+    "name": "Savings product",
+    "description": "gtasga",
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "nominalAnnualInterestRate": 5.000000,
+    "interestCompoundingPeriodType": {
+      "id": 1,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+      "value": "Daily"
+    },
+    "interestPostingPeriodType": {
+      "id": 4,
+      "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+      "value": "Monthly"
+    },
+    "interestCalculationType": {
+      "id": 1,
+      "code": "savingsInterestCalculationType.dailybalance",
+      "value": "Daily Balance"
+    },
+    "interestCalculationDaysInYearType": {
+      "id": 365,
+      "code": "savingsInterestCalculationDaysInYearType.days365",
+      "value": "365 Days"
+    },
+    "withdrawalFeeForTransfers": false,
+    "accountingRule": {
+      "id": 2,
+      "code": "accountingRuleType.cash",
+      "value": "CASH BASED"
+    }
   }
- } 
-]
-			</code>
+]			</code>
         </div>
     </div>
 <!-- end of saving products api docs -->

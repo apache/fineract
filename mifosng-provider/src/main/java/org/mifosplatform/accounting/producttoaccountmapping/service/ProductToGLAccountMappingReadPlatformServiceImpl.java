@@ -16,7 +16,7 @@ import org.mifosplatform.accounting.common.AccountingConstants.ACCRUAL_ACCOUNTS_
 import org.mifosplatform.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR_LOAN;
 import org.mifosplatform.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR_SAVINGS;
 import org.mifosplatform.accounting.common.AccountingConstants.LOAN_PRODUCT_ACCOUNTING_DATA_PARAMS;
-import org.mifosplatform.accounting.common.AccountingConstants.SAVINGS_PRODUCT_ACCOUNTING_PARAMS;
+import org.mifosplatform.accounting.common.AccountingConstants.SAVINGS_PRODUCT_ACCOUNTING_DATA_PARAMS;
 import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
 import org.mifosplatform.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
@@ -193,17 +193,17 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
 
 
                 if (glAccountForSavings.equals(CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_REFERENCE)) {
-                    accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue(), gLAccountData);
+                    accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_DATA_PARAMS.SAVINGS_REFERENCE.getValue(), gLAccountData);
                 } else if (glAccountForSavings.equals(CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL)) {
-                    accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_CONTROL.getValue(), gLAccountData);
+                    accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_DATA_PARAMS.SAVINGS_CONTROL.getValue(), gLAccountData);
                 } else if (glAccountForSavings.equals(CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_FEES)) {
-                    accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), gLAccountData);
+                    accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_DATA_PARAMS.INCOME_FROM_FEES.getValue(), gLAccountData);
                 } else if (glAccountForSavings.equals(CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_PENALTIES)) {
-                    accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), gLAccountData);
+                    accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_DATA_PARAMS.INCOME_FROM_PENALTIES.getValue(), gLAccountData);
                 } else if (glAccountForSavings.equals(CASH_ACCOUNTS_FOR_SAVINGS.TRANSFERS_SUSPENSE)) {
-                    accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(), gLAccountData);
+                    accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_DATA_PARAMS.TRANSFERS_SUSPENSE.getValue(), gLAccountData);
                 } else if (glAccountForSavings.equals(CASH_ACCOUNTS_FOR_SAVINGS.INTEREST_ON_SAVINGS)) {
-                    accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(), gLAccountData);
+                    accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_DATA_PARAMS.INTEREST_ON_SAVINGS.getValue(), gLAccountData);
                 }
             }
         }

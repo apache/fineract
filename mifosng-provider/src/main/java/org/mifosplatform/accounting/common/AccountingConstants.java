@@ -190,6 +190,30 @@ public class AccountingConstants {
             return this.value;
         }
     }
+    
+    public static enum SAVINGS_PRODUCT_ACCOUNTING_DATA_PARAMS {
+        SAVINGS_REFERENCE("savingsReferenceAccount"), SAVINGS_CONTROL("savingsControlAccount"), INCOME_FROM_FEES(
+                "incomeFromFeeAccount"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccount"), INTEREST_ON_SAVINGS(
+                "interestOnSavingsAccount"), PAYMENT_TYPE("paymentType"), FUND_SOURCE("fundSourceAccount"), 
+                TRANSFERS_SUSPENSE("transfersInSuspenseAccount"), PENALTY_INCOME_ACCOUNT_MAPPING("penaltyToIncomeAccountMappings"), CHARGE_ID("charge"), INCOME_ACCOUNT_ID(
+                "incomeAccount");
+
+        private final String value;
+
+        private SAVINGS_PRODUCT_ACCOUNTING_DATA_PARAMS(final String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return name().toString().replaceAll("_", " ");
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    }
+
 
     public static final String ASSESTS_TAG_OPTION_CODE_NAME = "AssetAccountTags";
     public static final String LIABILITIES_TAG_OPTION_CODE_NAME = "LiabilityAccountTags";
