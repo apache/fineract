@@ -1007,6 +1007,9 @@ public final class LoanProductDataValidator {
                             LoanProductValueConditionType.GRETERTHAN.getValue());
                     if (lastConditionType.equals(LoanProductValueConditionType.EQUAL)
                             && conditionType.equals(LoanProductValueConditionType.GRETERTHAN)) {
+                        if(lastCycleNumber == 0){
+                            lastCycleNumber = 1;
+                        }
                         baseDataValidator.reset().parameter(cycleNumbersParamName).value(cycleNumber).notNull()
                                 .integerSameAsNumber(lastCycleNumber);
                     } else if (lastConditionType.equals(LoanProductValueConditionType.EQUAL)) {
