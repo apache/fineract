@@ -5,10 +5,6 @@
  */
 package org.mifosplatform.infrastructure.configuration.service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
-
 import org.mifosplatform.infrastructure.configuration.data.GlobalConfigurationData;
 import org.mifosplatform.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
@@ -17,6 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
 @Service
 public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPlatformService {
@@ -51,8 +51,9 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
             final String name = rs.getString("name");
             final boolean enabled = rs.getBoolean("enabled");
+            final Long value      = rs.getLong("value");
 
-            return new GlobalConfigurationPropertyData(name, enabled);
+            return new GlobalConfigurationPropertyData(name, enabled,value);
         }
     }
 }
