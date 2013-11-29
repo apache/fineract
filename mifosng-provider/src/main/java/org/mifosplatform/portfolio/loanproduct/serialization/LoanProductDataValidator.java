@@ -1008,6 +1008,7 @@ public final class LoanProductDataValidator {
                     if (lastConditionType.equals(LoanProductValueConditionType.EQUAL)
                             && conditionType.equals(LoanProductValueConditionType.GRETERTHAN)) {
                         if(lastCycleNumber == 0){
+                            baseDataValidator.reset().parameter(cycleNumbersParamName).failWithCode(LoanProductConstants.VALUE_CONDITION_START_WITH_ERROR);
                             lastCycleNumber = 1;
                         }
                         baseDataValidator.reset().parameter(cycleNumbersParamName).value(cycleNumber).notNull()
@@ -1028,7 +1029,7 @@ public final class LoanProductDataValidator {
                     i++;
                 } while (i < variationArray.size());
                 if(!lastConditionType.equals(LoanProductValueConditionType.GRETERTHAN)){
-                    baseDataValidator.reset().parameter(cycleNumbersParamName).failWithCode(LoanProductConstants.VALUE_CONDITION_TYPE_ERROR);
+                    baseDataValidator.reset().parameter(cycleNumbersParamName).failWithCode(LoanProductConstants.VALUE_CONDITION_END_WITH_ERROR);
                 }
             }
 
