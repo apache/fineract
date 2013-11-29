@@ -149,23 +149,25 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
 
         List<JournalEntryData> entryDatas = jdbcTemplate.query(entryMapper.organizationRunningBalanceSchema(), entryMapper,
                 new Object[] { entityDate });
-        String[] updateSql = new String[entryDatas.size()];
-        int i = 0;
-        for (JournalEntryData entryData : entryDatas) {
-            Map<Long, BigDecimal> officeRunningBalanceMap = null;
-            if (officesRunningBalance.containsKey(entryData.getOfficeId())) {
-                officeRunningBalanceMap = officesRunningBalance.get(entryData.getOfficeId());
-            } else {
-                officeRunningBalanceMap = new HashMap<Long, BigDecimal>();
-                officesRunningBalance.put(entryData.getOfficeId(), officeRunningBalanceMap);
+        if(entryDatas.size()>0){
+            String[] updateSql = new String[entryDatas.size()];
+            int i = 0;
+            for (JournalEntryData entryData : entryDatas) {
+                Map<Long, BigDecimal> officeRunningBalanceMap = null;
+                if (officesRunningBalance.containsKey(entryData.getOfficeId())) {
+                    officeRunningBalanceMap = officesRunningBalance.get(entryData.getOfficeId());
+                } else {
+                    officeRunningBalanceMap = new HashMap<Long, BigDecimal>();
+                    officesRunningBalance.put(entryData.getOfficeId(), officeRunningBalanceMap);
+                }
+                BigDecimal officeRunningBalance = calculateRunningBalance(entryData, officeRunningBalanceMap);
+                BigDecimal runningBalance = calculateRunningBalance(entryData, runningBalanceMap);
+                String sql = "UPDATE acc_gl_journal_entry je SET je.is_running_balance_caculated=1, je.organization_running_balance="
+                        + runningBalance + ",je.office_running_balance=" + officeRunningBalance + " WHERE  je.id=" + entryData.getId();
+                updateSql[i++] = sql;
             }
-            BigDecimal officeRunningBalance = calculateRunningBalance(entryData, officeRunningBalanceMap);
-            BigDecimal runningBalance = calculateRunningBalance(entryData, runningBalanceMap);
-            String sql = "UPDATE acc_gl_journal_entry je SET je.is_running_balance_caculated=1, je.organization_running_balance="
-                    + runningBalance + ",je.office_running_balance=" + officeRunningBalance + " WHERE  je.id=" + entryData.getId();
-            updateSql[i++] = sql;
+            this.jdbcTemplate.batchUpdate(updateSql);
         }
-        this.jdbcTemplate.batchUpdate(updateSql);
 
     }
 
