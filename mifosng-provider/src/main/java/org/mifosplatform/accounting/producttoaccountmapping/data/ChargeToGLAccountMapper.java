@@ -5,16 +5,19 @@
  */
 package org.mifosplatform.accounting.producttoaccountmapping.data;
 
+import org.mifosplatform.accounting.glaccount.data.GLAccountData;
+import org.mifosplatform.portfolio.charge.data.ChargeData;
+
 public class ChargeToGLAccountMapper {
 
     @SuppressWarnings("unused")
-    private final long chargeId;
+    private final ChargeData charge;
     @SuppressWarnings("unused")
-    private final long incomeAccountId;
+    private final GLAccountData incomeAccount;
 
-    public ChargeToGLAccountMapper(final long chargeId, final long incomeAccountId) {
-        this.chargeId = chargeId;
-        this.incomeAccountId = incomeAccountId;
+    public ChargeToGLAccountMapper(final ChargeData charge, final GLAccountData incomeAccount) {
+        this.charge = charge;
+        this.incomeAccount = incomeAccount;
     }
 
 }

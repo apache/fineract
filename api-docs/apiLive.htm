@@ -7859,6 +7859,12 @@ Request Body:
 							<td class=fielddesc>It is a flag, Used to denote whether the loans should include in loan cycle counter or not.</td>
 						</tr>
 						<tr class=alt>
+							<td>useBorrowerCycle</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>It is a flag, Used to denote whether the loans should depend on <br>borrower loan cycle counter or not.</td>
+						</tr>
+						<tr class=alt>
 							<td>currencyCode</td>
 						</tr>
 						<tr>
@@ -7963,6 +7969,15 @@ Request Body:
 								loan is in arrears.
 							</td>
 						</tr>
+						<tr class=alt>
+							<td>principalVariationsForBorrowerCycle,interestRateVariationsForBorrowerCycle,<br>numberOfRepaymentVariationsForBorrowerCycle</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Variations for loan, based on borrower cycle number
+							</td>
+						</tr>
+
+
 <tr class=alt>
 	<td>transactionProcessingStrategyId</td>
 </tr>
@@ -8041,39 +8056,57 @@ GET https://DomainName/api/v1/loanproducts
 [
   {
     "id": 1,
-    "name": "LP with Charges but no accounting)",
+    "name": "personal loan product",
+    "includeInBorrowerCycle": false,
+    "useBorrowerCycle": false,
+    "startDate": [
+      2013,
+      9,
+      2
+    ],
+    "closeDate": [
+      2014,
+      2,
+      7
+    ],
+    "status": "loanProduct.active",
     "currency": {
       "code": "USD",
       "name": "US Dollar",
       "decimalPlaces": 2,
+      "inMultiplesOf": 0,
       "displaySymbol": "$",
       "nameCode": "currency.USD",
       "displayLabel": "US Dollar ($)"
     },
-    "principal": 100000,
-    "numberOfRepayments": 12,
-    "repaymentEvery": 1,
+    "principal": 10000.000000,
+    "minPrincipal": 5000.000000,
+    "maxPrincipal": 15000.000000,
+    "numberOfRepayments": 10,
+    "minNumberOfRepayments": 5,
+    "maxNumberOfRepayments": 15,
+    "repaymentEvery": 7,
     "repaymentFrequencyType": {
-      "id": 2,
-      "code": "repaymentFrequency.periodFrequencyType.months",
-      "value": "Months"
+      "id": 0,
+      "code": "repaymentFrequency.periodFrequencyType.days",
+      "value": "Days"
     },
-    "interestRatePerPeriod": 1.75,
+    "interestRatePerPeriod": 15.000000,
     "interestRateFrequencyType": {
-      "id": 2,
-      "code": "interestRateFrequency.periodFrequencyType.months",
-      "value": "Per month"
+      "id": 3,
+      "code": "interestRateFrequency.periodFrequencyType.years",
+      "value": "Per year"
     },
-    "annualInterestRate": 21,
+    "annualInterestRate": 15.000000,
     "amortizationType": {
       "id": 1,
       "code": "amortizationType.equal.installments",
       "value": "Equal installments"
     },
     "interestType": {
-      "id": 0,
-      "code": "interestType.declining.balance",
-      "value": "Declining Balance"
+      "id": 1,
+      "code": "interestType.flat",
+      "value": "Flat"
     },
     "interestCalculationPeriodType": {
       "id": 1,
@@ -8082,10 +8115,13 @@ GET https://DomainName/api/v1/loanproducts
     },
     "transactionProcessingStrategyId": 1,
     "transactionProcessingStrategyName": "Mifos style",
+    "principalVariationsForBorrowerCycle": [],
+    "interestRateVariationsForBorrowerCycle": [],
+    "numberOfRepaymentVariationsForBorrowerCycle": [],
     "accountingRule": {
-      "id": 1,
-      "code": "accountingRuleType.none",
-      "value": "NONE"
+      "id": 2,
+      "code": "accountingRuleType.cash",
+      "value": "CASH BASED"
     }
   }
 ]
@@ -8116,13 +8152,16 @@ GET https://DomainName/api/v1/loanproducts/template
 					</code>
 					<code class="method-response">
 {
+  "includeInBorrowerCycle": false,
+  "useBorrowerCycle": false,
   "currency": {
-    "code": "UGX",
-    "name": "Uganda Shilling",
-    "decimalPlaces": 2,
-    "displaySymbol": "USh",
-    "nameCode": "currency.UGX",
-    "displayLabel": "Uganda Shilling (USh)"
+    "code": "",
+    "name": "",
+    "decimalPlaces": 0,
+    "inMultiplesOf": 0,
+    "displaySymbol": "",
+    "nameCode": "",
+    "displayLabel": " []"
   },
   "repaymentFrequencyType": {
     "id": 2,
@@ -8149,22 +8188,29 @@ GET https://DomainName/api/v1/loanproducts/template
     "code": "interestCalculationPeriodType.same.as.repayment.period",
     "value": "Same as repayment period"
   },
-  "transactionProcessingStrategyId": 2,
-  "transactionProcessingStrategyName": "Heavensfamily",
+  "principalVariationsForBorrowerCycle": [],
+  "interestRateVariationsForBorrowerCycle": [],
+  "numberOfRepaymentVariationsForBorrowerCycle": [],
   "accountingRule": {
     "id": 1,
     "code": "accountingRuleType.none",
     "value": "NONE"
   },
-  "accountingMappings": {},
+  "paymentTypeOptions": [
+    {
+      "id": 10,
+      "name": "check",
+      "position": 1
+    }
+  ],
   "currencyOptions": [
     {
-      "code": "UGX",
-      "name": "Uganda Shilling",
+      "code": "USD",
+      "name": "US Dollar",
       "decimalPlaces": 2,
-      "displaySymbol": "USh",
-      "nameCode": "currency.UGX",
-      "displayLabel": "Uganda Shilling (USh)"
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
     }
   ],
   "repaymentFrequencyTypeOptions": [
@@ -8205,7 +8251,7 @@ GET https://DomainName/api/v1/loanproducts/template
     {
       "id": 0,
       "code": "amortizationType.equal.principal",
-      "value": "Equal principle payments"
+      "value": "Equal principal payments"
     }
   ],
   "interestTypeOptions": [
@@ -8234,26 +8280,261 @@ GET https://DomainName/api/v1/loanproducts/template
   ],
   "transactionProcessingStrategyOptions": [
     {
+      "id": 1,
+      "code": "mifos-standard-strategy",
+      "name": "Mifos style"
+    },
+    {
       "id": 2,
       "code": "heavensfamily-strategy",
       "name": "Heavensfamily"
+    },
+    {
+      "id": 3,
+      "code": "creocore-strategy",
+      "name": "Creocore"
+    },
+    {
+      "id": 4,
+      "code": "rbi-india-strategy",
+      "name": "RBI (India)"
+    },
+    {
+      "id": 5,
+      "code": "principal-interest-penalties-fees-order-strategy",
+      "name": "Principal Interest Penalties Fees Order"
+    },
+    {
+      "id": 6,
+      "code": "interest-principal-penalties-fees-order-strategy",
+      "name": "Interest Principal Penalties Fees Order"
     }
   ],
   "chargeOptions": [
     {
-      "id": 1,
-      "name": "Bank Fee (per installment)",
+      "id": 5,
+      "name": "des charge",
       "active": true,
       "penalty": false,
       "currency": {
-        "code": "UGX",
-        "name": "Uganda Shilling",
+        "code": "USD",
+        "name": "US Dollar",
         "decimalPlaces": 2,
-        "displaySymbol": "USh",
-        "nameCode": "currency.UGX",
-        "displayLabel": "Uganda Shilling (USh)"
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
       },
-      "amount": 1500,
+      "amount": 100.000000,
+      "chargeTimeType": {
+        "id": 1,
+        "code": "chargeTimeType.disbursement",
+        "value": "Disbursement"
+      },
+      "chargeAppliesTo": {
+        "id": 1,
+        "code": "chargeAppliesTo.loan",
+        "value": "Loan"
+      },
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      },
+      "chargePaymentMode": {
+        "id": 0,
+        "code": "chargepaymentmode.regular",
+        "value": "Regular"
+      }
+    },
+    {
+      "id": 1,
+      "name": "flat install",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 50.000000,
+      "chargeTimeType": {
+        "id": 8,
+        "code": "chargeTimeType.instalmentFee",
+        "value": "Instalment Fee"
+      },
+      "chargeAppliesTo": {
+        "id": 1,
+        "code": "chargeAppliesTo.loan",
+        "value": "Loan"
+      },
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      },
+      "chargePaymentMode": {
+        "id": 0,
+        "code": "chargepaymentmode.regular",
+        "value": "Regular"
+      }
+    },
+    {
+      "id": 9,
+      "name": "install amt+int",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 5.000000,
+      "chargeTimeType": {
+        "id": 8,
+        "code": "chargeTimeType.instalmentFee",
+        "value": "Instalment Fee"
+      },
+      "chargeAppliesTo": {
+        "id": 1,
+        "code": "chargeAppliesTo.loan",
+        "value": "Loan"
+      },
+      "chargeCalculationType": {
+        "id": 3,
+        "code": "chargeCalculationType.percent.of.amount.and.interest",
+        "value": "% Loan Amount + Interest"
+      },
+      "chargePaymentMode": {
+        "id": 0,
+        "code": "chargepaymentmode.regular",
+        "value": "Regular"
+      }
+    },
+    {
+      "id": 10,
+      "name": "install int",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 5.000000,
+      "chargeTimeType": {
+        "id": 8,
+        "code": "chargeTimeType.instalmentFee",
+        "value": "Instalment Fee"
+      },
+      "chargeAppliesTo": {
+        "id": 1,
+        "code": "chargeAppliesTo.loan",
+        "value": "Loan"
+      },
+      "chargeCalculationType": {
+        "id": 4,
+        "code": "chargeCalculationType.percent.of.interest",
+        "value": "% Interest"
+      },
+      "chargePaymentMode": {
+        "id": 0,
+        "code": "chargepaymentmode.regular",
+        "value": "Regular"
+      }
+    },
+    {
+      "id": 2,
+      "name": "install per",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 5.000000,
+      "chargeTimeType": {
+        "id": 8,
+        "code": "chargeTimeType.instalmentFee",
+        "value": "Instalment Fee"
+      },
+      "chargeAppliesTo": {
+        "id": 1,
+        "code": "chargeAppliesTo.loan",
+        "value": "Loan"
+      },
+      "chargeCalculationType": {
+        "id": 2,
+        "code": "chargeCalculationType.percent.of.amount",
+        "value": "% Amount"
+      },
+      "chargePaymentMode": {
+        "id": 1,
+        "code": "chargepaymentmode.accounttransfer",
+        "value": "Account transfer"
+      }
+    },
+    {
+      "id": 8,
+      "name": "spe int",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 5.000000,
+      "chargeTimeType": {
+        "id": 2,
+        "code": "chargeTimeType.specifiedDueDate",
+        "value": "Specified due date"
+      },
+      "chargeAppliesTo": {
+        "id": 1,
+        "code": "chargeAppliesTo.loan",
+        "value": "Loan"
+      },
+      "chargeCalculationType": {
+        "id": 4,
+        "code": "chargeCalculationType.percent.of.interest",
+        "value": "% Interest"
+      },
+      "chargePaymentMode": {
+        "id": 0,
+        "code": "chargepaymentmode.regular",
+        "value": "Regular"
+      }
+    },
+    {
+      "id": 4,
+      "name": "specific acc transfer",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 100.000000,
       "chargeTimeType": {
         "id": 2,
         "code": "chargeTimeType.specifiedDueDate",
@@ -8268,6 +8549,116 @@ GET https://DomainName/api/v1/loanproducts/template
         "id": 1,
         "code": "chargeCalculationType.flat",
         "value": "Flat"
+      },
+      "chargePaymentMode": {
+        "id": 1,
+        "code": "chargepaymentmode.accounttransfer",
+        "value": "Account transfer"
+      }
+    },
+    {
+      "id": 7,
+      "name": "specific amt+int",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 5.000000,
+      "chargeTimeType": {
+        "id": 2,
+        "code": "chargeTimeType.specifiedDueDate",
+        "value": "Specified due date"
+      },
+      "chargeAppliesTo": {
+        "id": 1,
+        "code": "chargeAppliesTo.loan",
+        "value": "Loan"
+      },
+      "chargeCalculationType": {
+        "id": 3,
+        "code": "chargeCalculationType.percent.of.amount.and.interest",
+        "value": "% Loan Amount + Interest"
+      },
+      "chargePaymentMode": {
+        "id": 0,
+        "code": "chargepaymentmode.regular",
+        "value": "Regular"
+      }
+    },
+    {
+      "id": 3,
+      "name": "specific per",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 5.000000,
+      "chargeTimeType": {
+        "id": 2,
+        "code": "chargeTimeType.specifiedDueDate",
+        "value": "Specified due date"
+      },
+      "chargeAppliesTo": {
+        "id": 1,
+        "code": "chargeAppliesTo.loan",
+        "value": "Loan"
+      },
+      "chargeCalculationType": {
+        "id": 2,
+        "code": "chargeCalculationType.percent.of.amount",
+        "value": "% Amount"
+      },
+      "chargePaymentMode": {
+        "id": 0,
+        "code": "chargepaymentmode.regular",
+        "value": "Regular"
+      }
+    },
+    {
+      "id": 6,
+      "name": "xyz",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 50.000000,
+      "chargeTimeType": {
+        "id": 2,
+        "code": "chargeTimeType.specifiedDueDate",
+        "value": "Specified due date"
+      },
+      "chargeAppliesTo": {
+        "id": 1,
+        "code": "chargeAppliesTo.loan",
+        "value": "Loan"
+      },
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      },
+      "chargePaymentMode": {
+        "id": 1,
+        "code": "chargepaymentmode.accounttransfer",
+        "value": "Account transfer"
       }
     }
   ],
@@ -8289,11 +8680,35 @@ GET https://DomainName/api/v1/loanproducts/template
     }
   ],
   "accountingMappingOptions": {
+    "liabilityAccountOptions": [
+      {
+        "id": 11,
+        "name": "over payment",
+        "glCode": "13",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 2,
+          "code": "accountType.liability",
+          "value": "LIABILITY"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        },
+        "nameDecorated": "over payment",
+        "tagId": {
+          "id": 0
+        },
+        "organizationRunningBalance": 0
+      },
+    ],
     "assetAccountOptions": [
       {
-        "id": 2,
-        "name": "Cash in Valut 1",
-        "glCode": "11101",
+        "id": 1,
+        "name": "fund source",
+        "glCode": "01",
         "disabled": false,
         "manualEntriesAllowed": true,
         "type": {
@@ -8305,12 +8720,17 @@ GET https://DomainName/api/v1/loanproducts/template
           "id": 1,
           "code": "accountUsage.detail",
           "value": "DETAIL"
-        }
+        },
+        "nameDecorated": "fund source",
+        "tagId": {
+          "id": 0
+        },
+        "organizationRunningBalance": -60000
       },
       {
-        "id": 4,
-        "name": "Centenary Opening Account",
-        "glCode": "11201",
+        "id": 2,
+        "name": "Loan portfolio",
+        "glCode": "02",
         "disabled": false,
         "manualEntriesAllowed": true,
         "type": {
@@ -8322,14 +8742,41 @@ GET https://DomainName/api/v1/loanproducts/template
           "id": 1,
           "code": "accountUsage.detail",
           "value": "DETAIL"
-        }
-      }
+        },
+        "nameDecorated": "Loan portfolio",
+        "tagId": {
+          "id": 0
+        },
+        "organizationRunningBalance": 60000
+      },
+      {
+        "id": 3,
+        "name": "transfers",
+        "glCode": "03",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 1,
+          "code": "accountType.asset",
+          "value": "ASSET"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        },
+        "nameDecorated": "transfers",
+        "tagId": {
+          "id": 0
+        },
+        "organizationRunningBalance": 0
+      },
     ],
     "expenseAccountOptions": [
       {
-        "id": 41,
-        "name": "Water Charges",
-        "glCode": "42102",
+        "id": 10,
+        "name": "loans written off 2",
+        "glCode": "12",
         "disabled": false,
         "manualEntriesAllowed": true,
         "type": {
@@ -8341,48 +8788,19 @@ GET https://DomainName/api/v1/loanproducts/template
           "id": 1,
           "code": "accountUsage.detail",
           "value": "DETAIL"
-        }
-      },
-      {
-        "id": 42,
-        "name": "Electricity Charges",
-        "glCode": "42103",
-        "disabled": false,
-        "manualEntriesAllowed": true,
-        "type": {
-          "id": 5,
-          "code": "accountType.expense",
-          "value": "EXPENSE"
         },
-        "usage": {
-          "id": 1,
-          "code": "accountUsage.detail",
-          "value": "DETAIL"
-        }
-      },
-      {
-        "id": 97,
-        "name": "Miscellaneous",
-        "glCode": "42905",
-        "disabled": false,
-        "manualEntriesAllowed": true,
-        "type": {
-          "id": 5,
-          "code": "accountType.expense",
-          "value": "EXPENSE"
+        "nameDecorated": "loans written off 2",
+        "tagId": {
+          "id": 0
         },
-        "usage": {
-          "id": 1,
-          "code": "accountUsage.detail",
-          "value": "DETAIL"
-        }
+        "organizationRunningBalance": 0
       }
     ],
     "incomeAccountOptions": [
       {
-        "id": 34,
-        "name": "Interest on Loans",
-        "glCode": "31101",
+        "id": 4,
+        "name": "income from interest",
+        "glCode": "04",
         "disabled": false,
         "manualEntriesAllowed": true,
         "type": {
@@ -8394,12 +8812,17 @@ GET https://DomainName/api/v1/loanproducts/template
           "id": 1,
           "code": "accountUsage.detail",
           "value": "DETAIL"
-        }
+        },
+        "nameDecorated": "income from interest",
+        "tagId": {
+          "id": 0
+        },
+        "organizationRunningBalance": 19
       },
       {
-        "id": 35,
-        "name": "Late Payment Interest",
-        "glCode": "31102",
+        "id": 8,
+        "name": "income from fees 2",
+        "glCode": "10",
         "disabled": false,
         "manualEntriesAllowed": true,
         "type": {
@@ -8411,12 +8834,17 @@ GET https://DomainName/api/v1/loanproducts/template
           "id": 1,
           "code": "accountUsage.detail",
           "value": "DETAIL"
-        }
+        },
+        "nameDecorated": "income from fees 2",
+        "tagId": {
+          "id": 0
+        },
+        "organizationRunningBalance": 0
       },
       {
-        "id": 37,
-        "name": "Collected Bank Fees Receivable",
-        "glCode": "6201",
+        "id": 9,
+        "name": "income from penalities 2",
+        "glCode": "11",
         "disabled": false,
         "manualEntriesAllowed": true,
         "type": {
@@ -8428,10 +8856,27 @@ GET https://DomainName/api/v1/loanproducts/template
           "id": 1,
           "code": "accountUsage.detail",
           "value": "DETAIL"
-        }
+        },
+        "nameDecorated": "income from penalities 2",
+        "tagId": {
+          "id": 0
+        },
+        "organizationRunningBalance": 0
       }
     ]
-  }
+  },
+  "valueConditionTypeOptions": [
+    {
+      "id": 2,
+      "code": "LoanProductValueConditionType.equal",
+      "value": "equals"
+    },
+    {
+      "id": 3,
+      "code": "LoanProductValueConditionType.greterthan",
+      "value": "greter than"
+    }
+  ]
 }
 					</code>
 				</div>
@@ -8457,31 +8902,37 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 					</code>
 					<code class="method-response">
 {
-  "id": 1,
-  "name": "LP with Charges but no accounting)",
+  "id": 11,
+  "name": "advanced accounting",
+  "includeInBorrowerCycle": true,
+  "useBorrowerCycle": true,
+  "status": "loanProduct.active",
   "currency": {
     "code": "USD",
     "name": "US Dollar",
     "decimalPlaces": 2,
+    "inMultiplesOf": 0,
     "displaySymbol": "$",
     "nameCode": "currency.USD",
     "displayLabel": "US Dollar ($)"
   },
-  "principal": 100000,
-  "numberOfRepayments": 12,
-  "repaymentEvery": 1,
+  "principal": 10000.000000,
+  "minPrincipal": 2000.000000,
+  "maxPrincipal": 15000.000000,
+  "numberOfRepayments": 7,
+  "repaymentEvery": 7,
   "repaymentFrequencyType": {
-    "id": 2,
-    "code": "repaymentFrequency.periodFrequencyType.months",
-    "value": "Months"
+    "id": 0,
+    "code": "repaymentFrequency.periodFrequencyType.days",
+    "value": "Days"
   },
-  "interestRatePerPeriod": 1.75,
+  "interestRatePerPeriod": 5.000000,
   "interestRateFrequencyType": {
     "id": 2,
     "code": "interestRateFrequency.periodFrequencyType.months",
     "value": "Per month"
   },
-  "annualInterestRate": 21,
+  "annualInterestRate": 60.000000,
   "amortizationType": {
     "id": 1,
     "code": "amortizationType.equal.installments",
@@ -8499,43 +8950,146 @@ GET https://DomainName/api/v1/loanproducts/{productId}
   },
   "transactionProcessingStrategyId": 1,
   "transactionProcessingStrategyName": "Mifos style",
-  "charges": [
+  "charges": [],
+  "principalVariationsForBorrowerCycle": [
     {
+      "id": 21,
+      "borrowerCycleNumber": 1,
+      "paramType": {
+        "id": 1,
+        "code": "LoanProductParamType.principal",
+        "value": "principal"
+      },
+      "valueConditionType": {
+        "id": 2,
+        "code": "LoanProductValueConditionType.equal",
+        "value": "equals"
+      },
+      "minValue": 2000.000000,
+      "maxValue": 20000.000000,
+      "defaultValue": 15000.000000
+    },
+    {
+      "id": 20,
+      "borrowerCycleNumber": 1,
+      "paramType": {
+        "id": 1,
+        "code": "LoanProductParamType.principal",
+        "value": "principal"
+      },
+      "valueConditionType": {
+        "id": 3,
+        "code": "LoanProductValueConditionType.greterthan",
+        "value": "greter than"
+      },
+      "minValue": 3000.000000,
+      "maxValue": 25000.000000,
+      "defaultValue": 20000.000000
+    }
+  ],
+  "interestRateVariationsForBorrowerCycle": [],
+  "numberOfRepaymentVariationsForBorrowerCycle": [],
+  "accountingRule": {
+    "id": 2,
+    "code": "accountingRuleType.cash",
+    "value": "CASH BASED"
+  },
+  "accountingMappings": {
+    "fundSourceAccount": {
       "id": 1,
-      "name": "Loan service fee",
-      "active": true,
-      "penalty": false,
-      "currency": {
-        "code": "USD",
-        "name": "US Dollar",
-        "decimalPlaces": 2,
-        "displaySymbol": "$",
-        "nameCode": "currency.USD",
-        "displayLabel": "US Dollar ($)"
+      "name": "fund source",
+      "glCode": "01"
+    },
+    "loanPortfolioAccount": {
+      "id": 2,
+      "name": "Loan portfolio",
+      "glCode": "02"
+    },
+    "transfersInSuspenseAccount": {
+      "id": 3,
+      "name": "transfers",
+      "glCode": "03"
+    },
+    "interestOnLoanAccount": {
+      "id": 4,
+      "name": "income from interest",
+      "glCode": "04"
+    },
+    "incomeFromFeeAccount": {
+      "id": 8,
+      "name": "income from fees 2",
+      "glCode": "10"
+    },
+    "incomeFromPenaltyAccount": {
+      "id": 9,
+      "name": "income from penalities 2",
+      "glCode": "11"
+    },
+    "writeOffAccount": {
+      "id": 10,
+      "name": "loans written off 2",
+      "glCode": "12"
+    },
+    "overpaymentLiabilityAccount": {
+      "id": 11,
+      "name": "over payment",
+      "glCode": "13"
+    }
+  },
+  "paymentChannelToFundSourceMappings": [
+    {
+      "paymentType": {
+        "id": 10,
+        "name": "check"
       },
-      "amount": 230.56,
-      "chargeTimeType": {
+      "fundSourceAccount": {
         "id": 1,
-        "code": "chargeTimeType.disbursement",
-        "value": "Disbursement"
-      },
-      "chargeAppliesTo": {
-        "id": 1,
-        "code": "chargeAppliesTo.loan",
-        "value": "Loan"
-      },
-      "chargeCalculationType": {
-        "id": 1,
-        "code": "chargeCalculationType.flat",
-        "value": "Flat"
+        "name": "fund source",
+        "glCode": "01"
       }
     }
   ],
-  "accountingRule": {
-    "id": 1,
-    "code": "accountingRuleType.none",
-    "value": "NONE"
-  }
+  "feeToIncomeAccountMappings": [
+    {
+      "charge": {
+        "id": 1,
+        "name": "flat install",
+        "active": false,
+        "penalty": false
+      },
+      "incomeAccount": {
+        "id": 8,
+        "name": "income from fees 2",
+        "glCode": "10"
+      }
+    },
+    {
+      "charge": {
+        "id": 2,
+        "name": "install per",
+        "active": false,
+        "penalty": false
+      },
+      "incomeAccount": {
+        "id": 4,
+        "name": "income from interest",
+        "glCode": "04"
+      }
+    },
+    {
+      "charge": {
+        "id": 5,
+        "name": "des charge",
+        "active": false,
+        "penalty": false
+      },
+      "incomeAccount": {
+        "id": 9,
+        "name": "income from penalities 2",
+        "glCode": "11"
+      }
+    }
+  ]
 }
 					</code>
 				</div>
@@ -8571,7 +9125,10 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>inArrearsTolerance, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, includeInBorrowerCycle</td>
+							<td>inArrearsTolerance, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, includeInBorrowerCycle,
+							useBorrowerCycle,principalVariationsForBorrowerCycle,
+							numberOfRepaymentVariationsForBorrowerCycle,
+							interestRateVariationsForBorrowerCycle</td>
 						</tr>
 
 						<tr class="matrixHeadingBG">
@@ -8601,25 +9158,55 @@ POST https://DomainName/api/v1/loanproducts
 POST loanproducts
 Content-Type: application/json 
 Request Body:
-{
-    "name": "LP with Charges but no accounting)",
-    "currencyCode": "USD",
-    "locale": "en_GB",
-    "digitsAfterDecimal": "2",
-    "inMultiplesOf": 0,
-    "principal": "100,000.00",
-    "numberOfRepayments": "12",
-    "repaymentEvery": "1",
-    "repaymentFrequencyType": 2,
-    "interestRatePerPeriod": "1.75",
-    "interestRateFrequencyType": 2,
-    "amortizationType": 1,
-    "interestType": 0,
-    "interestCalculationPeriodType": 1,
-    "inArrearsTolerance": "0",
-    "transactionProcessingStrategyId": 1,
-    "charges":[{"id":"1"}],
-    "accountingRule": 1
+{"currencyCode":"USD",
+"includeInBorrowerCycle":"true",
+"useBorrowerCycle":true,
+"digitsAfterDecimal":"2",
+"inMultiplesOf":"0",
+"repaymentFrequencyType":0,
+"interestRateFrequencyType":2,
+"amortizationType":1,
+"interestType":0,
+"interestCalculationPeriodType":1,
+"transactionProcessingStrategyId":1,
+"principalVariationsForBorrowerCycle":[],
+"interestRateVariationsForBorrowerCycle":[],
+"numberOfRepaymentVariationsForBorrowerCycle":[
+	{
+		"valueConditionType":2,
+		"borrowerCycleNumber":"1",
+		"minValue":"5",
+		"defaultValue":"10",
+		"maxValue":"15"
+	},
+	{
+		"valueConditionType":3,
+		"borrowerCycleNumber":"1",
+		"minValue":"7",
+		"defaultValue":"15",
+		"maxValue":"20"
+	}
+],
+"accountingRule":"2",
+"name":"product 5",
+"principal":"5000",
+"numberOfRepayments":"7",
+"repaymentEvery":"7",
+"interestRatePerPeriod":"5",
+"paymentChannelToFundSourceMappings":[],
+"feeToIncomeAccountMappings":[],
+"penaltyToIncomeAccountMappings":[],
+"charges":[],
+"dateFormat":"dd MMMM yyyy",
+"locale":"en",
+"fundSourceAccountId":1,
+"loanPortfolioAccountId":2,
+"transfersInSuspenseAccountId":3,
+"interestOnLoanAccountId":4,
+"incomeFromFeeAccountId":8,
+"incomeFromPenaltyAccountId":9,
+"writeOffAccountId":10,
+"overpaymentLiabilityAccountId":11
 }
 					</code>
 					<code class="method-response">
@@ -12933,8 +13520,8 @@ Request Body:
 			<code class="method-response">
 {
   "id": 1,
-  "name": "First Product",
-  "description": "A cool saving product",
+  "name": "savings product",
+  "description": "gtasga",
   "currency": {
     "code": "USD",
     "name": "US Dollar",
@@ -12943,15 +13530,15 @@ Request Body:
     "nameCode": "currency.USD",
     "displayLabel": "US Dollar ($)"
   },
-  "nominalAnnualInterestRate": 50.000000,
+  "nominalAnnualInterestRate": 5.000000,
   "interestCompoundingPeriodType": {
-    "id": 4,
-    "code": "savings.interest.period.savingsCompoundingInterestPeriodType.monthly",
-    "value": "Monthly"
+    "id": 1,
+    "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+    "value": "Daily"
   },
   "interestPostingPeriodType": {
     "id": 4,
-    "code": "savings.interest.posting.period.savingsInterestPostingPeriodType.monthly",
+    "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
     "value": "Monthly"
   },
   "interestCalculationType": {
@@ -12964,117 +13551,88 @@ Request Body:
     "code": "savingsInterestCalculationDaysInYearType.days365",
     "value": "365 Days"
   },
-  "minRequiredOpeningBalance": 20.000000,
-  "lockinPeriodFrequency": 1,
-  "lockinPeriodFrequencyType": {
-    "id": 1,
-    "code": "savings.lockin.savingsPeriodFrequencyType.weeks",
-    "value": "Weeks"
-  },
-  "withdrawalFeeForTransfers":true,
+  "withdrawalFeeForTransfers": false,
   "accountingRule": {
     "id": 2,
     "code": "accountingRuleType.cash",
     "value": "CASH BASED"
   },
-  "accountingMappings":{
-      "savingsReferenceAccountId":1,
-      "incomeFromFeeAccountId":5,
-      "interestOnSavingsAccountId":4,
-      "savingsControlAccountId":2,
-      "transfersInSuspenseAccountId":3,
-      "incomeFromPenaltyAccountId":15
-   },
-  "feeToIncomeAccountMappings":[
-      {
-         "chargeId":6,
-         "incomeAccountId":16
-      }
-  ],
-  "penaltyToIncomeAccountMappings":[
-      {
-         "chargeId":4,
-         "incomeAccountId":15
-      }
-  ],
+  "accountingMappings": {
+    "savingsReferenceAccount": {
+      "id": 12,
+      "name": "savings ref",
+      "glCode": "20"
+    },
+    "incomeFromFeeAccount": {
+      "id": 16,
+      "name": "income from savings fee",
+      "glCode": "24"
+    },
+    "incomeFromPenaltyAccount": {
+      "id": 17,
+      "name": "income from sav penalites",
+      "glCode": "25"
+    },
+    "interestOnSavingsAccount": {
+      "id": 15,
+      "name": "interest on savings",
+      "glCode": "23"
+    },
+    "savingsControlAccount": {
+      "id": 13,
+      "name": "savings ref tool kit",
+      "glCode": "21"
+    },
+    "transfersInSuspenseAccount": {
+      "id": 14,
+      "name": "saving transfers",
+      "glCode": "22"
+    }
+  },
   "paymentChannelToFundSourceMappings": [
     {
-      "paymentTypeId": 14,
-      "fundSourceAccountId": 2
+      "paymentType": {
+        "id": 10,
+        "name": "check"
+      },
+      "fundSourceAccount": {
+        "id": 12,
+        "name": "savings ref",
+        "glCode": "20"
+      }
     }
   ],
-  "charges": [
+  "feeToIncomeAccountMappings": [
     {
-      "id": 1,
-      "name": "Annual fee",
-      "active": true,
-      "penalty": false,
-      "currency": {
-        "code": "USD",
-        "name": "US Dollar",
-        "decimalPlaces": 2,
-        "displaySymbol": "$",
-        "nameCode": "currency.USD",
-        "displayLabel": "US Dollar ($)"
+      "charge": {
+        "id": 11,
+        "name": "sav charge",
+        "active": false,
+        "penalty": false
       },
-      "amount": 50,
-      "chargeTimeType": {
-        "id": 6,
-        "code": "chargeTimeType.annualFee",
-        "value": "Annual Fee"
-      },
-      "chargeAppliesTo": {
-        "id": 2,
-        "code": "chargeAppliesTo.savings",
-        "value": "Savings"
-      },
-      "chargeCalculationType": {
-        "id": 1,
-        "code": "chargeCalculationType.flat",
-        "value": "Flat"
-      },
-      "chargePaymentMode": {
-        "id": 0,
-        "code": "chargepaymentmode.regular",
-        "value": "Regular"
-      }
-    },
-    {
-      "id": 2,
-      "name": "Withdrawal fee percentage",
-      "active": true,
-      "penalty": false,
-      "currency": {
-        "code": "USD",
-        "name": "US Dollar",
-        "decimalPlaces": 2,
-        "displaySymbol": "$",
-        "nameCode": "currency.USD",
-        "displayLabel": "US Dollar ($)"
-      },
-      "amount": 0.25,
-      "chargeTimeType": {
-        "id": 5,
-        "code": "chargeTimeType.withdrawalFee",
-        "value": "Withdrawal Fee"
-      },
-      "chargeAppliesTo": {
-        "id": 2,
-        "code": "chargeAppliesTo.savings",
-        "value": "Savings"
-      },
-      "chargeCalculationType": {
-        "id": 2,
-        "code": "chargeCalculationType.percent.of.amount",
-        "value": "% Amount"
-      },
-      "chargePaymentMode": {
-        "id": 0,
-        "code": "chargepaymentmode.regular",
-        "value": "Regular"
+      "incomeAccount": {
+        "id": 16,
+        "name": "income from savings fee",
+        "glCode": "24"
       }
     }
-  ]
+  ],
+  "penaltyToIncomeAccountMappings": [
+    {
+      "charge": {
+        "id": 12,
+        "name": "sav 2",
+        "active": false,
+        "penalty": true
+      },
+      "incomeAccount": {
+        "id": 17,
+        "name": "income from sav penalites",
+        "glCode": "25"
+      }
+    }
+  ],
+  "charges": []
 }	
 			</code>
         </div>
@@ -13143,37 +13701,47 @@ Content-Type: application/json
             <code class="method-declaration">GET https://Domain Name/api/v1/savingsproducts</code>
             <code class="method-response">
 [
- {
-  "id": 1,
-  "name": "Passbook Savings",
-  "description": "Daily compounding using Daily Balance, 5% per year, 365 days in year",
-  "currency": {
-    "code": "USD",
-    "name": "US Dollar",
-    "decimalPlaces": 2,
-    "displaySymbol": "$",
-    "nameCode": "currency.USD",
-    "displayLabel": "US Dollar ($)"
-  },
-  "nominalAnnualInterestRate": 5,
-  "interestCompoundingPeriodType": {
+  {
     "id": 1,
-    "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
-    "value": "Daily"
-  },
-  "interestCalculationType": {
-    "id": 1,
-    "code": "savingsInterestCalculationType.dailybalance",
-    "value": "Daily Balance"
-  },
-  "interestCalculationDaysInYearType": {
-    "id": 365,
-    "code": "savingsInterestCalculationDaysInYearType.days365",
-    "value": "365 Days"
+    "name": "Savings product",
+    "description": "gtasga",
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "nominalAnnualInterestRate": 5.000000,
+    "interestCompoundingPeriodType": {
+      "id": 1,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+      "value": "Daily"
+    },
+    "interestPostingPeriodType": {
+      "id": 4,
+      "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+      "value": "Monthly"
+    },
+    "interestCalculationType": {
+      "id": 1,
+      "code": "savingsInterestCalculationType.dailybalance",
+      "value": "Daily Balance"
+    },
+    "interestCalculationDaysInYearType": {
+      "id": 365,
+      "code": "savingsInterestCalculationDaysInYearType.days365",
+      "value": "365 Days"
+    },
+    "withdrawalFeeForTransfers": false,
+    "accountingRule": {
+      "id": 2,
+      "code": "accountingRuleType.cash",
+      "value": "CASH BASED"
+    }
   }
- } 
-]
-			</code>
+]			</code>
         </div>
     </div>
 <!-- end of saving products api docs -->
