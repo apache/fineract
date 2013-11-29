@@ -5,13 +5,18 @@
  */
 package org.mifosplatform.portfolio.loanaccount.service;
 
+import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
-import org.mifosplatform.infrastructure.configuration.domain.GlobalConfigurationProperty;
-import org.mifosplatform.infrastructure.configuration.domain.GlobalConfigurationRepository;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
@@ -43,8 +48,19 @@ import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.data.GroupRoleData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
-import org.mifosplatform.portfolio.loanaccount.data.*;
-import org.mifosplatform.portfolio.loanaccount.domain.*;
+import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanApplicationTimelineData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanSummaryData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
+import org.mifosplatform.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
+import org.mifosplatform.portfolio.loanaccount.domain.Loan;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
@@ -67,13 +83,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-
 @Service
 public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
@@ -93,7 +102,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final StaffReadPlatformService staffReadPlatformService;
     private final PaginationHelper<LoanAccountData> paginationHelper = new PaginationHelper<LoanAccountData>();
     private final LoanMapper loaanLoanMapper = new LoanMapper();
-    private final GlobalConfigurationRepository repository;
 
     @Autowired
     public LoanReadPlatformServiceImpl(final PlatformSecurityContext context, final LoanRepository loanRepository,
@@ -103,8 +111,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final GroupReadPlatformService groupReadPlatformService, final LoanDropdownReadPlatformService loanDropdownReadPlatformService,
             final FundReadPlatformService fundReadPlatformService, final ChargeReadPlatformService chargeReadPlatformService,
             final CodeValueReadPlatformService codeValueReadPlatformService, final RoutingDataSource dataSource,
-            final CalendarReadPlatformService calendarReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
-            final GlobalConfigurationRepository repository) {
+            final CalendarReadPlatformService calendarReadPlatformService, final StaffReadPlatformService staffReadPlatformService) {
         this.context = context;
         this.loanRepository = loanRepository;
         this.loanTransactionRepository = loanTransactionRepository;
@@ -119,8 +126,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.calendarReadPlatformService = calendarReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.repository = repository;
-
     }
 
     @Override
@@ -1035,7 +1040,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-    public LoanAccountData retrieveLoanProductDetailsTemplate(final Long productId, Long clientId, Long groupId) {
+    public LoanAccountData retrieveLoanProductDetailsTemplate(final Long productId, final Long clientId, final Long groupId) {
 
         this.context.authenticatedUser();
 
@@ -1060,16 +1065,17 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final boolean feeChargesOnly = false;
         final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
         Integer loanCycleCounter = null;
-        if(loanProduct.useBorrowerCycle()){
-            if(clientId == null){
-                loanCycleCounter = retriveLoanCounter(groupId,AccountType.GROUP.getValue());
-            }else{
+        if (loanProduct.useBorrowerCycle()) {
+            if (clientId == null) {
+                loanCycleCounter = retriveLoanCounter(groupId, AccountType.GROUP.getValue());
+            } else {
                 loanCycleCounter = retriveLoanCounter(clientId);
             }
         }
         return LoanAccountData.loanProductWithTemplateDefaults(loanProduct, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
-                interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, loanPurposeOptions, loanCollateralOptions, loanCycleCounter);
+                interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, loanPurposeOptions, loanCollateralOptions,
+                loanCycleCounter);
     }
 
     @Override
@@ -1143,11 +1149,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-    public Collection<OverdueLoanScheduleData> retrieveAllLoansWithOverdueInstallmentsNotAlreadyPenalized() {
-        final String penaltyWaitPeriod  ="penalty-wait-period";
-        final GlobalConfigurationProperty globalConfigurationProperty= this.repository.findOneByName(penaltyWaitPeriod);
-        final Long penaltyWaitPeriodValue = globalConfigurationProperty.getValue();
-
+    public Collection<OverdueLoanScheduleData> retrieveAllLoansWithOverdueInstallmentsNotAlreadyPenalized(final Long penaltyWaitPeriod) {
         final MusoniOverdueLoanScheduleMapper rm = new MusoniOverdueLoanScheduleMapper();
         final String sql = "select "
                 + rm.schema()
@@ -1155,19 +1157,18 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 + " and ls.completed_derived <> 1 and mc.charge_applies_to_enum =1 "
                 + " and mc.charge_time_enum = 9 and ml.loan_status_id = 300 "
                 + " and plc.charge_id not in (SELECT charge_id from m_loan_charge as mlc where mlc.loan_id = ml.id and mlc.charge_id = plc.charge_id and mlc.due_for_collection_as_of_date > fromdate AND mlc.due_for_collection_as_of_date <= duedate) ";
-        return this.jdbcTemplate.query(sql, rm, new Object[]{penaltyWaitPeriodValue});
+        return this.jdbcTemplate.query(sql, rm, new Object[] { penaltyWaitPeriod });
     }
-    
+
     @Override
-    public Integer retriveLoanCounter(Long groupId,Integer loanType){
-        final String sql = "Select MAX(l.loan_counter) from m_loan l where l.group_id = ? "
-                + " and l.loan_type_enum = ?";
-        return this.jdbcTemplate.queryForInt(sql,groupId,loanType);
+    public Integer retriveLoanCounter(final Long groupId, final Integer loanType) {
+        final String sql = "Select MAX(l.loan_counter) from m_loan l where l.group_id = ? " + " and l.loan_type_enum = ?";
+        return this.jdbcTemplate.queryForInt(sql, groupId, loanType);
     }
-    
+
     @Override
-    public Integer retriveLoanCounter(Long clientId){
+    public Integer retriveLoanCounter(final Long clientId) {
         final String sql = "Select MAX(l.loan_counter) from m_loan l where l.client_id = ?";
-        return this.jdbcTemplate.queryForInt(sql,clientId);
+        return this.jdbcTemplate.queryForInt(sql, clientId);
     }
 }

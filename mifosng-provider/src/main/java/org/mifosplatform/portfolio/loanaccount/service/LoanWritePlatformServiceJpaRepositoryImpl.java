@@ -1620,7 +1620,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @CronTarget(jobName = JobName.APPLY_CHARGE_TO_OVERDUE_LOAN_INSTALLMENT)
     public void applyChargeForOverdueLoans() throws JobExecutionException {
 
-        final Collection<OverdueLoanScheduleData> overdueLoanScheduledInstallments = this.loanReadPlatformService.retrieveAllLoansWithOverdueInstallmentsNotAlreadyPenalized();
+        final Long penaltyWaitPeriodValue = this.configurationDomainService.retrievePenaltyWaitPeriod();
+        final Collection<OverdueLoanScheduleData> overdueLoanScheduledInstallments = this.loanReadPlatformService.retrieveAllLoansWithOverdueInstallmentsNotAlreadyPenalized(penaltyWaitPeriodValue);
 
         if (!overdueLoanScheduledInstallments.isEmpty()) {
             for (final OverdueLoanScheduleData overdueInstallment : overdueLoanScheduledInstallments) {

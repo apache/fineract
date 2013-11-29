@@ -62,7 +62,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.mifosplatform.infrastructure.configuration.domain.
      * ConfigurationDomainService#isHolidaysEnabled()
      */
@@ -84,18 +84,18 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
     @Override
     public boolean allowTransactionsOnNonWorkingDayEnabled() {
-        final String allowTransactionsOnNonWorkingDayProperty = "allow-transactions-on-non_workingday";
+        final String propertyName = "allow-transactions-on-non_workingday";
         final GlobalConfigurationProperty property = this.globalConfigurationRepository
-                .findOneByName(allowTransactionsOnNonWorkingDayProperty);
-        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(allowTransactionsOnNonWorkingDayProperty); }
+                .findOneByName(propertyName);
+        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(propertyName); }
         return property.isEnabled();
     }
 
     @Override
     public boolean isConstraintApproachEnabledForDatatables() {
-        final String colunnValue = "constraint_approach_for_datatables";
-        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByName(colunnValue);
-        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(colunnValue); }
+        final String propertyName = "constraint_approach_for_datatables";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByName(propertyName);
+        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(propertyName); }
         return property.isEnabled();
     }
 
@@ -111,5 +111,13 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         cache.update(cacheType);
 
         this.cacheTypeRepository.save(cache);
+    }
+
+    @Override
+    public Long retrievePenaltyWaitPeriod() {
+        final String propertyName  ="penalty-wait-period";
+        final GlobalConfigurationProperty property= this.globalConfigurationRepository.findOneByName(propertyName);
+        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(propertyName); }
+        return property.getValue();
     }
 }
