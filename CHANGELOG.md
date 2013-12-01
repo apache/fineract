@@ -5,7 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
-
+1. 01 Dec 2013 - 1.15.0.RELEASE
 1. 21 Nov 2013 - 1.14.0.RELEASE
 1. 03 Nov 2013 - 1.13.4.RELEASE
 1. 30 Oct 2013 - 1.13.3.RELEASE
@@ -49,6 +49,27 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.15.0.RELEASE
+=============
+Feature Release
+
+This feature release contains some API breaking changes around loan and savings products in relation to the accounting section of their respective APIs. Some small improvements are also bundled into this release.
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-569] - Calculate future loan amounts or installments based on previous loan cycle.
+ - [MIFOSX-744] - Implementation of mifosx-735 should be optional
+ - [MIFOSX-790] - Need ability to be able to link accounting journal entries with the additional payment details captured in m_payment_detail table
+ - [MIFOSX-792] - Improve penalties introducing a redemption periods for MFIs that dont input data same day.
+ - [MIFOSX-794] - Add roles list to /users endpoint
+ - [MIFOSX-795] - Clean up API around Loan/ Savings product creation for consistency and better usability
+
+
+Bug 
+ - [MIFOSX-798] - Read not working for holidays and API documentation not updated
+ - [MIFOSX-800] - Scheduler job is failed, if no accounting data is available.
 
 
 1.14.0.RELEASE
