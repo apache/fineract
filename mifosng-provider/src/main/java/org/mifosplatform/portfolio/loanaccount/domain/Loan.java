@@ -2097,6 +2097,21 @@ public class Loan extends AbstractPersistable<Long> {
 
         return changedTransactionDetail;
     }
+    
+    public ChangedTransactionDetail undoWrittenOff(final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds){
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
+        final LoanTransaction writeOffTransaction = findWriteOffTransaction();
+        writeOffTransaction.reverse();
+        this.loanStatus = LoanStatus.ACTIVE.getValue();
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
+                .determineProcessor(this.transactionProcessingStrategy);
+        final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
+        ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(),
+                allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, setOfLoanCharges());
+        updateLoanSummaryDerivedFields();
+        return changedTransactionDetail;
+    }
 
     private LoanTransaction findWriteOffTransaction() {
 
@@ -2350,7 +2365,7 @@ public class Loan extends AbstractPersistable<Long> {
         return status().isClosedObligationsMet();
     }
 
-    private boolean isClosedWrittenOff() {
+    public boolean isClosedWrittenOff() {
         return status().isClosedWrittenOff();
     }
 

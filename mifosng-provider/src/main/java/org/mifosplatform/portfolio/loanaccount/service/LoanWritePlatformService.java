@@ -74,6 +74,6 @@ public interface LoanWritePlatformService {
 
     void applyChargeForOverdueLoans() throws JobExecutionException;
 
-
+    CommandProcessingResult undoWriteOff(Long loanId);
 
 }

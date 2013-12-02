@@ -377,6 +377,10 @@ public class CommandWrapper {
     public boolean isLoanWriteOff() {
         return this.actionName.equalsIgnoreCase("WRITEOFF") && this.entityName.equalsIgnoreCase("LOAN");
     }
+    
+    public boolean isUndoLoanWriteOff() {
+        return this.actionName.equalsIgnoreCase("UNDOWRITEOFF") && this.entityName.equalsIgnoreCase("LOAN");
+    }
 
     public boolean isCloseLoanAsObligationsMet() {
         return this.actionName.equalsIgnoreCase("CLOSE") && this.entityName.equalsIgnoreCase("LOAN");

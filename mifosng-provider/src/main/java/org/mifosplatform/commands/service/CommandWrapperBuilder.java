@@ -573,6 +573,16 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId + "/transactions/template?command=writeoff";
         return this;
     }
+    
+    public CommandWrapperBuilder undoWriteOffLoanTransaction(final Long loanId) {
+        this.actionName = "UNDOWRITEOFF";
+        this.entityName = "LOAN";
+        this.entityId = null;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions/template?command=undowriteoff";
+        return this;
+    }
+
 
     public CommandWrapperBuilder closeLoanAsRescheduledTransaction(final Long loanId) {
         this.actionName = "CLOSEASRESCHEDULED";

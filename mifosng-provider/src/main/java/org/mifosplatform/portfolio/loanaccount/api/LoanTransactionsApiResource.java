@@ -149,7 +149,10 @@ public class LoanTransactionsApiResource {
         } else if (is(commandParam, "close")) {
             final CommandWrapper commandRequest = builder.closeLoanTransaction(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }
+        }else if (is(commandParam, "undowriteoff")) {
+            final CommandWrapper commandRequest = builder.undoWriteOffLoanTransaction(loanId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } 
 
         if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
 

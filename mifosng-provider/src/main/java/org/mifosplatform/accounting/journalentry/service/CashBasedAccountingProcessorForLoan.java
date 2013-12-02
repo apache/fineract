@@ -65,11 +65,11 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
              * and fee write off need not be considered). Debit losses written
              * off and credit Loan Portfolio
              **/
-            else if (loanTransactionDTO.getTransactionType().isWriteOff() && !loanTransactionDTO.isReversed()) {
+            else if (loanTransactionDTO.getTransactionType().isWriteOff()) {
                 final BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
                 this.helper.createCashBasedJournalEntriesAndReversalsForLoan(office, currencyCode,
                         CASH_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF, CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO, loanProductId, paymentTypeId,
-                        loanId, transactionId, transactionDate, principalAmount, false);
+                        loanId, transactionId, transactionDate, principalAmount, loanTransactionDTO.isReversed());
             } else if (loanTransactionDTO.getTransactionType().isInitiateTransfer()
                     || loanTransactionDTO.getTransactionType().isApproveTransfer()
                     || loanTransactionDTO.getTransactionType().isWithdrawTransfer()) {

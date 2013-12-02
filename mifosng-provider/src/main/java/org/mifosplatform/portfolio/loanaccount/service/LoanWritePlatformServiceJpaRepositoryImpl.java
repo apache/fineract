@@ -546,6 +546,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.LOAN)) { throw new PlatformServiceUnavailableException(
                 "error.msg.loan.transfer.transaction.update.not.allowed", "Loan transaction:" + transactionId
                         + " update not allowed as it involves in account transfer", transactionId); }
+        if(loan.isClosedWrittenOff()){ throw new PlatformServiceUnavailableException(
+                "error.msg.loan.written.off.update.not.allowed", "Loan transaction:" + transactionId
+                + " update not allowed as loan status is written off", transactionId); }
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
@@ -1691,5 +1694,34 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             // we post Journal entries only for loans in active status
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         }
+    }
+
+    @Override
+    public CommandProcessingResult undoWriteOff(Long loanId) {
+        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        checkClientOrGroupActive(loan);
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        if(!loan.isClosedWrittenOff()){
+            throw new PlatformServiceUnavailableException(
+                    "error.msg.loan.status.not.written.off.update.not.allowed", "Loan :" + loanId
+                            + " update not allowed as loan status is not written off", loanId); 
+        }
+        ChangedTransactionDetail changedTransactionDetail =loan.undoWrittenOff(existingTransactionIds,existingReversedTransactionIds);
+        if (changedTransactionDetail != null) {
+            for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+                this.loanTransactionRepository.save(mapEntry.getValue());
+                this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+            }
+        }
+        this.loanRepository.save(loan);
+        
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+        return new CommandProcessingResultBuilder() //
+        .withOfficeId(loan.getOfficeId()) //
+        .withClientId(loan.getClientId()) //
+        .withGroupId(loan.getGroupId()) //
+        .withLoanId(loanId) //
+        .build();
     }
 }
