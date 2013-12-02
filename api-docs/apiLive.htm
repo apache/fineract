@@ -440,6 +440,14 @@
                                 <td></td>
                                 <td></td>
                             </tr>
+                            <tr class="alt">
+                                <td></td>
+                                <td>loans/{loanId}/transactions?command=undowriteoff</td>
+                                <td><a href="#loans_transaction_undo_write-off_loan">Undo Loan Write-off transaction</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
 							<tr>
 								<td></td>
 								<td>loans/{loanId}/transactions/{transactionId}</td>
@@ -6445,6 +6453,31 @@ Request Body:
                 </div>
             </div>
 
+            <a id="loans_transaction_undo_write-off_loan" name="loans_transaction_undo_write-off_loan" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Undo Loan Write-off Transaction</h4>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+                        POST https://DomainName/api/v1/loans/{loanId}/transactions?command=undowriteoff
+                    </code>
+                    <code class="method-request">
+                        POST loans/70/transactions?command=undowriteoff
+                        Content-Type: application/json
+                        Request Body:
+                        { }
+                    </code>
+                    <code class="method-response">
+		      
+		        {
+		          "officeId": 1,
+		          "clientId": 1,
+		          "loanId": 22
+		        }
+                    </code>
+                </div>
+            </div>
 
             <a id="loans_transaction_retrieve" name="loans_transaction_retrieve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -21451,6 +21484,14 @@ No Request Body:
 					<td></td>
 					<td>loans/{loanId}/transactions?command=writeoff</td>
 					<td><a href="#loans_transaction_write-off_loan">Write-off Loan</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				</tr><tr>
+					<td></td>
+					<td>loans/{loanId}/transactions?command=undowriteoff</td>
+					<td><a href="#loans_transaction_undo_write-off_loan">Undo Loan Write-off Transaction</a></td>
 					<td></td>
 					<td></td>
 					<td></td>
