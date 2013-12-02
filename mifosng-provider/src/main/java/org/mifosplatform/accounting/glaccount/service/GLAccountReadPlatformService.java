@@ -10,13 +10,14 @@ import java.util.List;
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
 import org.mifosplatform.accounting.glaccount.data.GLAccountDataForLookup;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
+import org.mifosplatform.accounting.journalentry.data.JournalEntryAssociationParametersData;
 
 public interface GLAccountReadPlatformService {
 
     List<GLAccountData> retrieveAllGLAccounts(Integer accountClassification, String searchParam, Integer usage,
-            Boolean manualTransactionsAllowed, Boolean disabled);
+            Boolean manualTransactionsAllowed, Boolean disabled, JournalEntryAssociationParametersData associationParametersData);
 
-    GLAccountData retrieveGLAccountById(long glAccountId);
+    GLAccountData retrieveGLAccountById(long glAccountId,JournalEntryAssociationParametersData associationParametersData);
 
     List<GLAccountData> retrieveAllEnabledDetailGLAccounts();
 
