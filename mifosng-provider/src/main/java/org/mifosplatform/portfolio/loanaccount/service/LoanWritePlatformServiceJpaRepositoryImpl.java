@@ -434,9 +434,28 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
         removeLoanCycle(loan);
+
+        //
+        final MonetaryCurrency currency = loan.getCurrency();
+        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
+
+        final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByLoanId(loan.getId(),
+                CalendarEntityType.LOANS.getValue());
+        final LocalDate actualDisbursementDate = loan.getDisbursementDate();
+        final LocalDate calculatedRepaymentsStartingFromDate = getCalculatedRepaymentsStartingFromDate(actualDisbursementDate, loan,
+                calendarInstance);
+
+        final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
+                actualDisbursementDate.toDate());
+        final WorkingDays workingDays = this.workingDaysRepository.findOne();
+
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
-        final Map<String, Object> changes = loan.undoDisbursal(existingTransactionIds, existingReversedTransactionIds);
+
+        final Map<String, Object> changes = loan.undoDisbursal(this.loanScheduleFactory, applicationCurrency, existingTransactionIds,
+                existingReversedTransactionIds, calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays);
+
         if (!changes.isEmpty()) {
             this.loanRepository.saveAndFlush(loan);
             this.accountTransfersWritePlatformService.reverseAllTransactions(loanId, PortfolioAccountType.LOAN);
@@ -448,9 +467,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     this.noteRepository.save(note);
                 }
             }
-
-            final MonetaryCurrency currency = loan.getCurrency();
-            final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
 
             final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(applicationCurrency.toData(),
                     existingTransactionIds, existingReversedTransactionIds);
@@ -1624,7 +1640,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public void applyChargeForOverdueLoans() throws JobExecutionException {
 
         final Long penaltyWaitPeriodValue = this.configurationDomainService.retrievePenaltyWaitPeriod();
-        final Collection<OverdueLoanScheduleData> overdueLoanScheduledInstallments = this.loanReadPlatformService.retrieveAllLoansWithOverdueInstallmentsNotAlreadyPenalized(penaltyWaitPeriodValue);
+        final Collection<OverdueLoanScheduleData> overdueLoanScheduledInstallments = this.loanReadPlatformService
+                .retrieveAllLoansWithOverdueInstallmentsNotAlreadyPenalized(penaltyWaitPeriodValue);
 
         if (!overdueLoanScheduledInstallments.isEmpty()) {
             for (final OverdueLoanScheduleData overdueInstallment : overdueLoanScheduledInstallments) {
