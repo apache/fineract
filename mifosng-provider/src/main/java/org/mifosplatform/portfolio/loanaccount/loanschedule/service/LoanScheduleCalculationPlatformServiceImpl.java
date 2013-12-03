@@ -13,8 +13,10 @@ import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.mifosplatform.portfolio.loanaccount.serialization.CalculateLoanScheduleQueryFromApiJsonHelper;
+import org.mifosplatform.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
@@ -30,16 +32,19 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     private final FromJsonHelper fromJsonHelper;
     private final LoanProductRepository loanProductRepository;
     private final LoanProductDataValidator loanProductCommandFromApiJsonDeserializer;
+    private final LoanReadPlatformService loanReadPlatformService;
 
     @Autowired
     public LoanScheduleCalculationPlatformServiceImpl(final CalculateLoanScheduleQueryFromApiJsonHelper fromApiJsonDeserializer,
             final LoanScheduleAssembler loanScheduleAssembler, final FromJsonHelper fromJsonHelper,
-            final LoanProductRepository loanProductRepository, final LoanProductDataValidator loanProductCommandFromApiJsonDeserializer) {
+            final LoanProductRepository loanProductRepository, final LoanProductDataValidator loanProductCommandFromApiJsonDeserializer,
+            final LoanReadPlatformService loanReadPlatformService) {
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanScheduleAssembler = loanScheduleAssembler;
         this.fromJsonHelper = fromJsonHelper;
         this.loanProductRepository = loanProductRepository;
         this.loanProductCommandFromApiJsonDeserializer = loanProductCommandFromApiJsonDeserializer;
+        this.loanReadPlatformService = loanReadPlatformService;
     }
 
     @Override
@@ -54,7 +59,21 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
         if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
 
-        this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(query.parsedJson(), baseDataValidator, loanProduct);
+        if (loanProduct.useBorrowerCycle()) {
+            final Long clientId = this.fromJsonHelper.extractLongNamed("clientId", query.parsedJson());
+            final Long groupId = this.fromJsonHelper.extractLongNamed("groupId", query.parsedJson());
+            Integer cycleNumber = 0;
+            if (clientId != null) {
+                cycleNumber = this.loanReadPlatformService.retriveLoanCounter(clientId);
+            } else if (groupId != null) {
+                cycleNumber = this.loanReadPlatformService.retriveLoanCounter(groupId, AccountType.GROUP.getValue());
+            }
+            this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(query.parsedJson(), baseDataValidator,
+                    loanProduct, cycleNumber);
+        } else {
+            this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(query.parsedJson(), baseDataValidator,
+                    loanProduct);
+        }
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         
         return this.loanScheduleAssembler.assembleLoanScheduleFrom(query.parsedJson());
