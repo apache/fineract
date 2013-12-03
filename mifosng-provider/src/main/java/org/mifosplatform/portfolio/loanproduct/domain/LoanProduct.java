@@ -520,10 +520,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
             this.includeInBorrowerCycle = newValue;
         }
 
-        final String useBorrowerCycleParamName = "useBorrowerCycle";
-        if (command.isChangeInBooleanParameterNamed(useBorrowerCycleParamName, this.includeInBorrowerCycle)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(useBorrowerCycleParamName);
-            actualChanges.put(useBorrowerCycleParamName, newValue);
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.useBorrowerCycleParameterName, this.useBorrowerCycle)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.useBorrowerCycleParameterName);
+            actualChanges.put(LoanProductConstants.useBorrowerCycleParameterName, newValue);
             this.useBorrowerCycle = newValue;
         }
 
