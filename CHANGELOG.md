@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 04 Dec 2013 - 1.15.1.RELEASE
 1. 01 Dec 2013 - 1.15.0.RELEASE
 1. 21 Nov 2013 - 1.14.0.RELEASE
 1. 03 Nov 2013 - 1.13.4.RELEASE
@@ -49,6 +50,17 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.15.1.RELEASE
+=============
+Bug Release
+
+Bugs
+ - [MIFOSX-801] - Clean up implementation of [MIFOSX-765]
+ - MIFOSX-805] - Terms vary based on loan cycle is not getting updated in Edit Loan Product page.
+ - [MIFOSX-810] - Unhandled API error while creating multiple users with same name
+ - [MIFOSX-811] - Repayment schedule dates for Loan disbursement after undo disbursal is not proper
+ - [MIFOSX-744] - Implementation of mifosx-735 should be optional
 
 1.15.0.RELEASE
 =============
