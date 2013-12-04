@@ -64,9 +64,9 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
             final Long groupId = this.fromJsonHelper.extractLongNamed("groupId", query.parsedJson());
             Integer cycleNumber = 0;
             if (clientId != null) {
-                cycleNumber = this.loanReadPlatformService.retriveLoanCounter(clientId);
+                cycleNumber = this.loanReadPlatformService.retriveLoanCounter(clientId, loanProduct.getId());
             } else if (groupId != null) {
-                cycleNumber = this.loanReadPlatformService.retriveLoanCounter(groupId, AccountType.GROUP.getValue());
+                cycleNumber = this.loanReadPlatformService.retriveLoanCounter(groupId, AccountType.GROUP.getValue(), loanProduct.getId());
             }
             this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(query.parsedJson(), baseDataValidator,
                     loanProduct, cycleNumber);
