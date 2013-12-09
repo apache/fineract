@@ -19,5 +19,6 @@ rebel.xml
 *.sublime-workspace
 *.DS_Store
 *.ini
+*.gradletasknamecache
 *~
 .metadata
