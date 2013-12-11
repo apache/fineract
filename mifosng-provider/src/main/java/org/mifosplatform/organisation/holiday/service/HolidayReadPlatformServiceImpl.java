@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -39,7 +40,7 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
         public HolidayMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(200);
             sqlBuilder.append("h.id as id, h.name as name, h.description as description, h.from_date as fromDate, h.to_date as toDate, ");
-            sqlBuilder.append("h.repayments_rescheduled_to as repaymentsScheduleTO ");
+            sqlBuilder.append("h.repayments_rescheduled_to as repaymentsScheduleTO, h.status_enum as statusEnum ");
             sqlBuilder.append("from m_holiday h ");
             this.schema = sqlBuilder.toString();
         }
@@ -56,8 +57,10 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
             final LocalDate fromDate = JdbcSupport.getLocalDate(rs, "fromDate");
             final LocalDate toDate = JdbcSupport.getLocalDate(rs, "toDate");
             final LocalDate repaymentsScheduleTO = JdbcSupport.getLocalDate(rs, "repaymentsScheduleTO");
+            final Integer statusEnum = JdbcSupport.getInteger(rs, "statusEnum");
+            final EnumOptionData status = HolidayEnumerations.holidayStatusType(statusEnum);
 
-            return new HolidayData(id, name, description, fromDate, toDate, repaymentsScheduleTO);
+            return new HolidayData(id, name, description, fromDate, toDate, repaymentsScheduleTO, status);
         }
 
     }
