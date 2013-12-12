@@ -9,10 +9,14 @@ import java.util.Collection;
 
 import org.mifosplatform.commands.data.AuditData;
 import org.mifosplatform.commands.data.AuditSearchData;
+import org.mifosplatform.infrastructure.core.data.PaginationParameters;
+import org.mifosplatform.infrastructure.core.service.Page;
 
 public interface AuditReadPlatformService {
 
     Collection<AuditData> retrieveAuditEntries(String extraCriteria, boolean includeJson);
+    
+    Page<AuditData> retrievePaginatedAuditEntries(String extraCriteria, boolean includeJson, PaginationParameters parameters);
 
     Collection<AuditData> retrieveAllEntriesToBeChecked(String extraCriteria, boolean includeJson);
 

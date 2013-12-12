@@ -10657,8 +10657,8 @@ Content-Type: application/json
 			<div class="method-section">
 				<div class="method-description">
 					<h4>List Audits</h4>
-					<p>Get a list of audits that match the criteria supplied,
-                                        and are within the requestors' data scope.</p>
+					<p>Get a 200 list of audits that match the criteria supplied and sorted by audit id in descending order,
+                                        and are within the requestors' data scope. Also it supports pagination and sorting</p>
 					<h5>Arguments</h5>
 					<dl class="argument-list">
                                             <dt>actionName</dt>
@@ -10749,6 +10749,35 @@ Content-Type: application/json
                                             <dd>optional, <span>
                                             Values are true, false.  Default is false.</span>
                                             </dd>
+                        <dt>paged</dt>
+								<dd>
+									Boolean <span>optional</span>, defaults to false
+								</dd>
+								<dd>If paged is true then results will be paginated.</dd>
+
+                        <dt>offset</dt>
+								<dd>
+									Integer <span>optional</span>, defaults to 0
+								</dd>
+								<dd>Indicates from what result to start from.</dd>
+						
+						<dt>limit</dt>
+								<dd>
+									Integer <span>optional</span>, defaults to 200
+								</dd>
+								<dd>Restricts the size of results returned. To override the default and return all entries you must explicitly pass a non-positive integer value for limit e.g. limit=0, or limit=-1</dd>
+
+						<dt>orderBy</dt>
+								<dd>
+									String <span>optional</span>, one of <span>id, actionName, entityName, resourceId, subresourceId, madeOnDate, checkedOnDate, officeName, groupName, clientName, loanAccountNo, savingsAccountNo</span>
+								</dd>
+								<dd>Orders the results by the field indicated.</dd>
+
+						<dt>sortBy</dt>
+								<dd>
+									String <span>optional</span>, one of <span>ASC, DESC</span>
+								</dd>
+								<dd>Indicates what way to order results if <i>orderBy</i> is used.</dd>
                                             
 					</dl>
 					<p>Example Requests:</p>
@@ -10841,6 +10870,65 @@ GET https://DomainName/api/v1/audits
     "loanAccountNo": "000000373"
   },...
   ]
+					</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/audits?paged=true&limit=5
+					</code>
+					<code class="method-response">
+{						
+  "totalFilteredRecords": 30,
+  "pageItems": [
+  {
+    "id": 671,
+    "actionName": "PERMISSIONS",
+    "entityName": "ROLE",
+    "resourceId": 6,
+    "maker": "keithwoodlock",
+    "madeOnDate": 1365014262000,
+    "processingResult": "processed"
+  },
+  {
+    "id": 670,
+    "actionName": "CREATE",
+    "entityName": "CLIENTNOTE",
+    "resourceId": 287,
+    "maker": "keithwoodlock",
+    "madeOnDate": 1365014204000,
+    "processingResult": "awaiting.approval",
+    "officeName": "my office",
+    "clientName": "gg ggg"
+  },
+  {
+    "id": 668,
+    "actionName": "UPDATE",
+    "entityName": "PERMISSION",
+    "maker": "keithwoodlock",
+    "madeOnDate": 1365014186000,
+    "processingResult": "processed"
+  },
+  {
+    "id": 667,
+    "actionName": "CREATE",
+    "entityName": "CLIENTNOTE",
+    "resourceId": 286,
+    "maker": "keithwoodlock",
+    "madeOnDate": 1365014169000,
+    "processingResult": "processed",
+    "officeName": "my office name",
+    "clientName": "gg ggg"
+  },
+  {
+    "id": 666,
+    "actionName": "CREATE",
+    "entityName": "CLIENT",
+    "resourceId": 363,
+    "maker": "keithwoodlock",
+    "madeOnDate": 1365012843000,
+    "processingResult": "awaiting.approval",
+    "officeName": "my office name"
+  }
+  ]
+}
 					</code>
 				</div>
 			</div>
