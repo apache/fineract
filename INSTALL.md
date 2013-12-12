@@ -12,7 +12,7 @@ The release artifact (.zip file) has the following structure:
   + api-docs ... folder contains html based documentation on the platform API for this release
   + database ... folder contains database setup and upgrade scripts required for installation
   + pentahoReports ... folder contains any out-of-the-box reports provided through pentaho
-  + apps ... folder contains apps like reference app that speak to the platform
+  + apps ... folder contains apps like reference app and community app that speak to the platform
   |
   -- CHANGELOG.MD ... file documents changelog of project up to this release
   -- CONTRIBUTORS.MD ... file provides details on contributors to project
@@ -221,10 +221,12 @@ The two ways to get up and running with mifos platform is:
   
   Drop the following from the release artifact into [TOMCAT_HOME]/webapps/ROOT folder:
   - The entire ```apps/IndividualLendingGeneralJavaScript``` folder
+  - The entire ```apps/community-app``` folder. This contains a preview version of the community-app which will soon deprecate the older Reference app (IndividualLendingGeneralJavaScript)
   - The entire api-docs folder
 
 #### 2.3.7 Startup tomcat
   Startup tomcat:
   - Platform application should be available @ https://[server ip address]:8443/mifosng-provider/api/v1/offices?tenantIdentifier=default&pretty=true
   - Reference application should be available @ https://[server ip address]:8443/IndividualLendingGeneralJavaScript/IndivLendHome.html?baseApiUrl=https://[server ip address]:8443/mifosng-provider/api/v1/
+  - Preview version of the Community application should be available @ https://[server ip address]:8443/community-app?baseApiUrl=https://[server ip address]:8443/mifosng-provider/api/v1/
   - API docs should be available @ https://[server ip address]:8443/api-docs/apiLive.htm
