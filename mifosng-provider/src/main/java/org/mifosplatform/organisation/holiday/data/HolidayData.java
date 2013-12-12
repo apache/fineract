@@ -1,6 +1,7 @@
 package org.mifosplatform.organisation.holiday.data;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 public class HolidayData {
 
@@ -18,9 +19,11 @@ public class HolidayData {
     private final LocalDate repaymentsRescheduledTo;
     @SuppressWarnings("unused")
     private final Long officeId;
+    @SuppressWarnings("unused")
+    private final EnumOptionData status;
 
     public HolidayData(final Long id, final String name, final String description, final LocalDate fromDate, final LocalDate toDate,
-            final LocalDate repaymentsRescheduledTo) {
+            final LocalDate repaymentsRescheduledTo, final EnumOptionData status) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -28,6 +31,6 @@ public class HolidayData {
         this.toDate = toDate;
         this.repaymentsRescheduledTo = repaymentsRescheduledTo;
         this.officeId = null;
-
+        this.status = status;
     }
 }
