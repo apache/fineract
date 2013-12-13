@@ -8,18 +8,25 @@ package org.mifosplatform.commands.service;
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.mifosplatform.commands.data.AuditData;
 import org.mifosplatform.commands.data.AuditSearchData;
 import org.mifosplatform.commands.data.ProcessingResultLookup;
+import org.mifosplatform.infrastructure.core.data.PaginationParameters;
+import org.mifosplatform.infrastructure.core.data.PaginationParametersDataValidator;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeData;
@@ -49,6 +56,9 @@ import com.google.gson.JsonObject;
 public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
     private final static Logger logger = LoggerFactory.getLogger(AuditReadPlatformServiceImpl.class);
+    private final static Set<String> supportedOrderByValues = new HashSet<String>(Arrays.asList("id", "actionName", "entityName",
+            "resourceId", "subresourceId", "madeOnDate", "checkedOnDate", "officeName", "groupName", "clientName", "loanAccountNo",
+            "savingsAccountNo"));
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
@@ -58,12 +68,15 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     private final ClientReadPlatformService clientReadPlatformService;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
+    private final PaginationHelper<AuditData> paginationHelper = new PaginationHelper<AuditData>();
+    private final PaginationParametersDataValidator paginationParametersDataValidator;
 
     @Autowired
     public AuditReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final FromJsonHelper fromApiJsonHelper, final AppUserReadPlatformService appUserReadPlatformService,
             final OfficeReadPlatformService officeReadPlatformService, final ClientReadPlatformService clientReadPlatformService,
-            final LoanProductReadPlatformService loanProductReadPlatformService, final StaffReadPlatformService staffReadPlatformService) {
+            final LoanProductReadPlatformService loanProductReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
+            final PaginationParametersDataValidator paginationParametersDataValidator) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.fromApiJsonHelper = fromApiJsonHelper;
@@ -72,6 +85,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         this.clientReadPlatformService = clientReadPlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
+        this.paginationParametersDataValidator = paginationParametersDataValidator;
     }
 
     private static final class AuditMapper implements RowMapper<AuditData> {
@@ -145,9 +159,43 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         if (StringUtils.isNotBlank(extraCriteria)) {
             updatedExtraCriteria = " where (" + extraCriteria + ")";
         }
-
-        updatedExtraCriteria += " order by aud.id DESC";
+        
+        updatedExtraCriteria += " order by aud.id DESC limit " + PaginationParameters.getCheckedLimit(null);
         return retrieveEntries("audit", updatedExtraCriteria, includeJson);
+    }
+    
+    @Override
+    public Page<AuditData> retrievePaginatedAuditEntries(final String extraCriteria, final boolean includeJson, final PaginationParameters parameters) {
+        
+        this.paginationParametersDataValidator.validateParameterValues(parameters, supportedOrderByValues, "audits");
+        final AppUser currentUser = this.context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        
+        String updatedExtraCriteria = "";
+        if (StringUtils.isNotBlank(extraCriteria)) {
+            updatedExtraCriteria = " where (" + extraCriteria + ")";
+        }
+
+        final AuditMapper rm = new AuditMapper();
+        final StringBuilder sqlBuilder = new StringBuilder(200);
+        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append(rm.schema(includeJson, hierarchy));
+        sqlBuilder.append(' ').append(updatedExtraCriteria);
+        
+        if (parameters.isOrderByRequested()) {
+            sqlBuilder.append(' ').append(parameters.orderBySql());
+        }else {
+            sqlBuilder.append(' ').append(' ').append(" order by aud.id DESC");
+        }
+        
+        if (parameters.isLimited()) {
+            sqlBuilder.append(' ').append(parameters.limitSql());
+        }
+                
+        logger.info("sql: " + sqlBuilder.toString());
+        
+        final String sqlCountRows = "SELECT FOUND_ROWS()";
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), new Object[] {}, rm);
     }
 
     @Override
@@ -195,7 +243,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
-
+    
     @Override
     public AuditData retrieveAuditEntry(final Long auditId) {
 
