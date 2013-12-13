@@ -44,6 +44,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
 import org.mifosplatform.organisation.holiday.domain.Holiday;
@@ -1314,7 +1316,9 @@ public class Loan extends AbstractPersistable<Long> {
 
     public Map<String, Object> loanApplicationRejection(final AppUser currentUser, final JsonCommand command,
             final LoanLifecycleStateMachine loanLifecycleStateMachine) {
-
+        
+        validateAccountStatus(LoanEvent.LOAN_REJECTED);
+        
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
 
         final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECTED, LoanStatus.fromInt(this.loanStatus));
@@ -1410,6 +1414,8 @@ public class Loan extends AbstractPersistable<Long> {
     public Map<String, Object> loanApplicationApproval(final AppUser currentUser, final JsonCommand command,
             final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
+        validateAccountStatus(LoanEvent.LOAN_APPROVED);
+        
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
 
         final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVED, LoanStatus.fromInt(this.loanStatus));
@@ -1458,6 +1464,7 @@ public class Loan extends AbstractPersistable<Long> {
 
     public Map<String, Object> undoApproval(final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
+        validateAccountStatus(LoanEvent.LOAN_APPROVAL_UNDO);
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
 
         final LoanStatus currentStatus = LoanStatus.fromInt(this.loanStatus);
@@ -1506,6 +1513,7 @@ public class Loan extends AbstractPersistable<Long> {
             final LocalDate calculatedRepaymentsStartingFromDate, final boolean isHolidayEnabled, final List<Holiday> holidays,
             final WorkingDays workingDays, final boolean allowTransactionsOnHoliday, final boolean allowTransactionsOnNonWorkingDay) {
 
+        validateAccountStatus(LoanEvent.LOAN_DISBURSED);
         updateLoanToPreDisbursalState();
 
         final LoanStatus statusEnum = this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED,
@@ -1674,8 +1682,9 @@ public class Loan extends AbstractPersistable<Long> {
             final List<Long> existingReversedTransactionIds, final LocalDate calculatedRepaymentsStartingFromDate,
             final boolean isHolidayEnabled, final List<Holiday> holidays, final WorkingDays workingDays) {
 
+        validateAccountStatus(LoanEvent.LOAN_DISBURSAL_UNDO);
+        
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
-
         final LoanStatus currentStatus = LoanStatus.fromInt(this.loanStatus);
         final LoanStatus statusEnum = this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSAL_UNDO, currentStatus);
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_DISBURSAL_UNDO, getDisbursementDate());
@@ -1736,6 +1745,8 @@ public class Loan extends AbstractPersistable<Long> {
     public ChangedTransactionDetail waiveInterest(final LoanTransaction waiveInterestTransaction,
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds) {
+        
+        validateAccountStatus(LoanEvent.LOAN_REPAYMENT_OR_WAIVER);
 
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_REPAYMENT_OR_WAIVER,
                 waiveInterestTransaction.getTransactionDate());
@@ -1754,6 +1765,7 @@ public class Loan extends AbstractPersistable<Long> {
             final List<Long> existingReversedTransactionIds, final boolean allowTransactionsOnHoliday, final List<Holiday> holidays,
             final WorkingDays workingDays, final boolean allowTransactionsOnNonWorkingDay) {
 
+        validateAccountStatus(LoanEvent.LOAN_REPAYMENT_OR_WAIVER);
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, repaymentTransaction.getTransactionDate());
 
         validateRepaymentDateIsOnHoliday(repaymentTransaction.getTransactionDate(), allowTransactionsOnHoliday, holidays);
@@ -1773,6 +1785,7 @@ public class Loan extends AbstractPersistable<Long> {
             final boolean allowTransactionsOnHoliday, final List<Holiday> holidays, final WorkingDays workingDays,
             final boolean allowTransactionsOnNonWorkingDay, final LoanTransaction paymentTransaction, final Integer installmentNumber) {
 
+        validateAccountStatus(LoanEvent.LOAN_CHARGE_PAYMENT);
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_CHARGE_PAYMENT, paymentTransaction.getTransactionDate());
         validateRepaymentDateIsOnHoliday(paymentTransaction.getTransactionDate(), allowTransactionsOnHoliday, holidays);
         validateRepaymentDateIsOnNonWorkingDay(paymentTransaction.getTransactionDate(), workingDays, allowTransactionsOnNonWorkingDay);
@@ -2113,6 +2126,9 @@ public class Loan extends AbstractPersistable<Long> {
     }
     
     public ChangedTransactionDetail undoWrittenOff(final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds){
+        
+        validateAccountStatus(LoanEvent.WRITE_OFF_OUTSTANDING_UNDO);
+        
         existingTransactionIds.addAll(findExistingTransactionIds());
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
         final LoanTransaction writeOffTransaction = findWriteOffTransaction();
@@ -2179,6 +2195,8 @@ public class Loan extends AbstractPersistable<Long> {
             final Map<String, Object> changes, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
             final AppUser currentUser) {
 
+        validateAccountStatus(LoanEvent.WRITE_OFF_OUTSTANDING);
+        
         final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.WRITE_OFF_OUTSTANDING,
                 LoanStatus.fromInt(this.loanStatus));
 
@@ -2235,7 +2253,9 @@ public class Loan extends AbstractPersistable<Long> {
 
     public LoanTransaction close(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine,
             final Map<String, Object> changes, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
-
+        
+        validateAccountStatus(LoanEvent.LOAN_CLOSED);
+        
         existingTransactionIds.addAll(findExistingTransactionIds());
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
@@ -2363,6 +2383,10 @@ public class Loan extends AbstractPersistable<Long> {
         return status().isSubmittedAndPendingApproval();
     }
 
+    private boolean isApproved() {
+        return status().isApproved();
+    }
+    
     private boolean isNotDisbursed() {
         return !isDisbursed();
     }
@@ -3043,4 +3067,108 @@ public class Loan extends AbstractPersistable<Long> {
         return loanChargePerInstallments;
     }
 
+    private void validateAccountStatus(final LoanEvent event) {
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        switch (event) {
+            case LOAN_CREATED:
+            break;
+            case LOAN_APPROVED:
+                if (!isSubmittedAndPendingApproval()) {
+                    final String defaultUserMessage = "Loan Account Approval is not allowed. Loan Account is not in submitted and pending approval state.";
+                    final ApiParameterError error = ApiParameterError.generalError(
+                            "error.msg.loan.approve.account.is.not.submitted.and.pending.state", defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
+            case LOAN_APPROVAL_UNDO:
+                if (!isApproved()) {
+                    final String defaultUserMessage = "Loan Account Undo Approval is not allowed. Loan Account is not in approved state.";
+                    final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.undo.approval.account.is.not.approved",
+                            defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
+            case LOAN_DISBURSED:
+                if (!(isApproved() && isNotDisbursed())) {
+                    final String defaultUserMessage = "Loan Disbursal is not allowed. Loan Account is not in approved and not disbursed state.";
+                    final ApiParameterError error = ApiParameterError.generalError(
+                            "error.msg.loan.disbursal.account.is.not.approve.not.disbursed.state", defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
+            case LOAN_DISBURSAL_UNDO:
+                if (!isOpen()) {
+                    final String defaultUserMessage = "Loan Undo disbursal is not allowed. Loan Account is not active.";
+                    final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.undo.disbursal.account.is.not.active",
+                            defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
+            case LOAN_REPAYMENT_OR_WAIVER:
+                if (!isOpen()) {
+                    final String defaultUserMessage = "Loan Repayment or Waiver is not allowed. Loan Account is not active.";
+                    final ApiParameterError error = ApiParameterError.generalError(
+                            "error.msg.loan.repayment.or.waiver.account.is.not.active", defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
+            case LOAN_REJECTED:
+                if (!isClosedWrittenOff()) {
+                    final String defaultUserMessage = "Loan application cannot be rejected. Loan Account is not in Submitted and Pending approval state.";
+                    final ApiParameterError error = ApiParameterError.generalError(
+                            "error.msg.loan.reject.account.is.not.submitted.pending.approval.state", defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
+            case LOAN_WITHDRAWN:
+                if (!isSubmittedAndPendingApproval()) {
+                    final String defaultUserMessage = "Loan application cannot be withdrawn. Loan Account is not in Submitted and Pending approval state.";
+                    final ApiParameterError error = ApiParameterError.generalError(
+                            "error.msg.loan.withdrawn.account.is.not.submitted.pending.approval.state", defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
+            case WRITE_OFF_OUTSTANDING:
+                if (!isOpen()) {
+                    final String defaultUserMessage = "Loan Written off is not allowed. Loan Account is not active.";
+                    final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.writtenoff.account.is.not.active",
+                            defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
+            case WRITE_OFF_OUTSTANDING_UNDO:
+                if (!isClosedWrittenOff()) {
+                    final String defaultUserMessage = "Loan Undo Written off is not allowed. Loan Account is not Written off.";
+                    final ApiParameterError error = ApiParameterError.generalError(
+                            "error.msg.loan.undo.writtenoff.account.is.not.written.off", defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
+            case REPAID_IN_FULL:
+            break;
+            case LOAN_CHARGE_PAYMENT:
+                if (!isClosedWrittenOff()) {
+                    final String defaultUserMessage = "Charge payment is not allowed. Loan Account is not Active.";
+                    final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.charge.payment.account.is.not.active",
+                            defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
+            case LOAN_CLOSED:
+                if (!isClosedWrittenOff()) {
+                    final String defaultUserMessage = "Closing Loan Account is not allowed. Loan Account is not Active.";
+                    final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.close.account.is.not.active",
+                            defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
+            default:
+            break;
+        }
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+
+    }
 }
