@@ -228,5 +228,5 @@ The two ways to get up and running with mifos platform is:
   Startup tomcat:
   - Platform application should be available @ https://[server ip address]:8443/mifosng-provider/api/v1/offices?tenantIdentifier=default&pretty=true
   - Reference application should be available @ https://[server ip address]:8443/IndividualLendingGeneralJavaScript/IndivLendHome.html?baseApiUrl=https://[server ip address]:8443/mifosng-provider/api/v1/
-  - Preview version of the Community application should be available @ https://[server ip address]:8443/community-app?baseApiUrl=https://[server ip address]:8443/mifosng-provider/api/v1/
+  - Preview version of the Community application should be available @ https://[server ip address]:8443/community-app?baseApiUrl=https://[server ip address]:8443/mifosng-provider/api/v1/  (Refresh the Browser if you see untranslated labels while loading the application for the first time)
   - API docs should be available @ https://[server ip address]:8443/api-docs/apiLive.htm
