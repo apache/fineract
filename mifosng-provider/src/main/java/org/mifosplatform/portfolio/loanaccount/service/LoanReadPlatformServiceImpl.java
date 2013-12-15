@@ -1067,9 +1067,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         Integer loanCycleCounter = null;
         if (loanProduct.useBorrowerCycle()) {
             if (clientId == null) {
-                loanCycleCounter = retriveLoanCounter(groupId, AccountType.GROUP.getValue());
+                loanCycleCounter = retriveLoanCounter(groupId, AccountType.GROUP.getValue(), loanProduct.getId());
             } else {
-                loanCycleCounter = retriveLoanCounter(clientId);
+                loanCycleCounter = retriveLoanCounter(clientId, loanProduct.getId());
             }
         }
         return LoanAccountData.loanProductWithTemplateDefaults(loanProduct, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
@@ -1161,14 +1161,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-    public Integer retriveLoanCounter(final Long groupId, final Integer loanType) {
-        final String sql = "Select MAX(l.loan_counter) from m_loan l where l.group_id = ? " + " and l.loan_type_enum = ?";
-        return this.jdbcTemplate.queryForInt(sql, groupId, loanType);
+    public Integer retriveLoanCounter(final Long groupId, final Integer loanType, Long productId) {
+        final String sql = "Select MAX(l.loan_product_counter) from m_loan l where l.group_id = ?  and l.loan_type_enum = ? and l.product_id=?";
+        return this.jdbcTemplate.queryForInt(sql, groupId, loanType,productId);
     }
 
     @Override
-    public Integer retriveLoanCounter(final Long clientId) {
-        final String sql = "Select MAX(l.loan_counter) from m_loan l where l.client_id = ?";
-        return this.jdbcTemplate.queryForInt(sql, clientId);
+    public Integer retriveLoanCounter(final Long clientId, Long productId) {
+        final String sql = "Select MAX(l.loan_product_counter) from m_loan l where l.client_id = ? and l.product_id=?";
+        return this.jdbcTemplate.queryForInt(sql, clientId,productId);
     }
 }

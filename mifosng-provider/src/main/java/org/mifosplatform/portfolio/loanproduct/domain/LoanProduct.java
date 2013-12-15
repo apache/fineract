@@ -680,20 +680,31 @@ public class LoanProduct extends AbstractPersistable<Long> {
     public Map<String, BigDecimal> fetchBorrowerCycleVariationsForCycleNumber(final Integer cycleNumber) {
         Map<String, BigDecimal> borrowerCycleVariations = new HashMap<String, BigDecimal>();
         borrowerCycleVariations.put(LoanProductConstants.principal, this.loanProductRelatedDetail.getPrincipal().getAmount());
-        borrowerCycleVariations.put(LoanProductConstants.minPrincipal, this.loanProductMinMaxConstraints.getMinPrincipal());
-        borrowerCycleVariations.put(LoanProductConstants.maxPrincipal, this.loanProductMinMaxConstraints.getMaxPrincipal());
         borrowerCycleVariations.put(LoanProductConstants.interestRatePerPeriod,
                 this.loanProductRelatedDetail.getNominalInterestRatePerPeriod());
-        borrowerCycleVariations.put(LoanProductConstants.minInterestRatePerPeriod,
-                this.loanProductMinMaxConstraints.getMinNominalInterestRatePerPeriod());
-        borrowerCycleVariations.put(LoanProductConstants.maxInterestRatePerPeriod,
-                this.loanProductMinMaxConstraints.getMaxNominalInterestRatePerPeriod());
-        borrowerCycleVariations.put(LoanProductConstants.numberOfRepayments,
-                BigDecimal.valueOf(this.loanProductRelatedDetail.getNumberOfRepayments()));
-        borrowerCycleVariations.put(LoanProductConstants.minNumberOfRepayments,
-                BigDecimal.valueOf(this.loanProductMinMaxConstraints.getMinNumberOfRepayments()));
-        borrowerCycleVariations.put(LoanProductConstants.maxNumberOfRepayments,
-                BigDecimal.valueOf(this.loanProductMinMaxConstraints.getMaxNumberOfRepayments()));
+        if(this.loanProductRelatedDetail.getNumberOfRepayments() != null){
+            borrowerCycleVariations.put(LoanProductConstants.numberOfRepayments,
+                    BigDecimal.valueOf(this.loanProductRelatedDetail.getNumberOfRepayments())); 
+        }
+
+        if(this.loanProductMinMaxConstraints !=null){
+            borrowerCycleVariations.put(LoanProductConstants.minPrincipal, this.loanProductMinMaxConstraints.getMinPrincipal());
+            borrowerCycleVariations.put(LoanProductConstants.maxPrincipal, this.loanProductMinMaxConstraints.getMaxPrincipal());
+            borrowerCycleVariations.put(LoanProductConstants.minInterestRatePerPeriod,
+                    this.loanProductMinMaxConstraints.getMinNominalInterestRatePerPeriod());
+            borrowerCycleVariations.put(LoanProductConstants.maxInterestRatePerPeriod,
+                    this.loanProductMinMaxConstraints.getMaxNominalInterestRatePerPeriod());
+            
+            if(this.loanProductMinMaxConstraints.getMinNumberOfRepayments() != null){
+                borrowerCycleVariations.put(LoanProductConstants.minNumberOfRepayments,
+                        BigDecimal.valueOf(this.loanProductMinMaxConstraints.getMinNumberOfRepayments()));
+            }
+            
+            if(this.loanProductMinMaxConstraints.getMaxNumberOfRepayments() != null){
+            borrowerCycleVariations.put(LoanProductConstants.maxNumberOfRepayments,
+                    BigDecimal.valueOf(this.loanProductMinMaxConstraints.getMaxNumberOfRepayments()));
+            }
+        }
         if (cycleNumber > 0) {
             Integer principalCycleUsed = 0;
             Integer interestCycleUsed = 0;
