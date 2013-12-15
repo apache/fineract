@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 15 Dec 2013 - 1.16.0.RELEASE
 1. 12 Dec 2013 - 1.15.2.RELEASE
 1. 04 Dec 2013 - 1.15.1.RELEASE
 1. 01 Dec 2013 - 1.15.0.RELEASE
@@ -54,6 +55,18 @@ Releases
 1. 05 April 2013 - 0.11.0.beta
 
 
+1.16.0.RELEASE
+=============
+Feature Release
+
+This feature release adds support for undoing loan write-offs along with a couple other improvements
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-796] - Allow undo of write off transaction (disallow undo or change of any other transaction when loan is written off)
+ - [MIFOSX-824] - Add pagination to Audits endpoints
+ - [MIFOSX-826] - Add holiday status in response data
 
 1.15.2.RELEASE
 =============
