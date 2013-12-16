@@ -34,7 +34,7 @@ public class CenterData {
     private final Long staffId;
     private final String staffName;
     private final String hierarchy;
-
+    private final GroupTimelineData timeline;
     // associations
     private final Collection<GroupGeneralData> groupMembers;
 
@@ -49,20 +49,21 @@ public class CenterData {
             final Collection<StaffData> staffOptions, final Collection<GroupGeneralData> groupMembersOptions) {
         final CalendarData collectionMeetingCalendar = null;
         final Collection<CodeValueData> closureReasons = null;
+        final GroupTimelineData timeline = null;
         return new CenterData(null, null, null, null, activationDate, officeId, null, null, null, null, null, officeOptions, staffOptions,
-                groupMembersOptions, collectionMeetingCalendar, closureReasons);
+                groupMembersOptions, collectionMeetingCalendar, closureReasons, timeline);
     }
 
     public static CenterData withTemplate(final CenterData templateCenter, final CenterData center) {
         return new CenterData(center.id, center.name, center.externalId, center.status, center.activationDate, center.officeId,
                 center.officeName, center.staffId, center.staffName, center.hierarchy, center.groupMembers, templateCenter.officeOptions,
                 templateCenter.staffOptions, templateCenter.groupMembersOptions, templateCenter.collectionMeetingCalendar,
-                templateCenter.closureReasons);
+                templateCenter.closureReasons, center.timeline);
     }
 
     public static CenterData instance(final Long id, final String name, final String externalId, final EnumOptionData status,
             final LocalDate activationDate, final Long officeId, final String officeName, final Long staffId, final String staffName,
-            final String hierarchy) {
+            final String hierarchy, final GroupTimelineData timeline) {
 
         final Collection<GroupGeneralData> groupMembers = null;
         final Collection<OfficeData> officeOptions = null;
@@ -72,7 +73,7 @@ public class CenterData {
         final Collection<CodeValueData> closureReasons = null;
 
         return new CenterData(id, name, externalId, status, activationDate, officeId, officeName, staffId, staffName, hierarchy,
-                groupMembers, officeOptions, staffOptions, groupMembersOptions, collectionMeetingCalendar, closureReasons);
+                groupMembers, officeOptions, staffOptions, groupMembersOptions, collectionMeetingCalendar, closureReasons, timeline);
     }
 
     public static CenterData withAssociations(final CenterData centerData, final Collection<GroupGeneralData> groupMembers,
@@ -80,7 +81,7 @@ public class CenterData {
         return new CenterData(centerData.id, centerData.name, centerData.externalId, centerData.status, centerData.activationDate,
                 centerData.officeId, centerData.officeName, centerData.staffId, centerData.staffName, centerData.hierarchy, groupMembers,
                 centerData.officeOptions, centerData.staffOptions, centerData.groupMembersOptions, collectionMeetingCalendar,
-                centerData.closureReasons);
+                centerData.closureReasons, centerData.timeline);
     }
 
     public static CenterData withClosureReasons(final Collection<CodeValueData> closureReasons) {
@@ -99,15 +100,16 @@ public class CenterData {
         final Collection<StaffData> staffOptions = null;
         final Collection<GroupGeneralData> groupMembersOptions = null;
         final CalendarData collectionMeetingCalendar = null;
+        final GroupTimelineData timeline = null;
         return new CenterData(id, name, externalId, status, activationDate, officeId, officeName, staffId, staffName, hierarchy,
-                groupMembers, officeOptions, staffOptions, groupMembersOptions, collectionMeetingCalendar, closureReasons);
+                groupMembers, officeOptions, staffOptions, groupMembersOptions, collectionMeetingCalendar, closureReasons, timeline);
     }
 
     private CenterData(final Long id, final String name, final String externalId, final EnumOptionData status,
             final LocalDate activationDate, final Long officeId, final String officeName, final Long staffId, final String staffName,
             final String hierarchy, final Collection<GroupGeneralData> groupMembers, final Collection<OfficeData> officeOptions,
             final Collection<StaffData> staffOptions, final Collection<GroupGeneralData> groupMembersOptions,
-            final CalendarData collectionMeetingCalendar, final Collection<CodeValueData> closureReasons) {
+            final CalendarData collectionMeetingCalendar, final Collection<CodeValueData> closureReasons, final GroupTimelineData timeline) {
         this.id = id;
         this.name = name;
         this.externalId = externalId;
@@ -132,6 +134,7 @@ public class CenterData {
         this.groupMembersOptions = groupMembersOptions;
         this.collectionMeetingCalendar = collectionMeetingCalendar;
         this.closureReasons = closureReasons;
+        this.timeline = timeline;
     }
 
     public Long officeId() {

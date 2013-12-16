@@ -33,6 +33,7 @@ import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.group.api.GroupingTypesApiConstants;
 import org.mifosplatform.portfolio.group.data.CenterData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
+import org.mifosplatform.portfolio.group.data.GroupTimelineData;
 import org.mifosplatform.portfolio.group.domain.GroupTypes;
 import org.mifosplatform.portfolio.group.domain.GroupingTypeEnumerations;
 import org.mifosplatform.portfolio.group.exception.CenterNotFoundException;
@@ -120,9 +121,25 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             + "g.office_id as officeId, o.name as officeName, " //
             + "g.staff_id as staffId, s.display_name as staffName, " //
             + "g.status_enum as statusEnum, g.activation_date as activationDate, " //
-            + "g.hierarchy as hierarchy " //
+            + "g.hierarchy as hierarchy, " //
+            + "g.closedon_date as closedOnDate, "
+            + "g.submittedon_date as submittedOnDate, "
+            + "sbu.username as submittedByUsername, "
+            + "sbu.firstname as submittedByFirstname, "
+            + "sbu.lastname as submittedByLastname, "
+            + "clu.username as closedByUsername, "
+            + "clu.firstname as closedByFirstname, "
+            + "clu.lastname as closedByLastname, "
+            + "acu.username as activatedByUsername, "
+            + "acu.firstname as activatedByFirstname, "
+            + "acu.lastname as activatedByLastname "
             + "from m_group g " //
-            + "join m_office o on o.id = g.office_id " + "left join m_staff s on s.id = g.staff_id ";
+            + "join m_office o on o.id = g.office_id " 
+            + "left join m_staff s on s.id = g.staff_id "
+            + "left join m_group pg on pg.id = g.parent_id "
+            + "left join m_appuser sbu on sbu.id = g.submittedon_userid "
+            + "left join m_appuser acu on acu.id = g.activatedon_userid "
+            + "left join m_appuser clu on clu.id = g.closedon_userid ";
 
     private static final class CenterDataMapper implements RowMapper<CenterData> {
 
@@ -151,8 +168,27 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             final Long staffId = JdbcSupport.getLong(rs, "staffId");
             final String staffName = rs.getString("staffName");
             final String hierarchy = rs.getString("hierarchy");
+            
+            final LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedOnDate");
+            final String closedByUsername = rs.getString("closedByUsername");
+            final String closedByFirstname =  rs.getString("closedByFirstname");
+            final String closedByLastname = rs.getString("closedByLastname");
 
-            return CenterData.instance(id, name, externalId, status, activationDate, officeId, officeName, staffId, staffName, hierarchy);
+            final LocalDate submittedOnDate =  JdbcSupport.getLocalDate(rs, "submittedOnDate");
+            final String submittedByUsername = rs.getString("submittedByUsername");
+            final String submittedByFirstname = rs.getString("submittedByFirstname");
+            final String submittedByLastname = rs.getString("submittedByLastname");
+
+
+            final String activatedByUsername = rs.getString("activatedByUsername");
+            final String activatedByFirstname = rs.getString("activatedByFirstname");
+            final String activatedByLastname =  rs.getString("activatedByLastname");
+            
+            final GroupTimelineData timeline = new GroupTimelineData (submittedOnDate, submittedByUsername, submittedByFirstname, submittedByLastname,
+                    activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate, closedByUsername,
+                    closedByFirstname, closedByLastname);
+
+            return CenterData.instance(id, name, externalId, status, activationDate, officeId, officeName, staffId, staffName, hierarchy, timeline);
         }
     }
 
@@ -185,9 +221,28 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             final Long staffId = JdbcSupport.getLong(rs, "staffId");
             final String staffName = rs.getString("staffName");
             final String hierarchy = rs.getString("hierarchy");
+            
+            final LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedOnDate");
+            final String closedByUsername = rs.getString("closedByUsername");
+            final String closedByFirstname =  rs.getString("closedByFirstname");
+            final String closedByLastname = rs.getString("closedByLastname");
+
+            final LocalDate submittedOnDate =  JdbcSupport.getLocalDate(rs, "submittedOnDate");
+            final String submittedByUsername = rs.getString("submittedByUsername");
+            final String submittedByFirstname = rs.getString("submittedByFirstname");
+            final String submittedByLastname = rs.getString("submittedByLastname");
+
+
+            final String activatedByUsername = rs.getString("activatedByUsername");
+            final String activatedByFirstname = rs.getString("activatedByFirstname");
+            final String activatedByLastname =  rs.getString("activatedByLastname");
+            
+            final GroupTimelineData timeline = new GroupTimelineData (submittedOnDate, submittedByUsername, submittedByFirstname, submittedByLastname,
+                    activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate, closedByUsername,
+                    closedByFirstname, closedByLastname);
 
             return GroupGeneralData.instance(id, name, externalId, status, activationDate, officeId, officeName, null, null, staffId,
-                    staffName, hierarchy,null);
+                    staffName, hierarchy,timeline);
         }
     }
 

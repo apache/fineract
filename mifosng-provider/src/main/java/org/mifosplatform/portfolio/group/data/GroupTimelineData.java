@@ -8,8 +8,8 @@ package org.mifosplatform.portfolio.group.data;
 import org.joda.time.LocalDate;
 
 /**
- * Immutable data object represent the important time-line events of a loan
- * application and loan.
+ * Immutable data object represent the important time-line events of a group/center.
+ * 
  */
 @SuppressWarnings("unused")
 public class GroupTimelineData {
