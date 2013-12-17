@@ -93,10 +93,10 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
     @Transactional
     @Override
-    public CommandProcessingResult logCommand(final CommandSource commandSourceResult) {
+    public CommandProcessingResult logCommand(CommandSource commandSourceResult) {
 
         commandSourceResult.markAsAwaitingApproval();
-        this.commandSourceRepository.save(commandSourceResult);
+        commandSourceResult = this.commandSourceRepository.save(commandSourceResult);
 
         return new CommandProcessingResultBuilder().withCommandId(commandSourceResult.getId())
                 .withEntityId(commandSourceResult.getResourceId()).build();
