@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.organisation.monetary.data.CurrencyData;
 
 /**
  * Immutable object representing a General Ledger Account
@@ -32,6 +33,8 @@ public class JournalEntryData {
     private final LocalDate transactionDate;
     private final EnumOptionData entryType;
     private final BigDecimal amount;
+    @SuppressWarnings("unused")
+    private final CurrencyData currency;
     @SuppressWarnings("unused")
     private final String transactionId;
     @SuppressWarnings("unused")
@@ -68,7 +71,7 @@ public class JournalEntryData {
             final Boolean manualEntry, final EnumOptionData entityType, final Long entityId, final Long createdByUserId,
             final LocalDate createdDate, final String createdByUserName, final String comments, final Boolean reversed,
             final String referenceNumber, final BigDecimal officeRunningBalance, final BigDecimal organizationRunningBalance,
-            final Boolean runningBalanceComputed,final TransactionDetailData transactionDetailData) {
+            final Boolean runningBalanceComputed,final TransactionDetailData transactionDetailData, final CurrencyData currency) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -93,6 +96,7 @@ public class JournalEntryData {
         this.organizationRunningBalance = organizationRunningBalance;
         this.runningBalanceComputed = runningBalanceComputed;
         this.transactionDetails = transactionDetailData;
+        this.currency = currency;
     }
 
     public Long getId() {

@@ -27,6 +27,7 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
+import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.note.data.NoteData;
 import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
@@ -71,7 +72,9 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 .append(" journalEntry.type_enum as entryType,journalEntry.amount as amount, journalEntry.transaction_id as transactionId,")
                 .append(" journalEntry.entity_type_enum as entityType, journalEntry.entity_id as entityId, creatingUser.id as createdByUserId, ")
                 .append(" creatingUser.username as createdByUserName, journalEntry.description as comments, ")
-                .append(" journalEntry.created_date as createdDate, journalEntry.reversed as reversed ");
+                .append(" journalEntry.created_date as createdDate, journalEntry.reversed as reversed, ")
+                .append(" journalEntry.currency_code as currencyCode, curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ")
+                .append(" curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf ");
               if(associationParametersData.isRunningBalanceRequired()){
                   sb.append(" ,journalEntry.is_running_balance_caculated as runningBalanceComputed, ")
                     .append(" journalEntry.office_running_balance as officeRunningBalance, ")
@@ -91,7 +94,8 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
               sb.append(" from acc_gl_journal_entry as journalEntry ")
                 .append(" left join acc_gl_account as glAccount on glAccount.id = journalEntry.account_id")
                 .append(" left join m_office as office on office.id = journalEntry.office_id")
-                .append(" left join m_appuser as creatingUser on creatingUser.id = journalEntry.createdby_id ");
+                .append(" left join m_appuser as creatingUser on creatingUser.id = journalEntry.createdby_id ")
+                .append(" join m_currency curr on curr.code = journalEntry.currency_code ");
               if(associationParametersData.isTransactionDetailsRequired()){
                   sb.append(" left join m_loan_transaction as lt on journalEntry.loan_transaction_id = lt.id ")
                     .append(" left join m_savings_account_transaction as st on journalEntry.savings_transaction_id = st.id ")
@@ -136,6 +140,16 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             BigDecimal officeRunningBalance = null;
             BigDecimal organizationRunningBalance =null;
             Boolean runningBalanceComputed =null;
+            
+            final String currencyCode = rs.getString("currencyCode");
+            final String currencyName = rs.getString("currencyName");
+            final String currencyNameCode = rs.getString("currencyNameCode");
+            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
+                    currencyDisplaySymbol, currencyNameCode);
+            
             if(associationParametersData.isRunningBalanceRequired()){
                 officeRunningBalance = rs.getBigDecimal("officeRunningBalance");
                 organizationRunningBalance = rs.getBigDecimal("organizationRunningBalance");
@@ -171,7 +185,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             }
             return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glCode, accountType, transactionDate,
                     entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, createdDate, createdByUserName,
-                    comments, reversed, referenceNumber,officeRunningBalance,organizationRunningBalance,runningBalanceComputed,transactionDetailData);
+                    comments, reversed, referenceNumber,officeRunningBalance,organizationRunningBalance,runningBalanceComputed,transactionDetailData, currency);
         }
     }
 
