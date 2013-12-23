@@ -10,7 +10,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
@@ -18,6 +20,8 @@ import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.data.PaginationParameters;
+import org.mifosplatform.infrastructure.core.data.PaginationParametersDataValidator;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
@@ -63,17 +67,21 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     private final GroupDataMapper groupDataMapper = new GroupDataMapper();
 
     private final PaginationHelper<CenterData> paginationHelper = new PaginationHelper<CenterData>();
+    private final PaginationParametersDataValidator paginationParametersDataValidator;
+    private final static Set<String> supportedOrderByValues = new HashSet<String>(Arrays.asList("id", "name", "officeId", "officeName"));
 
     @Autowired
     public CenterReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
-            final StaffReadPlatformService staffReadPlatformService, final CodeValueReadPlatformService codeValueReadPlatformService) {
+            final StaffReadPlatformService staffReadPlatformService, final CodeValueReadPlatformService codeValueReadPlatformService,
+            final PaginationParametersDataValidator paginationParametersDataValidator) {
         this.context = context;
         this.clientReadPlatformService = clientReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.officeReadPlatformService = officeReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
+        this.paginationParametersDataValidator = paginationParametersDataValidator;
     }
 
     // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where
@@ -81,40 +89,41 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     // caused by the same name of columns in m_office and m_group tables
     private String getCenterExtraCriteria(final SearchParameters searchCriteria) {
 
-        String extraCriteria = " and g.level_id = " + GroupTypes.CENTER.getId();
+        StringBuffer extraCriteria = new StringBuffer(200);
+        extraCriteria.append(" and g.level_id = " + GroupTypes.CENTER.getId());
 
         String sqlQueryCriteria = searchCriteria.getSqlSearch();
         if (StringUtils.isNotBlank(sqlQueryCriteria)) {
             sqlQueryCriteria = sqlQueryCriteria.replaceAll(" display_name ", " g.display_name ");
             sqlQueryCriteria = sqlQueryCriteria.replaceAll("display_name ", "g.display_name ");
-            extraCriteria += " and (" + sqlQueryCriteria + ")";
+            extraCriteria.append(" and (").append(sqlQueryCriteria).append(") ");
         }
 
         final Long officeId = searchCriteria.getOfficeId();
         if (officeId != null) {
-            extraCriteria += " and g.office_id = " + officeId;
+            extraCriteria.append(" and g.office_id = ").append(officeId);
         }
 
         final String externalId = searchCriteria.getExternalId();
         if (externalId != null) {
-            extraCriteria += " and g.external_id = " + ApiParameterHelper.sqlEncodeString(externalId);
+            extraCriteria.append(" and g.external_id = ").append(ApiParameterHelper.sqlEncodeString(externalId));
         }
 
         final String name = searchCriteria.getName();
         if (name != null) {
-            extraCriteria += " and g.display_name like " + ApiParameterHelper.sqlEncodeString(name + "%");
+            extraCriteria.append(" and g.display_name like ").append(ApiParameterHelper.sqlEncodeString(name + "%"));
         }
 
         final String hierarchy = searchCriteria.getHierarchy();
         if (hierarchy != null) {
-            extraCriteria += " and o.hierarchy like " + ApiParameterHelper.sqlEncodeString(hierarchy + "%");
+            extraCriteria.append(" and o.hierarchy like ").append(ApiParameterHelper.sqlEncodeString(hierarchy + "%"));
         }
 
-        if (StringUtils.isNotBlank(extraCriteria)) {
-            extraCriteria = extraCriteria.substring(4);
+        if (StringUtils.isNotBlank(extraCriteria.toString())) {
+            extraCriteria.delete(0, 4);
         }
 
-        return extraCriteria;
+        return extraCriteria.toString();
     }
 
     private static final String sqlQuery = "g.id as id, g.external_id as externalId, g.display_name as name, "
@@ -247,8 +256,9 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     }
 
     @Override
-    public Page<CenterData> retrieveAll(final SearchParameters searchParameters) {
-
+    public Page<CenterData> retrievePagedAll(final SearchParameters searchParameters, final PaginationParameters parameters) {
+        
+        this.paginationParametersDataValidator.validateParameterValues(parameters, supportedOrderByValues, "audits");
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
@@ -278,6 +288,39 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
                 new Object[] { hierarchySearchString }, this.centerMapper);
+    }
+    
+    @Override
+    public Collection<CenterData> retrieveAll(SearchParameters searchParameters, PaginationParameters parameters) {
+        
+        this.paginationParametersDataValidator.validateParameterValues(parameters, supportedOrderByValues, "audits");
+        final AppUser currentUser = this.context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final String hierarchySearchString = hierarchy + "%";
+
+        final StringBuilder sqlBuilder = new StringBuilder(200);
+        sqlBuilder.append("select ");
+        sqlBuilder.append(this.centerMapper.schema());
+        sqlBuilder.append(" where o.hierarchy like ?");
+
+        final String extraCriteria = getCenterExtraCriteria(searchParameters);
+
+        if (StringUtils.isNotBlank(extraCriteria)) {
+            sqlBuilder.append(" and (").append(extraCriteria).append(")");
+        }
+
+        if (searchParameters.isOrderByRequested()) {
+            sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
+        }
+
+        if (searchParameters.isLimited()) {
+            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+            if (searchParameters.isOffset()) {
+                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+            }
+        }
+
+        return this.jdbcTemplate.query(sqlBuilder.toString(), this.centerMapper, new Object[] {hierarchySearchString});
     }
 
     @Override

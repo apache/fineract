@@ -162,8 +162,8 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     }
 
     @Override
-    public Collection<StaffData> retrieveAllStaff(final String sqlSearch, final Long officeId) {
-        final String extraCriteria = getStaffCriteria(sqlSearch, officeId);
+    public Collection<StaffData> retrieveAllStaff(final String sqlSearch, final Long officeId, final boolean loanOfficersOnly) {
+        final String extraCriteria = getStaffCriteria(sqlSearch, officeId, loanOfficersOnly);
         return retrieveAllStaff(extraCriteria);
     }
 
@@ -178,22 +178,26 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
 
-    private String getStaffCriteria(final String sqlSearch, final Long officeId) {
+    private String getStaffCriteria(final String sqlSearch, final Long officeId, final boolean loanOfficersOnly) {
 
-        String extraCriteria = "";
+        final StringBuffer extraCriteria = new StringBuffer(200);
 
         if (sqlSearch != null) {
-            extraCriteria = " and (" + sqlSearch + ")";
+            extraCriteria.append(" and (").append(sqlSearch).append(")");
         }
         if (officeId != null) {
-            extraCriteria += " and office_id = " + officeId;
+            extraCriteria.append(" and office_id = ").append(officeId).append(" ");
+        }        
+        if (loanOfficersOnly) {
+            extraCriteria.append(" and s.is_loan_officer is true ");
+        }
+        
+        if (StringUtils.isNotBlank(extraCriteria.toString())) {
+            extraCriteria.delete(0, 4);
         }
 
-        if (StringUtils.isNotBlank(extraCriteria)) {
-            extraCriteria = extraCriteria.substring(4);
-        }
-
-        return extraCriteria;
+        //remove begin four letter including a space from the string.
+        return extraCriteria.toString();
     }
 
     @Override

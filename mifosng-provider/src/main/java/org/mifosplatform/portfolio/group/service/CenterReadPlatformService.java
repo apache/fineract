@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.group.service;
 
 import java.util.Collection;
 
+import org.mifosplatform.infrastructure.core.data.PaginationParameters;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.portfolio.group.data.CenterData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
@@ -19,7 +20,9 @@ public interface CenterReadPlatformService {
 
     Collection<CenterData> retrieveAllForDropdown(Long officeId);
 
-    Page<CenterData> retrieveAll(SearchParameters searchParameters);
+    Page<CenterData> retrievePagedAll(SearchParameters searchParameters, PaginationParameters parameters);
+    
+    Collection<CenterData> retrieveAll(SearchParameters searchParameters, PaginationParameters parameters);
 
     GroupGeneralData retrieveCenterGroupTemplate(Long centerId);
 

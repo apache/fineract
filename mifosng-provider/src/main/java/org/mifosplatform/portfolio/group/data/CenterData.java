@@ -20,30 +20,29 @@ import org.mifosplatform.portfolio.calendar.data.CalendarData;
 public class CenterData {
 
     private final Long id;
-    private final String externalId;
-
-    private final EnumOptionData status;
-    @SuppressWarnings("unused")
-    private final boolean active;
-    private final LocalDate activationDate;
-
     private final String name;
-
+    private final String externalId;
     private final Long officeId;
     private final String officeName;
     private final Long staffId;
     private final String staffName;
     private final String hierarchy;
+        
+    private final EnumOptionData status;
+    @SuppressWarnings("unused")
+    private final boolean active;
+    private final LocalDate activationDate;
+
     private final GroupTimelineData timeline;
     // associations
     private final Collection<GroupGeneralData> groupMembers;
 
-    // template
-    private final Collection<OfficeData> officeOptions;
-    private final Collection<StaffData> staffOptions;
+    // template    
     private final Collection<GroupGeneralData> groupMembersOptions;
     private final CalendarData collectionMeetingCalendar;
     private final Collection<CodeValueData> closureReasons;
+    private final Collection<OfficeData> officeOptions;
+    private final Collection<StaffData> staffOptions;
 
     public static CenterData template(final Long officeId, final LocalDate activationDate, final Collection<OfficeData> officeOptions,
             final Collection<StaffData> staffOptions, final Collection<GroupGeneralData> groupMembersOptions) {

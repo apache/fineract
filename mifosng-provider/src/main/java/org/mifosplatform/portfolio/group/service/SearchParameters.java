@@ -20,10 +20,14 @@ public final class SearchParameters {
     private final Integer limit;
     private final String orderBy;
     private final String sortOrder;
+    
+    @SuppressWarnings("unused")
+    private final Long staffId; 
 
     public static SearchParameters from(final String sqlSearch, final Long officeId, final String externalId, final String name,
             final String hierarchy) {
-        return new SearchParameters(sqlSearch, officeId, externalId, name, hierarchy, null, null, null, null, null, null);
+        final Long staffId = null;
+        return new SearchParameters(sqlSearch, officeId, externalId, name, hierarchy, null, null, null, null, null, null, staffId);
     }
 
     public static SearchParameters forClients(final String sqlSearch, final Long officeId, final String externalId,
@@ -31,46 +35,50 @@ public final class SearchParameters {
             final Integer limit, final String orderBy, final String sortOrder) {
 
         final Integer maxLimitAllowed = getCheckedLimit(limit);
-
+        final Long staffId = null;
+        
         return new SearchParameters(sqlSearch, officeId, externalId, displayName, hierarchy, firstname, lastname, offset, maxLimitAllowed,
-                orderBy, sortOrder);
+                orderBy, sortOrder, staffId);
     }
 
-    public static SearchParameters forGroups(final String sqlSearch, final Long officeId, final String externalId, final String name,
+    public static SearchParameters forGroups(final String sqlSearch, final Long officeId, final Long staffId, final String externalId, final String name,
             final String hierarchy, final Integer offset, final Integer limit, final String orderBy, final String sortOrder) {
 
         final Integer maxLimitAllowed = getCheckedLimit(limit);
 
         return new SearchParameters(sqlSearch, officeId, externalId, name, hierarchy, null, null, offset, maxLimitAllowed, orderBy,
-                sortOrder);
+                sortOrder, staffId);
     }
 
     public static SearchParameters forLoans(final String sqlSearch, final String externalId, final Integer offset, final Integer limit,
             final String orderBy, final String sortOrder) {
 
         final Integer maxLimitAllowed = getCheckedLimit(limit);
-
-        return new SearchParameters(sqlSearch, null, externalId, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder);
+        final Long staffId = null;
+        
+        return new SearchParameters(sqlSearch, null, externalId, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder, staffId);
     }
 
     public static SearchParameters forJournalEntries(final Long officeId, final Integer offset, final Integer limit, final String orderBy,
             final String sortOrder) {
 
         final Integer maxLimitAllowed = getCheckedLimit(limit);
-
-        return new SearchParameters(null, officeId, null, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder);
+        final Long staffId = null;
+        
+        return new SearchParameters(null, officeId, null, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder, staffId);
     }
 
     public static SearchParameters forPagination(final Integer offset, final Integer limit, final String orderBy, final String sortOrder) {
 
         final Integer maxLimitAllowed = getCheckedLimit(limit);
-
-        return new SearchParameters(null, null, null, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder);
+        final Long staffId = null;
+        
+        return new SearchParameters(null, null, null, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder, staffId);
     }
 
     private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
             final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
-            final String orderBy, final String sortOrder) {
+            final String orderBy, final String sortOrder, final Long staffId) {
         this.sqlSearch = sqlSearch;
         this.officeId = officeId;
         this.externalId = externalId;
@@ -82,6 +90,7 @@ public final class SearchParameters {
         this.limit = limit;
         this.orderBy = orderBy;
         this.sortOrder = sortOrder;
+        this.staffId = staffId;
     }
 
     public boolean isOrderByRequested() {
@@ -167,4 +176,13 @@ public final class SearchParameters {
     public String getSortOrder() {
         return this.sortOrder;
     }
+    
+    public boolean isStaffIdPassed() {
+        return this.staffId != null && this.staffId != 0;
+    }
+    
+    public Long getStaffId() {
+        return this.staffId;
+    }
+    
 }

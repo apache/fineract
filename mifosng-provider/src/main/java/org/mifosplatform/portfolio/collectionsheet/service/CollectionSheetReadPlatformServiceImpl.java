@@ -77,24 +77,6 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         this.attendanceDropdownReadPlatformService = attendanceDropdownReadPlatformService;
     }
 
-    @Override
-    public JLGCollectionSheetData retriveCollectionSheet(final LocalDate dueDate, final Long centerId) {
-
-        final AppUser currentUser = this.context.authenticatedUser();
-        final String hierarchy = currentUser.getOffice().getHierarchy();
-        final String officeHierarchy = hierarchy + "%";
-
-        final CenterData center = this.centerReadPlatformService.retrieveOne(centerId);
-        final String groupHierarchy = center.getHierarchy() + "%";
-
-        final Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = retriveJLGCollectionSheet(groupHierarchy, officeHierarchy,
-                dueDate);
-
-        final JLGCollectionSheetData jlgCollectionSheetData = buildJLGCollectionSheet(dueDate, collectionSheetFlatDatas);
-
-        return jlgCollectionSheetData;
-    }
-
     /*
      * Reads all the loans which are due for disbursement or collection and
      * builds hierarchical data structure for collections sheet with hierarchy
@@ -187,63 +169,59 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         return jlgCollectionSheetData;
     }
 
-    @Override
-    public Collection<JLGCollectionSheetFlatData> retriveJLGCollectionSheet(final String groupHierarchy, final String officeHierarchy,
-            final LocalDate dueDate) {
-
-        final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper();
-        final String sql = mapper.collectionSheetSchema();
-        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        final String dueDateStr = df.format(dueDate.toDate());
-        final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("hierarchy", groupHierarchy)
-                .addValue("dueDate", dueDateStr).addValue("officeHierarchy", officeHierarchy);
-        return this.namedParameterjdbcTemplate.query(sql, namedParameters, mapper);
-    }
-
     private static final class JLGCollectionSheetFaltDataMapper implements RowMapper<JLGCollectionSheetFlatData> {
 
-        public String collectionSheetSchema() {
+        public String collectionSheetSchema(final boolean isCenterCollection) {
+            StringBuffer sql = new StringBuffer(400);
+            sql.append("SELECT loandata.*, sum(lc.amount_outstanding_derived) as chargesDue from ")
+                    .append("(SELECT gp.display_name As groupName, ")
+                    .append("gp.id As groupId, ")
+                    .append("cl.display_name As clientName, ")
+                    .append("sf.id As staffId, ")
+                    .append("sf.display_name As staffName, ")
+                    .append("gl.id As levelId, ")
+                    .append("gl.level_name As levelName, ")
+                    .append("cl.id As clientId, ")
+                    .append("ln.id As loanId, ")
+                    .append("ln.account_no As accountId, ")
+                    .append("ln.loan_status_id As accountStatusId, ")
+                    .append("pl.name As productShortName, ")
+                    .append("ln.product_id As productId, ")
+                    .append("ln.currency_code as currencyCode, ln.currency_digits as currencyDigits, ln.currency_multiplesof as inMultiplesOf, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, ")
+                    .append("if(ln.loan_status_id = 200 , ln.principal_amount , null) As disbursementAmount, ")
+                    .append("sum(ifnull(if(ln.loan_status_id = 300, ls.principal_amount, 0.0), 0.0) - ifnull(if(ln.loan_status_id = 300, ls.principal_completed_derived, 0.0), 0.0)) As principalDue, ")
+                    .append("ln.principal_repaid_derived As principalPaid, ")
+                    .append("sum(ifnull(if(ln.loan_status_id = 300, ls.interest_amount, 0.0), 0.0) - ifnull(if(ln.loan_status_id = 300, ls.interest_completed_derived, 0.0), 0.0)) As interestDue, ")
+                    .append("ln.interest_repaid_derived As interestPaid, ")
+                    .append("ca.attendance_type_enum as attendanceTypeId ")
+                    .append("FROM m_group gp ")
+                    .append("LEFT JOIN m_office of ON of.id = gp.office_id AND of.hierarchy like :officeHierarchy ")
+                    .append("JOIN m_group_level gl ON gl.id = gp.level_Id ")
+                    .append("LEFT JOIN m_staff sf ON sf.id = gp.staff_id ")
+                    .append("JOIN m_group_client gc ON gc.group_id = gp.id ")
+                    .append("JOIN m_client cl ON cl.id = gc.client_id ")
+                    .append("LEFT JOIN m_loan ln ON cl.id = ln.client_id AND ln.group_id is not null AND ( ln.loan_status_id = 300 OR ( ln.loan_status_id =200 AND ln.expected_disbursedon_date <= :dueDate )) ")
+                    .append("LEFT JOIN m_product_loan pl ON pl.id = ln.product_id ")
+                    .append("LEFT JOIN m_currency rc on rc.`code` = ln.currency_code ")
+                    .append("LEFT JOIN m_loan_repayment_schedule ls ON ls.loan_id = ln.id AND ls.completed_derived = 0 AND ls.duedate <= :dueDate ")
+                    .append("left join m_calendar_instance ci on gp.parent_id = ci.entity_id and ci.entity_type_enum =:entityTypeId ")
+                    .append("left join m_meeting mt on ci.id = mt.calendar_instance_id and mt.meeting_date =:dueDate ")
+                    .append("left join m_client_attendance ca on ca.meeting_id=mt.id and ca.client_id=cl.id ");
 
-            return "SELECT gp.display_name As groupName, "
-                    + "gp.id As groupId, "
-                    + "cl.display_name As clientName, "
-                    + "sf.id As staffId, "
-                    + "sf.display_name As staffName, "
-                    + "gl.id As levelId, "
-                    + "gl.level_name As levelName, "
-                    + "cl.id As clientId, "
-                    + "ln.id As loanId, "
-                    + "ln.account_no As accountId, "
-                    + "ln.loan_status_id As accountStatusId, "
-                    + "pl.name As productShortName, "
-                    + "ln.product_id As productId, "
-                    + "ln.currency_code as currencyCode, ln.currency_digits as currencyDigits, ln.currency_multiplesof as inMultiplesOf, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
-                    + "if(ln.loan_status_id = 200 , ln.principal_amount , null) As disbursementAmount, "
-                    + "sum(ifnull(if(ln.loan_status_id = 300, ls.principal_amount, 0.0), 0.0) - ifnull(if(ln.loan_status_id = 300, ls.principal_completed_derived, 0.0), 0.0)) As principalDue, "
-                    + "ln.principal_repaid_derived As principalPaid, "
-                    + "sum(ifnull(if(ln.loan_status_id = 300, ls.interest_amount, 0.0), 0.0) - ifnull(if(ln.loan_status_id = 300, ls.interest_completed_derived, 0.0), 0.0)) As interestDue, "
-                    + "ln.interest_repaid_derived As interestPaid, "
-                    + "sum(if(ln.loan_status_id = 300, lc.amount_outstanding_derived, 0.0)) as chargesDue, "
-                    + "ca.attendance_type_enum as attendanceTypeId "
-                    + "FROM m_group gp "
-                    + "LEFT JOIN m_office of ON of.id = gp.office_id AND of.hierarchy like :officeHierarchy "
-                    // + "LEFT JOIN m_office of ON of.id = gp.office_id "
-                    + "JOIN m_group_level gl ON gl.id = gp.level_Id "
-                    + "LEFT JOIN m_staff sf ON sf.id = gp.staff_id "
-                    + "JOIN m_group_client gc ON gc.group_id = gp.id "
-                    + "JOIN m_client cl ON cl.id = gc.client_id "
-                    + "LEFT JOIN m_loan ln ON cl.id = ln.client_id AND ln.group_id is not null AND ( ln.loan_status_id = 300 OR ( ln.loan_status_id =200 AND ln.expected_disbursedon_date <= :dueDate )) "
-                    + "LEFT JOIN m_product_loan pl ON pl.id = ln.product_id "
-                    + "LEFT JOIN m_currency rc on rc.`code` = ln.currency_code "
-                    + "LEFT JOIN m_loan_repayment_schedule ls ON ls.loan_id = ln.id AND ls.completed_derived = 0 AND ls.duedate <= :dueDate "
-                    + "LEFT JOIN m_loan_charge lc ON lc.loan_id = ln.id AND lc.is_paid_derived = 0 AND ( lc.due_for_collection_as_of_date  <= :dueDate OR lc.charge_time_enum = 1) "
-                    + "left join m_calendar_instance ci on gp.parent_id = ci.entity_id and ci.entity_type_enum =:entityTypeId "
-                    + "left join m_meeting mt on ci.id = mt.calendar_instance_id and mt.meeting_date =:dueDate "
-                    + "left join m_client_attendance ca on ca.meeting_id=mt.id and ca.client_id=cl.id ";
+            if (isCenterCollection) {
+                sql.append("WHERE gp.parent_id = :centerId ");
+            } else {
+                sql.append("WHERE gp.id = :groupId ");
+            }
 
-            // + "WHERE gp.hierarchy like :hierarchy " +
-            // "GROUP BY gp.id ,cl.id , ln.id " +
-            // "ORDER BY gp.id , cl.id , ln.id ";
+            sql.append("and (gp.status_enum = 300 or (gp.status_enum = 600 and gp.closedon_date >= :dueDate)) ")
+                    .append("and (cl.status_enum = 300 or (cl.status_enum = 600 and cl.closedon_date >= :dueDate)) ")
+                    .append("GROUP BY gp.id ,cl.id , ln.id ORDER BY gp.id , cl.id , ln.id ").append(") loandata ")
+                    .append("LEFT JOIN m_loan_charge lc ON lc.loan_id = loandata.loanId AND lc.is_paid_derived = 0 ")
+                    .append("AND ( lc.due_for_collection_as_of_date  <= :dueDate OR lc.charge_time_enum = 1)");
+
+            return sql.toString();
+
         }
 
         @Override
@@ -316,12 +294,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper();
 
-        final StringBuilder sql = new StringBuilder(mapper.collectionSheetSchema());
-        sql.append(" WHERE gp.id = :groupId ")
-        .append(" and (gp.status_enum = 300 or (gp.status_enum = 600 and gp.closedon_date >= :dueDate)) ")
-        .append(" and (cl.status_enum = 300 or (cl.status_enum = 600 and cl.closedon_date >= :dueDate)) ")
-        .append(" GROUP BY gp.id ,cl.id , ln.id ORDER BY gp.id , cl.id , ln.id ");
-
+        final StringBuilder sql = new StringBuilder(mapper.collectionSheetSchema(false));
+        
         // entityType should be center if it's within a center
         final CalendarEntityType entityType = (group.isChildGroup()) ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
 
@@ -352,12 +326,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper();
 
-        StringBuilder sql = new StringBuilder(mapper.collectionSheetSchema());
-        sql.append(" WHERE gp.parent_id = :centerId ")
-        .append(" and (gp.status_enum = 300 or (gp.status_enum = 600 and gp.closedon_date >= :dueDate)) ")
-        .append(" and (cl.status_enum = 300 or (cl.status_enum = 600 and cl.closedon_date >= :dueDate)) ")
-        .append(" GROUP BY gp.id ,cl.id , ln.id ORDER BY gp.id , cl.id , ln.id");
-
+        StringBuilder sql = new StringBuilder(mapper.collectionSheetSchema(true));
+        
         final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("dueDate", dueDateStr)
                 .addValue("centerId", center.getId()).addValue("officeHierarchy", officeHierarchy)
                 .addValue("entityTypeId", CalendarEntityType.CENTERS.getValue());

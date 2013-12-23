@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.group.service;
 
 import java.util.Collection;
 
+import org.mifosplatform.infrastructure.core.data.PaginationParameters;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 
@@ -14,7 +15,9 @@ public interface GroupReadPlatformService {
 
     GroupGeneralData retrieveTemplate(Long officeId, boolean isCenterGroup, boolean staffInSelectedOfficeOnly);
 
-    Page<GroupGeneralData> retrieveAll(SearchParameters searchParameters);
+    Page<GroupGeneralData> retrievePagedAll(SearchParameters searchParameters, PaginationParameters parameters);
+    
+    Collection<GroupGeneralData> retrieveAll(SearchParameters searchParameters, PaginationParameters parameters);
 
     GroupGeneralData retrieveOne(Long groupId);
 
