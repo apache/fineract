@@ -21,6 +21,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequire
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nameParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.shortNameParamName;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -57,6 +58,7 @@ public class SavingsProductAssembler {
     public SavingsProduct assemble(final JsonCommand command) {
 
         final String name = command.stringValueOfParameterNamed(nameParamName);
+        final String shortName = command.stringValueOfParameterNamed(shortNameParamName);
         final String description = command.stringValueOfParameterNamed(descriptionParamName);
 
         final String currencyCode = command.stringValueOfParameterNamed(currencyCodeParamName);
@@ -111,7 +113,7 @@ public class SavingsProductAssembler {
         // Savings product charges
         final Set<Charge> charges = assembleListOfSavingsProductCharges(command, currencyCode);
 
-        return SavingsProduct.createNew(name, description, currency, interestRate, interestCompoundingPeriodType,
+        return SavingsProduct.createNew(name, shortName, description, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, accountingRuleType, charges);
     }

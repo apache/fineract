@@ -73,9 +73,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
         public SavingProductMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
-            sqlBuilder.append("sp.id as id, sp.name as name, sp.description as description, ");
-            sqlBuilder
-                    .append("sp.currency_code as currencyCode, sp.currency_digits as currencyDigits, sp.currency_multiplesof as inMultiplesOf, ");
+            sqlBuilder.append("sp.id as id, sp.name as name, sp.short_name as shortName, sp.description as description, ");
+            sqlBuilder.append("sp.currency_code as currencyCode, sp.currency_digits as currencyDigits, sp.currency_multiplesof as inMultiplesOf, ");
             sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
             sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
             sqlBuilder.append("sp.nominal_annual_interest_rate as nominalAnnualInterestRate, ");
@@ -108,6 +107,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
             final Long id = rs.getLong("id");
             final String name = rs.getString("name");
+            final String shortName = rs.getString("shortName");
             final String description = rs.getString("description");
 
             final String currencyCode = rs.getString("currencyCode");
@@ -168,7 +168,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
                 annualFeeOnMonthDay = new MonthDay(annualFeeOnMonth, annualFeeOnDay);
             }
 */
-            return SavingsProductData.instance(id, name, description, currency, nominalAnnualInterestRate, compoundingInterestPeriodType,
+            return SavingsProductData.instance(id, name, shortName,  description, currency, nominalAnnualInterestRate, compoundingInterestPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                     lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, accountingRuleType);
         }

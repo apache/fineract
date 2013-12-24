@@ -56,7 +56,7 @@ public final class LoanProductDataValidator {
             LOAN_PRODUCT_ACCOUNTING_PARAMS.FEE_INCOME_ACCOUNT_MAPPING.getValue(),
             LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTY_INCOME_ACCOUNT_MAPPING.getValue(),LoanProductConstants.useBorrowerCycleParameterName, 
             LoanProductConstants.principalVariationsForBorrowerCycleParameterName,LoanProductConstants.interestRateVariationsForBorrowerCycleParameterName,
-            LoanProductConstants.numberOfRepaymentVariationsForBorrowerCycleParameterName));
+            LoanProductConstants.numberOfRepaymentVariationsForBorrowerCycleParameterName, LoanProductConstants.shortName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -78,6 +78,9 @@ public final class LoanProductDataValidator {
 
         final String name = this.fromApiJsonHelper.extractStringNamed("name", element);
         baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(100);
+        
+        final String shortName = this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.shortName, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.shortName).value(shortName).notBlank().notExceedingLengthOf(4);
 
         final String description = this.fromApiJsonHelper.extractStringNamed("description", element);
         baseDataValidator.reset().parameter("description").value(description).notExceedingLengthOf(500);
@@ -339,6 +342,11 @@ public final class LoanProductDataValidator {
         if (this.fromApiJsonHelper.parameterExists("name", element)) {
             final String name = this.fromApiJsonHelper.extractStringNamed("name", element);
             baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(100);
+        }
+        
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.shortName, element)) {
+            final String shortName = this.fromApiJsonHelper.extractStringNamed(LoanProductConstants.shortName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.shortName).value(shortName).notBlank().notExceedingLengthOf(4);
         }
 
         if (this.fromApiJsonHelper.parameterExists("description", element)) {

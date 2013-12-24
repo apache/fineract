@@ -23,6 +23,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequire
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nameParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.shortNameParamName;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -58,11 +60,15 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 import com.google.gson.JsonArray;
 
 @Entity
-@Table(name = "m_savings_product")
+@Table(name = "m_savings_product", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "sp_unq_name"),
+        @UniqueConstraint(columnNames = { "short_name" }, name = "sp_unq_short_name")})
 public class SavingsProduct extends AbstractPersistable<Long> {
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
+    
+    @Column(name = "short_name", nullable = false, unique = true)
+    private String shortName;
 
     @Column(name = "description", length = 500, nullable = false)
     private String description;
@@ -124,14 +130,14 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     @JoinTable(name = "m_savings_product_charge", joinColumns = @JoinColumn(name = "savings_product_id"), inverseJoinColumns = @JoinColumn(name = "charge_id"))
     private Set<Charge> charges;
 
-    public static SavingsProduct createNew(final String name, final String description, final MonetaryCurrency currency,
+    public static SavingsProduct createNew(final String name, final String shortName, final String description, final MonetaryCurrency currency,
             final BigDecimal interestRate, final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final AccountingRuleType accountingRuleType, final Set<Charge> charges) {
 
-        return new SavingsProduct(name, description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
+        return new SavingsProduct(name, shortName,  description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
                 lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, accountingRuleType, charges);
     }
@@ -141,7 +147,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         this.description = null;
     }
 
-    private SavingsProduct(final String name, final String description, final MonetaryCurrency currency, final BigDecimal interestRate,
+    private SavingsProduct(final String name, final String shortName, final String description, final MonetaryCurrency currency, final BigDecimal interestRate,
             final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
@@ -149,6 +155,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final boolean withdrawalFeeApplicableForTransfer, final AccountingRuleType accountingRuleType, final Set<Charge> charges) {
 
         this.name = name;
+        this.shortName = shortName;
         this.description = description;
 
         this.currency = currency;
@@ -237,6 +244,12 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final String newValue = command.stringValueOfParameterNamed(nameParamName);
             actualChanges.put(nameParamName, newValue);
             this.name = newValue;
+        }
+        
+        if (command.isChangeInStringParameterNamed(shortNameParamName, this.name)) {
+            final String newValue = command.stringValueOfParameterNamed(shortNameParamName);
+            actualChanges.put(shortNameParamName, newValue);
+            this.shortName = newValue;
         }
 
         if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {

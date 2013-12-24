@@ -57,7 +57,8 @@ import com.google.gson.JsonObject;
  */
 @Entity
 @Table(name = "m_product_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name"),
-        @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE") })
+        @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE"),
+        @UniqueConstraint(columnNames = { "short_name" }, name = "unq_short_name")})
 public class LoanProduct extends AbstractPersistable<Long> {
 
     @ManyToOne
@@ -70,6 +71,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
+    
+    @Column(name = "short_name", nullable = false, unique = true)
+    private String shortName;
 
     @Column(name = "description")
     private String description;
@@ -112,6 +116,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator) {
 
         final String name = command.stringValueOfParameterNamed("name");
+        final String shortName = command.stringValueOfParameterNamed(LoanProductConstants.shortName);
         final String description = command.stringValueOfParameterNamed("description");
         final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
         final Integer digitsAfterDecimal = command.integerValueOfParameterNamed("digitsAfterDecimal");
@@ -160,7 +165,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             populateBorrowerCyclevariations(command, loanProductBorrowerCycleVariations);
         }
 
-        return new LoanProduct(fund, loanTransactionProcessingStrategy, name, description, currency, principal, minPrincipal, maxPrincipal,
+        return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal, maxPrincipal,
                 interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType, annualInterestRate,
                 interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentFrequencyType, numberOfRepayments,
                 minNumberOfRepayments, maxNumberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
@@ -362,7 +367,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     }
 
     public LoanProduct(final Fund fund, final LoanTransactionProcessingStrategy transactionProcessingStrategy, final String name,
-            final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
+    		final String shortName, final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
             final BigDecimal defaultMinPrincipal, final BigDecimal defaultMaxPrincipal,
             final BigDecimal defaultNominalInterestRatePerPeriod, final BigDecimal defaultMinNominalInterestRatePerPeriod,
             final BigDecimal defaultMaxNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType,
@@ -378,6 +383,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
+        this.shortName = shortName.trim();
         if (StringUtils.isNotBlank(description)) {
             this.description = description.trim();
         } else {
@@ -476,6 +482,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final String newValue = command.stringValueOfParameterNamed(nameParamName);
             actualChanges.put(nameParamName, newValue);
             this.name = newValue;
+        }
+        
+        final String shortNameParamName = LoanProductConstants.shortName;
+        if (command.isChangeInStringParameterNamed(shortNameParamName, this.shortName)) {
+            final String newValue = command.stringValueOfParameterNamed(shortNameParamName);
+            actualChanges.put(shortNameParamName, newValue);
+            this.shortName = newValue;
         }
 
         final String descriptionParamName = "description";
