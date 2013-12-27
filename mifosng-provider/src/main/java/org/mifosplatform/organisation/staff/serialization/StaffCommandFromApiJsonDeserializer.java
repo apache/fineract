@@ -33,7 +33,7 @@ public final class StaffCommandFromApiJsonDeserializer {
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("firstname", "lastname", "officeId", "externalId",
-            "mobileNo", "isLoanOfficer"));
+            "mobileNo", "isLoanOfficer", "isActive"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -71,6 +71,11 @@ public final class StaffCommandFromApiJsonDeserializer {
         if (this.fromApiJsonHelper.parameterExists("isLoanOfficer", element)) {
             final Boolean loanOfficerFlag = this.fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
             baseDataValidator.reset().parameter("isLoanOfficer").value(loanOfficerFlag).notNull();
+        }
+        
+        if (this.fromApiJsonHelper.parameterExists("isActive", element)) {
+            final Boolean activeFlag = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
+            baseDataValidator.reset().parameter("isActive").value(activeFlag).notNull();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -110,7 +115,12 @@ public final class StaffCommandFromApiJsonDeserializer {
             final Boolean loanOfficerFlag = this.fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
             baseDataValidator.reset().parameter("isLoanOfficer").value(loanOfficerFlag).notNull();
         }
-
+        
+        if (this.fromApiJsonHelper.parameterExists("isActive", element)) {
+            final Boolean activeFlag = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
+            baseDataValidator.reset().parameter("isActive").value(activeFlag).notNull();
+        }
+        
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 

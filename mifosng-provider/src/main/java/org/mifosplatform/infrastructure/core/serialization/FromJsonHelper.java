@@ -102,7 +102,6 @@ public class FromJsonHelper {
         if (StringUtils.isNotBlank(json)) {
             parsedElement = this.parser.parse(json);
         }
-
         return parsedElement;
     }
 

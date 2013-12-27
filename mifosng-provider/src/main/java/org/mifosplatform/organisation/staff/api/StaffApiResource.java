@@ -49,7 +49,7 @@ public class StaffApiResource {
      * {@link StaffData}.
      */
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "firstname", "lastname", "displayName",
-            "officeId", "officeName", "loanOfficerFlag", "externalId", "mobileNo", "allowedOffices"));
+            "officeId", "officeName", "loanOfficerFlag", "externalId", "mobileNo", "allowedOffices", "isActive"));
 
     private final String resourceNameForPermissions = "STAFF";
 
@@ -120,8 +120,7 @@ public class StaffApiResource {
         if (settings.isTemplate()) {
             final Collection<OfficeData> allowedOffices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
             staff = StaffData.templateData(staff, allowedOffices);
-        }
-
+        }        
         return this.toApiJsonSerializer.serialize(settings, staff, this.RESPONSE_DATA_PARAMETERS);
     }
 
