@@ -11765,14 +11765,77 @@ Request Body:
 					<p>Allows you to model staff members. At present the key role
 						of significance is whether this staff member is a loan officer or
 						not.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>firstname</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>First Name of the new Employee.</td>
+						</tr>
+						<tr class=alt>
+							<td>lastname</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Last Name of the new Employee.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>externalId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>ID to put an external reference for an Employee.</td>
+						</tr>
+						<tr class=alt>
+							<td>mobileNo</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Mobile number of an Employee.							
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>isLoanOfficer</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Indicates whether the employee account is to be created as <b>Loan Officer</b>. If isLoanOfficer=true, then the employee is <b>Loan Officer</b>. If isLoanOfficer=false, then the employee is 
+								<b>not Loan Officer.</b>
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>isActive</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Indicates whether the employee account is to be created as <b>Active</b>. If isActive=true, then employee is active. If isActive=false, then employee is inactive.</td>
+						</tr>
+					</table>
 				</div>
 			</div>
+
 
 			<a id="staff_create" name="staff_create" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Create a staff member</h4>
 					<p>Creates a staff member.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>officeId, firstname, lastname</td>
+						</tr>
+					</table>
+					<br/>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>isLoanOfficer, isActive</td>
+						</tr>
+					</table>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -11788,7 +11851,8 @@ Request Body:
     "lastname": "Doe",
     "isLoanOfficer": "true",
     "externalId": "17H",
-    "mobileNo": "+353851239876"
+    "mobileNo": "+353851239876",
+    "isActive": "true"
 }
 					</code>
 					<code class="method-response">
