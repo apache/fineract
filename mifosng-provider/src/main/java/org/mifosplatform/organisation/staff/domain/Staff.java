@@ -51,6 +51,9 @@ public class Staff extends AbstractPersistable<Long> {
 
     @Column(name = "organisational_role_enum", nullable = true)
     private Integer organisationalRoleType;
+    
+    @Column (name="is_active" , nullable = false)
+    private boolean active;
 
     @ManyToOne
     @JoinColumn(name = "organisational_role_parent_staff_id", nullable = true)
@@ -72,8 +75,11 @@ public class Staff extends AbstractPersistable<Long> {
 
         final String isLoanOfficerParamName = "isLoanOfficer";
         final boolean isLoanOfficer = command.booleanPrimitiveValueOfParameterNamed(isLoanOfficerParamName);
+        
+        final String isActiveParamName = "isActive";
+        final boolean isActive = command.booleanPrimitiveValueOfParameterNamed(isActiveParamName);
 
-        return new Staff(staffOffice, firstname, lastname, externalId, mobileNo, isLoanOfficer);
+        return new Staff(staffOffice, firstname, lastname, externalId, mobileNo, isLoanOfficer, isActive);
     }
 
     protected Staff() {
@@ -81,13 +87,14 @@ public class Staff extends AbstractPersistable<Long> {
     }
 
     private Staff(final Office staffOffice, final String firstname, final String lastname, final String externalId, final String mobileNo,
-            final boolean isLoanOfficer) {
+            final boolean isLoanOfficer, final Boolean isActive) {
         this.office = staffOffice;
         this.firstname = StringUtils.defaultIfEmpty(firstname, null);
         this.lastname = StringUtils.defaultIfEmpty(lastname, null);
         this.externalId = StringUtils.defaultIfEmpty(externalId, null);
         this.mobileNo = StringUtils.defaultIfEmpty(mobileNo, null);
         this.loanOfficer = isLoanOfficer;
+        this.active = (isActive == null) ? false : isActive;
         deriveDisplayName(firstname);
     }
 
@@ -155,6 +162,13 @@ public class Staff extends AbstractPersistable<Long> {
             actualChanges.put(isLoanOfficerParamName, newValue);
             this.loanOfficer = newValue;
         }
+        
+        final String isActiveParamName = "isActive";
+        if (command.isChangeInBooleanParameterNamed(isActiveParamName, this.active)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isActiveParamName);
+            actualChanges.put(isActiveParamName, newValue);
+            this.active = newValue;
+        }
 
         return actualChanges;
     }
@@ -165,6 +179,14 @@ public class Staff extends AbstractPersistable<Long> {
 
     public boolean isLoanOfficer() {
         return this.loanOfficer;
+    }
+    
+    public boolean isNotActive() {
+        return !isActive();
+    }
+    
+    public boolean isActive() {
+        return this.active;
     }
 
     private void deriveDisplayName(final String firstname) {

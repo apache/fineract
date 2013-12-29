@@ -100,7 +100,6 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
             return CommandProcessingResult.empty();
         }
     }
-
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.

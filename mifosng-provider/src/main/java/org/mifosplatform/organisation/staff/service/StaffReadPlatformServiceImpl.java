@@ -38,7 +38,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
         public String schema() {
             return " s.id as id,s.office_id as officeId, o.name as officeName, s.firstname as firstname, s.lastname as lastname,"
-                    + " s.display_name as displayName, s.is_loan_officer as isLoanOfficer, s.external_id as externalId, s.mobile_no as mobileNo from m_staff s "
+                    + " s.display_name as displayName, s.is_loan_officer as isLoanOfficer, s.external_id as externalId, s.mobile_no as mobileNo, s.is_active as isActive from m_staff s "
                     + " join m_office o on o.id = s.office_id";
         }
 
@@ -54,8 +54,9 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             final String officeName = rs.getString("officeName");
             final String externalId = rs.getString("externalId");
             final String mobileNo = rs.getString("mobileNo");
+            final boolean isActive = rs.getBoolean("isActive");
 
-            return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, externalId, mobileNo);
+            return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, externalId, mobileNo, isActive);
         }
     }
 
@@ -64,10 +65,10 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         public String schema(final boolean loanOfficersOnly) {
 
             final StringBuilder sqlBuilder = new StringBuilder(200);
+            
             sqlBuilder.append("s.id as id, s.office_id as officeId, ohierarchy.name as officeName,");
             sqlBuilder.append("s.firstname as firstname, s.lastname as lastname,");
-            sqlBuilder
-                    .append("s.display_name as displayName, s.is_loan_officer as isLoanOfficer, s.external_id as externalId, s.mobile_no as mobileNo ");
+            sqlBuilder.append("s.display_name as displayName, s.is_loan_officer as isLoanOfficer, s.external_id as externalId, s.mobile_no as mobileNo ");
             sqlBuilder.append("from m_office o ");
             sqlBuilder.append("join m_office ohierarchy on o.hierarchy like concat(ohierarchy.hierarchy, '%') ");
             sqlBuilder.append("join m_staff s on s.office_id = ohierarchy.id ");
@@ -93,8 +94,9 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             final boolean isLoanOfficer = rs.getBoolean("isLoanOfficer");
             final String externalId = rs.getString("externalId");
             final String mobileNo = rs.getString("mobileNo");
+            final boolean isActive = rs.getBoolean("isActive");
 
-            return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, externalId, mobileNo);
+            return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, externalId, mobileNo, isActive);
         }
     }
 
@@ -120,7 +122,6 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
             final Long id = rs.getLong("id");
             final String displayName = rs.getString("displayName");
-
             return StaffData.lookup(id, displayName);
         }
     }
@@ -192,7 +193,6 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         if (StringUtils.isNotBlank(extraCriteria)) {
             extraCriteria = extraCriteria.substring(4);
         }
-
         return extraCriteria;
     }
 
@@ -201,7 +201,6 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
         String sql = "select " + this.staffInOfficeHierarchyMapper.schema(loanOfficersOnly);
         sql = sql + " order by s.lastname";
-
         return this.jdbcTemplate.query(sql, this.staffInOfficeHierarchyMapper, new Object[] { officeId });
     }
 }
