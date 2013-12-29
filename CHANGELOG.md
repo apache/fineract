@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 29 Dec 2013 - 1.16.1.RELEASE
 1. 15 Dec 2013 - 1.16.0.RELEASE
 1. 12 Dec 2013 - 1.15.2.RELEASE
 1. 04 Dec 2013 - 1.15.1.RELEASE
@@ -54,6 +55,16 @@ Releases
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
 
+1.16.1.RELEASE
+=============
+Bug Release
+
+Bugs
+ - [MIFOSX-802] - Loan life cycle is not considered in validations for loan operations
+ - [MIFOSX-812] - Journalentries Api is not returning currency while retrieving transactions
+ - [MIFOSX-825] - Timeline is not displaying while fetching the details of created centers
+ - [MIFOSX-830] - APIs are returning invalid commandId for all actions when maker-checker is enabled.
+ - [MIFOSX-834] - Reports-Loan products are not listing for currency ALL(Active Loans - Summary)
 
 1.16.0.RELEASE
 =============
