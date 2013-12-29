@@ -25,7 +25,7 @@ public final class AllGroupTypesDataMapper implements RowMapper<GroupGeneralData
 
     public AllGroupTypesDataMapper() {
         final StringBuilder sqlBuilder = new StringBuilder(400);
-        sqlBuilder.append("g.id as id, g.external_id as externalId, g.display_name as displayName, ");
+        sqlBuilder.append("g.id as id, g.external_id as externalId, g.display_name as name, ");
         sqlBuilder.append("g.office_id as officeId, o.name as officeName, ");
         sqlBuilder.append("g.parent_id as centerId, pg.display_name as centerName, ");
         sqlBuilder.append("g.staff_id as staffId, s.display_name as staffName, ");
@@ -66,7 +66,7 @@ public final class AllGroupTypesDataMapper implements RowMapper<GroupGeneralData
     public GroupGeneralData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
         final Long id = rs.getLong("id");
-        final String name = rs.getString("displayName");
+        final String name = rs.getString("name");
         final String externalId = rs.getString("externalId");
 
         final Integer statusEnum = JdbcSupport.getInteger(rs, "statusEnum");

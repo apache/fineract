@@ -3595,9 +3595,14 @@ GET https://DomainName/mifosng-provider/api/v1/centers/9?associations=groupMembe
 			<div class="method-section">
 				<div class="method-description">
 					<h4>List Centers</h4>
-					<p>The <i>list</i> capability of centers can support <b>pagination</b> and <b>sorting</b>.</p>
+					<p>The default implementation of <i>list</i> results into 200 entries with optional support for <b>pagination</b> and <b>sorting</b>. The parameter <b>limit</b> with value <b>-1</b> will return all entries.</p>
 					<h5>Optional Arguments</h5>
 					<dl class="argument-list">
+						<dt>paged</dt>
+						<dd>
+							Boolean <span>optional</span>, defaults to false
+						</dd>
+						<dd>If paged is <span>true</span> then results will be paginated.</dd>
 						<dt>offset</dt>
 						<dd>
 							Integer <span>optional</span>, defaults to 0
@@ -3662,7 +3667,7 @@ GET https://DomainName/mifosng-provider/api/v1/centers/9?associations=groupMembe
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/centers
+GET https://DomainName/mifosng-provider/api/v1/centers?paged=true
 					</code>
 					<code class="method-response">
 {
@@ -4506,9 +4511,14 @@ DELETE groups/2
 			<div class="method-section">
 				<div class="method-description">
 					<h4>List Groups</h4>
-					<p>The <i>list</i> capability of groups can support <b>pagination</b> and <b>sorting</b>.</p>
+					<p>The default implementation of <i>list</i> results into 200 entries with optional support for <b>pagination</b> and <b>sorting</b>. The parameter <b>limit</b> with value <b>-1</b> will return all entries.</p>
 					<h5>Optional Arguments</h5>
 					<dl class="argument-list">
+						<dt>paged</dt>
+						<dd>
+							Boolean <span>optional</span>, defaults to false
+						</dd>
+						<dd>If paged is <span>true</span> then results will be paginated.</dd>
 						<dt>offset</dt>
 						<dd>
 							Integer <span>optional</span>, defaults to 0
@@ -4573,7 +4583,7 @@ DELETE groups/2
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/groups
+GET https://DomainName/mifosng-provider/api/v1/groups?paged=true
 					</code>
 					<code class="method-response">
 {

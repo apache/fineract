@@ -58,6 +58,7 @@ public class GroupingTypesApiConstants {
     public static final String clientOptionsParamName = "clientOptions";
     public static final String collectionMeetingCalendar = "collectionMeetingCalendar";
     public static final String timeLine ="timeline";
+    public static final String closureReasons = "closureReasons";
 
     // group close parameters
     public static final String closureDateParamName = "closureDate";
@@ -81,7 +82,8 @@ public class GroupingTypesApiConstants {
      */
     public static final Set<String> CENTER_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName, nameParamName,
             externalIdParamName, officeIdParamName, officeNameParamName, staffIdParamName, staffNameParamName, hierarchyParamName,
-            officeOptionsParamName, staffOptionsParamName));
+            officeOptionsParamName, staffOptionsParamName, statusParamName, activeParamName, activationDateParamName, timeLine,
+            groupMembersParamName, collectionMeetingCalendar, closureReasons));
 
     public static final Set<String> CENTER_GROUP_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName, nameParamName,
             externalIdParamName, officeIdParamName, officeNameParamName, staffIdParamName, staffNameParamName, hierarchyParamName,
@@ -89,7 +91,8 @@ public class GroupingTypesApiConstants {
 
     public static final Set<String> GROUP_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName, nameParamName,
             externalIdParamName, officeIdParamName, officeNameParamName, "parentId", "parentName", staffIdParamName, staffNameParamName,
-            hierarchyParamName, officeOptionsParamName, staffOptionsParamName, clientOptionsParamName,timeLine));
+            hierarchyParamName, officeOptionsParamName, statusParamName, activeParamName, activationDateParamName, staffOptionsParamName,
+            clientOptionsParamName, timeLine));
 
     public static final Set<String> ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, activationDateParamName));

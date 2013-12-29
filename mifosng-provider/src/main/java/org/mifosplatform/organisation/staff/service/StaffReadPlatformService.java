@@ -23,5 +23,5 @@ public interface StaffReadPlatformService {
      */
     Collection<StaffData> retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(Long officeId, boolean loanOfficersOnly);
 
-    Collection<StaffData> retrieveAllStaff(String sqlSearch, Long officeId);
+    Collection<StaffData> retrieveAllStaff(String sqlSearch, Long officeId, boolean loanOfficersOnly);
 }
