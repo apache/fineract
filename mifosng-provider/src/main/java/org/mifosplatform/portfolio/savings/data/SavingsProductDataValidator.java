@@ -23,6 +23,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequire
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nameParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.shortNameParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -76,6 +77,9 @@ public class SavingsProductDataValidator {
 
         final String name = this.fromApiJsonHelper.extractStringNamed(nameParamName, element);
         baseDataValidator.reset().parameter(nameParamName).value(name).notBlank().notExceedingLengthOf(100);
+        
+        final String shortName = this.fromApiJsonHelper.extractStringNamed(shortNameParamName, element);
+        baseDataValidator.reset().parameter(shortNameParamName).value(shortName).notBlank().notExceedingLengthOf(4);
 
         final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParamName, element);
         baseDataValidator.reset().parameter(descriptionParamName).value(description).notBlank().notExceedingLengthOf(500);
@@ -260,6 +264,11 @@ public class SavingsProductDataValidator {
             final String name = this.fromApiJsonHelper.extractStringNamed(nameParamName, element);
             baseDataValidator.reset().parameter(nameParamName).value(name).notBlank().notExceedingLengthOf(100);
         }
+        
+        if (this.fromApiJsonHelper.parameterExists(shortNameParamName, element)) {
+        	final String shortName = this.fromApiJsonHelper.extractStringNamed(shortNameParamName, element);
+            baseDataValidator.reset().parameter(shortNameParamName).value(shortName).notBlank().notExceedingLengthOf(4);
+		}
 
         if (this.fromApiJsonHelper.parameterExists(descriptionParamName, element)) {
             final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParamName, element);

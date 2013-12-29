@@ -237,6 +237,11 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.name", "Loan product with name `" + name
                     + "` already exists", "name", name);
+        } else if (realCause.getMessage().contains("unq_short_name")) {
+
+            final String shortName = command.stringValueOfParameterNamed("shortName");
+            throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.short.name", "Loan product with short name `" + shortName
+                    + "` already exists", "shortName", shortName);
         } else if (realCause.getMessage().contains("Duplicate entry")) {
             final Object[] args = null;
             throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.charge",

@@ -215,7 +215,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     + "ln.id As loanId, "
                     + "ln.account_no As accountId, "
                     + "ln.loan_status_id As accountStatusId, "
-                    + "pl.name As productShortName, "
+                    + "pl.short_name As productShortName, "
                     + "ln.product_id As productId, "
                     + "ln.currency_code as currencyCode, ln.currency_digits as currencyDigits, ln.currency_multiplesof as inMultiplesOf, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
                     + "if(ln.loan_status_id = 200 , ln.principal_amount , null) As disbursementAmount, "

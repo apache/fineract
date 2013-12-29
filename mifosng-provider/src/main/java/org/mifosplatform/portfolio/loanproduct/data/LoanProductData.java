@@ -35,6 +35,7 @@ public class LoanProductData {
 
     private final Long id;
     private final String name;
+    private final String shortName;
     private final String description;
     private final Long fundId;
     private final String fundName;
@@ -109,6 +110,7 @@ public class LoanProductData {
      * Used when returning lookup information about loan product for dropdowns.
      */
     public static LoanProductData lookup(final Long id, final String name) {
+    	final String shortName = null;
         final String description = null;
         final CurrencyData currency = null;
         final BigDecimal principal = null;
@@ -146,7 +148,7 @@ public class LoanProductData {
         final LocalDate closeDate = null;
         final String status = null;
         final String externalId = null;
-        return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
+        return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
                 minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod, minInterestRatePerPeriod,
                 maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
@@ -156,6 +158,7 @@ public class LoanProductData {
     }
 
     public static LoanProductData lookupWithCurrency(final Long id, final String name, final CurrencyData currency) {
+    	final String shortName = null;
         final String description = null;
         final BigDecimal principal = null;
         final BigDecimal minPrincipal = null;
@@ -195,7 +198,7 @@ public class LoanProductData {
         final Collection<LoanProductBorrowerCycleVariationData> interestRateVariations = new ArrayList<LoanProductBorrowerCycleVariationData>(1);
         final Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariations = new ArrayList<LoanProductBorrowerCycleVariationData>(1);
 
-        return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
+        return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
                 minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod, minInterestRatePerPeriod,
                 maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
@@ -207,6 +210,7 @@ public class LoanProductData {
     public static LoanProductData sensibleDefaultsForNewLoanProductCreation() {
         final Long id = null;
         final String name = null;
+        final String shortName = null;
         final String description = null;
         final CurrencyData currency = CurrencyData.blank();
         final BigDecimal principal = null;
@@ -250,7 +254,7 @@ public class LoanProductData {
         final String status = null;
         final String externalId = null;
 
-        return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
+        return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
                 minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod, minInterestRatePerPeriod,
                 maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
@@ -270,7 +274,7 @@ public class LoanProductData {
         return productData;
     }
 
-    public LoanProductData(final Long id, final String name, final String description, final CurrencyData currency,
+    public LoanProductData(final Long id, final String name, final String shortName, final String description, final CurrencyData currency,
             final BigDecimal principal, final BigDecimal minPrincipal, final BigDecimal maxPrincipal, final BigDecimal tolerance,
             final Integer numberOfRepayments, final Integer minNumberOfRepayments, final Integer maxNumberOfRepayments,
             final Integer repaymentEvery, final BigDecimal interestRatePerPeriod, final BigDecimal minInterestRatePerPeriod,
@@ -285,6 +289,7 @@ public class LoanProductData {
             Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariations) {
         this.id = id;
         this.name = name;
+        this.shortName = shortName;
         this.description = description;
         this.currency = currency;
         this.principal = principal;
@@ -354,6 +359,7 @@ public class LoanProductData {
             final List<EnumOptionData>  valueConditionTypeOptions) {
         this.id = productData.id;
         this.name = productData.name;
+        this.shortName = productData.shortName;
         this.description = productData.description;
         this.fundId = productData.fundId;
         this.fundName = productData.fundName;

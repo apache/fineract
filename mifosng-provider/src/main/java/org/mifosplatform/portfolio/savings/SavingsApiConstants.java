@@ -66,6 +66,7 @@ public class SavingsApiConstants {
 
     public static final String activeParamName = "active";
     public static final String nameParamName = "name";
+    public static final String shortNameParamName = "shortName";
     public static final String descriptionParamName = "description";
     public static final String currencyCodeParamName = "currencyCode";
     public static final String digitsAfterDecimalParamName = "digitsAfterDecimal";
@@ -129,7 +130,7 @@ public class SavingsApiConstants {
     
 
     public static final Set<String> SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
-            monthDayFormatParamName, nameParamName, descriptionParamName, currencyCodeParamName, digitsAfterDecimalParamName,
+            monthDayFormatParamName, nameParamName, shortNameParamName, descriptionParamName, currencyCodeParamName, digitsAfterDecimalParamName,
             inMultiplesOfParamName, nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName,
             interestPostingPeriodTypeParamName, interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
             minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName,
@@ -150,7 +151,7 @@ public class SavingsApiConstants {
      * parameters to match those of request parameters.
      */
     public static final Set<String> SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName,
-            nameParamName, descriptionParamName, "currency", digitsAfterDecimalParamName, inMultiplesOfParamName,
+            nameParamName, shortNameParamName,  descriptionParamName, "currency", digitsAfterDecimalParamName, inMultiplesOfParamName,
             nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName,
             interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName,
             lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, withdrawalFeeAmountParamName, withdrawalFeeTypeParamName,

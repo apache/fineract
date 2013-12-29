@@ -26,6 +26,7 @@ public class SavingsProductData {
 
     private final Long id;
     private final String name;
+    private final String shortName;
     private final String description;
     private final CurrencyData currency;
     private final BigDecimal nominalAnnualInterestRate;
@@ -76,6 +77,7 @@ public class SavingsProductData {
 
         final Long id = null;
         final String name = null;
+        final String shortName = null;
         final String description = null;
         final BigDecimal nominalAnnualInterestRate = null;
         final BigDecimal minRequiredOpeningBalance = null;
@@ -88,7 +90,7 @@ public class SavingsProductData {
         final Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings = null;
         final Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = null;
 
-        return new SavingsProductData(id, name, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
+        return new SavingsProductData(id, name, shortName, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, accountingRule, accountingMappings,
                 paymentChannelToFundSourceMappings, currencyOptions, interestCompoundingPeriodTypeOptions,
@@ -99,7 +101,7 @@ public class SavingsProductData {
     }
 
     public static SavingsProductData withCharges(final SavingsProductData product, final Collection<ChargeData> charges) {
-        return new SavingsProductData(product.id, product.name, product.description, product.currency, product.nominalAnnualInterestRate,
+        return new SavingsProductData(product.id, product.name, product.shortName, product.description, product.currency, product.nominalAnnualInterestRate,
                 product.interestCompoundingPeriodType, product.interestPostingPeriodType, product.interestCalculationType,
                 product.interestCalculationDaysInYearType, product.minRequiredOpeningBalance, product.lockinPeriodFrequency,
                 product.lockinPeriodFrequencyType, product.withdrawalFeeForTransfers, product.accountingRule, product.accountingMappings,
@@ -125,8 +127,8 @@ public class SavingsProductData {
             final Map<String, List<GLAccountData>> accountingMappingOptions, final Collection<ChargeData> chargeOptions,
             final Collection<ChargeData> penaltyOptions) {
 
-        return new SavingsProductData(existingProduct.id, existingProduct.name, existingProduct.description, existingProduct.currency,
-                existingProduct.nominalAnnualInterestRate, existingProduct.interestCompoundingPeriodType,
+        return new SavingsProductData(existingProduct.id, existingProduct.name, existingProduct.shortName, existingProduct.description,
+        		existingProduct.currency, existingProduct.nominalAnnualInterestRate, existingProduct.interestCompoundingPeriodType,
                 existingProduct.interestPostingPeriodType, existingProduct.interestCalculationType,
                 existingProduct.interestCalculationDaysInYearType, existingProduct.minRequiredOpeningBalance,
                 existingProduct.lockinPeriodFrequency, existingProduct.lockinPeriodFrequencyType,
@@ -157,8 +159,8 @@ public class SavingsProductData {
         final Collection<ChargeData> chargeOptions = null;
         final Collection<ChargeData> penaltyOptions = null;
 
-        return new SavingsProductData(existingProduct.id, existingProduct.name, existingProduct.description, existingProduct.currency,
-                existingProduct.nominalAnnualInterestRate, existingProduct.interestCompoundingPeriodType,
+        return new SavingsProductData(existingProduct.id, existingProduct.name, existingProduct.shortName, existingProduct.description,
+        		existingProduct.currency, existingProduct.nominalAnnualInterestRate, existingProduct.interestCompoundingPeriodType,
                 existingProduct.interestPostingPeriodType, existingProduct.interestCalculationType,
                 existingProduct.interestCalculationDaysInYearType, existingProduct.minRequiredOpeningBalance,
                 existingProduct.lockinPeriodFrequency, existingProduct.lockinPeriodFrequencyType,
@@ -170,8 +172,8 @@ public class SavingsProductData {
                 penaltyToIncomeAccountMappings);
     }
 
-    public static SavingsProductData instance(final Long id, final String name, final String description, final CurrencyData currency,
-            final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestCompoundingPeriodType,
+    public static SavingsProductData instance(final Long id, final String name, final String shortName, final String description, 
+    		final CurrencyData currency, final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestCompoundingPeriodType,
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
             final EnumOptionData interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType, final boolean withdrawalFeeForTransfers,
@@ -196,7 +198,7 @@ public class SavingsProductData {
         final Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings = null;
         final Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = null;
 
-        return new SavingsProductData(id, name, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
+        return new SavingsProductData(id, name, shortName, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, accountingType, accountingMappings,
                 paymentChannelToFundSourceMappings, currencyOptions, interestCompoundingPeriodTypeOptions,
@@ -208,6 +210,7 @@ public class SavingsProductData {
 
     public static SavingsProductData lookup(final Long id, final String name) {
 
+    	final String shortName = null;
         final CurrencyData currency = null;
         final String description = null;
         final BigDecimal nominalAnnualInterestRate = null;
@@ -239,7 +242,7 @@ public class SavingsProductData {
         final Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings = null;
         final Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = null;
 
-        return new SavingsProductData(id, name, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
+        return new SavingsProductData(id, name, shortName, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers,
                 accountingType, accountingMappings, paymentChannelToFundSourceMappings,
@@ -249,7 +252,7 @@ public class SavingsProductData {
                 penaltyToIncomeAccountMappings);
     }
 
-    private SavingsProductData(final Long id, final String name, final String description, final CurrencyData currency,
+    private SavingsProductData(final Long id, final String name, final String shortName, final String description, final CurrencyData currency,
             final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestCompoundingPeriodType,
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
             final EnumOptionData interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
@@ -268,6 +271,7 @@ public class SavingsProductData {
             final Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings) {
         this.id = id;
         this.name = name;
+        this.shortName = shortName;
         this.description = description;
         this.currency = currency;
         this.nominalAnnualInterestRate = nominalAnnualInterestRate;

@@ -7874,6 +7874,14 @@ Request Body:
 							<td class=fielddesc>Name associated with loan product on system.</td>
 						</tr>
 						<tr class=alt>
+							<td>shortName</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Shortname associated with a loan product. <br>
+								An abbreviated version of the name, used in reports or menus where space is limited, such as Collection Sheets.
+							</td>
+						</tr>
+						<tr class=alt>
 							<td>description</td>
 						</tr>
 						<tr>
@@ -8090,6 +8098,7 @@ GET https://DomainName/api/v1/loanproducts
   {
     "id": 1,
     "name": "personal loan product",
+    "shortName": "pe1",
     "includeInBorrowerCycle": false,
     "useBorrowerCycle": false,
     "startDate": [
@@ -8937,6 +8946,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 {
   "id": 11,
   "name": "advanced accounting",
+  "shortName": "ad11",
   "includeInBorrowerCycle": true,
   "useBorrowerCycle": true,
   "status": "loanProduct.active",
@@ -9148,7 +9158,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>name, currencyCode, digitsAfterDecimal, inMultiplesOf, principal,
+							<td>name, shortName, currencyCode, digitsAfterDecimal, inMultiplesOf, principal,
 								numberOfRepayments, repaymentEvery, repaymentFrequencyType, 
 								interestRatePerPeriod, interestRateFrequencyType, amortizationType, interestType,
 								interestCalculationPeriodType, transactionProcessingStrategyId,
@@ -9222,6 +9232,7 @@ Request Body:
 ],
 "accountingRule":"2",
 "name":"product 5",
+"shortName":"prd5",
 "principal":"5000",
 "numberOfRepayments":"7",
 "repaymentEvery":"7",
@@ -9253,6 +9264,7 @@ Content-Type: application/json
 Request Body:
 {
     "name": "LP Cash Accounting",
+    "shortName": "LPCA",
     "currencyCode": "USD",
     "locale": "en_GB",
     "digitsAfterDecimal": "2",
@@ -9312,6 +9324,7 @@ Content-Type: application/json
 Request Body:
 {
     "name": "LP Accrual Accounting",
+    "shortName": "LPAA",
     "currencyCode": "USD",
     "locale": "en_GB",
     "digitsAfterDecimal": "2",
@@ -12934,6 +12947,11 @@ Content-Type: application/json
 				<tr class=alt><td>name</td></tr>
 	            <tr><td class=fielddesc>The name of the product offering.</td></tr>
 
+	            <tr class=alt><td>shortName</td></tr>
+	            <tr><td class=fielddesc>Shortname associated with a saving product. <br>
+	            	An abbreviated version of the name, used in reports or menus where space is limited.
+	            </td></tr>
+
 	            <tr class=alt><td>description</td></tr>
 	            <tr><td class=fielddesc>A description of the product offering.</td></tr>
 
@@ -13537,7 +13555,7 @@ Content-Type: application/json
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
                 <tr class=alt>
-                	<td>name, description, currencyCode, digitsAfterDecimal,inMultiplesOf, nominalAnnualInterestRate,
+                	<td>name, shortName, description, currencyCode, digitsAfterDecimal,inMultiplesOf, nominalAnnualInterestRate,
                 		interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType,accountingRule</td>
                 </tr>
             </table>
@@ -13561,6 +13579,7 @@ Content-Type: application/json
 Request Body:
 {
   "name": "Passbook Savings",
+  "shortName": "PBSV",
   "description": "Daily compounding using Daily Balance, 5% per year, 365 days in year",
   "currencyCode": "USD",
   "digitsAfterDecimal": 2,
@@ -13586,6 +13605,7 @@ Request Body:
 {
   "locale": "en",
   "name": "New Passbook Savings ",
+  "shortName": "NPBS",
   "description": "A savings product",
   "currencyCode": "USD",
   "digitsAfterDecimal": "2",
@@ -13652,6 +13672,7 @@ Request Body:
 {
   "id": 1,
   "name": "savings product",
+  "shortName": "sa1",
   "description": "gtasga",
   "currency": {
     "code": "USD",
@@ -13835,6 +13856,7 @@ Content-Type: application/json
   {
     "id": 1,
     "name": "Savings product",
+    "shortName": "sa1",
     "description": "gtasga",
     "currency": {
       "code": "USD",
