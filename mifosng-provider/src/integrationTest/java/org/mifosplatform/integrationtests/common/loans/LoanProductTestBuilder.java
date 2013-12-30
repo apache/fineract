@@ -31,6 +31,7 @@ public class LoanProductTestBuilder {
     private static final String ACCRUAL_BASED = "3";
 
     private String nameOfLoanProduct = ClientHelper.randomNameGenerator("LOAN_PRODUCT_", 6);
+    private String shortName = ClientHelper.randomNameGenerator("", 4);
     private String principal = "10000.00";
     private String numberOfRepayments = "5";
     private String repaymentFrequency = MONTHS;
@@ -52,6 +53,7 @@ public class LoanProductTestBuilder {
         final HashMap<String, String> map = new HashMap<String, String>();
 
         map.put("name", this.nameOfLoanProduct);
+        map.put("shortName", this.shortName);
         map.put("currencyCode", this.currencyCode);
         map.put("locale", LOCALE);
         map.put("digitsAfterDecimal", DIGITS_AFTER_DECIMAL);
