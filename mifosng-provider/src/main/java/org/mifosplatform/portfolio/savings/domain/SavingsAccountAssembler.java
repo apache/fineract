@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.savings.domain;
 
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountNoParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.clientIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.externalIdParamName;
@@ -217,7 +218,7 @@ public class SavingsAccountAssembler {
                 overdraftLimit);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
-        account.validateNewApplicationState(DateUtils.getLocalDateOfTenant());
+        account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         account.validateAccountValuesWithProduct();
 
@@ -270,7 +271,7 @@ public class SavingsAccountAssembler {
                 product.isWithdrawalFeeApplicableForTransfer(), charges, product.isAllowOverdraft(), product.overdraftLimit());
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
-        account.validateNewApplicationState(DateUtils.getLocalDateOfTenant());
+        account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         account.validateAccountValuesWithProduct();
 

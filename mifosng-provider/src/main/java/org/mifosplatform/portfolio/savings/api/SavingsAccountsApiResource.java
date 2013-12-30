@@ -37,6 +37,7 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountChargeData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
@@ -161,7 +162,7 @@ public class SavingsAccountsApiResource {
             if (associationParameters.contains(SavingsApiConstants.transactions)) {
                 mandatoryResponseParameters.add(SavingsApiConstants.transactions);
                 final Collection<SavingsAccountTransactionData> currentTransactions = this.savingsAccountReadPlatformService
-                        .retrieveAllTransactions(accountId);
+                        .retrieveAllTransactions(accountId, DepositAccountType.SAVINGS_DEPOSIT);
                 if (!CollectionUtils.isEmpty(currentTransactions)) {
                     transactions = currentTransactions;
                 }

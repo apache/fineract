@@ -9,6 +9,7 @@ import java.util.Collection;
 
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionData;
 
@@ -17,19 +18,21 @@ public interface SavingsAccountReadPlatformService {
     Page<SavingsAccountData> retrieveAll(SearchParameters searchParameters);
 
     Collection<SavingsAccountData> retrieveAllForLookup(Long clientId);
+    
+    Collection<SavingsAccountData> retrieveActiveForLookup(Long clientId, DepositAccountType depositAccountType);
 
     SavingsAccountData retrieveOne(Long savingsId);
 
     SavingsAccountData retrieveTemplate(Long clientId, Long groupId, Long productId, boolean staffInSelectedOfficeOnly);
 
-    SavingsAccountTransactionData retrieveDepositTransactionTemplate(Long savingsId);
+    SavingsAccountTransactionData retrieveDepositTransactionTemplate(Long savingsId, DepositAccountType depositAccountType);
 
-    Collection<SavingsAccountTransactionData> retrieveAllTransactions(Long savingsId);
+    Collection<SavingsAccountTransactionData> retrieveAllTransactions(Long savingsId, DepositAccountType depositAccountType);
 
     // Collection<SavingsAccountAnnualFeeData>
     // retrieveAccountsWithAnnualFeeDue();
 
-    SavingsAccountTransactionData retrieveSavingsTransaction(Long savingsId, Long transactionId);
+    SavingsAccountTransactionData retrieveSavingsTransaction(Long savingsId, Long transactionId, DepositAccountType depositAccountType);
     
     Collection<SavingsAccountData> retrieveForLookup(Long clientId,Boolean overdraft);
 }

@@ -6,6 +6,7 @@
 package org.mifosplatform.commands.service;
 
 import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.portfolio.savings.DepositAccountType;
 
 public class CommandWrapperBuilder {
 
@@ -22,10 +23,14 @@ public class CommandWrapperBuilder {
     private String json = "{}";
     private String transactionId;
     private Long productId;
+    private Long templateId;
+    private Long interestRatechartId;
+    private DepositAccountType depositAccountType;
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
-                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId);
+                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId,
+                this.templateId, this.interestRatechartId, this.depositAccountType);
     }
 
     public CommandWrapperBuilder withLoanId(final Long withLoanId) {
@@ -1086,6 +1091,105 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createFixedDepositProduct() {
+        this.actionName = "CREATE";
+        this.entityName = "FIXEDDEPOSITPRODUCT";
+        this.entityId = null;
+        this.href = "/fixeddepositproducts/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateFixedDepositProduct(final Long productId) {
+        this.actionName = "UPDATE";
+        this.entityName = "FIXEDDEPOSITPRODUCT";
+        this.entityId = productId;
+        this.href = "/fixeddepositproducts/" + productId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteFixedDepositProduct(final Long productId) {
+        this.actionName = "DELETE";
+        this.entityName = "FIXEDDEPOSITPRODUCT";
+        this.entityId = productId;
+        this.href = "/fixeddepositproducts/" + productId;
+        return this;
+    }
+
+    public CommandWrapperBuilder createRecurringDepositProduct() {
+        this.actionName = "CREATE";
+        this.entityName = "RECURRINGDEPOSITPRODUCT";
+        this.entityId = null;
+        this.href = "/recurringdepositproducts/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateRecurringDepositProduct(final Long productId) {
+        this.actionName = "UPDATE";
+        this.entityName = "RECURRINGDEPOSITPRODUCT";
+        this.entityId = productId;
+        this.href = "/recurringdepositproducts/" + productId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteRecurringDepositProduct(final Long productId) {
+        this.actionName = "DELETE";
+        this.entityName = "RECURRINGDEPOSITPRODUCT";
+        this.entityId = productId;
+        this.href = "/recurringdepositproducts/" + productId;
+        return this;
+    }
+
+    public CommandWrapperBuilder createInterestRateChart() {
+        this.actionName = "CREATE";
+        this.entityName = "INTERESTRATECHART";
+        this.entityId = null;
+        this.href = "/interestratechart/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateInterestRateChart(final Long interestRateChartId) {
+        this.actionName = "UPDATE";
+        this.entityName = "INTERESTRATECHART";
+        this.entityId = interestRateChartId;
+        this.href = "/interestratechart/" + interestRateChartId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteInterestRateChart(final Long interestRateChartId) {
+        this.actionName = "DELETE";
+        this.entityName = "INTERESTRATECHART";
+        this.entityId = interestRateChartId;
+        this.href = "/interestratechart/" + interestRateChartId;
+        return this;
+    }
+
+    public CommandWrapperBuilder createInterestRateChartSlab(final Long chartId) {
+        this.actionName = "CREATE";
+        this.entityName = "CHARTSLAB";
+        this.entityId = null;
+        this.interestRatechartId = chartId;
+        this.href = "/interestratechart/" + chartId + "/chartdetails/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateInterestRateChartSlab(final Long chartId, final Long chartSlabId) {
+        this.actionName = "UPDATE";
+        this.entityName = "CHARTSLAB";
+        this.entityId = chartSlabId;
+        this.interestRatechartId = chartId;
+        this.href = "/interestratechart/" + chartId + "/chartdetails/" + chartSlabId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteInterestRateChartSlab(final Long chartId, final Long chartSlabId) {
+        this.actionName = "DELETE";
+        this.entityName = "CHARTSLAB";
+        this.entityId = chartSlabId;
+        this.interestRatechartId = chartId;
+        this.href = "/interestratechart/" + chartId + "/chartdetails/" + chartSlabId;
+        return this;
+    }
+
     public CommandWrapperBuilder createCalendar(final CommandWrapper resourceDetails, final String supportedEntityType,
             final Long supportedEntityId) {
         this.actionName = "CREATE";
@@ -1565,6 +1669,308 @@ public class CommandWrapperBuilder {
         this.actionName = "UPDATE";
         this.entityName = "CACHE";
         this.href = "/cache";
+        return this;
+    }
+
+    /**
+     * Deposit account mappings
+     */
+
+    public CommandWrapperBuilder createFixedDepositAccount() {
+        this.actionName = "CREATE";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.entityId = null;
+        this.depositAccountType = DepositAccountType.FIXED_DEPOSIT;
+        this.href = "/fixeddepositaccounts/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateFixedDepositAccount(final Long accountId) {
+        this.actionName = "UPDATE";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.depositAccountType = DepositAccountType.FIXED_DEPOSIT;
+        this.href = "/fixeddepositaccounts/" + accountId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteFixedDepositAccount(final Long accountId) {
+        this.actionName = "DELETE";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.depositAccountType = DepositAccountType.FIXED_DEPOSIT;
+        this.href = "/fixeddepositaccounts/" + accountId;
+        return this;
+    }
+
+    public CommandWrapperBuilder rejectFixedDepositAccountApplication(final Long accountId) {
+        this.actionName = "REJECT";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.savingsId = accountId;
+        this.depositAccountType = DepositAccountType.FIXED_DEPOSIT;
+        this.href = "/fixeddepositaccounts/" + accountId + "?command=reject";
+        return this;
+    }
+
+    public CommandWrapperBuilder withdrawFixedDepositAccountApplication(final Long accountId) {
+        this.actionName = "WITHDRAW";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.savingsId = accountId;
+        this.depositAccountType = DepositAccountType.FIXED_DEPOSIT;
+        this.href = "/fixeddepositaccounts/" + accountId + "?command=withdrawnByApplicant";
+        return this;
+    }
+
+    public CommandWrapperBuilder approveFixedDepositAccountApplication(final Long accountId) {
+        this.actionName = "APPROVE";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.savingsId = accountId;
+        this.depositAccountType = DepositAccountType.FIXED_DEPOSIT;
+        this.href = "/fixeddepositaccounts/" + accountId + "?command=approve";
+        return this;
+    }
+
+    public CommandWrapperBuilder undoFixedDepositAccountApplication(final Long accountId) {
+        this.actionName = "APPROVALUNDO";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.savingsId = accountId;
+        this.depositAccountType = DepositAccountType.FIXED_DEPOSIT;
+        this.href = "/fixeddepositaccounts/" + accountId + "?command=undoapproval";
+        return this;
+    }
+
+    public CommandWrapperBuilder fixedDepositAccountActivation(final Long accountId) {
+        this.actionName = "ACTIVATE";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.depositAccountType = DepositAccountType.FIXED_DEPOSIT;
+        this.href = "/fixeddepositaccounts/" + accountId + "?command=activate";
+        return this;
+    }
+
+    public CommandWrapperBuilder closeFixedDepositAccount(final Long accountId) {
+        this.actionName = "CLOSE";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.savingsId = accountId;
+        this.depositAccountType = DepositAccountType.FIXED_DEPOSIT;
+        this.href = "/fixeddepositaccounts/" + accountId + "?command=close";
+        return this;
+    }
+
+    public CommandWrapperBuilder prematureCloseFixedDepositAccount(final Long accountId) {
+        this.actionName = "PREMATURECLOSE";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.savingsId = accountId;
+        this.depositAccountType = DepositAccountType.FIXED_DEPOSIT;
+        this.href = "/fixeddepositaccounts/" + accountId + "?command=prematureClose";
+        return this;
+    }
+
+    public CommandWrapperBuilder fixedDepositAccountInterestCalculation(final Long accountId) {
+        this.actionName = "CALCULATEINTEREST";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.depositAccountType = DepositAccountType.FIXED_DEPOSIT;
+        this.href = "/fixeddepositaccounts/" + accountId + "?command=calculateInterest";
+        return this;
+    }
+
+    public CommandWrapperBuilder fixedDepositAccountInterestPosting(final Long accountId) {
+        this.actionName = "POSTINTEREST";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.depositAccountType = DepositAccountType.FIXED_DEPOSIT;
+        this.href = "/fixeddepositaccounts/" + accountId + "?command=postInterest";
+        return this;
+    }
+    
+    public CommandWrapperBuilder fixedDepositAccountDeposit(final Long accountId) {
+        this.actionName = "DEPOSIT";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.depositAccountType = DepositAccountType.FIXED_DEPOSIT;
+        this.entityId = accountId;
+        this.href = "/fixeddepositaccounts/" + accountId + "/transactions?command=deposit";
+        return this;
+    }
+    
+    public CommandWrapperBuilder fixedDepositAccountWithdrawal(final Long accountId) {
+        this.actionName = "WITHDRAWAL";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.depositAccountType = DepositAccountType.FIXED_DEPOSIT;
+        this.entityId = accountId;
+        this.href = "/fixeddepositaccounts/" + accountId + "/transactions?command=withdrawal";
+        return this;
+    }
+
+    public CommandWrapperBuilder createRecurringDepositAccount() {
+        this.actionName = "CREATE";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.entityId = null;
+        this.depositAccountType = DepositAccountType.RECURRING_DEPOSIT;
+        this.href = "/recurringdepositaccounts/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateRecurringDepositAccount(final Long accountId) {
+        this.actionName = "UPDATE";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.depositAccountType = DepositAccountType.RECURRING_DEPOSIT;
+        this.href = "/recurringdepositaccounts/" + accountId;
+        return this;
+    }
+
+    public CommandWrapperBuilder recurringAccountDeposit(final Long accountId) {
+        this.actionName = "DEPOSIT";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.depositAccountType = DepositAccountType.RECURRING_DEPOSIT;
+        this.entityId = accountId;
+        this.href = "/recurringdepositaccounts/" + accountId + "/transactions?command=deposit";
+        return this;
+    }
+    
+    public CommandWrapperBuilder recurringAccountWithdrawal(final Long accountId) {
+        this.actionName = "WITHDRAWAL";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.depositAccountType = DepositAccountType.RECURRING_DEPOSIT;
+        this.entityId = accountId;
+        this.href = "/recurringdepositaccounts/" + accountId + "/transactions?command=withdrawal";
+        return this;
+    }
+
+    public CommandWrapperBuilder adjustRecurringAccountTransaction(final Long accountId, final Long transactionId) {
+        this.actionName = "ADJUSTTRANSACTION";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.depositAccountType = DepositAccountType.RECURRING_DEPOSIT;
+        this.subentityId = transactionId;
+        this.transactionId = transactionId.toString();
+        this.href = "/recurringdepositaccounts/" + accountId + "/transactions/" + transactionId + "?command=modify";
+        return this;
+    }
+    
+    public CommandWrapperBuilder undoRecurringAccountTransaction(final Long accountId, final Long transactionId) {
+        this.actionName = "UNDOTRANSACTION";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.depositAccountType = DepositAccountType.RECURRING_DEPOSIT;
+        this.subentityId = transactionId;
+        this.transactionId = transactionId.toString();
+        this.href = "/recurringdepositaccounts/" + accountId + "/transactions/" + transactionId + "?command=undo";
+        return this;
+    }
+    
+    public CommandWrapperBuilder deleteRecurringDepositAccount(final Long accountId) {
+        this.actionName = "DELETE";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.depositAccountType = DepositAccountType.RECURRING_DEPOSIT;
+        this.href = "/recurringdepositaccounts/" + accountId;
+        return this;
+    }
+
+    public CommandWrapperBuilder rejectRecurringDepositAccountApplication(final Long accountId) {
+        this.actionName = "REJECT";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.savingsId = accountId;
+        this.depositAccountType = DepositAccountType.RECURRING_DEPOSIT;
+        this.href = "/recurringdepositaccounts/" + accountId + "?command=reject";
+        return this;
+    }
+
+    public CommandWrapperBuilder withdrawRecurringDepositAccountApplication(final Long accountId) {
+        this.actionName = "WITHDRAW";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.savingsId = accountId;
+        this.depositAccountType = DepositAccountType.RECURRING_DEPOSIT;
+        this.href = "/recurringdepositaccounts/" + accountId + "?command=withdrawnByApplicant";
+        return this;
+    }
+
+    public CommandWrapperBuilder approveRecurringDepositAccountApplication(final Long accountId) {
+        this.actionName = "APPROVE";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.savingsId = accountId;
+        this.depositAccountType = DepositAccountType.RECURRING_DEPOSIT;
+        this.href = "/recurringdepositaccounts/" + accountId + "?command=approve";
+        return this;
+    }
+
+    public CommandWrapperBuilder undoRecurringDepositAccountApplication(final Long accountId) {
+        this.actionName = "APPROVALUNDO";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.savingsId = accountId;
+        this.depositAccountType = DepositAccountType.RECURRING_DEPOSIT;
+        this.href = "/recurringdepositaccounts/" + accountId + "?command=undoapproval";
+        return this;
+    }
+
+    public CommandWrapperBuilder recurringDepositAccountActivation(final Long accountId) {
+        this.actionName = "ACTIVATE";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.depositAccountType = DepositAccountType.RECURRING_DEPOSIT;
+        this.href = "/recurringdepositaccounts/" + accountId + "?command=activate";
+        return this;
+    }
+
+    public CommandWrapperBuilder closeRecurringDepositAccount(final Long accountId) {
+        this.actionName = "CLOSE";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.savingsId = accountId;
+        this.depositAccountType = DepositAccountType.RECURRING_DEPOSIT;
+        this.href = "/recurringdepositaccounts/" + accountId + "?command=close";
+        return this;
+    }
+
+    public CommandWrapperBuilder prematureCloseRecurringDepositAccount(final Long accountId) {
+        this.actionName = "PREMATURECLOSE";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.savingsId = accountId;
+        this.depositAccountType = DepositAccountType.RECURRING_DEPOSIT;
+        this.href = "/recurringdepositaccounts/" + accountId + "?command=prematureClose";
+        return this;
+    }
+
+    public CommandWrapperBuilder recurringDepositAccountInterestCalculation(final Long accountId) {
+        this.actionName = "CALCULATEINTEREST";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.depositAccountType = DepositAccountType.RECURRING_DEPOSIT;
+        this.href = "/recurringdepositaccounts/" + accountId + "?command=calculateInterest";
+        return this;
+    }
+
+    public CommandWrapperBuilder recurringDepositAccountInterestPosting(final Long accountId) {
+        this.actionName = "POSTINTEREST";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.depositAccountType = DepositAccountType.RECURRING_DEPOSIT;
+        this.href = "/recurringdepositaccounts/" + accountId + "?command=postInterest";
         return this;
     }
 }

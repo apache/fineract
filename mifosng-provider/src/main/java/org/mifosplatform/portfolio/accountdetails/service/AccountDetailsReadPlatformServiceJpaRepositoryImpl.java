@@ -141,7 +141,8 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     .append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf, ");
             accountsSummary.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
             accountsSummary.append("curr.display_symbol as currencyDisplaySymbol, ");
-            accountsSummary.append("sa.product_id as productId, p.name as productName ");
+            accountsSummary.append("sa.product_id as productId, p.name as productName, ");
+            accountsSummary.append("sa.deposit_type_enum as depositType ");
             accountsSummary.append("from m_savings_account sa ");
             accountsSummary.append("join m_savings_product as p on p.id = sa.product_id ");
             accountsSummary.append("join m_currency curr on curr.code = sa.currency_code ");
@@ -172,7 +173,9 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             final SavingsAccountStatusEnumData status = SavingsEnumerations.status(statusId);
             final Integer accountType = JdbcSupport.getInteger(rs, "accountType");
             final EnumOptionData accountTypeData = AccountEnumerations.loanType(accountType);
-
+            final Integer depositTypeId = JdbcSupport.getInteger(rs, "depositType");
+            final EnumOptionData depositTypeData = SavingsEnumerations.depositType(depositTypeId);
+            
             final String currencyCode = rs.getString("currencyCode");
             final String currencyName = rs.getString("currencyName");
             final String currencyNameCode = rs.getString("currencyNameCode");
@@ -220,7 +223,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     closedByLastname);
 
             return new SavingsAccountSummaryData(id, accountNo, externalId, productId, productName, status, currency, accountBalance,
-                    accountTypeData, timeline);
+                    accountTypeData, timeline, depositTypeData);
         }
     }
 

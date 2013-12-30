@@ -36,14 +36,19 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.Inheritance;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
@@ -52,6 +57,7 @@ import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidation
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.charge.domain.Charge;
+import org.mifosplatform.portfolio.interestratechart.domain.InterestRateChart;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
@@ -63,23 +69,26 @@ import com.google.gson.JsonArray;
 
 @Entity
 @Table(name = "m_savings_product", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "sp_unq_name"),
-        @UniqueConstraint(columnNames = { "short_name" }, name = "sp_unq_short_name") })
+        @UniqueConstraint(columnNames = { "short_name" }, name = "sp_unq_short_name")})
+@Inheritance
+@DiscriminatorColumn(name="deposit_type_enum", discriminatorType=DiscriminatorType.INTEGER)
+@DiscriminatorValue("100")
 public class SavingsProduct extends AbstractPersistable<Long> {
 
     @Column(name = "name", nullable = false, unique = true)
-    private String name;
+    protected String name;
 
     @Column(name = "short_name", nullable = false, unique = true)
-    private String shortName;
+    protected String shortName;
 
     @Column(name = "description", length = 500, nullable = false)
-    private String description;
+    protected String description;
 
     @Embedded
-    private MonetaryCurrency currency;
+    protected MonetaryCurrency currency;
 
     @Column(name = "nominal_annual_interest_rate", scale = 6, precision = 19, nullable = false)
-    private BigDecimal nominalAnnualInterestRate;
+    protected BigDecimal nominalAnnualInterestRate;
 
     /**
      * The interest period is the span of time at the end of which savings in a
@@ -89,48 +98,48 @@ public class SavingsProduct extends AbstractPersistable<Long> {
      * enumeration.
      */
     @Column(name = "interest_compounding_period_enum", nullable = false)
-    private Integer interestCompoundingPeriodType;
+    protected Integer interestCompoundingPeriodType;
 
     /**
      * A value from the {@link SavingsPostingInterestPeriodType} enumeration.
      */
     @Column(name = "interest_posting_period_enum", nullable = false)
-    private Integer interestPostingPeriodType;
+    protected Integer interestPostingPeriodType;
 
     /**
      * A value from the {@link SavingsInterestCalculationType} enumeration.
      */
     @Column(name = "interest_calculation_type_enum", nullable = false)
-    private Integer interestCalculationType;
+    protected Integer interestCalculationType;
 
     /**
      * A value from the {@link SavingsInterestCalculationDaysInYearType}
      * enumeration.
      */
     @Column(name = "interest_calculation_days_in_year_type_enum", nullable = false)
-    private Integer interestCalculationDaysInYearType;
+    protected Integer interestCalculationDaysInYearType;
 
     @Column(name = "min_required_opening_balance", scale = 6, precision = 19, nullable = true)
-    private BigDecimal minRequiredOpeningBalance;
+    protected BigDecimal minRequiredOpeningBalance;
 
     @Column(name = "lockin_period_frequency", nullable = true)
-    private Integer lockinPeriodFrequency;
+    protected Integer lockinPeriodFrequency;
 
     @Column(name = "lockin_period_frequency_enum", nullable = true)
-    private Integer lockinPeriodFrequencyType;
+    protected Integer lockinPeriodFrequencyType;
 
     /**
      * A value from the {@link AccountingRuleType} enumeration.
      */
     @Column(name = "accounting_type", nullable = false)
-    private Integer accountingRule;
+    protected Integer accountingRule;
 
     @Column(name = "withdrawal_fee_for_transfer")
-    private boolean withdrawalFeeApplicableForTransfer;
+    protected boolean withdrawalFeeApplicableForTransfer;
 
     @ManyToMany
     @JoinTable(name = "m_savings_product_charge", joinColumns = @JoinColumn(name = "savings_product_id"), inverseJoinColumns = @JoinColumn(name = "charge_id"))
-    private Set<Charge> charges;
+    protected Set<Charge> charges;
 
     @Column(name = "allow_overdraft")
     private boolean allowOverdraft;
@@ -158,8 +167,8 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         this.description = null;
     }
 
-    private SavingsProduct(final String name, final String shortName, final String description, final MonetaryCurrency currency,
-            final BigDecimal interestRate, final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+    protected SavingsProduct(final String name, final String shortName, final String description, final MonetaryCurrency currency, final BigDecimal interestRate,
+            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
@@ -187,12 +196,6 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         }
 
         this.withdrawalFeeApplicableForTransfer = withdrawalFeeApplicableForTransfer;
-        /*
-         * this.annualFeeAmount = annualFeeAmount; if (annualFeeAmount != null
-         * && annualFeeOnMonthDay != null) { this.annualFeeOnMonth =
-         * annualFeeOnMonthDay.getMonthOfYear(); this.annualFeeOnDay =
-         * annualFeeOnMonthDay.getDayOfMonth(); }
-         */
 
         if (accountingRuleType != null) {
             this.accountingRule = accountingRuleType.getValue();
@@ -203,8 +206,6 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         }
 
         validateLockinDetails();
-        // validateWithdrawalFeeDetails();
-        // validateAnnualFeeDetails();
         this.allowOverdraft = allowOverdraft;
         this.overdraftLimit = overdraftLimit;
     }
@@ -356,70 +357,12 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         if (this.lockinPeriodFrequency == null) {
             this.lockinPeriodFrequencyType = null;
         }
-        /*
-         * if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(
-         * withdrawalFeeAmountParamName, this.withdrawalFeeAmount)) { final
-         * BigDecimal newValue =
-         * command.bigDecimalValueOfParameterNamedDefaultToNullIfZero
-         * (withdrawalFeeAmountParamName);
-         * actualChanges.put(withdrawalFeeAmountParamName, newValue);
-         * actualChanges.put(localeParamName, localeAsInput);
-         * this.withdrawalFeeAmount = newValue; }
-         * 
-         * if (command.isChangeInIntegerParameterNamedDefaultingZeroToNull(
-         * withdrawalFeeTypeParamName, this.withdrawalFeeType)) { final Integer
-         * newValue = command.integerValueOfParameterNamedDefaultToNullIfZero(
-         * withdrawalFeeTypeParamName);
-         * actualChanges.put(withdrawalFeeTypeParamName, newValue);
-         * this.withdrawalFeeType = newValue != null ?
-         * SavingsWithdrawalFeesType.fromInt(newValue).getValue() : newValue; }
-         */
+
         if (command.isChangeInBooleanParameterNamed(withdrawalFeeForTransfersParamName, this.withdrawalFeeApplicableForTransfer)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(withdrawalFeeForTransfersParamName);
             actualChanges.put(withdrawalFeeForTransfersParamName, newValue);
             this.withdrawalFeeApplicableForTransfer = newValue;
         }
-
-        // set period type to null if frequency is null
-        // if (this.withdrawalFeeAmount == null) {
-        // this.withdrawalFeeType = null;
-        // }
-
-        /*
-         * if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(
-         * feeAmountParamName, this.annualFeeAmount)) { final BigDecimal
-         * newValue =
-         * command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(
-         * feeAmountParamName); actualChanges.put(feeAmountParamName, newValue);
-         * actualChanges.put(localeParamName, localeAsInput);
-         * this.annualFeeAmount = newValue; }
-         * 
-         * if (command.isChangeInIntegerParameterNamedDefaultingZeroToNull(
-         * feeOnMonthDayParamName, this.annualFeeOnDay)) { final MonthDay
-         * monthDay = command.extractMonthDayNamed(feeOnMonthDayParamName);
-         * final String actualValueEntered =
-         * command.stringValueOfParameterNamed(feeOnMonthDayParamName); final
-         * Integer newValue = monthDay != null ? monthDay.getDayOfMonth() :
-         * null; actualChanges.put(feeOnMonthDayParamName, actualValueEntered);
-         * actualChanges.put(localeParamName, localeAsInput);
-         * this.annualFeeOnDay = newValue; }
-         * 
-         * if (command.isChangeInIntegerParameterNamedDefaultingZeroToNull(
-         * feeOnMonthDayParamName, this.annualFeeOnMonth)) { final MonthDay
-         * monthDay = command.extractMonthDayNamed(feeOnMonthDayParamName);
-         * final String actualValueEntered =
-         * command.stringValueOfParameterNamed(feeOnMonthDayParamName); final
-         * Integer newValue = monthDay != null ? monthDay.getMonthOfYear() :
-         * null; actualChanges.put(feeOnMonthDayParamName, actualValueEntered);
-         * actualChanges.put(localeParamName, localeAsInput);
-         * this.annualFeeOnMonth = newValue; }
-         */
-
-        // // set period type to null if frequency is null
-        // if (this.annualFeeAmount == null) {
-        // this.annualFeeOnDay = null;
-        // this.annualFeeOnMonth = null;
-        // }
 
         if (command.isChangeInIntegerParameterNamed(accountingRuleParamName, this.accountingRule)) {
             final Integer newValue = command.integerValueOfParameterNamed(accountingRuleParamName);
@@ -452,64 +395,10 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         }
 
         validateLockinDetails();
-        // validateWithdrawalFeeDetails();
-        // validateAnnualFeeDetails();
 
         return actualChanges;
     }
 
-    /*
-     * private void validateAnnualFeeDetails() {
-     * 
-     * final List<ApiParameterError> dataValidationErrors = new
-     * ArrayList<ApiParameterError>(); final DataValidatorBuilder
-     * baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-     * .resource(SAVINGS_PRODUCT_RESOURCE_NAME);
-     * 
-     * if (this.annualFeeAmount == null) {
-     * 
-     * if (this.annualFeeOnMonth != null || this.annualFeeOnDay != null) {
-     * baseDataValidator
-     * .reset().parameter(feeAmountParamName).value(this.annualFeeAmount
-     * ).notNull(); } } else {
-     * 
-     * if (this.annualFeeOnMonth == null || this.annualFeeOnDay == null) {
-     * baseDataValidator
-     * .reset().parameter(feeOnMonthDayParamName).value(this.annualFeeOnMonth
-     * ).notNull(); }
-     * 
-     * baseDataValidator.reset().parameter(feeAmountParamName).value(this.
-     * annualFeeAmount).zeroOrPositiveAmount(); }
-     * 
-     * if (!dataValidationErrors.isEmpty()) { throw new
-     * PlatformApiDataValidationException(dataValidationErrors); } }
-     */
-    /*
-     * private void validateWithdrawalFeeDetails() {
-     * 
-     * final List<ApiParameterError> dataValidationErrors = new
-     * ArrayList<ApiParameterError>(); final DataValidatorBuilder
-     * baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-     * .resource(SAVINGS_PRODUCT_RESOURCE_NAME);
-     * 
-     * if (this.withdrawalFeeAmount == null) {
-     * baseDataValidator.reset().parameter
-     * (withdrawalFeeTypeParamName).value(this.withdrawalFeeType).ignoreIfNull()
-     * .isOneOfTheseValues(1, 2);
-     * 
-     * if (this.withdrawalFeeType != null) {
-     * baseDataValidator.reset().parameter(
-     * withdrawalFeeAmountParamName).value(this.withdrawalFeeAmount).notNull();
-     * } } else {
-     * baseDataValidator.reset().parameter(withdrawalFeeAmountParamName
-     * ).value(this.withdrawalFeeAmount).zeroOrPositiveAmount();
-     * baseDataValidator
-     * .reset().parameter(withdrawalFeeTypeParamName).value(this
-     * .withdrawalFeeType).notNull() .isOneOfTheseValues(1, 2); }
-     * 
-     * if (!dataValidationErrors.isEmpty()) { throw new
-     * PlatformApiDataValidationException(dataValidationErrors); } }
-     */
     private void validateLockinDetails() {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
@@ -590,4 +479,13 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     public Set<Charge> charges() {
         return this.charges;
     }
+    
+    public InterestRateChart applicableChart(@SuppressWarnings("unused") final LocalDate target){
+        return null;
+    }
+    
+    public InterestRateChart findChart(@SuppressWarnings("unused") Long chartId) {
+        return null;
+    }
+ 
 }

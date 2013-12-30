@@ -16,8 +16,10 @@ public interface ScheduledJobRunnerService {
     void updateLoanPaidInAdvance();
 
     void applyAnnualFeeForSavings();
-    
+
     void applyDueChargesForSavings() throws JobExecutionException;
 
     void updateNPA();
+
+    void updateMaturityDetailsOfDepositAccounts();
 }

@@ -21,6 +21,7 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -142,6 +143,17 @@ public final class ClientDataValidator {
             final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.submittedOnDateParamName,
                     element);
             baseDataValidator.reset().parameter(ClientApiConstants.submittedOnDateParamName).value(submittedOnDate).notNull();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.dateOfBirthParamName, element)) {
+            final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.dateOfBirthParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.dateOfBirthParamName).value(dateOfBirth).notNull()
+                    .validateDateBefore(DateUtils.getLocalDateOfTenant());
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.genderIdParamName, element)) {
+            final Integer genderId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.genderIdParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.genderIdParamName).value(genderId).notNull();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -318,6 +330,17 @@ public final class ClientDataValidator {
                     .longGreaterThanZero();
         }
 
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.dateOfBirthParamName, element)) {
+            final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.dateOfBirthParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.dateOfBirthParamName).value(dateOfBirth).notNull()
+                    .validateDateBefore(DateUtils.getLocalDateOfTenant());
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.genderIdParamName, element)) {
+            final Integer genderId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.genderIdParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.genderIdParamName).value(genderId).notNull();
+        }
+
         if (!atLeastOneParameterPassedForUpdate) {
             final Object forceError = null;
             baseDataValidator.reset().anyOfNotNull(forceError);
@@ -425,7 +448,7 @@ public final class ClientDataValidator {
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
-    
+
     public void validateForSavingsAccount(final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
@@ -449,6 +472,5 @@ public final class ClientDataValidator {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
 
     }
-
 
 }

@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.domain.LocalDateInterval;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
@@ -29,7 +28,6 @@ public class PostingPeriod {
     private Money interestEarnedRounded;
 
     // opening/closing details
-    @SuppressWarnings("unused")
     private final Money openingBalance;
     private final Money closingBalance;
     private final SavingsInterestCalculationType interestCalculationType;
@@ -37,7 +35,7 @@ public class PostingPeriod {
     public static PostingPeriod createFrom(final LocalDateInterval periodInterval, final Money periodStartingBalance,
             final List<SavingsAccountTransaction> orderedListOfTransactions, final MonetaryCurrency currency,
             final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
-            final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear) {
+            final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear, final LocalDate upToInterestCalculationDate) {
 
         final List<EndOfDayBalance> accountEndOfDayBalances = new ArrayList<EndOfDayBalance>();
 
@@ -62,8 +60,19 @@ public class PostingPeriod {
         }
 
         if (accountEndOfDayBalances.isEmpty()) {
-            final EndOfDayBalance endOfDayBalance = EndOfDayBalance.from(periodInterval.startDate(), openingDayBalance, closeOfDayBalance,
-                    periodInterval.daysInPeriodInclusiveOfEndDate());
+            LocalDate balanceStartDate = periodInterval.startDate();
+            LocalDate balanceEndDate = periodInterval.endDate();
+            Integer numberOfDaysOfBalance = periodInterval.daysInPeriodInclusiveOfEndDate();
+            
+            if (balanceEndDate.isAfter(upToInterestCalculationDate)) {
+                balanceEndDate = upToInterestCalculationDate;
+                final LocalDateInterval spanOfBalance = LocalDateInterval.create(balanceStartDate, balanceEndDate);
+                numberOfDaysOfBalance = spanOfBalance.daysInPeriodInclusiveOfEndDate();
+            }
+            
+            final EndOfDayBalance endOfDayBalance = EndOfDayBalance.from(balanceStartDate, openingDayBalance, closeOfDayBalance,
+                    numberOfDaysOfBalance);
+            
             accountEndOfDayBalances.add(endOfDayBalance);
 
             closeOfDayBalance = endOfDayBalance.closingBalance();
@@ -71,7 +80,7 @@ public class PostingPeriod {
         }
 
         final List<CompoundingPeriod> compoundingPeriods = compoundingPeriodsInPostingPeriod(periodInterval, interestCompoundingPeriodType,
-                accountEndOfDayBalances);
+                accountEndOfDayBalances, upToInterestCalculationDate);
 
         return new PostingPeriod(periodInterval, currency, periodStartingBalance, openingDayBalance, interestCompoundingPeriodType,
                 interestCalculationType, interestRateAsFraction, daysInYear, compoundingPeriods);
@@ -105,6 +114,10 @@ public class PostingPeriod {
     public Money closingBalance() {
         return this.closingBalance;
     }
+    
+    public Money openingBalance() {
+        return this.openingBalance;
+    }
 
     public BigDecimal calculateInterest(final BigDecimal interestFromPreviousPostingPeriod) {
         BigDecimal interestEarned = BigDecimal.ZERO;
@@ -131,7 +144,7 @@ public class PostingPeriod {
     }
 
     private static List<CompoundingPeriod> compoundingPeriodsInPostingPeriod(final LocalDateInterval postingPeriodInterval,
-            final SavingsCompoundingInterestPeriodType interestPeriodType, final List<EndOfDayBalance> allEndOfDayBalances) {
+            final SavingsCompoundingInterestPeriodType interestPeriodType, final List<EndOfDayBalance> allEndOfDayBalances, final LocalDate upToInterestCalculationDate) {
 
         final List<CompoundingPeriod> compoundingPeriods = new ArrayList<CompoundingPeriod>();
 
@@ -140,7 +153,7 @@ public class PostingPeriod {
             case INVALID:
             break;
             case DAILY:
-                compoundingPeriod = DailyCompoundingPeriod.create(postingPeriodInterval, allEndOfDayBalances);
+                compoundingPeriod = DailyCompoundingPeriod.create(postingPeriodInterval, allEndOfDayBalances, upToInterestCalculationDate);
                 compoundingPeriods.add(compoundingPeriod);
             break;
             case MONTHLY:
@@ -152,7 +165,7 @@ public class PostingPeriod {
 
                 while (!periodStartDate.isAfter(postingPeriodEndDate) && !periodEndDate.isAfter(postingPeriodEndDate)) {
 
-                    periodEndDate = determineInterestPeriodEndDateFrom(periodStartDate, interestPeriodType);
+                    periodEndDate = determineInterestPeriodEndDateFrom(periodStartDate, interestPeriodType, upToInterestCalculationDate);
                     if (periodEndDate.isAfter(postingPeriodEndDate)) {
                         periodEndDate = postingPeriodEndDate;
                     }
@@ -160,7 +173,7 @@ public class PostingPeriod {
                     final LocalDateInterval compoundingPeriodInterval = LocalDateInterval.create(periodStartDate, periodEndDate);
                     if (postingPeriodInterval.contains(compoundingPeriodInterval)) {
 
-                        compoundingPeriod = MonthlyCompoundingPeriod.create(compoundingPeriodInterval, allEndOfDayBalances);
+                        compoundingPeriod = MonthlyCompoundingPeriod.create(compoundingPeriodInterval, allEndOfDayBalances, upToInterestCalculationDate);
                         compoundingPeriods.add(compoundingPeriod);
                     }
 
@@ -186,9 +199,9 @@ public class PostingPeriod {
     }
 
     private static LocalDate determineInterestPeriodEndDateFrom(final LocalDate periodStartDate,
-            final SavingsCompoundingInterestPeriodType interestPeriodType) {
+            final SavingsCompoundingInterestPeriodType interestPeriodType, final LocalDate upToInterestCalculationDate) {
 
-        LocalDate periodEndDate = DateUtils.getLocalDateOfTenant();
+        LocalDate periodEndDate = upToInterestCalculationDate;
 
         switch (interestPeriodType) {
             case INVALID:

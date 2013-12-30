@@ -6,7 +6,6 @@ import java.math.RoundingMode;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.domain.LocalDateInterval;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.monetary.domain.Money;
 
 public class EndOfDayBalance {
@@ -78,7 +77,15 @@ public class EndOfDayBalance {
         return futureValue.subtract(presentValue);
     }
 
-    public EndOfDayBalance upTo(final LocalDateInterval compoundingPeriodInterval) {
+    /**
+     * @param compoundingPeriodInterval
+     * @param upToInterestCalculationDate
+     *            : For calculating maturity details in advance upToInterestCalculationDate
+     *            will be maturity date else it will be
+     *            DateUtils.getLocalDateOfTenant().
+     * @return
+     */
+    public EndOfDayBalance upTo(final LocalDateInterval compoundingPeriodInterval, final LocalDate upToInterestCalculationDate) {
 
         Money startingBalance = this.openingBalance;
         LocalDate balanceStartDate = this.date;
@@ -95,8 +102,8 @@ public class EndOfDayBalance {
             final LocalDateInterval balancePeriodInterval = LocalDateInterval.create(balanceStartDate, balanceEndDate);
             daysOfBalance = balancePeriodInterval.daysInPeriodInclusiveOfEndDate();
         }
-        if (balanceEndDate.isAfter(DateUtils.getLocalDateOfTenant())) {
-            balanceEndDate = DateUtils.getLocalDateOfTenant();
+        if (balanceEndDate.isAfter(upToInterestCalculationDate)) {
+            balanceEndDate = upToInterestCalculationDate;
             final LocalDateInterval balancePeriodInterval = LocalDateInterval.create(balanceStartDate, balanceEndDate);
             daysOfBalance = balancePeriodInterval.daysInPeriodInclusiveOfEndDate();
         }

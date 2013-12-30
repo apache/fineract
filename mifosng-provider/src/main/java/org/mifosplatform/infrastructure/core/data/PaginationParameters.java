@@ -112,4 +112,16 @@ public class PaginationParameters {
         }
         return sql.toString();
     }
+    
+    public String paginationSql(){
+        final StringBuilder sqlBuilder = new StringBuilder(50); 
+        if (this.isOrderByRequested()) {
+            sqlBuilder.append(' ').append(this.orderBySql());
+        }        
+        if (this.isLimited()) {
+            sqlBuilder.append(' ').append(this.limitSql());
+        }
+        
+        return sqlBuilder.toString();
+    }
 }

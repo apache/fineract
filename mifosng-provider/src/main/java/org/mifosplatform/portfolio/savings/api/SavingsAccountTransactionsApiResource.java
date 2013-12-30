@@ -31,6 +31,7 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
+import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionData;
 import org.mifosplatform.portfolio.savings.service.SavingsAccountReadPlatformService;
@@ -81,7 +82,7 @@ public class SavingsAccountTransactionsApiResource {
 
         // FIXME - KW - for now just send back generic default information for
         // both deposit/withdrawal templates
-        SavingsAccountTransactionData savingsAccount = this.savingsAccountReadPlatformService.retrieveDepositTransactionTemplate(savingsId);
+        SavingsAccountTransactionData savingsAccount = this.savingsAccountReadPlatformService.retrieveDepositTransactionTemplate(savingsId, DepositAccountType.SAVINGS_DEPOSIT);
         final Collection<CodeValueData> paymentTypeOptions = this.codeValueReadPlatformService
                 .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
         savingsAccount = SavingsAccountTransactionData.templateOnTop(savingsAccount, paymentTypeOptions);
@@ -100,7 +101,7 @@ public class SavingsAccountTransactionsApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
         SavingsAccountTransactionData transactionData = this.savingsAccountReadPlatformService.retrieveSavingsTransaction(savingsId,
-                transactionId);
+                transactionId, DepositAccountType.SAVINGS_DEPOSIT);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
             final Collection<CodeValueData> paymentTypeOptions = this.codeValueReadPlatformService

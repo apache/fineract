@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
+import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,12 @@ public class SavingsAccountRepositoryWrapper {
 
     public SavingsAccount findOneWithNotFoundDetection(final Long savingsId) {
         final SavingsAccount account = this.repository.findOne(savingsId);
+        if (account == null) { throw new SavingsAccountNotFoundException(savingsId); }
+        return account;
+    }
+    
+    public SavingsAccount findOneWithNotFoundDetection(final Long savingsId, final DepositAccountType depositAccountType) {
+        final SavingsAccount account = this.repository.findByIdAndDepositAccountType(savingsId, depositAccountType.getValue());
         if (account == null) { throw new SavingsAccountNotFoundException(savingsId); }
         return account;
     }

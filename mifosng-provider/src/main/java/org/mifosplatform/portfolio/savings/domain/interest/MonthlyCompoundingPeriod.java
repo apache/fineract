@@ -6,6 +6,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.domain.LocalDateInterval;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
@@ -16,9 +17,9 @@ public class MonthlyCompoundingPeriod implements CompoundingPeriod {
     private final LocalDateInterval periodInterval;
     private final List<EndOfDayBalance> endOfDayBalances;
 
-    public static MonthlyCompoundingPeriod create(final LocalDateInterval periodInterval, final List<EndOfDayBalance> allEndOfDayBalances) {
+    public static MonthlyCompoundingPeriod create(final LocalDateInterval periodInterval, final List<EndOfDayBalance> allEndOfDayBalances, final LocalDate upToInterestCalculationDate) {
 
-        final List<EndOfDayBalance> endOfDayBalancesWithinPeriod = endOfDayBalancesWithinPeriodInterval(periodInterval, allEndOfDayBalances);
+        final List<EndOfDayBalance> endOfDayBalancesWithinPeriod = endOfDayBalancesWithinPeriodInterval(periodInterval, allEndOfDayBalances, upToInterestCalculationDate);
 
         return new MonthlyCompoundingPeriod(periodInterval, endOfDayBalancesWithinPeriod);
     }
@@ -125,17 +126,17 @@ public class MonthlyCompoundingPeriod implements CompoundingPeriod {
     }
 
     private static List<EndOfDayBalance> endOfDayBalancesWithinPeriodInterval(final LocalDateInterval compoundingPeriodInterval,
-            final List<EndOfDayBalance> allEndOfDayBalances) {
+            final List<EndOfDayBalance> allEndOfDayBalances, final LocalDate upToInterestCalculationDate) {
 
         final List<EndOfDayBalance> endOfDayBalancesForPeriodInterval = new ArrayList<EndOfDayBalance>();
 
         for (final EndOfDayBalance endOfDayBalance : allEndOfDayBalances) {
 
             if (compoundingPeriodInterval.contains(endOfDayBalance.date())) {
-                final EndOfDayBalance cappedToPeriodEndDate = endOfDayBalance.upTo(compoundingPeriodInterval);
+                final EndOfDayBalance cappedToPeriodEndDate = endOfDayBalance.upTo(compoundingPeriodInterval, upToInterestCalculationDate);
                 endOfDayBalancesForPeriodInterval.add(cappedToPeriodEndDate);
             } else if (endOfDayBalance.contains(compoundingPeriodInterval)) {
-                final EndOfDayBalance cappedToPeriodEndDate = endOfDayBalance.upTo(compoundingPeriodInterval);
+                final EndOfDayBalance cappedToPeriodEndDate = endOfDayBalance.upTo(compoundingPeriodInterval, upToInterestCalculationDate);
                 endOfDayBalancesForPeriodInterval.add(cappedToPeriodEndDate);
             }
         }

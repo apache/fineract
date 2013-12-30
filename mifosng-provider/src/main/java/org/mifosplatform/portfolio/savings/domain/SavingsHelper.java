@@ -6,7 +6,6 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.domain.LocalDateInterval;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
@@ -27,10 +26,10 @@ public final class SavingsHelper {
 
         while (!periodStartDate.isAfter(interestPostingUpToDate) && !periodEndDate.isAfter(interestPostingUpToDate)) {
 
-            final LocalDate interestPostingLocalDate = determineInterestPostingPeriodEndDateFrom(periodStartDate, postingPeriodType);
+            final LocalDate interestPostingLocalDate = determineInterestPostingPeriodEndDateFrom(periodStartDate, postingPeriodType, interestPostingUpToDate);
             periodEndDate = interestPostingLocalDate.minusDays(1);
 
-            if (!interestPostingLocalDate.isAfter(DateUtils.getLocalDateOfTenant())) {
+            if (!interestPostingLocalDate.isAfter(interestPostingUpToDate)) {
                 postingPeriods.add(LocalDateInterval.create(periodStartDate, periodEndDate));
             } else {
                 postingPeriods.add(LocalDateInterval.create(periodStartDate, periodEndDate));
@@ -44,9 +43,9 @@ public final class SavingsHelper {
     }
 
     private LocalDate determineInterestPostingPeriodEndDateFrom(final LocalDate periodStartDate,
-            final SavingsPostingInterestPeriodType interestPostingPeriodType) {
+            final SavingsPostingInterestPeriodType interestPostingPeriodType, final LocalDate interestPostingUpToDate) {
 
-        LocalDate periodEndDate = DateUtils.getLocalDateOfTenant();
+        LocalDate periodEndDate = interestPostingUpToDate;
 
         switch (interestPostingPeriodType) {
             case INVALID:
@@ -62,7 +61,7 @@ public final class SavingsHelper {
                 final int monthofYear = periodStartDate.getMonthOfYear();
                 if (monthofYear <= 3) {
                     periodEndDate = new DateTime().withDate(year, 3, 31).toLocalDate();
-                } else if (monthofYear <= 6) {
+            } else if (monthofYear <= 6) {
                     periodEndDate = new DateTime().withDate(year, 6, 30).toLocalDate();
                 } else if (monthofYear <= 9) {
                     periodEndDate = new DateTime().withDate(year, 9, 30).toLocalDate();

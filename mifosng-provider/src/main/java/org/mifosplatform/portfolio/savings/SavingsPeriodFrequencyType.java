@@ -5,6 +5,9 @@
  */
 package org.mifosplatform.portfolio.savings;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * An enumeration of supported calendar periods used in savings.
  */
@@ -50,5 +53,20 @@ public enum SavingsPeriodFrequencyType {
             }
         }
         return repaymentFrequencyType;
+    }
+
+    public boolean isInvalid() {
+        return this.value.equals(SavingsPeriodFrequencyType.INVALID.value);
+    }
+    
+    public static Object[] integerValues() {
+        final List<Integer> values = new ArrayList<Integer>();
+        for (final SavingsPeriodFrequencyType enumType : values()) {
+            if (!enumType.isInvalid()) {
+                values.add(enumType.getValue());
+            }
+        }
+
+        return values.toArray();
     }
 }

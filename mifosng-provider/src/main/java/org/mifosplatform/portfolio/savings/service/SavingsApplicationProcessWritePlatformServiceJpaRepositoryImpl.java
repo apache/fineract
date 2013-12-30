@@ -175,7 +175,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
             checkClientOrGroupActive(account);
             account.modifyApplication(command, changes);
-            account.validateNewApplicationState(DateUtils.getLocalDateOfTenant());
+            account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), SAVINGS_ACCOUNT_RESOURCE_NAME);
             account.validateAccountValuesWithProduct();
 
             if (!changes.isEmpty()) {
