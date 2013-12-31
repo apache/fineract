@@ -185,7 +185,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     .append("ln.id As loanId, ")
                     .append("ln.account_no As accountId, ")
                     .append("ln.loan_status_id As accountStatusId, ")
-                    .append("pl.name As productShortName, ")
+                    .append("pl.short_name As productShortName, ")
                     .append("ln.product_id As productId, ")
                     .append("ln.currency_code as currencyCode, ln.currency_digits as currencyDigits, ln.currency_multiplesof as inMultiplesOf, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, ")
                     .append("if(ln.loan_status_id = 200 , ln.principal_amount , null) As disbursementAmount, ")
@@ -218,7 +218,9 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     .append("and (cl.status_enum = 300 or (cl.status_enum = 600 and cl.closedon_date >= :dueDate)) ")
                     .append("GROUP BY gp.id ,cl.id , ln.id ORDER BY gp.id , cl.id , ln.id ").append(") loandata ")
                     .append("LEFT JOIN m_loan_charge lc ON lc.loan_id = loandata.loanId AND lc.is_paid_derived = 0 ")
-                    .append("AND ( lc.due_for_collection_as_of_date  <= :dueDate OR lc.charge_time_enum = 1)");
+                    .append("AND ( lc.due_for_collection_as_of_date  <= :dueDate OR lc.charge_time_enum = 1) ")
+                    .append("GROUP BY loandata.groupId, ").append("loandata.clientId, ").append("loandata.loanId ")
+                    .append("ORDER BY loandata.groupId, ").append("loandata.clientId, ").append("loandata.loanId ");
 
             return sql.toString();
 
