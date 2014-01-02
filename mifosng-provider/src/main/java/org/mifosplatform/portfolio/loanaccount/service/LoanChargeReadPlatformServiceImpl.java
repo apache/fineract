@@ -151,7 +151,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
         final LoanChargeMapper rm = new LoanChargeMapper();
 
-        final String sql = "select " + rm.schema() + " where lc.loan_id=? "
+        final String sql = "select " + rm.schema() + " where lc.loan_id=? AND lc.is_active = 1"
                 + " order by lc.charge_time_enum ASC, lc.due_for_collection_as_of_date ASC, lc.is_penalty ASC";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
@@ -161,7 +161,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
     public Collection<LoanChargeData> retrieveLoanChargesForFeePayment(final Integer paymentMode, final Integer loanStatus) {
         final LoanChargeMapperWithLoanId rm = new LoanChargeMapperWithLoanId();
         final String sql = "select " + rm.schema()
-                + "where loan.loan_status_id= ? and lc.charge_payment_mode_enum=? and lc.waived =0 and lc.is_paid_derived=0";
+                + "where loan.loan_status_id= ? and lc.charge_payment_mode_enum=? and lc.waived =0 and lc.is_paid_derived=0 and lc.is_active = 1";
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanStatus, paymentMode });
     }
 

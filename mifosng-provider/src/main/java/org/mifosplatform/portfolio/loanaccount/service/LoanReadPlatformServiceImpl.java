@@ -1156,7 +1156,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 + " where DATE_SUB(CURDATE(),INTERVAL ? DAY) > ls.duedate "
                 + " and ls.completed_derived <> 1 and mc.charge_applies_to_enum =1 "
                 + " and mc.charge_time_enum = 9 and ml.loan_status_id = 300 "
-                + " and plc.charge_id not in (SELECT charge_id from m_loan_charge as mlc where mlc.loan_id = ml.id and mlc.charge_id = plc.charge_id and mlc.due_for_collection_as_of_date > fromdate AND mlc.due_for_collection_as_of_date <= duedate) ";
+                + " and plc.charge_id not in (SELECT charge_id from m_loan_charge as mlc where mlc.loan_id = ml.id and mlc.charge_id = plc.charge_id and mlc.is_active = 1 and mlc.due_for_collection_as_of_date > fromdate AND mlc.due_for_collection_as_of_date <= duedate) ";
         return this.jdbcTemplate.query(sql, rm, new Object[] { penaltyWaitPeriod });
     }
 

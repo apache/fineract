@@ -108,6 +108,10 @@ public class LoanCharge extends AbstractPersistable<Long> {
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loancharge", orphanRemoval = true)
     private final Set<LoanInstallmentCharge> loanInstallmentCharge = new HashSet<LoanInstallmentCharge>();
+    
+    @Column(name = "is_active", nullable = false)
+    private boolean active = true;
+
 
     public static LoanCharge createNewFromJson(final Loan loan, final Charge chargeDefinition, final JsonCommand command) {
 
@@ -768,5 +772,14 @@ public class LoanCharge extends AbstractPersistable<Long> {
             }
         }
         return null;
+    }
+    
+    public boolean isActive(){
+        return this.active;
+    }
+
+    
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }
