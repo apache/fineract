@@ -79,7 +79,8 @@ public class StaffApiResource {
     public String retrieveStaff(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
             @QueryParam("officeId") final Long officeId,
             @DefaultValue("false") @QueryParam("staffInOfficeHierarchy") final boolean staffInOfficeHierarchy, 
-            @DefaultValue("false") @QueryParam("loanOfficersOnly") final boolean loanOfficersOnly) {
+            @DefaultValue("false") @QueryParam("loanOfficersOnly") final boolean loanOfficersOnly,
+            @DefaultValue("active") @QueryParam("status") final String status) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
@@ -87,7 +88,7 @@ public class StaffApiResource {
         if (staffInOfficeHierarchy) {
             staff = this.readPlatformService.retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(officeId, loanOfficersOnly);
         } else {
-            staff = this.readPlatformService.retrieveAllStaff(sqlSearch, officeId, loanOfficersOnly);
+            staff = this.readPlatformService.retrieveAllStaff(sqlSearch, officeId, loanOfficersOnly, status);
         }
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());

@@ -10,10 +10,12 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.exception.StaffNotFoundException;
+import org.omg.PortableInterceptor.ACTIVE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -68,7 +70,8 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             
             sqlBuilder.append("s.id as id, s.office_id as officeId, ohierarchy.name as officeName,");
             sqlBuilder.append("s.firstname as firstname, s.lastname as lastname,");
-            sqlBuilder.append("s.display_name as displayName, s.is_loan_officer as isLoanOfficer, s.external_id as externalId, s.mobile_no as mobileNo ");
+            sqlBuilder.append("s.display_name as displayName, s.is_loan_officer as isLoanOfficer, s.external_id as externalId, ");
+            sqlBuilder.append("s.mobile_no as mobileNo, s.is_active as isActive ");
             sqlBuilder.append("from m_office o ");
             sqlBuilder.append("join m_office ohierarchy on o.hierarchy like concat(ohierarchy.hierarchy, '%') ");
             sqlBuilder.append("join m_staff s on s.office_id = ohierarchy.id ");
@@ -163,8 +166,8 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     }
 
     @Override
-    public Collection<StaffData> retrieveAllStaff(final String sqlSearch, final Long officeId, final boolean loanOfficersOnly) {
-        final String extraCriteria = getStaffCriteria(sqlSearch, officeId, loanOfficersOnly);
+    public Collection<StaffData> retrieveAllStaff(final String sqlSearch, final Long officeId, final boolean loanOfficersOnly, final String status) {
+        final String extraCriteria = getStaffCriteria(sqlSearch, officeId, loanOfficersOnly, status);
         return retrieveAllStaff(extraCriteria);
     }
 
@@ -179,7 +182,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
 
-    private String getStaffCriteria(final String sqlSearch, final Long officeId, final boolean loanOfficersOnly) {
+    private String getStaffCriteria(final String sqlSearch, final Long officeId, final boolean loanOfficersOnly, final String status) {
 
         final StringBuffer extraCriteria = new StringBuffer(200);
 
@@ -192,7 +195,16 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         if (loanOfficersOnly) {
             extraCriteria.append(" and s.is_loan_officer is true ");
         }
-        
+        // Passing status parameter to get ACTIVE (By Default), INACTIVE or ALL (Both active and Inactive) employees
+        if (status.equalsIgnoreCase("active")) {
+            extraCriteria.append(" and is_active = 1 ");
+        } else if (status.equalsIgnoreCase("inActive")) {
+            extraCriteria.append(" and is_active = 0 ");
+        } else if (status.equalsIgnoreCase("all")) {}
+        else {
+            throw new UnrecognizedQueryParamException("status", status, new Object[] { "all", "active", "inactive" });
+        }
+
         if (StringUtils.isNotBlank(extraCriteria.toString())) {
             extraCriteria.delete(0, 4);
         }

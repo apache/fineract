@@ -77,7 +77,7 @@ public class Staff extends AbstractPersistable<Long> {
         final boolean isLoanOfficer = command.booleanPrimitiveValueOfParameterNamed(isLoanOfficerParamName);
         
         final String isActiveParamName = "isActive";
-        final boolean isActive = command.booleanPrimitiveValueOfParameterNamed(isActiveParamName);
+        final Boolean isActive = command.booleanObjectValueOfParameterNamed(isActiveParamName);
 
         return new Staff(staffOffice, firstname, lastname, externalId, mobileNo, isLoanOfficer, isActive);
     }
@@ -94,7 +94,7 @@ public class Staff extends AbstractPersistable<Long> {
         this.externalId = StringUtils.defaultIfEmpty(externalId, null);
         this.mobileNo = StringUtils.defaultIfEmpty(mobileNo, null);
         this.loanOfficer = isLoanOfficer;
-        this.active = (isActive == null) ? false : isActive;
+        this.active = (isActive == null) ? true : isActive;
         deriveDisplayName(firstname);
     }
 

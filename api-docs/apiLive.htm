@@ -11909,7 +11909,8 @@ GET https://DomainName/api/v1/staff
         "officeId": 1,
         "officeName": "Head Office",
         "isLoanOfficer": true,
-	"externalId": "17H"
+	"externalId": "17H",
+	"isActive": "true"
     }
 ]
 					</code>
@@ -11935,7 +11936,37 @@ GET https://DomainName/api/v1/staff
     "officeId": 1,
     "officeName": "Head Office",
     "isLoanOfficer": true,
-    "externalId": "17H"
+    "externalId": "17H",
+    "isActive": "true"
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="staff_retrieve" name="staff_retrieve" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Staff by status</h4>
+					<p>Returns the details of a Staff based on status.</p>
+					<p>By <b>default</b> it Returns all the </b>ACTIVE</b> Staff.</p>
+					<p>If status=INACTIVE, then it returns all <b>INACTIVE</b> Staff.</p>
+					<p>and for status=ALL, it Returns both <b>ACTIVE</b> and <b>INACTIVE</b> Staff.</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>staff?status=active</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">GET https://DomainName/api/v1/staff?status={ACTIVE|INACTIVE|ALL}</code>
+					<code class="method-response">
+{
+    "id": 1,
+    "firstname": "John",
+    "lastname": "Doe",
+    "displayName": "Doe, John",
+    "officeId": 1,
+    "officeName": "Head Office",
+    "isLoanOfficer": true,
+    "externalId": "17H",
+    "isActive": "true"
 }
 					</code>
 				</div>
