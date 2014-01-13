@@ -31,6 +31,7 @@ import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.note.data.NoteData;
 import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
+import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -89,7 +90,9 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                     .append(" pd.bank_number as bankNumber, ")
                     .append(" pd.routing_code as routingCode, ")
                     .append(" note.id as noteId, ")
-                    .append(" note.note as transactionNote ");
+                    .append(" note.note as transactionNote, ")
+                    .append(" lte.enum_value as loanTransactionType, ")
+                    .append(" ste.enum_value as savingTransactionType ");
               }
               sb.append(" from acc_gl_journal_entry as journalEntry ")
                 .append(" left join acc_gl_account as glAccount on glAccount.id = journalEntry.account_id")
@@ -98,7 +101,9 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 .append(" join m_currency curr on curr.code = journalEntry.currency_code ");
               if(associationParametersData.isTransactionDetailsRequired()){
                   sb.append(" left join m_loan_transaction as lt on journalEntry.loan_transaction_id = lt.id ")
+                    .append(" left join r_enum_value as lte on ( lt.transaction_type_enum = lte.enum_id and lte.enum_name = 'transaction_type_enum' )")
                     .append(" left join m_savings_account_transaction as st on journalEntry.savings_transaction_id = st.id ")
+                    .append(" left join r_enum_value as ste on (st.transaction_type_enum = ste.enum_id and ste.enum_name = 'transaction_type_enum' )")
                     .append(" left join m_payment_detail as pd on lt.payment_detail_id = pd.id or st.payment_detail_id = pd.id")
                     .append(" left join m_code_value as cdv on cdv.id = pd.payment_type_cv_id ")
                     .append(" left join m_note as note on lt.id = note.loan_transaction_id or st.id = note.savings_account_transaction_id ");
@@ -128,6 +133,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             EnumOptionData entityType = null;
             if (entityTypeId != null) {
                 entityType = AccountingEnumerations.portfolioProductType(entityTypeId);
+
             }
 
             final Long entityId = JdbcSupport.getLong(rs, "entityId");
@@ -181,7 +187,21 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 if(entityType!=null){
                     transaction = Long.parseLong(transactionId.substring(1).trim());
                 }
-                transactionDetailData = new TransactionDetailData(transaction, paymentDetailData, noteData);
+
+                String transactionType = null;
+
+
+
+                if(PortfolioAccountType.fromInt(entityTypeId).isLoanAccount())
+                {
+                    transactionType = rs.getString("loanTransactionType");
+                }
+                else if(PortfolioAccountType.fromInt(entityTypeId).isSavingsAccount()){
+
+                    transactionType = rs.getString("savingTransactionType");
+                }
+
+                transactionDetailData = new TransactionDetailData(transaction, paymentDetailData, noteData,transactionType);
             }
             return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glCode, accountType, transactionDate,
                     entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, createdDate, createdByUserName,
