@@ -15,7 +15,7 @@ public class TransactionDetailData {
     private final NoteData noteData;
 
     @SuppressWarnings("unused")
-    private final String transactionType;
+    private final TransactionTypeEnumData transactionType;
 
     public TransactionDetailData(final Long transactionId, final PaymentDetailData paymentDetails, final NoteData noteData) {
         this.transactionId = transactionId;
@@ -25,7 +25,8 @@ public class TransactionDetailData {
 
     }
 
-    public TransactionDetailData(final Long transactionId, final PaymentDetailData paymentDetails, final NoteData noteData,final String transactionType) {
+    public TransactionDetailData(final Long transactionId, final PaymentDetailData paymentDetails, final NoteData noteData,
+            final TransactionTypeEnumData transactionType) {
         this.transactionId = transactionId;
         this.paymentDetails = paymentDetails;
         this.noteData = noteData;

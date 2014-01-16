@@ -58,6 +58,14 @@ public class LoanTransactionEnumData {
         return this.id;
     }
 
+    public String getCode() {
+        return this.code;
+    }
+
+    public String getValue() {
+        return this.value;
+    }
+
     /**
      * Returns true if the transaction involves either a payment (disbursement)
      * or a receipt (repayments, repayments during disbursement etc)

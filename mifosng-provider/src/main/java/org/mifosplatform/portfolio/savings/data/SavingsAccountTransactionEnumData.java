@@ -11,7 +11,6 @@ import org.mifosplatform.portfolio.savings.SavingsAccountTransactionType;
  * Immutable data object represent savings account transaction type
  * enumerations.
  */
-@SuppressWarnings("unused")
 public class SavingsAccountTransactionEnumData {
 
     private final Long id;
@@ -41,6 +40,18 @@ public class SavingsAccountTransactionEnumData {
         this.approveTransfer = Long.valueOf(SavingsAccountTransactionType.APPROVE_TRANSFER.getValue()).equals(this.id);
         this.withdrawTransfer = Long.valueOf(SavingsAccountTransactionType.WITHDRAW_TRANSFER.getValue()).equals(this.id);
         this.rejectTransfer = Long.valueOf(SavingsAccountTransactionType.REJECT_TRANSFER.getValue()).equals(this.id);
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public String getCode() {
+        return this.code;
+    }
+
+    public String getValue() {
+        return this.value;
     }
 
     public boolean isDeposit() {
