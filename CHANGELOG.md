@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 17 Dec 2013 - 1.17.0.RELEASE
 1. 29 Dec 2013 - 1.16.1.RELEASE
 1. 15 Dec 2013 - 1.16.0.RELEASE
 1. 12 Dec 2013 - 1.15.2.RELEASE
@@ -54,6 +55,25 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.17.0.RELEASE
+=============
+Feature Release
+
+This feature release contains some API breaking changes around charges, loans and savings products (introducing mandatory short names) along with improvements around Collection Sheet, introducing the ability to activate/inactivate Staff and other Bug fixes
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-831] - Collectionsheet improvements to make data entry easy
+ - [MIFOSX-832] - Options to set short name for loan, charge and saving products
+ - [MIFOSX-845] - Option to activate or inactivate a staff
+ - [MIFOSX-849] - Update search API to include group external Id as a search parameter
+ - [MIFOSX-866] - Return Transaction Type of loan or savings transaction associated with a journal entry
+
+Bugs
+ - [MIFOSX-720] - In modify loan application (Undo disbursal - Undo approval) if charge to be collected from savings is deleted then not able to save the application.
+ - [MIFOSX-819] - Not able to modify Loan application after undo disburse once one of the charge paid.
 
 1.16.1.RELEASE
 =============
