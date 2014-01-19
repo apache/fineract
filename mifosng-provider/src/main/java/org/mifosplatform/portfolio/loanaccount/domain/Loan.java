@@ -454,7 +454,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         // NOTE: must add new loan charge to set of loan charges before
         // reporcessing the repayment schedule.
-        charges().add(loanCharge);
+        this.charges.add(loanCharge);
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategy);
