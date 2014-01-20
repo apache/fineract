@@ -431,7 +431,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
 
-        this.summary = updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
+        
 
         loanCharge.update(this);
 
@@ -455,7 +455,7 @@ public class Loan extends AbstractPersistable<Long> {
         // NOTE: must add new loan charge to set of loan charges before
         // reporcessing the repayment schedule.
         this.charges.add(loanCharge);
-
+        this.summary = updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategy);
 
@@ -1244,6 +1244,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         updateLoanSchedule(loanSchedule);
 
+        
         LoanStatus from = null;
         if (this.loanStatus != null) {
             from = LoanStatus.fromInt(this.loanStatus);
@@ -1307,6 +1308,8 @@ public class Loan extends AbstractPersistable<Long> {
                     totalChargeAmt);
             validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
         }
+        
+        updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
 
         // validate if disbursement date is a holiday or a non-working day
         validateDisbursementDateIsOnNonWorkingDay(workingDays, allowTransactionsOnNonWorkingDay);
