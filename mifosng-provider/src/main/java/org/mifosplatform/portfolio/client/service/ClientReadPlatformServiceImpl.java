@@ -150,7 +150,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         if (officeId != null) {
-            extraCriteria += " and office_id = " + officeId;
+            extraCriteria += " and c.office_id = " + officeId;
         }
 
         if (externalId != null) {
@@ -158,16 +158,16 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         if (displayName != null) {
-            extraCriteria += " and concat(ifnull(firstname, ''), if(firstname > '',' ', '') , ifnull(lastname, '')) like "
+            extraCriteria += " and concat(ifnull(c.firstname, ''), if(c.firstname > '',' ', '') , ifnull(c.lastname, '')) like "
                     + ApiParameterHelper.sqlEncodeString(displayName);
         }
 
         if (firstname != null) {
-            extraCriteria += " and firstname like " + ApiParameterHelper.sqlEncodeString(firstname);
+            extraCriteria += " and c.firstname like " + ApiParameterHelper.sqlEncodeString(firstname);
         }
 
         if (lastname != null) {
-            extraCriteria += " and lastname like " + ApiParameterHelper.sqlEncodeString(lastname);
+            extraCriteria += " and c.lastname like " + ApiParameterHelper.sqlEncodeString(lastname);
         }
 
         if (searchParameters.isScopedByOfficeHierarchy()) {
