@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.loanaccount.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +46,7 @@ import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
 import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
+import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
@@ -267,13 +269,33 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             if (!existingLoanApplication.isSubmittedAndPendingApproval()) { throw new LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified(
                     loanId); }
-
+            
+            final Set<LoanCharge> existingCharges = existingLoanApplication.charges();
+            Map<Long,LoanChargeData> chargesMap = new HashMap<Long, LoanChargeData>();
+            for(LoanCharge charge:existingCharges){
+                LoanChargeData chargeData = new LoanChargeData(charge.getId(),charge.getDueLocalDate() ,charge.amountOrPercentage());
+                chargesMap.put(charge.getId(), chargeData);
+            }
+            
             final Set<LoanCharge> possiblyModifedLoanCharges = this.loanChargeAssembler.fromParsedJson(command.parsedJson());
+            boolean isChargeModified = false;
+            for(LoanCharge loanCharge : possiblyModifedLoanCharges){
+                if(loanCharge.getId() == null){
+                    isChargeModified = true;
+                }else{
+                    LoanChargeData chargeData = chargesMap.get(loanCharge.getId());
+                    if(loanCharge.amountOrPercentage().compareTo(chargeData.amountOrPercentage()) != 0 || 
+                            (loanCharge.isSpecifiedDueDate() && !loanCharge.getDueLocalDate().equals(chargeData.getDueDate()))){
+                        isChargeModified = true;
+                    }
+                }
+            }
+            
             final Set<LoanCollateral> possiblyModifedLoanCollateralItems = this.loanCollateralAssembler
                     .fromParsedJson(command.parsedJson());
 
             final Map<String, Object> changes = existingLoanApplication.loanApplicationModification(command, possiblyModifedLoanCharges,
-                    possiblyModifedLoanCollateralItems, this.aprCalculator);
+                    possiblyModifedLoanCollateralItems, this.aprCalculator, isChargeModified);
 
             if (changes.containsKey("expectedDisbursementDate")) {
                 this.loanAssembler.validateExpectedDisbursementForHolidayAndNonWorkingDay(existingLoanApplication);

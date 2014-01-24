@@ -221,6 +221,35 @@ public class LoanChargeData {
         this.loanId = chargeData.loanId;
         this.installmentChargeData = installmentChargeData;
     }
+    
+    public LoanChargeData(final Long id, final LocalDate dueAsOfDate, final BigDecimal amountOrPercentage) {
+        this.id = id;
+        this.chargeId = null;
+        this.name = null;
+        this.currency = null;
+        this.amount = null;
+        this.amountPaid = null;
+        this.amountWaived = null;
+        this.amountWrittenOff = null;
+        this.amountOutstanding = null;
+        this.chargeTimeType = null;
+        this.dueDate = dueAsOfDate;
+        this.chargeCalculationType = null;
+        this.percentage = null;
+        this.amountPercentageAppliedTo = null;
+        this.penalty = false;
+        this.chargePaymentMode = null;
+        this.paid = false;
+        this.waived = false;
+        this.amountOrPercentage = amountOrPercentage;
+        this.chargeOptions = null;
+        this.chargePayable = false;
+        this.loanId = null;
+        this.minCap = null;
+        this.maxCap = null;
+        this.installmentChargeData = null;
+    }
+ 
 
 
     public boolean isChargePayable() {
@@ -253,5 +282,10 @@ public class LoanChargeData {
             isInstalmentFee = ChargeTimeType.fromInt(this.chargeTimeType.getId().intValue()).isInstalmentFee();
         }
         return isInstalmentFee;
+    }
+
+    
+    public BigDecimal amountOrPercentage() {
+        return this.amountOrPercentage;
     }
 }
