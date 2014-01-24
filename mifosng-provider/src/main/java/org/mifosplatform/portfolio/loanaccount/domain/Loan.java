@@ -963,7 +963,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public Map<String, Object> loanApplicationModification(final JsonCommand command, final Set<LoanCharge> possiblyModifedLoanCharges,
-            final Set<LoanCollateral> possiblyModifedLoanCollateralItems, final AprCalculator aprCalculator) {
+            final Set<LoanCollateral> possiblyModifedLoanCollateralItems, final AprCalculator aprCalculator, boolean isChargesModified) {
 
         final Map<String, Object> actualChanges = this.loanRepaymentScheduleDetail.updateLoanApplicationAttributes(command, aprCalculator);
         if (!actualChanges.isEmpty()) {
@@ -1141,9 +1141,7 @@ public class Loan extends AbstractPersistable<Long> {
         final String chargesParamName = "charges";
         if (command.parameterExists(chargesParamName)) {
 
-            final Set<LoanCharge> existingLoanCharges = charges();
-
-            if (!possiblyModifedLoanCharges.equals(existingLoanCharges)) {
+            if (isChargesModified) {
                 actualChanges.put(chargesParamName, getLoanCharges(possiblyModifedLoanCharges));
 
                 actualChanges.put(chargesParamName, getLoanCharges(possiblyModifedLoanCharges));
