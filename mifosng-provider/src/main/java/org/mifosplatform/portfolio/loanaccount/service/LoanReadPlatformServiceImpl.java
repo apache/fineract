@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.Days;
@@ -209,12 +210,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         sqlBuilder.append(" join m_office o on o.id = c.office_id");
         sqlBuilder.append(" left join m_office transferToOffice on transferToOffice.id = c.transfer_to_office_id ");
         sqlBuilder.append(" where ( o.hierarchy like ? or transferToOffice.hierarchy like ?)");
-
-        final Object[] objectArray = new Object[2];
-        objectArray[0] = hierarchySearchString;
-        objectArray[1] = hierarchySearchString;
+        
         int arrayPos = 2;
-
+        List<Object> extraCriterias = new  ArrayList<Object>();
+        extraCriterias.add(hierarchySearchString);
+        extraCriterias.add(hierarchySearchString);
+        
         String sqlQueryCriteria = searchParameters.getSqlSearch();
         if (StringUtils.isNotBlank(sqlQueryCriteria)) {
             sqlQueryCriteria = sqlQueryCriteria.replaceAll("accountNo", "l.account_no");
@@ -222,8 +223,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
 
         if (StringUtils.isNotBlank(searchParameters.getExternalId())) {
-            sqlBuilder.append(" and l.external_id = ?");
-            objectArray[arrayPos] = searchParameters.getExternalId();
+            sqlBuilder.append(" and l.external_id = ?");            
+            extraCriterias.add(searchParameters.getExternalId());
+            arrayPos = arrayPos + 1;
+        }
+        
+        if (StringUtils.isNotBlank(searchParameters.getAccountNo())) {
+            sqlBuilder.append(" and l.account_no = ?");
+            extraCriterias.add(searchParameters.getAccountNo());   
             arrayPos = arrayPos + 1;
         }
 
@@ -234,14 +241,15 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
             }
         }
-
+                
         if (searchParameters.isLimited()) {
             sqlBuilder.append(" limit ").append(searchParameters.getLimit());
             if (searchParameters.isOffset()) {
                 sqlBuilder.append(" offset ").append(searchParameters.getOffset());
             }
         }
-
+        
+        final Object[] objectArray = extraCriterias.toArray();
         final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), finalObjectArray,
