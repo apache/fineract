@@ -125,6 +125,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final String accountNo = command.stringValueOfParameterNamed("accountNo");
             throw new PlatformDataIntegrityException("error.msg.client.duplicate.accountNo", "Client with accountNo `" + accountNo
                     + "` already exists", "accountNo", accountNo);
+        } else if (realCause.getMessage().contains("mobile_no")) {
+            final String mobileNo = command.stringValueOfParameterNamed("mobileNo");
+            throw new PlatformDataIntegrityException("error.msg.client.duplicate.mobileNo", "Client with mobileNo `" + mobileNo
+                    + "` already exists", "mobileNo", mobileNo);
         }
 
         logAsErrorUnexpectedDataIntegrityException(dve);
