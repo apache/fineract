@@ -100,4 +100,34 @@ public class SearchConstants {
             return this.value;
         }
     }
+    
+    public static enum SEARCH_LOAN_DATE {
+        APPROVAL_DATE("approvalDate"), CREATED_DATE("createdDate"), DISBURSAL_DATE("disbursalDate");
+
+        private final String value;
+
+        private SEARCH_LOAN_DATE(final String value) {
+            this.value = value;
+        }
+
+        private static final Set<String> values = new HashSet<String>();
+        static {
+            for (final SEARCH_LOAN_DATE param : SEARCH_LOAN_DATE.values()) {
+                values.add(param.value);
+            }
+        }
+
+        public static Set<String> getAllValues() {
+            return values;
+        }
+
+        @Override
+        public String toString() {
+            return name().toString().replaceAll("_", " ");
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    }
 }
