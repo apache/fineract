@@ -2503,7 +2503,7 @@ GET https://DomainName/api/v1/clients/{clientId}
 					<br>
 					<div class=apiClick>clients?offset=10&limit=50</div>
 					<br>
-					<div class=apiClick>clients?orderBy=displayName,sortOrder=DESC</div>
+					<div class=apiClick>clients?orderBy=displayName&sortOrder=DESC</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -3663,7 +3663,7 @@ GET https://DomainName/mifosng-provider/api/v1/centers/9?associations=groupMembe
 					<br>
 					<div class=apiClick>centers?offset=10&limit=50</div>
 					<br>
-					<div class=apiClick>centers?orderBy=name,sortOrder=DESC</div>
+					<div class=apiClick>centers?orderBy=name&sortOrder=DESC</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -4579,7 +4579,7 @@ DELETE groups/2
 					<br>
 					<div class=apiClick>groups?offset=10&limit=50</div>
 					<br>
-					<div class=apiClick>groups?orderBy=name,sortOrder=DESC</div>
+					<div class=apiClick>groups?orderBy=name&sortOrder=DESC</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -4820,6 +4820,9 @@ An enumeration that indicates the type of transaction processing strategy to be 
 	<li>4 = RBI (India)</li>
 	<li>5 = Principal Interest Penalties Fees Order</li>
 	<li>6 = Interest Principal Penalties Fees Order</li>
+      	<li>7 = Early Payment Strategy</li>
+</ul>
+
 </ul>
 	</td>
 </tr>
@@ -5473,7 +5476,7 @@ GET https://DomainName/api/v1/loans/{loanId}
 					<br>
 					<div class=apiClick>loans?offset=10&limit=50</div>
 					<br>
-					<div class=apiClick>loans?orderBy=accountNo,sortOrder=DESC</div>
+					<div class=apiClick>loans?orderBy=accountNo&sortOrder=DESC</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -8048,6 +8051,7 @@ An enumeration that indicates the type of transaction processing strategy to be 
 	<li>4 = RBI (India)</li>
 	<li>5 = Principal Interest Penalties Fees Order</li>
 	<li>6 = Interest Principal Penalties Fees Order</li>
+        <li>7 = Early Payment Strategy</li>
 </ul>
 	</td>
 </tr>
@@ -20454,7 +20458,7 @@ No Request Body:
 					<br>
 					<div class=apiClick>journalentries?offset=10&limit=50</div>
 					<br>
-					<div class=apiClick>journalentries?orderBy=transactionId,sortOrder=DESC</div>
+					<div class=apiClick>journalentries?orderBy=transactionId&sortOrder=DESC</div>
 					<br>
 					<div class=apiClick>journalentries?runningBalance=true</div>
 					<br>
@@ -22702,6 +22706,27 @@ No Request Body:
 	<p><strong>On time payment</strong>: Any payment that pays off an installment that occurs exactly on the due date of the installment.</p>
 
 	<p><strong>Late payment</strong>: Any payment that pays off an installment that occurs after the due date of the installment. There is no penalization for late payment. The total cost of the loan does not automatically increase, no penalties are automatically applied to the loan.</p>
+
+        <h4>Early Payment Strategy</h4>
+	<p>This strategy works similar to the Interest Principal Penalties Fees Order for on-time and late payments. If the installments are paid early we will  </p>
+	<p>
+		<strong>Payment order</strong>:
+		<ol>
+			<li>Overdue and due interest</li>
+			<li>Overdue and due principal</li>
+			<li>Overdue and due penalties</li>
+			<li>Overdue and due fees</li>
+		</ol>
+	</p>
+	<p><strong>Early payment</strong>: Any payment that pays off an installment that occurs before the due date of the installment. There is no incentive/advantage to making an early payment as theres no decrease in cost of the loan.</p>
+
+	<p><strong>On time payment</strong>: Any payment that pays off an installment that occurs exactly on the due date of the installment.</p>
+
+	<p><strong>Late payment</strong>: Any payment that pays off an installment that occurs after the due date of the installment. There is no penalization for late payment. The total cost of the loan does not automatically increase, no penalties are automatically applied to the loan.</p>
+
+
+      
+      
 </div>
 
 	<!-- end of page-wrapper div -->

@@ -12,6 +12,7 @@ import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.
 import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.MifosStyleLoanRepaymentScheduleTransactionProcessor;
 import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
 import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.RBILoanRepaymentScheduleTransactionProcessor;
+import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.EarlyPaymentLoanRepaymentScheduleTransactionProcessor;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +32,10 @@ public class LoanRepaymentScheduleTransactionProcessorFactory {
 
             if (transactionProcessingStrategy.isHeavensfamilyStrategy()) {
                 processor = new HeavensFamilyLoanRepaymentScheduleTransactionProcessor();
+            }
+            
+            if (transactionProcessingStrategy.isEarlyPaymentStrategy()) {
+                processor = new EarlyPaymentLoanRepaymentScheduleTransactionProcessor();
             }
 
             if (transactionProcessingStrategy.isCreocoreStrategy()) {
