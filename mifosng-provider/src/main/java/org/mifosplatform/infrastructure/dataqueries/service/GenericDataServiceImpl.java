@@ -278,7 +278,7 @@ public class GenericDataServiceImpl implements GenericDataService {
 
     private SqlRowSet getDatatableCodeData(final String datatable, final String columnName) {
 
-        final String sql = "select mc.id,mc.code_name from m_code mc join x_table_cloumn_code_mappings xcc on xcc.code_id = mc.id where xcc.column_alias_name='"
+        final String sql = "select mc.id,mc.code_name from m_code mc join x_table_column_code_mappings xcc on xcc.code_id = mc.id where xcc.column_alias_name='"
                 + datatable.toLowerCase().replaceAll("\\s", "_") + "_" + columnName + "'";
         final SqlRowSet rsValues = this.jdbcTemplate.queryForRowSet(sql);
 

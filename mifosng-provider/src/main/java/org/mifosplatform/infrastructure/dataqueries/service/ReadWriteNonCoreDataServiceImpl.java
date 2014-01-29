@@ -573,7 +573,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private int getCodeIdForColumn(final String dataTableNameAlias, final String name) {
         final StringBuilder checkColumnCodeMapping = new StringBuilder();
-        checkColumnCodeMapping.append("select ccm.code_id from x_table_cloumn_code_mappings ccm where ccm.column_alias_name='")
+        checkColumnCodeMapping.append("select ccm.code_id from x_table_column_code_mappings ccm where ccm.column_alias_name='")
                 .append(dataTableNameAlias).append("_").append(name).append("'");
         int codeId = 0;
         try {
@@ -650,7 +650,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final String[] addSqlList = new String[codeMappings.size()];
             int i = 0;
             for (final Map.Entry<String, Long> mapEntry : codeMappings.entrySet()) {
-                addSqlList[i++] = "insert into x_table_cloumn_code_mappings (column_alias_name, code_id) values ('" + mapEntry.getKey()
+                addSqlList[i++] = "insert into x_table_column_code_mappings (column_alias_name, code_id) values ('" + mapEntry.getKey()
                         + "'," + mapEntry.getValue() + ");";
             }
 
@@ -663,7 +663,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final String[] deleteSqlList = new String[columnNames.size()];
             int i = 0;
             for (final String columnName : columnNames) {
-                deleteSqlList[i++] = "DELETE FROM x_table_cloumn_code_mappings WHERE  column_alias_name='" + columnName + "';";
+                deleteSqlList[i++] = "DELETE FROM x_table_column_code_mappings WHERE  column_alias_name='" + columnName + "';";
             }
 
             this.jdbcTemplate.batchUpdate(deleteSqlList);
@@ -822,7 +822,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             deregisterDatatable(datatableName);
             String[] sqlArray = null;
             if (this.configurationDomainService.isConstraintApproachEnabledForDatatables()) {
-                final String deleteColumnCodeSql = "delete from x_table_cloumn_code_mappings where column_alias_name like'"
+                final String deleteColumnCodeSql = "delete from x_table_column_code_mappings where column_alias_name like'"
                         + datatableName.toLowerCase().replaceAll("\\s", "_") + "_%'";
                 sqlArray = new String[2];
                 sqlArray[1] = deleteColumnCodeSql;

@@ -83,7 +83,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
     @CronTarget(jobName = JobName.ACCOUNTING_RUNNING_BALANCE_UPDATE)
     public void updateRunningBalance() {
         String dateFinder = "select MIN(je.entry_date) as entityDate from acc_gl_journal_entry  je "
-                + "where je.is_running_balance_caculated=0 ";
+                + "where je.is_running_balance_calculated=0 ";
         try {
             Date entityDate = this.jdbcTemplate.queryForObject(dateFinder, Date.class);
             updateOrganizationRunningBalance(entityDate);
@@ -106,7 +106,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
             if (office == null) { throw new OfficeNotFoundException(officeId); }
 
             String dateFinder = "select MIN(je.entry_date) as entityDate " + "from acc_gl_journal_entry  je "
-                    + "where je.is_running_balance_caculated=0  and je.office_id=?";
+                    + "where je.is_running_balance_calculated=0  and je.office_id=?";
             try {
                 Date entityDate = this.jdbcTemplate.queryForObject(dateFinder, Date.class, officeId);
                 updateRunningBalance(officeId, entityDate);
@@ -162,7 +162,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
                 }
                 BigDecimal officeRunningBalance = calculateRunningBalance(entryData, officeRunningBalanceMap);
                 BigDecimal runningBalance = calculateRunningBalance(entryData, runningBalanceMap);
-                String sql = "UPDATE acc_gl_journal_entry je SET je.is_running_balance_caculated=1, je.organization_running_balance="
+                String sql = "UPDATE acc_gl_journal_entry je SET je.is_running_balance_calculated=1, je.organization_running_balance="
                         + runningBalance + ",je.office_running_balance=" + officeRunningBalance + " WHERE  je.id=" + entryData.getId();
                 updateSql[i++] = sql;
             }

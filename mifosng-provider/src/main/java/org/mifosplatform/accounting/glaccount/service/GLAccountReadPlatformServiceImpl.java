@@ -112,7 +112,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
         // append SQL statement for fetching account totals
         if(associationParametersData.isRunningBalanceRequired()){
         sql = sql + " and gl_j.id in (select t1.id from (SELECT t2.id , max(concat(t2.entry_date,t2.id)) "
-                + "FROM acc_gl_journal_entry t2 WHERE is_running_balance_caculated = 1 GROUP BY t2.account_id DESC) t1)";
+                + "FROM acc_gl_journal_entry t2 WHERE is_running_balance_calculated = 1 GROUP BY t2.account_id DESC) t1)";
         }
         final Object[] paramaterArray = new Object[3];
         int arrayPos = 0;
@@ -191,7 +191,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             final StringBuilder sql = new StringBuilder(); 
             sql.append("select ").append(rm.schema());
             if(associationParametersData.isRunningBalanceRequired()){
-                sql.append(" and gl_j.is_running_balance_caculated = 1 ");
+                sql.append(" and gl_j.is_running_balance_calculated = 1 ");
             }
             sql.append("where gl.id = ?");
             if(associationParametersData.isRunningBalanceRequired()){

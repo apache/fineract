@@ -80,7 +80,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                     .append(" journalEntry.currency_code as currencyCode, curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ")
                     .append(" curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf ");
             if (associationParametersData.isRunningBalanceRequired()) {
-                sb.append(" ,journalEntry.is_running_balance_caculated as runningBalanceComputed, ")
+                sb.append(" ,journalEntry.is_running_balance_calculated as runningBalanceComputed, ")
                         .append(" journalEntry.office_running_balance as officeRunningBalance, ")
                         .append(" journalEntry.organization_running_balance as organizationRunningBalance ");
             }
