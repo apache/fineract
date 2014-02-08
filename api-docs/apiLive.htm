@@ -12699,6 +12699,12 @@ Content-Type: application/json
 						<tr>
 							<td class=fielddesc>Allows passing multiple credit entries for the accounting rule</td>
 						</tr>
+						<tr class=alt>
+							<td>paymentTypeId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Allows passing multiple credit entries for the accounting rule</td>
+						</tr>
 					</table>
 				</div>
 			</div>
@@ -20354,6 +20360,21 @@ No Request Body:
                             <td class=fielddesc>Additional details of transaction like payment details and notes .
                         	</td>
                         </tr>
+                        <tr class=alt>
+                            <td>paymentTypeId</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Maps to a <a href="#configs_codes_codevalues">Code value</a> of a system defined  <a href="
+                            #configs_codes">Code</a> with the name "PaymentType". This is used to optionally identify the mode of payment (Ex: checks, Cash etc) associated with a Journal Entry
+                        	</td>
+                        </tr>
+                         <tr class=alt>
+                            <td>accountNumber, checkNumber, routingCode, receiptNumber, bankNumber</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Various properties associated with a payment type
+                        	</td>
+                        </tr>
                     </table>
                 </div>
             </div>
@@ -20614,6 +20635,15 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
                             </td>
                         </tr>
                     </table>
+                    <br />
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber</td>
+						</tr>
+					</table>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
@@ -20639,7 +20669,13 @@ Request Body:
 			"amount":5000},
 		   {"glAccountId":4,
 			"amount":5000}
-		 ]
+		 ],
+"paymentTypeId": "12",
+"accountNumber": "accno123",
+"checkNumber": "chec123",
+"routingCode": "rou123",
+"receiptNumber": "rec123",
+"bankNumber": "ban123"
 }
                     </code>
                     <code class="method-response">

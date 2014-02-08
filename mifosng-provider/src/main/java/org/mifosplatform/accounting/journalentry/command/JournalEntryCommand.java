@@ -27,13 +27,25 @@ public class JournalEntryCommand {
     private final String referenceNumber;
     private final Long accountingRuleId;
     private final BigDecimal amount;
+    private final Long paymentTypeId;
+    @SuppressWarnings("unused")
+    private final String accountNumber;
+    @SuppressWarnings("unused")
+    private final String checkNumber;
+    @SuppressWarnings("unused")
+    private final String receiptNumber;
+    @SuppressWarnings("unused")
+    private final String bankNumber;
+    @SuppressWarnings("unused")
+    private final String routingCode;
 
     private final SingleDebitOrCreditEntryCommand[] credits;
     private final SingleDebitOrCreditEntryCommand[] debits;
 
     public JournalEntryCommand(final Long officeId, final String currencyCode, final LocalDate transactionDate, final String comments,
             final SingleDebitOrCreditEntryCommand[] credits, final SingleDebitOrCreditEntryCommand[] debits, final String referenceNumber,
-            final Long accountingRuleId, final BigDecimal amount) {
+            final Long accountingRuleId, final BigDecimal amount, final Long paymentTypeId, final String accountNumber,
+            final String checkNumber, final String receiptNumber, final String bankNumber, final String routingCode) {
         this.officeId = officeId;
         this.currencyCode = currencyCode;
         this.transactionDate = transactionDate;
@@ -43,6 +55,13 @@ public class JournalEntryCommand {
         this.referenceNumber = referenceNumber;
         this.accountingRuleId = accountingRuleId;
         this.amount = amount;
+        this.paymentTypeId = paymentTypeId;
+        this.accountNumber = accountNumber;
+        this.checkNumber = checkNumber;
+        this.receiptNumber = receiptNumber;
+        this.bankNumber = bankNumber;
+        this.routingCode = routingCode;
+
     }
 
     public void validateForCreate() {
@@ -63,9 +82,7 @@ public class JournalEntryCommand {
 
         baseDataValidator.reset().parameter("accountingRule").value(this.accountingRuleId).ignoreIfNull().longGreaterThanZero();
 
-        baseDataValidator.reset().parameter("credits").value(this.credits).ignoreIfNull();
-
-        baseDataValidator.reset().parameter("debits").value(this.debits).ignoreIfNull();
+        baseDataValidator.reset().parameter("paymentTypeId").value(this.paymentTypeId).ignoreIfNull().longGreaterThanZero();
 
         // validation for credit array elements
         if (this.credits != null) {
