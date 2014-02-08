@@ -10,6 +10,7 @@ import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -21,6 +22,9 @@ import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.portfolio.search.SearchConstants.SEARCH_RESPONSE_PARAMETERS;
+import org.mifosplatform.portfolio.search.data.AdHocQueryDataValidator;
+import org.mifosplatform.portfolio.search.data.AdHocQuerySearchConditions;
+import org.mifosplatform.portfolio.search.data.AdHocSearchQueryData;
 import org.mifosplatform.portfolio.search.data.SearchConditions;
 import org.mifosplatform.portfolio.search.data.SearchData;
 import org.mifosplatform.portfolio.search.service.SearchReadPlatformService;
@@ -36,17 +40,32 @@ public class SearchApiResource {
     private final Set<String> searchResponseParameters = SEARCH_RESPONSE_PARAMETERS.getAllValues();
 
     private final SearchReadPlatformService searchReadPlatformService;
-    private final ToApiJsonSerializer<SearchData> toApiJsonSerializer;
+    private final ToApiJsonSerializer<Object> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private final AdHocQueryDataValidator fromApiJsonDeserializer;
 
     @Autowired
     public SearchApiResource(final SearchReadPlatformService searchReadPlatformService,
-            final ToApiJsonSerializer<SearchData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper) {
+            final ToApiJsonSerializer<Object> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
+            final AdHocQueryDataValidator fromApiJsonDeserializer) {
 
         this.searchReadPlatformService = searchReadPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
 
+    }
+    
+    @GET
+    @Path("/template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveAdHocSearchQueryTemplate(@Context final UriInfo uriInfo) {
+
+        final AdHocSearchQueryData templateData = this.searchReadPlatformService.retrieveAdHocQueryTemplate();
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, templateData);
     }
 
     @GET
@@ -61,5 +80,19 @@ public class SearchApiResource {
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, searchResults, this.searchResponseParameters);
+    }
+    
+    @POST
+    @Path("/advance")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String advancedSearch(@Context final UriInfo uriInfo,final String json) {
+        
+        final AdHocQuerySearchConditions searchConditions = this.fromApiJsonDeserializer.retrieveSearchConditions(json);
+        
+        final Collection<AdHocSearchQueryData> searchResults = this.searchReadPlatformService.retrieveAdHocQueryMatchingData(searchConditions);
+        
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, searchResults);
     }
 }

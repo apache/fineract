@@ -1406,6 +1406,14 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr class="alt">
+								<td><a href="#advance_search">AdHoc Search</a></td>
+								<td>search/advance</td>
+								<td><a href="#advance_search_resource">Advance Search</td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -21050,6 +21058,211 @@ GET https://DomainName/api/v1/search?query=000000111
     "parentName": "aaaa aaaaa"
   }
 ]
+					</code>
+				</div>
+			</div>
+			<a id="advance_search" name="advance_search" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Advance Search</h3>
+					<p>AdHoc Query search supported parameters and field descriptions</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>entities</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Entities to be included for search.(presently support added only for loans)<br></td>
+						</tr>
+						<tr class=alt>
+							<td>loanStatus</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Loan status values to be included for search.<br>
+								Supported loan status:["all","active","overpaid","closed","writeoff"]
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>loanProducts</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Array of loanproduct ids.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>offices</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Array of office ids.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>loanDateOption</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Date condition name for search query.<br>
+								Supported values "approvalDate" or "createdDate" or "disbursalDate".
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>loanFromDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Start date for 'loanDateOption' in 'yyyy-MM-dd' format. </td>
+						</tr>
+						<tr class=alt>
+							<td>loanToDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>End date for 'loanDateOption' in 'yyyy-MM-dd' format. </td>
+						</tr>
+						<tr class=alt>
+							<td>includeOutStandingAmountPercentage</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>It is a Boolean value, allows to search percentage of loan outstanding amount with in a given range</td>
+						</tr>
+						<tr class=alt>
+							<td>outStandingAmountPercentageCondition</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Condition type for outstanding amount percentage.
+								Supported values: between or &lt;= or &gt;= or &lt; or &gt; or = <br>
+								When 'outStandingAmountPercentageCondition' is <b>between</b> required fields <b>minOutStandingAmountPercentage</b> and <b>maxOutStandingAmountPercentage</b>
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>minOutStandingAmountPercentage</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Minimum percentage of outstanding amount. <br> Mandatory when 'outStandingAmountPercentageCondition' type is 'between' </td>
+						</tr>
+						<tr class=alt>
+							<td>maxOutStandingAmountPercentage </td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Maximum percentage of outstanding amount. <br> Mandatory when 'outStandingAmountPercentageCondition' type is 'between' </td>
+						</tr>
+						<tr class=alt>
+							<td>outStandingAmountPercentage</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Percentage of outstanding amount for search. <br> Mandatory when 'outStandingAmountPercentageCondition' type is otherthan 'between' </td>
+						</tr>
+						<tr class=alt>
+							<td>includeOutstandingAmount</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Boolean value, allows user to search loan outstanding amount with in a given range</td>
+						</tr>
+						<tr class=alt>
+							<td>outstandingAmountCondition</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Condition type to search outstanding amount.
+								Supported values: between or &lt;= or &gt;= or &lt; or &gt; or = <br>
+								When 'outstandingAmountCondition' is <b>between</b> required fields <b>minOutStandingAmount</b> and <b>maxOutStandingAmount</b>
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>minOutStandingAmount</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Minimum value of outstanding amount for outstandingAmountCondition type between. <br> Mandatory when 'outstandingAmountCondition' type is 'between' </td>
+						</tr>
+						<tr class=alt>
+							<td>maxOutStandingAmount</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Maximum value of outstanding amount for outstandingAmountCondition type between. <br> Mandatory when 'outstandingAmountCondition' type is 'between' </td>
+						</tr>
+						<tr class=alt>
+							<td>outStandingAmount</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Default value of outstanding amount for search. <br> Mandatory when 'outstandingAmountCondition' type is otherthan 'between' </td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<a id="advance_search_resource" name="advance_search_resource" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>AdHoc Query Search</h4>
+					<p>
+						AdHocQuery search has more search options, it is a <b>POST</b> request, it uses request body to send search parameters<br>
+					</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>entities</td>
+						</tr>
+					</table>
+						<br />
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>
+								loanStatus, loanProducts, offices, loanDateOption, loanFromDate, loanToDate, <br>includeOutStandingAmountPercentage, outStandingAmountPercentageCondition, <br> 
+								minOutStandingAmountPercentage and maxOutStandingAmountPercentage OR outStandingAmountPercentage, <br>includeOutstandingAmount, outstandingAmountCondition, <br> 
+								minOutstandingAmount and maxOutstandingAmount OR outstandingAmount</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/search/advance
+					</code>
+					<code class="method-request">
+POST search/advance
+Content-Type: application/json Request Body:
+{
+	"locale": "en",
+	"dateFormat": "yyyy-MM-dd",
+	"entities": ["loans"],
+	"loanStatus": ["all","active","overpaid"],
+	"loanProducts": ["65","97","73","82"],
+	"offices": ["1","10","100"],
+	"loanDateOption": "approvalDate",
+	"loanFromDate": "2013-01-01",
+	"loanToDate": "2014-01-27",
+	"includeOutStandingAmountPercentage": true,
+	"outStandingAmountPercentageCondition": "<=",
+	"outStandingAmountPercentage": "80",
+	"includeOutstandingAmount": true,
+	"outstandingAmountCondition": "between",
+	"minOutstandingAmount": "100",
+	"maxOutstandingAmount": "10000"
+} 
+					</code>
+					<code class="method-response">
+[{
+	"officeName": "HFC",
+	"loanProductName": "01 BC3M",
+	"count": 86,
+	"loanOutStanding": 5692.41,
+	"percentage": 76.4
+},
+{
+	"officeName": "keithoffice",
+	"loanProductName": "IGL",
+	"count": 3,
+	"loanOutStanding": 4168.23,
+	"percentage": 56.9
+},
+{
+	"officeName": "Rio",
+	"loanProductName": "IGL",
+	"count": 1,
+	"loanOutStanding": 1681.12,
+	"percentage": 55.56
+}]
 					</code>
 				</div>
 			</div>

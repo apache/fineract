@@ -5,13 +5,23 @@
  */
 package org.mifosplatform.portfolio.search.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.office.data.OfficeData;
+import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
+import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
+import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
+import org.mifosplatform.portfolio.search.SearchConstants;
+import org.mifosplatform.portfolio.search.data.AdHocQuerySearchConditions;
+import org.mifosplatform.portfolio.search.data.AdHocSearchQueryData;
 import org.mifosplatform.portfolio.search.data.SearchConditions;
 import org.mifosplatform.portfolio.search.data.SearchData;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -26,11 +36,16 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
 
     private final NamedParameterJdbcTemplate namedParameterjdbcTemplate;
     private final PlatformSecurityContext context;
+    private final LoanProductReadPlatformService loanProductReadPlatformService;
+    private final OfficeReadPlatformService officeReadPlatformService;
 
     @Autowired
-    public SearchReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public SearchReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+            final LoanProductReadPlatformService loanProductReadPlatformService, final OfficeReadPlatformService officeReadPlatformService ) {
         this.context = context;
         this.namedParameterjdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        this.loanProductReadPlatformService = loanProductReadPlatformService;
+        this.officeReadPlatformService = officeReadPlatformService;
     }
 
     @Override
@@ -143,6 +158,147 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
             return new SearchData(entityId, entityAccountNo, entityExternalId, entityName, entityType, parentId, parentName);
         }
 
+    }
+
+    @Override
+    public AdHocSearchQueryData retrieveAdHocQueryTemplate() {
+        
+        this.context.authenticatedUser();
+        
+        final Collection<LoanProductData> loanProducts = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
+        final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
+        
+        return AdHocSearchQueryData.template(loanProducts, offices);
+    }
+
+    @Override
+    public Collection<AdHocSearchQueryData> retrieveAdHocQueryMatchingData(final AdHocQuerySearchConditions searchConditions) {
+
+        this.context.authenticatedUser();
+
+        final AdHocQuerySearchMapper rm = new AdHocQuerySearchMapper();
+        final MapSqlParameterSource params = new MapSqlParameterSource();
+
+        return this.namedParameterjdbcTemplate.query(rm.schema(searchConditions, params), params, rm);
+    }
+
+    private static final class AdHocQuerySearchMapper implements RowMapper<AdHocSearchQueryData> {
+
+        private boolean isWhereClauseAdded = false;
+
+        //TODO- build the query dynamically based on selected entity types, for now adding query for only loan entity.
+        public String schema(final AdHocQuerySearchConditions searchConditions, final MapSqlParameterSource params) {
+            final StringBuffer sql = new StringBuffer();
+            sql.append("Select a.name as officeName, a.Product as productName, a.cnt as 'count', a.outstandingAmt as outstanding, a.percentOut as percentOut  ")
+            .append("from (select mo.name, mp.name Product, sum(ifnull(ml.total_expected_repayment_derived,0.0)) TotalAmt, count(*) cnt, ")
+            .append("sum(ifnull(ml.total_outstanding_derived,0.0)) outstandingAmt,  ")
+            .append("(sum(ifnull(ml.total_outstanding_derived,0.0)) * 100 / sum(ifnull(ml.total_expected_repayment_derived,0.0))) percentOut ")
+            .append("from m_loan ml inner join m_product_loan mp on mp.id=ml.product_id  ")
+            .append("inner join m_client mc on mc.id=ml.client_id  ")
+            .append("inner join m_office mo on mo.id=mc.office_id  ");
+            
+            if (searchConditions.getLoanStatus() != null && searchConditions.getLoanStatus().size() > 0) {
+                //If user requests for all statuses no need to add loanStatus filter 
+                if (!searchConditions.getLoanStatus().contains("all")) {
+                    checkAndUpdateWhereClause(sql);
+                    params.addValue("loanStatus", searchConditions.getLoanStatus());
+                    sql.append(" ml.loan_status_id in (:loanStatus) ");
+                }
+            }
+            
+            if (searchConditions.getLoanProducts() != null && searchConditions.getLoanProducts().size() > 0 ) {
+                checkAndUpdateWhereClause(sql);
+                params.addValue("loanProducts", searchConditions.getLoanProducts());
+                sql.append(" mp.id in (:loanProducts) ");
+            }
+            
+            if (searchConditions.getOffices() != null && searchConditions.getOffices().size() > 0) {
+                checkAndUpdateWhereClause(sql);
+                params.addValue("offices", searchConditions.getOffices());
+                sql.append(" mo.id in (:offices) ");
+            }
+            
+            if (StringUtils.isNotBlank(searchConditions.getLoanDateOption())) {
+                if (searchConditions.getLoanDateOption().equals(SearchConstants.SEARCH_LOAN_DATE.APPROVAL_DATE.getValue())) {
+                    checkAndUpdateWhereClause(sql);
+                    params.addValue("loanFromDate", searchConditions.getLoanFromDate().toDate());
+                    params.addValue("loanToDate", searchConditions.getLoanToDate().toDate());
+                    sql.append(" ( ml.approvedon_date between :loanFromDate and :loanToDate ) ");
+                } else if (searchConditions.getLoanDateOption().equals(SearchConstants.SEARCH_LOAN_DATE.CREATED_DATE.getValue())) {
+                    checkAndUpdateWhereClause(sql);
+                    params.addValue("loanFromDate", searchConditions.getLoanFromDate().toDate());
+                    params.addValue("loanToDate", searchConditions.getLoanToDate().toDate());
+                    sql.append(" ( ml.submittedon_date between :loanFromDate and :loanToDate ) ");
+                } else if (searchConditions.getLoanDateOption().equals(SearchConstants.SEARCH_LOAN_DATE.DISBURSAL_DATE.getValue())) {
+                    checkAndUpdateWhereClause(sql);
+                    params.addValue("loanFromDate", searchConditions.getLoanFromDate().toDate());
+                    params.addValue("loanToDate", searchConditions.getLoanToDate().toDate());
+                    sql.append(" ( ml.disbursedon_date between :loanFromDate and :loanToDate ) ");
+                }
+            }
+            
+            sql.append(" group by mo.id) a ");
+            
+            //update isWhereClauseAdded to false to add filters for derived table
+            isWhereClauseAdded = false;
+            
+            if (searchConditions.getIncludeOutStandingAmountPercentage()) {
+                if (searchConditions.getOutStandingAmountPercentageCondition().equals("between")) {
+                    checkAndUpdateWhereClause(sql);
+                   // params.addValue("outStandingAmountPercentageCondition", searchConditions.getOutStandingAmountPercentageCondition());
+                    params.addValue("minOutStandingAmountPercentage", searchConditions.getMinOutStandingAmountPercentage());
+                    params.addValue("maxOutStandingAmountPercentage", searchConditions.getMaxOutStandingAmountPercentage());
+                    sql.append(" ( a.percentOut between :minOutStandingAmountPercentage and :maxOutStandingAmountPercentage ) ");
+                } else {
+                    checkAndUpdateWhereClause(sql);
+                   // params.addValue("outStandingAmountPercentageCondition", searchConditions.getOutStandingAmountPercentageCondition());
+                    params.addValue("outStandingAmountPercentage", searchConditions.getOutStandingAmountPercentage());
+                    sql.append(" a.percentOut ")
+                    .append(searchConditions.getOutStandingAmountPercentageCondition())
+                    .append(" :outStandingAmountPercentage ");
+                }
+            }
+            
+            if (searchConditions.getIncludeOutstandingAmount()) {
+                if (searchConditions.getOutstandingAmountCondition().equals("between")) {
+                    checkAndUpdateWhereClause(sql);
+                   // params.addValue("outstandingAmountCondition", searchConditions.getOutstandingAmountCondition());
+                    params.addValue("minOutstandingAmount", searchConditions.getMinOutstandingAmount());
+                    params.addValue("maxOutstandingAmount", searchConditions.getMaxOutstandingAmount());
+                    sql.append(" ( a.outstandingAmt between :minOutstandingAmount and :maxOutstandingAmount ) ");
+                } else {
+                    checkAndUpdateWhereClause(sql);
+                   // params.addValue("outstandingAmountCondition", searchConditions.getOutstandingAmountCondition());
+                    params.addValue("outstandingAmount", searchConditions.getOutstandingAmount());
+                    sql.append(" a.outstandingAmt ")
+                    .append(searchConditions.getOutstandingAmountCondition())
+                    .append(" :outstandingAmount ");
+                }
+            }
+            
+            return sql.toString();
+        }
+        
+        private void checkAndUpdateWhereClause(final StringBuffer sql){
+            if (isWhereClauseAdded) {
+                sql.append(" and ");
+            } else {
+                sql.append(" where ");
+                isWhereClauseAdded = true;
+            }
+        }
+
+        @Override
+        public AdHocSearchQueryData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+
+            final String officeName = rs.getString("officeName");
+            final String loanProductName = rs.getString("productName");
+            final Integer count = JdbcSupport.getInteger(rs, "count");
+            final BigDecimal loanOutStanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "outstanding").setScale(2, RoundingMode.HALF_UP);
+            final Double percentage = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "percentOut").setScale(2, RoundingMode.HALF_UP).doubleValue();
+            return AdHocSearchQueryData.matchedResult(officeName, loanProductName, count, loanOutStanding, percentage);
+        }
+        
     }
 
 }

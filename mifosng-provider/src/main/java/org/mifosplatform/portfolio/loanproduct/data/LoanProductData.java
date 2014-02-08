@@ -110,7 +110,7 @@ public class LoanProductData {
      * Used when returning lookup information about loan product for dropdowns.
      */
     public static LoanProductData lookup(final Long id, final String name) {
-    	final String shortName = null;
+        final String shortName = null;
         final String description = null;
         final CurrencyData currency = null;
         final BigDecimal principal = null;
