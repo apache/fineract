@@ -4828,6 +4828,9 @@ An enumeration that indicates the type of transaction processing strategy to be 
 	<li>4 = RBI (India)</li>
 	<li>5 = Principal Interest Penalties Fees Order</li>
 	<li>6 = Interest Principal Penalties Fees Order</li>
+      	<li>7 = Early Payment Strategy</li>
+</ul>
+
 </ul>
 	</td>
 </tr>
@@ -8056,6 +8059,7 @@ An enumeration that indicates the type of transaction processing strategy to be 
 	<li>4 = RBI (India)</li>
 	<li>5 = Principal Interest Penalties Fees Order</li>
 	<li>6 = Interest Principal Penalties Fees Order</li>
+        <li>7 = Early Payment Strategy</li>
 </ul>
 	</td>
 </tr>
@@ -22974,6 +22978,27 @@ No Request Body:
 	<p><strong>On time payment</strong>: Any payment that pays off an installment that occurs exactly on the due date of the installment.</p>
 
 	<p><strong>Late payment</strong>: Any payment that pays off an installment that occurs after the due date of the installment. There is no penalization for late payment. The total cost of the loan does not automatically increase, no penalties are automatically applied to the loan.</p>
+
+        <h4>Early Payment Strategy</h4>
+	<p>This strategy works similar to the Interest Principal Penalties Fees Order for on-time and late payments. If the installments are paid early we will  </p>
+	<p>
+		<strong>Payment order</strong>:
+		<ol>
+			<li>Overdue and due interest</li>
+			<li>Overdue and due principal</li>
+			<li>Overdue and due penalties</li>
+			<li>Overdue and due fees</li>
+		</ol>
+	</p>
+	<p><strong>Early payment</strong>: Any payment that pays off an installment that occurs before the due date of the installment. There is no incentive/advantage to making an early payment as theres no decrease in cost of the loan.</p>
+
+	<p><strong>On time payment</strong>: Any payment that pays off an installment that occurs exactly on the due date of the installment.</p>
+
+	<p><strong>Late payment</strong>: Any payment that pays off an installment that occurs after the due date of the installment. There is no penalization for late payment. The total cost of the loan does not automatically increase, no penalties are automatically applied to the loan.</p>
+
+
+      
+      
 </div>
 
 	<!-- end of page-wrapper div -->
