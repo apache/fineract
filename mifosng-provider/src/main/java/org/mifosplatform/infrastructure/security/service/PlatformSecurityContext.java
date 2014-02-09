@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.infrastructure.security.service;
 
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 public interface PlatformSecurityContext {
@@ -14,4 +16,8 @@ public interface PlatformSecurityContext {
     void validateAccessRights(String resourceOfficeHierarchy);
 
     String officeHierarchy();
+
+    boolean doesPasswordHasToBeRenewed(AppUser currentUser);
+
+    AppUser authenticatedUser(CommandWrapper commandWrapper);
 }

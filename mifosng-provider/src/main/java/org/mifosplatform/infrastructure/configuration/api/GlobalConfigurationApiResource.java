@@ -11,12 +11,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
@@ -76,25 +73,21 @@ public class GlobalConfigurationApiResource {
         return this.toApiJsonSerializer.serialize(settings, configurationData, this.RESPONSE_DATA_PARAMETERS);
     }
 
+
     @PUT
+    @Path("{configId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateConfiguration(@Context final UriInfo uriInfo) {
+    public String updateConfiguration(@PathParam("configId") final Long configId,final String apiRequestBodyAsJson) {
 
-        final Map<String, String> configurationParameters = ApiParameterHelper.asMap(uriInfo.getQueryParameters());
-
-        final Map<String, Object> globalConfiguration = new HashMap<String, Object>();
-        globalConfiguration.put("globalConfiguration", configurationParameters);
-
-        final String apiRequestJson = this.toApiJsonSerializer.serialize(globalConfiguration);
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateGlobalConfiguration() //
-                .withJson(apiRequestJson) //
+                .updateGlobalConfiguration(configId) //
+                .withJson(apiRequestBodyAsJson) //
                 .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
-    }
+   }
 }

@@ -10225,9 +10225,17 @@ GET https://DomainName/api/v1/configurations
 {
   "globalConfiguration": [
     {
-      "name": "maker-checker",
-      "enabled": false
-    }
+    "name": "maker-checker",
+    "enabled": true,
+    "value": 0,
+    "id": 1
+    },
+    {
+    "name": "amazon-S3",
+    "enabled": false,
+    "value": 0,
+    "id": 2
+    },
   ]
 }
 					</code>
@@ -10242,22 +10250,24 @@ GET https://DomainName/api/v1/configurations
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-PUT https://DomainName/api/v1/configurations?maker-checker=false
+PUT https://DomainName/api/v1/configurations/9
 					</code>
 					<code class="method-request">
 PUT configurations
 Content-Type: application/json 
-Request Body: { }
+Request Body: {
+                "enabled":"true",
+                "value":2
+
+               }
 					</code>
 					<code class="method-response">
 {
-  "changes": {
-    "globalConfiguration": {
-      "maker-checker": false
+    "resourceId": 9,
+    "changes": {
+    "enabled": true
     }
-  }
-}
-					</code>
+}				</code>
 				</div>
 			</div>
 

@@ -47,7 +47,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
 
         boolean isApprovedByChecker = false;
         // check if is update of own account details
-        if (wrapper.isUpdateOfOwnUserDetails(this.context.authenticatedUser().getId())) {
+        if (wrapper.isUpdateOfOwnUserDetails(this.context.authenticatedUser(wrapper).getId())) {
             // then allow this operation to proceed.
             // maker checker doesnt mean anything here.
             isApprovedByChecker = true; // set to true in case permissions have
@@ -56,7 +56,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         } else {
             // if not user changing their own details - check user has
             // permission to perform specific task.
-            this.context.authenticatedUser().validateHasPermissionTo(wrapper.getTaskPermissionName());
+            this.context.authenticatedUser(wrapper).validateHasPermissionTo(wrapper.getTaskPermissionName());
         }
         validateIsUpdateAllowed();
 
@@ -71,6 +71,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
 
             result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
         } catch (final RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
+
 
             result = this.processAndLogCommandService.logCommand(e.getCommandSourceResult());
         }

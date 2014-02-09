@@ -54,11 +54,12 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder updateGlobalConfiguration() {
+    public CommandWrapperBuilder updateGlobalConfiguration(final Long configId) {
         this.actionName = "UPDATE";
         this.entityName = "CONFIGURATION";
-        this.entityId = null;
-        this.href = "/configurations";
+        this.entityId = configId;
+
+        this.href = "/configurations/"+configId;
         return this;
     }
 

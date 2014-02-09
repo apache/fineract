@@ -28,4 +28,8 @@ public interface ConfigurationDomainService {
     void updateCache(CacheType cacheType);
 
     Long retrievePenaltyWaitPeriod();
+
+    boolean isPasswordForcedResetEnable();
+
+    Long retrievePasswordLiveTime();
 }

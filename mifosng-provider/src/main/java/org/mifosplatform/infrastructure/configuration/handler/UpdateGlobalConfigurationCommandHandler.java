@@ -27,6 +27,6 @@ public class UpdateGlobalConfigurationCommandHandler implements NewCommandSource
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.update(command);
+        return this.writePlatformService.update(command.entityId(),command);
     }
 }

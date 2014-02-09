@@ -5,11 +5,18 @@
  */
 package org.mifosplatform.infrastructure.configuration.domain;
 
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "c_configuration")
@@ -22,7 +29,7 @@ public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
     private boolean enabled;
 
     @Column(name= "value", nullable= true)
-    private final Long value;
+    private Long value;
 
     protected GlobalConfigurationProperty() {
         this.name = null;
@@ -48,6 +55,34 @@ public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
         final boolean updated = this.enabled != value;
         this.enabled = value;
         return updated;
+    }
+
+    public Map<String, Object> update(final JsonCommand command)
+    {
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
+
+       // final String localeAsInput = command.locale();
+
+       // final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+       // final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("c");
+
+        final String enabledParamName = "enabled";
+        if (command.isChangeInBooleanParameterNamed(enabledParamName, this.enabled)) {
+            final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed (enabledParamName);
+            actualChanges.put(enabledParamName, newValue);
+            this.enabled = newValue;
+        }
+
+        final String valueParamName = "value";
+        if (command.isChangeInLongParameterNamed(valueParamName, this.value)) {
+            final Long newValue = command.longValueOfParameterNamed(valueParamName);
+            actualChanges.put(valueParamName, newValue);
+            this.value = newValue;
+        }
+
+        return actualChanges;
+
     }
 
 }

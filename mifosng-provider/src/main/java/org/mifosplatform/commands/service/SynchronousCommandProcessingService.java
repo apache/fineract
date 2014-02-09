@@ -59,7 +59,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         final NewCommandSourceHandler handler = findCommandHandler(wrapper);
         final CommandProcessingResult result = handler.processCommand(command);
 
-        final AppUser maker = this.context.authenticatedUser();
+        final AppUser maker = this.context.authenticatedUser(wrapper);
 
         CommandSource commandSourceResult = null;
         if (command.commandId() != null) {

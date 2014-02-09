@@ -120,4 +120,24 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(propertyName); }
         return property.getValue();
     }
+
+    @Override
+    public boolean isPasswordForcedResetEnable(){
+
+        final String propertyName  ="force-password-reset-days";
+        final GlobalConfigurationProperty property= this.globalConfigurationRepository.findOneByName(propertyName);
+        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(propertyName); }
+
+        return property.isEnabled();
+    }
+
+    @Override
+    public Long retrievePasswordLiveTime(){
+
+        final String propertyName  ="force-password-reset-days";
+        final GlobalConfigurationProperty property= this.globalConfigurationRepository.findOneByName(propertyName);
+        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(propertyName); }
+
+        return property.getValue();
+    }
 }

@@ -38,6 +38,9 @@ public class AuthenticatedUserData {
     @SuppressWarnings("unused")
     private final Collection<String> permissions;
 
+    @SuppressWarnings("unused")
+    private final boolean shouldRenewPassword;
+
     public AuthenticatedUserData(final String username, final Collection<String> permissions) {
         this.username = username;
         this.userId = null;
@@ -50,6 +53,7 @@ public class AuthenticatedUserData {
         this.organisationalRole = null;
         this.roles = null;
         this.permissions = permissions;
+        this.shouldRenewPassword = false;
     }
 
     public AuthenticatedUserData(final String username, final Long officeId, final String officeName, final Long staffId,
@@ -66,5 +70,21 @@ public class AuthenticatedUserData {
         this.authenticated = true;
         this.roles = roles;
         this.permissions = permissions;
+        this.shouldRenewPassword = false;
+    }
+
+    public AuthenticatedUserData(final String username, final Long userId, final String base64EncodedAuthenticationKey) {
+        this.username = username;
+        this.officeId = null;
+        this.officeName = null;
+        this.staffId = null;
+        this.staffDisplayName = null;
+        this.organisationalRole = null;
+        this.userId = userId;
+        this.base64EncodedAuthenticationKey = base64EncodedAuthenticationKey;
+        this.authenticated = true;
+        this.roles = null;
+        this.permissions = null;
+        this.shouldRenewPassword = true;
     }
 }

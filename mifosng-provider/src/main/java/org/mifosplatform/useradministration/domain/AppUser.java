@@ -12,16 +12,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -37,6 +30,8 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
+
 
 @Entity
 @Table(name = "m_appuser", uniqueConstraints = @UniqueConstraint(columnNames = { "username" }, name = "username_org"))
@@ -89,6 +84,10 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
     @JoinTable(name = "m_appuser_role", joinColumns = @JoinColumn(name = "appuser_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 
+    @Column(name = "last_time_password_updated")
+    @Temporal(TemporalType.DATE)
+    private Date lastTimePasswordUpdated;
+
     public static AppUser fromJson(final Office userOffice, final Set<Role> allRoles, final JsonCommand command) {
 
         final String username = command.stringValueOfParameterNamed("username");
@@ -137,6 +136,7 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
         this.enabled = user.isEnabled();
         this.roles = roles;
         this.firstTimeLoginRemaining = true;
+       this.lastTimePasswordUpdated = DateUtils.getDateOfTenant();
     }
 
     public EnumOptionData organisationalRoleData() {
@@ -150,6 +150,8 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
     public void updatePassword(final String encodePassword) {
         this.password = encodePassword;
         this.firstTimeLoginRemaining = false;
+        this.lastTimePasswordUpdated = DateUtils.getDateOfTenant();
+
     }
 
     public void changeOffice(final Office differentOffice) {
@@ -324,6 +326,8 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
         return this.office;
     }
 
+    public Date getLastTimePasswordUpdated(){ return this.lastTimePasswordUpdated; }
+
     public boolean canNotApproveLoanInPast() {
         return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "APPROVEINPAST_LOAN");
     }
@@ -490,5 +494,32 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
             staffDisplayName = this.staff.displayName();
         }
         return staffDisplayName;
+    }
+
+    public String getEncodedPassword(final JsonCommand command,final PlatformPasswordEncoder platformPasswordEncoder)
+    {
+        final String passwordParamName = "password";
+        final String passwordEncodedParamName = "passwordEncoded";
+        String passwordEncodedValue = null;
+
+        if (command.hasParameter(passwordParamName)) {
+            if (command.isChangeInPasswordParameterNamed(passwordParamName, this.password
+                    , platformPasswordEncoder,getId())) {
+
+                passwordEncodedValue = command.passwordValueOfParameterNamed(passwordParamName, platformPasswordEncoder,
+                       getId());
+
+            }
+        }
+        else if (command.hasParameter(passwordEncodedParamName)) {
+            if (command.isChangeInStringParameterNamed(passwordEncodedParamName, this.password)) {
+
+                passwordEncodedValue = command.stringValueOfParameterNamed(passwordEncodedParamName);
+
+
+            }
+        }
+
+        return passwordEncodedValue;
     }
 }
