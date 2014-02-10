@@ -137,7 +137,7 @@ public final class ResultsetColumnHeaderData {
     }
 
     private boolean isAnyInteger() {
-        return isInt() || isSmallInt() || isTinyInt() || isMediumInt() || isBigInt();
+        return isInt() || isSmallInt() || isTinyInt() || isMediumInt() || isBigInt() || isBit();
     }
 
     private boolean isInt() {
@@ -158,6 +158,10 @@ public final class ResultsetColumnHeaderData {
 
     private boolean isBigInt() {
         return "bigint".equalsIgnoreCase(this.columnType);
+    }
+    
+    private boolean isBit() {
+        return "bit".equalsIgnoreCase(this.columnType);
     }
 
     public String getColumnName() {
