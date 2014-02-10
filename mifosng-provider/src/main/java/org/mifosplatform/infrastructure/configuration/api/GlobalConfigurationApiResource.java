@@ -6,14 +6,16 @@
 package org.mifosplatform.infrastructure.configuration.api;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
@@ -22,7 +24,6 @@ import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.configuration.data.GlobalConfigurationData;
 import org.mifosplatform.infrastructure.configuration.service.ConfigurationReadPlatformService;
-import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -73,13 +74,11 @@ public class GlobalConfigurationApiResource {
         return this.toApiJsonSerializer.serialize(settings, configurationData, this.RESPONSE_DATA_PARAMETERS);
     }
 
-
     @PUT
     @Path("{configId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateConfiguration(@PathParam("configId") final Long configId,final String apiRequestBodyAsJson) {
-
+    public String updateConfiguration(@PathParam("configId") final Long configId, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateGlobalConfiguration(configId) //
@@ -89,5 +88,5 @@ public class GlobalConfigurationApiResource {
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
-   }
+    }
 }

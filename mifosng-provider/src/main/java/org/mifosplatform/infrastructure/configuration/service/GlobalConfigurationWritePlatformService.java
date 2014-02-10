@@ -10,7 +10,5 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 public interface GlobalConfigurationWritePlatformService {
 
-    //CommandProcessingResult update(JsonCommand command);
-
     CommandProcessingResult update(Long configId, JsonCommand command);
 }

@@ -18,13 +18,10 @@ import javax.ws.rs.core.MediaType;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.data.AuthenticatedUserData;
-import org.mifosplatform.infrastructure.security.exception.ResetPasswordException;
 import org.mifosplatform.infrastructure.security.service.SpringSecurityPlatformSecurityContext;
 import org.mifosplatform.useradministration.data.RoleData;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.useradministration.domain.Role;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
@@ -45,12 +42,11 @@ public class AuthenticationApiResource {
     private final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService;
     private final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext;
 
-    private final static Logger logger = LoggerFactory.getLogger(AuthenticationApiResource.class);
-
     @Autowired
     public AuthenticationApiResource(
             @Qualifier("customAuthenticationProvider") final DaoAuthenticationProvider customAuthenticationProvider,
-            final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService,final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext) {
+            final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService,
+            final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext) {
         this.customAuthenticationProvider = customAuthenticationProvider;
         this.apiJsonSerializerService = apiJsonSerializerService;
         this.springSecurityPlatformSecurityContext = springSecurityPlatformSecurityContext;
@@ -80,8 +76,6 @@ public class AuthenticationApiResource {
                 roles.add(role.toData());
             }
 
-
-
             final Long officeId = principal.getOffice().getId();
             final String officeName = principal.getOffice().getName();
 
@@ -90,16 +84,13 @@ public class AuthenticationApiResource {
 
             final EnumOptionData organisationalRole = principal.organisationalRoleData();
 
-            if(this.springSecurityPlatformSecurityContext.doesPasswordHasToBeRenewed(principal)){
-                //throw new ResetPasswordException(principal.getId());
-                authenticatedUserData = new AuthenticatedUserData(username,principal.getId(), new String(base64EncodedAuthenticationKey));
-            }
-            else{
+            if (this.springSecurityPlatformSecurityContext.doesPasswordHasToBeRenewed(principal)) {
+                authenticatedUserData = new AuthenticatedUserData(username, principal.getId(), new String(base64EncodedAuthenticationKey));
+            } else {
 
                 authenticatedUserData = new AuthenticatedUserData(username, officeId, officeName, staffId, staffDisplayName,
                         organisationalRole, roles, permissions, principal.getId(), new String(base64EncodedAuthenticationKey));
             }
-
 
         }
 

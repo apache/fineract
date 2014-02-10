@@ -15,7 +15,6 @@ import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.exception.StaffNotFoundException;
-import org.omg.PortableInterceptor.ACTIVE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;

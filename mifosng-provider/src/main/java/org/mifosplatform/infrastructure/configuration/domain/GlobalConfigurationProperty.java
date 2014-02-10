@@ -5,18 +5,15 @@
  */
 package org.mifosplatform.infrastructure.configuration.domain;
 
-import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.ApiParameterError;
-import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "c_configuration")
@@ -28,7 +25,7 @@ public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
     @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
-    @Column(name= "value", nullable= true)
+    @Column(name = "value", nullable = true)
     private Long value;
 
     protected GlobalConfigurationProperty() {
@@ -37,7 +34,7 @@ public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
         this.value = null;
     }
 
-    public GlobalConfigurationProperty(final String name, final boolean enabled,final Long value) {
+    public GlobalConfigurationProperty(final String name, final boolean enabled, final Long value) {
         this.name = name;
         this.enabled = enabled;
         this.value = value;
@@ -57,19 +54,13 @@ public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
         return updated;
     }
 
-    public Map<String, Object> update(final JsonCommand command)
-    {
+    public Map<String, Object> update(final JsonCommand command) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
 
-       // final String localeAsInput = command.locale();
-
-       // final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-       // final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("c");
-
         final String enabledParamName = "enabled";
         if (command.isChangeInBooleanParameterNamed(enabledParamName, this.enabled)) {
-            final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed (enabledParamName);
+            final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed(enabledParamName);
             actualChanges.put(enabledParamName, newValue);
             this.enabled = newValue;
         }

@@ -5,29 +5,24 @@
  */
 package org.mifosplatform.infrastructure.security.service;
 
-import com.sun.jersey.api.spring.Autowire;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.exception.ResetPasswordException;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.useradministration.exception.UnAuthenticatedUserException;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainServiceJpa;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.method.HandlerMethod;
-import sun.print.resources.serviceui_zh_TW;
-
-import java.lang.reflect.Array;
-import java.util.*;
 
 /**
  * Wrapper around spring security's {@link SecurityContext} for extracted the
@@ -37,18 +32,17 @@ import java.util.*;
 @Service
 public class SpringSecurityPlatformSecurityContext implements PlatformSecurityContext {
 
-    private final ConfigurationDomainService  configurationDomainService ;
+    private final ConfigurationDomainService configurationDomainService;
 
-    private final static Logger logger = LoggerFactory.getLogger(SpringSecurityPlatformSecurityContext.class);
+    public static final List<CommandWrapper> EXEMPT_FROM_PASSWORD_RESET_CHECK = new ArrayList<CommandWrapper>() {
 
-    public static final List<CommandWrapper> EXEMPT_FROM_PASSWORD_RESET_CHECK = new ArrayList<CommandWrapper>(){
         {
             add(new CommandWrapperBuilder().updateUser(null).build());
         }
     };
 
     @Autowired
-    SpringSecurityPlatformSecurityContext(final ConfigurationDomainService configurationDomainService){
+    SpringSecurityPlatformSecurityContext(final ConfigurationDomainService configurationDomainService) {
         this.configurationDomainService = configurationDomainService;
     }
 
@@ -66,14 +60,13 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
 
         if (currentUser == null) { throw new UnAuthenticatedUserException(); }
 
-
-        if(this.doesPasswordHasToBeRenewed(currentUser)) { throw new ResetPasswordException(currentUser.getId());}
+        if (this.doesPasswordHasToBeRenewed(currentUser)) { throw new ResetPasswordException(currentUser.getId()); }
 
         return currentUser;
     }
 
-    public AppUser authenticatedUser(CommandWrapper commandWrapper)
-    {
+    @Override
+    public AppUser authenticatedUser(CommandWrapper commandWrapper) {
 
         AppUser currentUser = null;
         final SecurityContext context = SecurityContextHolder.getContext();
@@ -84,15 +77,14 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
             }
         }
 
-
         if (currentUser == null) { throw new UnAuthenticatedUserException(); }
 
-        if(this.shouldCheckForPasswordForceReset(commandWrapper) && this.doesPasswordHasToBeRenewed(currentUser)) { throw new ResetPasswordException(currentUser.getId());}
+        if (this.shouldCheckForPasswordForceReset(commandWrapper) && this.doesPasswordHasToBeRenewed(currentUser)) { throw new ResetPasswordException(
+                currentUser.getId()); }
 
         return currentUser;
 
     }
-
 
     @Override
     public void validateAccessRights(final String resourceOfficeHierarchy) {
@@ -111,49 +103,31 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
     }
 
     @Override
-    public boolean doesPasswordHasToBeRenewed(AppUser currentUser )
-    {
+    public boolean doesPasswordHasToBeRenewed(AppUser currentUser) {
 
-       if( this.configurationDomainService.isPasswordForcedResetEnable()){
+        if (this.configurationDomainService.isPasswordForcedResetEnable()) {
 
-           Long passwordDurationDays = this.configurationDomainService.retrievePasswordLiveTime();
-           final Date passWordLastUpdateDate = currentUser .getLastTimePasswordUpdated();
+            Long passwordDurationDays = this.configurationDomainService.retrievePasswordLiveTime();
+            final Date passWordLastUpdateDate = currentUser.getLastTimePasswordUpdated();
 
-           Calendar c = Calendar.getInstance();
-           c.setTime(passWordLastUpdateDate);
-           c.add(Calendar.DATE,passwordDurationDays.intValue());
+            Calendar c = Calendar.getInstance();
+            c.setTime(passWordLastUpdateDate);
+            c.add(Calendar.DATE, passwordDurationDays.intValue());
 
-           final Date passwordExpirationDate = c.getTime();
+            final Date passwordExpirationDate = c.getTime();
 
-           if(DateUtils.getDateOfTenant().after(passwordExpirationDate)){
-
-               return true ;
-           }
-           else { return  false; }
-
-       }
-        else{
-
-           return false;
-       }
+            if (DateUtils.getDateOfTenant().after(passwordExpirationDate)) { return true; }
+        }
+        return false;
 
     }
 
-    private boolean shouldCheckForPasswordForceReset(CommandWrapper commandWrapper)
-    {
-        for( CommandWrapper commandItem : this.EXEMPT_FROM_PASSWORD_RESET_CHECK )
-        {
-            if(commandItem.actionName().equals(commandWrapper.actionName())
-                    && commandItem.getEntityName().equals(commandWrapper.getEntityName()))
-            {
-
-                return false;
-            }
+    private boolean shouldCheckForPasswordForceReset(CommandWrapper commandWrapper) {
+        for (CommandWrapper commandItem : EXEMPT_FROM_PASSWORD_RESET_CHECK) {
+            if (commandItem.actionName().equals(commandWrapper.actionName())
+                    && commandItem.getEntityName().equals(commandWrapper.getEntityName())) { return false; }
         }
-
         return true;
     }
-
-
 
 }

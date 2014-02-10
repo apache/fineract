@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
@@ -26,7 +25,13 @@ import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.useradministration.api.AppUserApiConstant;
-import org.mifosplatform.useradministration.domain.*;
+import org.mifosplatform.useradministration.domain.AppUser;
+import org.mifosplatform.useradministration.domain.AppUserPreviousPassword;
+import org.mifosplatform.useradministration.domain.AppUserPreviousPasswordRepository;
+import org.mifosplatform.useradministration.domain.AppUserRepository;
+import org.mifosplatform.useradministration.domain.Role;
+import org.mifosplatform.useradministration.domain.RoleRepository;
+import org.mifosplatform.useradministration.domain.UserDomainService;
 import org.mifosplatform.useradministration.exception.PasswordPreviouslyUsedException;
 import org.mifosplatform.useradministration.exception.RoleNotFoundException;
 import org.mifosplatform.useradministration.exception.UserNotFoundException;
@@ -54,12 +59,13 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     private final OfficeRepository officeRepository;
     private final RoleRepository roleRepository;
     private final UserDataValidator fromApiJsonDeserializer;
-    private final AppUserPreviewPasswordRepository appUserPreviewPasswordRepository;
+    private final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository;
 
     @Autowired
     public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository,
             final UserDomainService userDomainService, final OfficeRepository officeRepository, final RoleRepository roleRepository,
-            final PlatformPasswordEncoder platformPasswordEncoder, final UserDataValidator fromApiJsonDeserializer,final AppUserPreviewPasswordRepository appUserPreviewPasswordRepository) {
+            final PlatformPasswordEncoder platformPasswordEncoder, final UserDataValidator fromApiJsonDeserializer,
+            final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository) {
         this.context = context;
         this.appUserRepository = appUserRepository;
         this.userDomainService = userDomainService;
@@ -72,9 +78,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Transactional
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = "users", allEntries = true),
-            @CacheEvict(value = "usersByUsername", allEntries = true)})
+    @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
     public CommandProcessingResult createUser(final JsonCommand command) {
 
         try {
@@ -118,13 +122,10 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Transactional
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = "users", allEntries = true),
-            @CacheEvict(value = "usersByUsername", allEntries = true)})
+    @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
     public CommandProcessingResult updateUser(final Long userId, final JsonCommand command) {
 
         try {
-
 
             this.context.authenticatedUser(new CommandWrapperBuilder().updateUser(null).build());
 
@@ -132,12 +133,9 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
             final AppUser userToUpdate = this.appUserRepository.findOne(userId);
 
-
             if (userToUpdate == null) { throw new UserNotFoundException(userId); }
 
-
-            final  AppUserPreviewPassword currentPasswordToSaveAsPreview = getCurrentPasswordToSaveAsPreview(userToUpdate,command);
-
+            final AppUserPreviousPassword currentPasswordToSaveAsPreview = getCurrentPasswordToSaveAsPreview(userToUpdate, command);
 
             final Map<String, Object> changes = userToUpdate.update(command, this.platformPasswordEncoder);
 
@@ -159,7 +157,9 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             if (!changes.isEmpty()) {
                 this.appUserRepository.saveAndFlush(userToUpdate);
 
-                if(currentPasswordToSaveAsPreview!=null) {this.appUserPreviewPasswordRepository.save(currentPasswordToSaveAsPreview);}
+                if (currentPasswordToSaveAsPreview != null) {
+                    this.appUserPreviewPasswordRepository.save(currentPasswordToSaveAsPreview);
+                }
 
             }
 
@@ -176,43 +176,40 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     }
 
     /**
-     *  encode the new submitted password
-     * retrieve the last n used password
-     * check if the current submitted password, match with one of them
+     * encode the new submitted password retrieve the last n used password check
+     * if the current submitted password, match with one of them
+     * 
      * @param user
      * @param command
      * @return
      */
-    private AppUserPreviewPassword getCurrentPasswordToSaveAsPreview(final AppUser user,final JsonCommand command)
-    {
+    private AppUserPreviousPassword getCurrentPasswordToSaveAsPreview(final AppUser user, final JsonCommand command) {
 
-        final String passWordEncodedValue = user.getEncodedPassword(command,this.platformPasswordEncoder);
+        final String passWordEncodedValue = user.getEncodedPassword(command, this.platformPasswordEncoder);
 
-        AppUserPreviewPassword currentPasswordToSaveAsPreview = null;
+        AppUserPreviousPassword currentPasswordToSaveAsPreview = null;
 
-        if(passWordEncodedValue!=null )
-        {
+        if (passWordEncodedValue != null) {
 
-            PageRequest pageRequest = new PageRequest(0, AppUserApiConstant.numberOfPreviousPasswords, Sort.Direction.DESC,"removalDate");
+            PageRequest pageRequest = new PageRequest(0, AppUserApiConstant.numberOfPreviousPasswords, Sort.Direction.DESC, "removalDate");
 
-            final List<AppUserPreviewPassword> nLastUsedPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(),pageRequest);
+            final List<AppUserPreviousPassword> nLastUsedPasswords = this.appUserPreviewPasswordRepository.findByUserId(user.getId(),
+                    pageRequest);
 
-            for(AppUserPreviewPassword aPreviewPassword : nLastUsedPasswords)
-            {
+            for (AppUserPreviousPassword aPreviewPassword : nLastUsedPasswords) {
 
-                if(aPreviewPassword.getPassword().equals(passWordEncodedValue)){
+                if (aPreviewPassword.getPassword().equals(passWordEncodedValue)) {
 
-                   throw new PasswordPreviouslyUsedException();
+                throw new PasswordPreviouslyUsedException();
 
                 }
             }
 
-            currentPasswordToSaveAsPreview = new AppUserPreviewPassword(user);
+            currentPasswordToSaveAsPreview = new AppUserPreviousPassword(user);
 
         }
 
-
-        return  currentPasswordToSaveAsPreview ;
+        return currentPasswordToSaveAsPreview;
 
     }
 
@@ -234,9 +231,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Transactional
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = "users", allEntries = true),
-            @CacheEvict(value = "usersByUsername", allEntries = true)})
+    @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
     public CommandProcessingResult deleteUser(final Long userId) {
 
         final AppUser user = this.appUserRepository.findOne(userId);
