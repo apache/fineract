@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +32,8 @@ import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
+import org.mifosplatform.portfolio.calendar.data.CalendarData;
+import org.mifosplatform.portfolio.calendar.service.CalendarEnumerations;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.domain.ClientEnumerations;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
@@ -38,6 +41,7 @@ import org.mifosplatform.portfolio.group.api.GroupingTypesApiConstants;
 import org.mifosplatform.portfolio.group.data.CenterData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.data.GroupTimelineData;
+import org.mifosplatform.portfolio.group.data.StaffCenterData;
 import org.mifosplatform.portfolio.group.domain.GroupTypes;
 import org.mifosplatform.portfolio.group.domain.GroupingTypeEnumerations;
 import org.mifosplatform.portfolio.group.exception.CenterNotFoundException;
@@ -197,7 +201,58 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
                     activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate, closedByUsername,
                     closedByFirstname, closedByLastname);
 
-            return CenterData.instance(id, name, externalId, status, activationDate, officeId, officeName, staffId, staffName, hierarchy, timeline);
+            return CenterData.instance(id, name, externalId, status, activationDate, officeId, officeName, staffId, staffName, hierarchy, timeline, null);
+        }
+    }
+    
+    private static final class CenterCalendarDataMapper implements RowMapper<CenterData> {
+
+        private final String schemaSql;
+
+        public CenterCalendarDataMapper() {
+
+            schemaSql =  " select g.id as id, g.display_name as name, g.office_id as officeId, g.staff_id as staffId, s.display_name as staffName, g.external_id as externalId, "
+            		 +" g.status_enum as statusEnum, g.activation_date as activationDate, g.hierarchy as hierarchy,  "
+            		 +" c.id as calendarId, ci.id as calendarInstanceId, ci.entity_id as entityId,  "
+            		 +" ci.entity_type_enum as entityTypeId, c.title as title,  c.description as description,  "
+            		 +" c.location as location, c.start_date as startDate, c.end_date as endDate, c.recurrence as recurrence  "
+            		 +" from m_calendar c join m_calendar_instance ci on ci.calendar_id=c.id and ci.entity_type_enum=4 join m_group g  "
+            		 +" on g.id = ci.entity_id join m_staff s on g.staff_id = s.id where g.office_id=? ";
+        }
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        @Override
+        public CenterData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = rs.getLong("id");
+            final String name = rs.getString("name");
+            final Integer statusEnum = JdbcSupport.getInteger(rs, "statusEnum");
+            final EnumOptionData status = GroupingTypeEnumerations.status(statusEnum);
+            final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
+            final String externalId = rs.getString("externalId");
+            final Long officeId = rs.getLong("officeId");
+            final Long staffId = JdbcSupport.getLong(rs, "staffId");
+            final String staffName = rs.getString("staffName");
+            final String hierarchy = rs.getString("hierarchy");
+            
+            final Long calendarId = rs.getLong("calendarId");
+            final Long calendarInstanceId = rs.getLong("calendarInstanceId");
+            final Long entityId = rs.getLong("entityId");
+            final Integer entityTypeId = rs.getInt("entityTypeId");
+            final EnumOptionData entityType = CalendarEnumerations.calendarEntityType(entityTypeId);
+            final String title = rs.getString("title");
+            final String description = rs.getString("description");
+            final String location = rs.getString("location");
+            final LocalDate startDate = JdbcSupport.getLocalDate(rs, "startDate");
+            final LocalDate endDate = JdbcSupport.getLocalDate(rs, "endDate");
+            final String recurrence = rs.getString("recurrence");
+            
+            CalendarData calendarData = CalendarData.instance(calendarId, calendarInstanceId, entityId, entityType, title, description, location, startDate,
+            		endDate, null, null, false, recurrence, null, null, null, null, null, null, null, null, null, null, null, null, null);
+            return CenterData.instance(id, name, externalId, status, activationDate, officeId, null, staffId, staffName, hierarchy, null, calendarData);
         }
     }
 
@@ -451,4 +506,46 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(GroupingTypesApiConstants.GROUP_CLOSURE_REASON));
         return CenterData.withClosureReasons(closureReasons);
     }
+
+	@Override
+	public Collection<StaffCenterData> retriveAllCentersByMeetingDate(final Long officeId, final Date meetingDate, final Long staffId) {
+		final CenterCalendarDataMapper centerCalendarMapper = new CenterCalendarDataMapper();
+		String sql = centerCalendarMapper.schema();
+		Collection<CenterData> centerDataArray = null;
+		
+		if (staffId != null) {
+			sql += " and g.staff_id=? ";
+			centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, new Object[] {officeId, staffId});
+		} else {
+			centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, new Object[] {officeId});
+		}
+		
+		Collection<StaffCenterData> staffCenterDataArray = new ArrayList<StaffCenterData>();
+		Boolean flag = false; 
+ 		for (CenterData centerData : centerDataArray) {
+ 			if (centerData.getCollectionMeetingCalendar().isValidRecurringDate(new LocalDate(meetingDate))){
+				if (staffCenterDataArray.size() <= 0) {
+					Collection<CenterData> meetingFallCenter = new ArrayList<CenterData>();
+					meetingFallCenter.add(centerData);
+					staffCenterDataArray.add(StaffCenterData.instance(centerData.staffId(), centerData.getStaffName(), meetingFallCenter));
+				} else {
+					for(StaffCenterData staffCenterData : staffCenterDataArray) {
+						flag = false;
+						if (staffCenterData.getStaffId() == centerData.staffId()) {
+							staffCenterData.getMeetingFallCenters().add(centerData);
+							flag = true;
+							break;
+						}
+					}
+					if (!flag) {
+						Collection<CenterData> meetingFallCenter = new ArrayList<CenterData>();
+						meetingFallCenter.add(centerData);
+						staffCenterDataArray.add(StaffCenterData.instance(centerData.staffId(), centerData.getStaffName(), meetingFallCenter));
+					}
+				}
+				
+			}
+		}
+		return staffCenterDataArray;
+	}
 }

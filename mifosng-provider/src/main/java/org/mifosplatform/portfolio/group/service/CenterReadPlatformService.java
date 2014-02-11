@@ -6,11 +6,13 @@
 package org.mifosplatform.portfolio.group.service;
 
 import java.util.Collection;
+import java.util.Date;
 
 import org.mifosplatform.infrastructure.core.data.PaginationParameters;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.portfolio.group.data.CenterData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
+import org.mifosplatform.portfolio.group.data.StaffCenterData;
 
 public interface CenterReadPlatformService {
 
@@ -29,4 +31,6 @@ public interface CenterReadPlatformService {
     Collection<GroupGeneralData> retrieveAssociatedGroups(Long centerId);
 
     CenterData retrieveCenterWithClosureReasons();
+    
+    Collection<StaffCenterData> retriveAllCentersByMeetingDate(Long officeId, Date meetingDate, Long staffId);
 }
