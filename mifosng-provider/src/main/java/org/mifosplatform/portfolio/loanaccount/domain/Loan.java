@@ -1649,6 +1649,14 @@ public class Loan extends AbstractPersistable<Long> {
             throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.before.approval.date", errorMessage, disbursedOn,
                     getApprovedOnDate());
         }
+        
+        if(getExpectedFirstRepaymentOnDate() != null && disbursedOn.isAfter(getExpectedFirstRepaymentOnDate()))
+        {
+            final String errorMessage =  "submittedOnDate cannot be after the loans  expectedFirstRepaymentOnDate: " + getExpectedFirstRepaymentOnDate().toString();
+            throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.after.expected.first.repayment.date", errorMessage, disbursedOn,
+                    getExpectedFirstRepaymentOnDate());
+        }
+        
 
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_DISBURSED, disbursedOn);
 
@@ -2923,6 +2931,8 @@ public class Loan extends AbstractPersistable<Long> {
             }
         }
     }
+    
+
 
     public Group group() {
         return this.group;
