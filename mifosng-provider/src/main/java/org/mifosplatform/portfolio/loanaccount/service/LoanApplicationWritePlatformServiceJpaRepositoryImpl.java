@@ -300,7 +300,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (changes.containsKey("expectedDisbursementDate")) {
                 this.loanAssembler.validateExpectedDisbursementForHolidayAndNonWorkingDay(existingLoanApplication);
             }
-
+            
             final String clientIdParamName = "clientId";
             if (changes.containsKey(clientIdParamName)) {
                 final Long clientId = command.longValueOfParameterNamed(clientIdParamName);
@@ -712,6 +712,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private void validateSubmittedOnDate(final Loan loan) {
         final LocalDate startDate = loan.loanProduct().getStartDate();
         final LocalDate closeDate = loan.loanProduct().getCloseDate();
+        final LocalDate expectedFirstRepaymentOnDate = loan.getExpectedFirstRepaymentOnDate();
         final LocalDate submittedOnDate = loan.getSubmittedOnDate();
 
         String defaultUserMessage = "";
@@ -726,7 +727,17 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             throw new LoanApplicationDateException("submitted.on.date.cannot.be.after.the.loan.product.close.date", defaultUserMessage,
                     submittedOnDate.toString(), closeDate.toString());
         }
+        
+        if(expectedFirstRepaymentOnDate != null && submittedOnDate.isAfter(expectedFirstRepaymentOnDate))
+        {
+            defaultUserMessage = "submittedOnDate cannot be after the loans  expectedFirstRepaymentOnDate.";
+            throw new LoanApplicationDateException("submitted.on.date.cannot.be.after.the.loan.expected.first.repayment.date", defaultUserMessage,
+                    submittedOnDate.toString(), expectedFirstRepaymentOnDate.toString());
+        }
     }
+    
+    
+    
 
     private void checkClientOrGroupActive(final Loan loan) {
         final Client client = loan.client();
