@@ -42,7 +42,8 @@ Mifos Platform API
 Online Demos
 =============================
 
-<a target="_blank" href="https://demo.openmf.org" title="Reference Client App">Reference Client App</a>
+* <a target="_blank" href="https://demo.openmf.org" title="Reference Client App">Reference Client App</a>
+* <a target="_blank" href="https://demo.openmf.org/beta/" title="Community App">Community App</a>
 
 Developers
 ==========
