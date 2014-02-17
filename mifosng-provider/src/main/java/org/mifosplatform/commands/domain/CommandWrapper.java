@@ -329,7 +329,10 @@ public class CommandWrapper {
     public boolean isLoanChargeResource() {
         return this.entityName.equalsIgnoreCase("LOANCHARGE");
     }
-
+    public boolean isLoanDisburseDetailResource() {
+        return this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL");
+    }
+    
     public boolean isCollateralResource() {
         return this.entityName.equalsIgnoreCase("COLLATERAL");
     }
@@ -380,6 +383,10 @@ public class CommandWrapper {
     
     public boolean isUndoLoanWriteOff() {
         return this.actionName.equalsIgnoreCase("UNDOWRITEOFF") && this.entityName.equalsIgnoreCase("LOAN");
+    }
+    
+    public boolean isUpdateDisbursementDate() {
+        return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL");
     }
 
     public boolean isCloseLoanAsObligationsMet() {

@@ -11,6 +11,7 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
@@ -416,5 +417,25 @@ public class LoanEnumerations {
         }
         return optionData;
     }
+    
+    public static EnumOptionData loanvariationType(final int id) {
+        return loanvariationType(LoanTermVariationType.fromInt(id));
+    }
+
+    public static EnumOptionData loanvariationType(final LoanTermVariationType type) {
+        EnumOptionData optionData = null;
+        switch (type) {
+            case EMI_AMOUNT:
+                optionData = new EnumOptionData(LoanTermVariationType.EMI_AMOUNT.getValue().longValue(), LoanTermVariationType.EMI_AMOUNT.getCode(), "emiAmount");
+            break;
+            default:
+                optionData = new EnumOptionData(LoanTermVariationType.INVALID.getValue().longValue(), LoanTermVariationType.INVALID.getCode(),
+                        "Invalid");
+            break;
+        }
+        return optionData;
+    }
+
+
 
 }

@@ -104,7 +104,9 @@ public class LoanRepaymentScheduleProcessingWrapper {
             if(loanCharge.isFeeCharge()){
                 if(loanCharge.isInstalmentFee()){
                     LoanInstallmentCharge loanChargePerInstallment = loanCharge.getInstallmentLoanCharge(periodEnd);
-                    cumulative = cumulative.plus(loanChargePerInstallment.getAmountWaived(currency));
+                    if(loanChargePerInstallment != null){
+                        cumulative = cumulative.plus(loanChargePerInstallment.getAmountWaived(currency));
+                    }
                 }else if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)) {
                     cumulative = cumulative.plus(loanCharge.getAmountWaived(currency));
                 }
@@ -123,7 +125,9 @@ public class LoanRepaymentScheduleProcessingWrapper {
             if(loanCharge.isFeeCharge()){
                 if(loanCharge.isInstalmentFee()){
                     LoanInstallmentCharge loanChargePerInstallment = loanCharge.getInstallmentLoanCharge(periodEnd);
-                    cumulative = cumulative.plus(loanChargePerInstallment.getAmountWrittenOff(currency));
+                    if(loanChargePerInstallment != null){
+                        cumulative = cumulative.plus(loanChargePerInstallment.getAmountWrittenOff(currency));
+                    }
                 }else if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)) {
                 cumulative = cumulative.plus(loanCharge.getAmountWrittenOff(currency));
                 }
@@ -186,7 +190,9 @@ public class LoanRepaymentScheduleProcessingWrapper {
             if (loanCharge.isPenaltyCharge()) {
                 if(loanCharge.isInstalmentFee()){
                     LoanInstallmentCharge loanChargePerInstallment = loanCharge.getInstallmentLoanCharge(periodEnd);
-                    cumulative = cumulative.plus(loanChargePerInstallment.getAmountWaived(currency));
+                    if(loanChargePerInstallment != null){
+                        cumulative = cumulative.plus(loanChargePerInstallment.getAmountWaived(currency));
+                    }
                 }else if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)) {
                     cumulative = cumulative.plus(loanCharge.getAmountWaived(currency));
                 }
@@ -205,7 +211,9 @@ public class LoanRepaymentScheduleProcessingWrapper {
             if (loanCharge.isPenaltyCharge()) {
                 if(loanCharge.isInstalmentFee()){
                     LoanInstallmentCharge loanChargePerInstallment = loanCharge.getInstallmentLoanCharge(periodEnd);
-                    cumulative = cumulative.plus(loanChargePerInstallment.getAmountWrittenOff(currency));
+                    if(loanChargePerInstallment!= null){
+                        cumulative = cumulative.plus(loanChargePerInstallment.getAmountWrittenOff(currency));
+                    }
                 }else if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)) {
                 cumulative = cumulative.plus(loanCharge.getAmountWrittenOff(currency));
                 }

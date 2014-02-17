@@ -22,6 +22,7 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.portfolio.loanaccount.api.LoanApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +43,8 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             "loanTermFrequencyType", "repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType",
             "interestCalculationPeriodType", "expectedDisbursementDate", "repaymentsStartingFromDate", "graceOnPrincipalPayment",
             "graceOnInterestPayment", "graceOnInterestCharged", "interestChargedFromDate", "submittedOnDate", "submittedOnNote", "locale",
-            "dateFormat", "charges", "collateral", "syncDisbursementWithMeeting", "linkAccountId"));
+            "dateFormat", "charges", "collateral", "syncDisbursementWithMeeting", "linkAccountId",LoanApiConstants.disbursementDataParameterName,
+            LoanApiConstants.emiAmountParameterName,LoanApiConstants.maxOutstandingBalanceParameterName));
 
     private final FromJsonHelper fromApiJsonHelper;
 

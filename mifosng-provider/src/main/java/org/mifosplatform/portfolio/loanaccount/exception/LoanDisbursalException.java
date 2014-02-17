@@ -9,4 +9,7 @@ public class LoanDisbursalException extends AbstractPlatformDomainRuleException 
                 + "` are not allowed to co-exist", new Object[] { cureentProduct, restrictedProduct });
     }
 
+    public LoanDisbursalException(final String defaultUserMessage,final String entity,final Object... defaultUserMessageArgs) {
+        super("error.msg.loan." + entity , defaultUserMessage, defaultUserMessageArgs);
+    }
 }

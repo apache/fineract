@@ -18,7 +18,7 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanSchedulePer
 public final class LoanScheduleModelDisbursementPeriod implements LoanScheduleModelPeriod {
 
     @SuppressWarnings("unused")
-    private final int periodNumber;
+    private final Integer periodNumber;
     private final LocalDate disbursementDate;
     private final Money principalDisbursed;
     private final BigDecimal chargesDueAtTimeOfDisbursement;
@@ -27,16 +27,24 @@ public final class LoanScheduleModelDisbursementPeriod implements LoanScheduleMo
             final BigDecimal chargesDueAtTimeOfDisbursement) {
 
         final int periodNumber = 0;
-        return new LoanScheduleModelDisbursementPeriod(periodNumber, loanApplicationTerms, chargesDueAtTimeOfDisbursement);
+        return new LoanScheduleModelDisbursementPeriod(periodNumber, loanApplicationTerms.getExpectedDisbursementDate(),
+                loanApplicationTerms.getPrincipal(), chargesDueAtTimeOfDisbursement);
+    }
+    
+    public static LoanScheduleModelDisbursementPeriod disbursement(final LocalDate disbursementDate,final Money principalDisbursed,
+            final BigDecimal chargesDueAtTimeOfDisbursement){
+        return new LoanScheduleModelDisbursementPeriod(null, disbursementDate,principalDisbursed, chargesDueAtTimeOfDisbursement);
     }
 
-    private LoanScheduleModelDisbursementPeriod(final int periodNumber, final LoanApplicationTerms loanApplicationTerms,
+    private LoanScheduleModelDisbursementPeriod(final Integer periodNumber,final LocalDate disbursementDate,final Money principalDisbursed,
             final BigDecimal chargesDueAtTimeOfDisbursement) {
         this.periodNumber = periodNumber;
-        this.disbursementDate = loanApplicationTerms.getExpectedDisbursementDate();
-        this.principalDisbursed = loanApplicationTerms.getPrincipal();
+        this.disbursementDate = disbursementDate;
+        this.principalDisbursed = principalDisbursed;
         this.chargesDueAtTimeOfDisbursement = chargesDueAtTimeOfDisbursement;
     }
+    
+    
 
     @Override
     public LoanSchedulePeriodData toData() {
@@ -82,5 +90,10 @@ public final class LoanScheduleModelDisbursementPeriod implements LoanScheduleMo
     @Override
     public BigDecimal penaltyChargesDue() {
         return null;
+    }
+
+    @Override
+    public void addLoanCharges(@SuppressWarnings("unused") BigDecimal feeCharge, @SuppressWarnings("unused") BigDecimal penaltyCharge) {
+        return;
     }
 }

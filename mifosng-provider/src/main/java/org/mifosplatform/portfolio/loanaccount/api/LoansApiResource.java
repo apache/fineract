@@ -58,10 +58,13 @@ import org.mifosplatform.portfolio.fund.service.FundReadPlatformService;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTemplateTypeRequiredException;
 import org.mifosplatform.portfolio.loanaccount.exception.NotSupportedLoanTemplateTypeException;
 import org.mifosplatform.portfolio.loanaccount.guarantor.data.GuarantorData;
@@ -281,6 +284,8 @@ public class LoansApiResource {
         CalendarData meeting = null;
         Collection<NoteData> notes = null;
         PortfolioAccountData linkedAccount = null;
+        Collection<DisbursementData> disbursementData = null;
+        Collection<LoanTermVariationsData> emiAmountVariations = null;
 
         final Set<String> mandatoryResponseParameters = new HashSet<String>();
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -288,7 +293,7 @@ public class LoansApiResource {
 
             if (associationParameters.contains("all")) {
                 associationParameters.addAll(Arrays.asList("repaymentSchedule", "transactions", "charges", "guarantors", "collateral",
-                        "notes", "linkedAccount"));
+                        "notes", "linkedAccount","multiDisburseDetails"));
             }
 
             if (associationParameters.contains("guarantors")) {
@@ -306,12 +311,23 @@ public class LoansApiResource {
                     loanRepayments = currentLoanRepayments;
                 }
             }
+            
+            if(associationParameters.contains("multiDisburseDetails") || associationParameters.contains("repaymentSchedule")){
+                mandatoryResponseParameters.add("multiDisburseDetails");
+                disbursementData = this.loanReadPlatformService.retrieveLoanDisbursementDetails(loanId);
+            }
+            
 
+            if(associationParameters.contains("emiAmountVariations") || associationParameters.contains("repaymentSchedule")){
+                mandatoryResponseParameters.add("emiAmountVariations");
+                emiAmountVariations = this.loanReadPlatformService.retrieveLoanTermVariations(loanId, LoanTermVariationType.EMI_AMOUNT.getValue());
+            }
+            
             if (associationParameters.contains("repaymentSchedule")) {
                 mandatoryResponseParameters.add("repaymentSchedule");
 
                 final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData = loanBasicDetails.repaymentScheduleRelatedData();
-                repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, repaymentScheduleRelatedData);
+                repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, repaymentScheduleRelatedData, disbursementData);
             }
 
             if (associationParameters.contains("charges")) {
@@ -347,6 +363,7 @@ public class LoansApiResource {
                 mandatoryResponseParameters.add("linkedAccount");
                 linkedAccount = this.accountAssociationsReadPlatformService.retriveLoanAssociation(loanId);
             }
+            
         }
 
         Collection<LoanProductData> productOptions = null;
@@ -411,7 +428,7 @@ public class LoansApiResource {
                 charges, collateral, guarantors, meeting, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers, loanPurposeOptions,
-                loanCollateralOptions, calendarOptions, notes, accountLinkingOptions, linkedAccount);
+                loanCollateralOptions, calendarOptions, notes, accountLinkingOptions, linkedAccount, disbursementData,emiAmountVariations);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);

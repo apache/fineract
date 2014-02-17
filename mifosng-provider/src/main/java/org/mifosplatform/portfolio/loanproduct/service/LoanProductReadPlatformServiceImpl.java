@@ -120,6 +120,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.grace_on_principal_periods as graceOnPrincipalPayment, lp.grace_on_interest_periods as graceOnInterestPayment, lp.grace_interest_free_periods as graceOnInterestCharged,"
                     + "lp.amortization_method_enum as amortizationMethod, lp.arrearstolerance_amount as tolerance, "
                     + "lp.accounting_type as accountingType, lp.include_in_borrower_cycle as includeInBorrowerCycle,lp.use_borrower_cycle as useBorrowerCycle, lp.start_date as startDate, lp.close_date as closeDate,  "
+                    + "lp.multi_disburse_loan as multiDisburseLoan, lp.max_tranche_count as maxTrancheCount, lp.outstanding_loan_balance as outstandingLoanBalance, "
                     + "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol, lp.external_id as externalId "
                     + " from m_product_loan lp "
                     + " left join m_fund f on f.id = lp.fund_id"
@@ -213,6 +214,11 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     }
                 }
             }
+            
+
+            final Boolean multiDisburseLoan = rs.getBoolean("multiDisburseLoan");
+            final Integer maxTrancheCount = rs.getInt("maxTrancheCount");
+            final BigDecimal outstandingLoanBalance = rs.getBigDecimal("outstandingLoanBalance");
 
             return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -221,7 +227,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     transactionStrategyId, transactionStrategyName, graceOnPrincipalPayment, graceOnInterestPayment,
                     graceOnInterestCharged, this.charges, accountingRuleType, includeInBorrowerCycle, useBorrowerCycle, startDate,
                     closeDate, status, externalId, principalVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle,
-                    numberOfRepaymentVariationsForBorrowerCycle);
+                    numberOfRepaymentVariationsForBorrowerCycle, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance);
         }
 
     }

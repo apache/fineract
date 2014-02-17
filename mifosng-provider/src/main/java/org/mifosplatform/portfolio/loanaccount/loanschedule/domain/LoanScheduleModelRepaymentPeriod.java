@@ -23,9 +23,9 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
     private final Money principalDue;
     private final Money outstandingLoanBalance;
     private final Money interestDue;
-    private final Money feeChargesDue;
-    private final Money penaltyChargesDue;
-    private final Money totalDue;
+    private Money feeChargesDue;
+    private Money penaltyChargesDue;
+    private Money totalDue;
 
     public static LoanScheduleModelRepaymentPeriod repayment(final int periodNumber, final LocalDate startDate,
             final LocalDate scheduledDueDate, final Money principalDue, final Money outstandingLoanBalance, final Money interestDue,
@@ -34,7 +34,7 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
         return new LoanScheduleModelRepaymentPeriod(periodNumber, startDate, scheduledDueDate, principalDue, outstandingLoanBalance,
                 interestDue, feeChargesDue, penaltyChargesDue, totalDue);
     }
-
+    
     public LoanScheduleModelRepaymentPeriod(final int periodNumber, final LocalDate fromDate, final LocalDate dueDate,
             final Money principalDue, final Money outstandingLoanBalance, final Money interestDue, final Money feeChargesDue,
             final Money penaltyChargesDue, final Money totalDue) {
@@ -114,5 +114,12 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
         }
 
         return value;
+    }
+
+    @Override
+    public void addLoanCharges(BigDecimal feeCharge, BigDecimal penaltyCharge) {
+        this.feeChargesDue = this.feeChargesDue.plus(feeCharge);
+        this.penaltyChargesDue = this.penaltyChargesDue.plus(penaltyCharge);
+        this.totalDue = this.totalDue.plus(feeCharge).plus(penaltyCharge);
     }
 }

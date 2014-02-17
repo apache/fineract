@@ -348,7 +348,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = this.applicationContext.getBean("loanApplicationDeletionCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUndoLoanWriteOff()) {
                 handler = this.applicationContext.getBean("undoWriteOffLoanCommandHandler", NewCommandSourceHandler.class);
-            }else {
+            } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
         } else if (wrapper.isLoanChargeResource()) {
@@ -363,7 +363,11 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else if (wrapper.isPayLoanCharge()) {
                 handler = this.applicationContext.getBean("payLoanChargeCommandHandler", NewCommandSourceHandler.class);
             }
-        } else if (wrapper.isGLAccountResource()) {
+        } else if(wrapper.isLoanDisburseDetailResource()){
+            if(wrapper.isUpdateDisbursementDate()){
+                handler = this.applicationContext.getBean("updateLoanDisbuseDateCommandHandler", NewCommandSourceHandler.class);
+            }
+        }else if (wrapper.isGLAccountResource()) {
             if (wrapper.isCreate()) {
                 handler = this.applicationContext.getBean("createGLAccountCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdate()) {

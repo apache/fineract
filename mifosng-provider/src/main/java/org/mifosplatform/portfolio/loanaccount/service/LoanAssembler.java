@@ -5,10 +5,15 @@
  */
 package org.mifosplatform.portfolio.loanaccount.service;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
@@ -39,16 +44,20 @@ import org.mifosplatform.portfolio.group.domain.GroupRepository;
 import org.mifosplatform.portfolio.group.exception.ClientNotInGroupException;
 import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
+import org.mifosplatform.portfolio.loanaccount.api.LoanApiConstants;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionProcessingStrategyRepository;
+import org.mifosplatform.portfolio.loanaccount.exception.ExceedingTrancheCountException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionProcessingStrategyNotFoundException;
+import org.mifosplatform.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
@@ -63,7 +72,9 @@ import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 @Service
 public class LoanAssembler {
@@ -178,13 +189,33 @@ public class LoanAssembler {
         final String loanTypeParameterName = "loanType";
         final String loanTypeStr = this.fromApiJsonHelper.extractStringNamed(loanTypeParameterName, element);
         final EnumOptionData loanType = AccountEnumerations.loanType(loanTypeStr);
+        Set<LoanDisbursementDetails> disbursementDetails = null;
+        BigDecimal fixedEmiAmount = null;
+        BigDecimal maxOutstandingLoanBalance = null;
+        if(loanProduct.isMultiDisburseLoan()){
+            disbursementDetails = fetchDisbursementData(element.getAsJsonObject());
+            final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject());
+            fixedEmiAmount = this.fromApiJsonHelper.extractBigDecimalNamed(LoanApiConstants.emiAmountParameterName, element, locale);
+            maxOutstandingLoanBalance = this.fromApiJsonHelper.extractBigDecimalNamed(LoanApiConstants.maxOutstandingBalanceParameterName, element, locale);
+            if(disbursementDetails.isEmpty()){
+                final String errorMessage = "For this loan product, disbursement details must be provided";
+                throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+            }
+            
+            if(disbursementDetails.size() > loanProduct.maxTrancheCount()){
+                final String errorMessage = "Number of tranche shouldn't be greter than "+loanProduct.maxTrancheCount();
+                throw new ExceedingTrancheCountException(LoanApiConstants.disbursementDataParameterName, errorMessage,
+                        loanProduct.maxTrancheCount(),disbursementDetails.size());
+            }
+        }
 
         if (clientId != null) {
             client = this.clientRepository.findOneWithNotFoundDetection(clientId);
             if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
 
             loanApplication = Loan.newIndividualLoanApplication(accountNo, client, loanType.getId().intValue(), loanProduct, fund,
-                    loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral);
+                    loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral, 
+                    fixedEmiAmount, disbursementDetails,maxOutstandingLoanBalance);
         }
 
         if (groupId != null) {
@@ -193,7 +224,8 @@ public class LoanAssembler {
             if (group.isNotActive()) { throw new GroupNotActiveException(groupId); }
 
             loanApplication = Loan.newGroupLoanApplication(accountNo, group, loanType.getId().intValue(), loanProduct, fund, loanOfficer,
-                    loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, syncDisbursementWithMeeting);
+                    loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, syncDisbursementWithMeeting, fixedEmiAmount, 
+                    disbursementDetails, maxOutstandingLoanBalance);
         }
 
         if (client != null && group != null) {
@@ -202,9 +234,9 @@ public class LoanAssembler {
 
             loanApplication = Loan.newIndividualLoanApplicationFromGroup(accountNo, client, group, loanType.getId().intValue(),
                     loanProduct, fund, loanOfficer, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges,
-                    syncDisbursementWithMeeting);
+                    syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails,maxOutstandingLoanBalance);
         }
-
+        
         final String externalId = this.fromApiJsonHelper.extractStringNamed("externalId", element);
         final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed("submittedOnDate", element);
 
@@ -212,6 +244,12 @@ public class LoanAssembler {
         loanApplication.setHelpers(defaultLoanLifecycleStateMachine(), this.loanSummaryWrapper,
                 this.loanRepaymentScheduleTransactionProcessorFactory);
 
+        if(loanProduct.isMultiDisburseLoan()){
+            for(final LoanDisbursementDetails loanDisbursementDetails:loanApplication.getDisbursementDetails()){
+                loanDisbursementDetails.updateLoan(loanApplication);
+            }
+        }
+        
         final LoanApplicationTerms loanApplicationTerms = this.loanScheduleAssembler.assembleLoanTerms(element);
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loanApplication.getOfficeId(),
@@ -227,6 +265,40 @@ public class LoanAssembler {
         return loanApplication;
     }
 
+    
+    private Set<LoanDisbursementDetails> fetchDisbursementData(final JsonObject command) {
+        final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(command);
+        final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(command);
+        Set<LoanDisbursementDetails> disbursementDatas = new HashSet<LoanDisbursementDetails>();
+        if (command.has(LoanApiConstants.disbursementDataParameterName)) {
+            final JsonArray disbursementDataArray = command.getAsJsonArray(LoanApiConstants.disbursementDataParameterName);
+            if (disbursementDataArray != null && disbursementDataArray.size() > 0) {
+                int i = 0;
+                do {
+                    final JsonObject jsonObject = disbursementDataArray.get(i).getAsJsonObject();
+                    Date expectedDisbursementDate = null;
+                    BigDecimal principal = null;
+
+                    if (jsonObject.has(LoanApiConstants.disbursementDateParameterName)) {
+                       LocalDate date = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName, jsonObject,dateFormat,locale);
+                       if(date!=null){
+                           expectedDisbursementDate = date.toDate();
+                       }
+                    }
+                    if (jsonObject.has(LoanApiConstants.disbursementPrincipalParameterName)
+                            && jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).isJsonPrimitive()
+                            && StringUtils.isNotBlank((jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).getAsString()))) {
+                        principal = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementPrincipalParameterName).getAsBigDecimal();
+                    }
+                    disbursementDatas.add(new LoanDisbursementDetails(expectedDisbursementDate, null, principal));
+                    i++;
+                } while (i < disbursementDataArray.size());
+            }
+        }
+        return disbursementDatas;
+    }
+    
+    
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
         final List<LoanStatus> allowedLoanStatuses = Arrays.asList(LoanStatus.values());
         return new DefaultLoanLifecycleStateMachine(allowedLoanStatuses);

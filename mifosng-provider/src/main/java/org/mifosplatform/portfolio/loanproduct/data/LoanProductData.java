@@ -106,6 +106,10 @@ public class LoanProductData {
     private final Map<String, List<GLAccountData>> accountingMappingOptions;
     @SuppressWarnings("unused")
     private final List<EnumOptionData> valueConditionTypeOptions;
+    
+    private final Boolean multiDisburseLoan;
+    private final Integer maxTrancheCount;
+    private final BigDecimal outstandingLoanBalance;
     /**
      * Used when returning lookup information about loan product for dropdowns.
      */
@@ -148,13 +152,16 @@ public class LoanProductData {
         final LocalDate closeDate = null;
         final String status = null;
         final String externalId = null;
-        return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
+        final Boolean multiDisburseLoan = null;
+        final Integer maxTrancheCount = null; 
+        final BigDecimal outstandingLoanBalance = null;
+        return new LoanProductData(id, name,shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
                 minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod, minInterestRatePerPeriod,
                 maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
                 transactionProcessingStrategyName, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges,
                 accountingType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariations, 
-                interestRateVariations, numberOfRepaymentVariations);
+                interestRateVariations, numberOfRepaymentVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance);
     }
 
     public static LoanProductData lookupWithCurrency(final Long id, final String name, final CurrencyData currency) {
@@ -197,6 +204,10 @@ public class LoanProductData {
         final Collection<LoanProductBorrowerCycleVariationData> principalVariations = new ArrayList<LoanProductBorrowerCycleVariationData>(1);
         final Collection<LoanProductBorrowerCycleVariationData> interestRateVariations = new ArrayList<LoanProductBorrowerCycleVariationData>(1);
         final Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariations = new ArrayList<LoanProductBorrowerCycleVariationData>(1);
+        final Boolean multiDisburseLoan = null;
+        final Integer maxTrancheCount = null; 
+        final BigDecimal outstandingLoanBalance = null;
+
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
                 minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod, minInterestRatePerPeriod,
@@ -204,7 +215,7 @@ public class LoanProductData {
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
                 transactionProcessingStrategyName, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges,
                 accountingType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariations, 
-                interestRateVariations, numberOfRepaymentVariations);
+                interestRateVariations, numberOfRepaymentVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance);
     }
 
     public static LoanProductData sensibleDefaultsForNewLoanProductCreation() {
@@ -253,6 +264,10 @@ public class LoanProductData {
         final LocalDate closeDate = null;
         final String status = null;
         final String externalId = null;
+        final Boolean multiDisburseLoan = null;
+        final Integer maxTrancheCount = null; 
+        final BigDecimal outstandingLoanBalance = null;
+
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
                 minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod, minInterestRatePerPeriod,
@@ -260,7 +275,7 @@ public class LoanProductData {
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
                 transactionProcessingStrategyName, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges,
                 accountingType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariationsForBorrowerCycle, 
-                interestRateVariationsForBorrowerCycle, numberOfRepaymentVariationsForBorrowerCycle);
+                interestRateVariationsForBorrowerCycle, numberOfRepaymentVariationsForBorrowerCycle, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance);
     }
 
     public static LoanProductData withAccountingDetails(final LoanProductData productData, final Map<String, Object> accountingMappings,
@@ -286,7 +301,8 @@ public class LoanProductData {
             final Collection<ChargeData> charges, final EnumOptionData accountingType, final boolean includeInBorrowerCycle,
             boolean useBorrowerCycle, final LocalDate startDate, final LocalDate closeDate, final String status, final String externalId, 
             Collection<LoanProductBorrowerCycleVariationData> principalVariations, Collection<LoanProductBorrowerCycleVariationData> interestRateVariations, 
-            Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariations) {
+            Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariations, Boolean multiDisburseLoan, Integer maxTrancheCount, 
+            BigDecimal outstandingLoanBalance) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -347,6 +363,9 @@ public class LoanProductData {
         this.principalVariationsForBorrowerCycle = principalVariations;
         this.interestRateVariationsForBorrowerCycle = interestRateVariations;
         this.numberOfRepaymentVariationsForBorrowerCycle = numberOfRepaymentVariations;
+        this.multiDisburseLoan = multiDisburseLoan;
+        this.outstandingLoanBalance = outstandingLoanBalance;
+        this.maxTrancheCount = maxTrancheCount;
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
@@ -419,6 +438,9 @@ public class LoanProductData {
         this.graceOnInterestCharged = productData.graceOnInterestCharged;
         this.includeInBorrowerCycle = productData.includeInBorrowerCycle;
         this.useBorrowerCycle = productData.useBorrowerCycle;
+        this.multiDisburseLoan = productData.multiDisburseLoan;
+        this.maxTrancheCount = productData.maxTrancheCount;
+        this.outstandingLoanBalance = productData.outstandingLoanBalance;
 
         this.amortizationTypeOptions = amortizationTypeOptions;
         this.interestTypeOptions = interestTypeOptions;
@@ -609,5 +631,15 @@ public class LoanProductData {
     
     public Collection<LoanProductBorrowerCycleVariationData> getNumberOfRepaymentVariationsForBorrowerCycle() {
         return this.numberOfRepaymentVariationsForBorrowerCycle;
+    }
+
+    
+    public Boolean getMultiDisburseLoan() {
+        return this.multiDisburseLoan;
+    }
+
+    
+    public BigDecimal getOutstandingLoanBalance() {
+        return this.outstandingLoanBalance;
     }
 }

@@ -279,4 +279,9 @@ public final class LoanSummary {
     public BigDecimal getTotalPrincipalDisbursed() {
         return this.totalPrincipalDisbursed;
     }
+
+    
+    public BigDecimal getTotalPrincipalRepaid() {
+        return this.totalPrincipalRepaid;
+    }
 }

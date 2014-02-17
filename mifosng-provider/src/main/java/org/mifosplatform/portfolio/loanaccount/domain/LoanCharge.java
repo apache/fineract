@@ -662,15 +662,14 @@ public class LoanCharge extends AbstractPersistable<Long> {
             amountPaidToDate = amountPaidToDate.plus(amountOutstanding);
             this.amountPaid = amountPaidToDate.getAmount();
             this.amountOutstanding = BigDecimal.ZERO;
+            this.paid = true;
+
         } else {
             amountPaidOnThisCharge = processAmount;
             amountPaidToDate = amountPaidToDate.plus(processAmount);
             this.amountPaid = amountPaidToDate.getAmount();
             this.amountOutstanding = calculateAmountOutstanding(incrementBy.getCurrency());
         }
-
-        this.paid = determineIfFullyPaid();
-
         return amountPaidOnThisCharge;
     }
 
@@ -766,6 +765,10 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     public boolean hasNoLoanInstallmentCharges(){
         return this.loanInstallmentCharge.isEmpty();
+    }
+    
+    public Set<LoanInstallmentCharge>  installmentCharges(){
+        return this.loanInstallmentCharge;
     }
 
     public LoanRepaymentScheduleInstallment fetchRepaymentInstallment(final Money trasferedAmount){

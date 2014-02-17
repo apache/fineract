@@ -47,6 +47,8 @@ import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWr
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.mifosplatform.portfolio.account.data.AccountTransferDTO;
 import org.mifosplatform.portfolio.account.data.PortfolioAccountData;
+import org.mifosplatform.portfolio.account.domain.AccountTransfer;
+import org.mifosplatform.portfolio.account.domain.AccountTransferRepository;
 import org.mifosplatform.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.mifosplatform.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.mifosplatform.portfolio.account.service.AccountTransfersWritePlatformService;
@@ -85,6 +87,7 @@ import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanChargeRepository;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
@@ -151,6 +154,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanChargeReadPlatformService LoanChargeReadPlatformService;
     private final LoanReadPlatformService loanReadPlatformService;
     private final FromJsonHelper fromApiJsonHelper;
+    private final AccountTransferRepository accountTransferRepository;
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -169,7 +173,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final AccountTransfersReadPlatformService accountTransfersReadPlatformService,
             final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
             final LoanChargeReadPlatformService loanChargeReadPlatformService, final LoanReadPlatformService loanReadPlatformService,
-            final FromJsonHelper fromApiJsonHelper) {
+            final FromJsonHelper fromApiJsonHelper,final AccountTransferRepository accountTransferRepository) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
@@ -195,6 +199,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.LoanChargeReadPlatformService = loanChargeReadPlatformService;
         this.loanReadPlatformService = loanReadPlatformService;
         this.fromApiJsonHelper = fromApiJsonHelper;
+        this.accountTransferRepository = accountTransferRepository;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -247,12 +252,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
         updateLoanCounters(loan, actualDisbursementDate);
 
-        loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, existingTransactionIds,
-                existingReversedTransactionIds, changes, paymentDetail, calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays,
-                workingDays, allowTransactionsOnHoliday, allowTransactionsOnNonWorkingDay);
+        loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, 
+                existingTransactionIds, existingReversedTransactionIds, changes, paymentDetail, calculatedRepaymentsStartingFromDate, isHolidayEnabled, 
+                holidays,workingDays, allowTransactionsOnHoliday, allowTransactionsOnNonWorkingDay);
 
         if (!changes.isEmpty()) {
-            try {
+            try{
                 this.loanRepository.saveAndFlush(loan);
             } catch (final DataIntegrityViolationException e) {
                 final Throwable realCause = e.getCause();
@@ -265,10 +270,34 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                         "validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors); }
             }
 
+
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
                 final Note note = Note.loanNote(loan, noteText);
                 this.noteRepository.save(note);
+            }
+            
+            //fix me
+            //adding loan installment charges along with the actual disbursement, is trying to add 2 extra entries with null values. which is causing issues
+            ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactionForDisbursement();
+            try{
+                this.loanRepository.saveAndFlush(loan);
+            } catch (final DataIntegrityViolationException e) {
+                final Throwable realCause = e.getCause();
+                final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+                final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
+                if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
+                    baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
+                }
+                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(
+                        "validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors); }
+            }
+            
+            if (changedTransactionDetail != null) {
+                for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+                    this.loanTransactionRepository.save(mapEntry.getValue());
+                    this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+                }
             }
 
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
@@ -277,14 +306,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Set<LoanCharge> loanCharges = loan.charges();
         final Map<Long, BigDecimal> disBuLoanCharges = new HashMap<Long, BigDecimal>();
         for (final LoanCharge loanCharge : loanCharges) {
-            if (loanCharge.isDueAtDisbursement() && loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
-                disBuLoanCharges.put(loanCharge.getId(), loanCharge.amount());
-            } else if (loanCharge.isInstalmentFee() && loanCharge.hasNoLoanInstallmentCharges()) {
-                final Set<LoanInstallmentCharge> chargePerInstallments = loan.generateInstallmentLoanCharges(loanCharge);
-                loanCharge.addLoanInstallmentCharges(chargePerInstallments);
-                this.loanChargeRepository.save(loanCharge);
-            }
+            if (loanCharge.isDueAtDisbursement() && loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer() 
+                    && loanCharge.isNotFullyPaid() && !loanCharge.isWaived()) {
+                disBuLoanCharges.put(loanCharge.getId(), loanCharge.amountOutstanding());
+            } 
         }
+        
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
         for (final Map.Entry<Long, BigDecimal> entrySet : disBuLoanCharges.entrySet()) {
@@ -398,19 +425,38 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     final Note note = Note.loanNote(loan, noteText);
                     this.noteRepository.save(note);
                 }
+                
+                //fix me
+                //adding loan installment charges along with the actual disbursement, is trying to add 2 extra entries with null values. which is causing issues
+                ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactionForDisbursement();
+                try{
+                    this.loanRepository.saveAndFlush(loan);
+                } catch (final DataIntegrityViolationException e) {
+                    final Throwable realCause = e.getCause();
+                    final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+                    final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
+                    if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
+                        baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
+                    }
+                    if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(
+                            "validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors); }
+                }
+                if (changedTransactionDetail != null) {
+                    for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+                        this.loanTransactionRepository.save(mapEntry.getValue());
+                        this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+                    }
+                }
 
                 postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
             }
             final Set<LoanCharge> loanCharges = loan.charges();
             final Map<Long, BigDecimal> disBuLoanCharges = new HashMap<Long, BigDecimal>();
             for (final LoanCharge loanCharge : loanCharges) {
-                if (loanCharge.isDueAtDisbursement() && loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
-                    disBuLoanCharges.put(loanCharge.getId(), loanCharge.amount());
-                } else if (loanCharge.isInstalmentFee() && loanCharge.hasNoLoanInstallmentCharges()) {
-                    final Set<LoanInstallmentCharge> chargePerInstallments = loan.generateInstallmentLoanCharges(loanCharge);
-                    loanCharge.addLoanInstallmentCharges(chargePerInstallments);
-                    this.loanChargeRepository.save(loanCharge);
-                }
+                if (loanCharge.isDueAtDisbursement() && loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer() 
+                        && loanCharge.isNotFullyPaid() && !loanCharge.isWaived()) {
+                    disBuLoanCharges.put(loanCharge.getId(), loanCharge.amountOutstanding());
+                } 
             }
             final Locale locale = command.extractLocale();
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
@@ -737,12 +783,30 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
-        final LoanTransaction writeoff = loan.closeAsWrittenOff(command, defaultLoanLifecycleStateMachine(), changes,
-                existingTransactionIds, existingReversedTransactionIds, currentUser);
+        
+        final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByLoanId(loan.getId(),
+                CalendarEntityType.LOANS.getValue());
+        final LocalDate calculatedRepaymentsStartingFromDate = getCalculatedRepaymentsStartingFromDate(loan.getDisbursementDate(), loan,
+                calendarInstance);
+        final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
+                loan.getDisbursementDate().toDate());
+        final WorkingDays workingDays = this.workingDaysRepository.findOne();
+        updateLoanCounters(loan, loan.getDisbursementDate());
 
+        final MonetaryCurrency currency = loan.getCurrency();
+        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
+
+        final ChangedTransactionDetail changedTransactionDetail = loan.closeAsWrittenOff(command, defaultLoanLifecycleStateMachine(), changes,
+                existingTransactionIds, existingReversedTransactionIds, currentUser, this.loanScheduleFactory, 
+                applicationCurrency, calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays);
+        LoanTransaction writeoff = changedTransactionDetail.getNewTransactionMappings().remove(0L);
         this.loanTransactionRepository.save(writeoff);
+        for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+            this.loanTransactionRepository.save(mapEntry.getValue());
+            this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+        }
         this.loanRepository.save(loan);
-
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
@@ -782,12 +846,32 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
 
-        final LoanTransaction possibleClosingTransaction = loan.close(command, defaultLoanLifecycleStateMachine(), changes,
-                existingTransactionIds, existingReversedTransactionIds);
+        final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByLoanId(loan.getId(),
+                CalendarEntityType.LOANS.getValue());
+        final LocalDate calculatedRepaymentsStartingFromDate = getCalculatedRepaymentsStartingFromDate(loan.getDisbursementDate(), loan,
+                calendarInstance);
+        final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
+                loan.getDisbursementDate().toDate());
+        final WorkingDays workingDays = this.workingDaysRepository.findOne();
+        updateLoanCounters(loan, loan.getDisbursementDate());
+
+        final MonetaryCurrency currency = loan.getCurrency();
+        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
+
+        ChangedTransactionDetail changedTransactionDetail = loan.close(command, defaultLoanLifecycleStateMachine(), changes,
+                existingTransactionIds, existingReversedTransactionIds,this.loanScheduleFactory, 
+                applicationCurrency, calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays);
+        final LoanTransaction possibleClosingTransaction = changedTransactionDetail.getNewTransactionMappings().remove(0L);
         if (possibleClosingTransaction != null) {
             this.loanTransactionRepository.save(possibleClosingTransaction);
         }
+        for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+            this.loanTransactionRepository.save(mapEntry.getValue());
+            this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+        }
         this.loanRepository.save(loan);
+        
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
@@ -1746,5 +1830,58 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         .withGroupId(loan.getGroupId()) //
         .withLoanId(loanId) //
         .build();
+    }
+    
+    @Override
+    @Transactional
+    public CommandProcessingResult updateDisbursementDateForTranche(final Long loanId,final Long disbursementId, final JsonCommand command){
+        
+        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        checkClientOrGroupActive(loan);
+        LoanDisbursementDetails  loanDisbursementDetails = loan.fetchLoanDisbursementsById(disbursementId);
+        this.loanEventApiJsonValidator.validateUpdateDisbursementDate(command.json(),loanDisbursementDetails);
+        final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByLoanId(loan.getId(),
+                CalendarEntityType.LOANS.getValue());
+        final LocalDate calculatedRepaymentsStartingFromDate = getCalculatedRepaymentsStartingFromDate(loan.getDisbursementDate(), loan,
+                calendarInstance);
+        final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
+                loan.getDisbursementDate().toDate());
+        final WorkingDays workingDays = this.workingDaysRepository.findOne();
+
+        final MonetaryCurrency currency = loan.getCurrency();
+        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+        final ChangedTransactionDetail changedTransactionDetail = loan.updateDisbursementDateForTranche(loanDisbursementDetails,command, existingTransactionIds, existingReversedTransactionIds,
+                changes,this.loanScheduleFactory,applicationCurrency, calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays);
+        
+        this.loanRepository.saveAndFlush(loan);
+        
+        if (changedTransactionDetail != null) {
+            for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+                updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+            }
+        }
+        
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+        
+        return new CommandProcessingResultBuilder() //
+        .withOfficeId(loan.getOfficeId()) //
+        .withClientId(loan.getClientId()) //
+        .withGroupId(loan.getGroupId()) //
+        .withLoanId(loanId) //
+        .with(changes)
+        .build();
+
+    }
+    
+    private void updateLoanTransaction(final Long loanTransactionId, final LoanTransaction newLoanTransaction) {
+        final AccountTransfer transferTransaction = this.accountTransferRepository.findByToLoanTransactionId(loanTransactionId);
+        if (transferTransaction != null) {
+            transferTransaction.updateToLoanTransaction(newLoanTransaction);
+            this.accountTransferRepository.save(transferTransaction);
+        }
     }
 }

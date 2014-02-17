@@ -50,4 +50,9 @@ public interface LoanProductConstants {
     public static final String VALUE_CONDITION_END_WITH_ERROR = "condition.type.must.end.with.greterthan";
     public static final String VALUE_CONDITION_START_WITH_ERROR = "condition.type.must.start.with.equal";
     public static final String shortName = "shortName";
+    
+    public static final String multiDisburseLoanParameterName = "multiDisburseLoan";
+    public static final String maxTrancheCountParameterName = "maxTrancheCount";
+    public static final String outstandingLoanBalanceParameterName = "outstandingLoanBalance";
+    
 }

@@ -96,6 +96,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     @Column(name = "use_borrower_cycle")
     private boolean useBorrowerCycle;
+    
+    @Embedded
+    private LoanProductTrancheDetails loanProducTrancheDetails;
 
     @Column(name = "start_date", nullable = true)
     @Temporal(TemporalType.DATE)
@@ -165,12 +168,22 @@ public class LoanProduct extends AbstractPersistable<Long> {
             populateBorrowerCyclevariations(command, loanProductBorrowerCycleVariations);
         }
 
+        
+       final boolean multiDisburseLoan = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.multiDisburseLoanParameterName);
+       Integer maxTrancheCount = null;
+       BigDecimal outstandingLoanBalance = null;
+       if(multiDisburseLoan){
+           outstandingLoanBalance = command.bigDecimalValueOfParameterNamed(LoanProductConstants.outstandingLoanBalanceParameterName);
+           maxTrancheCount = command.integerValueOfParameterNamed(LoanProductConstants.maxTrancheCountParameterName);
+       }
+ 
+        
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal, maxPrincipal,
                 interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType, annualInterestRate,
                 interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentFrequencyType, numberOfRepayments,
                 minNumberOfRepayments, maxNumberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                 amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle, startDate, closeDate,
-                externalId, useBorrowerCycle, loanProductBorrowerCycleVariations);
+                externalId, useBorrowerCycle, loanProductBorrowerCycleVariations,multiDisburseLoan,maxTrancheCount,outstandingLoanBalance);
     }
 
     /**
@@ -379,7 +392,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final List<Charge> charges,
             final AccountingRuleType accountingRuleType, final boolean includeInBorrowerCycle, final LocalDate startDate,
             final LocalDate closeDate, final String externalId, final boolean useBorrowerCycle,
-            final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations) {
+            final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations,
+            final boolean multiDisburseLoan,final Integer maxTrancheCount, final BigDecimal outstandingLoanBalance) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -424,6 +438,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         for (LoanProductBorrowerCycleVariations borrowerCycleVariations : this.borrowerCycleVariations) {
             borrowerCycleVariations.updateLoanProduct(this);
         }
+        this.loanProducTrancheDetails   = new LoanProductTrancheDetails(multiDisburseLoan, maxTrancheCount, outstandingLoanBalance);
     }
 
     public MonetaryCurrency getCurrency() {
@@ -586,9 +601,11 @@ public class LoanProduct extends AbstractPersistable<Long> {
             actualChanges.put(accountingTypeParamName, newValue);
             this.externalId = newValue;
         }
+        loanProducTrancheDetails.update(command, actualChanges, localeAsInput);
 
         return actualChanges;
     }
+
 
     public boolean isCashBasedAccountingEnabled() {
         return AccountingRuleType.CASH_BASED.getValue().equals(this.accountingRule);
@@ -677,6 +694,18 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     public boolean useBorrowerCycle() {
         return this.useBorrowerCycle;
+    }
+    
+    public boolean isMultiDisburseLoan(){
+        return this.loanProducTrancheDetails.isMultiDisburseLoan();
+    }
+    
+    public BigDecimal outstandingLoanBalance() {
+        return this.loanProducTrancheDetails.outstandingLoanBalance();
+    }
+    
+    public Integer maxTrancheCount() {
+        return this.loanProducTrancheDetails.maxTrancheCount();
     }
 
     public LoanProductBorrowerCycleVariations fetchLoanProductBorrowerCycleVariationById(Long id) {

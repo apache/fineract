@@ -629,6 +629,16 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId;
         return this;
     }
+    
+    public CommandWrapperBuilder updateDisbusementDate(final Long loanId,final Long disbursementId) {
+        this.actionName = "UPDATE";
+        this.entityName = "DISBURSEMENTDETAIL";
+        this.entityId = disbursementId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/disbursementdetail/" + disbursementId;
+        return this;
+    }
+
 
     public CommandWrapperBuilder deleteLoanApplication(final Long loanId) {
         this.actionName = "DELETE";

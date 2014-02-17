@@ -72,7 +72,7 @@ public class LoanSchedulePeriodData {
 
     public static LoanSchedulePeriodData disbursementOnlyPeriod(final LocalDate disbursementDate, final BigDecimal principalDisbursed,
             final BigDecimal feeChargesDueAtTimeOfDisbursement, final boolean isDisbursed) {
-        final Integer periodNumber = Integer.valueOf(0);
+        final Integer periodNumber = null;
         final LocalDate from = null;
         return new LoanSchedulePeriodData(periodNumber, from, disbursementDate, principalDisbursed, feeChargesDueAtTimeOfDisbursement,
                 isDisbursed);

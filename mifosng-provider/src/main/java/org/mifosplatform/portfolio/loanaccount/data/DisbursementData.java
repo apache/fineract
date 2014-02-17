@@ -12,17 +12,25 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing disbursement information.
  */
-public class DisbursementData {
+public class DisbursementData implements Comparable<DisbursementData>{
 
+    @SuppressWarnings("unused")
+    private final Long id;
     private final LocalDate expectedDisbursementDate;
     private final LocalDate actualDisbursementDate;
     private final BigDecimal principal;
+    @SuppressWarnings("unused")
+    private final BigDecimal approvedPrincipal;
+    
 
-    public DisbursementData(final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate,
-            final BigDecimal principalDisbursed) {
+    public DisbursementData(Long id, final LocalDate expectedDisbursementDate,
+            final LocalDate actualDisbursementDate, final BigDecimal principalDisbursed,
+            final BigDecimal approvedPrincipal) {
+        this.id = id;
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.actualDisbursementDate = actualDisbursementDate;
         this.principal = principalDisbursed;
+        this.approvedPrincipal = approvedPrincipal;
     }
 
     public LocalDate disbursementDate() {
@@ -40,4 +48,24 @@ public class DisbursementData {
     public boolean isDisbursed() {
         return this.actualDisbursementDate != null;
     }
+    
+    @Override
+    public int compareTo(final DisbursementData obj) {
+        if (obj == null) { return -1; }
+
+        return obj.expectedDisbursementDate.compareTo(this.expectedDisbursementDate);
+    }
+    
+    public boolean isDueForDisbursement(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive) {
+        final LocalDate dueDate = disbursementDate();
+        return occursOnDayFromAndUpToAndIncluding(fromNotInclusive, upToAndInclusive, dueDate);
+    }
+    
+    private boolean occursOnDayFromAndUpToAndIncluding(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive,
+            final LocalDate target) {
+        return target != null && target.isAfter(fromNotInclusive) && !target.isAfter(upToAndInclusive);
+    }
+
+
+
 }
