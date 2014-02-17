@@ -316,6 +316,15 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
 
         account.postInterest(mc, today);
+        
+        // for generating transaction id's
+        List<SavingsAccountTransaction> transactions = account.getTransactions();
+        for(SavingsAccountTransaction accountTransaction:transactions){
+            if(accountTransaction.getId() == null){
+                this.savingsAccountTransactionRepository.save(accountTransaction);
+            }
+        }
+
         this.savingAccountRepository.save(account);
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
