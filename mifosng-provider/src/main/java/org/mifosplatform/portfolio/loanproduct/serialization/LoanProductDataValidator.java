@@ -321,10 +321,11 @@ public final class LoanProductDataValidator {
             final Boolean useBorrowerCycle = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.useBorrowerCycleParameterName, element);
             baseDataValidator.reset().parameter(LoanProductConstants.useBorrowerCycleParameterName).value(useBorrowerCycle).ignoreIfNull()
                     .validateForBooleanValue();
+            if(useBorrowerCycle){
+                validateBorrowerCycleVariations(element, baseDataValidator);    
+            }
         }
 
-
-        validateBorrowerCycleVariations(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -575,9 +576,12 @@ public final class LoanProductDataValidator {
             final Boolean useBorrowerCycle = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.useBorrowerCycleParameterName, element);
             baseDataValidator.reset().parameter(LoanProductConstants.useBorrowerCycleParameterName).value(useBorrowerCycle).ignoreIfNull()
                     .validateForBooleanValue();
+            if(useBorrowerCycle){
+                validateBorrowerCycleVariations(element, baseDataValidator);
+            }
         }
 
-        validateBorrowerCycleVariations(element, baseDataValidator);
+        
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
