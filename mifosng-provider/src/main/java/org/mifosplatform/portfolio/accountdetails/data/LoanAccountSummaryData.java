@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.accountdetails.data;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanApplicationTimelineData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 
 /**
@@ -22,9 +23,11 @@ public class LoanAccountSummaryData {
     private final LoanStatusEnumData status;
     private final EnumOptionData loanType;
     private final Integer loanCycle;
+    private final LoanApplicationTimelineData timeline;
 
     public LoanAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
-            final String loanProductName, final LoanStatusEnumData loanStatus, final EnumOptionData loanType, final Integer loanCycle) {
+            final String loanProductName, final LoanStatusEnumData loanStatus, final EnumOptionData loanType, final Integer loanCycle,
+            final LoanApplicationTimelineData timeline) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -33,5 +36,6 @@ public class LoanAccountSummaryData {
         this.status = loanStatus;
         this.loanType = loanType;
         this.loanCycle = loanCycle;
+        this.timeline = timeline;
     }
 }

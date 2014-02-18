@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountApplicationTimelineData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountStatusEnumData;
 
 /**
@@ -26,10 +27,11 @@ public class SavingsAccountSummaryData {
     private final CurrencyData currency;
     private final BigDecimal accountBalance;
     private final EnumOptionData accountType;
+    private final SavingsAccountApplicationTimelineData timeline;
 
     public SavingsAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
             final String productName, final SavingsAccountStatusEnumData status, final CurrencyData currency,
-            final BigDecimal accountBalance, final EnumOptionData accountType) {
+            final BigDecimal accountBalance, final EnumOptionData accountType, final SavingsAccountApplicationTimelineData timeline) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -39,5 +41,6 @@ public class SavingsAccountSummaryData {
         this.currency = currency;
         this.accountBalance = accountBalance;
         this.accountType = accountType;
+        this.timeline = timeline;
     }
 }
