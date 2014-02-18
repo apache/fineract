@@ -223,4 +223,9 @@ public class GroupGeneralData {
                 staffName, hierarchy, clientMembers, centerOptions, officeOptions, staffOptions, clientOptions, groupRoles, availableRoles,
                 role, calendarsData, collectionMeetingCalendar, closureReasons,null);
     }
+
+    
+    public Collection<ClientData> clientMembers() {
+        return this.clientMembers;
+    }
 }

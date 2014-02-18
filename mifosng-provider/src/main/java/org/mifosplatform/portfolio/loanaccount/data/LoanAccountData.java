@@ -13,6 +13,8 @@ package org.mifosplatform.portfolio.loanaccount.data;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.Transient;
 
@@ -149,6 +151,9 @@ public class LoanAccountData {
     
     private final Collection<LoanTermVariationsData> emiAmountVariations;
     
+    private final LoanProductData product;
+    
+    private final Map<Long, LoanBorrowerCycleData> memberVariations;
     /**
      * Used to produce a {@link LoanAccountData} with only collateral options
      * for now.
@@ -229,6 +234,8 @@ public class LoanAccountData {
         final BigDecimal fixedEmiAmount = null;
         final BigDecimal maxOutstandingLoanBalance = null;
         final Collection<LoanTermVariationsData> emiAmountVariations = null;
+        final Map<Long, LoanBorrowerCycleData> memberVariations = null;
+        final LoanProductData product = null;
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, loanType, loanProductId,
                 loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName, loanOfficerId, loanOfficerName,
                 currencyData, principal,principal, totalOverpaid, inArrearsTolerance, termFrequency, termPeriodFrequencyType, numberOfRepayments,
@@ -241,7 +248,7 @@ public class LoanAccountData {
                 amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions,
                 chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions, calendarOptions,
                 syncDisbursementWithMeeting, loancounter, loanProductCounter, notes, accountLinkingOptions, linkedAccount, disbursementData, 
-                multiDisburseLoan, fixedEmiAmount,maxOutstandingLoanBalance,emiAmountVariations);
+                multiDisburseLoan, fixedEmiAmount,maxOutstandingLoanBalance,emiAmountVariations,memberVariations, product);
     }
 
     /**
@@ -324,6 +331,8 @@ public class LoanAccountData {
         final BigDecimal fixedEmiAmount = null;
         final BigDecimal maxOutstandingLoanBalance = null;
         final Collection<LoanTermVariationsData> emiAmountVariations = null;
+        final Map<Long, LoanBorrowerCycleData> memberVariations = null;
+        final LoanProductData product = null;
 
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, loanType, loanProductId,
                 loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName, loanOfficerId, loanOfficerName,
@@ -337,7 +346,7 @@ public class LoanAccountData {
                 interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions,
                 loanPurposeOptions, loanCollateralOptions, calendarOptions, syncDisbursementWithMeeting, loancounter, loanProductCounter,
                 notes, accountLinkingOptions, linkedAccount, disbursementData, multiDisburseLoan, fixedEmiAmount, maxOutstandingLoanBalance,
-                emiAmountVariations);
+                emiAmountVariations,memberVariations, product);
     }
 
     public static LoanAccountData populateClientDefaults(final LoanAccountData acc, final LoanAccountData clientAcc) {
@@ -357,7 +366,7 @@ public class LoanAccountData {
                 acc.chargeOptions, null, acc.loanOfficerOptions, acc.loanPurposeOptions, acc.loanCollateralOptions, acc.calendarOptions,
                 acc.syncDisbursementWithMeeting, acc.loanCounter, acc.loanProductCounter, acc.notes, acc.accountLinkingOptions,
                 acc.linkedAccount, acc.disbursementDetails, acc.multiDisburseLoan, acc.fixedEmiAmount,acc.maxOutstandingLoanBalance,
-                acc.emiAmountVariations);
+                acc.emiAmountVariations,acc.memberVariations, acc.product);
     }
 
     /**
@@ -441,6 +450,8 @@ public class LoanAccountData {
         final BigDecimal fixedEmiAmount = null;
         final BigDecimal maxOutstandingBalance = null;
         final Collection<LoanTermVariationsData>  emiAmountVariations = null;
+        final Map<Long, LoanBorrowerCycleData> memberVariations = null;
+        final LoanProductData product = null;
 
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, loanType, loanProductId,
                 loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName, loanOfficerId, loanOfficerName,
@@ -454,7 +465,7 @@ public class LoanAccountData {
                 interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions,
                 loanPurposeOptions, loanCollateralOptions, calendarOptions, syncDisbursementWithMeeting, loancounter, loanProductCounter,
                 notes, accountLinkingOptions, linkedAccount, disbursementData, multiDisburseLoan, fixedEmiAmount,maxOutstandingBalance,
-                emiAmountVariations);
+                emiAmountVariations,memberVariations, product);
     }
 
     public static LoanAccountData populateGroupDefaults(final LoanAccountData acc, final LoanAccountData groupAcc) {
@@ -474,7 +485,7 @@ public class LoanAccountData {
                 acc.loanOfficerOptions, acc.loanPurposeOptions, acc.loanCollateralOptions, acc.calendarOptions,
                 acc.syncDisbursementWithMeeting, acc.loanCounter, acc.loanProductCounter, acc.notes, acc.accountLinkingOptions,
                 acc.linkedAccount, acc.disbursementDetails, acc.multiDisburseLoan, acc.fixedEmiAmount,acc.maxOutstandingLoanBalance,
-                acc.emiAmountVariations);
+                acc.emiAmountVariations,acc.memberVariations, acc.product);
     }
 
     public static LoanAccountData loanProductWithTemplateDefaults(final LoanProductData product,
@@ -577,6 +588,7 @@ public class LoanAccountData {
         
         final Integer termFrequency = numberOfRepayments * product.getRepaymentEvery();
         final BigDecimal fixedEmi = null;
+        Map<Long, LoanBorrowerCycleData> memberVariations = null;
 
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, loanType,
                 product.getId(), product.getName(), product.getDescription(), product.getFundId(), product.getFundName(), loanPurposeId,
@@ -592,7 +604,7 @@ public class LoanAccountData {
                 interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions,
                 loanPurposeOptions, loanCollateralOptions, calendarOptions, syncDisbursementWithMeeting, loancounter, loanProductCounter,
                 notes, accountLinkingOptions, linkedAccount, disbursementData, product.getMultiDisburseLoan(), fixedEmi, product.getOutstandingLoanBalance(),
-                emiAmountVariations);
+                emiAmountVariations,memberVariations, product);
     }
 
     public static LoanAccountData populateLoanProductDefaults(final LoanAccountData acc, final LoanProductData product) {
@@ -643,7 +655,7 @@ public class LoanAccountData {
                 fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions, calendarOptions,
                 acc.syncDisbursementWithMeeting, acc.loanCounter, acc.loanProductCounter, notes, acc.accountLinkingOptions,
                 acc.linkedAccount, acc.disbursementDetails, product.getMultiDisburseLoan(), acc.fixedEmiAmount,product.getOutstandingLoanBalance(),
-                acc.emiAmountVariations);
+                acc.emiAmountVariations,acc.memberVariations, product);
     }
 
     /*
@@ -693,6 +705,8 @@ public class LoanAccountData {
         final PortfolioAccountData linkedAccount = null;
         final Collection<DisbursementData> disbursementData= null;
         final Collection<LoanTermVariationsData> emiAmountVariations= null;
+        final Map<Long, LoanBorrowerCycleData> memberVariations = null;
+        final LoanProductData product = null;
         
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, loanType, loanProductId,
                 loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName, loanOfficerId, loanOfficerName,
@@ -705,7 +719,8 @@ public class LoanAccountData {
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions,
                 loanCollateralOptions, calendarOptions, syncDisbursementWithMeeting, loancounter, loanProductCounter, notes,
-                accountLinkingOptions, linkedAccount, disbursementData, multiDisburseLoan, fixedEmiAmont, outstandingLoanBalance,emiAmountVariations);
+                accountLinkingOptions, linkedAccount, disbursementData, multiDisburseLoan, fixedEmiAmont, outstandingLoanBalance,emiAmountVariations,
+                memberVariations, product);
     }
 
     /*
@@ -739,7 +754,7 @@ public class LoanAccountData {
                 interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions,
                 fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions, calendarOptions,
                 acc.syncDisbursementWithMeeting, acc.loanCounter, acc.loanProductCounter, notes, accountLinkingOptions, linkedAccount, disbursementDetails, 
-                acc.multiDisburseLoan, acc.fixedEmiAmount,acc.maxOutstandingLoanBalance,emiAmountVariations);
+                acc.multiDisburseLoan, acc.fixedEmiAmount,acc.maxOutstandingLoanBalance,emiAmountVariations,acc.memberVariations, acc.product);
     }
 
     public static LoanAccountData associationsAndTemplate(final LoanAccountData acc, final Collection<LoanProductData> productOptions,
@@ -769,7 +784,63 @@ public class LoanAccountData {
                 acc.loanOfficerOptions, acc.loanPurposeOptions, acc.loanCollateralOptions, acc.calendarOptions,
                 acc.syncDisbursementWithMeeting, acc.loanCounter, acc.loanProductCounter, acc.notes, acc.accountLinkingOptions,
                 acc.linkedAccount, acc.disbursementDetails, acc.multiDisburseLoan, acc.fixedEmiAmount,acc.maxOutstandingLoanBalance,
-                acc.emiAmountVariations);
+                acc.emiAmountVariations,acc.memberVariations, acc.product);
+    }
+    
+    public static LoanAccountData associateMemberVariations(final LoanAccountData acc,final Map<Long,Integer> memberLoanCycle) {
+          
+        final Map<Long, LoanBorrowerCycleData> memberVariations = new HashMap<Long, LoanBorrowerCycleData>();
+        for(Map.Entry<Long, Integer> mapEntry : memberLoanCycle.entrySet()){
+            BigDecimal principal = null;
+            BigDecimal interestRatePerPeriod = null;
+            Integer numberOfRepayments = null;
+            Long clientId = mapEntry.getKey();
+            Integer loanCycleNumber = mapEntry.getValue();
+            if (acc.product.useBorrowerCycle() && loanCycleNumber != null && loanCycleNumber > 0) {
+                Collection<LoanProductBorrowerCycleVariationData> principalVariationsForBorrowerCycle = acc.product
+                        .getPrincipalVariationsForBorrowerCycle();
+                Collection<LoanProductBorrowerCycleVariationData> interestForVariationsForBorrowerCycle = acc.product
+                        .getInterestRateVariationsForBorrowerCycle();
+                Collection<LoanProductBorrowerCycleVariationData> repaymentVariationsForBorrowerCycle = acc.product
+                        .getNumberOfRepaymentVariationsForBorrowerCycle();
+                principal = fetchLoanCycleDefaultValue(principalVariationsForBorrowerCycle, loanCycleNumber);
+                interestRatePerPeriod = fetchLoanCycleDefaultValue(interestForVariationsForBorrowerCycle, loanCycleNumber);
+                BigDecimal numberofRepaymentval = fetchLoanCycleDefaultValue(repaymentVariationsForBorrowerCycle, loanCycleNumber);
+                if (numberofRepaymentval != null) {
+                    numberOfRepayments = numberofRepaymentval.intValue();
+                }
+            }
+            if (principal == null) {
+                principal = acc.product.getPrincipal();
+            }
+            if (interestRatePerPeriod == null) {
+                interestRatePerPeriod = acc.product.getInterestRatePerPeriod();
+            }
+            if (numberOfRepayments == null) {
+                numberOfRepayments = acc.product.getNumberOfRepayments();
+            }
+            final Integer termFrequency = numberOfRepayments * acc.product.getRepaymentEvery();
+            LoanBorrowerCycleData borrowerCycleData = new LoanBorrowerCycleData(principal, interestRatePerPeriod, numberOfRepayments,termFrequency);
+            memberVariations.put(clientId, borrowerCycleData);
+            }
+        
+        
+        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientName, acc.clientOfficeId,
+                acc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription, acc.fundId, acc.fundName,
+                acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName, acc.currency, acc.principal,acc.approvedPrincipal,
+                acc.totalOverpaid, acc.inArrearsTolerance, acc.termFrequency, acc.termPeriodFrequencyType, acc.numberOfRepayments,
+                acc.repaymentEvery, acc.repaymentFrequencyType, acc.transactionProcessingStrategyId, acc.transactionProcessingStrategyName,
+                acc.amortizationType, acc.interestRatePerPeriod, acc.interestRateFrequencyType, acc.annualInterestRate, acc.interestType,
+                acc.interestCalculationPeriodType, acc.expectedFirstRepaymentOnDate, acc.graceOnPrincipalPayment,
+                acc.graceOnInterestPayment, acc.graceOnInterestCharged, acc.interestChargedFromDate, acc.timeline, acc.summary,
+                acc.feeChargesAtDisbursementCharged, acc.repaymentSchedule, acc.transactions, acc.charges, acc.collateral, acc.guarantors,
+                acc.meeting, acc.productOptions, acc.termFrequencyTypeOptions, acc.repaymentFrequencyTypeOptions,
+                acc.transactionProcessingStrategyOptions, acc.interestRateFrequencyTypeOptions, acc.amortizationTypeOptions,
+                acc.interestTypeOptions, acc.interestCalculationPeriodTypeOptions, acc.fundOptions, acc.chargeOptions, null,
+                acc.loanOfficerOptions, acc.loanPurposeOptions, acc.loanCollateralOptions, acc.calendarOptions,
+                acc.syncDisbursementWithMeeting, acc.loanCounter, acc.loanProductCounter, acc.notes, acc.accountLinkingOptions,
+                acc.linkedAccount, acc.disbursementDetails, acc.multiDisburseLoan, acc.fixedEmiAmount,acc.maxOutstandingLoanBalance,
+                acc.emiAmountVariations,memberVariations, acc.product);
     }
 
     private LoanAccountData(
@@ -820,7 +891,8 @@ public class LoanAccountData {
             final Boolean syncDisbursementWithMeeting, final Integer loanCounter, final Integer loanProductCounter,
             final Collection<NoteData> notes, final Collection<PortfolioAccountData> accountLinkingOptions,
             final PortfolioAccountData linkedAccount,final Collection<DisbursementData> disbursementDetails,final Boolean multiDisburseLoan, BigDecimal fixedEmiAmount,
-            final BigDecimal maxOutstandingLoanBalance,final Collection<LoanTermVariationsData> emiAmountVariations) {
+            final BigDecimal maxOutstandingLoanBalance,final Collection<LoanTermVariationsData> emiAmountVariations,
+            final Map<Long, LoanBorrowerCycleData> memberVariations, final LoanProductData product) {
         this.id = id;
         this.accountNo = accountNo;
         this.status = status;
@@ -953,6 +1025,8 @@ public class LoanAccountData {
             this.canDisburse = canDisburse;
         }
         this.emiAmountVariations = emiAmountVariations;
+        this.memberVariations = memberVariations;
+        this.product = product;
     }
 
     public RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData() {
@@ -1016,6 +1090,16 @@ public class LoanAccountData {
 
     private static boolean isLoanCycleValuesWhenConditionEqual(Integer loanCycleNumber, LoanProductBorrowerCycleVariationData data) {
         return data.getBorrowerCycleNumber() == loanCycleNumber && data.getValueConditionType().equals(LoanProductValueConditionType.EQUAL);
+    }
+
+    
+    public LoanProductData product() {
+        return this.product;
+    }
+
+    
+    public GroupGeneralData groupData() {
+        return this.group;
     }
 
 }
