@@ -12,13 +12,13 @@ import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
 @Embeddable
 public class LoanProductTrancheDetails {
 
-    @Column(name = "multi_disburse_loan")
+    @Column(name = "allow_multiple_disbursals")
     private boolean multiDisburseLoan;
 
-    @Column(name = "max_tranche_count", nullable = false)
+    @Column(name = "max_disbursals", nullable = false)
     private Integer maxTrancheCount;
 
-    @Column(name = "outstanding_loan_balance", scale = 6, precision = 19, nullable = false)
+    @Column(name = "max_outstanding_loan_balance", scale = 6, precision = 19, nullable = false)
     private BigDecimal outstandingLoanBalance;
 
     protected LoanProductTrancheDetails() {
