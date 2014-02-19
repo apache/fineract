@@ -7,7 +7,9 @@ package org.mifosplatform.portfolio.loanaccount.api;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -51,6 +53,7 @@ import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.calendar.service.CalendarReadPlatformService;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
+import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.collateral.data.CollateralData;
 import org.mifosplatform.portfolio.collateral.service.CollateralReadPlatformService;
 import org.mifosplatform.portfolio.fund.data.FundData;
@@ -235,6 +238,16 @@ public class LoansApiResource {
                 calendarOptions = this.loanReadPlatformService.retrieveCalendars(groupId);
                 newLoanAccount = newLoanAccount == null ? loanAccountGroupData : LoanAccountData.populateGroupDefaults(newLoanAccount,
                         loanAccountGroupData);
+                if(productId != null){
+                    Map<Long, Integer> memberLoanCycle = new HashMap<Long, Integer>();
+                    Collection<ClientData> members = loanAccountGroupData.groupData().clientMembers();
+                    for(ClientData clientData:members){
+                        Integer loanCounter = this.loanReadPlatformService.retriveLoanCounter(clientData.id(), productId);
+                        memberLoanCycle.put(clientData.id(), loanCounter);
+                    }
+                    newLoanAccount = LoanAccountData.associateMemberVariations(newLoanAccount, memberLoanCycle);
+                }
+                
             } else {
                 final String errorMsg = "Loan template type '" + templateType + "' is not supported";
                 throw new NotSupportedLoanTemplateTypeException(errorMsg, templateType);
