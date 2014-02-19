@@ -15,6 +15,7 @@ import org.mifosplatform.portfolio.calendar.domain.CalendarRemindBy;
 import org.mifosplatform.portfolio.calendar.domain.CalendarType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarWeekDaysType;
 import org.mifosplatform.portfolio.calendar.service.CalendarEnumerations;
+import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 
 /**
  * Immutable data object representing a Calendar.
@@ -318,6 +319,12 @@ public class CalendarData {
                 return true;
             }
         }
+        return false;
+    }
+    
+    public boolean isValidRecurringDate(final LocalDate compareDate) {
+        if (isBetweenStartAndEndDate(compareDate)) { return CalendarUtils.isValidRedurringDate(this.getRecurrence(), this.getStartDate(),
+                compareDate); }
         return false;
     }
 }

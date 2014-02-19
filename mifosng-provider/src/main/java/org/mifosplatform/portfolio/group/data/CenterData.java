@@ -62,13 +62,12 @@ public class CenterData {
 
     public static CenterData instance(final Long id, final String name, final String externalId, final EnumOptionData status,
             final LocalDate activationDate, final Long officeId, final String officeName, final Long staffId, final String staffName,
-            final String hierarchy, final GroupTimelineData timeline) {
+            final String hierarchy, final GroupTimelineData timeline, final CalendarData collectionMeetingCalendar) {
 
         final Collection<GroupGeneralData> groupMembers = null;
         final Collection<OfficeData> officeOptions = null;
         final Collection<StaffData> staffOptions = null;
         final Collection<GroupGeneralData> groupMembersOptions = null;
-        final CalendarData collectionMeetingCalendar = null;
         final Collection<CodeValueData> closureReasons = null;
 
         return new CenterData(id, name, externalId, status, activationDate, officeId, officeName, staffId, staffName, hierarchy,
@@ -154,5 +153,13 @@ public class CenterData {
 
     public String getHierarchy() {
         return this.hierarchy;
+    }
+    
+    public CalendarData getCollectionMeetingCalendar() {
+		return collectionMeetingCalendar;
+	}
+    
+    public String getStaffName() {
+        return this.staffName;
     }
 }
