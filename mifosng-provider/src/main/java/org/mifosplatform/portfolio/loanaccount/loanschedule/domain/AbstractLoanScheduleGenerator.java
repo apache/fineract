@@ -111,7 +111,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             int daysInPeriodApplicableForInterest = daysInPeriod;
 
             if (periodStartDate.isBefore(idealDisbursementDate)) {
-                periodStartDateApplicableForInterest = idealDisbursementDate;
+                if (loanApplicationTerms.getInterestChargedFromLocalDate() != null) {
+                    periodStartDateApplicableForInterest = loanApplicationTerms.getInterestChargedFromLocalDate();
+                } else {
+                    periodStartDateApplicableForInterest = idealDisbursementDate;
+                }
                 daysInPeriodApplicableForInterest = Days.daysBetween(periodStartDateApplicableForInterest, scheduledDueDate).getDays();
             }
 
