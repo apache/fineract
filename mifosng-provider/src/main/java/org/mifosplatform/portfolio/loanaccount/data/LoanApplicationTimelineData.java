@@ -38,6 +38,10 @@ public class LoanApplicationTimelineData {
     private final String disbursedByUsername;
     private final String disbursedByFirstname;
     private final String disbursedByLastname;
+    private final LocalDate closedOnDate;
+    private final String closedByUsername;
+    private final String closedByFirstname;
+    private final String closedByLastname;
     private final LocalDate expectedMaturityDate;
     private final LocalDate writeOffOnDate;
     private final String writeOffByUsername;
@@ -115,6 +119,10 @@ public class LoanApplicationTimelineData {
         this.disbursedByUsername = disbursedByUsername;
         this.disbursedByFirstname = disbursedByFirstname;
         this.disbursedByLastname = disbursedByLastname;
+        this.closedOnDate = closedOnDate;
+        this.closedByUsername = closedByUsername;
+        this.closedByFirstname = closedByFirstname;
+        this.closedByLastname = closedByLastname;
         this.expectedMaturityDate = expectedMaturityDate;
         this.writeOffOnDate = writeOffOnDate;
         this.writeOffByUsername = writeOffByUsername;
