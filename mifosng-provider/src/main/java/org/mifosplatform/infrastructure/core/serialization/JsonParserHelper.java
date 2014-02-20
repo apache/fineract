@@ -514,7 +514,11 @@ public class JsonParserHelper {
 
                 final NumberFormatter numberFormatter = new NumberFormatter();
                 final Number parsedNumber = numberFormatter.parse(source, clientApplicationLocale);
-                number = BigDecimal.valueOf(Double.valueOf(parsedNumber.doubleValue()));
+                if(parsedNumber instanceof BigDecimal){
+                    number = (BigDecimal)parsedNumber;
+                }else{
+                    number = BigDecimal.valueOf(Double.valueOf(parsedNumber.doubleValue()));
+                }
             }
 
             return number;
