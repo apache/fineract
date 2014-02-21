@@ -40,4 +40,12 @@ public class LoanStatusEnumData {
     public Long id() {
         return this.id;
     }
+    
+    public String code() {
+        return this.code;
+    }
+    
+    public String value() {
+        return this.value;
+    }
 }

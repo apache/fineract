@@ -12,7 +12,7 @@ public class SearchConstants {
 
     public static enum SEARCH_RESPONSE_PARAMETERS {
         ENTITY_ID("entityId"), ENTITY_ACCOUNT_NO("entityAccountNo"), ENTITY_EXTERNAL_ID("entityExternalId"), ENTITY_NAME("entityName"), ENTITY_TYPE(
-                "entityType"), PARENT_ID("parentId"), PARENT_NAME("parentName");
+                "entityType"), PARENT_ID("parentId"), PARENT_NAME("parentName"), ENTITY_STATUS("entityStatus");
 
         private final String value;
 
