@@ -314,6 +314,15 @@ public class LoanEnumerations {
         }
         return optionData;
     }
+    
+    public static EnumOptionData status(final LoanStatusEnumData status) {
+        
+        Long id = status.id();
+        String code = status.code();
+        String value = status.value();
+        
+        return new EnumOptionData(id, code, value);
+    }
 
     public static LoanStatusEnumData status(final Integer statusId) {
         return status(LoanStatus.fromInt(statusId));
