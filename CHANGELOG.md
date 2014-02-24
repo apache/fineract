@@ -6,7 +6,8 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
-1. 17 Dec 2013 - 1.17.0.RELEASE
+1. 21 Feb 2014 - 1.17.1.RELEASE
+1. 17 Jan 2014 - 1.17.0.RELEASE
 1. 29 Dec 2013 - 1.16.1.RELEASE
 1. 15 Dec 2013 - 1.16.0.RELEASE
 1. 12 Dec 2013 - 1.15.2.RELEASE
@@ -56,6 +57,21 @@ Releases
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
 
+1.17.1.RELEASE
+=============
+Bug Release
+
+Bugs
+ - [MIFOSX-827] - Not able to disburse loan with the percentage charges applied while submitting the loan application.
+ - [MIFOSX-860] - NOt able to reject the loan application with status "Submitted and pending for approval"
+ - [MIFOSX-873] - Get clients by office id API is returing HTTP Status 500
+ - [MIFOSX-875] - Attach duplicate mobile number while creating Client results in Unknown Data Integrity Issue
+ - [MIFOSX-876] - Retrieve Loan by Loan account number returns all loan account in API
+ - [MIFOSX-878] - Not able to use created datatable for a client results in Forbidden error
+ - [MIFOSX-882] - API doccument related Issues
+ - [MIFOSX-883] - Additional fields added in Edit datatables (for client) page is not woking as expected
+ - [MIFOSX-912] - Client Loan amount is not getting rounded off even if "Currency in Multiples Of" is set as 100 in loan product.
+ 
 1.17.0.RELEASE
 =============
 Feature Release
