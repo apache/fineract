@@ -261,8 +261,6 @@ public final class ClientDataValidator {
                     baseDataValidator.reset().parameter(ClientApiConstants.idParamName).failWithCode(".no.name.details.passed");
                 }
 
-            } else {
-                baseDataValidator.reset().parameter(ClientApiConstants.idParamName).failWithCode(".no.name.details.passed");
             }
         }
 

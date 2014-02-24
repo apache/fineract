@@ -43,9 +43,14 @@ public class ClientApiConstants {
     public static final String hierarchyParamName = "hierarchy";
     public static final String displayNameParamName = "displayName";
     public static final String officeNameParamName = "officeName";
+    public static final String staffNameParamName = "staffName";
     public static final String trasnferOfficeNameParamName = "transferOfficeName";
+    public static final String transferToOfficeNameParamName = "transferToOfficeName";
+    public static final String transferToOfficeIdParamName = "transferToOfficeId";
     public static final String imageKeyParamName = "imageKey";
+    public static final String imageIdParamName = "imageId";
     public static final String imagePresentParamName = "imagePresent";
+    public static final String timelineParamName = "timeline";
 
     // associations related part of response
     public static final String groupsParamName = "groups";
@@ -69,10 +74,10 @@ public class ClientApiConstants {
      * match those of request parameters.
      */
     public static final Set<String> CLIENT_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName, accountNoParamName,
-            externalIdParamName, mobileNoParamName, statusParamName, activeParamName, activationDateParamName, firstnameParamName, middlenameParamName,
-            lastnameParamName, fullnameParamName, displayNameParamName, officeIdParamName, officeNameParamName, transferOfficeIdParamName,
-            trasnferOfficeNameParamName, hierarchyParamName, imageKeyParamName, imagePresentParamName, groupsParamName,
-            officeOptionsParamName, staffOptionsParamName));
+            externalIdParamName, statusParamName, activeParamName, activationDateParamName, firstnameParamName, middlenameParamName,
+            lastnameParamName, fullnameParamName, displayNameParamName, mobileNoParamName, officeIdParamName, officeNameParamName,
+            transferToOfficeIdParamName, transferToOfficeNameParamName, hierarchyParamName, imageIdParamName, imagePresentParamName,
+            staffIdParamName, staffNameParamName, timelineParamName, groupsParamName, officeOptionsParamName, staffOptionsParamName));
 
     public static final Set<String> ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, activationDateParamName));
