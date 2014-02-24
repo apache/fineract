@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 23 Feb 2014 - 1.18.0.RELEASE
 1. 21 Feb 2014 - 1.17.1.RELEASE
 1. 17 Jan 2014 - 1.17.0.RELEASE
 1. 29 Dec 2013 - 1.16.1.RELEASE
@@ -56,6 +57,38 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.18.0.RELEASE
+=============
+Feature Release
+
+This feature release ships the first implementation of Tranche Loans functionality along with various bug fixes and minor improvements
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-92] - Tranche Loans
+ - [MIFOSX-869] - Correct spelling mistakes observed in MifosX schema
+ - [MIFOSX-902] - Generate Productive Collection sheet based on office, meeting date, loan officera search parameter
+ - [MIFOSX-872] - Capture Payment Type while creating a journal entry
+ - [MIFOSX-888] - Early Payment repayment strategy
+ - [MIFOSX-923] - Missing entity status in search resultset
+ 
+Bugs
+ - [MIFOSX-847] - For a Client - 2nd loan(with same product) is not getting incremented as per Borrower Cycle.
+ - [MIFOSX-867] - If a loan is created with first repayment on date, upon approving if loan is disbursed on other than expected disb date, schedule is not updated
+ - [MIFOSX-870] - For Disbursed Loan - charge collected on disbursement is not reflecting in Loan summary page.(After running "Update Loan Summary" in schedular job)
+ - [MIFOSX-895] - Checkbox for "Terms vary based on loan cycle" only controls display and not the desired principal definition
+ - [MIFOSX-896] - Missing permission for "savingsaccountcharge" endpoint
+ - [MIFOSX-897] - Missing _CHECKER permission for CREATE_JOURNALENTRY
+ - [MIFOSX-900] - Deactivating a charge with assigned products causing integrity issues in product mapping
+ - [MIFOSX-901] - "BIT" datatype/columntype missing displaytype, throws "error.msg.invalid.lookup.type" error message
+ - [MIFOSX-904] - Loan disbursement checks cause corrupted schedule
+ - [MIFOSX-906] - Scheduler job exception for post interest for savings
+ - [MIFOSX-914] - Global configuration page is not working as exptected
+ - [MIFOSX-920] - Not able to submit the Tranche Loan application for the higher amounts (in Crores)
+ - [MIFOSX-921] - While submitting the Tranche Loan for a client Improper error message is displaying rather displaying for proper inputs
+ - [MIFOSX-922] - In Modify application page for Tranche Loans if the Installment amount is modified then Last repayment amount is more than defined.
 
 1.17.1.RELEASE
 =============
