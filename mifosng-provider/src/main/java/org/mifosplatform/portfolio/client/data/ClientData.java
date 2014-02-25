@@ -17,6 +17,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
+import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 
 /**
  * Immutable data object representing client data.
@@ -49,6 +50,9 @@ final public class ClientData implements Comparable<ClientData> {
     private final Long staffId;
     private final String staffName;
     private final ClientTimelineData timeline;
+    
+    private final Long savingsProductId;
+    private final String savingsProductName;
 
     // associations
     private final Collection<GroupGeneralData> groups;
@@ -58,11 +62,13 @@ final public class ClientData implements Comparable<ClientData> {
     private final Collection<StaffData> staffOptions;
     @SuppressWarnings("unused")
     private final Collection<CodeValueData> closureReasons;
+    private final Collection<SavingsProductData> savingProductOptions;
 
     public static ClientData template(final Long officeId, final LocalDate joinedDate, final Collection<OfficeData> officeOptions,
-            final Collection<StaffData> staffOptions, final Collection<CodeValueData> closureReasons) {
+            final Collection<StaffData> staffOptions, final Collection<CodeValueData> closureReasons,
+            final Collection<SavingsProductData> savingProductOptions) {
         return new ClientData(null, null, officeId, null, null, null, null, null, null, null, null, null, null, null, joinedDate, null,
-                null, null, officeOptions, null, staffOptions, closureReasons,null);
+                null, null, officeOptions, null, staffOptions, closureReasons,null, savingProductOptions,null,null);
 
     }
 
@@ -72,7 +78,8 @@ final public class ClientData implements Comparable<ClientData> {
                 clientData.transferToOfficeId, clientData.transferToOfficeName, clientData.id, clientData.firstname, clientData.middlename,
                 clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId, clientData.mobileNo,
                 clientData.activationDate, clientData.imageId, clientData.staffId, clientData.staffName, templateData.officeOptions,
-                clientData.groups, templateData.staffOptions, null,null);
+                clientData.groups, templateData.staffOptions, null,null, templateData.savingProductOptions,
+                clientData.savingsProductId, clientData.savingsProductName);
 
     }
 
@@ -81,7 +88,8 @@ final public class ClientData implements Comparable<ClientData> {
                 clientData.transferToOfficeId, clientData.transferToOfficeName, clientData.id, clientData.firstname, clientData.middlename,
                 clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId, clientData.mobileNo,
                 clientData.activationDate, clientData.imageId, clientData.staffId, clientData.staffName, clientData.officeOptions,
-                parentGroups, clientData.staffOptions, null,clientData.timeline);
+                parentGroups, clientData.staffOptions, null,clientData.timeline, clientData.savingProductOptions,
+                clientData.savingsProductId, clientData.savingsProductName);
 
     }
 
@@ -90,31 +98,34 @@ final public class ClientData implements Comparable<ClientData> {
             final String officeName) {
 
         return new ClientData(accountNo, status, officeId, officeName, null, null, id, firstname, middlename, lastname, fullname,
-                displayName, null, null, null, null, null, null, null, null, null, null,null);
+                displayName, null, null, null, null, null, null, null, null, null, null,null, null,null,null);
 
     }
 
     public static ClientData lookup(final Long id, final String displayName, final Long officeId, final String officeName) {
         return new ClientData(null, null, officeId, officeName, null, null, id, null, null, null, null, displayName, null, null, null,
-                null, null, null, null, null, null, null,null);
+                null, null, null, null, null, null, null,null, null,null,null);
 
     }
 
     public static ClientData instance(final String accountNo, final EnumOptionData status, final Long officeId, final String officeName,
             final Long transferToOfficeId, final String transferToOfficeName, final Long id, final String firstname,
             final String middlename, final String lastname, final String fullname, final String displayName, final String externalId,
-            final String mobileNo, final LocalDate activationDate, final Long imageId, final Long staffId, final String staffName,final ClientTimelineData timeline) {
+            final String mobileNo, final LocalDate activationDate, final Long imageId, final Long staffId, final String staffName,
+            final ClientTimelineData timeline,final Long savingsProductId,final String savingsProductName) {
         return new ClientData(accountNo, status, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname, middlename,
-                lastname, fullname, displayName, externalId, mobileNo, activationDate, imageId, staffId, staffName, null, null, null, null,timeline);
+                lastname, fullname, displayName, externalId, mobileNo, activationDate, imageId, staffId, staffName, null, null, null, null,
+                timeline, null,savingsProductId,savingsProductName);
 
     }
-
+    
     private ClientData(final String accountNo, final EnumOptionData status, final Long officeId, final String officeName,
             final Long transferToOfficeId, final String transferToOfficeName, final Long id, final String firstname,
             final String middlename, final String lastname, final String fullname, final String displayName, final String externalId,
             final String mobileNo, final LocalDate activationDate, final Long imageId, final Long staffId, final String staffName,
             final Collection<OfficeData> allowedOffices, final Collection<GroupGeneralData> groups,
-            final Collection<StaffData> staffOptions, final Collection<CodeValueData> closureReasons,final ClientTimelineData timeline) {
+            final Collection<StaffData> staffOptions, final Collection<CodeValueData> closureReasons,final ClientTimelineData timeline, 
+            final Collection<SavingsProductData> savingProductOptions,final Long savingsProductId, final String savingsProductName) {
         this.accountNo = accountNo;
         this.status = status;
         if (status != null) {
@@ -153,6 +164,9 @@ final public class ClientData implements Comparable<ClientData> {
         this.closureReasons = closureReasons;
 
         this.timeline = timeline;
+        this.savingProductOptions = savingProductOptions;
+        this.savingsProductId = savingsProductId;
+        this.savingsProductName = savingsProductName;
     }
 
     public Long id() {

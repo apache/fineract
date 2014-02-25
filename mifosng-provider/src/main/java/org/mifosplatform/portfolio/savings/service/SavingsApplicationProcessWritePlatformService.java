@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.savings.service;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountDataDTO;
 
 public interface SavingsApplicationProcessWritePlatformService {
 
@@ -23,4 +24,6 @@ public interface SavingsApplicationProcessWritePlatformService {
     CommandProcessingResult rejectApplication(Long savingsId, JsonCommand command);
 
     CommandProcessingResult applicantWithdrawsFromApplication(Long savingsId, JsonCommand command);
+    
+    Long createActiveApplication(SavingsAccountDataDTO savingsAccountDataDTO);
 }

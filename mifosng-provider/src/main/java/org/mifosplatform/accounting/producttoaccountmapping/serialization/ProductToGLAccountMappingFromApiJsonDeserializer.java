@@ -186,6 +186,21 @@ public final class ProductToGLAccountMappingFromApiJsonDeserializer {
             baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue())
                     .value(incomeFromPenaltyId).notNull().integerGreaterThanZero();
 
+            final Long overdraftAccount = this.fromApiJsonHelper.extractLongNamed(
+                    SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), element);
+            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue())
+                    .value(overdraftAccount).notNull().integerGreaterThanZero();
+            
+            final Long incomeFromInterest = this.fromApiJsonHelper.extractLongNamed(
+                    SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue(), element);
+            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue())
+                    .value(incomeFromInterest).notNull().integerGreaterThanZero();
+            
+            final Long writtenOff = this.fromApiJsonHelper.extractLongNamed(
+                    SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), element);
+            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue())
+                    .value(writtenOff).notNull().integerGreaterThanZero();
+
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

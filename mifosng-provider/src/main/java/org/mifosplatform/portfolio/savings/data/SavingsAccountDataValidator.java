@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.savings.data;
 
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountNoParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.amountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargesParamName;
@@ -23,6 +24,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeri
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.productIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
@@ -187,6 +189,8 @@ public class SavingsAccountDataValidator {
         }
 
         validateSavingsCharges(element, baseDataValidator);
+        
+        validateOverdraftParams(baseDataValidator, element);
         
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -359,10 +363,27 @@ public class SavingsAccountDataValidator {
                     .ignoreIfNull().validateForBooleanValue();
         }
 
+        validateOverdraftParams(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    }
+    
+    private void validateOverdraftParams(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        if (this.fromApiJsonHelper.parameterExists(allowOverdraftParamName, element)) {
+            final Boolean allowOverdraft = this.fromApiJsonHelper.extractBooleanNamed(
+                    allowOverdraftParamName, element);
+            baseDataValidator.reset().parameter(allowOverdraftParamName).value(allowOverdraft)
+                    .ignoreIfNull().validateForBooleanValue();
+        }
+        
+        if (this.fromApiJsonHelper.parameterExists(overdraftLimitParamName, element)) {
+            final BigDecimal overdraftLimit = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                    overdraftLimitParamName, element);
+            baseDataValidator.reset().parameter(overdraftLimitParamName).value(overdraftLimit).ignoreIfNull().zeroOrPositiveAmount();
+        }
+        
     }
 }

@@ -32,8 +32,10 @@ import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.ClientStatus;
+import org.mifosplatform.portfolio.client.exception.ClientActiveForUpdateException;
 import org.mifosplatform.portfolio.client.exception.ClientHasNoStaffException;
 import org.mifosplatform.portfolio.client.exception.ClientMustBePendingToBeDeletedException;
+import org.mifosplatform.portfolio.client.exception.InvalidClientSavingProductException;
 import org.mifosplatform.portfolio.client.exception.InvalidClientStateTransitionException;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
@@ -42,8 +44,13 @@ import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
 import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountDataDTO;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepository;
+import org.mifosplatform.portfolio.savings.domain.SavingsProduct;
+import org.mifosplatform.portfolio.savings.domain.SavingsProductRepository;
+import org.mifosplatform.portfolio.savings.exception.SavingsProductNotFoundException;
+import org.mifosplatform.portfolio.savings.service.SavingsApplicationProcessWritePlatformService;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +75,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final CodeValueRepositoryWrapper codeValueRepository;
     private final LoanRepository loanRepository;
     private final SavingsAccountRepository savingsRepository;
+    private final SavingsProductRepository savingsProductRepository;
+    private final SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -75,7 +84,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final ClientDataValidator fromApiJsonDeserializer, final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
             final GroupRepository groupRepository, final StaffRepositoryWrapper staffRepository,
             final CodeValueRepositoryWrapper codeValueRepository, final LoanRepository loanRepository,
-            final SavingsAccountRepository savingsRepository) {
+            final SavingsAccountRepository savingsRepository,final SavingsProductRepository savingsProductRepository,
+            final SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.officeRepository = officeRepository;
@@ -87,6 +97,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.codeValueRepository = codeValueRepository;
         this.loanRepository = loanRepository;
         this.savingsRepository = savingsRepository;
+        this.savingsProductRepository = savingsProductRepository;
+        this.savingsApplicationProcessWritePlatformService = savingsApplicationProcessWritePlatformService;
     }
 
     @Transactional
@@ -163,8 +175,16 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             if (staffId != null) {
                 staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, clientOffice.getHierarchy());
             }
+            
+            SavingsProduct savingsProduct = null;
+            final Long savingsProductId = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
+            if(savingsProductId != null){
+                savingsProduct = this.savingsProductRepository.findOne(savingsProductId);
+                if (savingsProduct == null) { throw new SavingsProductNotFoundException(savingsProductId); }
 
-            final Client newClient = Client.createNew(currentUser,clientOffice, clientParentGroup, staff, command);
+            }
+
+            final Client newClient = Client.createNew(currentUser,clientOffice, clientParentGroup, staff, savingsProduct, command);
 
             this.clientRepository.save(newClient);
 
@@ -174,6 +194,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 newClient.updateAccountNo(accountNoGenerator.generate());
                 this.clientRepository.save(newClient);
             }
+            
+            final Locale locale = command.extractLocale();
+            final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+            Long savingsId = openOverdraftSavingsAccount(newClient, fmt);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -181,6 +205,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withClientId(newClient.getId()) //
                     .withGroupId(groupId) //
                     .withEntityId(newClient.getId()) //
+                    .withSavingsId(savingsId)//
                     .build();
         } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
@@ -199,6 +224,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final String clientHierarchy = clientForUpdate.getOffice().getHierarchy();
 
             this.context.validateAccessRights(clientHierarchy);
+            
 
             final Map<String, Object> changes = clientForUpdate.update(command);
 
@@ -212,6 +238,20 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 }
                 clientForUpdate.updateStaff(newStaff);
             }
+            
+            if (changes.containsKey(ClientApiConstants.savingsProductIdParamName)) {
+                if(clientForUpdate.isActive()){
+                    throw new ClientActiveForUpdateException(clientId, ClientApiConstants.savingsProductIdParamName);
+                }
+                SavingsProduct savingsProduct = null;
+                final Long savingsProductId = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
+                if(savingsProductId != null){
+                    savingsProduct = this.savingsProductRepository.findOne(savingsProductId);
+                    if (savingsProduct == null) { throw new SavingsProductNotFoundException(savingsProductId); }
+                }
+                clientForUpdate.updateSavingsProduct(savingsProduct);
+            }
+
 
             if (!changes.isEmpty()) {
                 this.clientRepository.saveAndFlush(clientForUpdate);
@@ -244,7 +284,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final AppUser currentUser = this.context.authenticatedUser();
             client.activate(currentUser, fmt, activationDate);
-
+            Long savingsId = openOverdraftSavingsAccount(client, fmt);
             this.clientRepository.saveAndFlush(client);
 
             return new CommandProcessingResultBuilder() //
@@ -252,11 +292,25 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withOfficeId(client.officeId()) //
                     .withClientId(clientId) //
                     .withEntityId(clientId) //
+                    .withSavingsId(savingsId)//
                     .build();
         } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
+    }
+
+    private Long openOverdraftSavingsAccount(final Client client, final DateTimeFormatter fmt) {
+        Long accountId = null;
+        if(client.isActive() && client.SavingsProduct() != null){
+            if(!client.SavingsProduct().isAllowOverdraft()){
+                String defaultUserMessage = "Client's saving account must be a overdraft account";
+                throw new InvalidClientSavingProductException("saving.product", "must.be.ovrdraft.account", defaultUserMessage, client.SavingsProduct().getId(),client.getId());
+            }
+            SavingsAccountDataDTO savingsAccountDataDTO = new SavingsAccountDataDTO(client, null, client.SavingsProduct(), client.getActivationLocalDate(), client.activatedBy(), fmt);
+            accountId = this.savingsApplicationProcessWritePlatformService.createActiveApplication(savingsAccountDataDTO);
+        }
+        return accountId;
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
