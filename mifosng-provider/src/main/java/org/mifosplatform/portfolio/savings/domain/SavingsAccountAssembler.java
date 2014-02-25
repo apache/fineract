@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.savings.domain;
 
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountNoParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.clientIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.externalIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.fieldOfficerIdParamName;
@@ -18,11 +19,13 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeri
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.productIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
@@ -112,15 +115,15 @@ public class SavingsAccountAssembler {
         if (groupId != null) {
             group = this.groupRepository.findOneWithNotFoundDetection(groupId);
             accountType = AccountType.GROUP;
+            if (group.isNotActive()) {
+                if (group.isCenter()) { throw new CenterNotActiveException(groupId); }
+                throw new GroupNotActiveException(groupId);
+            }
         }
 
         if (group != null && client != null) {
             if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(clientId, groupId); }
             accountType = AccountType.JLG;
-            if (group.isNotActive()) {
-                if (group.isCenter()) { throw new CenterNotActiveException(groupId); }
-                throw new GroupNotActiveException(groupId);
-            }
         }
 
         final Long fieldOfficerId = this.fromApiJsonHelper.extractLongNamed(fieldOfficerIdParamName, element);
@@ -202,13 +205,23 @@ public class SavingsAccountAssembler {
 
         final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(element, product.currency().getCode());
         
+        boolean allowOverdraft = false;
+        if (command.parameterExists(allowOverdraftParamName)) {
+            allowOverdraft = command.booleanPrimitiveValueOfParameterNamed(allowOverdraftParamName);
+        }
+
+        final BigDecimal overdraftLimit = command
+                .bigDecimalValueOfParameterNamedDefaultToNullIfZero(overdraftLimitParamName);
+        
         final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer, accountNo,
                 externalId, accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
-                lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, charges);
+                lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, charges,allowOverdraft,overdraftLimit);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
         account.validateNewApplicationState(DateUtils.getLocalDateOfTenant());
+        
+        account.validateAccountValuesWithProduct();
 
         return account;
     }
@@ -216,9 +229,52 @@ public class SavingsAccountAssembler {
     public SavingsAccount assembleFrom(final Long savingsId) {
         final SavingsAccount account = this.savingsAccountRepository.findOneWithNotFoundDetection(savingsId);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+        return account;
+    }
+    
+    /**
+     * Assembles a new {@link SavingsAccount} from JSON details passed in
+     * request inheriting details where relevant from chosen
+     * {@link SavingsProduct}.
+     */
+    public SavingsAccount assembleFrom(final Client client ,final Group group, final SavingsProduct product,final LocalDate appliedonDate,final AppUser appliedBy) {
+
+        AccountType accountType = AccountType.INVALID;
+        if (client != null) {
+            accountType = AccountType.INDIVIDUAL;
+            if (client.isNotActive()) { throw new ClientNotActiveException(client.getId()); }
+        }
+
+        if (group != null) {
+            accountType = AccountType.GROUP;
+            if(group.isNotActive()){ 
+                if (group.isCenter()) { throw new CenterNotActiveException(group.getId()); }
+                throw new GroupNotActiveException(group.getId()); 
+                }
+        }
+
+        if (group != null && client != null) {
+            if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(client.getId(), group.getId()); }
+            accountType = AccountType.JLG;
+        }
+
+        final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromSavingsProduct(product);
+
+        
+        final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, null, null,
+                null, accountType, appliedonDate, appliedBy, product.nominalAnnualInterestRate(), product.interestCompoundingPeriodType(), 
+                product.interestPostingPeriodType(),
+                product.interestCalculationType(), product.interestCalculationDaysInYearType(), product.minRequiredOpeningBalance(), product.lockinPeriodFrequency(),
+                product.lockinPeriodFrequencyType(), product.isWithdrawalFeeApplicableForTransfer(), charges ,product.isAllowOverdraft(),product.overdraftLimit());
+        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+
+        account.validateNewApplicationState(DateUtils.getLocalDateOfTenant());
+        
+        account.validateAccountValuesWithProduct();
 
         return account;
     }
+
 
     public void assignSavingAccountHelpers(final SavingsAccount savingsAccount) {
         savingsAccount.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);

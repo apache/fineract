@@ -150,6 +150,7 @@ public class AccountingProcessorHelper {
             final BigDecimal amount = (BigDecimal) map.get("amount");
             final boolean reversed = (Boolean) map.get("reversed");
             final Long paymentTypeId = (Long) map.get("paymentTypeId");
+            final BigDecimal overdraftAmount = (BigDecimal) map.get("overdraftAmount");
 
             final List<ChargePaymentDTO> feePayments = new ArrayList<ChargePaymentDTO>();
             final List<ChargePaymentDTO> penaltyPayments = new ArrayList<ChargePaymentDTO>();
@@ -172,7 +173,7 @@ public class AccountingProcessorHelper {
             }
 
             final SavingsTransactionDTO transaction = new SavingsTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
-                    transactionDate, transactionType, amount, reversed, feePayments, penaltyPayments);
+                    transactionDate, transactionType, amount, reversed, feePayments, penaltyPayments,overdraftAmount);
 
             newSavingsTransactions.add(transaction);
 

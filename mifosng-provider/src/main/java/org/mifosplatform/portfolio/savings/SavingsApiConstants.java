@@ -92,6 +92,8 @@ public class SavingsApiConstants {
     public static final String routingCodeParamName = "routingCode";
     public static final String receiptNumberParamName = "receiptNumber";
     public static final String bankNumberParamName = "bankNumber";
+    public static final String allowOverdraftParamName = "allowOverdraft";
+    public static final String overdraftLimitParamName = "overdraftLimit";
 
     // transaction parameters
     public static final String transactionDateParamName = "transactionDate";
@@ -143,7 +145,11 @@ public class SavingsApiConstants {
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_CONTROL.getValue(), SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(),
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue(),
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.FEE_INCOME_ACCOUNT_MAPPING.getValue(),
-            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PENALTY_INCOME_ACCOUNT_MAPPING.getValue()));
+            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PENALTY_INCOME_ACCOUNT_MAPPING.getValue(),
+            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(),
+            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(),
+            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue(),
+            allowOverdraftParamName,overdraftLimitParamName));
 
     /**
      * These parameters will match the class level parameters of
@@ -167,7 +173,7 @@ public class SavingsApiConstants {
             lockinPeriodFrequencyTypeParamName, 
             //withdrawalFeeAmountParamName, withdrawalFeeTypeParamName,
             withdrawalFeeForTransfersParamName, 
-            feeAmountParamName, feeOnMonthDayParamName, chargesParamName));
+            feeAmountParamName, feeOnMonthDayParamName, chargesParamName,allowOverdraftParamName,overdraftLimitParamName));
 
     /**
      * These parameters will match the class level parameters of

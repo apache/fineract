@@ -126,6 +126,32 @@ public class SavingsAccountChargeAssembler {
         return savingsAccountCharges;
     }
     
+    public Set<SavingsAccountCharge> fromSavingsProduct(final SavingsProduct savingsProduct) {
+
+        final Set<SavingsAccountCharge> savingsAccountCharges = new HashSet<SavingsAccountCharge>();
+        Set<Charge> productCharges = savingsProduct.charges();
+        for (Charge charge : productCharges) {
+            ChargeTimeType chargeTime = null;
+            if (charge.getChargeTime() != null) {
+                chargeTime = ChargeTimeType.fromInt(charge.getChargeTime());
+            }
+            if(chargeTime !=null && chargeTime.isOnSpecifiedDueDate()){
+                continue;
+            }
+            
+            ChargeCalculationType chargeCalculation = null;
+            if (charge.getChargeCalculation() != null) {
+                chargeCalculation = ChargeCalculationType.fromInt(charge.getChargeCalculation());
+            }
+            final boolean status = true;
+            final SavingsAccountCharge savingsAccountCharge = SavingsAccountCharge.createNewWithoutSavingsAccount(
+                    charge, charge.getAmount(),chargeTime ,chargeCalculation , null, status, charge.getFeeOnMonthDay(), charge.feeInterval());
+            savingsAccountCharges.add(savingsAccountCharge);
+        }
+        return savingsAccountCharges;
+    }
+    
+    
     private void validateSavingsCharges(final Set<SavingsAccountCharge> charges, final String productCurrencyCode) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)

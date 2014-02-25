@@ -45,6 +45,7 @@ import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.mifosplatform.portfolio.group.domain.Group;
+import org.mifosplatform.portfolio.savings.domain.SavingsProduct;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
@@ -138,9 +139,13 @@ public final class Client extends AbstractPersistable<Long> {
     @ManyToOne(optional = true)
     @JoinColumn(name = "activatedon_userid", nullable = true)
     private AppUser activatedBy;
+    
+    @ManyToOne
+    @JoinColumn(name = "default_savings_product", nullable = true)
+    private SavingsProduct savingsProduct;
 
     public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
-            final JsonCommand command) {
+            final SavingsProduct savingsProduct, final JsonCommand command) {
 
         final String accountNo = command.stringValueOfParameterNamed(ClientApiConstants.accountNoParamName);
         final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
@@ -174,7 +179,7 @@ public final class Client extends AbstractPersistable<Long> {
         }
 
         return new Client(currentUser, status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname,
-                activationDate, officeJoiningDate, externalId, mobileNo, staff, submittedOnDate);
+                activationDate, officeJoiningDate, externalId, mobileNo, staff, submittedOnDate,savingsProduct);
     }
 
     protected Client() {
@@ -184,7 +189,7 @@ public final class Client extends AbstractPersistable<Long> {
     private Client(final AppUser currentUser, final ClientStatus status, final Office office, final Group clientParentGroup,
             final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
             final LocalDate activationDate, final LocalDate officeJoiningDate, final String externalId, final String mobileNo,
-            final Staff staff, final LocalDate submittedOnDate) {
+            final Staff staff, final LocalDate submittedOnDate, final SavingsProduct savingsProduct) {
 
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
@@ -247,6 +252,7 @@ public final class Client extends AbstractPersistable<Long> {
         }
 
         this.staff = staff;
+        this.savingsProduct = savingsProduct;
 
         deriveDisplayName();
         validate();
@@ -394,6 +400,11 @@ public final class Client extends AbstractPersistable<Long> {
             actualChanges.put(ClientApiConstants.staffIdParamName, newValue);
         }
 
+        if (command.isChangeInLongParameterNamed(ClientApiConstants.savingsProductIdParamName, savingsProductId())) {
+            final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
+            actualChanges.put(ClientApiConstants.savingsProductIdParamName, newValue);
+        }
+        
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
 
@@ -627,5 +638,29 @@ public final class Client extends AbstractPersistable<Long> {
             }
         }
         return false;
+    }
+
+    
+    private Long savingsProductId() {
+        Long savingsProductId = null;
+        if (this.savingsProduct != null) {
+            savingsProductId = this.savingsProduct.getId();
+        }
+        return savingsProductId;
+    }
+
+    
+    public SavingsProduct SavingsProduct() {
+        return this.savingsProduct;
+    }
+
+    
+    public void updateSavingsProduct(SavingsProduct savingsProduct) {
+        this.savingsProduct = savingsProduct;
+    }
+
+    
+    public AppUser activatedBy() {
+        return this.activatedBy;
     }
 }

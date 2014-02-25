@@ -89,6 +89,9 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccountTransaction", orphanRemoval = true)
     private final Set<SavingsAccountChargePaidBy> savingsAccountChargesPaid = new HashSet<SavingsAccountChargePaidBy>();
+    
+    @Column(name = "overdraft_amount_derived", scale = 6, precision = 19, nullable = true)
+    private BigDecimal overdraftAmount;
 
     protected SavingsAccountTransaction() {
         this.dateOf = null;
@@ -167,6 +170,13 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
                 SavingsAccountTransactionType.WITHDRAW_TRANSFER.getValue(), date, savingsAccount.getSummary().getAccountBalance(),
                 isReversed);
     }
+    
+    public static SavingsAccountTransaction copyTransaction(SavingsAccountTransaction accountTransaction) {
+        return new SavingsAccountTransaction(accountTransaction.savingsAccount, accountTransaction.office, accountTransaction.paymentDetail,
+                accountTransaction.typeOf, accountTransaction.transactionLocalDate(), accountTransaction.amount,
+                accountTransaction.reversed);
+    }
+
 
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final Integer typeOf,
             final LocalDate transactionLocalDate, final Money amount, final boolean isReversed) {
@@ -331,6 +341,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         thisTransactionData.put("date", getTransactionLocalDate());
         thisTransactionData.put("currency", currencyData);
         thisTransactionData.put("amount", this.amount);
+        thisTransactionData.put("overdraftAmount", this.overdraftAmount);
 
         if (this.paymentDetail != null) {
             thisTransactionData.put("paymentTypeId", this.paymentDetail.getPaymentType().getId());
@@ -534,5 +545,15 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     public Set<SavingsAccountChargePaidBy> getSavingsAccountChargesPaid() {
         return this.savingsAccountChargesPaid;
     }
+
+    
+    public void updateOverdraftAmount(BigDecimal overdraftAmount) {
+        this.overdraftAmount = overdraftAmount;
+    }
+    
+    public Money getOverdraftAmount(final MonetaryCurrency currency) {
+        return Money.of(currency, this.overdraftAmount);
+    }
+
 
 }

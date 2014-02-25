@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.savings.data;
 
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeAmountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
@@ -22,6 +23,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeri
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nameParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.shortNameParamName;
 
@@ -240,10 +242,28 @@ public class SavingsProductDataValidator {
                     SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), element);
             baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue())
                     .value(incomeFromPenaltyId).notNull().integerGreaterThanZero();
+            
+            final Long overdraftControlAccountId = this.fromApiJsonHelper.extractLongNamed(
+                    SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), element);
+            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue())
+                    .value(overdraftControlAccountId).notNull().integerGreaterThanZero();
+
+            final Long incomeFromInterest = this.fromApiJsonHelper.extractLongNamed(
+                    SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue(), element);
+            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue())
+                    .value(incomeFromInterest).notNull().integerGreaterThanZero();
+
+            final Long writtenoff = this.fromApiJsonHelper.extractLongNamed(
+                    SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), element);
+            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue())
+                    .value(writtenoff).notNull().integerGreaterThanZero();
+
 
             validatePaymentChannelFundSourceMappings(baseDataValidator, element);
             validateChargeToIncomeAccountMappings(baseDataValidator, element);
         }
+        
+        validateOverdraftParams(baseDataValidator, element);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -383,10 +403,27 @@ public class SavingsProductDataValidator {
                 SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), element);
         baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue()).value(incomeFromPenaltyId)
                 .ignoreIfNull().integerGreaterThanZero();
+        
+        final Long overdraftAccountId = this.fromApiJsonHelper.extractLongNamed(
+                SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), element);
+        baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue())
+                .value(overdraftAccountId).ignoreIfNull().integerGreaterThanZero();
 
+        final Long incomeFromInterest = this.fromApiJsonHelper.extractLongNamed(
+                SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue(), element);
+        baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue())
+                .value(incomeFromInterest).ignoreIfNull().integerGreaterThanZero();
+
+        final Long writtenoff = this.fromApiJsonHelper.extractLongNamed(
+                SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), element);
+        baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue())
+                .value(writtenoff).ignoreIfNull().integerGreaterThanZero();
+
+        
         validatePaymentChannelFundSourceMappings(baseDataValidator, element);
         validateChargeToIncomeAccountMappings(baseDataValidator, element);
-
+        validateOverdraftParams(baseDataValidator, element);
+        
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -467,4 +504,21 @@ public class SavingsProductDataValidator {
             }
         }
     }
+    
+    private void validateOverdraftParams(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        if (this.fromApiJsonHelper.parameterExists(allowOverdraftParamName, element)) {
+            final Boolean allowOverdraft = this.fromApiJsonHelper.extractBooleanNamed(
+                    allowOverdraftParamName, element);
+            baseDataValidator.reset().parameter(allowOverdraftParamName).value(allowOverdraft)
+                    .ignoreIfNull().validateForBooleanValue();
+        }
+        
+        if (this.fromApiJsonHelper.parameterExists(overdraftLimitParamName, element)) {
+            final BigDecimal overdraftLimit = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                    overdraftLimitParamName, element);
+            baseDataValidator.reset().parameter(overdraftLimitParamName).value(overdraftLimit).ignoreIfNull().zeroOrPositiveAmount();
+        }
+        
+    }
+
 }

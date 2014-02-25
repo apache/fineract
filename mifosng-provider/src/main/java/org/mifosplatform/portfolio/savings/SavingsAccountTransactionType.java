@@ -24,7 +24,9 @@ public enum SavingsAccountTransactionType {
     INITIATE_TRANSFER(12, "savingsAccountTransactionType.initiateTransfer"), //
     APPROVE_TRANSFER(13, "savingsAccountTransactionType.approveTransfer"), //
     WITHDRAW_TRANSFER(14, "savingsAccountTransactionType.withdrawTransfer"), //
-    REJECT_TRANSFER(15, "savingsAccountTransactionType.rejectTransfer");
+    REJECT_TRANSFER(15, "savingsAccountTransactionType.rejectTransfer"),
+    WRITTEN_OFF(16, "savingsAccountTransactionType.writtenoff"), //
+    OVERDRAFT_INTEREST(17, "savingsAccountTransactionType.overdraftInterest"); //
 
     private final Integer value;
     private final String code;
@@ -81,6 +83,12 @@ public enum SavingsAccountTransactionType {
             case 15:
                 savingsAccountTransactionType = SavingsAccountTransactionType.REJECT_TRANSFER;
             break;
+            case 18:
+                savingsAccountTransactionType = SavingsAccountTransactionType.WRITTEN_OFF;
+            break;
+            case 19:
+                savingsAccountTransactionType = SavingsAccountTransactionType.OVERDRAFT_INTEREST;
+            break;
         }
         return savingsAccountTransactionType;
     }
@@ -131,6 +139,14 @@ public enum SavingsAccountTransactionType {
 
     public boolean isTransferWithdrawal() {
         return this.value.equals(SavingsAccountTransactionType.WITHDRAW_TRANSFER.getValue());
+    }
+    
+    public boolean isWrittenoff(){
+        return this.value.equals(SavingsAccountTransactionType.WRITTEN_OFF.getValue());
+    }
+    
+    public boolean isIncomeFromInterest(){
+        return this.value.equals(SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue());
     }
 
     public boolean isDebit() {

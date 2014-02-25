@@ -223,6 +223,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 //            sqlBuilder.append("sa.withdrawal_fee_amount as withdrawalFeeAmount,");
 //            sqlBuilder.append("sa.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
             sqlBuilder.append("sa.withdrawal_fee_for_transfer as withdrawalFeeForTransfers, ");
+            sqlBuilder.append("sa.allow_overdraft as allowOverdraft, ");
+            sqlBuilder.append("sa.overdraft_limit as overdraftLimit, ");
 //            sqlBuilder.append("sa.annual_fee_amount as annualFeeAmount,");
 //            sqlBuilder.append("sa.annual_fee_on_month as annualFeeOnMonth, ");
 //            sqlBuilder.append("sa.annual_fee_on_day as annualFeeOnDay, ");
@@ -358,6 +360,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             }*/
 
             final boolean withdrawalFeeForTransfers = rs.getBoolean("withdrawalFeeForTransfers");
+            
+            final boolean allowOverdraft = rs.getBoolean("allowOverdraft");
+            final BigDecimal overdraftLimit = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "overdraftLimit");
 
             /*final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
 
@@ -388,7 +393,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             return SavingsAccountData.instance(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                     fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary);
+                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,allowOverdraft,overdraftLimit);
         }
     }
 
@@ -731,7 +736,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sp.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
 //            sqlBuilder.append("sp.withdrawal_fee_amount as withdrawalFeeAmount,");
 //            sqlBuilder.append("sp.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
-            sqlBuilder.append("sp.withdrawal_fee_for_transfer as withdrawalFeeForTransfers ");
+            sqlBuilder.append("sp.withdrawal_fee_for_transfer as withdrawalFeeForTransfers, ");
+            sqlBuilder.append("sp.allow_overdraft as allowOverdraft, ");
+            sqlBuilder.append("sp.overdraft_limit as overdraftLimit ");
 //            sqlBuilder.append("sp.annual_fee_amount as annualFeeAmount,");
 //            sqlBuilder.append("sp.annual_fee_on_month as annualFeeOnMonth, ");
 //            sqlBuilder.append("sp.annual_fee_on_day as annualFeeOnDay ");
@@ -795,6 +802,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             }
 */
             final boolean withdrawalFeeForTransfers = rs.getBoolean("withdrawalFeeForTransfers");
+            
+            final boolean allowOverdraft = rs.getBoolean("allowOverdraft");
+            final BigDecimal overdraftLimit = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "overdraftLimit");
 
             //final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
 
@@ -830,7 +840,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             return SavingsAccountData.instance(null, null, null, groupId, groupName, clientId, clientName, productId, productName,
                     fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualIterestRate, interestCompoundingPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary);
+                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,allowOverdraft,overdraftLimit);
         }
     }
 

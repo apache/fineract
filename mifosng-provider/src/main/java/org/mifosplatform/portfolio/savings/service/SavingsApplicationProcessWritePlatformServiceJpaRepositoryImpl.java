@@ -8,12 +8,14 @@ package org.mifosplatform.portfolio.savings.service;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -38,6 +40,7 @@ import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountDataDTO;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountDataValidator;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountAssembler;
@@ -169,6 +172,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             checkClientOrGroupActive(account);
             account.modifyApplication(command, changes);
             account.validateNewApplicationState(DateUtils.getLocalDateOfTenant());
+            account.validateAccountValuesWithProduct();
 
             if (!changes.isEmpty()) {
 
@@ -426,5 +430,22 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 throw new GroupNotActiveException(group.getId());
             }
         }
+    }
+
+    @Override
+    public Long createActiveApplication(final SavingsAccountDataDTO savingsAccountDataDTO) {
+        
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsAccountDataDTO.getClient(),savingsAccountDataDTO.getGroup(),
+                savingsAccountDataDTO.getSavingsProduct(),savingsAccountDataDTO.getApplicationDate(),savingsAccountDataDTO.getAppliedBy());
+        account.approveAndActivateApplication(savingsAccountDataDTO.getApplicationDate().toDate(), savingsAccountDataDTO.getAppliedBy(), savingsAccountDataDTO.getFmt());
+        this.savingAccountRepository.save(account);
+
+        if (account.isAccountNumberRequiresAutoGeneration()) {
+            final AccountNumberGenerator accountNoGenerator = this.accountIdentifierGeneratorFactory
+                    .determineSavingsAccountNoGenerator(account.getId());
+            account.updateAccountNo(accountNoGenerator.generate());
+            this.savingAccountRepository.save(account);
+        }
+        return account.getId();
     }
 }

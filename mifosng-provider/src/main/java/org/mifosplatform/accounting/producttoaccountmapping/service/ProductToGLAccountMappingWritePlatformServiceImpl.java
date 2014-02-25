@@ -158,6 +158,9 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_REFERENCE.getValue());
+                this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
+                        SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), savingProductId,
+                        CASH_ACCOUNTS_FOR_SAVINGS.OVERDRAFT_PORTFOLIO_CONTROL.getValue());
 
                 // income
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
@@ -167,11 +170,20 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_PENALTIES.getValue());
+                
+                this.savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
+                        SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue(), savingProductId,
+                        CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_INTEREST.getValue());
+                
 
                 // expenses
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToExpenseAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.INTEREST_ON_SAVINGS.getValue());
+                
+                this.savingsProductToGLAccountMappingHelper.saveSavingsToExpenseAccountMapping(element,
+                        SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), savingProductId,
+                        CASH_ACCOUNTS_FOR_SAVINGS.LOSSES_WRITTEN_OFF.getValue());
 
                 // liability
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,

@@ -204,6 +204,12 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
                     accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_DATA_PARAMS.TRANSFERS_SUSPENSE.getValue(), gLAccountData);
                 } else if (glAccountForSavings.equals(CASH_ACCOUNTS_FOR_SAVINGS.INTEREST_ON_SAVINGS)) {
                     accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_DATA_PARAMS.INTEREST_ON_SAVINGS.getValue(), gLAccountData);
+                } else if (glAccountForSavings.equals(CASH_ACCOUNTS_FOR_SAVINGS.OVERDRAFT_PORTFOLIO_CONTROL)) {
+                    accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_DATA_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), gLAccountData);
+                }else if (glAccountForSavings.equals(CASH_ACCOUNTS_FOR_SAVINGS.LOSSES_WRITTEN_OFF)) {
+                    accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_DATA_PARAMS.LOSSES_WRITTEN_OFF.getValue(), gLAccountData);
+                }else if (glAccountForSavings.equals(CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_INTEREST)) {
+                    accountMappingDetails.put(SAVINGS_PRODUCT_ACCOUNTING_DATA_PARAMS.INCOME_FROM_INTEREST.getValue(), gLAccountData);
                 }
             }
         }

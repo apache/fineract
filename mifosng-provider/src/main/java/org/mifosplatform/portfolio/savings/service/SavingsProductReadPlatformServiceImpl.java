@@ -88,6 +88,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 //            sqlBuilder.append("sp.withdrawal_fee_amount as withdrawalFeeAmount,");
 //            sqlBuilder.append("sp.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
             sqlBuilder.append("sp.withdrawal_fee_for_transfer as withdrawalFeeForTransfers, ");
+            sqlBuilder.append("sp.allow_overdraft as allowOverdraft, ");
+            sqlBuilder.append("sp.overdraft_limit as overdraftLimit, ");
 //            sqlBuilder.append("sp.annual_fee_amount as annualFeeAmount,");
 //            sqlBuilder.append("sp.annual_fee_on_month as annualFeeOnMonth, ");
 //            sqlBuilder.append("sp.annual_fee_on_day as annualFeeOnDay, ");
@@ -158,7 +160,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             }
 */
             final boolean withdrawalFeeForTransfers = rs.getBoolean("withdrawalFeeForTransfers");
-
+            final boolean allowOverdraft = rs.getBoolean("allowOverdraft");
+            final BigDecimal overdraftLimit = rs.getBigDecimal("overdraftLimit");
 /*            final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
 
             MonthDay annualFeeOnMonthDay = null;
@@ -170,7 +173,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 */
             return SavingsProductData.instance(id, name, shortName,  description, currency, nominalAnnualInterestRate, compoundingInterestPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, accountingRuleType);
+                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, accountingRuleType,allowOverdraft,overdraftLimit);
         }
     }
 
@@ -188,5 +191,13 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
             return SavingsProductData.lookup(id, name);
         }
+    }
+
+    @Override
+    public Collection<SavingsProductData> retrieveAllForLookupByType(boolean isOverdraftType) {
+        final String sql = "select " + this.savingsProductLookupsRowMapper.schema() + " where sp.allow_overdraft=?";
+
+        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper,isOverdraftType);
+
     }
 }

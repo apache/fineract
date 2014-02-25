@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.savings.domain;
 
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.descriptionParamName;
@@ -22,8 +23,9 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeri
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nameParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.shortNameParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -129,17 +131,25 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     @ManyToMany
     @JoinTable(name = "m_savings_product_charge", joinColumns = @JoinColumn(name = "savings_product_id"), inverseJoinColumns = @JoinColumn(name = "charge_id"))
     private Set<Charge> charges;
-
+    
+    @Column(name = "allow_overdraft")
+    private boolean allowOverdraft;
+    
+    @Column(name = "overdraft_limit", scale = 6, precision = 19, nullable = true)
+    private BigDecimal overdraftLimit;
+    
     public static SavingsProduct createNew(final String name, final String shortName, final String description, final MonetaryCurrency currency,
             final BigDecimal interestRate, final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final boolean withdrawalFeeApplicableForTransfer, final AccountingRuleType accountingRuleType, final Set<Charge> charges) {
+            final boolean withdrawalFeeApplicableForTransfer, final AccountingRuleType accountingRuleType, final Set<Charge> charges,
+            final boolean allowOverdraft,final BigDecimal overdraftLimit) {
 
         return new SavingsProduct(name, shortName,  description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
-                lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, accountingRuleType, charges);
+                lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, accountingRuleType, charges,
+                allowOverdraft,overdraftLimit);
     }
 
     protected SavingsProduct() {
@@ -152,7 +162,8 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final boolean withdrawalFeeApplicableForTransfer, final AccountingRuleType accountingRuleType, final Set<Charge> charges) {
+            final boolean withdrawalFeeApplicableForTransfer, final AccountingRuleType accountingRuleType, final Set<Charge> charges,
+            final boolean allowOverdraft,final BigDecimal overdraftLimit) {
 
         this.name = name;
         this.shortName = shortName;
@@ -192,6 +203,8 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         validateLockinDetails();
         //validateWithdrawalFeeDetails();
         //validateAnnualFeeDetails();
+        this.allowOverdraft = allowOverdraft;
+        this.overdraftLimit = overdraftLimit;
     }
 
     public MonetaryCurrency currency() {
@@ -411,6 +424,23 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             }
         }
 
+        if (command.isChangeInBooleanParameterNamed(allowOverdraftParamName, this.allowOverdraft)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(allowOverdraftParamName);
+            actualChanges.put(allowOverdraftParamName, newValue);
+            this.allowOverdraft = newValue;
+        }
+        
+       if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(overdraftLimitParamName,
+                this.overdraftLimit)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(overdraftLimitParamName);
+            actualChanges.put(overdraftLimitParamName, newValue);
+            actualChanges.put(localeParamName, localeAsInput);
+            this.overdraftLimit = newValue;
+        }
+       if(!this.allowOverdraft){
+           this.overdraftLimit = null;
+       }
+       
         validateLockinDetails();
         //validateWithdrawalFeeDetails();
         //validateAnnualFeeDetails();
@@ -516,5 +546,25 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             this.charges = newSavingsProductCharges;
         }
         return updated;
+    }
+
+    
+    public BigDecimal overdraftLimit() {
+        return this.overdraftLimit;
+    }
+
+    
+    public boolean isWithdrawalFeeApplicableForTransfer() {
+        return this.withdrawalFeeApplicableForTransfer;
+    }
+
+    
+    public boolean isAllowOverdraft() {
+        return this.allowOverdraft;
+    }
+
+    
+    public Set<Charge> charges() {
+        return this.charges;
     }
 }

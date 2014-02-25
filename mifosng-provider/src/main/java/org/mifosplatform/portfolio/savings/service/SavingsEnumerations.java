@@ -109,6 +109,14 @@ public class SavingsEnumerations {
                 optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.WAIVE_CHARGES.getValue().longValue(),
                         SavingsAccountTransactionType.WAIVE_CHARGES.getCode(), "Waive Charge");
             break;
+            case WRITTEN_OFF:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.WRITTEN_OFF.getValue().longValue(),
+                        SavingsAccountTransactionType.WRITTEN_OFF.getCode(), "writtenoff");
+            break;
+            case OVERDRAFT_INTEREST:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue().longValue(),
+                        SavingsAccountTransactionType.OVERDRAFT_INTEREST.getCode(), "Overdraft Interest");
+            break;
         }
         return optionData;
     }
