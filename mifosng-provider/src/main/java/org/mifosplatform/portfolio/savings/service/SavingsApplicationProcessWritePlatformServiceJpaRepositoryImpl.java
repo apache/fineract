@@ -16,6 +16,9 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.format.DateTimeFormatter;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandProcessingService;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -75,6 +78,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final StaffRepositoryWrapper staffRepository;
     private final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator;
     private final SavingsAccountChargeAssembler savingsAccountChargeAssembler;
+    private final CommandProcessingService commandProcessingService;
 
     @Autowired
     public SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -84,7 +88,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final GroupRepository groupRepository, final SavingsProductRepository savingsProductRepository,
             final NoteRepository noteRepository, final StaffRepositoryWrapper staffRepository,
             final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator,
-            final SavingsAccountChargeAssembler savingsAccountChargeAssembler) {
+            final SavingsAccountChargeAssembler savingsAccountChargeAssembler,
+            final CommandProcessingService commandProcessingService) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.savingAccountAssembler = savingAccountAssembler;
@@ -97,6 +102,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.staffRepository = staffRepository;
         this.savingsAccountApplicationTransitionApiJsonValidator = savingsAccountApplicationTransitionApiJsonValidator;
         this.savingsAccountChargeAssembler = savingsAccountChargeAssembler;
+        this.commandProcessingService = commandProcessingService;
     }
 
     /*
@@ -433,7 +439,10 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     }
 
     @Override
-    public Long createActiveApplication(final SavingsAccountDataDTO savingsAccountDataDTO) {
+    public CommandProcessingResult createActiveApplication(final SavingsAccountDataDTO savingsAccountDataDTO) {
+        
+        final CommandWrapper commandWrapper = new CommandWrapperBuilder().savingsAccountActivation(null).build();
+        boolean rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, savingsAccountDataDTO.getAppliedBy());
         
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsAccountDataDTO.getClient(),savingsAccountDataDTO.getGroup(),
                 savingsAccountDataDTO.getSavingsProduct(),savingsAccountDataDTO.getApplicationDate(),savingsAccountDataDTO.getAppliedBy());
@@ -446,6 +455,9 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             account.updateAccountNo(accountNoGenerator.generate());
             this.savingAccountRepository.save(account);
         }
-        return account.getId();
+        return new CommandProcessingResultBuilder() //
+            .withSavingsId(account.getId()) //
+            .setRollbackTransaction(rollbackTransaction)//
+            .build();
     }
 }

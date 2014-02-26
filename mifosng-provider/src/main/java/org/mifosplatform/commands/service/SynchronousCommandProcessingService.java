@@ -53,8 +53,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     public CommandProcessingResult processAndLogCommand(final CommandWrapper wrapper, final JsonCommand command,
             final boolean isApprovedByChecker) {
 
-        final boolean rollbackTransaction = this.configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName())
-                && !isApprovedByChecker;
+        final boolean rollbackTransaction = this.configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName());
 
         final NewCommandSourceHandler handler = findCommandHandler(wrapper);
         final CommandProcessingResult result = handler.processCommand(command);
@@ -86,7 +85,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             this.commandSourceRepository.save(commandSourceResult);
         }
 
-        if (rollbackTransaction) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(commandSourceResult); }
+        if ((rollbackTransaction || result.isRollbackTransaction()) && !isApprovedByChecker) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(commandSourceResult); }
 
         return result;
     }
@@ -626,5 +625,12 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         }
 
         return handler;
+    }
+
+    @Override
+    public boolean validateCommand(final CommandWrapper commandWrapper, final AppUser user) {
+        boolean rollbackTransaction = this.configurationDomainService.isMakerCheckerEnabledForTask(commandWrapper.taskPermissionName());
+        user.validateHasPermissionTo(commandWrapper.getTaskPermissionName());
+        return rollbackTransaction;
     }
 }

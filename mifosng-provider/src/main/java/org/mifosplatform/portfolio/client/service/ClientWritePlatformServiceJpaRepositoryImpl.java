@@ -13,6 +13,9 @@ import java.util.Map;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandProcessingService;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -77,6 +80,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final SavingsAccountRepository savingsRepository;
     private final SavingsProductRepository savingsProductRepository;
     private final SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService;
+    private final CommandProcessingService commandProcessingService;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -85,7 +89,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final GroupRepository groupRepository, final StaffRepositoryWrapper staffRepository,
             final CodeValueRepositoryWrapper codeValueRepository, final LoanRepository loanRepository,
             final SavingsAccountRepository savingsRepository,final SavingsProductRepository savingsProductRepository,
-            final SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService) {
+            final SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService,
+            final CommandProcessingService commandProcessingService) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.officeRepository = officeRepository;
@@ -99,6 +104,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.savingsRepository = savingsRepository;
         this.savingsProductRepository = savingsProductRepository;
         this.savingsApplicationProcessWritePlatformService = savingsApplicationProcessWritePlatformService;
+        this.commandProcessingService = commandProcessingService;
     }
 
     @Transactional
@@ -185,6 +191,11 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             }
 
             final Client newClient = Client.createNew(currentUser,clientOffice, clientParentGroup, staff, savingsProduct, command);
+            boolean rollbackTransaction = false;
+            if(newClient.isActive()){
+                final CommandWrapper commandWrapper = new CommandWrapperBuilder().activateClient(null).build();
+                rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
+            }
 
             this.clientRepository.save(newClient);
 
@@ -197,7 +208,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             
             final Locale locale = command.extractLocale();
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
-            Long savingsId = openOverdraftSavingsAccount(newClient, fmt);
+            CommandProcessingResult result = openOverdraftSavingsAccount(newClient, fmt);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -205,7 +216,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withClientId(newClient.getId()) //
                     .withGroupId(groupId) //
                     .withEntityId(newClient.getId()) //
-                    .withSavingsId(savingsId)//
+                    .withSavingsId(result.getSavingsId())//
+                    .setRollbackTransaction(rollbackTransaction)//
+                    .setRollbackTransaction(result.isRollbackTransaction())//
                     .build();
         } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
@@ -284,7 +297,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final AppUser currentUser = this.context.authenticatedUser();
             client.activate(currentUser, fmt, activationDate);
-            Long savingsId = openOverdraftSavingsAccount(client, fmt);
+            CommandProcessingResult result = openOverdraftSavingsAccount(client, fmt);
             this.clientRepository.saveAndFlush(client);
 
             return new CommandProcessingResultBuilder() //
@@ -292,7 +305,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withOfficeId(client.officeId()) //
                     .withClientId(clientId) //
                     .withEntityId(clientId) //
-                    .withSavingsId(savingsId)//
+                    .withSavingsId(result.getSavingsId())//
+                    .setRollbackTransaction(result.isRollbackTransaction())//
                     .build();
         } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
@@ -300,17 +314,17 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         }
     }
 
-    private Long openOverdraftSavingsAccount(final Client client, final DateTimeFormatter fmt) {
-        Long accountId = null;
+    private CommandProcessingResult openOverdraftSavingsAccount(final Client client, final DateTimeFormatter fmt) {
+        CommandProcessingResult commandProcessingResult = CommandProcessingResult.empty();
         if(client.isActive() && client.SavingsProduct() != null){
             if(!client.SavingsProduct().isAllowOverdraft()){
                 String defaultUserMessage = "Client's saving account must be a overdraft account";
                 throw new InvalidClientSavingProductException("saving.product", "must.be.ovrdraft.account", defaultUserMessage, client.SavingsProduct().getId(),client.getId());
             }
             SavingsAccountDataDTO savingsAccountDataDTO = new SavingsAccountDataDTO(client, null, client.SavingsProduct(), client.getActivationLocalDate(), client.activatedBy(), fmt);
-            accountId = this.savingsApplicationProcessWritePlatformService.createActiveApplication(savingsAccountDataDTO);
+            commandProcessingResult = this.savingsApplicationProcessWritePlatformService.createActiveApplication(savingsAccountDataDTO);
         }
-        return accountId;
+        return commandProcessingResult;
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
