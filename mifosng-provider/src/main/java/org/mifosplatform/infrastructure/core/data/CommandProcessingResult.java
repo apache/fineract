@@ -178,7 +178,7 @@ public class CommandProcessingResult {
     }
 
     
-    public void setRollbackTransaction(boolean rollbackTransaction) {
+    public void setRollbackTransaction(Boolean rollbackTransaction) {
         this.rollbackTransaction = rollbackTransaction;
     }
 }

@@ -86,7 +86,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         }
 
         if ((rollbackTransaction || result.isRollbackTransaction()) && !isApprovedByChecker) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(commandSourceResult); }
-
+        result.setRollbackTransaction(null);
         return result;
     }
 
