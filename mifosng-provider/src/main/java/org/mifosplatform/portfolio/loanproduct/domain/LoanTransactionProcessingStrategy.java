@@ -39,7 +39,7 @@ public class LoanTransactionProcessingStrategy extends AbstractPersistable<Long>
     }
     
     public boolean isEarlyPaymentStrategy() {
-        return "early-payment-strategy".equalsIgnoreCase(this.code);
+        return "early-repayment-strategy".equalsIgnoreCase(this.code);
     }
 
     public boolean isCreocoreStrategy() {
