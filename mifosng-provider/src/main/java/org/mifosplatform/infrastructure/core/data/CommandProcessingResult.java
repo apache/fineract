@@ -26,12 +26,13 @@ public class CommandProcessingResult {
     @SuppressWarnings("unused")
     private final String resourceIdentifier;
     private final Long productId;
+    private Boolean rollbackTransaction;
 
     public static CommandProcessingResult fromDetails(final Long commandId, final Long officeId, final Long groupId, final Long clientId,
             final Long loanId, final Long savingsId, final String resourceIdentifier, final Long entityId, final String transactionId,
-            final Map<String, Object> changes, final Long productId) {
+            final Map<String, Object> changes, final Long productId,final Boolean rollbackTransaction) {
         return new CommandProcessingResult(commandId, officeId, groupId, clientId, loanId, savingsId, resourceIdentifier, entityId,
-                transactionId, changes, productId);
+                transactionId, changes, productId,rollbackTransaction);
     }
 
     public static CommandProcessingResult commandOnlyResult(final Long commandId) {
@@ -85,7 +86,7 @@ public class CommandProcessingResult {
 
     private CommandProcessingResult(final Long commandId, final Long officeId, final Long groupId, final Long clientId, final Long loanId,
             final Long savingsId, final String resourceIdentifier, final Long resourceId, final String transactionId,
-            final Map<String, Object> changesOnly, final Long productId) {
+            final Map<String, Object> changesOnly, final Long productId, Boolean rollbackTransaction) {
         this.commandId = commandId;
         this.officeId = officeId;
         this.groupId = groupId;
@@ -97,6 +98,7 @@ public class CommandProcessingResult {
         this.changes = changesOnly;
         this.transactionId = transactionId;
         this.productId = productId;
+        this.rollbackTransaction = rollbackTransaction;
     }
 
     private CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId, final Map<String, Object> changesOnly) {
@@ -168,5 +170,15 @@ public class CommandProcessingResult {
 
     public Long getProductId() {
         return this.productId;
+    }
+
+    
+    public boolean isRollbackTransaction() {
+        return this.rollbackTransaction!=null && this.rollbackTransaction;
+    }
+
+    
+    public void setRollbackTransaction(Boolean rollbackTransaction) {
+        this.rollbackTransaction = rollbackTransaction;
     }
 }

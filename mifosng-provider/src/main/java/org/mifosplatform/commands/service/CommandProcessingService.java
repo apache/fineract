@@ -9,11 +9,14 @@ import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.useradministration.domain.AppUser;
 
 public interface CommandProcessingService {
 
     CommandProcessingResult processAndLogCommand(CommandWrapper wrapper, JsonCommand command, boolean isApprovedByChecker);
 
     CommandProcessingResult logCommand(CommandSource commandSourceResult);
+    
+    boolean validateCommand(final CommandWrapper commandWrapper,final AppUser user);
 
 }
