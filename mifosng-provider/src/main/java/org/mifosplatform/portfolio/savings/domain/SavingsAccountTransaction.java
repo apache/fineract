@@ -92,24 +92,29 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     
     @Column(name = "overdraft_amount_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal overdraftAmount;
+    
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_date", nullable = false)
+    private final Date createdDate;
 
     protected SavingsAccountTransaction() {
         this.dateOf = null;
         this.typeOf = null;
+        this.createdDate = null;
     }
 
     public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final Office office,
-            final PaymentDetail paymentDetail, final LocalDate date, final Money amount) {
+            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate) {
         final boolean isReversed = false;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, SavingsAccountTransactionType.DEPOSIT.getValue(), date,
-                amount, isReversed);
+        		createdDate, amount, isReversed);
     }
 
     public static SavingsAccountTransaction withdrawal(final SavingsAccount savingsAccount, final Office office,
-            final PaymentDetail paymentDetail, final LocalDate date, final Money amount) {
+            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate) {
         final boolean isReversed = false;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, SavingsAccountTransactionType.WITHDRAWAL.getValue(),
-                date, amount, isReversed);
+                date,createdDate, amount, isReversed);
     }
 
     public static SavingsAccountTransaction interestPosting(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
@@ -151,7 +156,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         final boolean isReversed = false;
         final PaymentDetail paymentDetail = null;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
-                SavingsAccountTransactionType.INITIATE_TRANSFER.getValue(), date, savingsAccount.getSummary().getAccountBalance(),
+                SavingsAccountTransactionType.INITIATE_TRANSFER.getValue(), date, new Date(),savingsAccount.getSummary().getAccountBalance(),
                 isReversed);
     }
 
@@ -159,7 +164,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         final boolean isReversed = false;
         final PaymentDetail paymentDetail = null;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
-                SavingsAccountTransactionType.APPROVE_TRANSFER.getValue(), date, savingsAccount.getSummary().getAccountBalance(),
+                SavingsAccountTransactionType.APPROVE_TRANSFER.getValue(), date,new Date(), savingsAccount.getSummary().getAccountBalance(),
                 isReversed);
     }
 
@@ -167,29 +172,29 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         final boolean isReversed = false;
         final PaymentDetail paymentDetail = null;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
-                SavingsAccountTransactionType.WITHDRAW_TRANSFER.getValue(), date, savingsAccount.getSummary().getAccountBalance(),
+                SavingsAccountTransactionType.WITHDRAW_TRANSFER.getValue(), date,new Date(), savingsAccount.getSummary().getAccountBalance(),
                 isReversed);
     }
     
     public static SavingsAccountTransaction copyTransaction(SavingsAccountTransaction accountTransaction) {
         return new SavingsAccountTransaction(accountTransaction.savingsAccount, accountTransaction.office, accountTransaction.paymentDetail,
-                accountTransaction.typeOf, accountTransaction.transactionLocalDate(), accountTransaction.amount,
+                accountTransaction.typeOf, accountTransaction.transactionLocalDate(),accountTransaction.createdDate, accountTransaction.amount,
                 accountTransaction.reversed);
     }
 
 
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final Integer typeOf,
             final LocalDate transactionLocalDate, final Money amount, final boolean isReversed) {
-        this(savingsAccount, office, null, typeOf, transactionLocalDate, amount, isReversed);
+        this(savingsAccount, office, null, typeOf, transactionLocalDate, new Date(),amount, isReversed);
     }
 
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final PaymentDetail paymentDetail,
-            final Integer typeOf, final LocalDate transactionLocalDate, final Money amount, final boolean isReversed) {
-        this(savingsAccount, office, paymentDetail, typeOf, transactionLocalDate, amount.getAmount(), isReversed);
+            final Integer typeOf, final LocalDate transactionLocalDate,final Date createdDate, final Money amount, final boolean isReversed) {
+        this(savingsAccount, office, paymentDetail, typeOf, transactionLocalDate,createdDate, amount.getAmount(), isReversed);
     }
 
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final PaymentDetail paymentDetail,
-            final Integer typeOf, final LocalDate transactionLocalDate, final BigDecimal amount, final boolean isReversed) {
+            final Integer typeOf, final LocalDate transactionLocalDate, final Date createdDate, final BigDecimal amount, final boolean isReversed) {
         this.savingsAccount = savingsAccount;
         this.office = office;
         this.typeOf = typeOf;
@@ -197,7 +202,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         this.amount = amount;
         this.reversed = isReversed;
         this.paymentDetail = paymentDetail;
-
+        this.createdDate = createdDate;
     }
 
     public LocalDate transactionLocalDate() {
@@ -554,6 +559,10 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     public Money getOverdraftAmount(final MonetaryCurrency currency) {
         return Money.of(currency, this.overdraftAmount);
     }
+
+	public Date createdDate() {
+		return this.createdDate;
+	}
 
 
 }

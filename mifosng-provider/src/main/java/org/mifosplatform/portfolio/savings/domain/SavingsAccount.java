@@ -231,7 +231,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Embedded
     private SavingsAccountSummary summary;
 
-    @OrderBy(value = "dateOf, id")
+    @OrderBy(value = "dateOf, createdDate, id")
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true)
     private final List<SavingsAccountTransaction> transactions = new ArrayList<SavingsAccountTransaction>();
@@ -495,13 +495,13 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     private List<SavingsAccountTransaction> retreiveListOfTransactions() {
         final List<SavingsAccountTransaction> listOfTransactionsSorted = new ArrayList<SavingsAccountTransaction>();
-        for (final SavingsAccountTransaction transaction : this.transactions) {
+        listOfTransactionsSorted.addAll(this.transactions);
+/*        for (final SavingsAccountTransaction transaction : this.transactions) {
             listOfTransactionsSorted.add(transaction);
         }
-
+*/
         final SavingsAccountTransactionComparator transactionComparator = new SavingsAccountTransactionComparator();
         Collections.sort(listOfTransactionsSorted, transactionComparator);
-
         return listOfTransactionsSorted;
     }
 
@@ -615,7 +615,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final Money amount = Money.of(this.currency, transactionDTO.getTransactionAmount());
 
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, office(), transactionDTO.getPaymentDetail(),
-                transactionDTO.getTransactionDate(), amount);
+                transactionDTO.getTransactionDate(), amount, transactionDTO.getCrecreatedDate());
         this.transactions.add(transaction);
 
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
@@ -686,7 +686,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final Money transactionAmountMoney = Money.of(this.currency, transactionDTO.getTransactionAmount());
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, office(),
-                transactionDTO.getPaymentDetail(), transactionDTO.getTransactionDate(), transactionAmountMoney);
+                transactionDTO.getPaymentDetail(), transactionDTO.getTransactionDate(), transactionAmountMoney, 
+                transactionDTO.getCrecreatedDate());
         this.transactions.add(transaction);
 
         if (applyWithdrawFee){
@@ -1530,7 +1531,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
         if (minRequiredOpeningBalance.isGreaterThanZero()) {
             final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, getActivationLocalDate(),
-                    minRequiredOpeningBalance.getAmount(), null);
+                    minRequiredOpeningBalance.getAmount(), null,new Date());
             deposit(transactionDTO);
 
             // no openingBalance concept supported yet but probably will to

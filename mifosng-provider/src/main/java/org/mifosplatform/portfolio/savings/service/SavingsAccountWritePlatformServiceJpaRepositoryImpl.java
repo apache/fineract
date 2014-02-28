@@ -441,13 +441,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
 
         SavingsAccountTransaction transaction = null;
+        final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
+                paymentDetail,savingsAccountTransaction.createdDate());
         if (savingsAccountTransaction.isDeposit()) {
-            final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                    paymentDetail);
             transaction = account.deposit(transactionDTO);
         } else {
-            final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                    paymentDetail);
             transaction = account.withdraw(transactionDTO, true);
         }
         final Long newtransactionId = saveTransactionToGenerateTransactionId(transaction);

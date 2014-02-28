@@ -15,30 +15,18 @@ public class SavingsAccountTransactionComparator implements Comparator<SavingsAc
 
     @Override
     public int compare(final SavingsAccountTransaction o1, final SavingsAccountTransaction o2) {
-        int compareResult = 0;
+    	int compareResult = 0;
         final int comparsion = o1.transactionLocalDate().compareTo(o2.transactionLocalDate());
         if (comparsion == 0) {
-            // equal transaction dates
-            if (o1.isInterestPostingAndNotReversed() && !o2.isInterestPostingAndNotReversed()) {
-                compareResult = -1;
-            } else if (!o1.isInterestPostingAndNotReversed() && o2.isInterestPostingAndNotReversed()) {
-                compareResult = 1;
-            } else if (!o1.isDepositAndNotReversed() && o2.isDepositAndNotReversed()) {
-                // push all deposit transactions before charge/withdrawal transactions on same day.
-                // activation charge is charged on account activation date, any
-                // adjustments with deposit amount
-                // resulting into negative balance, to fix this push deposit
-                // transactions before charge/withdrawal charges transactions.
-                compareResult = 1;
-            } else if (o1.isDepositAndNotReversed() && !o2.isDepositAndNotReversed()) {
-                compareResult = -1;
-            } else {
-                compareResult = 0;
-            }
+        	compareResult = o1.createdDate().compareTo(o2.createdDate());
+        	if(compareResult == 0){
+        		compareResult = o1.getId().compareTo(o2.getId());
+        	}else{
+        		compareResult = comparsion;
+        	}
         } else {
             compareResult = comparsion;
         }
-
         return compareResult;
     }
 }
