@@ -496,10 +496,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     private List<SavingsAccountTransaction> retreiveListOfTransactions() {
         final List<SavingsAccountTransaction> listOfTransactionsSorted = new ArrayList<SavingsAccountTransaction>();
         listOfTransactionsSorted.addAll(this.transactions);
-/*        for (final SavingsAccountTransaction transaction : this.transactions) {
-            listOfTransactionsSorted.add(transaction);
-        }
-*/
+
         final SavingsAccountTransactionComparator transactionComparator = new SavingsAccountTransactionComparator();
         Collections.sort(listOfTransactionsSorted, transactionComparator);
         return listOfTransactionsSorted;
