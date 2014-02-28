@@ -543,7 +543,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     @Override
     public Collection<SavingsAccountTransactionData> retrieveAllTransactions(final Long savingsId) {
 
-        final String sql = "select " + this.transactionsMapper.schema() + " where sa.id = ? order by tr.transaction_date DESC, tr.id DESC";
+        final String sql = "select " + this.transactionsMapper.schema() + " where sa.id = ? order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC";
 
         return this.jdbcTemplate.query(sql, this.transactionsMapper, new Object[] { savingsId });
     }
