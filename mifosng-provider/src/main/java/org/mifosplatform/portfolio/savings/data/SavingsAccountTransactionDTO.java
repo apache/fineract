@@ -13,15 +13,15 @@ public class SavingsAccountTransactionDTO {
     private final LocalDate transactionDate;
     private final BigDecimal transactionAmount;
     private final PaymentDetail paymentDetail;
-    private final Date crecreatedDate;
+    private final Date createdDate;
 
     public SavingsAccountTransactionDTO(final DateTimeFormatter formatter, final LocalDate transactionDate,
-            final BigDecimal transactionAmount, final PaymentDetail paymentDetail,final Date crecreatedDate) {
+            final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final Date createdDate) {
         this.formatter = formatter;
         this.transactionDate = transactionDate;
         this.transactionAmount = transactionAmount;
         this.paymentDetail = paymentDetail;
-        this.crecreatedDate = crecreatedDate;
+        this.createdDate = createdDate;
     }
 
     public DateTimeFormatter getFormatter() {
@@ -40,7 +40,7 @@ public class SavingsAccountTransactionDTO {
         return this.paymentDetail;
     }
 
-	public Date getCrecreatedDate() {
-		return this.crecreatedDate;
-	}
+    public Date getCreatedDate() {
+        return this.createdDate;
+    }
 }

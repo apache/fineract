@@ -221,10 +221,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     @Column(name = "withdrawal_fee_for_transfer", nullable = true)
     private boolean withdrawalFeeApplicableForTransfer;
-    
+
     @Column(name = "allow_overdraft")
     private boolean allowOverdraft;
-    
+
     @Column(name = "overdraft_limit", scale = 6, precision = 19, nullable = true)
     private BigDecimal overdraftLimit;
 
@@ -259,13 +259,13 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
-            final boolean allowOverdraft,final BigDecimal overdraftLimit) {
+            final boolean allowOverdraft, final BigDecimal overdraftLimit) {
 
         final SavingsAccountStatusType status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
-        return new SavingsAccount(client, group, product, fieldOfficer, accountNo, externalId, status, accountType, submittedOnDate, submittedBy,
-                interestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
+        return new SavingsAccount(client, group, product, fieldOfficer, accountNo, externalId, status, accountType, submittedOnDate,
+                submittedBy, interestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
                 interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
-                withdrawalFeeApplicableForTransfer, savingsAccountCharges,allowOverdraft,overdraftLimit);
+                withdrawalFeeApplicableForTransfer, savingsAccountCharges, allowOverdraft, overdraftLimit);
     }
 
     private SavingsAccount(final Client client, final Group group, final SavingsProduct product, final Staff fieldOfficer,
@@ -276,7 +276,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
-            final boolean allowOverdraft,final BigDecimal overdraftLimit) {
+            final boolean allowOverdraft, final BigDecimal overdraftLimit) {
         this.client = client;
         this.group = group;
         this.product = product;
@@ -515,46 +515,44 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 Money overdraftAmount = Money.zero(this.currency);
                 Money transactionAmount = Money.zero(this.currency);
                 if (transaction.isCredit()) {
-                    if(runningBalance.isLessThanZero()){
+                    if (runningBalance.isLessThanZero()) {
                         Money diffAmount = transaction.getAmount(this.currency).plus(runningBalance);
-                        if(diffAmount.isGreaterThanZero()){
+                        if (diffAmount.isGreaterThanZero()) {
                             overdraftAmount = transaction.getAmount(this.currency).minus(diffAmount);
-                        }else{
-                            overdraftAmount = transaction.getAmount(this.currency); 
+                        } else {
+                            overdraftAmount = transaction.getAmount(this.currency);
                         }
                     }
                     transactionAmount = transactionAmount.plus(transaction.getAmount(this.currency));
                 } else if (transaction.isDebit()) {
-                    if(runningBalance.isLessThanZero()){
+                    if (runningBalance.isLessThanZero()) {
                         overdraftAmount = transaction.getAmount(this.currency);
                     }
                     transactionAmount = transactionAmount.minus(transaction.getAmount(this.currency));
                 }
-                
+
                 runningBalance = runningBalance.plus(transactionAmount);
                 transaction.updateRunningBalance(runningBalance);
-                if(overdraftAmount.isZero() && runningBalance.isLessThanZero()){
+                if (overdraftAmount.isZero() && runningBalance.isLessThanZero()) {
                     overdraftAmount = overdraftAmount.plus(runningBalance.getAmount().negate());
                 }
-                if(transaction.getId() == null && overdraftAmount.isGreaterThanZero()){
-                    transaction.updateOverdraftAmount(overdraftAmount.getAmount());   
-                }else if(overdraftAmount.isNotEqualTo(transaction.getOverdraftAmount(getCurrency()))){
+                if (transaction.getId() == null && overdraftAmount.isGreaterThanZero()) {
+                    transaction.updateOverdraftAmount(overdraftAmount.getAmount());
+                } else if (overdraftAmount.isNotEqualTo(transaction.getOverdraftAmount(getCurrency()))) {
                     SavingsAccountTransaction accountTransaction = SavingsAccountTransaction.copyTransaction(transaction);
                     transaction.reverse();
-                    if(overdraftAmount.isGreaterThanZero()){
+                    if (overdraftAmount.isGreaterThanZero()) {
                         accountTransaction.updateOverdraftAmount(overdraftAmount.getAmount());
                     }
                     accountTransaction.updateRunningBalance(runningBalance);
                     this.transactions.add(accountTransaction);
                     isTransactionsModified = true;
                 }
-                    
-                
-                
+
             }
         }
 
-        if(isTransactionsModified){
+        if (isTransactionsModified) {
             accountTransactionsSorted = retreiveListOfTransactions();
         }
         // loop over transactions in reverse
@@ -612,7 +610,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final Money amount = Money.of(this.currency, transactionDTO.getTransactionAmount());
 
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, office(), transactionDTO.getPaymentDetail(),
-                transactionDTO.getTransactionDate(), amount, transactionDTO.getCrecreatedDate());
+                transactionDTO.getTransactionDate(), amount, transactionDTO.getCreatedDate());
         this.transactions.add(transaction);
 
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
@@ -683,20 +681,20 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final Money transactionAmountMoney = Money.of(this.currency, transactionDTO.getTransactionAmount());
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, office(),
-                transactionDTO.getPaymentDetail(), transactionDTO.getTransactionDate(), transactionAmountMoney, 
-                transactionDTO.getCrecreatedDate());
+                transactionDTO.getPaymentDetail(), transactionDTO.getTransactionDate(), transactionAmountMoney,
+                transactionDTO.getCreatedDate());
         this.transactions.add(transaction);
 
-        if (applyWithdrawFee){
-            //auto pay withdrawal fee
+        if (applyWithdrawFee) {
+            // auto pay withdrawal fee
             payWithdrawalFee(transactionDTO.getTransactionAmount(), transactionDTO.getTransactionDate());
         }
         return transaction;
     }
-    
-    private void payWithdrawalFee(final BigDecimal transactionAmoount, final LocalDate transactionDate){
+
+    private void payWithdrawalFee(final BigDecimal transactionAmoount, final LocalDate transactionDate) {
         for (SavingsAccountCharge charge : this.charges()) {
-            if (charge.isWithdrawalFee()){
+            if (charge.isWithdrawalFee()) {
                 charge.updateWithdralFeeAmount(transactionAmoount);
                 this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate);
             }
@@ -732,19 +730,16 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 //
                 final BigDecimal withdrawalFee = null;
                 Money limit = runningBalance.zero();
-                if(this.allowOverdraft){
-                    if(this.overdraftLimit != null){
+                if (this.allowOverdraft) {
+                    if (this.overdraftLimit != null) {
                         limit = limit.plus(this.overdraftLimit);
                     }
                 }
-                if(limit.plus(runningBalance).isLessThanZero()){
-                    throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
-                }
+                if (limit.plus(runningBalance).isLessThanZero()) { throw new InsufficientAccountBalanceException("transactionAmount",
+                        getAccountBalance(), withdrawalFee, transactionAmount); }
             }
         }
     }
-    
-    
 
     public void validateAccountBalanceDoesNotBecomeNegative(final String transactionAction) {
 
@@ -763,23 +758,23 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
                 final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                         .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + transactionAction);
-                
-                if(this.allowOverdraft){
+
+                if (this.allowOverdraft) {
                     Money limit = runningBalance.zero();
-                    if(this.overdraftLimit != null){
+                    if (this.overdraftLimit != null) {
                         limit = limit.plus(this.overdraftLimit);
                     }
-                    if(limit.plus(runningBalance).isLessThanZero()){
+                    if (limit.plus(runningBalance).isLessThanZero()) {
                         baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("results.in.balance.exceeding.overdraft.limit");
                     }
-                }else{
+                } else {
                     baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("results.in.balance.going.negative");
                 }
                 if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
             }
         }
     }
-    
+
     private boolean isAccountLocked(final LocalDate transactionDate) {
         boolean isLocked = false;
         final boolean accountHasLockedInSetting = this.lockedInUntilDate != null;
@@ -941,27 +936,26 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 actualChanges.put(chargesParamName, command.jsonFragment(chargesParamName));
             }
         }
-        
+
         if (command.isChangeInBooleanParameterNamed(allowOverdraftParamName, this.allowOverdraft)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(allowOverdraftParamName);
             actualChanges.put(allowOverdraftParamName, newValue);
             this.allowOverdraft = newValue;
         }
-        
-       if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(overdraftLimitParamName,
-                this.overdraftLimit)) {
+
+        if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(overdraftLimitParamName, this.overdraftLimit)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(overdraftLimitParamName);
             actualChanges.put(overdraftLimitParamName, newValue);
             actualChanges.put(localeParamName, localeAsInput);
             this.overdraftLimit = newValue;
         }
-       
-       if(!this.allowOverdraft){
-           this.overdraftLimit = null;
-       }
+
+        if (!this.allowOverdraft) {
+            this.overdraftLimit = null;
+        }
 
         validateLockinDetails();
-        
+
     }
 
     private void validateLockinDetails() {
@@ -1124,8 +1118,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     public void validateNewApplicationState(final LocalDate todayDateOfTenant) {
 
         validateLockinDetails();
-        //validateWithdrawalFeeDetails();
-        //validateAnnualFeeDetails();
+        // validateWithdrawalFeeDetails();
+        // validateAnnualFeeDetails();
 
         final LocalDate submittedOn = getSubmittedOnLocalDate();
 
@@ -1476,10 +1470,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.activatedBy = currentUser;
         this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivationLocalDate());
 
-        /*if (annualFeeSettingsSet()) {
-            updateToNextAnnualFeeDueDateFrom(getActivationLocalDate());
-        }
-*/
+        /*
+         * if (annualFeeSettingsSet()) {
+         * updateToNextAnnualFeeDueDateFrom(getActivationLocalDate()); }
+         */
         if (this.client != null && this.client.isActivatedAfter(activationDate)) {
             final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
             final String dateAsString = formatter.print(this.client.getActivationLocalDate());
@@ -1520,7 +1514,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         // auto enter deposit for minimum required opening balance when
         // activating account.
         processAccountUponActivation(fmt);
-        
+
         return actualChanges;
     }
 
@@ -1528,7 +1522,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
         if (minRequiredOpeningBalance.isGreaterThanZero()) {
             final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, getActivationLocalDate(),
-                    minRequiredOpeningBalance.getAmount(), null,new Date());
+                    minRequiredOpeningBalance.getAmount(), null, new Date());
             deposit(transactionDTO);
 
             // no openingBalance concept supported yet but probably will to
@@ -1540,19 +1534,18 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             // correct.
             recalculateDailyBalances(openingAccountBalance);
         }
-        
-        
-        //update annual fee due date
+
+        // update annual fee due date
         for (SavingsAccountCharge charge : this.charges()) {
             charge.updateToNextDueDateFrom(getActivationLocalDate());
         }
-        
-        //auto pay the activation time charges
+
+        // auto pay the activation time charges
         this.payActivationCharges();
-        //TODO : AA add activation charges to actual changes list
+        // TODO : AA add activation charges to actual changes list
     }
-    
-    public void approveAndActivateApplication(final Date appliedonDate,final AppUser appliedBy,final DateTimeFormatter fmt){
+
+    public void approveAndActivateApplication(final Date appliedonDate, final AppUser appliedBy, final DateTimeFormatter fmt) {
         this.status = SavingsAccountStatusType.ACTIVE.getValue();
         this.approvedOnDate = appliedonDate;
         this.approvedBy = appliedBy;
@@ -1567,7 +1560,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivationLocalDate());
         processAccountUponActivation(fmt);
     }
-        
+
     private void payActivationCharges() {
         for (SavingsAccountCharge savingsAccountCharge : this.charges()) {
             if (savingsAccountCharge.isSavingsActivation()) {
@@ -1760,11 +1753,11 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final SavingsAccountCharge savingsAccountCharge = getCharge(savingsAccountChargeId);
 
-        if (savingsAccountCharge.isWithdrawalFee()){
+        if (savingsAccountCharge.isWithdrawalFee()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.waiver.of.withdrawal.fee.not.supported");
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
-        
+
         // validate charge is not already paid or waived
         if (savingsAccountCharge.isWaived()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.charge.is.already.waived");
@@ -1777,7 +1770,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         // waive charge
         final Money amountWaived = savingsAccountCharge.waive(getCurrency());
         handleWaiverChargeTransactions(savingsAccountCharge, amountWaived);
-      
+
     }
 
     public void addCharge(final DateTimeFormatter formatter, final SavingsAccountCharge savingsAccountCharge, final Charge chargeDefinition) {
@@ -1810,46 +1803,43 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
         }
-        
+
         if (savingsAccountCharge.isSavingsActivation() && !(isSubmittedAndPendingApproval() || (isApproved() && isNotActive()))) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
-                    "not.valid.account.status.cannot.add.activation.time.charge");
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.valid.account.status.cannot.add.activation.time.charge");
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
-      //Only one withdrawal fee is supported per account
-        if(savingsAccountCharge.isWithdrawalFee()){
-            if(this.isWithDrawalFeeExists()){
-                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
-                        "multiple.withdrawal.fee.per.account.not.supported");
+        // Only one withdrawal fee is supported per account
+        if (savingsAccountCharge.isWithdrawalFee()) {
+            if (this.isWithDrawalFeeExists()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("multiple.withdrawal.fee.per.account.not.supported");
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
         }
-        
-      //Only one annual fee is supported per account
-        if(savingsAccountCharge.isAnnualFee()){
-            if(this.isAnnualFeeExists()){
-                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
-                        "multiple.annual.fee.per.account.not.supported");
+
+        // Only one annual fee is supported per account
+        if (savingsAccountCharge.isAnnualFee()) {
+            if (this.isAnnualFeeExists()) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("multiple.annual.fee.per.account.not.supported");
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
-            
+
         }
-        
-        if(savingsAccountCharge.isAnnualFee() || savingsAccountCharge.isMonthlyFee()){
-            //update due date
-            if(isActive()){
+
+        if (savingsAccountCharge.isAnnualFee() || savingsAccountCharge.isMonthlyFee()) {
+            // update due date
+            if (isActive()) {
                 savingsAccountCharge.updateToNextDueDateFrom(getActivationLocalDate());
-            }else if(isApproved()){
+            } else if (isApproved()) {
                 savingsAccountCharge.updateToNextDueDateFrom(getApprovedOnLocalDate());
-            }          
+            }
         }
-        
-        //activation charge and withdrawal charges not required this validation
-        if(savingsAccountCharge.isOnSpecifiedDueDate()){
+
+        // activation charge and withdrawal charges not required this validation
+        if (savingsAccountCharge.isOnSpecifiedDueDate()) {
             validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_APPLY_CHARGE, chargeDueDate);
         }
-                
+
         // add new charge to savings account
         charges().add(savingsAccountCharge);
 
@@ -1857,14 +1847,14 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     private boolean isWithDrawalFeeExists() {
         for (SavingsAccountCharge charge : this.charges()) {
-            if(charge.isWithdrawalFee()) return true;
+            if (charge.isWithdrawalFee()) return true;
         }
         return false;
     }
-    
+
     private boolean isAnnualFeeExists() {
         for (SavingsAccountCharge charge : this.charges()) {
-            if(charge.isAnnualFee()) return true;
+            if (charge.isAnnualFee()) return true;
         }
         return false;
     }
@@ -1897,20 +1887,20 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                     .failWithCodeNoParameterAddedToErrorCode("transaction.is.futureDate");
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
-        
+
         if (savingsAccountCharge.isSavingsActivation()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
                     "transaction.not.valid.cannot.pay.activation.time.charge.is.automated");
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
-        
-        if (savingsAccountCharge.isAnnualFee()){
+
+        if (savingsAccountCharge.isAnnualFee()) {
             final LocalDate annualFeeDueDate = savingsAccountCharge.getDueLocalDate();
             if (annualFeeDueDate == null) {
                 baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.annualfee.settings");
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
-            
+
             if (!annualFeeDueDate.equals(transactionDate)) {
                 baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("invalid.date");
                 throw new PlatformApiDataValidationException(dataValidationErrors);
@@ -1924,7 +1914,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
         }
-                
+
         // validate charge is not already paid or waived
         if (savingsAccountCharge.isWaived()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.charge.is.already.waived");
@@ -1947,19 +1937,19 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         savingsAccountCharge.pay(getCurrency(), amountPaid);
         handlePayChargeTransactions(savingsAccountCharge, amountPaid, transactionDate);
     }
-    
+
     private void handlePayChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount,
             final LocalDate transactionDate) {
         SavingsAccountTransaction chargeTransaction = null;
-        
-        if (savingsAccountCharge.isWithdrawalFee()){
+
+        if (savingsAccountCharge.isWithdrawalFee()) {
             chargeTransaction = SavingsAccountTransaction.withdrawalFee(this, office(), transactionDate, transactionAmount);
-        }else if (savingsAccountCharge.isAnnualFee()){
+        } else if (savingsAccountCharge.isAnnualFee()) {
             chargeTransaction = SavingsAccountTransaction.annualFee(this, office(), transactionDate, transactionAmount);
-        }else {
+        } else {
             chargeTransaction = SavingsAccountTransaction.charge(this, office(), transactionDate, transactionAmount);
         }
-        
+
         handleChargeTransactions(savingsAccountCharge, chargeTransaction);
     }
 
@@ -2001,14 +1991,14 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
-        
-        if(this.overdraftLimit != null && this.product.overdraftLimit() != null && this.overdraftLimit.compareTo(this.product.overdraftLimit()) == 1){
+
+        if (this.overdraftLimit != null && this.product.overdraftLimit() != null
+                && this.overdraftLimit.compareTo(this.product.overdraftLimit()) == 1) {
             baseDataValidator.reset().parameter(SavingsApiConstants.overdraftLimitParamName).value(this.overdraftLimit)
-            .failWithCode("cannot.exceed.product.value");
+                    .failWithCode("cannot.exceed.product.value");
         }
-        
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors);}
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
-    
 }
