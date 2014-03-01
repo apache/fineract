@@ -35,13 +35,12 @@ public enum CalendarWeekDaysType {
     private static final Map<Integer, CalendarWeekDaysType> intToEnumMap = new HashMap<Integer, CalendarWeekDaysType>();
     private static int minValue = CalendarWeekDaysType.MO.value;
     private static int maxValue = CalendarWeekDaysType.SU.value;
-    
+
     static {
         for (final CalendarWeekDaysType type : CalendarWeekDaysType.values()) {
             intToEnumMap.put(type.value, type);
         }
     }
-
 
     public static CalendarWeekDaysType fromInt(final int i) {
         final CalendarWeekDaysType type = intToEnumMap.get(Integer.valueOf(i));
@@ -60,11 +59,11 @@ public enum CalendarWeekDaysType {
     public String toString() {
         return name().toString();
     }
-    
-    public boolean isInvalid(){
+
+    public boolean isInvalid() {
         return this.value.equals(CalendarWeekDaysType.INVALID.value);
     }
-    
+
     public static CalendarWeekDaysType fromString(final String weekDayString) {
         CalendarWeekDaysType weekDay = CalendarWeekDaysType.INVALID;
 

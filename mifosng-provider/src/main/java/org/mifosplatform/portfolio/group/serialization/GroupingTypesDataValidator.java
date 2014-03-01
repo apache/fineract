@@ -97,10 +97,10 @@ public final class GroupingTypesDataValidator {
             baseDataValidator.reset().parameter(ClientApiConstants.activeParamName).value(active).trueOrFalseRequired(false);
         }
 
-        if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.submittedOnDateParamName, element))
-        {
-            final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(GroupingTypesApiConstants.submittedOnDateParamName, element);
-        baseDataValidator.reset().parameter(GroupingTypesApiConstants.submittedOnDateParamName).value(submittedOnDate).notNull();
+        if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.submittedOnDateParamName, element)) {
+            final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(
+                    GroupingTypesApiConstants.submittedOnDateParamName, element);
+            baseDataValidator.reset().parameter(GroupingTypesApiConstants.submittedOnDateParamName).value(submittedOnDate).notNull();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -161,9 +161,9 @@ public final class GroupingTypesDataValidator {
             baseDataValidator.reset().parameter(ClientApiConstants.activeParamName).value(active).trueOrFalseRequired(false);
         }
 
-        if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.submittedOnDateParamName, element))
-        {
-            final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(GroupingTypesApiConstants.submittedOnDateParamName, element);
+        if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.submittedOnDateParamName, element)) {
+            final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(
+                    GroupingTypesApiConstants.submittedOnDateParamName, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.submittedOnDateParamName).value(submittedOnDate).notNull();
         }
 
@@ -221,9 +221,9 @@ public final class GroupingTypesDataValidator {
             baseDataValidator.reset().parameter(ClientApiConstants.activeParamName).value(active).trueOrFalseRequired(false);
         }
 
-        if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.submittedOnDateParamName, element))
-        {
-            final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(GroupingTypesApiConstants.submittedOnDateParamName, element);
+        if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.submittedOnDateParamName, element)) {
+            final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(
+                    GroupingTypesApiConstants.submittedOnDateParamName, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.submittedOnDateParamName).value(submittedOnDate).notNull();
         }
 

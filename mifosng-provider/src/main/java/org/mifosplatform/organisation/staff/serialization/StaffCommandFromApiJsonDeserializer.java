@@ -72,7 +72,7 @@ public final class StaffCommandFromApiJsonDeserializer {
             final Boolean loanOfficerFlag = this.fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
             baseDataValidator.reset().parameter("isLoanOfficer").value(loanOfficerFlag).notNull();
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists("isActive", element)) {
             final Boolean activeFlag = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
             baseDataValidator.reset().parameter("isActive").value(activeFlag).notNull();
@@ -115,12 +115,12 @@ public final class StaffCommandFromApiJsonDeserializer {
             final Boolean loanOfficerFlag = this.fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
             baseDataValidator.reset().parameter("isLoanOfficer").value(loanOfficerFlag).notNull();
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists("isActive", element)) {
             final Boolean activeFlag = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
             baseDataValidator.reset().parameter("isActive").value(activeFlag).notNull();
         }
-        
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 

@@ -8,10 +8,10 @@ package org.mifosplatform.portfolio.loanproduct.domain;
 public enum LoanProductValueConditionType {
 
     INVALID(0, "LoanProductParamType.invalid"), //
-//    LESSTHAN(1,"LoanProductValueConditionType.lessthan"),//
+    // LESSTHAN(1,"LoanProductValueConditionType.lessthan"),//
     EQUAL(2, "LoanProductValueConditionType.equal"), //
     GRETERTHAN(3, "LoanProductValueConditionType.greterthan"); //
-    
+
     private final Integer value;
     private final String code;
 
@@ -45,12 +45,12 @@ public enum LoanProductValueConditionType {
         }
         return loanProductParamType;
     }
-    
-    public boolean isValueConditionTypeEqual(){
+
+    public boolean isValueConditionTypeEqual() {
         return LoanProductValueConditionType.EQUAL.getValue().equals(this.value);
     }
 
-    public boolean isValueConditionTypeGreterThan(){
+    public boolean isValueConditionTypeGreterThan() {
         return LoanProductValueConditionType.GRETERTHAN.getValue().equals(this.value);
     }
 

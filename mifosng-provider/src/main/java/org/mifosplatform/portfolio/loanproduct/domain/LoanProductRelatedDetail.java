@@ -38,7 +38,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
     @Column(name = "principal_amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal principal;
-    
+
     @Column(name = "nominal_interest_rate_per_period", scale = 6, precision = 19, nullable = false)
     private BigDecimal nominalInterestRatePerPeriod;
 
@@ -155,9 +155,10 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         return Money.of(this.currency, this.principal);
     }
 
-    public void setPrincipal(BigDecimal principal){
+    public void setPrincipal(BigDecimal principal) {
         this.principal = principal;
     }
+
     public Money getInArrearsTolerance() {
         return Money.of(this.currency, this.inArrearsTolerance);
     }

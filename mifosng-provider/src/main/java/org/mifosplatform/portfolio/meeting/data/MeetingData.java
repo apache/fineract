@@ -70,5 +70,5 @@ public class MeetingData {
     public LocalDate getMeetingDate() {
         return this.meetingDate;
     }
-     
+
 }

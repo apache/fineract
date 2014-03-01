@@ -149,7 +149,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
 
         List<JournalEntryData> entryDatas = jdbcTemplate.query(entryMapper.organizationRunningBalanceSchema(), entryMapper,
                 new Object[] { entityDate });
-        if(entryDatas.size()>0){
+        if (entryDatas.size() > 0) {
             String[] updateSql = new String[entryDatas.size()];
             int i = 0;
             for (JournalEntryData entryData : entryDatas) {
@@ -268,7 +268,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
             final EnumOptionData entryType = AccountingEnumerations.journalEntryType(entryTypeId);
 
             return new JournalEntryData(id, officeId, null, null, glAccountId, null, accountType, null, entryType, amount, null, null,
-                    null, null, null, null, null, null, null, null, null, null, null,null, null);
+                    null, null, null, null, null, null, null, null, null, null, null, null, null);
         }
     }
 

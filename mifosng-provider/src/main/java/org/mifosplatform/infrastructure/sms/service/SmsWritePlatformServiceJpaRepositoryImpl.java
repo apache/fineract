@@ -48,8 +48,11 @@ public class SmsWritePlatformServiceJpaRepositoryImpl implements SmsWritePlatfor
 
             final SmsMessage message = this.assembler.assembleFromJson(command);
 
-            // TODO: at this point we also want to fire off request using third party service to send SMS.
-            // TODO: decision to be made on wheter we 'wait' for response or use 'future/promise' to capture response and update the SmsMessage table
+            // TODO: at this point we also want to fire off request using third
+            // party service to send SMS.
+            // TODO: decision to be made on wheter we 'wait' for response or use
+            // 'future/promise' to capture response and update the SmsMessage
+            // table
             this.repository.save(message);
 
             return new CommandProcessingResultBuilder() //
@@ -108,9 +111,8 @@ public class SmsWritePlatformServiceJpaRepositoryImpl implements SmsWritePlatfor
     private void handleDataIntegrityIssues(@SuppressWarnings("unused") final JsonCommand command, final DataIntegrityViolationException dve) {
         final Throwable realCause = dve.getMostSpecificCause();
 
-        if (realCause.getMessage().contains("mobile_no")) {
-            throw new PlatformDataIntegrityException("error.msg.sms.no.mobile.no.exists", "The group, client or staff provided has no mobile no.", "id");
-        }
+        if (realCause.getMessage().contains("mobile_no")) { throw new PlatformDataIntegrityException("error.msg.sms.no.mobile.no.exists",
+                "The group, client or staff provided has no mobile no.", "id"); }
 
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.sms.unknown.data.integrity.issue",

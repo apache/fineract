@@ -90,11 +90,11 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
                 }
             break;
             case LOAN_CLOSED:
-                break;
+            break;
             case WRITE_OFF_OUTSTANDING_UNDO:
-                break;
+            break;
             default:
-                break;
+            break;
         }
 
         return newState;

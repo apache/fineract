@@ -31,9 +31,9 @@ public enum ChargeCalculationType {
 
     public static Object[] validValuesForLoan() {
         return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue(),
-                ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue(),ChargeCalculationType.PERCENT_OF_INTEREST.getValue() };
+                ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue(), ChargeCalculationType.PERCENT_OF_INTEREST.getValue() };
     }
-    
+
     public static Object[] validValuesForSavings() {
         return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue() };
     }
@@ -76,8 +76,8 @@ public enum ChargeCalculationType {
     public boolean isAllowedSavingsChargeCalculationType() {
         return isFlat() || isPercentageOfAmount();
     }
-    
-    public boolean isPercentageBased(){
+
+    public boolean isPercentageBased() {
         return isPercentageOfAmount() || isPercentageOfAmountAndInterest() || isPercentageOfInterest();
     }
 }

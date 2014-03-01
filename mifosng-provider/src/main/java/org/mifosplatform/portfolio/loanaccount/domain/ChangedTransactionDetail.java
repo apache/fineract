@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public class ChangedTransactionDetail {
 
-    private final Map<Long,LoanTransaction> newTransactionMappings = new HashMap<Long, LoanTransaction>();
+    private final Map<Long, LoanTransaction> newTransactionMappings = new HashMap<Long, LoanTransaction>();
 
     public Map<Long, LoanTransaction> getNewTransactionMappings() {
         return this.newTransactionMappings;

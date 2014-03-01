@@ -88,7 +88,7 @@ public final class SavingsAccountTransactionSummaryWrapper {
         }
         return total.getAmountDefaultedToNullIfZero();
     }
-    
+
     public BigDecimal calculateTotalPenaltyCharge(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
@@ -98,7 +98,7 @@ public final class SavingsAccountTransactionSummaryWrapper {
         }
         return total.getAmountDefaultedToNullIfZero();
     }
-    
+
     public BigDecimal calculateTotalPenaltyChargeWaived(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {

@@ -102,14 +102,14 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
 
         return strategyOptions;
     }
-    
+
     @Override
     public List<EnumOptionData> retrieveLoanCycleValueConditionTypeOptions() {
 
-        final List<EnumOptionData> repaymentFrequencyOptions = Arrays.asList(loanCycleValueConditionType(LoanProductValueConditionType.EQUAL),
+        final List<EnumOptionData> repaymentFrequencyOptions = Arrays.asList(
+                loanCycleValueConditionType(LoanProductValueConditionType.EQUAL),
                 loanCycleValueConditionType(LoanProductValueConditionType.GRETERTHAN));
         return repaymentFrequencyOptions;
     }
-
 
 }

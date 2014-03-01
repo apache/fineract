@@ -133,24 +133,24 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     }
 
     public static LoanTransaction initiateTransfer(final Office office, final Loan loan, final LocalDate transferDate) {
-        return new LoanTransaction(loan, office, LoanTransactionType.INITIATE_TRANSFER.getValue(), transferDate.toDateTimeAtStartOfDay().toDate(),
-                loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(), loan.getSummary()
-                        .getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(), loan.getSummary()
-                        .getTotalPenaltyChargesOutstanding(), null, false, null,null);
+        return new LoanTransaction(loan, office, LoanTransactionType.INITIATE_TRANSFER.getValue(), transferDate.toDateTimeAtStartOfDay()
+                .toDate(), loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(), loan.getSummary()
+                .getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(), loan.getSummary()
+                .getTotalPenaltyChargesOutstanding(), null, false, null, null);
     }
 
     public static LoanTransaction approveTransfer(final Office office, final Loan loan, final LocalDate transferDate) {
-        return new LoanTransaction(loan, office, LoanTransactionType.APPROVE_TRANSFER.getValue(), transferDate.toDateTimeAtStartOfDay().toDate(),
-                loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(), loan.getSummary()
-                        .getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(), loan.getSummary()
-                        .getTotalPenaltyChargesOutstanding(), null, false, null,null);
+        return new LoanTransaction(loan, office, LoanTransactionType.APPROVE_TRANSFER.getValue(), transferDate.toDateTimeAtStartOfDay()
+                .toDate(), loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(), loan.getSummary()
+                .getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(), loan.getSummary()
+                .getTotalPenaltyChargesOutstanding(), null, false, null, null);
     }
 
     public static LoanTransaction withdrawTransfer(final Office office, final Loan loan, final LocalDate transferDate) {
-        return new LoanTransaction(loan, office, LoanTransactionType.WITHDRAW_TRANSFER.getValue(), transferDate.toDateTimeAtStartOfDay().toDate(),
-                loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(), loan.getSummary()
-                        .getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(), loan.getSummary()
-                        .getTotalPenaltyChargesOutstanding(), null, false, null,null);
+        return new LoanTransaction(loan, office, LoanTransactionType.WITHDRAW_TRANSFER.getValue(), transferDate.toDateTimeAtStartOfDay()
+                .toDate(), loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(), loan.getSummary()
+                .getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(), loan.getSummary()
+                .getTotalPenaltyChargesOutstanding(), null, false, null, null);
     }
 
     public static LoanTransaction refund(final Office office, final Money amount, final PaymentDetail paymentDetail,
@@ -162,7 +162,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return new LoanTransaction(loanTransaction.loan, loanTransaction.office, loanTransaction.typeOf, loanTransaction.dateOf,
                 loanTransaction.amount, loanTransaction.principalPortion, loanTransaction.interestPortion,
                 loanTransaction.feeChargesPortion, loanTransaction.penaltyChargesPortion, loanTransaction.overPaymentPortion,
-                loanTransaction.reversed, loanTransaction.paymentDetail,loanTransaction.externalId);
+                loanTransaction.reversed, loanTransaction.paymentDetail, loanTransaction.externalId);
     }
 
     public static LoanTransaction applyLoanCharge(final Loan loan, final Office office, final Money amount, final LocalDate applyDate,
@@ -187,7 +187,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     private LoanTransaction(final Loan loan, final Office office, final Integer typeOf, final Date dateOf, final BigDecimal amount,
             final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
             final BigDecimal penaltyChargesPortion, final BigDecimal overPaymentPortion, final boolean reversed,
-            final PaymentDetail paymentDetail,final String externalId) {
+            final PaymentDetail paymentDetail, final String externalId) {
         super();
         this.loan = loan;
         this.typeOf = typeOf;
@@ -256,7 +256,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     /**
      * This updates the derived fields of a loan transaction for the principal,
      * interest and interest waived portions.
-     *
+     * 
      * This accumulates the values passed to the already existent values for
      * each of the portions.
      */
@@ -502,7 +502,6 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     public boolean isRefund() {
         return LoanTransactionType.REFUND.equals(getTypeOf()) && isNotReversed();
     }
-
 
     public void updateExternalId(final String externalId) {
         this.externalId = externalId;

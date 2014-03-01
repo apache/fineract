@@ -30,21 +30,19 @@ public final class LoanScheduleModelDisbursementPeriod implements LoanScheduleMo
         return new LoanScheduleModelDisbursementPeriod(periodNumber, loanApplicationTerms.getExpectedDisbursementDate(),
                 loanApplicationTerms.getPrincipal(), chargesDueAtTimeOfDisbursement);
     }
-    
-    public static LoanScheduleModelDisbursementPeriod disbursement(final LocalDate disbursementDate,final Money principalDisbursed,
-            final BigDecimal chargesDueAtTimeOfDisbursement){
-        return new LoanScheduleModelDisbursementPeriod(null, disbursementDate,principalDisbursed, chargesDueAtTimeOfDisbursement);
+
+    public static LoanScheduleModelDisbursementPeriod disbursement(final LocalDate disbursementDate, final Money principalDisbursed,
+            final BigDecimal chargesDueAtTimeOfDisbursement) {
+        return new LoanScheduleModelDisbursementPeriod(null, disbursementDate, principalDisbursed, chargesDueAtTimeOfDisbursement);
     }
 
-    private LoanScheduleModelDisbursementPeriod(final Integer periodNumber,final LocalDate disbursementDate,final Money principalDisbursed,
-            final BigDecimal chargesDueAtTimeOfDisbursement) {
+    private LoanScheduleModelDisbursementPeriod(final Integer periodNumber, final LocalDate disbursementDate,
+            final Money principalDisbursed, final BigDecimal chargesDueAtTimeOfDisbursement) {
         this.periodNumber = periodNumber;
         this.disbursementDate = disbursementDate;
         this.principalDisbursed = principalDisbursed;
         this.chargesDueAtTimeOfDisbursement = chargesDueAtTimeOfDisbursement;
     }
-    
-    
 
     @Override
     public LoanSchedulePeriodData toData() {

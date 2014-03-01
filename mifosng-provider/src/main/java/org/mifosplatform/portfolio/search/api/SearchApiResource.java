@@ -55,7 +55,7 @@ public class SearchApiResource {
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
 
     }
-    
+
     @GET
     @Path("/template")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -81,17 +81,18 @@ public class SearchApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, searchResults, this.searchResponseParameters);
     }
-    
+
     @POST
     @Path("/advance")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String advancedSearch(@Context final UriInfo uriInfo,final String json) {
-        
+    public String advancedSearch(@Context final UriInfo uriInfo, final String json) {
+
         final AdHocQuerySearchConditions searchConditions = this.fromApiJsonDeserializer.retrieveSearchConditions(json);
-        
-        final Collection<AdHocSearchQueryData> searchResults = this.searchReadPlatformService.retrieveAdHocQueryMatchingData(searchConditions);
-        
+
+        final Collection<AdHocSearchQueryData> searchResults = this.searchReadPlatformService
+                .retrieveAdHocQueryMatchingData(searchConditions);
+
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, searchResults);
     }

@@ -57,7 +57,8 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             final String mobileNo = rs.getString("mobileNo");
             final boolean isActive = rs.getBoolean("isActive");
 
-            return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, externalId, mobileNo, isActive);
+            return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, externalId, mobileNo,
+                    isActive);
         }
     }
 
@@ -66,7 +67,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         public String schema(final boolean loanOfficersOnly) {
 
             final StringBuilder sqlBuilder = new StringBuilder(200);
-            
+
             sqlBuilder.append("s.id as id, s.office_id as officeId, ohierarchy.name as officeName,");
             sqlBuilder.append("s.firstname as firstname, s.lastname as lastname,");
             sqlBuilder.append("s.display_name as displayName, s.is_loan_officer as isLoanOfficer, s.external_id as externalId, ");
@@ -98,7 +99,8 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             final String mobileNo = rs.getString("mobileNo");
             final boolean isActive = rs.getBoolean("isActive");
 
-            return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, externalId, mobileNo, isActive);
+            return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, externalId, mobileNo,
+                    isActive);
         }
     }
 
@@ -165,7 +167,8 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     }
 
     @Override
-    public Collection<StaffData> retrieveAllStaff(final String sqlSearch, final Long officeId, final boolean loanOfficersOnly, final String status) {
+    public Collection<StaffData> retrieveAllStaff(final String sqlSearch, final Long officeId, final boolean loanOfficersOnly,
+            final String status) {
         final String extraCriteria = getStaffCriteria(sqlSearch, officeId, loanOfficersOnly, status);
         return retrieveAllStaff(extraCriteria);
     }
@@ -190,17 +193,17 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         }
         if (officeId != null) {
             extraCriteria.append(" and office_id = ").append(officeId).append(" ");
-        }        
+        }
         if (loanOfficersOnly) {
             extraCriteria.append(" and s.is_loan_officer is true ");
         }
-        // Passing status parameter to get ACTIVE (By Default), INACTIVE or ALL (Both active and Inactive) employees
+        // Passing status parameter to get ACTIVE (By Default), INACTIVE or ALL
+        // (Both active and Inactive) employees
         if (status.equalsIgnoreCase("active")) {
             extraCriteria.append(" and is_active = 1 ");
         } else if (status.equalsIgnoreCase("inActive")) {
             extraCriteria.append(" and is_active = 0 ");
-        } else if (status.equalsIgnoreCase("all")) {}
-        else {
+        } else if (status.equalsIgnoreCase("all")) {} else {
             throw new UnrecognizedQueryParamException("status", status, new Object[] { "all", "active", "inactive" });
         }
 
@@ -208,7 +211,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             extraCriteria.delete(0, 4);
         }
 
-        //remove begin four letter including a space from the string.
+        // remove begin four letter including a space from the string.
         return extraCriteria.toString();
     }
 

@@ -329,10 +329,11 @@ public class CommandWrapper {
     public boolean isLoanChargeResource() {
         return this.entityName.equalsIgnoreCase("LOANCHARGE");
     }
+
     public boolean isLoanDisburseDetailResource() {
         return this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL");
     }
-    
+
     public boolean isCollateralResource() {
         return this.entityName.equalsIgnoreCase("COLLATERAL");
     }
@@ -380,11 +381,11 @@ public class CommandWrapper {
     public boolean isLoanWriteOff() {
         return this.actionName.equalsIgnoreCase("WRITEOFF") && this.entityName.equalsIgnoreCase("LOAN");
     }
-    
+
     public boolean isUndoLoanWriteOff() {
         return this.actionName.equalsIgnoreCase("UNDOWRITEOFF") && this.entityName.equalsIgnoreCase("LOAN");
     }
-    
+
     public boolean isUpdateDisbursementDate() {
         return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL");
     }
@@ -603,7 +604,7 @@ public class CommandWrapper {
     public boolean isHolidayResource() {
         return this.entityName.equalsIgnoreCase("HOLIDAY");
     }
-    
+
     public boolean isHolidayActivation() {
         return this.entityName.equalsIgnoreCase("HOLIDAY") && this.actionName.equalsIgnoreCase("ACTIVATE") && this.entityId != null;
     }

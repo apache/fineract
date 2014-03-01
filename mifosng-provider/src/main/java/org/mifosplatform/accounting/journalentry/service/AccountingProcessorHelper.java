@@ -173,7 +173,7 @@ public class AccountingProcessorHelper {
             }
 
             final SavingsTransactionDTO transaction = new SavingsTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
-                    transactionDate, transactionType, amount, reversed, feePayments, penaltyPayments,overdraftAmount);
+                    transactionDate, transactionType, amount, reversed, feePayments, penaltyPayments, overdraftAmount);
 
             newSavingsTransactions.add(transaction);
 

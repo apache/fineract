@@ -12,7 +12,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing disbursement information.
  */
-public class DisbursementData implements Comparable<DisbursementData>{
+public class DisbursementData implements Comparable<DisbursementData> {
 
     @SuppressWarnings("unused")
     private final Long id;
@@ -21,11 +21,9 @@ public class DisbursementData implements Comparable<DisbursementData>{
     private final BigDecimal principal;
     @SuppressWarnings("unused")
     private final BigDecimal approvedPrincipal;
-    
 
-    public DisbursementData(Long id, final LocalDate expectedDisbursementDate,
-            final LocalDate actualDisbursementDate, final BigDecimal principalDisbursed,
-            final BigDecimal approvedPrincipal) {
+    public DisbursementData(Long id, final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate,
+            final BigDecimal principalDisbursed, final BigDecimal approvedPrincipal) {
         this.id = id;
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.actualDisbursementDate = actualDisbursementDate;
@@ -48,24 +46,22 @@ public class DisbursementData implements Comparable<DisbursementData>{
     public boolean isDisbursed() {
         return this.actualDisbursementDate != null;
     }
-    
+
     @Override
     public int compareTo(final DisbursementData obj) {
         if (obj == null) { return -1; }
 
         return obj.expectedDisbursementDate.compareTo(this.expectedDisbursementDate);
     }
-    
+
     public boolean isDueForDisbursement(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive) {
         final LocalDate dueDate = disbursementDate();
         return occursOnDayFromAndUpToAndIncluding(fromNotInclusive, upToAndInclusive, dueDate);
     }
-    
+
     private boolean occursOnDayFromAndUpToAndIncluding(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive,
             final LocalDate target) {
         return target != null && target.isAfter(fromNotInclusive) && !target.isAfter(upToAndInclusive);
     }
-
-
 
 }

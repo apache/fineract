@@ -130,9 +130,9 @@ public class LoanApplicationTimelineData {
         this.writeOffByLastname = writeOffByLastname;
     }
 
-    public RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData(final CurrencyData currency, final BigDecimal principal,final BigDecimal approvedPrincipal,
-            final BigDecimal inArrearsTolerance, final BigDecimal totalFeeChargesAtDisbursement) {
-        return new RepaymentScheduleRelatedLoanData(this.expectedDisbursementDate, this.actualDisbursementDate, currency, principal,approvedPrincipal,
-                inArrearsTolerance, totalFeeChargesAtDisbursement);
+    public RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData(final CurrencyData currency, final BigDecimal principal,
+            final BigDecimal approvedPrincipal, final BigDecimal inArrearsTolerance, final BigDecimal totalFeeChargesAtDisbursement) {
+        return new RepaymentScheduleRelatedLoanData(this.expectedDisbursementDate, this.actualDisbursementDate, currency, principal,
+                approvedPrincipal, inArrearsTolerance, totalFeeChargesAtDisbursement);
     }
 }

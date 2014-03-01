@@ -37,7 +37,7 @@ public class LoanTransactionProcessingStrategy extends AbstractPersistable<Long>
     public boolean isHeavensfamilyStrategy() {
         return "heavensfamily-strategy".equalsIgnoreCase(this.code);
     }
-    
+
     public boolean isEarlyPaymentStrategy() {
         return "early-repayment-strategy".equalsIgnoreCase(this.code);
     }

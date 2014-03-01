@@ -48,16 +48,16 @@ public enum LoanProductParamType {
         }
         return loanProductParamType;
     }
-    
-    public boolean isParamTypePrincipal(){
+
+    public boolean isParamTypePrincipal() {
         return LoanProductParamType.PRINCIPAL.getValue().equals(this.value);
     }
 
-    public boolean isParamTypeInterestTate(){
+    public boolean isParamTypeInterestTate() {
         return LoanProductParamType.INTERESTRATE.getValue().equals(this.value);
     }
 
-    public boolean isParamTypeRepayment(){
+    public boolean isParamTypeRepayment() {
         return LoanProductParamType.REPAYMENT.getValue().equals(this.value);
     }
 

@@ -137,12 +137,12 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             if (active && submittedOnDate.isAfter(activationDate)) {
                 submittedOnDate = activationDate;
             }
-            if(command.hasParameter(GroupingTypesApiConstants.submittedOnDateParamName)){
+            if (command.hasParameter(GroupingTypesApiConstants.submittedOnDateParamName)) {
                 submittedOnDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.submittedOnDateParamName);
             }
 
             final Group newGroup = Group.newGroup(groupOffice, staff, parentGroup, groupLevel, name, externalId, active, activationDate,
-                    clientMembers, groupMembers,submittedOnDate,currentUser);
+                    clientMembers, groupMembers, submittedOnDate, currentUser);
 
             // pre-save to generate id for use in group hierarchy
             this.groupRepository.save(newGroup);
@@ -203,7 +203,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final LocalDate activationDate = command.localDateValueOfParameterNamed("activationDate");
 
             validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(group.getOffice(), group.getGroupLevel(), activationDate);
-            group.activate(currentUser,fmt, activationDate);
+            group.activate(currentUser, fmt, activationDate);
 
             this.groupRepository.saveAndFlush(group);
 
@@ -442,7 +442,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         validateLoansAndSavingsForGroupOrCenterClose(group, closureDate);
 
-        group.close(currentUser,closureReason, closureDate);
+        group.close(currentUser, closureReason, closureDate);
 
         this.groupRepository.saveAndFlush(group);
 
@@ -503,7 +503,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         final CodeValue closureReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
                 GroupingTypesApiConstants.GROUP_CLOSURE_REASON, closureReasonId);
 
-        final AppUser  currentUser = this.context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
 
         if (center.hasActiveGroups()) {
             final String errorMessage = center.getGroupLevel().getLevelName()
@@ -514,7 +514,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         validateLoansAndSavingsForGroupOrCenterClose(center, closureDate);
 
-        center.close(currentUser,closureReason, closureDate);
+        center.close(currentUser, closureReason, closureDate);
 
         this.groupRepository.saveAndFlush(center);
 

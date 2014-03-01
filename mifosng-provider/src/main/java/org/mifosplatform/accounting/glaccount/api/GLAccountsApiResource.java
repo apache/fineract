@@ -124,7 +124,7 @@ public class GLAccountsApiResource {
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(false, runningBalance);
-        GLAccountData glAccountData = this.glAccountReadPlatformService.retrieveGLAccountById(glAccountId,associationParametersData);
+        GLAccountData glAccountData = this.glAccountReadPlatformService.retrieveGLAccountById(glAccountId, associationParametersData);
         if (settings.isTemplate()) {
             glAccountData = handleTemplate(glAccountData);
         }

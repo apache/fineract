@@ -30,10 +30,8 @@ public class SmsMessageAssembler {
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
-    public SmsMessageAssembler(final SmsMessageRepository smsMessageRepository,
-            final GroupRepositoryWrapper groupRepositoryWrapper,
-            final ClientRepositoryWrapper clientRepository,
-            final StaffRepositoryWrapper staffRepository,
+    public SmsMessageAssembler(final SmsMessageRepository smsMessageRepository, final GroupRepositoryWrapper groupRepositoryWrapper,
+            final ClientRepositoryWrapper clientRepository, final StaffRepositoryWrapper staffRepository,
             final FromJsonHelper fromApiJsonHelper) {
         this.smsMessageRepository = smsMessageRepository;
         this.groupRepository = groupRepositoryWrapper;

@@ -79,9 +79,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final Long defaultOfficeId = defaultToUsersOfficeIfNull(officeId);
 
         final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
-        
+
         final Collection<SavingsProductData> savingsProductDatas = this.savingsProductReadPlatformService.retrieveAllForLookupByType(true);
-        
 
         Collection<StaffData> staffOptions = null;
 
@@ -96,7 +95,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             staffOptions = null;
         }
 
-        return ClientData.template(defaultOfficeId, new LocalDate(), offices, staffOptions, null,savingsProductDatas);
+        return ClientData.template(defaultOfficeId, new LocalDate(), offices, staffOptions, null, savingsProductDatas);
     }
 
     @Override
@@ -105,10 +104,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final String userOfficeHierarchy = this.context.officeHierarchy();
         final String underHierarchySearchString = userOfficeHierarchy + "%";
 
-//        if (searchParameters.isScopedByOfficeHierarchy()) {
-//            this.context.validateAccessRights(searchParameters.getHierarchy());
-//            underHierarchySearchString = searchParameters.getHierarchy() + "%";
-//        }
+        // if (searchParameters.isScopedByOfficeHierarchy()) {
+        // this.context.validateAccessRights(searchParameters.getHierarchy());
+        // underHierarchySearchString = searchParameters.getHierarchy() + "%";
+        // }
 
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
@@ -334,10 +333,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final Long imageId = JdbcSupport.getLong(rs, "imageId");
             final Long staffId = JdbcSupport.getLong(rs, "staffId");
             final String staffName = rs.getString("staffName");
-            
+
             final Long savingsProductId = JdbcSupport.getLong(rs, "savingsProductId");
             final String savingsProductName = rs.getString("savingsProductName");
-
 
             final LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedOnDate");
             final String closedByUsername = rs.getString("closedByUsername");
@@ -349,18 +347,17 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String submittedByFirstname = rs.getString("submittedByFirstname");
             final String submittedByLastname = rs.getString("submittedByLastname");
 
-
             final String activatedByUsername = rs.getString("activatedByUsername");
             final String activatedByFirstname = rs.getString("activatedByFirstname");
             final String activatedByLastname = rs.getString("activatedByLastname");
 
-            final ClientTimelineData timeline = new ClientTimelineData (submittedOnDate, submittedByUsername, submittedByFirstname, submittedByLastname,
-                    activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate, closedByUsername,
-                    closedByFirstname, closedByLastname);
+            final ClientTimelineData timeline = new ClientTimelineData(submittedOnDate, submittedByUsername, submittedByFirstname,
+                    submittedByLastname, activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate,
+                    closedByUsername, closedByFirstname, closedByLastname);
 
             return ClientData.instance(accountNo, status, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
-                    middlename, lastname, fullname, displayName, externalId, mobileNo, activationDate, imageId, staffId, staffName,timeline, 
-                    savingsProductId, savingsProductName);
+                    middlename, lastname, fullname, displayName, externalId, mobileNo, activationDate, imageId, staffId, staffName,
+                    timeline, savingsProductId, savingsProductName);
 
         }
     }
@@ -394,7 +391,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("c.fullname as fullname, c.display_name as displayName, ");
             builder.append("c.mobile_no as mobileNo, ");
 
-
             builder.append("c.submittedon_date as submittedOnDate, ");
             builder.append("sbu.username as submittedByUsername, ");
             builder.append("sbu.firstname as submittedByFirstname, ");
@@ -405,11 +401,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("clu.firstname as closedByFirstname, ");
             builder.append("clu.lastname as closedByLastname, ");
 
-           // builder.append("c.submittedon as submittedOnDate, ");
+            // builder.append("c.submittedon as submittedOnDate, ");
             builder.append("acu.username as activatedByUsername, ");
             builder.append("acu.firstname as activatedByFirstname, ");
             builder.append("acu.lastname as activatedByLastname, ");
-
 
             builder.append("c.activation_date as activationDate, c.image_id as imageId, ");
             builder.append("c.staff_id as staffId, s.display_name as staffName, ");
@@ -460,7 +455,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final Long savingsProductId = JdbcSupport.getLong(rs, "savingsProductId");
             final String savingsProductName = rs.getString("savingsProductName");
 
-            
             final LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedOnDate");
             final String closedByUsername = rs.getString("closedByUsername");
             final String closedByFirstname = rs.getString("closedByFirstname");
@@ -475,13 +469,13 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String activatedByFirstname = rs.getString("activatedByFirstname");
             final String activatedByLastname = rs.getString("activatedByLastname");
 
-            final ClientTimelineData timeline = new ClientTimelineData (submittedOnDate, submittedByUsername, submittedByFirstname, submittedByLastname,
-                    activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate, closedByUsername,
-                    closedByFirstname, closedByLastname);
+            final ClientTimelineData timeline = new ClientTimelineData(submittedOnDate, submittedByUsername, submittedByFirstname,
+                    submittedByLastname, activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate,
+                    closedByUsername, closedByFirstname, closedByLastname);
 
             return ClientData.instance(accountNo, status, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
-                    middlename, lastname, fullname, displayName, externalId, mobileNo, activationDate, imageId, staffId, staffName,timeline, 
-                    savingsProductId, savingsProductName);
+                    middlename, lastname, fullname, displayName, externalId, mobileNo, activationDate, imageId, staffId, staffName,
+                    timeline, savingsProductId, savingsProductName);
 
         }
     }
@@ -593,7 +587,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     public ClientData retrieveAllClosureReasons(final String clientClosureReason) {
         final List<CodeValueData> closureReasons = new ArrayList<CodeValueData>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(clientClosureReason));
-        return ClientData.template(null, null, null, null, closureReasons,null);
+        return ClientData.template(null, null, null, null, closureReasons, null);
     }
 
 }

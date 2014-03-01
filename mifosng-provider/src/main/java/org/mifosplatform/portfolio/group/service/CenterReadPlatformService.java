@@ -23,7 +23,7 @@ public interface CenterReadPlatformService {
     Collection<CenterData> retrieveAllForDropdown(Long officeId);
 
     Page<CenterData> retrievePagedAll(SearchParameters searchParameters, PaginationParameters parameters);
-    
+
     Collection<CenterData> retrieveAll(SearchParameters searchParameters, PaginationParameters parameters);
 
     GroupGeneralData retrieveCenterGroupTemplate(Long centerId);
@@ -31,6 +31,6 @@ public interface CenterReadPlatformService {
     Collection<GroupGeneralData> retrieveAssociatedGroups(Long centerId);
 
     CenterData retrieveCenterWithClosureReasons();
-    
+
     Collection<StaffCenterData> retriveAllCentersByMeetingDate(Long officeId, Date meetingDate, Long staffId);
 }

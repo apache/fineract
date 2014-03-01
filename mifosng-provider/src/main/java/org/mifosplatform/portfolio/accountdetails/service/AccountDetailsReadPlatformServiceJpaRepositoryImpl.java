@@ -181,7 +181,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
             final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
                     currencyDisplaySymbol, currencyNameCode);
-            
+
             final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
             final String submittedByUsername = rs.getString("submittedByUsername");
             final String submittedByFirstname = rs.getString("submittedByFirstname");

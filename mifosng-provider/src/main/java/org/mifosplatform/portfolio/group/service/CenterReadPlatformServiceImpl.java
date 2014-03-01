@@ -135,24 +135,15 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             + "g.staff_id as staffId, s.display_name as staffName, " //
             + "g.status_enum as statusEnum, g.activation_date as activationDate, " //
             + "g.hierarchy as hierarchy, " //
-            + "g.closedon_date as closedOnDate, "
-            + "g.submittedon_date as submittedOnDate, "
-            + "sbu.username as submittedByUsername, "
-            + "sbu.firstname as submittedByFirstname, "
-            + "sbu.lastname as submittedByLastname, "
-            + "clu.username as closedByUsername, "
-            + "clu.firstname as closedByFirstname, "
-            + "clu.lastname as closedByLastname, "
-            + "acu.username as activatedByUsername, "
+            + "g.closedon_date as closedOnDate, " + "g.submittedon_date as submittedOnDate, " + "sbu.username as submittedByUsername, "
+            + "sbu.firstname as submittedByFirstname, " + "sbu.lastname as submittedByLastname, " + "clu.username as closedByUsername, "
+            + "clu.firstname as closedByFirstname, " + "clu.lastname as closedByLastname, " + "acu.username as activatedByUsername, "
             + "acu.firstname as activatedByFirstname, "
             + "acu.lastname as activatedByLastname "
             + "from m_group g " //
-            + "join m_office o on o.id = g.office_id " 
-            + "left join m_staff s on s.id = g.staff_id "
-            + "left join m_group pg on pg.id = g.parent_id "
-            + "left join m_appuser sbu on sbu.id = g.submittedon_userid "
-            + "left join m_appuser acu on acu.id = g.activatedon_userid "
-            + "left join m_appuser clu on clu.id = g.closedon_userid ";
+            + "join m_office o on o.id = g.office_id " + "left join m_staff s on s.id = g.staff_id "
+            + "left join m_group pg on pg.id = g.parent_id " + "left join m_appuser sbu on sbu.id = g.submittedon_userid "
+            + "left join m_appuser acu on acu.id = g.activatedon_userid " + "left join m_appuser clu on clu.id = g.closedon_userid ";
 
     private static final class CenterDataMapper implements RowMapper<CenterData> {
 
@@ -181,43 +172,43 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             final Long staffId = JdbcSupport.getLong(rs, "staffId");
             final String staffName = rs.getString("staffName");
             final String hierarchy = rs.getString("hierarchy");
-            
+
             final LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedOnDate");
             final String closedByUsername = rs.getString("closedByUsername");
-            final String closedByFirstname =  rs.getString("closedByFirstname");
+            final String closedByFirstname = rs.getString("closedByFirstname");
             final String closedByLastname = rs.getString("closedByLastname");
 
-            final LocalDate submittedOnDate =  JdbcSupport.getLocalDate(rs, "submittedOnDate");
+            final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
             final String submittedByUsername = rs.getString("submittedByUsername");
             final String submittedByFirstname = rs.getString("submittedByFirstname");
             final String submittedByLastname = rs.getString("submittedByLastname");
 
-
             final String activatedByUsername = rs.getString("activatedByUsername");
             final String activatedByFirstname = rs.getString("activatedByFirstname");
-            final String activatedByLastname =  rs.getString("activatedByLastname");
-            
-            final GroupTimelineData timeline = new GroupTimelineData (submittedOnDate, submittedByUsername, submittedByFirstname, submittedByLastname,
-                    activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate, closedByUsername,
-                    closedByFirstname, closedByLastname);
+            final String activatedByLastname = rs.getString("activatedByLastname");
 
-            return CenterData.instance(id, name, externalId, status, activationDate, officeId, officeName, staffId, staffName, hierarchy, timeline, null);
+            final GroupTimelineData timeline = new GroupTimelineData(submittedOnDate, submittedByUsername, submittedByFirstname,
+                    submittedByLastname, activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate,
+                    closedByUsername, closedByFirstname, closedByLastname);
+
+            return CenterData.instance(id, name, externalId, status, activationDate, officeId, officeName, staffId, staffName, hierarchy,
+                    timeline, null);
         }
     }
-    
+
     private static final class CenterCalendarDataMapper implements RowMapper<CenterData> {
 
         private final String schemaSql;
 
         public CenterCalendarDataMapper() {
 
-            schemaSql =  " select g.id as id, g.display_name as name, g.office_id as officeId, g.staff_id as staffId, s.display_name as staffName, g.external_id as externalId, "
-            		 +" g.status_enum as statusEnum, g.activation_date as activationDate, g.hierarchy as hierarchy,  "
-            		 +" c.id as calendarId, ci.id as calendarInstanceId, ci.entity_id as entityId,  "
-            		 +" ci.entity_type_enum as entityTypeId, c.title as title,  c.description as description,  "
-            		 +" c.location as location, c.start_date as startDate, c.end_date as endDate, c.recurrence as recurrence  "
-            		 +" from m_calendar c join m_calendar_instance ci on ci.calendar_id=c.id and ci.entity_type_enum=4 join m_group g  "
-            		 +" on g.id = ci.entity_id join m_staff s on g.staff_id = s.id where g.office_id=? ";
+            schemaSql = " select g.id as id, g.display_name as name, g.office_id as officeId, g.staff_id as staffId, s.display_name as staffName, g.external_id as externalId, "
+                    + " g.status_enum as statusEnum, g.activation_date as activationDate, g.hierarchy as hierarchy,  "
+                    + " c.id as calendarId, ci.id as calendarInstanceId, ci.entity_id as entityId,  "
+                    + " ci.entity_type_enum as entityTypeId, c.title as title,  c.description as description,  "
+                    + " c.location as location, c.start_date as startDate, c.end_date as endDate, c.recurrence as recurrence  "
+                    + " from m_calendar c join m_calendar_instance ci on ci.calendar_id=c.id and ci.entity_type_enum=4 join m_group g  "
+                    + " on g.id = ci.entity_id join m_staff s on g.staff_id = s.id where g.office_id=? ";
         }
 
         public String schema() {
@@ -237,7 +228,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             final Long staffId = JdbcSupport.getLong(rs, "staffId");
             final String staffName = rs.getString("staffName");
             final String hierarchy = rs.getString("hierarchy");
-            
+
             final Long calendarId = rs.getLong("calendarId");
             final Long calendarInstanceId = rs.getLong("calendarInstanceId");
             final Long entityId = rs.getLong("entityId");
@@ -249,10 +240,12 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             final LocalDate startDate = JdbcSupport.getLocalDate(rs, "startDate");
             final LocalDate endDate = JdbcSupport.getLocalDate(rs, "endDate");
             final String recurrence = rs.getString("recurrence");
-            
-            CalendarData calendarData = CalendarData.instance(calendarId, calendarInstanceId, entityId, entityType, title, description, location, startDate,
-            		endDate, null, null, false, recurrence, null, null, null, null, null, null, null, null, null, null, null, null, null);
-            return CenterData.instance(id, name, externalId, status, activationDate, officeId, null, staffId, staffName, hierarchy, null, calendarData);
+
+            CalendarData calendarData = CalendarData.instance(calendarId, calendarInstanceId, entityId, entityType, title, description,
+                    location, startDate, endDate, null, null, false, recurrence, null, null, null, null, null, null, null, null, null,
+                    null, null, null, null);
+            return CenterData.instance(id, name, externalId, status, activationDate, officeId, null, staffId, staffName, hierarchy, null,
+                    calendarData);
         }
     }
 
@@ -285,34 +278,33 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             final Long staffId = JdbcSupport.getLong(rs, "staffId");
             final String staffName = rs.getString("staffName");
             final String hierarchy = rs.getString("hierarchy");
-            
+
             final LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedOnDate");
             final String closedByUsername = rs.getString("closedByUsername");
-            final String closedByFirstname =  rs.getString("closedByFirstname");
+            final String closedByFirstname = rs.getString("closedByFirstname");
             final String closedByLastname = rs.getString("closedByLastname");
 
-            final LocalDate submittedOnDate =  JdbcSupport.getLocalDate(rs, "submittedOnDate");
+            final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
             final String submittedByUsername = rs.getString("submittedByUsername");
             final String submittedByFirstname = rs.getString("submittedByFirstname");
             final String submittedByLastname = rs.getString("submittedByLastname");
 
-
             final String activatedByUsername = rs.getString("activatedByUsername");
             final String activatedByFirstname = rs.getString("activatedByFirstname");
-            final String activatedByLastname =  rs.getString("activatedByLastname");
-            
-            final GroupTimelineData timeline = new GroupTimelineData (submittedOnDate, submittedByUsername, submittedByFirstname, submittedByLastname,
-                    activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate, closedByUsername,
-                    closedByFirstname, closedByLastname);
+            final String activatedByLastname = rs.getString("activatedByLastname");
+
+            final GroupTimelineData timeline = new GroupTimelineData(submittedOnDate, submittedByUsername, submittedByFirstname,
+                    submittedByLastname, activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate,
+                    closedByUsername, closedByFirstname, closedByLastname);
 
             return GroupGeneralData.instance(id, name, externalId, status, activationDate, officeId, officeName, null, null, staffId,
-                    staffName, hierarchy,timeline);
+                    staffName, hierarchy, timeline);
         }
     }
 
     @Override
     public Page<CenterData> retrievePagedAll(final SearchParameters searchParameters, final PaginationParameters parameters) {
-        
+
         this.paginationParametersDataValidator.validateParameterValues(parameters, supportedOrderByValues, "audits");
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
@@ -344,10 +336,10 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
                 new Object[] { hierarchySearchString }, this.centerMapper);
     }
-    
+
     @Override
     public Collection<CenterData> retrieveAll(SearchParameters searchParameters, PaginationParameters parameters) {
-        
+
         this.paginationParametersDataValidator.validateParameterValues(parameters, supportedOrderByValues, "audits");
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
@@ -375,7 +367,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             }
         }
 
-        return this.jdbcTemplate.query(sqlBuilder.toString(), this.centerMapper, new Object[] {hierarchySearchString});
+        return this.jdbcTemplate.query(sqlBuilder.toString(), this.centerMapper, new Object[] { hierarchySearchString });
     }
 
     @Override
@@ -397,7 +389,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         final Long officeIdDefaulted = defaultToUsersOfficeIfNull(officeId);
 
         final Collection<OfficeData> officeOptions = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
-        
+
         final boolean loanOfficersOnly = false;
         Collection<StaffData> staffOptions = null;
         if (staffInSelectedOfficeOnly) {
@@ -507,45 +499,46 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         return CenterData.withClosureReasons(closureReasons);
     }
 
-	@Override
-	public Collection<StaffCenterData> retriveAllCentersByMeetingDate(final Long officeId, final Date meetingDate, final Long staffId) {
-		final CenterCalendarDataMapper centerCalendarMapper = new CenterCalendarDataMapper();
-		String sql = centerCalendarMapper.schema();
-		Collection<CenterData> centerDataArray = null;
-		
-		if (staffId != null) {
-			sql += " and g.staff_id=? ";
-			centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, new Object[] {officeId, staffId});
-		} else {
-			centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, new Object[] {officeId});
-		}
-		
-		Collection<StaffCenterData> staffCenterDataArray = new ArrayList<StaffCenterData>();
-		Boolean flag = false; 
- 		for (CenterData centerData : centerDataArray) {
- 			if (centerData.getCollectionMeetingCalendar().isValidRecurringDate(new LocalDate(meetingDate))){
-				if (staffCenterDataArray.size() <= 0) {
-					Collection<CenterData> meetingFallCenter = new ArrayList<CenterData>();
-					meetingFallCenter.add(centerData);
-					staffCenterDataArray.add(StaffCenterData.instance(centerData.staffId(), centerData.getStaffName(), meetingFallCenter));
-				} else {
-					for(StaffCenterData staffCenterData : staffCenterDataArray) {
-						flag = false;
-						if (staffCenterData.getStaffId() == centerData.staffId()) {
-							staffCenterData.getMeetingFallCenters().add(centerData);
-							flag = true;
-							break;
-						}
-					}
-					if (!flag) {
-						Collection<CenterData> meetingFallCenter = new ArrayList<CenterData>();
-						meetingFallCenter.add(centerData);
-						staffCenterDataArray.add(StaffCenterData.instance(centerData.staffId(), centerData.getStaffName(), meetingFallCenter));
-					}
-				}
-				
-			}
-		}
-		return staffCenterDataArray;
-	}
+    @Override
+    public Collection<StaffCenterData> retriveAllCentersByMeetingDate(final Long officeId, final Date meetingDate, final Long staffId) {
+        final CenterCalendarDataMapper centerCalendarMapper = new CenterCalendarDataMapper();
+        String sql = centerCalendarMapper.schema();
+        Collection<CenterData> centerDataArray = null;
+
+        if (staffId != null) {
+            sql += " and g.staff_id=? ";
+            centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, new Object[] { officeId, staffId });
+        } else {
+            centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, new Object[] { officeId });
+        }
+
+        Collection<StaffCenterData> staffCenterDataArray = new ArrayList<StaffCenterData>();
+        Boolean flag = false;
+        for (CenterData centerData : centerDataArray) {
+            if (centerData.getCollectionMeetingCalendar().isValidRecurringDate(new LocalDate(meetingDate))) {
+                if (staffCenterDataArray.size() <= 0) {
+                    Collection<CenterData> meetingFallCenter = new ArrayList<CenterData>();
+                    meetingFallCenter.add(centerData);
+                    staffCenterDataArray.add(StaffCenterData.instance(centerData.staffId(), centerData.getStaffName(), meetingFallCenter));
+                } else {
+                    for (StaffCenterData staffCenterData : staffCenterDataArray) {
+                        flag = false;
+                        if (staffCenterData.getStaffId() == centerData.staffId()) {
+                            staffCenterData.getMeetingFallCenters().add(centerData);
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if (!flag) {
+                        Collection<CenterData> meetingFallCenter = new ArrayList<CenterData>();
+                        meetingFallCenter.add(centerData);
+                        staffCenterDataArray.add(StaffCenterData.instance(centerData.staffId(), centerData.getStaffName(),
+                                meetingFallCenter));
+                    }
+                }
+
+            }
+        }
+        return staffCenterDataArray;
+    }
 }

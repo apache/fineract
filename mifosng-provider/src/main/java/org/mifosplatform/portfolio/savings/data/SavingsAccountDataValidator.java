@@ -189,9 +189,9 @@ public class SavingsAccountDataValidator {
         }
 
         validateSavingsCharges(element, baseDataValidator);
-        
+
         validateOverdraftParams(baseDataValidator, element);
-        
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -207,21 +207,25 @@ public class SavingsAccountDataValidator {
 
                     final JsonObject savingsChargeElement = array.get(i).getAsJsonObject();
 
-                    //final Long id = this.fromApiJsonHelper.extractLongNamed(idParamName, savingsChargeElement);
+                    // final Long id =
+                    // this.fromApiJsonHelper.extractLongNamed(idParamName,
+                    // savingsChargeElement);
 
                     final Long chargeId = this.fromApiJsonHelper.extractLongNamed(chargeIdParamName, savingsChargeElement);
                     baseDataValidator.reset().parameter(chargeIdParamName).value(chargeId).longGreaterThanZero();
 
                     final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(amountParamName, savingsChargeElement, locale);
                     baseDataValidator.reset().parameter(amountParamName).value(amount).notNull().positiveAmount();
-                    
+
                     if (this.fromApiJsonHelper.parameterExists(feeOnMonthDayParamName, savingsChargeElement)) {
-                        final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, savingsChargeElement, monthDayFormat, locale); 
+                        final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, savingsChargeElement,
+                                monthDayFormat, locale);
                         baseDataValidator.reset().parameter(feeOnMonthDayParamName).value(monthDay).notNull();
                     }
-                    
+
                     if (this.fromApiJsonHelper.parameterExists(feeIntervalParamName, savingsChargeElement)) {
-                        final Integer feeInterval = this.fromApiJsonHelper.extractIntegerNamed(feeIntervalParamName, savingsChargeElement, Locale.getDefault());
+                        final Integer feeInterval = this.fromApiJsonHelper.extractIntegerNamed(feeIntervalParamName, savingsChargeElement,
+                                Locale.getDefault());
                         baseDataValidator.reset().parameter(feeIntervalParamName).value(feeInterval).notNull().inMinMaxRange(1, 12);
                     }
                 }
@@ -370,20 +374,17 @@ public class SavingsAccountDataValidator {
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
-    
+
     private void validateOverdraftParams(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
         if (this.fromApiJsonHelper.parameterExists(allowOverdraftParamName, element)) {
-            final Boolean allowOverdraft = this.fromApiJsonHelper.extractBooleanNamed(
-                    allowOverdraftParamName, element);
-            baseDataValidator.reset().parameter(allowOverdraftParamName).value(allowOverdraft)
-                    .ignoreIfNull().validateForBooleanValue();
+            final Boolean allowOverdraft = this.fromApiJsonHelper.extractBooleanNamed(allowOverdraftParamName, element);
+            baseDataValidator.reset().parameter(allowOverdraftParamName).value(allowOverdraft).ignoreIfNull().validateForBooleanValue();
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists(overdraftLimitParamName, element)) {
-            final BigDecimal overdraftLimit = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                    overdraftLimitParamName, element);
+            final BigDecimal overdraftLimit = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(overdraftLimitParamName, element);
             baseDataValidator.reset().parameter(overdraftLimitParamName).value(overdraftLimit).ignoreIfNull().zeroOrPositiveAmount();
         }
-        
+
     }
 }

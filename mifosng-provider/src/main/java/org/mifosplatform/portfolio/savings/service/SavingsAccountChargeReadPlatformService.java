@@ -18,8 +18,8 @@ public interface SavingsAccountChargeReadPlatformService {
     Collection<SavingsAccountChargeData> retrieveSavingsAccountCharges(Long savingsAccountId);
 
     SavingsAccountChargeData retrieveSavingsAccountChargeDetails(Long savingsAccountChargeId, Long savingsAccountId);
-    
+
     Collection<SavingsAccountAnnualFeeData> retrieveChargesWithAnnualFeeDue();
-    
+
     Collection<SavingsAccountAnnualFeeData> retrieveChargesWithDue();
 }

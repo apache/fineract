@@ -70,7 +70,7 @@ public class HolidaysApiResource {
 
         return this.toApiJsonSerializer.serialize(result);
     }
-    
+
     @POST
     @Path("{holidayId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -95,7 +95,7 @@ public class HolidaysApiResource {
 
         return this.toApiJsonSerializer.serialize(result);
     }
-    
+
     @GET
     @Path("{holidayId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -103,29 +103,27 @@ public class HolidaysApiResource {
     public String retrieveOne(@PathParam("holidayId") final Long holidayId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(HOLIDAY_RESOURCE_NAME);
-        
+
         final HolidayData holidayData = this.holidayReadPlatformService.retrieveHoliday(holidayId);
-        
+
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        
-        
+
         return this.toApiJsonSerializer.serialize(settings, holidayData, HOLIDAY_RESPONSE_DATA_PARAMETERS);
     }
-    
+
     @PUT
     @Path("{holidayId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String update(@PathParam("holidayId") final Long holidayId, final String jsonRequestBody) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateHoliday(holidayId)
-                .withJson(jsonRequestBody).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateHoliday(holidayId).withJson(jsonRequestBody).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
-    
+
     @DELETE
     @Path("{holidayId}")
     @Consumes({ MediaType.APPLICATION_JSON })

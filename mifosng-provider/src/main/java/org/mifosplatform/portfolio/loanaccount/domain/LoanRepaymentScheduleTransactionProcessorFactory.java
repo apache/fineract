@@ -33,7 +33,7 @@ public class LoanRepaymentScheduleTransactionProcessorFactory {
             if (transactionProcessingStrategy.isHeavensfamilyStrategy()) {
                 processor = new HeavensFamilyLoanRepaymentScheduleTransactionProcessor();
             }
-            
+
             if (transactionProcessingStrategy.isEarlyPaymentStrategy()) {
                 processor = new EarlyPaymentLoanRepaymentScheduleTransactionProcessor();
             }

@@ -32,7 +32,9 @@ public class ApplyAnnualFeeSavingsAccountCommandHandler implements NewCommandSou
         @SuppressWarnings("unused")
         final LocalDate annualFeeTransactionDate = command.localDateValueOfParameterNamed("annualFeeTransactionDate");
 
-        //return this.writePlatformService.applyAnnualFee(command.getSavingsId(), annualFeeTransactionDate);
+        // return
+        // this.writePlatformService.applyAnnualFee(command.getSavingsId(),
+        // annualFeeTransactionDate);
         return null;
     }
 }

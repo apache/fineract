@@ -159,7 +159,7 @@ public final class ResultsetColumnHeaderData {
     private boolean isBigInt() {
         return "bigint".equalsIgnoreCase(this.columnType);
     }
-    
+
     private boolean isBit() {
         return "bit".equalsIgnoreCase(this.columnType);
     }

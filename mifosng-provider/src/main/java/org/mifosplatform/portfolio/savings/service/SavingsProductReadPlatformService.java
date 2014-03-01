@@ -14,7 +14,7 @@ public interface SavingsProductReadPlatformService {
     Collection<SavingsProductData> retrieveAll();
 
     Collection<SavingsProductData> retrieveAllForLookup();
-    
+
     Collection<SavingsProductData> retrieveAllForLookupByType(boolean isOverdraftType);
 
     SavingsProductData retrieveOne(Long productId);

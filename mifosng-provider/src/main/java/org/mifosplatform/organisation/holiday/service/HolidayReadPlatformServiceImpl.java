@@ -115,5 +115,5 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
             throw new HolidayNotFoundException(holidayId);
         }
     }
-    
+
 }

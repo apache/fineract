@@ -32,14 +32,12 @@ public class LoanInstallmentChargeData {
         return this.dueDate;
     }
 
-    public boolean isPaymentPending(){
+    public boolean isPaymentPending() {
         return !(this.paid || this.waived);
     }
-
 
     public BigDecimal getAmountOutstanding() {
         return this.amountOutstanding;
     }
-
 
 }

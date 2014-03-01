@@ -36,7 +36,7 @@ import com.google.gson.JsonPrimitive;
 public class JsonParserHelper {
 
     public boolean parameterExists(final String parameterName, final JsonElement element) {
-        if (element == null) {return false;}
+        if (element == null) { return false; }
         return element.getAsJsonObject().has(parameterName);
     }
 
@@ -144,10 +144,10 @@ public class JsonParserHelper {
     /**
      * Method used to extract integers from unformatted strings. Ex: "1" ,
      * "100002" etc
-     *
+     * 
      * Please note that this method does not support extracting Integers from
      * locale specific formatted strings Ex "1,000" etc
-     *
+     * 
      * @param parameterName
      * @param element
      * @param parametersPassedInRequest
@@ -514,9 +514,9 @@ public class JsonParserHelper {
 
                 final NumberFormatter numberFormatter = new NumberFormatter();
                 final Number parsedNumber = numberFormatter.parse(source, clientApplicationLocale);
-                if(parsedNumber instanceof BigDecimal){
-                    number = (BigDecimal)parsedNumber;
-                }else{
+                if (parsedNumber instanceof BigDecimal) {
+                    number = (BigDecimal) parsedNumber;
+                } else {
                     number = BigDecimal.valueOf(Double.valueOf(parsedNumber.doubleValue()));
                 }
             }

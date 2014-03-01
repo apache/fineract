@@ -94,7 +94,6 @@ public class SavingsProductData {
         final boolean allowOverdraft = false;
         final BigDecimal overdraftLimit = null;
 
-
         return new SavingsProductData(id, name, shortName, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, accountingRule, accountingMappings,
@@ -102,20 +101,20 @@ public class SavingsProductData {
                 interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                 lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions,
                 accountingMappingOptions, charges, chargeOptions, penaltyOptions, feeToIncomeAccountMappings,
-                penaltyToIncomeAccountMappings,allowOverdraft,overdraftLimit);
+                penaltyToIncomeAccountMappings, allowOverdraft, overdraftLimit);
     }
 
     public static SavingsProductData withCharges(final SavingsProductData product, final Collection<ChargeData> charges) {
-        return new SavingsProductData(product.id, product.name, product.shortName, product.description, product.currency, product.nominalAnnualInterestRate,
-                product.interestCompoundingPeriodType, product.interestPostingPeriodType, product.interestCalculationType,
-                product.interestCalculationDaysInYearType, product.minRequiredOpeningBalance, product.lockinPeriodFrequency,
-                product.lockinPeriodFrequencyType, product.withdrawalFeeForTransfers, product.accountingRule, product.accountingMappings,
-                product.paymentChannelToFundSourceMappings, product.currencyOptions, product.interestCompoundingPeriodTypeOptions,
-                product.interestPostingPeriodTypeOptions, product.interestCalculationTypeOptions,
-                product.interestCalculationDaysInYearTypeOptions, product.lockinPeriodFrequencyTypeOptions,
-                product.withdrawalFeeTypeOptions, product.paymentTypeOptions, product.accountingRuleOptions,
-                product.accountingMappingOptions, charges, product.chargeOptions, product.penaltyOptions,
-                product.feeToIncomeAccountMappings, product.penaltyToIncomeAccountMappings,product.allowOverdraft,product.overdraftLimit);
+        return new SavingsProductData(product.id, product.name, product.shortName, product.description, product.currency,
+                product.nominalAnnualInterestRate, product.interestCompoundingPeriodType, product.interestPostingPeriodType,
+                product.interestCalculationType, product.interestCalculationDaysInYearType, product.minRequiredOpeningBalance,
+                product.lockinPeriodFrequency, product.lockinPeriodFrequencyType, product.withdrawalFeeForTransfers,
+                product.accountingRule, product.accountingMappings, product.paymentChannelToFundSourceMappings, product.currencyOptions,
+                product.interestCompoundingPeriodTypeOptions, product.interestPostingPeriodTypeOptions,
+                product.interestCalculationTypeOptions, product.interestCalculationDaysInYearTypeOptions,
+                product.lockinPeriodFrequencyTypeOptions, product.withdrawalFeeTypeOptions, product.paymentTypeOptions,
+                product.accountingRuleOptions, product.accountingMappingOptions, charges, product.chargeOptions, product.penaltyOptions,
+                product.feeToIncomeAccountMappings, product.penaltyToIncomeAccountMappings, product.allowOverdraft, product.overdraftLimit);
     }
 
     /**
@@ -133,7 +132,7 @@ public class SavingsProductData {
             final Collection<ChargeData> penaltyOptions) {
 
         return new SavingsProductData(existingProduct.id, existingProduct.name, existingProduct.shortName, existingProduct.description,
-        		existingProduct.currency, existingProduct.nominalAnnualInterestRate, existingProduct.interestCompoundingPeriodType,
+                existingProduct.currency, existingProduct.nominalAnnualInterestRate, existingProduct.interestCompoundingPeriodType,
                 existingProduct.interestPostingPeriodType, existingProduct.interestCalculationType,
                 existingProduct.interestCalculationDaysInYearType, existingProduct.minRequiredOpeningBalance,
                 existingProduct.lockinPeriodFrequency, existingProduct.lockinPeriodFrequencyType,
@@ -142,8 +141,8 @@ public class SavingsProductData {
                 interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                 lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions,
                 accountingMappingOptions, existingProduct.charges, chargeOptions, penaltyOptions,
-                existingProduct.feeToIncomeAccountMappings, existingProduct.penaltyToIncomeAccountMappings,
-                existingProduct.allowOverdraft,existingProduct.overdraftLimit);
+                existingProduct.feeToIncomeAccountMappings, existingProduct.penaltyToIncomeAccountMappings, existingProduct.allowOverdraft,
+                existingProduct.overdraftLimit);
     }
 
     public static SavingsProductData withAccountingDetails(final SavingsProductData existingProduct,
@@ -166,7 +165,7 @@ public class SavingsProductData {
         final Collection<ChargeData> penaltyOptions = null;
 
         return new SavingsProductData(existingProduct.id, existingProduct.name, existingProduct.shortName, existingProduct.description,
-        		existingProduct.currency, existingProduct.nominalAnnualInterestRate, existingProduct.interestCompoundingPeriodType,
+                existingProduct.currency, existingProduct.nominalAnnualInterestRate, existingProduct.interestCompoundingPeriodType,
                 existingProduct.interestPostingPeriodType, existingProduct.interestCalculationType,
                 existingProduct.interestCalculationDaysInYearType, existingProduct.minRequiredOpeningBalance,
                 existingProduct.lockinPeriodFrequency, existingProduct.lockinPeriodFrequencyType,
@@ -175,15 +174,15 @@ public class SavingsProductData {
                 interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                 lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions,
                 accountingMappingOptions, existingProduct.charges, chargeOptions, penaltyOptions, feeToIncomeAccountMappings,
-                penaltyToIncomeAccountMappings,existingProduct.allowOverdraft,existingProduct.overdraftLimit);
+                penaltyToIncomeAccountMappings, existingProduct.allowOverdraft, existingProduct.overdraftLimit);
     }
 
-    public static SavingsProductData instance(final Long id, final String name, final String shortName, final String description, 
-    		final CurrencyData currency, final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestCompoundingPeriodType,
+    public static SavingsProductData instance(final Long id, final String name, final String shortName, final String description,
+            final CurrencyData currency, final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestCompoundingPeriodType,
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
             final EnumOptionData interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType, final boolean withdrawalFeeForTransfers,
-            final EnumOptionData accountingType,final boolean allowOverdraft,final BigDecimal overdraftLimit) {
+            final EnumOptionData accountingType, final boolean allowOverdraft, final BigDecimal overdraftLimit) {
 
         final Map<String, Object> accountingMappings = null;
         final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = null;
@@ -211,12 +210,12 @@ public class SavingsProductData {
                 interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                 lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions,
                 accountingMappingOptions, charges, chargeOptions, penaltyOptions, feeToIncomeAccountMappings,
-                penaltyToIncomeAccountMappings,allowOverdraft,overdraftLimit);
+                penaltyToIncomeAccountMappings, allowOverdraft, overdraftLimit);
     }
 
     public static SavingsProductData lookup(final Long id, final String name) {
 
-    	final String shortName = null;
+        final String shortName = null;
         final CurrencyData currency = null;
         final String description = null;
         final BigDecimal nominalAnnualInterestRate = null;
@@ -249,21 +248,19 @@ public class SavingsProductData {
         final Collection<ChargeData> penaltyOptions = null;
         final Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings = null;
         final Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = null;
-        
-
 
         return new SavingsProductData(id, name, shortName, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers,
-                accountingType, accountingMappings, paymentChannelToFundSourceMappings,
-                currencyOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
-                interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions,
-                accountingRuleOptions, accountingMappingOptions, charges, chargeOptions, penaltyOptions, feeToIncomeAccountMappings,
-                penaltyToIncomeAccountMappings,allowOverdraft,overdraftLimit);
+                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, accountingType, accountingMappings,
+                paymentChannelToFundSourceMappings, currencyOptions, interestCompoundingPeriodTypeOptions,
+                interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
+                lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions,
+                accountingMappingOptions, charges, chargeOptions, penaltyOptions, feeToIncomeAccountMappings,
+                penaltyToIncomeAccountMappings, allowOverdraft, overdraftLimit);
     }
 
-    private SavingsProductData(final Long id, final String name, final String shortName, final String description, final CurrencyData currency,
-            final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestCompoundingPeriodType,
+    private SavingsProductData(final Long id, final String name, final String shortName, final String description,
+            final CurrencyData currency, final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestCompoundingPeriodType,
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
             final EnumOptionData interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType, final boolean withdrawalFeeForTransfers,
@@ -278,8 +275,8 @@ public class SavingsProductData {
             final Map<String, List<GLAccountData>> accountingMappingOptions, final Collection<ChargeData> charges,
             final Collection<ChargeData> chargeOptions, final Collection<ChargeData> penaltyOptions,
             final Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings,
-            final Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings,
-            final boolean allowOverdraft,final BigDecimal overdraftLimit) {
+            final Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings, final boolean allowOverdraft,
+            final BigDecimal overdraftLimit) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;

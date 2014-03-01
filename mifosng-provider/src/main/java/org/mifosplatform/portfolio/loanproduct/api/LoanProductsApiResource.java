@@ -63,8 +63,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class LoanProductsApiResource {
 
-    private final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "shortName", "description", "fundId",
-            "fundName", "includeInBorrowerCycle", "currency", "principal", "minPrincipal", "maxPrincipal", "numberOfRepayments",
+    private final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "shortName", "description",
+            "fundId", "fundName", "includeInBorrowerCycle", "currency", "principal", "minPrincipal", "maxPrincipal", "numberOfRepayments",
             "minNumberOfRepayments", "maxNumberOfRepayments", "repaymentEvery", "repaymentFrequencyType", "graceOnPrincipalPayment",
             "graceOnInterestPayment", "graceOnInterestCharged", "interestRatePerPeriod", "minInterestRatePerPeriod",
             "maxInterestRatePerPeriod", "interestRateFrequencyType", "annualInterestRate", "amortizationType", "interestType",
@@ -264,13 +264,14 @@ public class LoanProductsApiResource {
 
         final List<EnumOptionData> accountingRuleTypeOptions = this.accountingDropdownReadPlatformService
                 .retrieveAccountingRuleTypeOptions();
-        
-        final List<EnumOptionData> loanCycleValueConditionTypeOptions = this.dropdownReadPlatformService.retrieveLoanCycleValueConditionTypeOptions();
+
+        final List<EnumOptionData> loanCycleValueConditionTypeOptions = this.dropdownReadPlatformService
+                .retrieveLoanCycleValueConditionTypeOptions();
 
         return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions,
                 amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions,
                 interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions, accountOptions,
-                accountingRuleTypeOptions,loanCycleValueConditionTypeOptions);
+                accountingRuleTypeOptions, loanCycleValueConditionTypeOptions);
     }
 
 }

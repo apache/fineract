@@ -37,8 +37,8 @@ public class HolidayRepositoryWrapper {
     public void save(final Holiday holiday) {
         this.repository.save(holiday);
     }
-    
-    public void save(final Iterable<Holiday> holidays){
+
+    public void save(final Iterable<Holiday> holidays) {
         this.repository.save(holidays);
     }
 

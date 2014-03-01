@@ -67,9 +67,9 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
                     + "` already exists", "name", name);
         } else if (realCause.getMessage().contains("sp_unq_short_name")) {
 
-        	final String shortName = command.stringValueOfParameterNamed("shortName");
-            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.short.name", "Savings product with short name `" 
-            		+ shortName + "` already exists", "shortName", shortName);
+            final String shortName = command.stringValueOfParameterNamed("shortName");
+            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.short.name", "Savings product with short name `"
+                    + shortName + "` already exists", "shortName", shortName);
         }
 
         logAsErrorUnexpectedDataIntegrityException(dae);

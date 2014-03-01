@@ -5,7 +5,6 @@
  */
 package org.mifosplatform.organisation.holiday.domain;
 
-
 /**
  * Enum representation of {@link Holiday} status states.
  */
@@ -15,7 +14,7 @@ public enum HolidayStatusType {
     PENDING_FOR_ACTIVATION(100, "holidayStatusType.pending.for.activation"), //
     ACTIVE(300, "holidayStatusType.active"), //
     DELETED(600, "savingsAccountStatusType.transfer.in.progress");
-    
+
     private final Integer value;
     private final String code;
 

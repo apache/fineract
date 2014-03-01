@@ -19,18 +19,17 @@ import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.LoanR
  * This {@link LoanRepaymentScheduleTransactionProcessor} defaults to having the
  * payment order of Interest first, then principal, penalties and fees.
  */
-public class EarlyPaymentLoanRepaymentScheduleTransactionProcessor extends
-        AbstractLoanRepaymentScheduleTransactionProcessor {
+public class EarlyPaymentLoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
     /**
      * For early/'in advance' repayments, pay off in the same way as on-time
      * payments, interest first, principal, penalties and charges.
      */
+    @SuppressWarnings("unused")
     @Override
     protected Money handleTransactionThatIsPaymentInAdvanceOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
             final LocalDate transactionDate, final Money paymentInAdvance) {
-        
 
         final MonetaryCurrency currency = paymentInAdvance.getCurrency();
         Money transactionAmountRemaining = paymentInAdvance;
@@ -61,19 +60,19 @@ public class EarlyPaymentLoanRepaymentScheduleTransactionProcessor extends
             // Only allocate to principal:
             principalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
-            
+
             loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         }
 
         return transactionAmountRemaining;
 
-        
     }
 
     /**
      * For late repayments, pay off in the same way as on-time payments,
      * interest first then principal.
      */
+    @SuppressWarnings("unused")
     @Override
     protected Money handleTransactionThatIsALateRepaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
@@ -132,7 +131,5 @@ public class EarlyPaymentLoanRepaymentScheduleTransactionProcessor extends
 
         return transactionAmountRemaining;
     }
-    
-    
-    
+
 }

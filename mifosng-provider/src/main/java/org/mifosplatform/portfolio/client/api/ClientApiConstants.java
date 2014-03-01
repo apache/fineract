@@ -37,8 +37,8 @@ public class ClientApiConstants {
     public static final String staffIdParamName = "staffId";
     public static final String closureDateParamName = "closureDate";
     public static final String closureReasonIdParamName = "closureReasonId";
-    public static final String submittedOnDateParamName="submittedOnDate";
-    public static final String savingsProductIdParamName="savingsProductId";
+    public static final String submittedOnDateParamName = "submittedOnDate";
+    public static final String savingsProductIdParamName = "savingsProductId";
     // response parameters
     public static final String statusParamName = "status";
     public static final String hierarchyParamName = "hierarchy";
@@ -63,11 +63,11 @@ public class ClientApiConstants {
     public static final Set<String> CLIENT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, groupIdParamName, accountNoParamName, externalIdParamName, mobileNoParamName, firstnameParamName,
             middlenameParamName, lastnameParamName, fullnameParamName, officeIdParamName, activeParamName, activationDateParamName,
-            staffIdParamName,submittedOnDateParamName,savingsProductIdParamName));
+            staffIdParamName, submittedOnDateParamName, savingsProductIdParamName));
 
     public static final Set<String> CLIENT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, accountNoParamName, externalIdParamName, mobileNoParamName, firstnameParamName, middlenameParamName,
-            lastnameParamName, fullnameParamName, activeParamName, activationDateParamName, staffIdParamName,savingsProductIdParamName));
+            lastnameParamName, fullnameParamName, activeParamName, activationDateParamName, staffIdParamName, savingsProductIdParamName));
 
     /**
      * These parameters will match the class level parameters of

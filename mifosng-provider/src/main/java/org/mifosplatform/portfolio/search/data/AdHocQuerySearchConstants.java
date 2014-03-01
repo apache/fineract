@@ -37,9 +37,9 @@ public interface AdHocQuerySearchConstants {
 
     public static final Set<String> AD_HOC_SEARCH_QUERY_CONDITIONS = new HashSet<String>(
             Arrays.asList("between", "<=", ">=", "<", ">", "="));
-    
-    public static final Object[] loanDateOptions = {"approvalDate", "createdDate", "disbursalDate"};
-    public static final Object[] entityTypeOptions = {"clients", "groups", "loans", "clientIdentifiers"};
-    public static final Object[] loanStatusOptions = {"all", "active", "overpaid", "arrears", "closed", "writeoff"};
+
+    public static final Object[] loanDateOptions = { "approvalDate", "createdDate", "disbursalDate" };
+    public static final Object[] entityTypeOptions = { "clients", "groups", "loans", "clientIdentifiers" };
+    public static final Object[] loanStatusOptions = { "all", "active", "overpaid", "arrears", "closed", "writeoff" };
 
 }

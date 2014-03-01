@@ -83,26 +83,23 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
             final Map<String, Object> changes = chargeForUpdate.update(command);
 
-            // MIFOSX-900: Check if the Charge has been active before and now is deactivated:
+            // MIFOSX-900: Check if the Charge has been active before and now is
+            // deactivated:
             if (changes.containsKey("active")) {
-                 // IF the key exists then it has changed (otherwise it would have been filtered), so check current state:
-                if(!chargeForUpdate.isActive())
-                {
+                // IF the key exists then it has changed (otherwise it would
+                // have been filtered), so check current state:
+                if (!chargeForUpdate.isActive()) {
                     // TODO: Change this function to only check the mappings!!!
                     final Boolean isChargeExistWithLoans = isAnyLoanProductsAssociateWithThisCharge(chargeId);
-                    final Boolean isChargeExistWithSavings = isAnySavingsProductsAssociateWithThisCharge(chargeId); 
-                    
-                    if(isChargeExistWithLoans || isChargeExistWithSavings)
-                    {
-                        throw new ChargeCannotBeUpdatedException(
-                                "error.msg.charge.cannot.be.updated.it.is.used.in.loan",
-                                "This charge cannot be updated, it is used in loan"); 
-                    }
+                    final Boolean isChargeExistWithSavings = isAnySavingsProductsAssociateWithThisCharge(chargeId);
+
+                    if (isChargeExistWithLoans || isChargeExistWithSavings) { throw new ChargeCannotBeUpdatedException(
+                            "error.msg.charge.cannot.be.updated.it.is.used.in.loan", "This charge cannot be updated, it is used in loan"); }
                 }
             }
 
-            if (!changes.isEmpty()) {           
-                
+            if (!changes.isEmpty()) {
+
                 this.chargeRepository.save(chargeForUpdate);
             }
 
@@ -124,7 +121,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         final Collection<LoanProduct> loanProducts = this.loanProductRepository.retrieveLoanProductsByChargeId(chargeId);
         final Boolean isChargeExistWithLoans = isAnyLoansAssociateWithThisCharge(chargeId);
         final Boolean isChargeExistWithSavings = isAnySavingsAssociateWithThisCharge(chargeId);
-        
+
         // TODO: Change error messages around:
         if (!loanProducts.isEmpty() || isChargeExistWithLoans || isChargeExistWithSavings) { throw new ChargeCannotBeDeletedException(
                 "error.msg.charge.cannot.be.deleted.it.is.already.used.in.loan",
@@ -161,22 +158,21 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         final String isLoansUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { chargeId });
         return new Boolean(isLoansUsingCharge);
     }
-    
+
     private boolean isAnySavingsAssociateWithThisCharge(final Long chargeId) {
 
         final String sql = "select if((exists (select 1 from m_savings_account_charge sc where sc.charge_id = ?)) = 1, 'true', 'false')";
         final String isSavingsUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { chargeId });
         return new Boolean(isSavingsUsingCharge);
     }
-    
-    
-        private boolean isAnyLoanProductsAssociateWithThisCharge(final Long chargeId) {
+
+    private boolean isAnyLoanProductsAssociateWithThisCharge(final Long chargeId) {
 
         final String sql = "select if((exists (select 1 from m_product_loan_charge lc where lc.charge_id = ?)) = 1, 'true', 'false')";
         final String isLoansUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { chargeId });
         return new Boolean(isLoansUsingCharge);
     }
-    
+
     private boolean isAnySavingsProductsAssociateWithThisCharge(final Long chargeId) {
 
         final String sql = "select if((exists (select 1 from m_savings_product_charge sc where sc.charge_id = ?)) = 1, 'true', 'false')";

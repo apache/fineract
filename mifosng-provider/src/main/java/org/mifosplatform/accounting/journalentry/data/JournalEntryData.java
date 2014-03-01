@@ -13,7 +13,7 @@ import org.mifosplatform.organisation.monetary.data.CurrencyData;
 
 /**
  * Immutable object representing a General Ledger Account
- *
+ * 
  * Note: no getter/setters required as google will produce json from fields of
  * object.
  */
@@ -71,7 +71,7 @@ public class JournalEntryData {
             final Boolean manualEntry, final EnumOptionData entityType, final Long entityId, final Long createdByUserId,
             final LocalDate createdDate, final String createdByUserName, final String comments, final Boolean reversed,
             final String referenceNumber, final BigDecimal officeRunningBalance, final BigDecimal organizationRunningBalance,
-            final Boolean runningBalanceComputed,final TransactionDetailData transactionDetailData, final CurrencyData currency) {
+            final Boolean runningBalanceComputed, final TransactionDetailData transactionDetailData, final CurrencyData currency) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;

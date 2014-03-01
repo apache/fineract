@@ -139,7 +139,7 @@ public final class Client extends AbstractPersistable<Long> {
     @ManyToOne(optional = true)
     @JoinColumn(name = "activatedon_userid", nullable = true)
     private AppUser activatedBy;
-    
+
     @ManyToOne
     @JoinColumn(name = "default_savings_product", nullable = true)
     private SavingsProduct savingsProduct;
@@ -179,7 +179,7 @@ public final class Client extends AbstractPersistable<Long> {
         }
 
         return new Client(currentUser, status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname,
-                activationDate, officeJoiningDate, externalId, mobileNo, staff, submittedOnDate,savingsProduct);
+                activationDate, officeJoiningDate, externalId, mobileNo, staff, submittedOnDate, savingsProduct);
     }
 
     protected Client() {
@@ -404,7 +404,7 @@ public final class Client extends AbstractPersistable<Long> {
             final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
             actualChanges.put(ClientApiConstants.savingsProductIdParamName, newValue);
         }
-        
+
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
 
@@ -640,7 +640,6 @@ public final class Client extends AbstractPersistable<Long> {
         return false;
     }
 
-    
     private Long savingsProductId() {
         Long savingsProductId = null;
         if (this.savingsProduct != null) {
@@ -649,17 +648,14 @@ public final class Client extends AbstractPersistable<Long> {
         return savingsProductId;
     }
 
-    
     public SavingsProduct SavingsProduct() {
         return this.savingsProduct;
     }
 
-    
     public void updateSavingsProduct(SavingsProduct savingsProduct) {
         this.savingsProduct = savingsProduct;
     }
 
-    
     public AppUser activatedBy() {
         return this.activatedBy;
     }

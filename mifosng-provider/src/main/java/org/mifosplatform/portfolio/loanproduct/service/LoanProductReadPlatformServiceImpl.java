@@ -214,7 +214,6 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     }
                 }
             }
-            
 
             final Boolean multiDisburseLoan = rs.getBoolean("multiDisburseLoan");
             final Integer maxTrancheCount = rs.getInt("maxTrancheCount");

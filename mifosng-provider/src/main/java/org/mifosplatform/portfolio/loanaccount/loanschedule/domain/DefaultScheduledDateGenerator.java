@@ -26,38 +26,35 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
 
         for (int repaymentPeriod = 1; repaymentPeriod <= numberOfRepayments; repaymentPeriod++) {
             lastRepaymentDate = generateNextRepaymentDate(lastRepaymentDate, loanApplicationTerms);
-         }
+        }
         lastRepaymentDate = adjustRepaymentDate(lastRepaymentDate, loanApplicationTerms, isHolidayEnabled, holidays, workingDays);
         return lastRepaymentDate;
     }
 
-    
     @Override
-    public LocalDate generateNextRepaymentDate(final LocalDate lastRepaymentDate,final LoanApplicationTerms loanApplicationTerms){
+    public LocalDate generateNextRepaymentDate(final LocalDate lastRepaymentDate, final LoanApplicationTerms loanApplicationTerms) {
         final LocalDate firstRepaymentPeriodDate = loanApplicationTerms.getCalculatedRepaymentsStartingFromLocalDate();
         LocalDate dueRepaymentPeriodDate = null;
-        if(firstRepaymentPeriodDate !=null && firstRepaymentPeriodDate.isAfter(lastRepaymentDate)){
+        if (firstRepaymentPeriodDate != null && firstRepaymentPeriodDate.isAfter(lastRepaymentDate)) {
             dueRepaymentPeriodDate = firstRepaymentPeriodDate;
-        }else{
+        } else {
             dueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms, lastRepaymentDate);
         }
         return dueRepaymentPeriodDate;
     }
-    
+
     @Override
-    public LocalDate adjustRepaymentDate(final LocalDate dueRepaymentPeriodDate,final LoanApplicationTerms loanApplicationTerms,final boolean isHolidayEnabled,
-            final List<Holiday> holidays, final WorkingDays workingDays){
+    public LocalDate adjustRepaymentDate(final LocalDate dueRepaymentPeriodDate, final LoanApplicationTerms loanApplicationTerms,
+            final boolean isHolidayEnabled, final List<Holiday> holidays, final WorkingDays workingDays) {
         LocalDate adjustedDate = dueRepaymentPeriodDate;
         final LocalDate nextDueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms, adjustedDate);
-        adjustedDate = WorkingDaysUtil.getOffSetDateIfNonWorkingDay(adjustedDate, nextDueRepaymentPeriodDate,
-                workingDays);
+        adjustedDate = WorkingDaysUtil.getOffSetDateIfNonWorkingDay(adjustedDate, nextDueRepaymentPeriodDate, workingDays);
         if (isHolidayEnabled) {
             adjustedDate = HolidayUtil.getRepaymentRescheduleDateToIfHoliday(adjustedDate, holidays);
         }
         return adjustedDate;
     }
-    
-    
+
     private LocalDate getRepaymentPeriodDate(final LoanApplicationTerms loanApplicationTerms, final LocalDate startDate) {
         final int repaidEvery = loanApplicationTerms.getRepaymentEvery();
         LocalDate dueRepaymentPeriodDate = startDate;

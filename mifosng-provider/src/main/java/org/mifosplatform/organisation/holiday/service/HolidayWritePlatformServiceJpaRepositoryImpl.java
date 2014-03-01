@@ -51,8 +51,9 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
 
     @Autowired
     public HolidayWritePlatformServiceJpaRepositoryImpl(final HolidayDataValidator fromApiJsonDeserializer,
-            final HolidayRepositoryWrapper holidayRepository, final PlatformSecurityContext context, final OfficeRepository officeRepository,
-            final FromJsonHelper fromApiJsonHelper, final WorkingDaysRepositoryWrapper daysRepositoryWrapper, final ConfigurationDomainService configurationDomainService) {
+            final HolidayRepositoryWrapper holidayRepository, final PlatformSecurityContext context,
+            final OfficeRepository officeRepository, final FromJsonHelper fromApiJsonHelper,
+            final WorkingDaysRepositoryWrapper daysRepositoryWrapper, final ConfigurationDomainService configurationDomainService) {
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.holidayRepository = holidayRepository;
         this.context = context;
@@ -84,7 +85,7 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
             return CommandProcessingResult.empty();
         }
     }
-    
+
     @Transactional
     @Override
     public CommandProcessingResult updateHoliday(final JsonCommand command) {
@@ -114,19 +115,18 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
             return CommandProcessingResult.empty();
         }
     }
-    
+
     @Transactional
     @Override
     public CommandProcessingResult activateHoliday(final Long holidayId) {
         this.context.authenticatedUser();
         final Holiday holiday = this.holidayRepository.findOneWithNotFoundDetection(holidayId);
-        
+
         holiday.activate();
         this.holidayRepository.saveAndFlush(holiday);
-        return new CommandProcessingResultBuilder()
-        .withEntityId(holiday.getId()).build();
+        return new CommandProcessingResultBuilder().withEntityId(holiday.getId()).build();
     }
-    
+
     @Transactional
     @Override
     public CommandProcessingResult deleteHoliday(final Long holidayId) {
@@ -134,14 +134,14 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
         final Holiday holiday = this.holidayRepository.findOneWithNotFoundDetection(holidayId);
         holiday.delete();
         this.holidayRepository.saveAndFlush(holiday);
-        return new CommandProcessingResultBuilder()
-        .withEntityId(holidayId).build();
+        return new CommandProcessingResultBuilder().withEntityId(holidayId).build();
     }
 
     private Set<Office> getSelectedOffices(final JsonCommand command) {
         Set<Office> offices = null;
         final JsonObject topLevelJsonElement = this.fromApiJsonHelper.parse(command.json()).getAsJsonObject();
-        if (topLevelJsonElement.has(HolidayApiConstants.officesParamName) && topLevelJsonElement.get(HolidayApiConstants.officesParamName).isJsonArray()) {
+        if (topLevelJsonElement.has(HolidayApiConstants.officesParamName)
+                && topLevelJsonElement.get(HolidayApiConstants.officesParamName).isJsonArray()) {
 
             final JsonArray array = topLevelJsonElement.get(HolidayApiConstants.officesParamName).getAsJsonArray();
             offices = new HashSet<Office>(array.size());
@@ -172,11 +172,13 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
     private void validateInputDates(final JsonCommand command) {
         final LocalDate fromDate = command.localDateValueOfParameterNamed(HolidayApiConstants.fromDateParamName);
         final LocalDate toDate = command.localDateValueOfParameterNamed(HolidayApiConstants.toDateParamName);
-        final LocalDate repaymentsRescheduledTo = command.localDateValueOfParameterNamed(HolidayApiConstants.repaymentsRescheduledToParamName);
+        final LocalDate repaymentsRescheduledTo = command
+                .localDateValueOfParameterNamed(HolidayApiConstants.repaymentsRescheduledToParamName);
         this.validateInputDates(fromDate, toDate, repaymentsRescheduledTo);
     }
+
     private void validateInputDates(final LocalDate fromDate, final LocalDate toDate, final LocalDate repaymentsRescheduledTo) {
-        
+
         String defaultUserMessage = "";
 
         if (toDate.isBefore(fromDate)) {
@@ -226,5 +228,5 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
     public boolean isTransactionAllowedOnHoliday() {
         return this.configurationDomainService.allowTransactionsOnHolidayEnabled();
     }
-    
+
 }

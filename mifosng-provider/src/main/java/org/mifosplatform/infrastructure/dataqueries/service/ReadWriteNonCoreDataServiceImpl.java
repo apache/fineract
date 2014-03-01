@@ -826,7 +826,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                         + datatableName.toLowerCase().replaceAll("\\s", "_") + "_%'";
                 sqlArray = new String[2];
                 sqlArray[1] = deleteColumnCodeSql;
-            }else{
+            } else {
                 sqlArray = new String[1];
             }
             final String sql = "DROP TABLE `" + datatableName + "`";

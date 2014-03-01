@@ -14,7 +14,8 @@ public class SavingsAccountAnnualFeeData {
     private final String accountNo;
     private final LocalDate nextAnnualFeeDueDate;
 
-    public static SavingsAccountAnnualFeeData instance(final Long id, final Long accountId, final String accountNo, final LocalDate nextAnnualFeeDueDate) {
+    public static SavingsAccountAnnualFeeData instance(final Long id, final Long accountId, final String accountNo,
+            final LocalDate nextAnnualFeeDueDate) {
         return new SavingsAccountAnnualFeeData(id, accountId, accountNo, nextAnnualFeeDueDate);
     }
 
@@ -36,7 +37,7 @@ public class SavingsAccountAnnualFeeData {
     public LocalDate getNextAnnualFeeDueDate() {
         return this.nextAnnualFeeDueDate;
     }
-    
+
     public String getAccountNo() {
         return this.accountNo;
     }

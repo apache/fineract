@@ -131,7 +131,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-        
+
         this.calendarRepository.save(newCalendar);
 
         final CalendarInstance newCalendarInstance = CalendarInstance.fromJson(newCalendar, command);
@@ -154,27 +154,29 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         if (calendarForUpdate == null) { throw new CalendarNotFoundException(calendarId); }
         final Date oldStartDate = calendarForUpdate.getStartDate();
         final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
-        //create calendar history before updating calendar
+        // create calendar history before updating calendar
         final CalendarHistory calendarHistory = new CalendarHistory(calendarForUpdate, oldStartDate);
         final Map<String, Object> changes = calendarForUpdate.update(command);
-        
+
         if (!changes.isEmpty()) {
-          //update calendar history table only if there is a change in calendar start date.
-            if(currentDate.isAfter(new LocalDate(oldStartDate))){
+            // update calendar history table only if there is a change in
+            // calendar start date.
+            if (currentDate.isAfter(new LocalDate(oldStartDate))) {
                 final Date endDate = calendarForUpdate.getStartDateLocalDate().minusDays(1).toDate();
                 calendarHistory.updateEndDate(endDate);
                 this.calendarHistoryRepository.save(calendarHistory);
             }
-            
+
             this.calendarRepository.saveAndFlush(calendarForUpdate);
 
             if (this.configurationDomainService.isRescheduleFutureRepaymentsEnabled() && calendarForUpdate.isRepeating()) {
-                //fetch all loan calendar instances associated with modifying calendar.
+                // fetch all loan calendar instances associated with modifying
+                // calendar.
                 final Collection<CalendarInstance> loanCalendarInstances = this.calendarInstanceRepository.findByCalendarIdAndEntityTypeId(
                         calendarId, CalendarEntityType.LOANS.getValue());
 
                 if (!CollectionUtils.isEmpty(loanCalendarInstances)) {
-                    //update all loans associated with modifying calendar
+                    // update all loans associated with modifying calendar
                     this.loanWritePlatformService.applyMeetingDateChanges(calendarForUpdate, loanCalendarInstances);
                 }
             }

@@ -27,7 +27,7 @@ public class CenterData {
     private final Long staffId;
     private final String staffName;
     private final String hierarchy;
-        
+
     private final EnumOptionData status;
     @SuppressWarnings("unused")
     private final boolean active;
@@ -37,7 +37,7 @@ public class CenterData {
     // associations
     private final Collection<GroupGeneralData> groupMembers;
 
-    // template    
+    // template
     private final Collection<GroupGeneralData> groupMembersOptions;
     private final CalendarData collectionMeetingCalendar;
     private final Collection<CodeValueData> closureReasons;
@@ -154,11 +154,11 @@ public class CenterData {
     public String getHierarchy() {
         return this.hierarchy;
     }
-    
+
     public CalendarData getCollectionMeetingCalendar() {
-		return collectionMeetingCalendar;
-	}
-    
+        return collectionMeetingCalendar;
+    }
+
     public String getStaffName() {
         return this.staffName;
     }

@@ -45,6 +45,7 @@ public class XBRLBuilderTest {
 
     }
 
+    @SuppressWarnings("null")
     @Test
     public void shouldCorrectlyBuildMap() {
 

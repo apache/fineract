@@ -192,20 +192,21 @@ public class LoanAssembler {
         Set<LoanDisbursementDetails> disbursementDetails = null;
         BigDecimal fixedEmiAmount = null;
         BigDecimal maxOutstandingLoanBalance = null;
-        if(loanProduct.isMultiDisburseLoan()){
+        if (loanProduct.isMultiDisburseLoan()) {
             disbursementDetails = fetchDisbursementData(element.getAsJsonObject());
             final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject());
             fixedEmiAmount = this.fromApiJsonHelper.extractBigDecimalNamed(LoanApiConstants.emiAmountParameterName, element, locale);
-            maxOutstandingLoanBalance = this.fromApiJsonHelper.extractBigDecimalNamed(LoanApiConstants.maxOutstandingBalanceParameterName, element, locale);
-            if(disbursementDetails.isEmpty()){
+            maxOutstandingLoanBalance = this.fromApiJsonHelper.extractBigDecimalNamed(LoanApiConstants.maxOutstandingBalanceParameterName,
+                    element, locale);
+            if (disbursementDetails.isEmpty()) {
                 final String errorMessage = "For this loan product, disbursement details must be provided";
                 throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
             }
-            
-            if(disbursementDetails.size() > loanProduct.maxTrancheCount()){
-                final String errorMessage = "Number of tranche shouldn't be greter than "+loanProduct.maxTrancheCount();
+
+            if (disbursementDetails.size() > loanProduct.maxTrancheCount()) {
+                final String errorMessage = "Number of tranche shouldn't be greter than " + loanProduct.maxTrancheCount();
                 throw new ExceedingTrancheCountException(LoanApiConstants.disbursementDataParameterName, errorMessage,
-                        loanProduct.maxTrancheCount(),disbursementDetails.size());
+                        loanProduct.maxTrancheCount(), disbursementDetails.size());
             }
         }
 
@@ -249,12 +250,12 @@ public class LoanAssembler {
         loanApplication.setHelpers(defaultLoanLifecycleStateMachine(), this.loanSummaryWrapper,
                 this.loanRepaymentScheduleTransactionProcessorFactory);
 
-        if(loanProduct.isMultiDisburseLoan()){
-            for(final LoanDisbursementDetails loanDisbursementDetails:loanApplication.getDisbursementDetails()){
+        if (loanProduct.isMultiDisburseLoan()) {
+            for (final LoanDisbursementDetails loanDisbursementDetails : loanApplication.getDisbursementDetails()) {
                 loanDisbursementDetails.updateLoan(loanApplication);
             }
         }
-        
+
         final LoanApplicationTerms loanApplicationTerms = this.loanScheduleAssembler.assembleLoanTerms(element);
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loanApplication.getOfficeId(),
@@ -270,7 +271,6 @@ public class LoanAssembler {
         return loanApplication;
     }
 
-    
     private Set<LoanDisbursementDetails> fetchDisbursementData(final JsonObject command) {
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(command);
         final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(command);
@@ -285,10 +285,11 @@ public class LoanAssembler {
                     BigDecimal principal = null;
 
                     if (jsonObject.has(LoanApiConstants.disbursementDateParameterName)) {
-                       LocalDate date = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName, jsonObject,dateFormat,locale);
-                       if(date!=null){
-                           expectedDisbursementDate = date.toDate();
-                       }
+                        LocalDate date = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName,
+                                jsonObject, dateFormat, locale);
+                        if (date != null) {
+                            expectedDisbursementDate = date.toDate();
+                        }
                     }
                     if (jsonObject.has(LoanApiConstants.disbursementPrincipalParameterName)
                             && jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).isJsonPrimitive()
@@ -302,8 +303,7 @@ public class LoanAssembler {
         }
         return disbursementDatas;
     }
-    
-    
+
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
         final List<LoanStatus> allowedLoanStatuses = Arrays.asList(LoanStatus.values());
         return new DefaultLoanLifecycleStateMachine(allowedLoanStatuses);

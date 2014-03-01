@@ -159,18 +159,19 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         if (StringUtils.isNotBlank(extraCriteria)) {
             updatedExtraCriteria = " where (" + extraCriteria + ")";
         }
-        
+
         updatedExtraCriteria += " order by aud.id DESC limit " + PaginationParameters.getCheckedLimit(null);
         return retrieveEntries("audit", updatedExtraCriteria, includeJson);
     }
-    
+
     @Override
-    public Page<AuditData> retrievePaginatedAuditEntries(final String extraCriteria, final boolean includeJson, final PaginationParameters parameters) {
-        
+    public Page<AuditData> retrievePaginatedAuditEntries(final String extraCriteria, final boolean includeJson,
+            final PaginationParameters parameters) {
+
         this.paginationParametersDataValidator.validateParameterValues(parameters, supportedOrderByValues, "audits");
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
-        
+
         String updatedExtraCriteria = "";
         if (StringUtils.isNotBlank(extraCriteria)) {
             updatedExtraCriteria = " where (" + extraCriteria + ")";
@@ -181,19 +182,19 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(rm.schema(includeJson, hierarchy));
         sqlBuilder.append(' ').append(updatedExtraCriteria);
-        
+
         if (parameters.isOrderByRequested()) {
             sqlBuilder.append(' ').append(parameters.orderBySql());
-        }else {
+        } else {
             sqlBuilder.append(' ').append(' ').append(" order by aud.id DESC");
         }
-        
+
         if (parameters.isLimited()) {
             sqlBuilder.append(' ').append(parameters.limitSql());
         }
-                
+
         logger.info("sql: " + sqlBuilder.toString());
-        
+
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), new Object[] {}, rm);
     }
@@ -243,7 +244,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
-    
+
     @Override
     public AuditData retrieveAuditEntry(final Long auditId) {
 

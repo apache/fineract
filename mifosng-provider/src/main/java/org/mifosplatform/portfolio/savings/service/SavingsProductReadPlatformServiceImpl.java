@@ -74,7 +74,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         public SavingProductMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("sp.id as id, sp.name as name, sp.short_name as shortName, sp.description as description, ");
-            sqlBuilder.append("sp.currency_code as currencyCode, sp.currency_digits as currencyDigits, sp.currency_multiplesof as inMultiplesOf, ");
+            sqlBuilder
+                    .append("sp.currency_code as currencyCode, sp.currency_digits as currencyDigits, sp.currency_multiplesof as inMultiplesOf, ");
             sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
             sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
             sqlBuilder.append("sp.nominal_annual_interest_rate as nominalAnnualInterestRate, ");
@@ -85,14 +86,14 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sqlBuilder.append("sp.min_required_opening_balance as minRequiredOpeningBalance, ");
             sqlBuilder.append("sp.lockin_period_frequency as lockinPeriodFrequency,");
             sqlBuilder.append("sp.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
-//            sqlBuilder.append("sp.withdrawal_fee_amount as withdrawalFeeAmount,");
-//            sqlBuilder.append("sp.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
+            // sqlBuilder.append("sp.withdrawal_fee_amount as withdrawalFeeAmount,");
+            // sqlBuilder.append("sp.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
             sqlBuilder.append("sp.withdrawal_fee_for_transfer as withdrawalFeeForTransfers, ");
             sqlBuilder.append("sp.allow_overdraft as allowOverdraft, ");
             sqlBuilder.append("sp.overdraft_limit as overdraftLimit, ");
-//            sqlBuilder.append("sp.annual_fee_amount as annualFeeAmount,");
-//            sqlBuilder.append("sp.annual_fee_on_month as annualFeeOnMonth, ");
-//            sqlBuilder.append("sp.annual_fee_on_day as annualFeeOnDay, ");
+            // sqlBuilder.append("sp.annual_fee_amount as annualFeeAmount,");
+            // sqlBuilder.append("sp.annual_fee_on_month as annualFeeOnMonth, ");
+            // sqlBuilder.append("sp.annual_fee_on_day as annualFeeOnDay, ");
             sqlBuilder.append("sp.accounting_type as accountingType ");
             sqlBuilder.append("from m_savings_product sp ");
             sqlBuilder.append("join m_currency curr on curr.code = sp.currency_code ");
@@ -151,29 +152,35 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
                 lockinPeriodFrequencyType = SavingsEnumerations.lockinPeriodFrequencyType(lockinPeriodFrequencyTypeValue);
             }
 
-            /*final BigDecimal withdrawalFeeAmount = rs.getBigDecimal("withdrawalFeeAmount");
-
-            EnumOptionData withdrawalFeeType = null;
-            final Integer withdrawalFeeTypeValue = JdbcSupport.getInteger(rs, "withdrawalFeeTypeEnum");
-            if (withdrawalFeeTypeValue != null) {
-                withdrawalFeeType = SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue);
-            }
-*/
+            /*
+             * final BigDecimal withdrawalFeeAmount =
+             * rs.getBigDecimal("withdrawalFeeAmount");
+             * 
+             * EnumOptionData withdrawalFeeType = null; final Integer
+             * withdrawalFeeTypeValue = JdbcSupport.getInteger(rs,
+             * "withdrawalFeeTypeEnum"); if (withdrawalFeeTypeValue != null) {
+             * withdrawalFeeType =
+             * SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue); }
+             */
             final boolean withdrawalFeeForTransfers = rs.getBoolean("withdrawalFeeForTransfers");
             final boolean allowOverdraft = rs.getBoolean("allowOverdraft");
             final BigDecimal overdraftLimit = rs.getBigDecimal("overdraftLimit");
-/*            final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
-
-            MonthDay annualFeeOnMonthDay = null;
-            final Integer annualFeeOnMonth = JdbcSupport.getInteger(rs, "annualFeeOnMonth");
-            final Integer annualFeeOnDay = JdbcSupport.getInteger(rs, "annualFeeOnDay");
-            if (annualFeeAmount != null && annualFeeOnDay != null) {
-                annualFeeOnMonthDay = new MonthDay(annualFeeOnMonth, annualFeeOnDay);
-            }
-*/
-            return SavingsProductData.instance(id, name, shortName,  description, currency, nominalAnnualInterestRate, compoundingInterestPeriodType,
-                    interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, accountingRuleType,allowOverdraft,overdraftLimit);
+            /*
+             * final BigDecimal annualFeeAmount =
+             * JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,
+             * "annualFeeAmount");
+             * 
+             * MonthDay annualFeeOnMonthDay = null; final Integer
+             * annualFeeOnMonth = JdbcSupport.getInteger(rs,
+             * "annualFeeOnMonth"); final Integer annualFeeOnDay =
+             * JdbcSupport.getInteger(rs, "annualFeeOnDay"); if (annualFeeAmount
+             * != null && annualFeeOnDay != null) { annualFeeOnMonthDay = new
+             * MonthDay(annualFeeOnMonth, annualFeeOnDay); }
+             */
+            return SavingsProductData.instance(id, name, shortName, description, currency, nominalAnnualInterestRate,
+                    compoundingInterestPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
+                    minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers,
+                    accountingRuleType, allowOverdraft, overdraftLimit);
         }
     }
 
@@ -197,7 +204,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
     public Collection<SavingsProductData> retrieveAllForLookupByType(boolean isOverdraftType) {
         final String sql = "select " + this.savingsProductLookupsRowMapper.schema() + " where sp.allow_overdraft=?";
 
-        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper,isOverdraftType);
+        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, isOverdraftType);
 
     }
 }

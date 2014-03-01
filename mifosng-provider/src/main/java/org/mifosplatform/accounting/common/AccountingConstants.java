@@ -109,9 +109,8 @@ public class AccountingConstants {
     public static enum LOAN_PRODUCT_ACCOUNTING_DATA_PARAMS {
         FUND_SOURCE("fundSourceAccount"), LOAN_PORTFOLIO("loanPortfolioAccount"), INTEREST_ON_LOANS("interestOnLoanAccount"), INCOME_FROM_FEES(
                 "incomeFromFeeAccount"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccount"), LOSSES_WRITTEN_OFF("writeOffAccount"), OVERPAYMENT(
-                "overpaymentLiabilityAccount"), INTEREST_RECEIVABLE("receivableInterestAccount"), FEES_RECEIVABLE(
-                "receivableFeeAccount"), PENALTIES_RECEIVABLE("receivablePenaltyAccount"), TRANSFERS_SUSPENSE(
-                "transfersInSuspenseAccount"), INCOME_ACCOUNT_ID("incomeAccount");
+                "overpaymentLiabilityAccount"), INTEREST_RECEIVABLE("receivableInterestAccount"), FEES_RECEIVABLE("receivableFeeAccount"), PENALTIES_RECEIVABLE(
+                "receivablePenaltyAccount"), TRANSFERS_SUSPENSE("transfersInSuspenseAccount"), INCOME_ACCOUNT_ID("incomeAccount");
 
         private final String value;
 
@@ -129,12 +128,10 @@ public class AccountingConstants {
         }
     }
 
-    
     /*** Accounting placeholders for cash based accounting for savings products ***/
     public static enum CASH_ACCOUNTS_FOR_SAVINGS {
         SAVINGS_REFERENCE(1), SAVINGS_CONTROL(2), INTEREST_ON_SAVINGS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), TRANSFERS_SUSPENSE(
-                10),OVERDRAFT_PORTFOLIO_CONTROL(11),INCOME_FROM_INTEREST(12),
-                LOSSES_WRITTEN_OFF(13);
+                10), OVERDRAFT_PORTFOLIO_CONTROL(11), INCOME_FROM_INTEREST(12), LOSSES_WRITTEN_OFF(13);
 
         private final Integer value;
 
@@ -174,8 +171,8 @@ public class AccountingConstants {
                 "interestOnSavingsAccountId"), PAYMENT_CHANNEL_FUND_SOURCE_MAPPING("paymentChannelToFundSourceMappings"), PAYMENT_TYPE(
                 "paymentTypeId"), FUND_SOURCE("fundSourceAccountId"), TRANSFERS_SUSPENSE("transfersInSuspenseAccountId"), FEE_INCOME_ACCOUNT_MAPPING(
                 "feeToIncomeAccountMappings"), PENALTY_INCOME_ACCOUNT_MAPPING("penaltyToIncomeAccountMappings"), CHARGE_ID("chargeId"), INCOME_ACCOUNT_ID(
-                "incomeAccountId"),OVERDRAFT_PORTFOLIO_CONTROL("overdraftPortfolioControlId"),INCOME_FROM_INTEREST("incomeFromInterestId"),
-                LOSSES_WRITTEN_OFF("writeOffAccountId");
+                "incomeAccountId"), OVERDRAFT_PORTFOLIO_CONTROL("overdraftPortfolioControlId"), INCOME_FROM_INTEREST("incomeFromInterestId"), LOSSES_WRITTEN_OFF(
+                "writeOffAccountId");
 
         private final String value;
 
@@ -192,14 +189,13 @@ public class AccountingConstants {
             return this.value;
         }
     }
-    
+
     public static enum SAVINGS_PRODUCT_ACCOUNTING_DATA_PARAMS {
-        SAVINGS_REFERENCE("savingsReferenceAccount"), SAVINGS_CONTROL("savingsControlAccount"), INCOME_FROM_FEES(
-                "incomeFromFeeAccount"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccount"), INTEREST_ON_SAVINGS(
-                "interestOnSavingsAccount"), PAYMENT_TYPE("paymentType"), FUND_SOURCE("fundSourceAccount"), 
-                TRANSFERS_SUSPENSE("transfersInSuspenseAccount"), PENALTY_INCOME_ACCOUNT_MAPPING("penaltyToIncomeAccountMappings"), CHARGE_ID("charge"), INCOME_ACCOUNT_ID(
-                "incomeAccount"),OVERDRAFT_PORTFOLIO_CONTROL("overdraftPortfolioControl"),INCOME_FROM_INTEREST("incomeFromInterest"),
-                LOSSES_WRITTEN_OFF("writeOffAccount");
+        SAVINGS_REFERENCE("savingsReferenceAccount"), SAVINGS_CONTROL("savingsControlAccount"), INCOME_FROM_FEES("incomeFromFeeAccount"), INCOME_FROM_PENALTIES(
+                "incomeFromPenaltyAccount"), INTEREST_ON_SAVINGS("interestOnSavingsAccount"), PAYMENT_TYPE("paymentType"), FUND_SOURCE(
+                "fundSourceAccount"), TRANSFERS_SUSPENSE("transfersInSuspenseAccount"), PENALTY_INCOME_ACCOUNT_MAPPING(
+                "penaltyToIncomeAccountMappings"), CHARGE_ID("charge"), INCOME_ACCOUNT_ID("incomeAccount"), OVERDRAFT_PORTFOLIO_CONTROL(
+                "overdraftPortfolioControl"), INCOME_FROM_INTEREST("incomeFromInterest"), LOSSES_WRITTEN_OFF("writeOffAccount");
 
         private final String value;
 
@@ -216,7 +212,6 @@ public class AccountingConstants {
             return this.value;
         }
     }
-
 
     public static final String ASSESTS_TAG_OPTION_CODE_NAME = "AssetAccountTags";
     public static final String LIABILITIES_TAG_OPTION_CODE_NAME = "LiabilityAccountTags";

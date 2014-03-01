@@ -26,13 +26,13 @@ public class AdHocQuerySearchConditions {
     private final BigDecimal maxOutstandingAmount;
     private final BigDecimal outstandingAmount;
 
-    public static AdHocQuerySearchConditions instance(final List<String> loanStatus,
-            final List<Long> loanProducts, final List<Long> offices, final String loanDateOption, final LocalDate loanFromDate,
-            final LocalDate loanToDate, final Boolean includeOutStandingAmountPercentage,
-            final String outStandingAmountPercentageCondition, final BigDecimal minOutStandingAmountPercentage,
-            final BigDecimal maxOutStandingAmountPercentage, final BigDecimal outStandingAmountPercentage,
-            final Boolean includeOutstandingAmountParamName, final String outstandingAmountCondition,
-            final BigDecimal minOutstandingAmount, final BigDecimal maxOutstandingAmount, final BigDecimal outstandingAmount) {
+    public static AdHocQuerySearchConditions instance(final List<String> loanStatus, final List<Long> loanProducts,
+            final List<Long> offices, final String loanDateOption, final LocalDate loanFromDate, final LocalDate loanToDate,
+            final Boolean includeOutStandingAmountPercentage, final String outStandingAmountPercentageCondition,
+            final BigDecimal minOutStandingAmountPercentage, final BigDecimal maxOutStandingAmountPercentage,
+            final BigDecimal outStandingAmountPercentage, final Boolean includeOutstandingAmountParamName,
+            final String outstandingAmountCondition, final BigDecimal minOutstandingAmount, final BigDecimal maxOutstandingAmount,
+            final BigDecimal outstandingAmount) {
 
         return new AdHocQuerySearchConditions(loanStatus, loanProducts, offices, loanDateOption, loanFromDate, loanToDate,
                 includeOutStandingAmountPercentage, outStandingAmountPercentageCondition, minOutStandingAmountPercentage,
@@ -41,8 +41,8 @@ public class AdHocQuerySearchConditions {
 
     }
 
-    public AdHocQuerySearchConditions(final List<String> loanStatus, final List<Long> loanProducts,
-            final List<Long> offices, final String loanDateOption, final LocalDate loanFromDate, final LocalDate loanToDate,
+    public AdHocQuerySearchConditions(final List<String> loanStatus, final List<Long> loanProducts, final List<Long> offices,
+            final String loanDateOption, final LocalDate loanFromDate, final LocalDate loanToDate,
             final Boolean includeOutStandingAmountPercentage, final String outStandingAmountPercentageCondition,
             final BigDecimal minOutStandingAmountPercentage, final BigDecimal maxOutStandingAmountPercentage,
             final BigDecimal outStandingAmountPercentage, final Boolean includeOutstandingAmount, final String outstandingAmountCondition,
@@ -93,7 +93,8 @@ public class AdHocQuerySearchConditions {
                 }
 
                 if (statusCode.equalsIgnoreCase("arrears")) {
-                    //TODO - No status code is there for loans which are in active bad standing
+                    // TODO - No status code is there for loans which are in
+                    // active bad standing
                 }
 
                 if (statusCode.equalsIgnoreCase("all")) {

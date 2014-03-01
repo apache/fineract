@@ -314,13 +314,13 @@ public class LoanEnumerations {
         }
         return optionData;
     }
-    
+
     public static EnumOptionData status(final LoanStatusEnumData status) {
-        
+
         Long id = status.id();
         String code = status.code();
         String value = status.value();
-        
+
         return new EnumOptionData(id, code, value);
     }
 
@@ -381,7 +381,7 @@ public class LoanEnumerations {
 
         return optionData;
     }
-    
+
     public static EnumOptionData loanCycleValueConditionType(final int id) {
         return loanCycleValueConditionType(LoanProductValueConditionType.fromInt(id));
     }
@@ -390,14 +390,16 @@ public class LoanEnumerations {
         EnumOptionData optionData = null;
         switch (type) {
             case EQUAL:
-                optionData = new EnumOptionData(LoanProductValueConditionType.EQUAL.getValue().longValue(), LoanProductValueConditionType.EQUAL.getCode(), "equals");
+                optionData = new EnumOptionData(LoanProductValueConditionType.EQUAL.getValue().longValue(),
+                        LoanProductValueConditionType.EQUAL.getCode(), "equals");
             break;
             case GRETERTHAN:
-                optionData = new EnumOptionData(LoanProductValueConditionType.GRETERTHAN.getValue().longValue(), LoanProductValueConditionType.GRETERTHAN.getCode(), "greter than");
+                optionData = new EnumOptionData(LoanProductValueConditionType.GRETERTHAN.getValue().longValue(),
+                        LoanProductValueConditionType.GRETERTHAN.getCode(), "greter than");
             break;
             default:
-                optionData = new EnumOptionData(LoanProductValueConditionType.INVALID.getValue().longValue(), LoanProductValueConditionType.INVALID.getCode(),
-                        "Invalid");
+                optionData = new EnumOptionData(LoanProductValueConditionType.INVALID.getValue().longValue(),
+                        LoanProductValueConditionType.INVALID.getCode(), "Invalid");
             break;
         }
         return optionData;
@@ -411,22 +413,25 @@ public class LoanEnumerations {
         EnumOptionData optionData = null;
         switch (type) {
             case PRINCIPAL:
-                optionData = new EnumOptionData(LoanProductParamType.PRINCIPAL.getValue().longValue(), LoanProductParamType.PRINCIPAL.getCode(), "principal");
+                optionData = new EnumOptionData(LoanProductParamType.PRINCIPAL.getValue().longValue(),
+                        LoanProductParamType.PRINCIPAL.getCode(), "principal");
             break;
             case INTERESTRATE:
-                optionData = new EnumOptionData(LoanProductParamType.INTERESTRATE.getValue().longValue(),LoanProductParamType.INTERESTRATE.getCode(), "Interest rate");
+                optionData = new EnumOptionData(LoanProductParamType.INTERESTRATE.getValue().longValue(),
+                        LoanProductParamType.INTERESTRATE.getCode(), "Interest rate");
             break;
             case REPAYMENT:
-                optionData = new EnumOptionData(LoanProductParamType.REPAYMENT.getValue().longValue(),LoanProductParamType.REPAYMENT.getCode(), "repayment");
+                optionData = new EnumOptionData(LoanProductParamType.REPAYMENT.getValue().longValue(),
+                        LoanProductParamType.REPAYMENT.getCode(), "repayment");
             break;
             default:
-                optionData = new EnumOptionData(LoanProductParamType.INVALID.getValue().longValue(), LoanProductParamType.INVALID.getCode(),
-                        "Invalid");
+                optionData = new EnumOptionData(LoanProductParamType.INVALID.getValue().longValue(),
+                        LoanProductParamType.INVALID.getCode(), "Invalid");
             break;
         }
         return optionData;
     }
-    
+
     public static EnumOptionData loanvariationType(final int id) {
         return loanvariationType(LoanTermVariationType.fromInt(id));
     }
@@ -435,16 +440,15 @@ public class LoanEnumerations {
         EnumOptionData optionData = null;
         switch (type) {
             case EMI_AMOUNT:
-                optionData = new EnumOptionData(LoanTermVariationType.EMI_AMOUNT.getValue().longValue(), LoanTermVariationType.EMI_AMOUNT.getCode(), "emiAmount");
+                optionData = new EnumOptionData(LoanTermVariationType.EMI_AMOUNT.getValue().longValue(),
+                        LoanTermVariationType.EMI_AMOUNT.getCode(), "emiAmount");
             break;
             default:
-                optionData = new EnumOptionData(LoanTermVariationType.INVALID.getValue().longValue(), LoanTermVariationType.INVALID.getCode(),
-                        "Invalid");
+                optionData = new EnumOptionData(LoanTermVariationType.INVALID.getValue().longValue(),
+                        LoanTermVariationType.INVALID.getCode(), "Invalid");
             break;
         }
         return optionData;
     }
-
-
 
 }

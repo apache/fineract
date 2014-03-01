@@ -40,7 +40,7 @@ public enum CalendarFrequencyType {
             intToEnumMap.put(type.value, type);
         }
     }
-    
+
     public static CalendarFrequencyType fromInt(final int i) {
         final CalendarFrequencyType type = intToEnumMap.get(Integer.valueOf(i));
         return type;
@@ -63,7 +63,7 @@ public enum CalendarFrequencyType {
 
         return frequency;
     }
-    
+
     public static int getMinValue() {
         return minValue;
     }
@@ -76,12 +76,12 @@ public enum CalendarFrequencyType {
     public String toString() {
         return name().toString();
     }
-    
-    public boolean isWeekly(){
+
+    public boolean isWeekly() {
         return this.value.equals(CalendarFrequencyType.WEEKLY.value);
     }
-    
-    public boolean isInvalid(){
+
+    public boolean isInvalid() {
         return this.value.equals(CalendarFrequencyType.INVALID.value);
     }
 }
