@@ -275,12 +275,10 @@ public final class LoanSummary {
         this.totalOutstanding = totalOutstanding.getAmount();
     }
 
-    
     public BigDecimal getTotalPrincipalDisbursed() {
         return this.totalPrincipalDisbursed;
     }
 
-    
     public BigDecimal getTotalPrincipalRepaid() {
         return this.totalPrincipalRepaid;
     }

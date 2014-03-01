@@ -73,9 +73,11 @@ public class SavingsProductChargeAssembler {
                             savingsChargeElement, locale);
                     final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, savingsChargeElement,
                             dateFormat, locale);
-                    final MonthDay feeOnMonthDay = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, savingsChargeElement);
-                    final Integer feeInterval = this.fromApiJsonHelper.extractIntegerNamed(feeIntervalParamName, savingsChargeElement, locale);
-                    
+                    final MonthDay feeOnMonthDay = this.fromApiJsonHelper
+                            .extractMonthDayNamed(feeOnMonthDayParamName, savingsChargeElement);
+                    final Integer feeInterval = this.fromApiJsonHelper.extractIntegerNamed(feeIntervalParamName, savingsChargeElement,
+                            locale);
+
                     if (id == null) {
                         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeId);
                         final ChargeTimeType chargeTime = null;

@@ -14,24 +14,29 @@ public class SmsMessageEnumerations {
     }
 
     public static EnumOptionData status(final SmsMessageStatusType status) {
-        EnumOptionData optionData = new EnumOptionData(SmsMessageStatusType.INVALID.getValue().longValue(), SmsMessageStatusType.INVALID.getCode(),
-                "Invalid");
+        EnumOptionData optionData = new EnumOptionData(SmsMessageStatusType.INVALID.getValue().longValue(),
+                SmsMessageStatusType.INVALID.getCode(), "Invalid");
         switch (status) {
             case INVALID:
-                optionData = new EnumOptionData(SmsMessageStatusType.INVALID.getValue().longValue(), SmsMessageStatusType.INVALID.getCode(), "Invalid");
+                optionData = new EnumOptionData(SmsMessageStatusType.INVALID.getValue().longValue(),
+                        SmsMessageStatusType.INVALID.getCode(), "Invalid");
             break;
             case PENDING:
-                optionData = new EnumOptionData(SmsMessageStatusType.PENDING.getValue().longValue(), SmsMessageStatusType.PENDING.getCode(), "Pending");
+                optionData = new EnumOptionData(SmsMessageStatusType.PENDING.getValue().longValue(),
+                        SmsMessageStatusType.PENDING.getCode(), "Pending");
             break;
             case SENT:
-                optionData = new EnumOptionData(SmsMessageStatusType.SENT.getValue().longValue(), SmsMessageStatusType.SENT.getCode(), "Sent");
-                break;
+                optionData = new EnumOptionData(SmsMessageStatusType.SENT.getValue().longValue(), SmsMessageStatusType.SENT.getCode(),
+                        "Sent");
+            break;
             case DELIVERED:
-                optionData = new EnumOptionData(SmsMessageStatusType.DELIVERED.getValue().longValue(), SmsMessageStatusType.DELIVERED.getCode(), "Delivered");
-                break;
+                optionData = new EnumOptionData(SmsMessageStatusType.DELIVERED.getValue().longValue(),
+                        SmsMessageStatusType.DELIVERED.getCode(), "Delivered");
+            break;
             case FAILED:
-                optionData = new EnumOptionData(SmsMessageStatusType.FAILED.getValue().longValue(), SmsMessageStatusType.FAILED.getCode(), "Failed");
-                break;
+                optionData = new EnumOptionData(SmsMessageStatusType.FAILED.getValue().longValue(), SmsMessageStatusType.FAILED.getCode(),
+                        "Failed");
+            break;
 
         }
 

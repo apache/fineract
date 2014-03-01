@@ -97,7 +97,7 @@ public class SavingsAccountsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
             @QueryParam("externalId") final String externalId,
-//            @QueryParam("underHierarchy") final String hierarchy,
+            // @QueryParam("underHierarchy") final String hierarchy,
             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
             @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
 

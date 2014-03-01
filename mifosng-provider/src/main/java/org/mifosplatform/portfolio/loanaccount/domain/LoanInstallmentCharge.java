@@ -53,12 +53,11 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
     @Column(name = "waived", nullable = false)
     private boolean waived = false;
 
-
     public LoanInstallmentCharge() {
         // TODO Auto-generated constructor stub
     }
 
-    public LoanInstallmentCharge(final BigDecimal amount,final LoanCharge loanCharge,final LoanRepaymentScheduleInstallment installment) {
+    public LoanInstallmentCharge(final BigDecimal amount, final LoanCharge loanCharge, final LoanRepaymentScheduleInstallment installment) {
         this.loancharge = loanCharge;
         this.installment = installment;
         this.amount = amount;
@@ -68,13 +67,12 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
         this.amountWrittenOff = null;
     }
 
-    public void copyFrom(final LoanInstallmentCharge loanChargePerInstallment){
+    public void copyFrom(final LoanInstallmentCharge loanChargePerInstallment) {
         this.amount = loanChargePerInstallment.amount;
         this.installment = loanChargePerInstallment.installment;
         this.amountOutstanding = calculateOutstanding();
         this.paid = determineIfFullyPaid();
     }
-
 
     public Money waive(final MonetaryCurrency currency) {
         this.amountWaived = this.amountOutstanding;
@@ -84,22 +82,17 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
         return getAmountWaived(currency);
     }
 
-
     public Money getAmountWaived(final MonetaryCurrency currency) {
         return Money.of(currency, this.amountWaived);
     }
 
     private boolean determineIfFullyPaid() {
-        if(this.amount == null){
-            return true;
-        }
+        if (this.amount == null) { return true; }
         return BigDecimal.ZERO.compareTo(calculateOutstanding()) == 0;
     }
 
     private BigDecimal calculateOutstanding() {
-        if(this.amount == null){
-            return null;
-        }
+        if (this.amount == null) { return null; }
         BigDecimal amountPaidLocal = BigDecimal.ZERO;
         if (this.amountPaid != null) {
             amountPaidLocal = this.amountPaid;
@@ -119,7 +112,6 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
 
         return this.amount.subtract(totalAccountedFor);
     }
-
 
     public BigDecimal getAmount() {
         return this.amount;
@@ -141,7 +133,6 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
         return getAmount(currency).minus(getAmountWaived(currency)).minus(getAmountPaid(currency)).getAmount();
     }
 
-
     public boolean isPaid() {
         return this.paid;
     }
@@ -150,10 +141,9 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
         return this.waived;
     }
 
-    public boolean isPending(){
+    public boolean isPending() {
         return !(isPaid() || isWaived());
     }
-
 
     public LoanRepaymentScheduleInstallment getRepaymentInstallment() {
         return this.installment;
@@ -182,7 +172,6 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
         return amountPaidOnThisCharge;
     }
 
-
     public Money getAmountWrittenOff(final MonetaryCurrency currency) {
         return Money.of(currency, this.amountWrittenOff);
     }
@@ -201,7 +190,6 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
         this.paid = false;
         this.waived = false;
     }
-
 
     public Money getAmountThroughChargePayment(final MonetaryCurrency currency) {
         return Money.of(currency, this.amountThroughChargePayment);

@@ -59,17 +59,14 @@ public class LoanProductTrancheDetails {
         }
     }
 
-    
     public boolean isMultiDisburseLoan() {
         return this.multiDisburseLoan;
     }
 
-    
     public BigDecimal outstandingLoanBalance() {
         return this.outstandingLoanBalance;
     }
 
-    
     public Integer maxTrancheCount() {
         return this.maxTrancheCount;
     }

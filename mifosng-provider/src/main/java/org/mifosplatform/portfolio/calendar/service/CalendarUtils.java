@@ -286,17 +286,17 @@ public class CalendarUtils {
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         return recur.getInterval();
     }
-    
-    public static CalendarFrequencyType getFrequency(final String recurringRule){
+
+    public static CalendarFrequencyType getFrequency(final String recurringRule) {
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         return CalendarFrequencyType.fromString(recur.getFrequency());
     }
-    
-    public static CalendarWeekDaysType getRepeatsOnDay(final String recurringRule){
+
+    public static CalendarWeekDaysType getRepeatsOnDay(final String recurringRule) {
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         final WeekDayList weekDays = recur.getDayList();
-        if(weekDays.isEmpty()) return CalendarWeekDaysType.INVALID;
-        //supports only one day        
+        if (weekDays.isEmpty()) return CalendarWeekDaysType.INVALID;
+        // supports only one day
         WeekDay weekDay = (WeekDay) weekDays.get(0);
         return CalendarWeekDaysType.fromString(weekDay.getDay());
     }

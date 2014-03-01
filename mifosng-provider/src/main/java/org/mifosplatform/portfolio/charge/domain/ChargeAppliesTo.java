@@ -5,7 +5,6 @@
  */
 package org.mifosplatform.portfolio.charge.domain;
 
-
 public enum ChargeAppliesTo {
 
     INVALID(0, "chargeAppliesTo.invalid"), //
@@ -57,6 +56,6 @@ public enum ChargeAppliesTo {
     }
 
     public static Object[] validValues() {
-        return new Object[] {ChargeAppliesTo.LOAN.getValue(), ChargeAppliesTo.SAVINGS.getValue()};
+        return new Object[] { ChargeAppliesTo.LOAN.getValue(), ChargeAppliesTo.SAVINGS.getValue() };
     }
 }

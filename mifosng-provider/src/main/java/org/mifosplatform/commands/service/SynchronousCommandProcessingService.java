@@ -362,11 +362,11 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else if (wrapper.isPayLoanCharge()) {
                 handler = this.applicationContext.getBean("payLoanChargeCommandHandler", NewCommandSourceHandler.class);
             }
-        } else if(wrapper.isLoanDisburseDetailResource()){
-            if(wrapper.isUpdateDisbursementDate()){
+        } else if (wrapper.isLoanDisburseDetailResource()) {
+            if (wrapper.isUpdateDisbursementDate()) {
                 handler = this.applicationContext.getBean("updateLoanDisbuseDateCommandHandler", NewCommandSourceHandler.class);
             }
-        }else if (wrapper.isGLAccountResource()) {
+        } else if (wrapper.isGLAccountResource()) {
             if (wrapper.isCreate()) {
                 handler = this.applicationContext.getBean("createGLAccountCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdate()) {
@@ -391,9 +391,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = this.applicationContext.getBean("createJournalEntryCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isRevertJournalEntry()) {
                 handler = this.applicationContext.getBean("reverseJournalEntryCommandHandler", NewCommandSourceHandler.class);
-            }else if(wrapper.isUpdateRunningbalance()){
+            } else if (wrapper.isUpdateRunningbalance()) {
                 handler = this.applicationContext.getBean("updateRunningBalanceCommandHandler", NewCommandSourceHandler.class);
-            }else {
+            } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
         } else if (wrapper.isSavingsProductResource()) {
@@ -435,9 +435,12 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = this.applicationContext.getBean("calculateInterestSavingsAccountCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isSavingsAccountInterestPosting()) {
                 handler = this.applicationContext.getBean("postInterestSavingsAccountCommandHandler", NewCommandSourceHandler.class);
-            } /*else if (wrapper.isSavingsAccountApplyAnnualFee()) {
-                handler = this.applicationContext.getBean("applyAnnualFeeSavingsAccountCommandHandler", NewCommandSourceHandler.class);
-            } */else if (wrapper.isSavingsAccountUndoTransaction()) {
+            } /*
+               * else if (wrapper.isSavingsAccountApplyAnnualFee()) { handler =
+               * this.applicationContext.getBean(
+               * "applyAnnualFeeSavingsAccountCommandHandler",
+               * NewCommandSourceHandler.class); }
+               */else if (wrapper.isSavingsAccountUndoTransaction()) {
                 handler = this.applicationContext.getBean("undoTransactionSavingsAccountCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isAdjustSavingsAccountTransaction()) {
                 handler = this.applicationContext.getBean("savingsTransactionAdjustmentCommandHandler", NewCommandSourceHandler.class);

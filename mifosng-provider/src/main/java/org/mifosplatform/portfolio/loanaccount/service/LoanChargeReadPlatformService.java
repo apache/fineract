@@ -20,6 +20,6 @@ public interface LoanChargeReadPlatformService {
     LoanChargeData retrieveLoanChargeDetails(Long loanChargeId, Long loanId);
 
     Collection<LoanChargeData> retrieveLoanChargesForFeePayment(Integer paymentMode, Integer loanStatus);
-    
-    Collection<LoanInstallmentChargeData> retrieveInstallmentLoanCharges(Long loanChargeId,boolean onlyPaymentPendingCharges);
+
+    Collection<LoanInstallmentChargeData> retrieveInstallmentLoanCharges(Long loanChargeId, boolean onlyPaymentPendingCharges);
 }

@@ -122,7 +122,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
             if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
-                baseDataValidator.reset().parameter("externalId").value(newRepaymentTransaction.getExternalId()).failWithCode("value.must.be.unique");
+                baseDataValidator.reset().parameter("externalId").value(newRepaymentTransaction.getExternalId())
+                        .failWithCode("value.must.be.unique");
             }
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                     "Validation errors exist.", dataValidationErrors); }
@@ -135,13 +136,13 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
          * only in edge cases (when a payment is made before the latest payment
          * recorded against the loan)
          ***/
-        
+
         this.loanRepository.saveAndFlush(loan);
 
         if (changedTransactionDetail != null) {
             for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                 this.loanTransactionRepository.save(mapEntry.getValue());
-                //update loan with references to the newly created transactions
+                // update loan with references to the newly created transactions
                 loan.getLoanTransactions().add(mapEntry.getValue());
                 updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
@@ -187,7 +188,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             loan.handlePayDisbursementTransaction(chargeId, newPaymentTransaction, existingTransactionIds, existingReversedTransactionIds);
         } else {
             loan.makeChargePayment(chargeId, defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds,
-                    allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay, newPaymentTransaction, installmentNumber);
+                    allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay, newPaymentTransaction,
+                    installmentNumber);
         }
         this.loanTransactionRepository.save(newPaymentTransaction);
         this.loanRepository.saveAndFlush(loan);

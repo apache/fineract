@@ -59,7 +59,7 @@ public class CommandWrapperBuilder {
         this.entityName = "CONFIGURATION";
         this.entityId = configId;
 
-        this.href = "/configurations/"+configId;
+        this.href = "/configurations/" + configId;
         return this;
     }
 
@@ -574,7 +574,7 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId + "/transactions/template?command=writeoff";
         return this;
     }
-    
+
     public CommandWrapperBuilder undoWriteOffLoanTransaction(final Long loanId) {
         this.actionName = "UNDOWRITEOFF";
         this.entityName = "LOAN";
@@ -583,7 +583,6 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId + "/transactions/template?command=undowriteoff";
         return this;
     }
-
 
     public CommandWrapperBuilder closeLoanAsRescheduledTransaction(final Long loanId) {
         this.actionName = "CLOSEASRESCHEDULED";
@@ -629,8 +628,8 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId;
         return this;
     }
-    
-    public CommandWrapperBuilder updateDisbusementDate(final Long loanId,final Long disbursementId) {
+
+    public CommandWrapperBuilder updateDisbusementDate(final Long loanId, final Long disbursementId) {
         this.actionName = "UPDATE";
         this.entityName = "DISBURSEMENTDETAIL";
         this.entityId = disbursementId;
@@ -638,7 +637,6 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId + "/disbursementdetail/" + disbursementId;
         return this;
     }
-
 
     public CommandWrapperBuilder deleteLoanApplication(final Long loanId) {
         this.actionName = "DELETE";
@@ -826,7 +824,6 @@ public class CommandWrapperBuilder {
         this.href = "/journalentries/update";
         return this;
     }
-
 
     public CommandWrapperBuilder createSavingProduct() {
         this.actionName = "CREATE";
@@ -1332,7 +1329,7 @@ public class CommandWrapperBuilder {
         this.href = "/holidays/template";
         return this;
     }
-    
+
     public CommandWrapperBuilder activateHoliday(final Long holidayId) {
         this.actionName = "ACTIVATE";
         this.entityName = "HOLIDAY";
@@ -1340,15 +1337,15 @@ public class CommandWrapperBuilder {
         this.href = "/holidays/" + holidayId + "command=activate";
         return this;
     }
-    
+
     public CommandWrapperBuilder updateHoliday(final Long holidayId) {
         this.actionName = "UPDATE";
         this.entityName = "HOLIDAY";
         this.entityId = holidayId;
-        this.href = "/holidays/" + holidayId ;
+        this.href = "/holidays/" + holidayId;
         return this;
     }
-    
+
     public CommandWrapperBuilder deleteHoliday(final Long holidayId) {
         this.actionName = "DELETE";
         this.entityName = "HOLIDAY";

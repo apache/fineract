@@ -58,7 +58,7 @@ public class SearchData {
     public String getParentName() {
         return this.parentName;
     }
-    
+
     public EnumOptionData getEntityStatus() {
         return this.entityStatus;
     }

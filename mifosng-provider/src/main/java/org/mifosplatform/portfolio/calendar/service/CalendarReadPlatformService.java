@@ -34,7 +34,7 @@ public interface CalendarReadPlatformService {
     CalendarData retrieveLoanCalendar(final Long loanId);
 
     CalendarData retrieveCollctionCalendarByEntity(final Long entityId, final Integer entityTypeId);
-    
+
     LocalDate generateNextEligibleMeetingDateForCollection(CalendarData calendarData, MeetingData lastMeetingData);
 
 }

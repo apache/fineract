@@ -135,7 +135,6 @@ public class ClientsApiResource {
             clientData = ClientData.templateOnTop(clientData, templateData);
         }
 
-
         return this.toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
     }
 

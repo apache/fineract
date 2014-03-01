@@ -35,7 +35,6 @@ public class GLAccountData {
     private final CodeValueData tagId;
     private final Long organizationRunningBalance;
 
-
     // templates
     final List<EnumOptionData> accountTypeOptions;
     final List<EnumOptionData> usageOptions;
@@ -52,7 +51,7 @@ public class GLAccountData {
 
     public GLAccountData(final Long id, final String name, final Long parentId, final String glCode, final boolean disabled,
             final boolean manualEntriesAllowed, final EnumOptionData type, final EnumOptionData usage, final String description,
-            final String nameDecorated, final CodeValueData tagId,final Long organizationRunningBalance) {
+            final String nameDecorated, final CodeValueData tagId, final Long organizationRunningBalance) {
         this.id = id;
         this.name = name;
         this.parentId = parentId;
@@ -97,7 +96,7 @@ public class GLAccountData {
         this.description = accountData.description;
         this.nameDecorated = accountData.nameDecorated;
         this.tagId = accountData.tagId;
-        this.organizationRunningBalance =  accountData.organizationRunningBalance;
+        this.organizationRunningBalance = accountData.organizationRunningBalance;
         this.accountTypeOptions = accountTypeOptions;
         this.usageOptions = usageOptions;
         this.assetHeaderAccountOptions = assetHeaderAccountOptions;
@@ -131,7 +130,8 @@ public class GLAccountData {
         final CodeValueData tagId = null;
         final Long organizationRunningBalance = null;
 
-        return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, type, usage, description, nameDecorated, tagId,organizationRunningBalance);
+        return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, type, usage, description, nameDecorated,
+                tagId, organizationRunningBalance);
     }
 
     public GLAccountData(final Long id, final String name, final String glCode) {

@@ -72,7 +72,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     private final SavingsAccountTransactionTemplateMapper transactionTemplateMapper;
     private final SavingsAccountTransactionsMapper transactionsMapper;
     private final SavingAccountMapper savingAccountMapper;
-    //private final SavingsAccountAnnualFeeMapper annualFeeMapper;
+    // private final SavingsAccountAnnualFeeMapper annualFeeMapper;
 
     // pagination
     private final PaginationHelper<SavingsAccountData> paginationHelper = new PaginationHelper<SavingsAccountData>();
@@ -93,7 +93,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         this.transactionTemplateMapper = new SavingsAccountTransactionTemplateMapper();
         this.transactionsMapper = new SavingsAccountTransactionsMapper();
         this.savingAccountMapper = new SavingAccountMapper();
-        //this.annualFeeMapper = new SavingsAccountAnnualFeeMapper();
+        // this.annualFeeMapper = new SavingsAccountAnnualFeeMapper();
         this.chargeReadPlatformService = chargeReadPlatformService;
     }
 
@@ -220,15 +220,15 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.min_required_opening_balance as minRequiredOpeningBalance, ");
             sqlBuilder.append("sa.lockin_period_frequency as lockinPeriodFrequency,");
             sqlBuilder.append("sa.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
-//            sqlBuilder.append("sa.withdrawal_fee_amount as withdrawalFeeAmount,");
-//            sqlBuilder.append("sa.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
+            // sqlBuilder.append("sa.withdrawal_fee_amount as withdrawalFeeAmount,");
+            // sqlBuilder.append("sa.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
             sqlBuilder.append("sa.withdrawal_fee_for_transfer as withdrawalFeeForTransfers, ");
             sqlBuilder.append("sa.allow_overdraft as allowOverdraft, ");
             sqlBuilder.append("sa.overdraft_limit as overdraftLimit, ");
-//            sqlBuilder.append("sa.annual_fee_amount as annualFeeAmount,");
-//            sqlBuilder.append("sa.annual_fee_on_month as annualFeeOnMonth, ");
-//            sqlBuilder.append("sa.annual_fee_on_day as annualFeeOnDay, ");
-//            sqlBuilder.append("sa.annual_fee_next_due_date as annualFeeNextDueDate, ");
+            // sqlBuilder.append("sa.annual_fee_amount as annualFeeAmount,");
+            // sqlBuilder.append("sa.annual_fee_on_month as annualFeeOnMonth, ");
+            // sqlBuilder.append("sa.annual_fee_on_day as annualFeeOnDay, ");
+            // sqlBuilder.append("sa.annual_fee_next_due_date as annualFeeNextDueDate, ");
             sqlBuilder.append("sa.total_deposits_derived as totalDeposits, ");
             sqlBuilder.append("sa.total_withdrawals_derived as totalWithdrawals, ");
             sqlBuilder.append("sa.total_withdrawal_fees_derived as totalWithdrawalFees, ");
@@ -351,30 +351,37 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 lockinPeriodFrequencyType = SavingsEnumerations.lockinPeriodFrequencyType(lockinPeriodType);
             }
 
-            /*final BigDecimal withdrawalFeeAmount = rs.getBigDecimal("withdrawalFeeAmount");
-
-            EnumOptionData withdrawalFeeType = null;
-            final Integer withdrawalFeeTypeValue = JdbcSupport.getInteger(rs, "withdrawalFeeTypeEnum");
-            if (withdrawalFeeTypeValue != null) {
-                withdrawalFeeType = SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue);
-            }*/
+            /*
+             * final BigDecimal withdrawalFeeAmount =
+             * rs.getBigDecimal("withdrawalFeeAmount");
+             * 
+             * EnumOptionData withdrawalFeeType = null; final Integer
+             * withdrawalFeeTypeValue = JdbcSupport.getInteger(rs,
+             * "withdrawalFeeTypeEnum"); if (withdrawalFeeTypeValue != null) {
+             * withdrawalFeeType =
+             * SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue); }
+             */
 
             final boolean withdrawalFeeForTransfers = rs.getBoolean("withdrawalFeeForTransfers");
-            
+
             final boolean allowOverdraft = rs.getBoolean("allowOverdraft");
             final BigDecimal overdraftLimit = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "overdraftLimit");
 
-            /*final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
-
-            MonthDay annualFeeOnMonthDay = null;
-            final Integer annualFeeOnMonth = JdbcSupport.getInteger(rs, "annualFeeOnMonth");
-            final Integer annualFeeOnDay = JdbcSupport.getInteger(rs, "annualFeeOnDay");
-            if (annualFeeAmount != null && annualFeeOnDay != null) {
-                annualFeeOnMonthDay = new MonthDay(annualFeeOnMonth, annualFeeOnDay);
-            }
-
-            final LocalDate annualFeeNextDueDate = JdbcSupport.getLocalDate(rs, "annualFeeNextDueDate");
-*/
+            /*
+             * final BigDecimal annualFeeAmount =
+             * JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,
+             * "annualFeeAmount");
+             * 
+             * MonthDay annualFeeOnMonthDay = null; final Integer
+             * annualFeeOnMonth = JdbcSupport.getInteger(rs,
+             * "annualFeeOnMonth"); final Integer annualFeeOnDay =
+             * JdbcSupport.getInteger(rs, "annualFeeOnDay"); if (annualFeeAmount
+             * != null && annualFeeOnDay != null) { annualFeeOnMonthDay = new
+             * MonthDay(annualFeeOnMonth, annualFeeOnDay); }
+             * 
+             * final LocalDate annualFeeNextDueDate =
+             * JdbcSupport.getLocalDate(rs, "annualFeeNextDueDate");
+             */
             final BigDecimal totalDeposits = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalDeposits");
             final BigDecimal totalWithdrawals = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalWithdrawals");
             final BigDecimal totalWithdrawalFees = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalWithdrawalFees");
@@ -393,7 +400,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             return SavingsAccountData.instance(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                     fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,allowOverdraft,overdraftLimit);
+                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, allowOverdraft, overdraftLimit);
         }
     }
 
@@ -543,7 +550,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     @Override
     public Collection<SavingsAccountTransactionData> retrieveAllTransactions(final Long savingsId) {
 
-        final String sql = "select " + this.transactionsMapper.schema() + " where sa.id = ? order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC";
+        final String sql = "select " + this.transactionsMapper.schema()
+                + " where sa.id = ? order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC";
 
         return this.jdbcTemplate.query(sql, this.transactionsMapper, new Object[] { savingsId });
     }
@@ -556,13 +564,16 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         return this.jdbcTemplate.queryForObject(sql, this.transactionsMapper, new Object[] { savingsId, transactionId });
     }
 
-    /*@Override
-    public Collection<SavingsAccountAnnualFeeData> retrieveAccountsWithAnnualFeeDue() {
-        final String sql = "select " + this.annualFeeMapper.schema()
-                + " where sa.annual_fee_next_due_date is not null and sa.annual_fee_next_due_date <= NOW()";
-
-        return this.jdbcTemplate.query(sql, this.annualFeeMapper, new Object[] {});
-    }*/
+    /*
+     * @Override public Collection<SavingsAccountAnnualFeeData>
+     * retrieveAccountsWithAnnualFeeDue() { final String sql = "select " +
+     * this.annualFeeMapper.schema() +
+     * " where sa.annual_fee_next_due_date is not null and sa.annual_fee_next_due_date <= NOW()"
+     * ;
+     * 
+     * return this.jdbcTemplate.query(sql, this.annualFeeMapper, new Object[]
+     * {}); }
+     */
 
     private static final class SavingsAccountTransactionsMapper implements RowMapper<SavingsAccountTransactionData> {
 
@@ -734,14 +745,14 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sp.min_required_opening_balance as minRequiredOpeningBalance, ");
             sqlBuilder.append("sp.lockin_period_frequency as lockinPeriodFrequency,");
             sqlBuilder.append("sp.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
-//            sqlBuilder.append("sp.withdrawal_fee_amount as withdrawalFeeAmount,");
-//            sqlBuilder.append("sp.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
+            // sqlBuilder.append("sp.withdrawal_fee_amount as withdrawalFeeAmount,");
+            // sqlBuilder.append("sp.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
             sqlBuilder.append("sp.withdrawal_fee_for_transfer as withdrawalFeeForTransfers, ");
             sqlBuilder.append("sp.allow_overdraft as allowOverdraft, ");
             sqlBuilder.append("sp.overdraft_limit as overdraftLimit ");
-//            sqlBuilder.append("sp.annual_fee_amount as annualFeeAmount,");
-//            sqlBuilder.append("sp.annual_fee_on_month as annualFeeOnMonth, ");
-//            sqlBuilder.append("sp.annual_fee_on_day as annualFeeOnDay ");
+            // sqlBuilder.append("sp.annual_fee_amount as annualFeeAmount,");
+            // sqlBuilder.append("sp.annual_fee_on_month as annualFeeOnMonth, ");
+            // sqlBuilder.append("sp.annual_fee_on_day as annualFeeOnDay ");
             sqlBuilder.append("from m_savings_product sp ");
             sqlBuilder.append("join m_currency curr on curr.code = sp.currency_code ");
 
@@ -793,27 +804,33 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 lockinPeriodFrequencyType = SavingsEnumerations.lockinPeriodFrequencyType(lockinPeriodType);
             }
 
-//            final BigDecimal withdrawalFeeAmount = rs.getBigDecimal("withdrawalFeeAmount");
+            // final BigDecimal withdrawalFeeAmount =
+            // rs.getBigDecimal("withdrawalFeeAmount");
 
-/*            EnumOptionData withdrawalFeeType = null;
-            final Integer withdrawalFeeTypeValue = JdbcSupport.getInteger(rs, "withdrawalFeeTypeEnum");
-            if (withdrawalFeeTypeValue != null) {
-                withdrawalFeeType = SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue);
-            }
-*/
+            /*
+             * EnumOptionData withdrawalFeeType = null; final Integer
+             * withdrawalFeeTypeValue = JdbcSupport.getInteger(rs,
+             * "withdrawalFeeTypeEnum"); if (withdrawalFeeTypeValue != null) {
+             * withdrawalFeeType =
+             * SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue); }
+             */
             final boolean withdrawalFeeForTransfers = rs.getBoolean("withdrawalFeeForTransfers");
-            
+
             final boolean allowOverdraft = rs.getBoolean("allowOverdraft");
             final BigDecimal overdraftLimit = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "overdraftLimit");
 
-            //final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
+            // final BigDecimal annualFeeAmount =
+            // JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,
+            // "annualFeeAmount");
 
-            /*MonthDay annualFeeOnMonthDay = null;
-            final Integer annualFeeOnMonth = JdbcSupport.getInteger(rs, "annualFeeOnMonth");
-            final Integer annualFeeOnDay = JdbcSupport.getInteger(rs, "annualFeeOnDay");
-            if (annualFeeAmount != null && annualFeeOnDay != null) {
-                annualFeeOnMonthDay = new MonthDay(annualFeeOnMonth, annualFeeOnDay);
-            }*/
+            /*
+             * MonthDay annualFeeOnMonthDay = null; final Integer
+             * annualFeeOnMonth = JdbcSupport.getInteger(rs,
+             * "annualFeeOnMonth"); final Integer annualFeeOnDay =
+             * JdbcSupport.getInteger(rs, "annualFeeOnDay"); if (annualFeeAmount
+             * != null && annualFeeOnDay != null) { annualFeeOnMonthDay = new
+             * MonthDay(annualFeeOnMonth, annualFeeOnDay); }
+             */
 
             Long clientId = null;
             String clientName = null;
@@ -832,7 +849,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final Long fieldOfficerId = null;
             final String fieldOfficerName = null;
             final SavingsAccountStatusEnumData status = null;
-//            final LocalDate annualFeeNextDueDate = null;
+            // final LocalDate annualFeeNextDueDate = null;
             final SavingsAccountSummaryData summary = null;
 
             final SavingsAccountApplicationTimelineData timeline = SavingsAccountApplicationTimelineData.templateDefault();
@@ -840,35 +857,35 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             return SavingsAccountData.instance(null, null, null, groupId, groupName, clientId, clientName, productId, productName,
                     fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualIterestRate, interestCompoundingPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,allowOverdraft,overdraftLimit);
+                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, allowOverdraft, overdraftLimit);
         }
     }
 
-    /*private static final class SavingsAccountAnnualFeeMapper implements RowMapper<SavingsAccountAnnualFeeData> {
-
-        private final String schemaSql;
-
-        public SavingsAccountAnnualFeeMapper() {
-            final StringBuilder sqlBuilder = new StringBuilder(200);
-            sqlBuilder.append("sa.id as id, sa.account_no as accountNo, ");
-            sqlBuilder.append("sa.annual_fee_next_due_date as annualFeeNextDueDate ");
-            sqlBuilder.append("from m_savings_account sa ");
-
-            this.schemaSql = sqlBuilder.toString();
-        }
-
-        public String schema() {
-            return this.schemaSql;
-        }
-
-        @Override
-        public SavingsAccountAnnualFeeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = rs.getLong("id");
-            final String accountNo = rs.getString("accountNo");
-            final LocalDate annualFeeNextDueDate = JdbcSupport.getLocalDate(rs, "annualFeeNextDueDate");
-
-            return SavingsAccountAnnualFeeData.instance(id, accountNo, annualFeeNextDueDate);
-        }
-    }*/
+    /*
+     * private static final class SavingsAccountAnnualFeeMapper implements
+     * RowMapper<SavingsAccountAnnualFeeData> {
+     * 
+     * private final String schemaSql;
+     * 
+     * public SavingsAccountAnnualFeeMapper() { final StringBuilder sqlBuilder =
+     * new StringBuilder(200);
+     * sqlBuilder.append("sa.id as id, sa.account_no as accountNo, ");
+     * sqlBuilder
+     * .append("sa.annual_fee_next_due_date as annualFeeNextDueDate ");
+     * sqlBuilder.append("from m_savings_account sa ");
+     * 
+     * this.schemaSql = sqlBuilder.toString(); }
+     * 
+     * public String schema() { return this.schemaSql; }
+     * 
+     * @Override public SavingsAccountAnnualFeeData mapRow(final ResultSet rs,
+     * @SuppressWarnings("unused") final int rowNum) throws SQLException {
+     * 
+     * final Long id = rs.getLong("id"); final String accountNo =
+     * rs.getString("accountNo"); final LocalDate annualFeeNextDueDate =
+     * JdbcSupport.getLocalDate(rs, "annualFeeNextDueDate");
+     * 
+     * return SavingsAccountAnnualFeeData.instance(id, accountNo,
+     * annualFeeNextDueDate); } }
+     */
 }

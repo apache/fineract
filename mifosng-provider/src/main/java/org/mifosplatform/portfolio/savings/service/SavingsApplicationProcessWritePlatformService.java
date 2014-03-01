@@ -24,6 +24,6 @@ public interface SavingsApplicationProcessWritePlatformService {
     CommandProcessingResult rejectApplication(Long savingsId, JsonCommand command);
 
     CommandProcessingResult applicantWithdrawsFromApplication(Long savingsId, JsonCommand command);
-    
+
     CommandProcessingResult createActiveApplication(SavingsAccountDataDTO savingsAccountDataDTO);
 }

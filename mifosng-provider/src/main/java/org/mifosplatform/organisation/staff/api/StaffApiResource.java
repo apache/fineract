@@ -78,7 +78,7 @@ public class StaffApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveStaff(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
             @QueryParam("officeId") final Long officeId,
-            @DefaultValue("false") @QueryParam("staffInOfficeHierarchy") final boolean staffInOfficeHierarchy, 
+            @DefaultValue("false") @QueryParam("staffInOfficeHierarchy") final boolean staffInOfficeHierarchy,
             @DefaultValue("false") @QueryParam("loanOfficersOnly") final boolean loanOfficersOnly,
             @DefaultValue("active") @QueryParam("status") final String status) {
 
@@ -121,7 +121,7 @@ public class StaffApiResource {
         if (settings.isTemplate()) {
             final Collection<OfficeData> allowedOffices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
             staff = StaffData.templateData(staff, allowedOffices);
-        }        
+        }
         return this.toApiJsonSerializer.serialize(settings, staff, this.RESPONSE_DATA_PARAMETERS);
     }
 

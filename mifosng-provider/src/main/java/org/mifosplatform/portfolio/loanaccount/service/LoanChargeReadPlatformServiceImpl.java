@@ -160,7 +160,8 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
     @Override
     public Collection<LoanChargeData> retrieveLoanChargesForFeePayment(final Integer paymentMode, final Integer loanStatus) {
         final LoanChargeMapperWithLoanId rm = new LoanChargeMapperWithLoanId();
-        final String sql = "select " + rm.schema()
+        final String sql = "select "
+                + rm.schema()
                 + "where loan.loan_status_id= ? and lc.charge_payment_mode_enum=? and lc.waived =0 and lc.is_paid_derived=0 and lc.is_active = 1";
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanStatus, paymentMode });
     }
@@ -169,11 +170,8 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
         public String schema() {
             return "lc.id as id, lc.due_for_collection_as_of_date as dueAsOfDate, "
-                    + "lc.amount_outstanding_derived as amountOutstanding, "
-                    + "lc.charge_time_enum as chargeTime, "
-                    + "loan.id as loanId " 
-                    + "from  m_loan_charge lc "
-                    + "join m_loan loan on loan.id = lc.loan_id ";
+                    + "lc.amount_outstanding_derived as amountOutstanding, " + "lc.charge_time_enum as chargeTime, " + "loan.id as loanId "
+                    + "from  m_loan_charge lc " + "join m_loan loan on loan.id = lc.loan_id ";
         }
 
         @Override
@@ -185,18 +183,17 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final BigDecimal amountOutstanding = rs.getBigDecimal("amountOutstanding");
             final int chargeTime = rs.getInt("chargeTime");
             final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(chargeTime);
- 
+
             return new LoanChargeData(id, dueAsOfDate, amountOutstanding, chargeTimeType, loanId, null);
         }
     }
 
     @Override
-    public Collection<LoanInstallmentChargeData> retrieveInstallmentLoanCharges(Long loanChargeId,boolean onlyPaymentPendingCharges) {
+    public Collection<LoanInstallmentChargeData> retrieveInstallmentLoanCharges(Long loanChargeId, boolean onlyPaymentPendingCharges) {
         final LoanInstallmentChargeMapper rm = new LoanInstallmentChargeMapper();
-        String sql = "select " + rm.schema()
-                + "where lic.loan_charge_id= ? ";
-        if(onlyPaymentPendingCharges){
-            sql = sql +"and lic.waived =0 and lic.is_paid_derived=0";
+        String sql = "select " + rm.schema() + "where lic.loan_charge_id= ? ";
+        if (onlyPaymentPendingCharges) {
+            sql = sql + "and lic.waived =0 and lic.is_paid_derived=0";
         }
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanChargeId });
     }
@@ -205,11 +202,8 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
         public String schema() {
             return " lsi.installment as installmentNumber, lsi.duedate as dueAsOfDate, "
-                    + "lic.amount_outstanding_derived as amountOutstanding," 
-                    + "lic.amount as  amount, " 
-                    + "lic.is_paid_derived as paid, "
-                    + "lic.waived as waied " 
-                    + "from  m_loan_installment_charge lic "
+                    + "lic.amount_outstanding_derived as amountOutstanding," + "lic.amount as  amount, " + "lic.is_paid_derived as paid, "
+                    + "lic.waived as waied " + "from  m_loan_installment_charge lic "
                     + "join m_loan_repayment_schedule lsi on lsi.id = lic.loan_schedule_id ";
         }
 

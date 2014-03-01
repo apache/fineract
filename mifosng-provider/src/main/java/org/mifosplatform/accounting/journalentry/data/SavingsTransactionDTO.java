@@ -31,7 +31,7 @@ public class SavingsTransactionDTO {
 
     public SavingsTransactionDTO(final Long officeId, final Long paymentTypeId, final String transactionId, final Date transactionDate,
             final SavingsAccountTransactionEnumData transactionType, final BigDecimal amount, final boolean reversed,
-            final List<ChargePaymentDTO> feePayments, final List<ChargePaymentDTO> penaltyPayments,final BigDecimal overdraftAmount) {
+            final List<ChargePaymentDTO> feePayments, final List<ChargePaymentDTO> penaltyPayments, final BigDecimal overdraftAmount) {
         this.paymentTypeId = paymentTypeId;
         this.transactionId = transactionId;
         this.transactionDate = transactionDate;
@@ -80,13 +80,12 @@ public class SavingsTransactionDTO {
         return this.feePayments;
     }
 
-    
     public BigDecimal getOverdraftAmount() {
         return this.overdraftAmount;
     }
-    
-    public boolean isOverdraftTransaction(){
-        return this.overdraftAmount!=null && this.overdraftAmount.doubleValue() > 0;
+
+    public boolean isOverdraftTransaction() {
+        return this.overdraftAmount != null && this.overdraftAmount.doubleValue() > 0;
     }
 
 }

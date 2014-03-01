@@ -51,7 +51,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     public LoanScheduleModel calculateLoanSchedule(final JsonQuery query) {
 
         this.fromApiJsonDeserializer.validate(query.json());
-        
+
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
 
@@ -68,14 +68,13 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
             } else if (groupId != null) {
                 cycleNumber = this.loanReadPlatformService.retriveLoanCounter(groupId, AccountType.GROUP.getValue(), loanProduct.getId());
             }
-            this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(query.parsedJson(), baseDataValidator,
-                    loanProduct, cycleNumber);
+            this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(query.parsedJson(), baseDataValidator, loanProduct,
+                    cycleNumber);
         } else {
-            this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(query.parsedJson(), baseDataValidator,
-                    loanProduct);
+            this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(query.parsedJson(), baseDataValidator, loanProduct);
         }
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-        
+
         return this.loanScheduleAssembler.assembleLoanScheduleFrom(query.parsedJson());
     }
 }

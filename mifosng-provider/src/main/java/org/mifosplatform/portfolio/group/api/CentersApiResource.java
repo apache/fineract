@@ -134,16 +134,18 @@ public class CentersApiResource {
             @QueryParam("externalId") final String externalId, @QueryParam("name") final String name,
             @QueryParam("underHierarchy") final String hierarchy, @QueryParam("paged") final Boolean paged,
             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder, 
-            @QueryParam("meetingDate") final DateParam meetingDateParam, @QueryParam("dateFormat") final String dateFormat, 
+            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder,
+            @QueryParam("meetingDate") final DateParam meetingDateParam, @QueryParam("dateFormat") final String dateFormat,
             @QueryParam("locale") final String locale) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.CENTER_RESOURCE_NAME);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (meetingDateParam != null && officeId != null) {
-        	Date meetingDate = meetingDateParam.getDate("meetingDate", dateFormat, locale);
-            Collection<StaffCenterData> staffCenterDataArray = this.centerReadPlatformService.retriveAllCentersByMeetingDate(officeId, meetingDate, staffId);
-            return this.toApiJsonSerializer.serialize(settings, staffCenterDataArray, GroupingTypesApiConstants.STAFF_CENTER_RESPONSE_DATA_PARAMETERS);
+            Date meetingDate = meetingDateParam.getDate("meetingDate", dateFormat, locale);
+            Collection<StaffCenterData> staffCenterDataArray = this.centerReadPlatformService.retriveAllCentersByMeetingDate(officeId,
+                    meetingDate, staffId);
+            return this.toApiJsonSerializer.serialize(settings, staffCenterDataArray,
+                    GroupingTypesApiConstants.STAFF_CENTER_RESPONSE_DATA_PARAMETERS);
         }
         final PaginationParameters parameters = PaginationParameters.instance(paged, offset, limit, orderBy, sortOrder);
         final SearchParameters searchParameters = SearchParameters.forGroups(sqlSearch, officeId, staffId, externalId, name, hierarchy,
@@ -187,11 +189,16 @@ public class CentersApiResource {
                 if (collectionMeetingCalendar != null) {
                     final boolean withHistory = true;
                     final LocalDate tillDate = null;
-                    final Collection<LocalDate> recurringDates = this.calendarReadPlatformService.generateRecurringDates(collectionMeetingCalendar, withHistory, tillDate);
-                    final Collection<LocalDate> nextTenRecurringDates = this.calendarReadPlatformService.generateNextTenRecurringDates(collectionMeetingCalendar);
-                    final MeetingData lastMeeting = this.meetingReadPlatformService.retrieveLastMeeting(collectionMeetingCalendar.getCalendarInstanceId());
-                    final LocalDate recentEligibleMeetingDate = this.calendarReadPlatformService.generateNextEligibleMeetingDateForCollection(collectionMeetingCalendar, lastMeeting);
-                    collectionMeetingCalendar = CalendarData.withRecurringDates(collectionMeetingCalendar, recurringDates, nextTenRecurringDates, recentEligibleMeetingDate);
+                    final Collection<LocalDate> recurringDates = this.calendarReadPlatformService.generateRecurringDates(
+                            collectionMeetingCalendar, withHistory, tillDate);
+                    final Collection<LocalDate> nextTenRecurringDates = this.calendarReadPlatformService
+                            .generateNextTenRecurringDates(collectionMeetingCalendar);
+                    final MeetingData lastMeeting = this.meetingReadPlatformService.retrieveLastMeeting(collectionMeetingCalendar
+                            .getCalendarInstanceId());
+                    final LocalDate recentEligibleMeetingDate = this.calendarReadPlatformService
+                            .generateNextEligibleMeetingDateForCollection(collectionMeetingCalendar, lastMeeting);
+                    collectionMeetingCalendar = CalendarData.withRecurringDates(collectionMeetingCalendar, recurringDates,
+                            nextTenRecurringDates, recentEligibleMeetingDate);
                 }
             }
 
@@ -248,7 +255,7 @@ public class CentersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String activate(@PathParam("centerId") final Long centerId, @QueryParam("command") final String commandParam,
-    		 final String apiRequestBodyAsJson, @Context final UriInfo uriInfo) {
+            final String apiRequestBodyAsJson, @Context final UriInfo uriInfo) {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 

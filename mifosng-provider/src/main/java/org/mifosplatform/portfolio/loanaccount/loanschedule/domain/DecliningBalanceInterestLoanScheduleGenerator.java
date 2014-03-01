@@ -19,14 +19,14 @@ import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
  * <li>Equal installment payments</li>
  * </ol>
  * </p>
- *
+ * 
  * <p>
  * When amortized using <i>equal principal payments</i>, the <b>principal
  * component</b> of each installment is fixed and <b>interest due</b> is
  * calculated from the <b>outstanding principal balance</b> resulting in a
  * different <b>total payment due</b> for each installment.
  * </p>
- *
+ * 
  * <p>
  * When amortized using <i>equal installments</i>, the <b>total payment due</b>
  * for each installment is fixed and is calculated using the excel like

@@ -63,15 +63,15 @@ public class SavingsAccountChargeDataValidator {
         baseDataValidator.reset().parameter(amountParamName).value(amount).notNull().positiveAmount();
 
         if (this.fromApiJsonHelper.parameterExists(dueAsOfDateParamName, element)) {
-            final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element); 
+            final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element);
             baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate).notNull();
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists(feeOnMonthDayParamName, element)) {
-            final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, element); 
+            final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, element);
             baseDataValidator.reset().parameter(feeOnMonthDayParamName).value(monthDay).notNull();
         }
-        
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -91,17 +91,18 @@ public class SavingsAccountChargeDataValidator {
         baseDataValidator.reset().parameter(amountParamName).value(amount).notNull().positiveAmount();
 
         if (this.fromApiJsonHelper.parameterExists(dueAsOfDateParamName, element)) {
-            final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element); 
+            final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element);
             baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate).notNull();
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists(feeOnMonthDayParamName, element)) {
             final String monthDayFormat = this.fromApiJsonHelper.extractMonthDayFormatParameter(element.getAsJsonObject());
             final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject());
-            final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, element.getAsJsonObject(), monthDayFormat, locale); 
+            final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, element.getAsJsonObject(),
+                    monthDayFormat, locale);
             baseDataValidator.reset().parameter(feeOnMonthDayParamName).value(monthDay).notNull();
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists(feeIntervalParamName, element)) {
             final Integer feeInterval = this.fromApiJsonHelper.extractIntegerNamed(feeIntervalParamName, element, Locale.getDefault());
             baseDataValidator.reset().parameter(feeIntervalParamName).value(feeInterval).notNull().inMinMaxRange(1, 12);
@@ -125,12 +126,12 @@ public class SavingsAccountChargeDataValidator {
         final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(amountParamName, element);
         baseDataValidator.reset().parameter(amountParamName).value(amount).notNull().positiveAmount();
 
-        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element); 
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(dueAsOfDateParamName, element);
         baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate).notNull();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
-    
+
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }

@@ -213,8 +213,8 @@ public class LoansApiResource {
 
                 officeId = loanAccountClientDetails.officeId();
 
-                newLoanAccount = newLoanAccount == null ? loanAccountClientDetails : LoanAccountData.populateClientDefaults(
-                        newLoanAccount, loanAccountClientDetails);
+                newLoanAccount = newLoanAccount == null ? loanAccountClientDetails : LoanAccountData.populateClientDefaults(newLoanAccount,
+                        loanAccountClientDetails);
 
                 // if it's JLG loan add group details
                 if (templateType.equals("jlg")) {
@@ -238,16 +238,16 @@ public class LoansApiResource {
                 calendarOptions = this.loanReadPlatformService.retrieveCalendars(groupId);
                 newLoanAccount = newLoanAccount == null ? loanAccountGroupData : LoanAccountData.populateGroupDefaults(newLoanAccount,
                         loanAccountGroupData);
-                if(productId != null){
+                if (productId != null) {
                     Map<Long, Integer> memberLoanCycle = new HashMap<Long, Integer>();
                     Collection<ClientData> members = loanAccountGroupData.groupData().clientMembers();
-                    for(ClientData clientData:members){
+                    for (ClientData clientData : members) {
                         Integer loanCounter = this.loanReadPlatformService.retriveLoanCounter(clientData.id(), productId);
                         memberLoanCycle.put(clientData.id(), loanCounter);
                     }
                     newLoanAccount = LoanAccountData.associateMemberVariations(newLoanAccount, memberLoanCycle);
                 }
-                
+
             } else {
                 final String errorMsg = "Loan template type '" + templateType + "' is not supported";
                 throw new NotSupportedLoanTemplateTypeException(errorMsg, templateType);
@@ -306,7 +306,7 @@ public class LoansApiResource {
 
             if (associationParameters.contains("all")) {
                 associationParameters.addAll(Arrays.asList("repaymentSchedule", "transactions", "charges", "guarantors", "collateral",
-                        "notes", "linkedAccount","multiDisburseDetails"));
+                        "notes", "linkedAccount", "multiDisburseDetails"));
             }
 
             if (associationParameters.contains("guarantors")) {
@@ -324,23 +324,24 @@ public class LoansApiResource {
                     loanRepayments = currentLoanRepayments;
                 }
             }
-            
-            if(associationParameters.contains("multiDisburseDetails") || associationParameters.contains("repaymentSchedule")){
+
+            if (associationParameters.contains("multiDisburseDetails") || associationParameters.contains("repaymentSchedule")) {
                 mandatoryResponseParameters.add("multiDisburseDetails");
                 disbursementData = this.loanReadPlatformService.retrieveLoanDisbursementDetails(loanId);
             }
-            
 
-            if(associationParameters.contains("emiAmountVariations") || associationParameters.contains("repaymentSchedule")){
+            if (associationParameters.contains("emiAmountVariations") || associationParameters.contains("repaymentSchedule")) {
                 mandatoryResponseParameters.add("emiAmountVariations");
-                emiAmountVariations = this.loanReadPlatformService.retrieveLoanTermVariations(loanId, LoanTermVariationType.EMI_AMOUNT.getValue());
+                emiAmountVariations = this.loanReadPlatformService.retrieveLoanTermVariations(loanId,
+                        LoanTermVariationType.EMI_AMOUNT.getValue());
             }
-            
+
             if (associationParameters.contains("repaymentSchedule")) {
                 mandatoryResponseParameters.add("repaymentSchedule");
 
                 final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData = loanBasicDetails.repaymentScheduleRelatedData();
-                repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, repaymentScheduleRelatedData, disbursementData);
+                repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, repaymentScheduleRelatedData,
+                        disbursementData);
             }
 
             if (associationParameters.contains("charges")) {
@@ -376,7 +377,7 @@ public class LoansApiResource {
                 mandatoryResponseParameters.add("linkedAccount");
                 linkedAccount = this.accountAssociationsReadPlatformService.retriveLoanAssociation(loanId);
             }
-            
+
         }
 
         Collection<LoanProductData> productOptions = null;
@@ -441,7 +442,7 @@ public class LoansApiResource {
                 charges, collateral, guarantors, meeting, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers, loanPurposeOptions,
-                loanCollateralOptions, calendarOptions, notes, accountLinkingOptions, linkedAccount, disbursementData,emiAmountVariations);
+                loanCollateralOptions, calendarOptions, notes, accountLinkingOptions, linkedAccount, disbursementData, emiAmountVariations);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
@@ -451,15 +452,18 @@ public class LoansApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
-            @QueryParam("externalId") final String externalId, 
-//            @QueryParam("underHierarchy") final String hierarchy,
+    public String retrieveAll(@Context final UriInfo uriInfo,
+            @QueryParam("sqlSearch") final String sqlSearch,
+            @QueryParam("externalId") final String externalId,
+            // @QueryParam("underHierarchy") final String hierarchy,
             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder, @QueryParam("accountNo") final String accountNo) {
+            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder,
+            @QueryParam("accountNo") final String accountNo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final SearchParameters searchParameters = SearchParameters.forLoans(sqlSearch, externalId, offset, limit, orderBy, sortOrder, accountNo);
+        final SearchParameters searchParameters = SearchParameters.forLoans(sqlSearch, externalId, offset, limit, orderBy, sortOrder,
+                accountNo);
 
         final Page<LoanAccountData> loanBasicDetails = this.loanReadPlatformService.retrieveAll(searchParameters);
 

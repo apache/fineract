@@ -46,7 +46,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
 
     @Autowired
     public SearchReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final LoanProductReadPlatformService loanProductReadPlatformService, final OfficeReadPlatformService officeReadPlatformService ) {
+            final LoanProductReadPlatformService loanProductReadPlatformService, final OfficeReadPlatformService officeReadPlatformService) {
         this.context = context;
         this.namedParameterjdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         this.loanProductReadPlatformService = loanProductReadPlatformService;
@@ -161,23 +161,23 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
             final Long parentId = JdbcSupport.getLong(rs, "parentId");
             final String parentName = rs.getString("parentName");
             final Integer entityStatusEnum = JdbcSupport.getInteger(rs, "entityStatusEnum");
-            
+
             EnumOptionData entityStatus = new EnumOptionData(0L, "", "");
-            
-            if(entityType.equalsIgnoreCase("client") || entityType.equalsIgnoreCase("clientidentifier")) {
+
+            if (entityType.equalsIgnoreCase("client") || entityType.equalsIgnoreCase("clientidentifier")) {
                 entityStatus = ClientEnumerations.status(entityStatusEnum);
             }
-            
-            else if(entityType.equalsIgnoreCase("group") || entityType.equalsIgnoreCase("center")) {
+
+            else if (entityType.equalsIgnoreCase("group") || entityType.equalsIgnoreCase("center")) {
                 entityStatus = GroupingTypeEnumerations.status(entityStatusEnum);
             }
-            
-            else if(entityType.equalsIgnoreCase("loan")) {
+
+            else if (entityType.equalsIgnoreCase("loan")) {
                 LoanStatusEnumData loanStatusEnumData = LoanEnumerations.status(entityStatusEnum);
-                
+
                 entityStatus = LoanEnumerations.status(loanStatusEnumData);
             }
-            
+
             return new SearchData(entityId, entityAccountNo, entityExternalId, entityName, entityType, parentId, parentName, entityStatus);
         }
 
@@ -185,12 +185,12 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
 
     @Override
     public AdHocSearchQueryData retrieveAdHocQueryTemplate() {
-        
+
         this.context.authenticatedUser();
-        
+
         final Collection<LoanProductData> loanProducts = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
         final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
-        
+
         return AdHocSearchQueryData.template(loanProducts, offices);
     }
 
@@ -209,38 +209,40 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
 
         private boolean isWhereClauseAdded = false;
 
-        //TODO- build the query dynamically based on selected entity types, for now adding query for only loan entity.
+        // TODO- build the query dynamically based on selected entity types, for
+        // now adding query for only loan entity.
         public String schema(final AdHocQuerySearchConditions searchConditions, final MapSqlParameterSource params) {
             final StringBuffer sql = new StringBuffer();
-            sql.append("Select a.name as officeName, a.Product as productName, a.cnt as 'count', a.outstandingAmt as outstanding, a.percentOut as percentOut  ")
-            .append("from (select mo.name, mp.name Product, sum(ifnull(ml.total_expected_repayment_derived,0.0)) TotalAmt, count(*) cnt, ")
-            .append("sum(ifnull(ml.total_outstanding_derived,0.0)) outstandingAmt,  ")
-            .append("(sum(ifnull(ml.total_outstanding_derived,0.0)) * 100 / sum(ifnull(ml.total_expected_repayment_derived,0.0))) percentOut ")
-            .append("from m_loan ml inner join m_product_loan mp on mp.id=ml.product_id  ")
-            .append("inner join m_client mc on mc.id=ml.client_id  ")
-            .append("inner join m_office mo on mo.id=mc.office_id  ");
-            
+            sql.append(
+                    "Select a.name as officeName, a.Product as productName, a.cnt as 'count', a.outstandingAmt as outstanding, a.percentOut as percentOut  ")
+                    .append("from (select mo.name, mp.name Product, sum(ifnull(ml.total_expected_repayment_derived,0.0)) TotalAmt, count(*) cnt, ")
+                    .append("sum(ifnull(ml.total_outstanding_derived,0.0)) outstandingAmt,  ")
+                    .append("(sum(ifnull(ml.total_outstanding_derived,0.0)) * 100 / sum(ifnull(ml.total_expected_repayment_derived,0.0))) percentOut ")
+                    .append("from m_loan ml inner join m_product_loan mp on mp.id=ml.product_id  ")
+                    .append("inner join m_client mc on mc.id=ml.client_id  ").append("inner join m_office mo on mo.id=mc.office_id  ");
+
             if (searchConditions.getLoanStatus() != null && searchConditions.getLoanStatus().size() > 0) {
-                //If user requests for all statuses no need to add loanStatus filter 
+                // If user requests for all statuses no need to add loanStatus
+                // filter
                 if (!searchConditions.getLoanStatus().contains("all")) {
                     checkAndUpdateWhereClause(sql);
                     params.addValue("loanStatus", searchConditions.getLoanStatus());
                     sql.append(" ml.loan_status_id in (:loanStatus) ");
                 }
             }
-            
-            if (searchConditions.getLoanProducts() != null && searchConditions.getLoanProducts().size() > 0 ) {
+
+            if (searchConditions.getLoanProducts() != null && searchConditions.getLoanProducts().size() > 0) {
                 checkAndUpdateWhereClause(sql);
                 params.addValue("loanProducts", searchConditions.getLoanProducts());
                 sql.append(" mp.id in (:loanProducts) ");
             }
-            
+
             if (searchConditions.getOffices() != null && searchConditions.getOffices().size() > 0) {
                 checkAndUpdateWhereClause(sql);
                 params.addValue("offices", searchConditions.getOffices());
                 sql.append(" mo.id in (:offices) ");
             }
-            
+
             if (StringUtils.isNotBlank(searchConditions.getLoanDateOption())) {
                 if (searchConditions.getLoanDateOption().equals(SearchConstants.SEARCH_LOAN_DATE.APPROVAL_DATE.getValue())) {
                     checkAndUpdateWhereClause(sql);
@@ -259,50 +261,53 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                     sql.append(" ( ml.disbursedon_date between :loanFromDate and :loanToDate ) ");
                 }
             }
-            
+
             sql.append(" group by mo.id) a ");
-            
-            //update isWhereClauseAdded to false to add filters for derived table
+
+            // update isWhereClauseAdded to false to add filters for derived
+            // table
             isWhereClauseAdded = false;
-            
+
             if (searchConditions.getIncludeOutStandingAmountPercentage()) {
                 if (searchConditions.getOutStandingAmountPercentageCondition().equals("between")) {
                     checkAndUpdateWhereClause(sql);
-                   // params.addValue("outStandingAmountPercentageCondition", searchConditions.getOutStandingAmountPercentageCondition());
+                    // params.addValue("outStandingAmountPercentageCondition",
+                    // searchConditions.getOutStandingAmountPercentageCondition());
                     params.addValue("minOutStandingAmountPercentage", searchConditions.getMinOutStandingAmountPercentage());
                     params.addValue("maxOutStandingAmountPercentage", searchConditions.getMaxOutStandingAmountPercentage());
                     sql.append(" ( a.percentOut between :minOutStandingAmountPercentage and :maxOutStandingAmountPercentage ) ");
                 } else {
                     checkAndUpdateWhereClause(sql);
-                   // params.addValue("outStandingAmountPercentageCondition", searchConditions.getOutStandingAmountPercentageCondition());
+                    // params.addValue("outStandingAmountPercentageCondition",
+                    // searchConditions.getOutStandingAmountPercentageCondition());
                     params.addValue("outStandingAmountPercentage", searchConditions.getOutStandingAmountPercentage());
-                    sql.append(" a.percentOut ")
-                    .append(searchConditions.getOutStandingAmountPercentageCondition())
-                    .append(" :outStandingAmountPercentage ");
+                    sql.append(" a.percentOut ").append(searchConditions.getOutStandingAmountPercentageCondition())
+                            .append(" :outStandingAmountPercentage ");
                 }
             }
-            
+
             if (searchConditions.getIncludeOutstandingAmount()) {
                 if (searchConditions.getOutstandingAmountCondition().equals("between")) {
                     checkAndUpdateWhereClause(sql);
-                   // params.addValue("outstandingAmountCondition", searchConditions.getOutstandingAmountCondition());
+                    // params.addValue("outstandingAmountCondition",
+                    // searchConditions.getOutstandingAmountCondition());
                     params.addValue("minOutstandingAmount", searchConditions.getMinOutstandingAmount());
                     params.addValue("maxOutstandingAmount", searchConditions.getMaxOutstandingAmount());
                     sql.append(" ( a.outstandingAmt between :minOutstandingAmount and :maxOutstandingAmount ) ");
                 } else {
                     checkAndUpdateWhereClause(sql);
-                   // params.addValue("outstandingAmountCondition", searchConditions.getOutstandingAmountCondition());
+                    // params.addValue("outstandingAmountCondition",
+                    // searchConditions.getOutstandingAmountCondition());
                     params.addValue("outstandingAmount", searchConditions.getOutstandingAmount());
-                    sql.append(" a.outstandingAmt ")
-                    .append(searchConditions.getOutstandingAmountCondition())
-                    .append(" :outstandingAmount ");
+                    sql.append(" a.outstandingAmt ").append(searchConditions.getOutstandingAmountCondition())
+                            .append(" :outstandingAmount ");
                 }
             }
-            
+
             return sql.toString();
         }
-        
-        private void checkAndUpdateWhereClause(final StringBuffer sql){
+
+        private void checkAndUpdateWhereClause(final StringBuffer sql) {
             if (isWhereClauseAdded) {
                 sql.append(" and ");
             } else {
@@ -317,11 +322,13 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
             final String officeName = rs.getString("officeName");
             final String loanProductName = rs.getString("productName");
             final Integer count = JdbcSupport.getInteger(rs, "count");
-            final BigDecimal loanOutStanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "outstanding").setScale(2, RoundingMode.HALF_UP);
-            final Double percentage = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "percentOut").setScale(2, RoundingMode.HALF_UP).doubleValue();
+            final BigDecimal loanOutStanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "outstanding").setScale(2,
+                    RoundingMode.HALF_UP);
+            final Double percentage = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "percentOut").setScale(2, RoundingMode.HALF_UP)
+                    .doubleValue();
             return AdHocSearchQueryData.matchedResult(officeName, loanProductName, count, loanOutStanding, percentage);
         }
-        
+
     }
 
 }

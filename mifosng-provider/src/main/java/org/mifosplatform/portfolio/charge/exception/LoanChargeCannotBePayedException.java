@@ -11,7 +11,7 @@ public class LoanChargeCannotBePayedException extends AbstractPlatformDomainRule
 
     /*** enum of reasons of why Loan Charge cannot be waived **/
     public static enum LOAN_CHARGE_CANNOT_BE_PAYED_REASON {
-        ALREADY_PAID, ALREADY_WAIVED, LOAN_INACTIVE, CHARGE_NOT_ACCOUNT_TRANSFER,CHARGE_NOT_PAYABLE;
+        ALREADY_PAID, ALREADY_WAIVED, LOAN_INACTIVE, CHARGE_NOT_ACCOUNT_TRANSFER, CHARGE_NOT_PAYABLE;
 
         public String errorMessage() {
             if (name().toString().equalsIgnoreCase("ALREADY_PAID")) {
@@ -21,10 +21,8 @@ public class LoanChargeCannotBePayedException extends AbstractPlatformDomainRule
             } else if (name().toString().equalsIgnoreCase("LOAN_INACTIVE")) {
                 return "This loan charge can be payed as the loan associated with it is currently inactive";
             } else if (name().toString().equalsIgnoreCase("CHARGE_NOT_ACCOUNT_TRANSFER")) {
-                return "This loan charge can be payed as the charge payment mode is not account transfer"; 
-            }else if (name().toString().equalsIgnoreCase("CHARGE_NOT_PAYABLE")) {
-                return "This loan charge is not Payable through account transfer"; 
-            }
+                return "This loan charge can be payed as the charge payment mode is not account transfer";
+            } else if (name().toString().equalsIgnoreCase("CHARGE_NOT_PAYABLE")) { return "This loan charge is not Payable through account transfer"; }
 
             return name().toString();
         }
@@ -37,10 +35,8 @@ public class LoanChargeCannotBePayedException extends AbstractPlatformDomainRule
             } else if (name().toString().equalsIgnoreCase("LOAN_INACTIVE")) {
                 return "error.msg.loan.charge.associated.loan.inactive";
             } else if (name().toString().equalsIgnoreCase("CHARGE_NOT_ACCOUNT_TRANSFER")) {
-                return "error.msg.loan.charge.payment.mode.not.account.transfer"; 
-            }else if (name().toString().equalsIgnoreCase("CHARGE_NOT_PAYABLE")) {
-                return "error.msg.loan.charge.payment.not.allowed.account.transfer"; 
-            }
+                return "error.msg.loan.charge.payment.mode.not.account.transfer";
+            } else if (name().toString().equalsIgnoreCase("CHARGE_NOT_PAYABLE")) { return "error.msg.loan.charge.payment.not.allowed.account.transfer"; }
             return name().toString();
         }
     }

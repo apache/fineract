@@ -41,7 +41,6 @@ import org.mifosplatform.portfolio.loanaccount.api.LoanApiConstants;
 import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanTermVariations;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
@@ -199,24 +198,27 @@ public class LoanScheduleAssembler {
         // other
         final BigDecimal inArrearsTolerance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element);
         final Money inArrearsToleranceMoney = Money.of(currency, inArrearsTolerance);
-        
-        final BigDecimal emiAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.emiAmountParameterName, element);
-        final BigDecimal maxOutstandingBalance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.maxOutstandingBalanceParameterName, element);
-        
-        final List<DisbursementData>  disbursementDatas = fetchDisbursementData(element.getAsJsonObject());
-        
+
+        final BigDecimal emiAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.emiAmountParameterName,
+                element);
+        final BigDecimal maxOutstandingBalance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                LoanApiConstants.maxOutstandingBalanceParameterName, element);
+
+        final List<DisbursementData> disbursementDatas = fetchDisbursementData(element.getAsJsonObject());
+
         final List<LoanTermVariationsData> loanVariationTermsData = new ArrayList<LoanTermVariationsData>();
-        LoanTermVariationsData data = new LoanTermVariationsData(null, LoanEnumerations.loanvariationType(LoanTermVariationType.EMI_AMOUNT), expectedDisbursementDate, emiAmount);
+        LoanTermVariationsData data = new LoanTermVariationsData(null,
+                LoanEnumerations.loanvariationType(LoanTermVariationType.EMI_AMOUNT), expectedDisbursementDate, emiAmount);
         loanVariationTermsData.add(data);
 
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, amortizationMethod, interestMethod, interestRatePerPeriod,
                 interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod, principalMoney,
                 expectedDisbursementDate, repaymentsStartingFromDate, calculatedRepaymentsStartingFromDate, graceOnPrincipalPayment,
-                graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, inArrearsToleranceMoney,loanProduct.isMultiDisburseLoan(),
-                emiAmount,disbursementDatas, maxOutstandingBalance,loanVariationTermsData);
+                graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, inArrearsToleranceMoney,
+                loanProduct.isMultiDisburseLoan(), emiAmount, disbursementDatas, maxOutstandingBalance, loanVariationTermsData);
     }
-    
+
     private List<DisbursementData> fetchDisbursementData(final JsonObject command) {
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(command);
         final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(command);
@@ -231,22 +233,21 @@ public class LoanScheduleAssembler {
                     BigDecimal principal = null;
 
                     if (jsonObject.has(LoanApiConstants.disbursementDateParameterName)) {
-                        expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName, jsonObject,dateFormat,locale);
+                        expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(
+                                LoanApiConstants.disbursementDateParameterName, jsonObject, dateFormat, locale);
                     }
                     if (jsonObject.has(LoanApiConstants.disbursementPrincipalParameterName)
                             && jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).isJsonPrimitive()
                             && StringUtils.isNotBlank((jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).getAsString()))) {
                         principal = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementPrincipalParameterName).getAsBigDecimal();
                     }
-                    disbursementDatas.add(new DisbursementData(null, expectedDisbursementDate, null, principal,null));
+                    disbursementDatas.add(new DisbursementData(null, expectedDisbursementDate, null, principal, null));
                     i++;
                 } while (i < disbursementDataArray.size());
             }
         }
         return disbursementDatas;
     }
-
-
 
     private void validateRepaymentsStartDateWithMeetingDates(final LocalDate repaymentsStartingFromDate, final Calendar calendar) {
         if (repaymentsStartingFromDate != null
@@ -282,7 +283,8 @@ public class LoanScheduleAssembler {
                 if (repaymentInterval % meetingInterval != 0) {
                     // throw exception: Loan product frequency/interval
                     throw new MeetingFrequencyMismatchException("loanapplication.repayment.interval",
-                            "Loan repayment repaid every # must equal or multiple of meeting interval " + meetingInterval, meetingInterval, repaymentInterval);
+                            "Loan repayment repaid every # must equal or multiple of meeting interval " + meetingInterval, meetingInterval,
+                            repaymentInterval);
                 }
             }
         }

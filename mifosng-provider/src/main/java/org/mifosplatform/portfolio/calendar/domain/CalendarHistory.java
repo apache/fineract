@@ -21,12 +21,12 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_calendar_history")
-public class CalendarHistory extends AbstractPersistable<Long>{
+public class CalendarHistory extends AbstractPersistable<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "calendar_id", referencedColumnName = "id", nullable = false)
     private Calendar calendar;
-    
+
     @Column(name = "title", length = 50, nullable = false)
     private String title;
 
@@ -75,7 +75,8 @@ public class CalendarHistory extends AbstractPersistable<Long>{
         this.description = calendar.getDescription();
         this.location = calendar.getLocation();
         this.startDate = startDate;
-        this.endDate = calendar.getStartDate();//Calendar start date become end date for history data.
+        this.endDate = calendar.getStartDate();// Calendar start date become end
+                                               // date for history data.
         this.duration = calendar.getDuration();
         this.typeId = calendar.getTypeId();
         this.repeating = calendar.isRepeating();
@@ -84,7 +85,7 @@ public class CalendarHistory extends AbstractPersistable<Long>{
         this.firstReminder = calendar.getFirstReminder();
         this.secondReminder = calendar.getSecondReminder();
     }
-    
+
     public String getRecurrence() {
         return this.recurrence;
     }
@@ -119,16 +120,14 @@ public class CalendarHistory extends AbstractPersistable<Long>{
         return false;
     }
 
-    public boolean isBetweenStartAndEndDate(final LocalDate compareDate){
-        if (isStartDateBeforeOrEqual(compareDate)){
-            if (getEndDateLocalDate() == null || isEndDateAfterOrEqual(compareDate)){
-                return true;
-            }
+    public boolean isBetweenStartAndEndDate(final LocalDate compareDate) {
+        if (isStartDateBeforeOrEqual(compareDate)) {
+            if (getEndDateLocalDate() == null || isEndDateAfterOrEqual(compareDate)) { return true; }
         }
         return false;
     }
-    
-    public void updateEndDate(Date historyCalEndDate){
+
+    public void updateEndDate(Date historyCalEndDate) {
         this.endDate = historyCalEndDate;
     }
 }

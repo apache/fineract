@@ -66,7 +66,7 @@ public class Holiday extends AbstractPersistable<Long> {
 
     @Column(name = "status_enum", nullable = false)
     private Integer status;
-    
+
     @Column(name = "processed", nullable = false)
     private boolean processed;
 
@@ -81,20 +81,20 @@ public class Holiday extends AbstractPersistable<Long> {
         final String name = command.stringValueOfParameterNamed(HolidayApiConstants.nameParamName);
         final LocalDate fromDate = command.localDateValueOfParameterNamed(HolidayApiConstants.fromDateParamName);
         final LocalDate toDate = command.localDateValueOfParameterNamed(HolidayApiConstants.toDateParamName);
-        final LocalDate repaymentsRescheduledTo = command.localDateValueOfParameterNamed(HolidayApiConstants.repaymentsRescheduledToParamName);
+        final LocalDate repaymentsRescheduledTo = command
+                .localDateValueOfParameterNamed(HolidayApiConstants.repaymentsRescheduledToParamName);
         final Integer status = HolidayStatusType.PENDING_FOR_ACTIVATION.getValue();
         final boolean processed = false;// default it to false. Only batch job
                                         // should update this field.
         final String description = command.stringValueOfParameterNamed(HolidayApiConstants.descriptionParamName);
         return new Holiday(name, fromDate, toDate, repaymentsRescheduledTo, status, processed, description, offices);
     }
-    
+
     public Map<String, Object> update(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource("holiday" + ".update");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("holiday" + ".update");
 
         final HolidayStatusType currentStatus = HolidayStatusType.fromInt(this.status);
 
@@ -106,7 +106,7 @@ public class Holiday extends AbstractPersistable<Long> {
             actualChanges.put(nameParamName, newValue);
             this.name = StringUtils.defaultIfEmpty(newValue, null);
         }
-        
+
         if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
             final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
             actualChanges.put(descriptionParamName, newValue);
@@ -171,7 +171,7 @@ public class Holiday extends AbstractPersistable<Long> {
 
         return actualChanges;
     }
-    
+
     public boolean update(final Set<Office> newOffices) {
         if (newOffices == null) { return false; }
 
@@ -260,21 +260,20 @@ public class Holiday extends AbstractPersistable<Long> {
     public void processed() {
         this.processed = true;
     }
-    
+
     public void activate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource("holiday" + ".activate");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("holiday" + ".activate");
 
         final HolidayStatusType currentStatus = HolidayStatusType.fromInt(this.status);
         if (!currentStatus.isPendingActivation()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.in.pending.for.activation.state");
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
-        
+
         this.status = HolidayStatusType.ACTIVE.getValue();
     }
-    
+
     public void delete() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("holiday" + ".delete");

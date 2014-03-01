@@ -58,7 +58,7 @@ import com.google.gson.JsonObject;
 @Entity
 @Table(name = "m_product_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE"),
-        @UniqueConstraint(columnNames = { "short_name" }, name = "unq_short_name")})
+        @UniqueConstraint(columnNames = { "short_name" }, name = "unq_short_name") })
 public class LoanProduct extends AbstractPersistable<Long> {
 
     @ManyToOne
@@ -71,7 +71,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
-    
+
     @Column(name = "short_name", nullable = false, unique = true)
     private String shortName;
 
@@ -96,7 +96,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     @Column(name = "use_borrower_cycle")
     private boolean useBorrowerCycle;
-    
+
     @Embedded
     private LoanProductTrancheDetails loanProducTrancheDetails;
 
@@ -168,22 +168,22 @@ public class LoanProduct extends AbstractPersistable<Long> {
             populateBorrowerCyclevariations(command, loanProductBorrowerCycleVariations);
         }
 
-        
-       final boolean multiDisburseLoan = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.multiDisburseLoanParameterName);
-       Integer maxTrancheCount = null;
-       BigDecimal outstandingLoanBalance = null;
-       if(multiDisburseLoan){
-           outstandingLoanBalance = command.bigDecimalValueOfParameterNamed(LoanProductConstants.outstandingLoanBalanceParameterName);
-           maxTrancheCount = command.integerValueOfParameterNamed(LoanProductConstants.maxTrancheCountParameterName);
-       }
- 
-        
-        return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal, maxPrincipal,
-                interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType, annualInterestRate,
-                interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentFrequencyType, numberOfRepayments,
-                minNumberOfRepayments, maxNumberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
-                amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle, startDate, closeDate,
-                externalId, useBorrowerCycle, loanProductBorrowerCycleVariations,multiDisburseLoan,maxTrancheCount,outstandingLoanBalance);
+        final boolean multiDisburseLoan = command
+                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.multiDisburseLoanParameterName);
+        Integer maxTrancheCount = null;
+        BigDecimal outstandingLoanBalance = null;
+        if (multiDisburseLoan) {
+            outstandingLoanBalance = command.bigDecimalValueOfParameterNamed(LoanProductConstants.outstandingLoanBalanceParameterName);
+            maxTrancheCount = command.integerValueOfParameterNamed(LoanProductConstants.maxTrancheCountParameterName);
+        }
+
+        return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
+                maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
+                annualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentFrequencyType,
+                numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment,
+                graceOnInterestCharged, amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle,
+                startDate, closeDate, externalId, useBorrowerCycle, loanProductBorrowerCycleVariations, multiDisburseLoan, maxTrancheCount,
+                outstandingLoanBalance);
     }
 
     /**
@@ -380,7 +380,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     }
 
     public LoanProduct(final Fund fund, final LoanTransactionProcessingStrategy transactionProcessingStrategy, final String name,
-    		final String shortName, final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
+            final String shortName, final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
             final BigDecimal defaultMinPrincipal, final BigDecimal defaultMaxPrincipal,
             final BigDecimal defaultNominalInterestRatePerPeriod, final BigDecimal defaultMinNominalInterestRatePerPeriod,
             final BigDecimal defaultMaxNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType,
@@ -392,8 +392,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final List<Charge> charges,
             final AccountingRuleType accountingRuleType, final boolean includeInBorrowerCycle, final LocalDate startDate,
             final LocalDate closeDate, final String externalId, final boolean useBorrowerCycle,
-            final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations,
-            final boolean multiDisburseLoan,final Integer maxTrancheCount, final BigDecimal outstandingLoanBalance) {
+            final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations, final boolean multiDisburseLoan,
+            final Integer maxTrancheCount, final BigDecimal outstandingLoanBalance) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -438,7 +438,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         for (LoanProductBorrowerCycleVariations borrowerCycleVariations : this.borrowerCycleVariations) {
             borrowerCycleVariations.updateLoanProduct(this);
         }
-        this.loanProducTrancheDetails   = new LoanProductTrancheDetails(multiDisburseLoan, maxTrancheCount, outstandingLoanBalance);
+        this.loanProducTrancheDetails = new LoanProductTrancheDetails(multiDisburseLoan, maxTrancheCount, outstandingLoanBalance);
     }
 
     public MonetaryCurrency getCurrency() {
@@ -498,7 +498,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             actualChanges.put(nameParamName, newValue);
             this.name = newValue;
         }
-        
+
         final String shortNameParamName = LoanProductConstants.shortName;
         if (command.isChangeInStringParameterNamed(shortNameParamName, this.shortName)) {
             final String newValue = command.stringValueOfParameterNamed(shortNameParamName);
@@ -606,7 +606,6 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
-
     public boolean isCashBasedAccountingEnabled() {
         return AccountingRuleType.CASH_BASED.getValue().equals(this.accountingRule);
     }
@@ -695,15 +694,15 @@ public class LoanProduct extends AbstractPersistable<Long> {
     public boolean useBorrowerCycle() {
         return this.useBorrowerCycle;
     }
-    
-    public boolean isMultiDisburseLoan(){
+
+    public boolean isMultiDisburseLoan() {
         return this.loanProducTrancheDetails.isMultiDisburseLoan();
     }
-    
+
     public BigDecimal outstandingLoanBalance() {
         return this.loanProducTrancheDetails.outstandingLoanBalance();
     }
-    
+
     public Integer maxTrancheCount() {
         return this.loanProducTrancheDetails.maxTrancheCount();
     }
@@ -724,27 +723,27 @@ public class LoanProduct extends AbstractPersistable<Long> {
         borrowerCycleVariations.put(LoanProductConstants.principal, this.loanProductRelatedDetail.getPrincipal().getAmount());
         borrowerCycleVariations.put(LoanProductConstants.interestRatePerPeriod,
                 this.loanProductRelatedDetail.getNominalInterestRatePerPeriod());
-        if(this.loanProductRelatedDetail.getNumberOfRepayments() != null){
+        if (this.loanProductRelatedDetail.getNumberOfRepayments() != null) {
             borrowerCycleVariations.put(LoanProductConstants.numberOfRepayments,
-                    BigDecimal.valueOf(this.loanProductRelatedDetail.getNumberOfRepayments())); 
+                    BigDecimal.valueOf(this.loanProductRelatedDetail.getNumberOfRepayments()));
         }
 
-        if(this.loanProductMinMaxConstraints !=null){
+        if (this.loanProductMinMaxConstraints != null) {
             borrowerCycleVariations.put(LoanProductConstants.minPrincipal, this.loanProductMinMaxConstraints.getMinPrincipal());
             borrowerCycleVariations.put(LoanProductConstants.maxPrincipal, this.loanProductMinMaxConstraints.getMaxPrincipal());
             borrowerCycleVariations.put(LoanProductConstants.minInterestRatePerPeriod,
                     this.loanProductMinMaxConstraints.getMinNominalInterestRatePerPeriod());
             borrowerCycleVariations.put(LoanProductConstants.maxInterestRatePerPeriod,
                     this.loanProductMinMaxConstraints.getMaxNominalInterestRatePerPeriod());
-            
-            if(this.loanProductMinMaxConstraints.getMinNumberOfRepayments() != null){
+
+            if (this.loanProductMinMaxConstraints.getMinNumberOfRepayments() != null) {
                 borrowerCycleVariations.put(LoanProductConstants.minNumberOfRepayments,
                         BigDecimal.valueOf(this.loanProductMinMaxConstraints.getMinNumberOfRepayments()));
             }
-            
-            if(this.loanProductMinMaxConstraints.getMaxNumberOfRepayments() != null){
-            borrowerCycleVariations.put(LoanProductConstants.maxNumberOfRepayments,
-                    BigDecimal.valueOf(this.loanProductMinMaxConstraints.getMaxNumberOfRepayments()));
+
+            if (this.loanProductMinMaxConstraints.getMaxNumberOfRepayments() != null) {
+                borrowerCycleVariations.put(LoanProductConstants.maxNumberOfRepayments,
+                        BigDecimal.valueOf(this.loanProductMinMaxConstraints.getMaxNumberOfRepayments()));
             }
         }
         if (cycleNumber > 0) {

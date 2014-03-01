@@ -49,7 +49,7 @@ public class LoanTransactionData {
                 loanTransactionData.type, loanTransactionData.paymentDetailData, loanTransactionData.currency, loanTransactionData.date,
                 loanTransactionData.amount, loanTransactionData.principalPortion, loanTransactionData.interestPortion,
                 loanTransactionData.feeChargesPortion, loanTransactionData.penaltyChargesPortion, loanTransactionData.overpaymentPortion,
-                paymentTypeOptions, loanTransactionData.externalId, loanTransactionData.transfer,loanTransactionData.fixedEmiAmount);
+                paymentTypeOptions, loanTransactionData.externalId, loanTransactionData.transfer, loanTransactionData.fixedEmiAmount);
     }
 
     public LoanTransactionData(final Long id, final Long officeId, final String officeName, final LoanTransactionEnumData transactionType,
@@ -58,7 +58,7 @@ public class LoanTransactionData {
             final BigDecimal penaltyChargesPortion, final BigDecimal overpaymentPortion, final String externalId,
             final AccountTransferData transfer, BigDecimal fixedEmiAmount) {
         this(id, officeId, officeName, transactionType, paymentDetailData, currency, date, amount, principalPortion, interestPortion,
-                feeChargesPortion, penaltyChargesPortion, overpaymentPortion, null, externalId, transfer,fixedEmiAmount);
+                feeChargesPortion, penaltyChargesPortion, overpaymentPortion, null, externalId, transfer, fixedEmiAmount);
     }
 
     public LoanTransactionData(final Long id, final Long officeId, final String officeName, final LoanTransactionEnumData transactionType,

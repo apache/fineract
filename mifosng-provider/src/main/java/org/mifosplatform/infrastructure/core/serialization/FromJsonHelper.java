@@ -148,7 +148,7 @@ public class FromJsonHelper {
     public MonthDay extractMonthDayNamed(final String parameterName, final JsonElement element) {
         return this.helperDelegator.extractMonthDayNamed(parameterName, element);
     }
-    
+
     public MonthDay extractMonthDayNamed(final String parameterName, final JsonObject object, final String dateFormat,
             final Locale clientApplicationLocale) {
         return this.helperDelegator.extractMonthDayNamed(parameterName, object, dateFormat, clientApplicationLocale);
@@ -220,7 +220,7 @@ public class FromJsonHelper {
     public String extractDateFormatParameter(final JsonObject element) {
         return this.helperDelegator.extractDateFormatParameter(element);
     }
-    
+
     public String extractMonthDayFormatParameter(final JsonObject element) {
         return this.helperDelegator.extractMonthDayFormatParameter(element);
     }

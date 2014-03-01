@@ -33,12 +33,10 @@ public class ClientTimelineData {
     private final String closedByFirstname;
     private final String closedByLastname;
 
-
-    public ClientTimelineData(final LocalDate submittedOnDate, final String submittedByUsername,
-                              final String submittedByFirstname, final String submittedByLastname, final LocalDate activatedOnDate,
-                              final String activatedByUsername, final String activatedByFirstname, final String activatedByLastname,
-                              final LocalDate closedOnDate, final String closedByUsername, final String closedByFirstname,
-                              final String closedByLastname) {
+    public ClientTimelineData(final LocalDate submittedOnDate, final String submittedByUsername, final String submittedByFirstname,
+            final String submittedByLastname, final LocalDate activatedOnDate, final String activatedByUsername,
+            final String activatedByFirstname, final String activatedByLastname, final LocalDate closedOnDate,
+            final String closedByUsername, final String closedByFirstname, final String closedByLastname) {
         this.submittedOnDate = submittedOnDate;
         this.submittedByUsername = submittedByUsername;
         this.submittedByFirstname = submittedByFirstname;
@@ -55,6 +53,5 @@ public class ClientTimelineData {
         this.closedByLastname = closedByLastname;
 
     }
-
 
 }

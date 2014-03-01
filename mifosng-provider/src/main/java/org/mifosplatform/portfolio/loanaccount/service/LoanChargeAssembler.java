@@ -84,7 +84,7 @@ public class LoanChargeAssembler {
                             chargePaymentModeEnum = ChargePaymentMode.fromInt(chargePaymentMode);
                         }
                         final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition, principal, amount, chargeTime,
-                                chargeCalculation, dueDate, chargePaymentModeEnum,numberOfRepayments);
+                                chargeCalculation, dueDate, chargePaymentModeEnum, numberOfRepayments);
                         loanCharges.add(loanCharge);
                     } else {
                         final Long loanChargeId = id;

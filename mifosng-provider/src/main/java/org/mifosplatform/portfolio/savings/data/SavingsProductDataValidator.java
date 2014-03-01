@@ -79,7 +79,7 @@ public class SavingsProductDataValidator {
 
         final String name = this.fromApiJsonHelper.extractStringNamed(nameParamName, element);
         baseDataValidator.reset().parameter(nameParamName).value(name).notBlank().notExceedingLengthOf(100);
-        
+
         final String shortName = this.fromApiJsonHelper.extractStringNamed(shortNameParamName, element);
         baseDataValidator.reset().parameter(shortNameParamName).value(shortName).notBlank().notExceedingLengthOf(4);
 
@@ -154,32 +154,41 @@ public class SavingsProductDataValidator {
             }
         }
 
-        /*if (this.fromApiJsonHelper.parameterExists(withdrawalFeeAmountParamName, element)) {
-
-            final BigDecimal withdrawalFeeAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(withdrawalFeeAmountParamName,
-                    element);
-            baseDataValidator.reset().parameter(withdrawalFeeAmountParamName).value(withdrawalFeeAmount).zeroOrPositiveAmount();
-
-            if (withdrawalFeeAmount != null) {
-                final Integer withdrawalFeeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(withdrawalFeeTypeParamName, element);
-                baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(withdrawalFeeType)
-                        .isOneOfTheseValues(SavingsWithdrawalFeesType.integerValues());
-            }
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(withdrawalFeeTypeParamName, element)) {
-            final Integer withdrawalFeeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(withdrawalFeeTypeParamName, element);
-            baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(withdrawalFeeType).ignoreIfNull()
-                    .isOneOfTheseValues(1, 2);
-
-            if (withdrawalFeeType != null) {
-                final BigDecimal withdrawalFeeAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                        withdrawalFeeAmountParamName, element);
-                baseDataValidator.reset().parameter(withdrawalFeeAmountParamName).value(withdrawalFeeAmount).notNull()
-                        .zeroOrPositiveAmount();
-            }
-        }
-*/
+        /*
+         * if
+         * (this.fromApiJsonHelper.parameterExists(withdrawalFeeAmountParamName,
+         * element)) {
+         * 
+         * final BigDecimal withdrawalFeeAmount =
+         * this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed
+         * (withdrawalFeeAmountParamName, element);
+         * baseDataValidator.reset().parameter
+         * (withdrawalFeeAmountParamName).value
+         * (withdrawalFeeAmount).zeroOrPositiveAmount();
+         * 
+         * if (withdrawalFeeAmount != null) { final Integer withdrawalFeeType =
+         * this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+         * withdrawalFeeTypeParamName, element);
+         * baseDataValidator.reset().parameter
+         * (withdrawalFeeTypeParamName).value(withdrawalFeeType)
+         * .isOneOfTheseValues(SavingsWithdrawalFeesType.integerValues()); } }
+         * 
+         * if
+         * (this.fromApiJsonHelper.parameterExists(withdrawalFeeTypeParamName,
+         * element)) { final Integer withdrawalFeeType =
+         * this.fromApiJsonHelper.extractIntegerSansLocaleNamed
+         * (withdrawalFeeTypeParamName, element);
+         * baseDataValidator.reset().parameter
+         * (withdrawalFeeTypeParamName).value(withdrawalFeeType).ignoreIfNull()
+         * .isOneOfTheseValues(1, 2);
+         * 
+         * if (withdrawalFeeType != null) { final BigDecimal withdrawalFeeAmount
+         * = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+         * withdrawalFeeAmountParamName, element);
+         * baseDataValidator.reset().parameter
+         * (withdrawalFeeAmountParamName).value(withdrawalFeeAmount).notNull()
+         * .zeroOrPositiveAmount(); } }
+         */
         if (this.fromApiJsonHelper.parameterExists(withdrawalFeeForTransfersParamName, element)) {
             final Boolean isWithdrawalFeeApplicableForTransfers = this.fromApiJsonHelper.extractBooleanNamed(
                     withdrawalFeeForTransfersParamName, element);
@@ -201,8 +210,7 @@ public class SavingsProductDataValidator {
 
             final MonthDay monthDayOfAnnualFee = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, element);
             if (monthDayOfAnnualFee != null) {
-                final BigDecimal annualFeeAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(feeAmountParamName,
-                        element);
+                final BigDecimal annualFeeAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(feeAmountParamName, element);
                 baseDataValidator.reset().parameter(feeAmountParamName).value(annualFeeAmount).notNull().zeroOrPositiveAmount();
             }
         }
@@ -242,7 +250,7 @@ public class SavingsProductDataValidator {
                     SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), element);
             baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue())
                     .value(incomeFromPenaltyId).notNull().integerGreaterThanZero();
-            
+
             final Long overdraftControlAccountId = this.fromApiJsonHelper.extractLongNamed(
                     SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), element);
             baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue())
@@ -255,14 +263,13 @@ public class SavingsProductDataValidator {
 
             final Long writtenoff = this.fromApiJsonHelper.extractLongNamed(
                     SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), element);
-            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue())
-                    .value(writtenoff).notNull().integerGreaterThanZero();
-
+            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue()).value(writtenoff)
+                    .notNull().integerGreaterThanZero();
 
             validatePaymentChannelFundSourceMappings(baseDataValidator, element);
             validateChargeToIncomeAccountMappings(baseDataValidator, element);
         }
-        
+
         validateOverdraftParams(baseDataValidator, element);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -284,11 +291,11 @@ public class SavingsProductDataValidator {
             final String name = this.fromApiJsonHelper.extractStringNamed(nameParamName, element);
             baseDataValidator.reset().parameter(nameParamName).value(name).notBlank().notExceedingLengthOf(100);
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists(shortNameParamName, element)) {
-        	final String shortName = this.fromApiJsonHelper.extractStringNamed(shortNameParamName, element);
+            final String shortName = this.fromApiJsonHelper.extractStringNamed(shortNameParamName, element);
             baseDataValidator.reset().parameter(shortNameParamName).value(shortName).notBlank().notExceedingLengthOf(4);
-		}
+        }
 
         if (this.fromApiJsonHelper.parameterExists(descriptionParamName, element)) {
             final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParamName, element);
@@ -403,7 +410,7 @@ public class SavingsProductDataValidator {
                 SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), element);
         baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue()).value(incomeFromPenaltyId)
                 .ignoreIfNull().integerGreaterThanZero();
-        
+
         final Long overdraftAccountId = this.fromApiJsonHelper.extractLongNamed(
                 SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), element);
         baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue())
@@ -411,19 +418,18 @@ public class SavingsProductDataValidator {
 
         final Long incomeFromInterest = this.fromApiJsonHelper.extractLongNamed(
                 SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue(), element);
-        baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue())
-                .value(incomeFromInterest).ignoreIfNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue()).value(incomeFromInterest)
+                .ignoreIfNull().integerGreaterThanZero();
 
-        final Long writtenoff = this.fromApiJsonHelper.extractLongNamed(
-                SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), element);
-        baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue())
-                .value(writtenoff).ignoreIfNull().integerGreaterThanZero();
+        final Long writtenoff = this.fromApiJsonHelper.extractLongNamed(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(),
+                element);
+        baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue()).value(writtenoff)
+                .ignoreIfNull().integerGreaterThanZero();
 
-        
         validatePaymentChannelFundSourceMappings(baseDataValidator, element);
         validateChargeToIncomeAccountMappings(baseDataValidator, element);
         validateOverdraftParams(baseDataValidator, element);
-        
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -504,21 +510,18 @@ public class SavingsProductDataValidator {
             }
         }
     }
-    
+
     private void validateOverdraftParams(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
         if (this.fromApiJsonHelper.parameterExists(allowOverdraftParamName, element)) {
-            final Boolean allowOverdraft = this.fromApiJsonHelper.extractBooleanNamed(
-                    allowOverdraftParamName, element);
-            baseDataValidator.reset().parameter(allowOverdraftParamName).value(allowOverdraft)
-                    .ignoreIfNull().validateForBooleanValue();
+            final Boolean allowOverdraft = this.fromApiJsonHelper.extractBooleanNamed(allowOverdraftParamName, element);
+            baseDataValidator.reset().parameter(allowOverdraftParamName).value(allowOverdraft).ignoreIfNull().validateForBooleanValue();
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists(overdraftLimitParamName, element)) {
-            final BigDecimal overdraftLimit = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                    overdraftLimitParamName, element);
+            final BigDecimal overdraftLimit = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(overdraftLimitParamName, element);
             baseDataValidator.reset().parameter(overdraftLimitParamName).value(overdraftLimit).ignoreIfNull().zeroOrPositiveAmount();
         }
-        
+
     }
 
 }

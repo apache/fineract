@@ -109,8 +109,10 @@ public class MeetingsApiResource {
         if (calendarId != null) {
             calendarData = this.calendarReadPlatformService.retrieveCalendar(calendarId, entityId, entityTypeId);
             final boolean withHistory = true;
-            final Collection<LocalDate> recurringDates = this.calendarReadPlatformService.generateRecurringDates(calendarData, withHistory, DateUtils.getLocalDateOfTenant());
-            final Collection<LocalDate> nextTenRecurringDates = this.calendarReadPlatformService.generateNextTenRecurringDates(calendarData);
+            final Collection<LocalDate> recurringDates = this.calendarReadPlatformService.generateRecurringDates(calendarData, withHistory,
+                    DateUtils.getLocalDateOfTenant());
+            final Collection<LocalDate> nextTenRecurringDates = this.calendarReadPlatformService
+                    .generateNextTenRecurringDates(calendarData);
             final LocalDate recentEligibleMeetingDate = null;
             calendarData = CalendarData.withRecurringDates(calendarData, recurringDates, nextTenRecurringDates, recentEligibleMeetingDate);
         }

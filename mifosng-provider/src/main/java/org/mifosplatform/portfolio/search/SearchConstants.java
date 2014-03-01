@@ -100,7 +100,7 @@ public class SearchConstants {
             return this.value;
         }
     }
-    
+
     public static enum SEARCH_LOAN_DATE {
         APPROVAL_DATE("approvalDate"), CREATED_DATE("createdDate"), DISBURSAL_DATE("disbursalDate");
 

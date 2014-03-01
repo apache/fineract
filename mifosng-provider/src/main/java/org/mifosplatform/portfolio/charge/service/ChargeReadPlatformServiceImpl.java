@@ -141,12 +141,11 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             return "c.id as id, c.name as name, c.amount as amount, c.currency_code as currencyCode, "
                     + "c.charge_applies_to_enum as chargeAppliesTo, c.charge_time_enum as chargeTime, "
                     + "c.charge_payment_mode_enum as chargePaymentMode, "
-                    + "c.charge_calculation_enum as chargeCalculation, c.is_penalty as penalty, " 
-                    + "c.is_active as active, oc.name as currencyName, oc.decimal_places as currencyDecimalPlaces, " 
+                    + "c.charge_calculation_enum as chargeCalculation, c.is_penalty as penalty, "
+                    + "c.is_active as active, oc.name as currencyName, oc.decimal_places as currencyDecimalPlaces, "
                     + "oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
-                    + "oc.internationalized_name_code as currencyNameCode, c.fee_on_day as feeOnDay, c.fee_on_month as feeOnMonth, " 
-                    + "c.fee_interval as feeInterval,c.min_cap as minCap,c.max_cap as maxCap "
-                    + "from m_charge c "
+                    + "oc.internationalized_name_code as currencyNameCode, c.fee_on_day as feeOnDay, c.fee_on_month as feeOnMonth, "
+                    + "c.fee_interval as feeInterval,c.min_cap as minCap,c.max_cap as maxCap " + "from m_charge c "
                     + "join m_organisation_currency oc on c.currency_code = oc.code";
         }
 
@@ -198,9 +197,9 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             }
             final BigDecimal minCap = rs.getBigDecimal("minCap");
             final BigDecimal maxCap = rs.getBigDecimal("maxCap");
-            
+
             return ChargeData.instance(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType,
-                    chargePaymentMode, feeOnMonthDay, feeInterval, penalty, active,minCap,maxCap);
+                    chargePaymentMode, feeOnMonthDay, feeInterval, penalty, active, minCap, maxCap);
         }
     }
 

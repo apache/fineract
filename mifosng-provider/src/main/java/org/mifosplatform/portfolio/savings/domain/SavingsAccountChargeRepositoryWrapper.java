@@ -39,8 +39,8 @@ public class SavingsAccountChargeRepositoryWrapper {
         if (savingsAccountCharge == null) { throw new SavingsAccountChargeNotFoundException(id); }
         return savingsAccountCharge;
     }
-    
-    public List<SavingsAccountCharge> findPendingCharges(final Date transactionDate){
+
+    public List<SavingsAccountCharge> findPendingCharges(final Date transactionDate) {
         return this.repository.findPendingCharges(transactionDate);
     }
 
@@ -48,10 +48,10 @@ public class SavingsAccountChargeRepositoryWrapper {
         this.repository.save(savingsAccountCharge);
     }
 
-    public void save(final Iterable<SavingsAccountCharge> savingsAccountCharges){
+    public void save(final Iterable<SavingsAccountCharge> savingsAccountCharges) {
         this.repository.save(savingsAccountCharges);
     }
-    
+
     public void saveAndFlush(final SavingsAccountCharge savingsAccountCharge) {
         this.repository.saveAndFlush(savingsAccountCharge);
     }

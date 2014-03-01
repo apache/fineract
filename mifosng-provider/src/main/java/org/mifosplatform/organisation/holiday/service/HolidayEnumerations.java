@@ -26,10 +26,12 @@ public class HolidayEnumerations {
                         HolidayStatusType.PENDING_FOR_ACTIVATION.getCode(), "Pending for activation");
             break;
             case ACTIVE:
-                optionData = new EnumOptionData(HolidayStatusType.ACTIVE.getValue().longValue(), HolidayStatusType.ACTIVE.getCode(), "Active");
+                optionData = new EnumOptionData(HolidayStatusType.ACTIVE.getValue().longValue(), HolidayStatusType.ACTIVE.getCode(),
+                        "Active");
             break;
             case DELETED:
-                optionData = new EnumOptionData(HolidayStatusType.DELETED.getValue().longValue(), HolidayStatusType.DELETED.getCode(), "Deleted");
+                optionData = new EnumOptionData(HolidayStatusType.DELETED.getValue().longValue(), HolidayStatusType.DELETED.getCode(),
+                        "Deleted");
             break;
         }
         return optionData;

@@ -85,11 +85,12 @@ public class AuditsApiResource {
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        if (parameters.isPaged()){
-            final Page<AuditData> auditEntries = this.auditReadPlatformService.retrievePaginatedAuditEntries(extraCriteria, settings.isIncludeJson(), parameters);
-            return this.toApiJsonSerializer.serialize(settings, auditEntries, this.RESPONSE_DATA_PARAMETERS); 
+        if (parameters.isPaged()) {
+            final Page<AuditData> auditEntries = this.auditReadPlatformService.retrievePaginatedAuditEntries(extraCriteria,
+                    settings.isIncludeJson(), parameters);
+            return this.toApiJsonSerializer.serialize(settings, auditEntries, this.RESPONSE_DATA_PARAMETERS);
         }
-        
+
         final Collection<AuditData> auditEntries = this.auditReadPlatformService.retrieveAuditEntries(extraCriteria,
                 settings.isIncludeJson());
 

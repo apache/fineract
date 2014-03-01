@@ -16,7 +16,7 @@ public interface GroupReadPlatformService {
     GroupGeneralData retrieveTemplate(Long officeId, boolean isCenterGroup, boolean staffInSelectedOfficeOnly);
 
     Page<GroupGeneralData> retrievePagedAll(SearchParameters searchParameters, PaginationParameters parameters);
-    
+
     Collection<GroupGeneralData> retrieveAll(SearchParameters searchParameters, PaginationParameters parameters);
 
     GroupGeneralData retrieveOne(Long groupId);

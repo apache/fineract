@@ -23,7 +23,8 @@ public interface LoanReadPlatformService {
 
     LoanAccountData retrieveOne(Long loanId);
 
-    LoanScheduleData retrieveRepaymentSchedule(Long loanId, RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData, Collection<DisbursementData> disbursementData);
+    LoanScheduleData retrieveRepaymentSchedule(Long loanId, RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData,
+            Collection<DisbursementData> disbursementData);
 
     Collection<LoanTransactionData> retrieveLoanTransactions(Long loanId);
 
@@ -58,9 +59,12 @@ public interface LoanReadPlatformService {
     Collection<StaffData> retrieveAllowedLoanOfficers(Long selectedOfficeId, boolean staffInSelectedOfficeOnly);
 
     /*
-     * musoni-specific at present - will find overdue scheduled installments that have a special 'overdue charge' associated with the loan product.
-     *
-     * The 'overdue-charge' is only ever applied once to an installment and as a result overdue installments with this charge already applied are not returned.
+     * musoni-specific at present - will find overdue scheduled installments
+     * that have a special 'overdue charge' associated with the loan product.
+     * 
+     * The 'overdue-charge' is only ever applied once to an installment and as a
+     * result overdue installments with this charge already applied are not
+     * returned.
      */
     Collection<OverdueLoanScheduleData> retrieveAllLoansWithOverdueInstallmentsNotAlreadyPenalized(final Long penaltyWaitPeriod);
 
@@ -69,8 +73,8 @@ public interface LoanReadPlatformService {
     Integer retriveLoanCounter(Long clientId, Long productId);
 
     Collection<DisbursementData> retrieveLoanDisbursementDetails(Long loanId);
-    
-    DisbursementData retrieveLoanDisbursementDetail(Long loanId,Long disbursementId);
-    
-    Collection<LoanTermVariationsData> retrieveLoanTermVariations(Long loanId,Integer termType);
+
+    DisbursementData retrieveLoanDisbursementDetail(Long loanId, Long disbursementId);
+
+    Collection<LoanTermVariationsData> retrieveLoanTermVariations(Long loanId, Integer termType);
 }

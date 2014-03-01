@@ -76,17 +76,21 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
             baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull();
             if (chargeTimeType != null) {
-                baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).isOneOfTheseValues(ChargeTimeType.validLoanValues());
+                baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType)
+                        .isOneOfTheseValues(ChargeTimeType.validLoanValues());
             }
 
             final Integer chargePaymentMode = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargePaymentMode", element);
-            baseDataValidator.reset().parameter("chargePaymentMode").value(chargePaymentMode).notNull().isOneOfTheseValues(ChargePaymentMode.validValues());
+            baseDataValidator.reset().parameter("chargePaymentMode").value(chargePaymentMode).notNull()
+                    .isOneOfTheseValues(ChargePaymentMode.validValues());
             if (chargePaymentMode != null) {
-                baseDataValidator.reset().parameter("chargePaymentMode").value(chargePaymentMode).isOneOfTheseValues(ChargePaymentMode.validValues());
+                baseDataValidator.reset().parameter("chargePaymentMode").value(chargePaymentMode)
+                        .isOneOfTheseValues(ChargePaymentMode.validValues());
             }
-            
+
             if (chargeCalculationType != null) {
-                baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).isOneOfTheseValues(ChargeCalculationType.validValuesForLoan());
+                baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
+                        .isOneOfTheseValues(ChargeCalculationType.validValuesForLoan());
             }
 
         } else if (appliesTo.isSavingsCharge()) {
@@ -94,7 +98,8 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
             baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull();
             if (chargeTimeType != null) {
-                baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).isOneOfTheseValues(ChargeTimeType.validSavingsValues());
+                baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType)
+                        .isOneOfTheseValues(ChargeTimeType.validSavingsValues());
             }
 
             final ChargeTimeType ctt = ChargeTimeType.fromInt(chargeTimeType);
@@ -110,9 +115,10 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                 final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed("feeOnMonthDay", element);
                 baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay).notNull();
             }
-            
+
             if (chargeCalculationType != null) {
-                baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).isOneOfTheseValues(ChargeCalculationType.validValuesForSavings());
+                baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
+                        .isOneOfTheseValues(ChargeCalculationType.validValuesForSavings());
             }
         }
 

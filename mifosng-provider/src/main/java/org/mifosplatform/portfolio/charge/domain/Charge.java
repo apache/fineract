@@ -124,7 +124,6 @@ public class Charge extends AbstractPersistable<Long> {
         this.active = active;
         this.chargePaymentMode = paymentMode == null ? null : paymentMode.getValue();
 
-
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charges");
 
@@ -161,7 +160,7 @@ public class Charge extends AbstractPersistable<Long> {
                         .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
             }
         }
-        if(isPercentageOfAmount()){
+        if (isPercentageOfAmount()) {
             this.minCap = minCap;
             this.maxCap = maxCap;
         }
@@ -425,7 +424,7 @@ public class Charge extends AbstractPersistable<Long> {
     /**
      * Delete is a <i>soft delete</i>. Updates flag on charge so it wont appear
      * in query/report results.
-     *
+     * 
      * Any fields with unique constraints and prepended with id of record.
      */
     public void delete() {

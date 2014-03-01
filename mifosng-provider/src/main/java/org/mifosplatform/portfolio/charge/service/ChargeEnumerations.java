@@ -29,29 +29,37 @@ public class ChargeEnumerations {
                         ChargeTimeType.SPECIFIED_DUE_DATE.getCode(), "Specified due date");
             break;
             case SAVINGS_ACTIVATION:
-                optionData = new EnumOptionData(ChargeTimeType.SAVINGS_ACTIVATION.getValue().longValue(), ChargeTimeType.SAVINGS_ACTIVATION.getCode(), "Savings Activation");
+                optionData = new EnumOptionData(ChargeTimeType.SAVINGS_ACTIVATION.getValue().longValue(),
+                        ChargeTimeType.SAVINGS_ACTIVATION.getCode(), "Savings Activation");
             break;
             case SAVINGS_CLOSURE:
-                optionData = new EnumOptionData(ChargeTimeType.SAVINGS_CLOSURE.getValue().longValue(), ChargeTimeType.SAVINGS_CLOSURE.getCode(), "Savings Closure");
+                optionData = new EnumOptionData(ChargeTimeType.SAVINGS_CLOSURE.getValue().longValue(),
+                        ChargeTimeType.SAVINGS_CLOSURE.getCode(), "Savings Closure");
             break;
             case WITHDRAWAL_FEE:
-                optionData = new EnumOptionData(ChargeTimeType.WITHDRAWAL_FEE.getValue().longValue(), ChargeTimeType.WITHDRAWAL_FEE.getCode(), "Withdrawal Fee");
+                optionData = new EnumOptionData(ChargeTimeType.WITHDRAWAL_FEE.getValue().longValue(),
+                        ChargeTimeType.WITHDRAWAL_FEE.getCode(), "Withdrawal Fee");
             break;
             case ANNUAL_FEE:
-                optionData = new EnumOptionData(ChargeTimeType.ANNUAL_FEE.getValue().longValue(), ChargeTimeType.ANNUAL_FEE.getCode(), "Annual Fee");
+                optionData = new EnumOptionData(ChargeTimeType.ANNUAL_FEE.getValue().longValue(), ChargeTimeType.ANNUAL_FEE.getCode(),
+                        "Annual Fee");
             break;
             case MONTHLY_FEE:
-                optionData = new EnumOptionData(ChargeTimeType.MONTHLY_FEE.getValue().longValue(), ChargeTimeType.MONTHLY_FEE.getCode(), "Monthly Fee");
+                optionData = new EnumOptionData(ChargeTimeType.MONTHLY_FEE.getValue().longValue(), ChargeTimeType.MONTHLY_FEE.getCode(),
+                        "Monthly Fee");
             break;
             case INSTALMENT_FEE:
-                optionData = new EnumOptionData(ChargeTimeType.INSTALMENT_FEE.getValue().longValue(), ChargeTimeType.INSTALMENT_FEE.getCode(), "Instalment Fee");
+                optionData = new EnumOptionData(ChargeTimeType.INSTALMENT_FEE.getValue().longValue(),
+                        ChargeTimeType.INSTALMENT_FEE.getCode(), "Instalment Fee");
             break;
             case OVERDUE_INSTALLMENT:
-                optionData = new EnumOptionData(ChargeTimeType.OVERDUE_INSTALLMENT.getValue().longValue(),ChargeTimeType.OVERDUE_INSTALLMENT.getCode(),"overdue fees") ;
+                optionData = new EnumOptionData(ChargeTimeType.OVERDUE_INSTALLMENT.getValue().longValue(),
+                        ChargeTimeType.OVERDUE_INSTALLMENT.getCode(), "overdue fees");
             break;
             case OVERDRAFT_FEE:
-                optionData = new EnumOptionData(ChargeTimeType.OVERDRAFT_FEE.getValue().longValue(), ChargeTimeType.OVERDRAFT_FEE.getCode(), "Overdraft Fee");
-                break;
+                optionData = new EnumOptionData(ChargeTimeType.OVERDRAFT_FEE.getValue().longValue(),
+                        ChargeTimeType.OVERDRAFT_FEE.getCode(), "Overdraft Fee");
+            break;
             default:
                 optionData = new EnumOptionData(ChargeTimeType.INVALID.getValue().longValue(), ChargeTimeType.INVALID.getCode(), "Invalid");
             break;

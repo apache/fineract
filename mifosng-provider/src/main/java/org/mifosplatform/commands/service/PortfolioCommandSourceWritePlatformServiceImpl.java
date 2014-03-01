@@ -72,7 +72,6 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
             result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
         } catch (final RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
 
-
             result = this.processAndLogCommandService.logCommand(e.getCommandSourceResult());
         }
 

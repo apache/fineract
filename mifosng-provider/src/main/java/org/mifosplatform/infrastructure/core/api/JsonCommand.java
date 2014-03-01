@@ -28,7 +28,7 @@ import com.google.gson.reflect.TypeToken;
 
 /**
  * Immutable representation of a command.
- *
+ * 
  * Wraps the provided JSON with convenience functions for extracting parameter
  * values and checking for changes against an existing value.
  */
@@ -317,9 +317,9 @@ public final class JsonCommand {
     }
 
     public Map<String, String> mapValueOfParameterNamed(final String json) {
-    	final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
-    	final Map<String, String> value = this.fromApiJsonHelper.extractDataMap(typeOfMap, json);
-    	return value;
+        final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
+        final Map<String, String> value = this.fromApiJsonHelper.extractDataMap(typeOfMap, json);
+        return value;
     }
 
     public boolean isChangeInBigDecimalParameterNamedDefaultingZeroToNull(final String parameterName, final BigDecimal existingValue) {

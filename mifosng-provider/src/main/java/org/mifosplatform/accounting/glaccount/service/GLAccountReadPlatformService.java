@@ -17,7 +17,7 @@ public interface GLAccountReadPlatformService {
     List<GLAccountData> retrieveAllGLAccounts(Integer accountClassification, String searchParam, Integer usage,
             Boolean manualTransactionsAllowed, Boolean disabled, JournalEntryAssociationParametersData associationParametersData);
 
-    GLAccountData retrieveGLAccountById(long glAccountId,JournalEntryAssociationParametersData associationParametersData);
+    GLAccountData retrieveGLAccountById(long glAccountId, JournalEntryAssociationParametersData associationParametersData);
 
     List<GLAccountData> retrieveAllEnabledDetailGLAccounts();
 

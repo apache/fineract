@@ -207,7 +207,8 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         return generateRecurringDate(calendarData, DateUtils.getLocalDateOfTenant(), tillDate, 10);
     }
 
-    private Collection<LocalDate> generateRecurringDate(final CalendarData calendarData, final LocalDate fromDate, final LocalDate tillDate, final int maxCount) {
+    private Collection<LocalDate> generateRecurringDate(final CalendarData calendarData, final LocalDate fromDate,
+            final LocalDate tillDate, final int maxCount) {
 
         if (!calendarData.isRepeating()) { return null; }
         final String rrule = calendarData.getRecurrence();
@@ -235,13 +236,13 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
     private LocalDate getPeriodStartDate(final LocalDate seedDate, final LocalDate recurrenceStartDate, final LocalDate fromDate) {
         LocalDate periodStartDate = null;
-        if(fromDate != null) {
+        if (fromDate != null) {
             periodStartDate = fromDate;
-        }else {
+        } else {
             final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
             if (seedDate.isBefore(currentDate.minusYears(1))) {
                 periodStartDate = currentDate.minusYears(1);
-            }else{
+            } else {
                 periodStartDate = recurrenceStartDate;
             }
         }

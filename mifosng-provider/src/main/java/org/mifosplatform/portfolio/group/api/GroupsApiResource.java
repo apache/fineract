@@ -230,11 +230,16 @@ public class GroupsApiResource {
                 if (collectionMeetingCalendar != null) {
                     final boolean withHistory = true;
                     final LocalDate tillDate = null;
-                    final Collection<LocalDate> recurringDates = this.calendarReadPlatformService.generateRecurringDates(collectionMeetingCalendar, withHistory, tillDate);
-                    final Collection<LocalDate> nextTenRecurringDates = this.calendarReadPlatformService.generateNextTenRecurringDates(collectionMeetingCalendar);
-                    final MeetingData lastMeeting = this.meetingReadPlatformService.retrieveLastMeeting(collectionMeetingCalendar.getCalendarInstanceId());
-                    final LocalDate recentEligibleMeetingDate = this.calendarReadPlatformService.generateNextEligibleMeetingDateForCollection(collectionMeetingCalendar, lastMeeting);
-                    collectionMeetingCalendar = CalendarData.withRecurringDates(collectionMeetingCalendar, recurringDates, nextTenRecurringDates, recentEligibleMeetingDate);
+                    final Collection<LocalDate> recurringDates = this.calendarReadPlatformService.generateRecurringDates(
+                            collectionMeetingCalendar, withHistory, tillDate);
+                    final Collection<LocalDate> nextTenRecurringDates = this.calendarReadPlatformService
+                            .generateNextTenRecurringDates(collectionMeetingCalendar);
+                    final MeetingData lastMeeting = this.meetingReadPlatformService.retrieveLastMeeting(collectionMeetingCalendar
+                            .getCalendarInstanceId());
+                    final LocalDate recentEligibleMeetingDate = this.calendarReadPlatformService
+                            .generateNextEligibleMeetingDateForCollection(collectionMeetingCalendar, lastMeeting);
+                    collectionMeetingCalendar = CalendarData.withRecurringDates(collectionMeetingCalendar, recurringDates,
+                            nextTenRecurringDates, recentEligibleMeetingDate);
                 }
             }
 

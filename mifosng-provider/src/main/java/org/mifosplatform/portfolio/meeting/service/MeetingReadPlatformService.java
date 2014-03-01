@@ -18,6 +18,6 @@ public interface MeetingReadPlatformService {
 
     Collection<MeetingData> retrieveMeetingsByEntityByCalendarType(final Long entityId, final Integer entityTypeId,
             final List<Integer> calendarTypeOptions);
-    
+
     MeetingData retrieveLastMeeting(Long calendarInstanceId);
 }

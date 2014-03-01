@@ -58,14 +58,15 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private final AllGroupTypesDataMapper allGroupTypesDataMapper = new AllGroupTypesDataMapper();
     private final PaginationHelper<GroupGeneralData> paginationHelper = new PaginationHelper<GroupGeneralData>();
     private final PaginationParametersDataValidator paginationParametersDataValidator;
-    
+
     private final static Set<String> supportedOrderByValues = new HashSet<String>(Arrays.asList("id", "name", "officeId", "officeName"));
 
     @Autowired
     public GroupReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final CenterReadPlatformService centerReadPlatformService, final ClientReadPlatformService clientReadPlatformService,
             final OfficeReadPlatformService officeReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService, final PaginationParametersDataValidator paginationParametersDataValidator) {
+            final CodeValueReadPlatformService codeValueReadPlatformService,
+            final PaginationParametersDataValidator paginationParametersDataValidator) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.centerReadPlatformService = centerReadPlatformService;
@@ -160,7 +161,6 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
                 new Object[] { hierarchySearchString }, this.allGroupTypesDataMapper);
     }
-    
 
     @Override
     public Collection<GroupGeneralData> retrieveAll(SearchParameters searchParameters, final PaginationParameters parameters) {
@@ -186,8 +186,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         if (parameters.isLimited()) {
             sqlBuilder.append(parameters.limitSql());
         }
-        
-        return this.jdbcTemplate.query(sqlBuilder.toString(), this.allGroupTypesDataMapper, new Object[] {hierarchySearchString});
+
+        return this.jdbcTemplate.query(sqlBuilder.toString(), this.allGroupTypesDataMapper, new Object[] { hierarchySearchString });
     }
 
     // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where
@@ -223,8 +223,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         if (hierarchy != null) {
             extraCriteria.append(" and o.hierarchy like ").append(ApiParameterHelper.sqlEncodeString(hierarchy + "%"));
         }
-        
-        if (searchCriteria.isStaffIdPassed()){
+
+        if (searchCriteria.isStaffIdPassed()) {
             extraCriteria.append(" and g.staff_id = ").append(searchCriteria.getStaffId());
         }
 

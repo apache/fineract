@@ -24,7 +24,6 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_loan_disbursement_detail")
 public class LoanDisbursementDetails extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;
@@ -39,7 +38,7 @@ public class LoanDisbursementDetails extends AbstractPersistable<Long> {
 
     @Column(name = "principal", scale = 6, precision = 19, nullable = false)
     private BigDecimal principal;
-    
+
     @Column(name = "approved_principal", scale = 6, precision = 19, nullable = false)
     private BigDecimal approvedPrincipal;
 
@@ -85,12 +84,11 @@ public class LoanDisbursementDetails extends AbstractPersistable<Long> {
     public BigDecimal principal() {
         return this.principal;
     }
-    
-    public void updatePrincipal(BigDecimal principal){
+
+    public void updatePrincipal(BigDecimal principal) {
         this.principal = principal;
     }
 
- 
     public Date getDisbursementDate() {
         Date disbursementDate = this.expectedDisbursementDate;
         if (this.actualDisbursementDate != null) {
@@ -102,26 +100,24 @@ public class LoanDisbursementDetails extends AbstractPersistable<Long> {
     public DisbursementData toData() {
         LocalDate expectedDisburseDate = null;
         LocalDate actualDisburseDate = null;
-        if(this.expectedDisbursementDate  != null){
+        if (this.expectedDisbursementDate != null) {
             expectedDisburseDate = new LocalDate(this.expectedDisbursementDate);
             actualDisburseDate = expectedDisburseDate;
         }
-        if(getDisbursementDate() != null){
+        if (getDisbursementDate() != null) {
             actualDisburseDate = new LocalDate(getDisbursementDate());
         }
-        return new DisbursementData(getId(), expectedDisburseDate, actualDisburseDate, this.principal,this.approvedPrincipal);
+        return new DisbursementData(getId(), expectedDisburseDate, actualDisburseDate, this.principal, this.approvedPrincipal);
     }
 
-    
     public void updateActualDisbursementDate(Date actualDisbursementDate) {
         this.actualDisbursementDate = actualDisbursementDate;
     }
-    
+
     public BigDecimal resetPrincipal() {
         return this.principal = this.approvedPrincipal;
     }
 
-    
     public void updateExpectedDisbursementDate(Date expectedDisbursementDate) {
         this.expectedDisbursementDate = expectedDisbursementDate;
     }

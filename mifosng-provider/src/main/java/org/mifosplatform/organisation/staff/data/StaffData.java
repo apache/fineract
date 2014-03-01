@@ -38,8 +38,10 @@ public class StaffData {
     }
 
     public static StaffData instance(final Long id, final String firstname, final String lastname, final String displayName,
-            final Long officeId, final String officeName, final Boolean isLoanOfficer, final String externalId, final String mobileNo, final boolean isActive) {
-        return new StaffData(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, externalId, mobileNo, null, isActive);
+            final Long officeId, final String officeName, final Boolean isLoanOfficer, final String externalId, final String mobileNo,
+            final boolean isActive) {
+        return new StaffData(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, externalId, mobileNo, null,
+                isActive);
     }
 
     private StaffData(final Long id, final String firstname, final String lastname, final String displayName, final Long officeId,

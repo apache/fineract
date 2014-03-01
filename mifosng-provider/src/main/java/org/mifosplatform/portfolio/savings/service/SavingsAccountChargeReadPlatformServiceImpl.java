@@ -38,8 +38,8 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;
-    
-    //mappers
+
+    // mappers
     private final SavingsAccountChargeDueMapper chargeDueMapper;
 
     @Autowired

@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-    This Source Code Form is subject to the terms of the Mozilla Public
-    License, v. 2.0. If a copy of the MPL was not distributed with this file,
-    You can obtain one at http://mozilla.org/MPL/2.0/.
--->
-<web-app 
-  xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
-  id="mifosng-platform-provider" version="2.5">
+<!-- This Source Code Form is subject to the terms of the Mozilla Public 
+	License, v. 2.0. If a copy of the MPL was not distributed with this file, 
+	You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<web-app xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="mifosng-platform-provider" version="2.5">
 
 	<display-name>Mifos Platform</display-name>
-	<description>A provider of microfinance services which applications can consume once authenticated and authorized.</description>
+	<description>A provider of microfinance services which applications can
+		consume once authenticated and authorized.</description>
 
 	<context-param>
-	    <param-name>webAppRootKey</param-name>
-	    <param-value>mifosplatform.root</param-value>
-    </context-param>
+		<param-name>webAppRootKey</param-name>
+		<param-value>mifosplatform.root</param-value>
+	</context-param>
 
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
@@ -35,7 +33,7 @@
 
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
+	</listener>
 
 	<servlet>
 		<servlet-name>jersey-serlvet</servlet-name>
@@ -45,19 +43,16 @@
 			<param-value>true</param-value>
 		</init-param>
 		<!-- debugging on for development -->
-		<!-- 
-	    <init-param>
-		  <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
-		  <param-value>com.sun.jersey.api.container.filter.LoggingFilter</param-value>
-		</init-param>
-		-->
+		<!-- <init-param> <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name> 
+			<param-value>com.sun.jersey.api.container.filter.LoggingFilter</param-value> 
+			</init-param> -->
 		<init-param>
-		  <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-		  <param-value>org.mifosplatform.infrastructure.core.filters.ResponseCorsFilter</param-value>
+			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+			<param-value>org.mifosplatform.infrastructure.core.filters.ResponseCorsFilter</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
- 
+
 	<servlet-mapping>
 		<servlet-name>jersey-serlvet</servlet-name>
 		<url-pattern>/api/v1/*</url-pattern>

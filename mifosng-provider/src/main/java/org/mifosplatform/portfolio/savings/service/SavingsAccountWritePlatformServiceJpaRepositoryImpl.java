@@ -152,7 +152,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final Map<String, Object> changes = account.activate(user, command, DateUtils.getLocalDateOfTenant());
         if (!changes.isEmpty()) {
-            
+
             final MathContext mc = MathContext.DECIMAL64;
             if (account.isBeforeLastPostingPeriod(account.getActivationLocalDate())) {
                 final LocalDate today = DateUtils.getLocalDateOfTenant();
@@ -316,11 +316,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
 
         account.postInterest(mc, today);
-        
+
         // for generating transaction id's
         List<SavingsAccountTransaction> transactions = account.getTransactions();
-        for(SavingsAccountTransaction accountTransaction:transactions){
-            if(accountTransaction.getId() == null){
+        for (SavingsAccountTransaction accountTransaction : transactions) {
+            if (accountTransaction.getId() == null) {
                 this.savingsAccountTransactionRepository.save(accountTransaction);
             }
         }
@@ -376,7 +376,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 account.undoTransaction(transactionId + 1);
             }
         }
-        
+
         checkClientOrGroupActive(account);
         if (savingsAccountTransaction.isPostInterestCalculationRequired()
                 && account.isBeforeLastPostingPeriod(savingsAccountTransaction.transactionLocalDate())) {
@@ -442,7 +442,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         SavingsAccountTransaction transaction = null;
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                paymentDetail,savingsAccountTransaction.createdDate());
+                paymentDetail, savingsAccountTransaction.createdDate());
         if (savingsAccountTransaction.isDeposit()) {
             transaction = account.deposit(transactionDTO);
         } else {
@@ -624,7 +624,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final Locale locale = command.extractLocale();
         final String format = command.dateFormat();
-        final DateTimeFormatter fmt = StringUtils.isNotBlank(format) ? DateTimeFormat.forPattern(format).withLocale(locale) : DateTimeFormat.forPattern("dd MM yyyy");
+        final DateTimeFormatter fmt = StringUtils.isNotBlank(format) ? DateTimeFormat.forPattern(format).withLocale(locale)
+                : DateTimeFormat.forPattern("dd MM yyyy");
 
         final Long chargeDefinitionId = command.longValueOfParameterNamed(chargeIdParamName);
         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeDefinitionId);

@@ -38,7 +38,7 @@ import org.springframework.stereotype.Service;
  * Service class to create and load batch jobs to Scheduler using
  * {@link SchedulerFactoryBean} ,{@link MethodInvokingJobDetailFactoryBean} and
  * {@link CronTriggerFactoryBean}
- *
+ * 
  */
 @Service
 public class JobRegisterServiceImpl implements JobRegisterService {

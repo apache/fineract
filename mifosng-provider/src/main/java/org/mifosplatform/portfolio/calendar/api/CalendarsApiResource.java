@@ -55,12 +55,12 @@ public class CalendarsApiResource {
     /**
      * The set of parameters that are supported in response for {@link Calendar}
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(
-            Arrays.asList("id", "entityId", "entityType", "title", "description", "location", "startDate", "endDate", "duration", "type",
-                    "repeating", "recurrence", "frequency", "interval", "repeatsOnDay", "remindBy", "firstReminder", "secondReminder",
-                    "humanReadable", "createdDate", "lastUpdatedDate", "createdByUserId", "createdByUsername", "lastUpdatedByUserId",
-                    "lastUpdatedByUsername", "recurringDates", "nextTenRecurringDates", "entityTypeOptions", "calendarTypeOptions",
-                    "remindByOptions", "frequencyOptions", "repeatsOnDayOptions"));
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "entityId", "entityType", "title",
+            "description", "location", "startDate", "endDate", "duration", "type", "repeating", "recurrence", "frequency", "interval",
+            "repeatsOnDay", "remindBy", "firstReminder", "secondReminder", "humanReadable", "createdDate", "lastUpdatedDate",
+            "createdByUserId", "createdByUsername", "lastUpdatedByUserId", "lastUpdatedByUsername", "recurringDates",
+            "nextTenRecurringDates", "entityTypeOptions", "calendarTypeOptions", "remindByOptions", "frequencyOptions",
+            "repeatsOnDayOptions"));
     private final String resourceNameForPermissions = "CALENDAR";
 
     private final PlatformSecurityContext context;

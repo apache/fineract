@@ -36,8 +36,8 @@ public class MeetingReadPlatformServiceImpl implements MeetingReadPlatformServic
 
         public String schema() {
 
-            return " select m.id as id, m.meeting_date as meetingDate from m_meeting m " +
-            		"inner join m_calendar_instance ci on m.calendar_instance_id = ci.id ";
+            return " select m.id as id, m.meeting_date as meetingDate from m_meeting m "
+                    + "inner join m_calendar_instance ci on m.calendar_instance_id = ci.id ";
         }
 
         @Override

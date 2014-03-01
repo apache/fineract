@@ -34,7 +34,7 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
         return new LoanScheduleModelRepaymentPeriod(periodNumber, startDate, scheduledDueDate, principalDue, outstandingLoanBalance,
                 interestDue, feeChargesDue, penaltyChargesDue, totalDue);
     }
-    
+
     public LoanScheduleModelRepaymentPeriod(final int periodNumber, final LocalDate fromDate, final LocalDate dueDate,
             final Money principalDue, final Money outstandingLoanBalance, final Money interestDue, final Money feeChargesDue,
             final Money penaltyChargesDue, final Money totalDue) {

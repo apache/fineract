@@ -37,7 +37,6 @@ public final class AllGroupTypesDataMapper implements RowMapper<GroupGeneralData
         sqlBuilder.append("sbu.firstname as submittedByFirstname, ");
         sqlBuilder.append("sbu.lastname as submittedByLastname, ");
 
-
         sqlBuilder.append("clu.username as closedByUsername, ");
         sqlBuilder.append("clu.firstname as closedByFirstname, ");
         sqlBuilder.append("clu.lastname as closedByLastname, ");
@@ -83,24 +82,23 @@ public final class AllGroupTypesDataMapper implements RowMapper<GroupGeneralData
 
         final LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedOnDate");
         final String closedByUsername = rs.getString("closedByUsername");
-        final String closedByFirstname =  rs.getString("closedByFirstname");
+        final String closedByFirstname = rs.getString("closedByFirstname");
         final String closedByLastname = rs.getString("closedByLastname");
 
-        final LocalDate submittedOnDate =  JdbcSupport.getLocalDate(rs, "submittedOnDate");
+        final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
         final String submittedByUsername = rs.getString("submittedByUsername");
         final String submittedByFirstname = rs.getString("submittedByFirstname");
         final String submittedByLastname = rs.getString("submittedByLastname");
 
-
         final String activatedByUsername = rs.getString("activatedByUsername");
         final String activatedByFirstname = rs.getString("activatedByFirstname");
-        final String activatedByLastname =  rs.getString("activatedByLastname");
+        final String activatedByLastname = rs.getString("activatedByLastname");
 
-        final GroupTimelineData timeline = new GroupTimelineData (submittedOnDate, submittedByUsername, submittedByFirstname, submittedByLastname,
-                activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate, closedByUsername,
-                closedByFirstname, closedByLastname);
+        final GroupTimelineData timeline = new GroupTimelineData(submittedOnDate, submittedByUsername, submittedByFirstname,
+                submittedByLastname, activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate,
+                closedByUsername, closedByFirstname, closedByLastname);
 
         return GroupGeneralData.instance(id, name, externalId, status, activationDate, officeId, officeName, centerId, centerName, staffId,
-                staffName, hierarchy,timeline);
+                staffName, hierarchy, timeline);
     }
 }

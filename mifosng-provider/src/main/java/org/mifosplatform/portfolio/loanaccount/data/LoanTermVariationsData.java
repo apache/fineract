@@ -13,25 +13,22 @@ public class LoanTermVariationsData {
     private final LocalDate termVariationApplicableFrom;
     private final BigDecimal termValue;
 
-    public LoanTermVariationsData(final Long id, final EnumOptionData termType, 
-            final LocalDate termVariationApplicableFrom, final BigDecimal termValue) {
+    public LoanTermVariationsData(final Long id, final EnumOptionData termType, final LocalDate termVariationApplicableFrom,
+            final BigDecimal termValue) {
         this.id = id;
         this.termType = termType;
         this.termVariationApplicableFrom = termVariationApplicableFrom;
         this.termValue = termValue;
     }
 
-    
     public EnumOptionData getTermType() {
         return this.termType;
     }
 
-    
     public LocalDate getTermApplicableFrom() {
         return this.termVariationApplicableFrom;
     }
 
-    
     public BigDecimal getTermValue() {
         return this.termValue;
     }

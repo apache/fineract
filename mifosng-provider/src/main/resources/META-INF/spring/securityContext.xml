@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-
-    This Source Code Form is subject to the terms of the Mozilla Public
-    License, v. 2.0. If a copy of the MPL was not distributed with this file,
-    You can obtain one at http://mozilla.org/MPL/2.0/.
-
--->
+<!-- This Source Code Form is subject to the terms of the Mozilla Public 
+	License, v. 2.0. If a copy of the MPL was not distributed with this file, 
+	You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <beans:beans xmlns="http://www.springframework.org/schema/security"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
 	xsi:schemaLocation="
@@ -14,36 +10,49 @@
    http://www.springframework.org/schema/beans 
    http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
-	<http create-session="stateless" use-expressions="true" pattern="/api/**" entry-point-ref="basicAuthenticationEntryPoint">
-	   <intercept-url pattern="/api/*/authentication" access="permitAll" method="POST" requires-channel="https" />
-	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" method="GET" requires-channel="https" />
-	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" method="POST" requires-channel="https"/>
-	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" method="PUT" requires-channel="https"/>
-	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" method="DELETE" requires-channel="https"/>
-	   <intercept-url pattern="/api/**" access="isFullyAuthenticated()" method="HEAD" requires-channel="https"/>
+	<http create-session="stateless" use-expressions="true" pattern="/api/**"
+		entry-point-ref="basicAuthenticationEntryPoint">
+		<intercept-url pattern="/api/*/authentication" access="permitAll"
+			method="POST" requires-channel="https" />
+		<intercept-url pattern="/api/**" access="isFullyAuthenticated()"
+			method="GET" requires-channel="https" />
+		<intercept-url pattern="/api/**" access="isFullyAuthenticated()"
+			method="POST" requires-channel="https" />
+		<intercept-url pattern="/api/**" access="isFullyAuthenticated()"
+			method="PUT" requires-channel="https" />
+		<intercept-url pattern="/api/**" access="isFullyAuthenticated()"
+			method="DELETE" requires-channel="https" />
+		<intercept-url pattern="/api/**" access="isFullyAuthenticated()"
+			method="HEAD" requires-channel="https" />
 
-		<custom-filter after="SECURITY_CONTEXT_FILTER" ref="basicAuthenticationProcessingFilter" />	   
+		<custom-filter after="SECURITY_CONTEXT_FILTER"
+			ref="basicAuthenticationProcessingFilter" />
 	</http>
-	
-	<beans:bean id="basicAuthenticationEntryPoint" class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
+
+	<beans:bean id="basicAuthenticationEntryPoint"
+		class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
 		<beans:property name="realmName" value="Mifos Platform API" />
 	</beans:bean>
 
-	<beans:bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.ShaPasswordEncoder">
-    	<beans:constructor-arg value="256"/>
- 	</beans:bean>
- 	
- 	<beans:bean id="saltSource" class="org.springframework.security.authentication.dao.ReflectionSaltSource">
-    	<beans:property name="userPropertyToUse" value="id"/>
- 	</beans:bean>
- 		
-	<beans:bean id="customAuthenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+	<beans:bean id="passwordEncoder"
+		class="org.springframework.security.authentication.encoding.ShaPasswordEncoder">
+		<beans:constructor-arg value="256" />
+	</beans:bean>
+
+	<beans:bean id="saltSource"
+		class="org.springframework.security.authentication.dao.ReflectionSaltSource">
+		<beans:property name="userPropertyToUse" value="id" />
+	</beans:bean>
+
+	<beans:bean id="customAuthenticationProvider"
+		class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
 		<beans:property name="userDetailsService" ref="userDetailsService" />
 		<beans:property name="passwordEncoder" ref="passwordEncoder" />
 		<beans:property name="saltSource" ref="saltSource" />
 	</beans:bean>
 
-	<authentication-manager alias="authenticationManager" erase-credentials="false">
+	<authentication-manager alias="authenticationManager"
+		erase-credentials="false">
 		<authentication-provider ref="customAuthenticationProvider" />
 	</authentication-manager>
 </beans:beans>

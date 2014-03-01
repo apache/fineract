@@ -29,6 +29,6 @@ public interface LoanScheduleModelPeriod {
     BigDecimal feeChargesDue();
 
     BigDecimal penaltyChargesDue();
-    
-    void addLoanCharges(BigDecimal feeCharge,BigDecimal penaltyCharge);
+
+    void addLoanCharges(BigDecimal feeCharge, BigDecimal penaltyCharge);
 }

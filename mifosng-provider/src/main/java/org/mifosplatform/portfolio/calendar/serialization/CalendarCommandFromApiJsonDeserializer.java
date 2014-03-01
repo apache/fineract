@@ -151,8 +151,8 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
                 if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue(), element)) {
                     final Integer interval = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
                             CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue(), element);
-                    baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue()).value(interval)
-                            .notNull().integerGreaterThanZero();
+                    baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue()).value(interval).notNull()
+                            .integerGreaterThanZero();
                 }
                 if (CalendarFrequencyType.fromInt(frequency).isWeekly()) {
                     final Integer repeatsOnDay = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
@@ -261,8 +261,8 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
                 if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue(), element)) {
                     final Integer interval = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
                             CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue(), element);
-                    baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue()).value(interval)
-                            .notNull().integerGreaterThanZero();
+                    baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue()).value(interval).notNull()
+                            .integerGreaterThanZero();
                 }
 
                 if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue(), element)) {

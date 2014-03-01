@@ -54,7 +54,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                paymentDetail,new Date());
+                paymentDetail, new Date());
         final SavingsAccountTransaction withdrawal = account.withdraw(transactionDTO, applyWithdrawFee);
 
         final MathContext mc = MathContext.DECIMAL64;
@@ -83,7 +83,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                paymentDetail,new Date());
+                paymentDetail, new Date());
         final SavingsAccountTransaction deposit = account.deposit(transactionDTO);
 
         final MathContext mc = MathContext.DECIMAL64;

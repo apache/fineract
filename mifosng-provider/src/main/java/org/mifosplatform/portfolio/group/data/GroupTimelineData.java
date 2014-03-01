@@ -8,7 +8,8 @@ package org.mifosplatform.portfolio.group.data;
 import org.joda.time.LocalDate;
 
 /**
- * Immutable data object represent the important time-line events of a group/center.
+ * Immutable data object represent the important time-line events of a
+ * group/center.
  * 
  */
 @SuppressWarnings("unused")
@@ -29,12 +30,10 @@ public class GroupTimelineData {
     private final String closedByFirstname;
     private final String closedByLastname;
 
-
-    public GroupTimelineData(final LocalDate submittedOnDate, final String submittedByUsername,
-                             final String submittedByFirstname, final String submittedByLastname, final LocalDate activatedOnDate,
-                             final String activatedByUsername, final String activatedByFirstname, final String activatedByLastname,
-                             final LocalDate closedOnDate, final String closedByUsername, final String closedByFirstname,
-                             final String closedByLastname) {
+    public GroupTimelineData(final LocalDate submittedOnDate, final String submittedByUsername, final String submittedByFirstname,
+            final String submittedByLastname, final LocalDate activatedOnDate, final String activatedByUsername,
+            final String activatedByFirstname, final String activatedByLastname, final LocalDate closedOnDate,
+            final String closedByUsername, final String closedByFirstname, final String closedByLastname) {
         this.submittedOnDate = submittedOnDate;
         this.submittedByUsername = submittedByUsername;
         this.submittedByFirstname = submittedByFirstname;
@@ -51,6 +50,5 @@ public class GroupTimelineData {
         this.closedByLastname = closedByLastname;
 
     }
-
 
 }
