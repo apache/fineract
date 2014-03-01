@@ -184,7 +184,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 if (clientId != null) {
                     cycleNumber = this.loanReadPlatformService.retriveLoanCounter(clientId, loanProduct.getId());
                 } else if (groupId != null) {
-                    cycleNumber = this.loanReadPlatformService.retriveLoanCounter(groupId, AccountType.GROUP.getValue(), loanProduct.getId());
+                    cycleNumber = this.loanReadPlatformService.retriveLoanCounter(groupId, AccountType.GROUP.getValue(),
+                            loanProduct.getId());
                 }
                 this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(command.parsedJson(), baseDataValidator,
                         loanProduct, cycleNumber);
@@ -269,28 +270,46 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             if (!existingLoanApplication.isSubmittedAndPendingApproval()) { throw new LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified(
                     loanId); }
-            
+
             final Set<LoanCharge> existingCharges = existingLoanApplication.charges();
-            Map<Long,LoanChargeData> chargesMap = new HashMap<Long, LoanChargeData>();
-            for(LoanCharge charge:existingCharges){
-                LoanChargeData chargeData = new LoanChargeData(charge.getId(),charge.getDueLocalDate() ,charge.amountOrPercentage());
+            Map<Long, LoanChargeData> chargesMap = new HashMap<Long, LoanChargeData>();
+            for (LoanCharge charge : existingCharges) {
+                LoanChargeData chargeData = new LoanChargeData(charge.getId(), charge.getDueLocalDate(), charge.amountOrPercentage());
                 chargesMap.put(charge.getId(), chargeData);
             }
-            
+
+            /**
+             * Stores all charges which are passed in during modify loan
+             * application
+             **/
             final Set<LoanCharge> possiblyModifedLoanCharges = this.loanChargeAssembler.fromParsedJson(command.parsedJson());
+            /** Boolean determines if any charge has been modified **/
             boolean isChargeModified = false;
-            for(LoanCharge loanCharge : possiblyModifedLoanCharges){
-                if(loanCharge.getId() == null){
+
+            /**
+             * If there are any charges already present, which are now not
+             * passed in as a part of the request, deem the charges as modified
+             **/
+            if (!possiblyModifedLoanCharges.containsAll(existingCharges)) {
+                isChargeModified = true;
+            }
+
+            /**
+             * If any new charges are added or values of existing charges are
+             * modified
+             **/
+            for (LoanCharge loanCharge : possiblyModifedLoanCharges) {
+                if (loanCharge.getId() == null) {
                     isChargeModified = true;
-                }else{
+                } else {
                     LoanChargeData chargeData = chargesMap.get(loanCharge.getId());
-                    if(loanCharge.amountOrPercentage().compareTo(chargeData.amountOrPercentage()) != 0 || 
-                            (loanCharge.isSpecifiedDueDate() && !loanCharge.getDueLocalDate().equals(chargeData.getDueDate()))){
+                    if (loanCharge.amountOrPercentage().compareTo(chargeData.amountOrPercentage()) != 0
+                            || (loanCharge.isSpecifiedDueDate() && !loanCharge.getDueLocalDate().equals(chargeData.getDueDate()))) {
                         isChargeModified = true;
                     }
                 }
             }
-            
+
             final Set<LoanCollateral> possiblyModifedLoanCollateralItems = this.loanCollateralAssembler
                     .fromParsedJson(command.parsedJson());
 
@@ -300,7 +319,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (changes.containsKey("expectedDisbursementDate")) {
                 this.loanAssembler.validateExpectedDisbursementForHolidayAndNonWorkingDay(existingLoanApplication);
             }
-            
+
             final String clientIdParamName = "clientId";
             if (changes.containsKey(clientIdParamName)) {
                 final Long clientId = command.longValueOfParameterNamed(clientIdParamName);
@@ -338,7 +357,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     if (clientId != null) {
                         cycleNumber = this.loanReadPlatformService.retriveLoanCounter(clientId, loanProduct.getId());
                     } else if (groupId != null) {
-                        cycleNumber = this.loanReadPlatformService.retriveLoanCounter(groupId, AccountType.GROUP.getValue(), loanProduct.getId());
+                        cycleNumber = this.loanReadPlatformService.retriveLoanCounter(groupId, AccountType.GROUP.getValue(),
+                                loanProduct.getId());
                     }
                     this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(command.parsedJson(), baseDataValidator,
                             loanProduct, cycleNumber);
@@ -727,17 +747,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             throw new LoanApplicationDateException("submitted.on.date.cannot.be.after.the.loan.product.close.date", defaultUserMessage,
                     submittedOnDate.toString(), closeDate.toString());
         }
-        
-        if(expectedFirstRepaymentOnDate != null && submittedOnDate.isAfter(expectedFirstRepaymentOnDate))
-        {
+
+        if (expectedFirstRepaymentOnDate != null && submittedOnDate.isAfter(expectedFirstRepaymentOnDate)) {
             defaultUserMessage = "submittedOnDate cannot be after the loans  expectedFirstRepaymentOnDate.";
-            throw new LoanApplicationDateException("submitted.on.date.cannot.be.after.the.loan.expected.first.repayment.date", defaultUserMessage,
-                    submittedOnDate.toString(), expectedFirstRepaymentOnDate.toString());
+            throw new LoanApplicationDateException("submitted.on.date.cannot.be.after.the.loan.expected.first.repayment.date",
+                    defaultUserMessage, submittedOnDate.toString(), expectedFirstRepaymentOnDate.toString());
         }
     }
-    
-    
-    
 
     private void checkClientOrGroupActive(final Loan loan) {
         final Client client = loan.client();
