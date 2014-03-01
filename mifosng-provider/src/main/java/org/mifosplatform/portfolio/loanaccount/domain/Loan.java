@@ -317,36 +317,34 @@ public class Loan extends AbstractPersistable<Long> {
         final Boolean syncDisbursementWithMeeting = null;
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting, fixedEmiAmount,
-                disbursementDetails,maxOutstandingLoanBalance);
+                disbursementDetails, maxOutstandingLoanBalance);
     }
 
     public static Loan newGroupLoanApplication(final String accountNo, final Group group, final Integer loanType,
-            final LoanProduct loanProduct, final Fund fund, final Staff officer,
+            final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy,
             final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges,
             final Boolean syncDisbursementWithMeeting, final BigDecimal fixedEmiAmount,
-            final Set<LoanDisbursementDetails> disbursementDetails,final BigDecimal maxOutstandingLoanBalance) {
+            final Set<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance) {
         final LoanStatus status = null;
-        final CodeValue loanPurpose = null;
         final Set<LoanCollateral> collateral = null;
         final Client client = null;
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting, fixedEmiAmount,
-                disbursementDetails,maxOutstandingLoanBalance);
+                disbursementDetails, maxOutstandingLoanBalance);
     }
 
     public static Loan newIndividualLoanApplicationFromGroup(final String accountNo, final Client client, final Group group,
-            final Integer loanType, final LoanProduct loanProduct, final Fund fund, final Staff officer,
+            final Integer loanType, final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy,
             final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges,
             final Boolean syncDisbursementWithMeeting, final BigDecimal fixedEmiAmount,
-            final Set<LoanDisbursementDetails> disbursementDetails,final BigDecimal maxOutstandingLoanBalance) {
+            final Set<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance) {
         final LoanStatus status = null;
-        final CodeValue loanPurpose = null;
         final Set<LoanCollateral> collateral = null;
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting, fixedEmiAmount,
-                disbursementDetails,maxOutstandingLoanBalance);
+                disbursementDetails, maxOutstandingLoanBalance);
     }
 
     protected Loan() {
