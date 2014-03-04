@@ -72,7 +72,7 @@ New Features & Improvements
  - [MIFOSX-932] - Basic Savings reports
  - [MIFOSX-939] - Order of Saving transactions
 
-Bug 
+Bugs 
  - [MIFOSX-884] - Charges removed in Modify loan application is not getting deleted after saving the application.
  - [MIFOSX-911] - Not able to edit client without passing name details
  - [MIFOSX-929] - User with no permission to activate the client is able to activate successfully while creating the client.
