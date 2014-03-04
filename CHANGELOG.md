@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 04 Mar 2014 - 1.19.0.RELEASE
 1. 23 Feb 2014 - 1.18.0.RELEASE
 1. 21 Feb 2014 - 1.17.1.RELEASE
 1. 17 Jan 2014 - 1.17.0.RELEASE
@@ -57,6 +58,32 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.19.0.RELEASE
+=============
+Feature Release
+
+This feature release adds the ability to associate current accounts with clients along with other improvements and enhancements
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-931] - Add current account support (overdrafts) for savings
+ - [MIFOSX-932] - Basic Savings reports
+ - [MIFOSX-939] - Order of Saving transactions
+
+Bug 
+ - [MIFOSX-884] - Charges removed in Modify loan application is not getting deleted after saving the application.
+ - [MIFOSX-911] - Not able to edit client without passing name details
+ - [MIFOSX-929] - User with no permission to activate the client is able to activate successfully while creating the client.
+
+
+Community App
+ - [MIFOSX-933] - Update to latest version of Angular and fix all observed issues
+ - [MIFOSX-946] - Loan purpose is not captured for Group and JLG loans
+ - [MIFOSX-864] - Improvements with respect to Closed Loans/Closed Savings
+ - [MIFOSX-935] - Improvements to view particular transaction details in transaction page (Loan/savings)
+ - [MIFOSX-937] - Ability to display Loan status in Client loan page
 
 1.18.0.RELEASE
 =============
