@@ -1978,6 +1978,13 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 						<tr>
 							<td class=fielddesc>The staffId of the staff member dealing with the client office. The staff member is not specifically the loan officer.</td>
 						</tr>
+						<tr class=alt>
+							<td>savingsProductId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Default overdraft savings account of client  
+							</td>
+						</tr>
 					</table>
 				</div>
 			</div>
@@ -2023,19 +2030,29 @@ GET https://DomainName/api/v1/clients/template
 					</code>
 					<code class="method-response">
 {
-  "activationDate": [
-    2013,
-    4,
-    17
-  ],
-  "officeId": 1,
-  "officeOptions": [
-    {
-      "id": 1,
-      "name": "Head Office",
-      "nameDecorated": "Head Office"
-    }
-  ]
+	"activationDate":[2014,3,4],
+	"officeId":1,
+	"officeOptions":[{
+		"id":1,
+		"name":"Head Office",
+		"nameDecorated":"Head Office"
+	}],
+	"staffOptions":[{
+		"id":1,
+		"firstname":"xyz",
+		"lastname":"sjs",
+		"displayName":"sjs, xyz",
+		"officeId":1,
+		"officeName":"Head Office",
+		"isLoanOfficer":true,
+		"isActive":true
+	}],
+	"savingProductOptions":[{
+		"id":4,
+		"name":"account overdraft",
+		"withdrawalFeeForTransfers":false,
+		"allowOverdraft":false
+	}]
 }
 					</code>
 				</div>
@@ -2066,7 +2083,7 @@ GET https://DomainName/api/v1/clients/template
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>groupId, externalId, accountNo, staffId, mobileNo</td>
+							<td>groupId, externalId, accountNo, staffId, mobileNo, savingsProductId</td>
 						</tr>
 					</table>
 				</div>
@@ -2086,14 +2103,16 @@ Content-Type: application/json Request Body:
 	"locale": "en", 
 	"active": true,
 	"activationDate": "04 March 2009",
-    "submittedOnDate":"04 March 2009"
+    "submittedOnDate":"04 March 2009",
+    "savingsProductId" : 4
 } 
 					</code>
 					<code class="method-response">
 {
     "officeId": 1,
     "clientId": 1,
-    "resourceId": 1
+    "resourceId": 1,
+    "savingsId": 10
 }
 					</code>
 				</div>
@@ -13157,6 +13176,13 @@ Content-Type: application/json
 					product and the type of the accounting rule to be used
 					<span>Example Values:</span>1=NONE,2=CASH_BASED</td>
 				</tr>
+
+				<tr class=alt><td>allowOverdraft</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, depending on the value mark the savings account as overdraft account </td></tr>
+
+				<tr class=alt><td>overdraftLimit</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets the maximum allowed overdraft amount for a  savings account e.g. <b>5,000</b> else set the limit as zero</td></tr>
+
 	        </table>
 	    </div>
 	</div>
@@ -13728,7 +13754,7 @@ Content-Type: application/json
             <br/>
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
-                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges</tr>
+                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, allowOverdraft, overdraftLimit</tr>
             </table>
         </div>
         <div class="method-example">
@@ -13775,6 +13801,8 @@ Request Body:
   "interestCalculationType": "1",
   "interestCalculationDaysInYearType": "365",
   "minRequiredOpeningBalance": "50",
+  "allowOverdraft":true,
+  "overdraftLimit":5000,
   "lockinPeriodFrequency": "4",
   "lockinPeriodFrequencyType": "1",
   "withdrawalFeeForTransfers":false,
@@ -14155,6 +14183,13 @@ Content-Type: application/json
 
 	            <tr class=alt><td>withdrawalFeeForTransfers</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: Used along with <i>withdrawalFeeAmount</i> to indicate whether the withdrawal fee should be applied on the account for account transfers .</td></tr>
+
+	            <tr class=alt><td>allowOverdraft</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, depending on the value mark the savings account as overdraft account </td></tr>
+
+				<tr class=alt><td>overdraftLimit</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets the maximum allowed overdraft amount for a  savings account e.g. <b>5,000</b> else set the limit as zero</td></tr>
+
 	        </table>
 	    </div>
 	</div>
@@ -14518,7 +14553,7 @@ Content-Type: application/json
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Inherited from Product (if not provided)</div></td></tr>
-	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers</td>
+	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, allowOverdraft, overdraftLimit</td>
 	       		</tr>
 	        </table>
 	    </div>
@@ -14571,6 +14606,8 @@ Request Body:
   "minRequiredOpeningBalance": "1,000", 
   "lockinPeriodFrequency": 6,
   "lockinPeriodFrequencyType": 2,
+  "allowOverdraft":true, 
+  "overdraftLimit":5000,
   "charges":[{"id":"1"}]
 }
 			</code>
