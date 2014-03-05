@@ -273,6 +273,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlBuilder.append("c.activation_date as activationDate, c.image_id as imageId, ");
             sqlBuilder.append("c.staff_id as staffId, s.display_name as staffName,");
             sqlBuilder.append("c.default_savings_product as savingsProductId, sp.name as savingsProductName, ");
+            sqlBuilder.append("c.default_savings_account as savingsAccountId");
 
             sqlBuilder.append("c.submittedon_date as submittedOnDate, ");
             sqlBuilder.append("sbu.username as submittedByUsername, ");
@@ -336,6 +337,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             final Long savingsProductId = JdbcSupport.getLong(rs, "savingsProductId");
             final String savingsProductName = rs.getString("savingsProductName");
+            
+            final Long savingsAccountId = JdbcSupport.getLong(rs, "savingsAccountId");
+            
 
             final LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedOnDate");
             final String closedByUsername = rs.getString("closedByUsername");
@@ -357,7 +361,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             return ClientData.instance(accountNo, status, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
                     middlename, lastname, fullname, displayName, externalId, mobileNo, activationDate, imageId, staffId, staffName,
-                    timeline, savingsProductId, savingsProductName);
+                    timeline, savingsProductId, savingsProductName,savingsAccountId);
 
         }
     }
@@ -408,7 +412,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             builder.append("c.activation_date as activationDate, c.image_id as imageId, ");
             builder.append("c.staff_id as staffId, s.display_name as staffName, ");
-            builder.append("c.default_savings_product as savingsProductId, sp.name as savingsProductName ");
+            builder.append("c.default_savings_product as savingsProductId, sp.name as savingsProductName, ");
+            builder.append("c.default_savings_account as savingsAccountId ");
             builder.append("from m_client c ");
             builder.append("join m_office o on o.id = c.office_id ");
             builder.append("left join m_staff s on s.id = c.staff_id ");
@@ -454,6 +459,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             final Long savingsProductId = JdbcSupport.getLong(rs, "savingsProductId");
             final String savingsProductName = rs.getString("savingsProductName");
+            final Long savingsAccountId = JdbcSupport.getLong(rs, "savingsAccountId");
+            
 
             final LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedOnDate");
             final String closedByUsername = rs.getString("closedByUsername");
@@ -475,7 +482,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             return ClientData.instance(accountNo, status, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
                     middlename, lastname, fullname, displayName, externalId, mobileNo, activationDate, imageId, staffId, staffName,
-                    timeline, savingsProductId, savingsProductName);
+                    timeline, savingsProductId, savingsProductName,savingsAccountId);
 
         }
     }

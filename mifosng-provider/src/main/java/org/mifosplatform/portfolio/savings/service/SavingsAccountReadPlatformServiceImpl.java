@@ -101,7 +101,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     public Collection<SavingsAccountData> retrieveAllForLookup(final Long clientId) {
 
         final StringBuilder sqlBuilder = new StringBuilder("select " + this.savingAccountMapper.schema());
-        sqlBuilder.append(" where sa.client_id = ? and sa.status_enum = 300");
+        sqlBuilder.append(" where sa.client_id = ? and sa.status_enum = 300 ");
 
         final Object[] queryParameters = new Object[] { clientId };
         return this.jdbcTemplate.query(sqlBuilder.toString(), this.savingAccountMapper, queryParameters);
@@ -401,6 +401,42 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                     lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, allowOverdraft, overdraftLimit);
+        }
+    }
+
+    private static final class SavingAccountMapperForLookup implements RowMapper<SavingsAccountData> {
+
+        private final String schemaSql;
+
+        public SavingAccountMapperForLookup() {
+            final StringBuilder sqlBuilder = new StringBuilder(400);
+            sqlBuilder.append("sa.id as id, sa.account_no as accountNo, ");
+            sqlBuilder.append("sp.id as productId, sp.name as productName, ");
+            sqlBuilder.append("sa.status_enum as statusEnum ");
+
+            sqlBuilder.append("from m_savings_account sa ");
+            sqlBuilder.append("join m_savings_product sp ON sa.product_id = sp.id ");
+
+            this.schemaSql = sqlBuilder.toString();
+        }
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        @Override
+        public SavingsAccountData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = rs.getLong("id");
+            final String accountNo = rs.getString("accountNo");
+
+            final Long productId = rs.getLong("productId");
+            final String productName = rs.getString("productName");
+
+            final Integer statusEnum = JdbcSupport.getInteger(rs, "statusEnum");
+            final SavingsAccountStatusEnumData status = SavingsEnumerations.status(statusEnum);
+
+            return SavingsAccountData.lookupWithProductDetails(id, accountNo, productId, productName, status);
         }
     }
 
@@ -861,6 +897,23 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         }
     }
 
+    @Override
+    public Collection<SavingsAccountData> retrieveForLookup(Long clientId, Boolean overdraft) {
+
+        SavingAccountMapperForLookup accountMapperForLookup = new SavingAccountMapperForLookup();
+        final StringBuilder sqlBuilder = new StringBuilder("select " + accountMapperForLookup.schema());
+        sqlBuilder.append(" where sa.client_id = ? and sa.status_enum = 300");
+        Object[] queryParameters = null;
+        if (overdraft == null) {
+            queryParameters = new Object[] { clientId };
+        } else {
+            sqlBuilder.append(" and sa.allow_overdraft = ?");
+            queryParameters = new Object[] { clientId, overdraft };
+        }
+        return this.jdbcTemplate.query(sqlBuilder.toString(), accountMapperForLookup, queryParameters);
+
+    }
+
     /*
      * private static final class SavingsAccountAnnualFeeMapper implements
      * RowMapper<SavingsAccountAnnualFeeData> {
@@ -879,6 +932,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
      * public String schema() { return this.schemaSql; }
      * 
      * @Override public SavingsAccountAnnualFeeData mapRow(final ResultSet rs,
+     * 
      * @SuppressWarnings("unused") final int rowNum) throws SQLException {
      * 
      * final Long id = rs.getLong("id"); final String accountNo =

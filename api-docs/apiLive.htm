@@ -240,6 +240,14 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>clients/{clientId}?command=updateSavingsAccount</td>
+								<td><a href="#clients_updateSavingsAccount">Update Default Savings Account</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
 							<tr>
 								<td class="alt"></td>
 								<td>clients/{clientId}?command=proposeAndAcceptTransfer</td>
@@ -2251,6 +2259,35 @@ Request Body:
 	    </div>
 	</div>
 
+	<a id="clients_updateSavingsAccount" name="clients_updateSavingsAccount" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Update Default Savings Account</h4>
+	        <p>Allows you to modify or assign default overdraft savings account for existed Client.</p>
+	        <p>The selected savings account should be belongs to the client's.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=updateSavingsAccount</code>
+	        <code class="method-request">POST clients/1?command=updateSavingsAccount
+Content-Type: application/json
+Request Body:
+{
+  "savingsAccountId": "22"
+}
+			</code>
+	        <code class="method-response">
+{
+	"officeId":1,
+	"clientId":1,
+	"resourceId":1
+	,"changes":{
+		"savingsAccountId":22
+	}
+}
+	        </code>
+	    </div>
+	</div>
+
 	<a id="clients_propose_transfer" name="clients_propose_transfer" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
@@ -2414,38 +2451,45 @@ GET https://DomainName/api/v1/clients/{clientId}
 					</code>
 					<code class="method-response">
 {
-  "id": 2,
-  "accountNo": "000000002",
+  "id": 27,
+  "accountNo": "000000027",
   "status": {
     "id": 300,
     "code": "clientStatusType.active",
     "value": "Active"
   },
+  "active": true,
   "activationDate": [
-    2009,
-    3,
-    4
+    2013,
+    1,
+    1
   ],
-  "fullname": "Client of group",
-  "displayName": "Client of group",
+  "firstname": "savings",
+  "lastname": "test",
+  "displayName": "savings test",
   "officeId": 1,
   "officeName": "Head Office",
   "timeline": {
+    "submittedOnDate": [
+      2013,
+      1,
+      1
+    ],
+    "submittedByUsername": "mifos",
+    "submittedByFirstname": "App",
+    "submittedByLastname": "Administrator",
     "activatedOnDate": [
-        2009,
-        3,
-        4
+      2013,
+      1,
+      1
     ],
     "activatedByUsername": "mifos",
     "activatedByFirstname": "App",
     "activatedByLastname": "Administrator"
   },
-  "groups": [
-    {
-      "id": 1,
-      "name": "Example Group"
-    }
-  ]
+  "savingsProductId": 4,
+  "savingsProductName": "account overdraft",
+  "groups": []
 }
 					</code>
 				</div>
@@ -21811,6 +21855,14 @@ No Request Body:
 					<td></td>
 					<td>clients/{clientId}?command=transfer</td>
 					<td><a href="#clients_transfer">Transfer Client</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>clients/{clientId}?command=updateSavingsAccount</td>
+					<td><a href="#clients_updateSavingsAccount">Update Default Savings Account</a></td>
 					<td></td>
 					<td></td>
 					<td></td>

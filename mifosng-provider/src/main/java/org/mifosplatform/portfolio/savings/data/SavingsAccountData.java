@@ -157,6 +157,59 @@ public class SavingsAccountData {
                 withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit);
     }
 
+    public static SavingsAccountData lookupWithProductDetails(final Long accountId, final String accountNo, final Long productId,
+            final String productName, final SavingsAccountStatusEnumData status) {
+
+        final String externalId = null;
+        final Long groupId = null;
+        final Long clientId = null;
+        final String clientName = null;
+        final String groupName = null;
+        final Long fieldOfficerId = null;
+        final String fieldOfficerName = null;
+        final SavingsAccountApplicationTimelineData timeline = null;
+        final CurrencyData currency = null;
+        final BigDecimal nominalAnnualInterestRate = null;
+        final EnumOptionData interestPeriodType = null;
+        final EnumOptionData interestPostingPeriodType = null;
+        final EnumOptionData interestCalculationType = null;
+        final EnumOptionData interestCalculationDaysInYearType = null;
+        final BigDecimal minRequiredOpeningBalance = null;
+        final Integer lockinPeriodFrequency = null;
+        final EnumOptionData lockinPeriodFrequencyType = null;
+        // final BigDecimal withdrawalFeeAmount = null;
+        // final EnumOptionData withdrawalFeeType = null;
+        final boolean withdrawalFeeForTransfers = false;
+        // final BigDecimal annualFeeAmount = null;
+        // final MonthDay annualFeeOnMonthDay = null;
+        // final LocalDate annualFeeNextDueDate = null;
+        final boolean allowOverdraft = false;
+        final BigDecimal overdraftLimit = null;
+
+        final SavingsAccountSummaryData summary = null;
+        final Collection<SavingsAccountTransactionData> transactions = null;
+
+        final Collection<SavingsProductData> productOptions = null;
+        final Collection<StaffData> fieldOfficerOptions = null;
+        final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = null;
+        final Collection<EnumOptionData> interestPostingPeriodTypeOptions = null;
+        final Collection<EnumOptionData> interestCalculationTypeOptions = null;
+        final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
+        final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
+        final Collection<EnumOptionData> withdrawalFeeTypeOptions = null;
+
+        final Collection<SavingsAccountChargeData> charges = null;
+        final Collection<ChargeData> chargeOptions = null;
+
+        return new SavingsAccountData(accountId, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
+                fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestPeriodType,
+                interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
+                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, transactions, productOptions,
+                fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
+                interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
+                withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit);
+    }
+
     public static SavingsAccountData withTemplateOptions(final SavingsAccountData account, final SavingsAccountData template,
             final Collection<SavingsAccountTransactionData> transactions, final Collection<SavingsAccountChargeData> charges) {
 

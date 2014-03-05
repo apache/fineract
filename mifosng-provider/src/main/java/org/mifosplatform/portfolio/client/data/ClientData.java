@@ -17,6 +17,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 
 /**
@@ -54,6 +55,8 @@ final public class ClientData implements Comparable<ClientData> {
     private final Long savingsProductId;
     private final String savingsProductName;
 
+    private final Long savingsAccountId;
+
     // associations
     private final Collection<GroupGeneralData> groups;
 
@@ -63,12 +66,13 @@ final public class ClientData implements Comparable<ClientData> {
     @SuppressWarnings("unused")
     private final Collection<CodeValueData> closureReasons;
     private final Collection<SavingsProductData> savingProductOptions;
+    private final Collection<SavingsAccountData> savingAccountOptions;
 
     public static ClientData template(final Long officeId, final LocalDate joinedDate, final Collection<OfficeData> officeOptions,
             final Collection<StaffData> staffOptions, final Collection<CodeValueData> closureReasons,
             final Collection<SavingsProductData> savingProductOptions) {
         return new ClientData(null, null, officeId, null, null, null, null, null, null, null, null, null, null, null, joinedDate, null,
-                null, null, officeOptions, null, staffOptions, closureReasons, null, savingProductOptions, null, null);
+                null, null, officeOptions, null, staffOptions, closureReasons, null, savingProductOptions, null, null, null, null);
 
     }
 
@@ -79,7 +83,19 @@ final public class ClientData implements Comparable<ClientData> {
                 clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId, clientData.mobileNo,
                 clientData.activationDate, clientData.imageId, clientData.staffId, clientData.staffName, templateData.officeOptions,
                 clientData.groups, templateData.staffOptions, null, null, templateData.savingProductOptions, clientData.savingsProductId,
-                clientData.savingsProductName);
+                clientData.savingsProductName, clientData.savingsAccountId, clientData.savingAccountOptions);
+
+    }
+
+    public static ClientData templateWithSavingAccountOptions(final ClientData clientData,
+            final Collection<SavingsAccountData> savingAccountOptions) {
+
+        return new ClientData(clientData.accountNo, clientData.status, clientData.officeId, clientData.officeName,
+                clientData.transferToOfficeId, clientData.transferToOfficeName, clientData.id, clientData.firstname, clientData.middlename,
+                clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId, clientData.mobileNo,
+                clientData.activationDate, clientData.imageId, clientData.staffId, clientData.staffName, clientData.officeOptions,
+                clientData.groups, clientData.staffOptions, null, null, clientData.savingProductOptions, clientData.savingsProductId,
+                clientData.savingsProductName, clientData.savingsAccountId, savingAccountOptions);
 
     }
 
@@ -89,7 +105,7 @@ final public class ClientData implements Comparable<ClientData> {
                 clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId, clientData.mobileNo,
                 clientData.activationDate, clientData.imageId, clientData.staffId, clientData.staffName, clientData.officeOptions,
                 parentGroups, clientData.staffOptions, null, clientData.timeline, clientData.savingProductOptions,
-                clientData.savingsProductId, clientData.savingsProductName);
+                clientData.savingsProductId, clientData.savingsProductName, clientData.savingsAccountId, clientData.savingAccountOptions);
 
     }
 
@@ -98,13 +114,13 @@ final public class ClientData implements Comparable<ClientData> {
             final String officeName) {
 
         return new ClientData(accountNo, status, officeId, officeName, null, null, id, firstname, middlename, lastname, fullname,
-                displayName, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+                displayName, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 
     }
 
     public static ClientData lookup(final Long id, final String displayName, final Long officeId, final String officeName) {
         return new ClientData(null, null, officeId, officeName, null, null, id, null, null, null, null, displayName, null, null, null,
-                null, null, null, null, null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null, null, null, null, null, null);
 
     }
 
@@ -112,10 +128,10 @@ final public class ClientData implements Comparable<ClientData> {
             final Long transferToOfficeId, final String transferToOfficeName, final Long id, final String firstname,
             final String middlename, final String lastname, final String fullname, final String displayName, final String externalId,
             final String mobileNo, final LocalDate activationDate, final Long imageId, final Long staffId, final String staffName,
-            final ClientTimelineData timeline, final Long savingsProductId, final String savingsProductName) {
+            final ClientTimelineData timeline, final Long savingsProductId, final String savingsProductName, final Long savingsAccountId) {
         return new ClientData(accountNo, status, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname, middlename,
                 lastname, fullname, displayName, externalId, mobileNo, activationDate, imageId, staffId, staffName, null, null, null, null,
-                timeline, null, savingsProductId, savingsProductName);
+                timeline, null, savingsProductId, savingsProductName, savingsAccountId, null);
 
     }
 
@@ -125,7 +141,8 @@ final public class ClientData implements Comparable<ClientData> {
             final String mobileNo, final LocalDate activationDate, final Long imageId, final Long staffId, final String staffName,
             final Collection<OfficeData> allowedOffices, final Collection<GroupGeneralData> groups,
             final Collection<StaffData> staffOptions, final Collection<CodeValueData> closureReasons, final ClientTimelineData timeline,
-            final Collection<SavingsProductData> savingProductOptions, final Long savingsProductId, final String savingsProductName) {
+            final Collection<SavingsProductData> savingProductOptions, final Long savingsProductId, final String savingsProductName,
+            final Long savingsAccountId, final Collection<SavingsAccountData> savingAccountOptions) {
         this.accountNo = accountNo;
         this.status = status;
         if (status != null) {
@@ -167,6 +184,8 @@ final public class ClientData implements Comparable<ClientData> {
         this.savingProductOptions = savingProductOptions;
         this.savingsProductId = savingsProductId;
         this.savingsProductName = savingsProductName;
+        this.savingsAccountId = savingsAccountId;
+        this.savingAccountOptions = savingAccountOptions;
     }
 
     public Long id() {

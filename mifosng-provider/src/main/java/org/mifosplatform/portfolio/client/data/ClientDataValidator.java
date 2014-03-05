@@ -425,5 +425,30 @@ public final class ClientDataValidator {
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
+    
+    public void validateForSavingsAccount(final String json) {
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+
+        final Set<String> supportedParameters = new HashSet<String>(Arrays.asList(ClientApiConstants.savingsAccountIdParamName));
+
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+
+        final String savingsIdParameterName = ClientApiConstants.savingsAccountIdParamName;
+        final Long savingsId = this.fromApiJsonHelper.extractLongNamed(savingsIdParameterName, element);
+        baseDataValidator.reset().parameter(savingsIdParameterName).value(savingsId).notNull().longGreaterThanZero();
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+
+    }
+
 
 }

@@ -660,6 +660,10 @@ public class CommandWrapper {
     public boolean isRejectClientTransfer() {
         return this.actionName.equalsIgnoreCase("REJECTTRANSFER") && this.entityName.equalsIgnoreCase("CLIENT");
     }
+    
+    public boolean isUpdateClientSavingsAccount() {
+        return this.actionName.equalsIgnoreCase("UPDATESAVINGSACCOUNT") && this.entityName.equalsIgnoreCase("CLIENT");
+    }
 
     public boolean isProductMixResource() {
         return this.entityName.equalsIgnoreCase("PRODUCTMIX");

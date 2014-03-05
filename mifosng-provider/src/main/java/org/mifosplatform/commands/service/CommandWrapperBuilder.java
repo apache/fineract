@@ -1425,6 +1425,16 @@ public class CommandWrapperBuilder {
         this.href = "/clients/" + clientId + "?command=assignStaff";
         return this;
     }
+    
+    public CommandWrapperBuilder updateClientSavingsAccount(final Long clientId) {
+        this.actionName = "UPDATESAVINGSACCOUNT";
+        this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.clientId = clientId;
+        this.href = "/clients/" + clientId + "?command=updateSavingsAccount";
+        return this;
+    }
+
 
     public CommandWrapperBuilder createProductMix(final Long productId) {
         this.actionName = "CREATE";

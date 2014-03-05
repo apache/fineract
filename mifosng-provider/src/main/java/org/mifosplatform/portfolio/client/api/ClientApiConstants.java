@@ -39,6 +39,7 @@ public class ClientApiConstants {
     public static final String closureReasonIdParamName = "closureReasonId";
     public static final String submittedOnDateParamName = "submittedOnDate";
     public static final String savingsProductIdParamName = "savingsProductId";
+    public static final String savingsAccountIdParamName = "savingsAccountId";
     // response parameters
     public static final String statusParamName = "status";
     public static final String hierarchyParamName = "hierarchy";
