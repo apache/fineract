@@ -24,4 +24,6 @@ public interface ClientWritePlatformService {
 
     CommandProcessingResult assignClientStaff(Long clientId, JsonCommand command);
 
+    CommandProcessingResult updateDefaultSavingsAccount(Long clientId, JsonCommand command);
+
 }

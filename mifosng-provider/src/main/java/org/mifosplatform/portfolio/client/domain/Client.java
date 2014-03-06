@@ -45,6 +45,7 @@ import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.mifosplatform.portfolio.group.domain.Group;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsProduct;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -143,6 +144,10 @@ public final class Client extends AbstractPersistable<Long> {
     @ManyToOne
     @JoinColumn(name = "default_savings_product", nullable = true)
     private SavingsProduct savingsProduct;
+    
+    @ManyToOne
+    @JoinColumn(name = "default_savings_account", nullable = true)
+    private SavingsAccount savingsAccount;
 
     public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
             final SavingsProduct savingsProduct, final JsonCommand command) {
@@ -179,7 +184,7 @@ public final class Client extends AbstractPersistable<Long> {
         }
 
         return new Client(currentUser, status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname,
-                activationDate, officeJoiningDate, externalId, mobileNo, staff, submittedOnDate, savingsProduct);
+                activationDate, officeJoiningDate, externalId, mobileNo, staff, submittedOnDate, savingsProduct, null);
     }
 
     protected Client() {
@@ -189,7 +194,7 @@ public final class Client extends AbstractPersistable<Long> {
     private Client(final AppUser currentUser, final ClientStatus status, final Office office, final Group clientParentGroup,
             final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
             final LocalDate activationDate, final LocalDate officeJoiningDate, final String externalId, final String mobileNo,
-            final Staff staff, final LocalDate submittedOnDate, final SavingsProduct savingsProduct) {
+            final Staff staff, final LocalDate submittedOnDate, final SavingsProduct savingsProduct,final SavingsAccount savingsAccount) {
 
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
@@ -253,6 +258,7 @@ public final class Client extends AbstractPersistable<Long> {
 
         this.staff = staff;
         this.savingsProduct = savingsProduct;
+        this.savingsAccount = savingsAccount;
 
         deriveDisplayName();
         validate();
@@ -659,4 +665,12 @@ public final class Client extends AbstractPersistable<Long> {
     public AppUser activatedBy() {
         return this.activatedBy;
     }
+
+	public SavingsAccount savingsAccount() {
+		return this.savingsAccount;
+	}
+
+	public void updateSavingsAccount(SavingsAccount savingsAccount) {
+		this.savingsAccount = savingsAccount;
+	}
 }

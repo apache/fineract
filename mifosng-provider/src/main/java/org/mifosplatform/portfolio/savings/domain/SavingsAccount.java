@@ -2001,4 +2001,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
+	public boolean allowOverdraft() {
+		return this.allowOverdraft;
+	}
+
 }

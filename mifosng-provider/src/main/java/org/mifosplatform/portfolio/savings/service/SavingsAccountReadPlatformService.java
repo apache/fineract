@@ -30,4 +30,6 @@ public interface SavingsAccountReadPlatformService {
     // retrieveAccountsWithAnnualFeeDue();
 
     SavingsAccountTransactionData retrieveSavingsTransaction(Long savingsId, Long transactionId);
+    
+    Collection<SavingsAccountData> retrieveForLookup(Long clientId,Boolean overdraft);
 }
