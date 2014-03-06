@@ -950,6 +950,23 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr class="alt">
+								<td><a href="#templates">User Generated Documents</a></td>
+								<td>templates</td>
+								<td><a href="#resources_addtemplate">Create a UGD</a></td>
+								<td><a href="#resource_templatelist">List UGDs</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>templates/{templateId}</td>
+								<td></td>
+								<td><a href="#resources_retrievetemplate">Retrieve a UGD</a></td>
+								<td><a href="#resources_updatetemplate">Update a UGD</a></td>
+								<td><a href="#resources_deletetemplate">Delete a UGD</a></td>
+							</tr>
+
 						</table>
 					</div>
 				</div>
@@ -21350,12 +21367,12 @@ Content-Type: application/json Request Body:
 		<a id="templates" name="clients" class="old-syle-anchor">&nbsp;</a>
 		<div class="method-section">
 			<div class="method-description">
-				<h3>Templates</h3>
-				<p>Templates are used for end-user features such as custom user defined document generation (AKA UGD).  They are based on <a href="http://mustache.github.io/">{{ moustache }} templates</a>. Think of them as a sort of built-in "mail merge" functionality.</p>
+				<h3>User Generated Documents</h3>
+				<p>User Generated Documents(alternatively, Templates) are used for end-user features such as custom user defined document generation (AKA UGD).  They are based on <a href="http://mustache.github.io/">{{ moustache }} templates</a>. Think of them as a sort of built-in "mail merge" functionality.</p>
 
 				<p>User Generated Documents (and other types of templates) can aggregate data from several Mifos X back-end API calls via <b>mappers</b>.  Mappers can even access non-Mifos X REST services from other servers.  UGDs can render such data in tables, show images, etc. <i>TBD: Please have a look at some of the Example UGDs included in Mifos X (or <a href="https://mifosforge.jira.com/wiki/display/RES/UGD_FinalDoc">the Wiki page</a>, for now.).</i></p>
 
-				<p>Templates can be assigned to an entity like <b>client</b> or <b>loan</b> and be of a typ like <b>document</b>.  The entity and type of a template is only there for the convenience of user agents (UIs), in order to know where to show templates for the user (i.e. which tab).  The Template Engine back-end runner does not actually need this metadata.</p>
+				<p>UGDs can be assigned to an entity like <b>client</b> or <b>loan</b> and be of a typ like <b>document</b>.  The entity and type of a UGD is only there for the convenience of user agents (UIs), in order to know where to show UGDs for the user (i.e. which tab).  The Template Engine back-end runner does not actually need this metadata.</p>
 				<table class=matrixHeading>
 					<tr class="matrixHeadingBG">
 						<td><div class="mifosXHeading2">Field Descriptions</div></td>
@@ -21373,7 +21390,7 @@ Content-Type: application/json Request Body:
 					<tr>
 						<td class=fielddesc>
 							For now only the type document is supported.
-							In a next version templates may be created for e-mails oder SMS.
+							In a next version UGDs may be created for e-mails oder SMS.
 						</td>
 					</tr>
 					<tr class=alt>
@@ -21382,7 +21399,7 @@ Content-Type: application/json Request Body:
 					<tr>
 						<td class=fielddesc>
 							Indicates the primary resource reference.
-							Templates may be filtered by entity and type so the relevant templates may be listed at the belonging position.
+							UGDs may be filtered by entity and type so the relevant UGDs may be listed at the belonging position.
 						</td>
 					</tr>
 					<tr class=alt>
@@ -21390,7 +21407,7 @@ Content-Type: application/json Request Body:
 					</tr>
 					<tr>
 						<td class=fielddesc>
-							The actual template which may be any html-text containing mustache tags.
+							The actual UGD which may be any html-text containing mustache tags.
 						</td>
 					</tr>
 					<tr class=alt>
@@ -21398,8 +21415,8 @@ Content-Type: application/json Request Body:
 					</tr>
 					<tr>
 						<td class=fielddesc>
-							By default one mapper is assigned to the template depending on the entity.
-							Mappers are used to create requests and get tags wich may be used in the template.
+							By default one mapper is assigned to the UGD depending on the entity.
+							Mappers are used to create requests and get tags wich may be used in the UGD.
 							Also mappery are in order and may depend on the previous mappers.
 							For now mappers expect a response in JSON or plain/text. 
 							JSON contains the keys and the values. 
@@ -21413,10 +21430,10 @@ Content-Type: application/json Request Body:
 			<a id="clients_template" name="clients_template" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Retrieve Template Details Template</h4>
+					<h4>Retrieve UGD Details Template</h4>
 					<p>This is a convenience resource. It can be useful when
-						building maintenance user interface screens for templates.
-						The template data returned consists of any or all of:
+						building maintenance user interface screens for UGDs.
+						The UGD data returned consists of any or all of:
 					</p>
 					<h5>Arguments</h5>
 					<dl class="argument-list">
@@ -21472,8 +21489,8 @@ GET https://DomainName/api/v1/templates/template
 				class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Add a Template</h4>
-					<p>Adds a new template.</p>
+					<h4>Add a UGD</h4>
+					<p>Adds a new UGD.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
@@ -21521,13 +21538,13 @@ Request Body:
 				class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Retrieve all Templates</h4>
+					<h4>Retrieve all UGDs</h4>
 
 					<p>Example Requests:</p>
 					<div class=apiClick>templates</div>
 					<br>
 					<p>
-					It is also possible to get specific templates by entity and type:
+					It is also possible to get specific UGDs by entity and type:
 					</p> 
 					<div class=apiClick>templates?type=0&entity=0</div>
 					<br>
@@ -21588,7 +21605,7 @@ GET https://DomainName/api/v1/templates
 				class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Retrieve a Template</h4>
+					<h4>Retrieve a UGD</h4>
 					<p>Example Requests:</p>
 					<div class=apiClick>templates/1</div>
 				</div>
@@ -21620,7 +21637,7 @@ GET https://DomainName/api/v1/templates/{Id}
 				class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Update a Template</h4>
+					<h4>Update a UGD</h4>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -21658,7 +21675,7 @@ Request Body:
 				class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Delete a Template</h4>
+					<h4>Delete a UGD</h4>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -21677,7 +21694,7 @@ No Request Body:
 				</div>
 			</div>
 			
-			<!-- end of template api docs -->
+			<!-- end of UGD api docs -->
 		
 		
 		
