@@ -19,6 +19,7 @@ public class DatatableData {
     @SuppressWarnings("unused")
     private final List<ResultsetColumnHeaderData> columnHeaderData;
 
+
     public static DatatableData create(final String applicationTableName, final String registeredTableName,
             final List<ResultsetColumnHeaderData> columnHeaderData) {
         return new DatatableData(applicationTableName, registeredTableName, columnHeaderData);
@@ -29,5 +30,6 @@ public class DatatableData {
         this.applicationTableName = applicationTableName;
         this.registeredTableName = registeredTableName;
         this.columnHeaderData = columnHeaderData;
+
     }
 }

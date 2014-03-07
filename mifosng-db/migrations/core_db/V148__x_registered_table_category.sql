@@ -1,0 +1,1 @@
+ALTER TABLE  `x_registered_table` ADD  `category` INT NOT NULL ;

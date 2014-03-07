@@ -500,6 +500,39 @@ public class CommandWrapperBuilder {
         }
     }
 
+    public CommandWrapperBuilder registerDBDatatable(final String datatable,final String apptable)
+    {
+        this.actionName = "REGISTER";
+        this.entityName = "DATATABLE";
+        this.entityId = null;
+        this.href = "/datatables/register/" + datatable+"/"+apptable;
+
+        return this;
+
+    }
+
+    public CommandWrapperBuilder registerSurvey(final String datatable,final String apptable)
+    {
+        this.actionName = "REGISTER";
+        this.entityName = "SURVEY";
+        this.entityId = null;
+        this.href = "/survey/register/" + datatable+"/"+apptable;
+
+        return this;
+
+    }
+
+    public CommandWrapperBuilder fullFilSurvey(final String datatable, final Long apptableId) {
+
+        this.entityName =datatable;
+        this.entityId = apptableId;
+        this.actionName = "CREATE";
+
+        this.href = "/survey/" + datatable + "/" + apptableId;
+
+        return this;
+    }
+
     public CommandWrapperBuilder createLoanCharge(final Long loanId) {
         this.actionName = "CREATE";
         this.entityName = "LOANCHARGE";
@@ -1508,6 +1541,14 @@ public class CommandWrapperBuilder {
         this.actionName = "UPDATE";
         this.entityName = "CACHE";
         this.href = "/cache";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateLikelihood(final Long entityId) {
+        this.actionName = "UPDATE";
+        this.entityName = "LIKELIHOOD";
+        this.href = "/likelihood/"+entityId;
+        this.entityId = entityId;
         return this;
     }
 }

@@ -7,6 +7,7 @@ package org.mifosplatform.commands.service;
 
 import java.util.Map;
 
+import com.jcraft.jsch.Logger;
 import org.joda.time.DateTime;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.domain.CommandSourceRepository;
@@ -19,8 +20,10 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.mifosplatform.infrastructure.dataqueries.handler.RegisterDatatableCommandHandler;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.domain.AppUser;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private final ToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer;
     private CommandSourceRepository commandSourceRepository;
     private final ConfigurationDomainService configurationDomainService;
+    private final static org.slf4j.Logger logger = LoggerFactory.getLogger(SynchronousCommandProcessingService.class);
 
     @Autowired
     public SynchronousCommandProcessingService(final PlatformSecurityContext context, final ApplicationContext applicationContext,
@@ -57,6 +61,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 && !isApprovedByChecker;
 
         final NewCommandSourceHandler handler = findCommandHandler(wrapper);
+
+
         final CommandProcessingResult result = handler.processCommand(command);
 
         final AppUser maker = this.context.authenticatedUser(wrapper);
@@ -130,7 +136,11 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = this.applicationContext.getBean("deleteOneToManyDatatableEntryCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isDeleteOneToOne()) {
                 handler = this.applicationContext.getBean("deleteOneToOneDatatableEntryCommandHandler", NewCommandSourceHandler.class);
-            } else {
+            }else if (wrapper.isRegisterDatatable()) {
+
+                handler = this.applicationContext.getBean("registerDatatableCommandHandler", NewCommandSourceHandler.class);
+             }
+            else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
         } else if (wrapper.isNoteResource()) {
@@ -620,7 +630,26 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
 
-        } else {
+
+
+        }else if (wrapper.isLikelihoodResource()) {
+            if (wrapper.isUpdateLikelihood()) {
+                handler = this.applicationContext.getBean("updateLikelihoodCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
+        }else if (wrapper.isSurveyResource()) {
+            if (wrapper.isRegisterSurvey()) {
+                handler = this.applicationContext.getBean("registerSurveyCommandHandler", NewCommandSourceHandler.class);
+            } else if(wrapper.isFullFilSurvey())
+            {
+                handler = this.applicationContext.getBean("fullFilSurveyCommandHandler", NewCommandSourceHandler.class);
+            }
+            else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
+        }
+        else {
 
             throw new UnsupportedCommandException(wrapper.commandName());
         }

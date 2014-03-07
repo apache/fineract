@@ -76,4 +76,9 @@ public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
 
     }
 
+    public static GlobalConfigurationProperty newSurveyConfiguration(final String name)
+    {
+        return new GlobalConfigurationProperty(name,false,null);
+    }
+
 }

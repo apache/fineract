@@ -13,10 +13,17 @@ public class ResultsetColumnValueData {
 
     private final int id;
     private final String value;
+    private final Integer score;
 
     public ResultsetColumnValueData(final int id, final String value) {
         this.id = id;
         this.value = value;
+        this.score = null;
+    }
+    public ResultsetColumnValueData(final int id, final String value, final int score) {
+        this.id = id;
+        this.value = value;
+        this.score = score;
     }
 
     public boolean matches(final String match) {

@@ -7,8 +7,13 @@ package org.mifosplatform.infrastructure.configuration.service;
 
 import org.mifosplatform.infrastructure.configuration.data.GlobalConfigurationData;
 
+import java.util.List;
+
 public interface ConfigurationReadPlatformService {
 
-    GlobalConfigurationData retrieveGlobalConfiguration();
+    //GlobalConfigurationData retrieveGlobalConfiguration();
+    GlobalConfigurationData retrieveGlobalConfiguration(boolean survey);
+
+   // GlobalConfigurationData retrieveGlobalConfiguration(List<String> configurationName);
 
 }

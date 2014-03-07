@@ -8,6 +8,7 @@ package org.mifosplatform.infrastructure.configuration.service;
 import org.mifosplatform.infrastructure.configuration.data.GlobalConfigurationData;
 import org.mifosplatform.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
+import org.mifosplatform.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -34,15 +35,26 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
     }
 
     @Override
-    public GlobalConfigurationData retrieveGlobalConfiguration() {
+    public GlobalConfigurationData retrieveGlobalConfiguration(final boolean survey) {
 
         this.context.authenticatedUser();
 
-        final String sql = "SELECT c.id, c.name, c.enabled, c.value FROM c_configuration c order by c.id";
+        String sql = "SELECT c.id, c.name, c.enabled, c.value FROM c_configuration c ";
+
+        if(survey)
+        {
+             sql += " JOIN x_registered_table on x_registered_table.registered_table_name = c.name ";
+             sql += " WHERE x_registered_table.category ="+DataTableApiConstant.CATEGORY_PPI;
+
+        }
+
+        sql += "  order by c.id";
         final List<GlobalConfigurationPropertyData> globalConfiguration = this.jdbcTemplate.query(sql, this.rm, new Object[] {});
 
         return new GlobalConfigurationData(globalConfiguration);
     }
+
+
 
     private static final class GlobalConfigurationRowMapper implements RowMapper<GlobalConfigurationPropertyData> {
 
