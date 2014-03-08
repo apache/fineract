@@ -3,7 +3,7 @@ package org.mifosplatform.integrationtests.common.loans;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mifosplatform.integrationtests.common.ClientHelper;
+import org.mifosplatform.integrationtests.common.Utils;
 import org.mifosplatform.integrationtests.common.accounting.Account;
 
 import com.google.gson.Gson;
@@ -30,8 +30,8 @@ public class LoanProductTestBuilder {
     private static final String CASH_BASED = "2";
     private static final String ACCRUAL_BASED = "3";
 
-    private String nameOfLoanProduct = ClientHelper.randomNameGenerator("LOAN_PRODUCT_", 6);
-    private String shortName = ClientHelper.randomNameGenerator("", 4);
+    private String nameOfLoanProduct = Utils.randomNameGenerator("LOAN_PRODUCT_", 6);
+    private String shortName = Utils.randomNameGenerator("", 4);
     private String principal = "10000.00";
     private String numberOfRepayments = "5";
     private String repaymentFrequency = MONTHS;
