@@ -21,7 +21,9 @@ import com.jayway.restassured.specification.ResponseSpecification;
 @SuppressWarnings("unchecked")
 public class Utils {
 
-    private static final String LOGIN_URL = "/mifosng-provider/api/v1/authentication?username=mifos&password=password&tenantIdentifier=default";
+    public static final String TENANT_IDENTIFIER = "tenantIdentifier=default";
+    
+    private static final String LOGIN_URL = "/mifosng-provider/api/v1/authentication?username=mifos&password=password&"+TENANT_IDENTIFIER;
 
     public static void initializeRESTAssured() {
         RestAssured.baseURI = "https://localhost";
@@ -96,5 +98,9 @@ public class Utils {
 
     public static String randomStringGenerator(final String prefix, final int len) {
         return randomStringGenerator(prefix, len, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    }
+
+    public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
+        return randomStringGenerator(prefix, lenOfRandomSuffix);
     }
 }

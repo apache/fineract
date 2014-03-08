@@ -25,8 +25,8 @@ public class ClientHelper {
     public static String getTestClientAsJSON(final String dateOfJoining) {
         final HashMap<String, String> map = new HashMap<String, String>();
         map.put("officeId", "1");
-        map.put("firstname", randomNameGenerator("Client_FirstName_", 5));
-        map.put("lastname", randomNameGenerator("Client_LastName_", 4));
+        map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
+        map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
         map.put("externalId", randomIDGenerator("ID_", 7));
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
@@ -42,10 +42,6 @@ public class ClientHelper {
         final String CLIENT_URL = "/mifosng-provider/api/v1/clients/" + generatedClientID + "?tenantIdentifier=default";
         final Integer responseClientID = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL, "id");
         assertEquals("ERROR IN CREATING THE CLIENT", generatedClientID, responseClientID);
-    }
-
-    public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
-        return Utils.randomStringGenerator(prefix, lenOfRandomSuffix);
     }
 
     private static String randomIDGenerator(final String prefix, final int lenOfRandomSuffix) {
