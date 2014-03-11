@@ -2,8 +2,6 @@ package org.mifosplatform.integrationtests.common.savings;
 
 import java.util.HashMap;
 
-import org.mifosplatform.portfolio.savings.SavingsApiConstants;
-
 import com.google.gson.Gson;
 
 public class SavingsApplicationTestBuilder {
@@ -15,12 +13,11 @@ public class SavingsApplicationTestBuilder {
     public String build(final String ID, final String savingsProductId) {
 
         final HashMap<String, String> map = new HashMap<String, String>();
-        map.put(SavingsApiConstants.dateFormatParamName, "dd MMMM yyyy");
-        map.put(SavingsApiConstants.localeParamName, "en_GB");
-        map.put(SavingsApiConstants.clientIdParamName, ID);
-        map.put(SavingsApiConstants.productIdParamName, savingsProductId);
-        map.put(SavingsApiConstants.localeParamName, LOCALE);
-        map.put(SavingsApiConstants.submittedOnDateParamName, this.submittedOnDate);
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("clientId", ID);
+        map.put("productId", savingsProductId);
+        map.put("locale", LOCALE);
+        map.put("submittedOnDate", this.submittedOnDate);
         String savingsApplicationJSON = new Gson().toJson(map);
         System.out.println(savingsApplicationJSON);
         return savingsApplicationJSON;

@@ -273,7 +273,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlBuilder.append("c.activation_date as activationDate, c.image_id as imageId, ");
             sqlBuilder.append("c.staff_id as staffId, s.display_name as staffName,");
             sqlBuilder.append("c.default_savings_product as savingsProductId, sp.name as savingsProductName, ");
-            sqlBuilder.append("c.default_savings_account as savingsAccountId");
+            sqlBuilder.append("c.default_savings_account as savingsAccountId, ");
 
             sqlBuilder.append("c.submittedon_date as submittedOnDate, ");
             sqlBuilder.append("sbu.username as submittedByUsername, ");
