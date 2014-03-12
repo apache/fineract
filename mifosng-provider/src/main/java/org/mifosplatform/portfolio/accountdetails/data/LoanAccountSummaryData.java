@@ -24,10 +24,11 @@ public class LoanAccountSummaryData {
     private final EnumOptionData loanType;
     private final Integer loanCycle;
     private final LoanApplicationTimelineData timeline;
+    private final Boolean inArrears;
 
     public LoanAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
             final String loanProductName, final LoanStatusEnumData loanStatus, final EnumOptionData loanType, final Integer loanCycle,
-            final LoanApplicationTimelineData timeline) {
+            final LoanApplicationTimelineData timeline, final Boolean inArrears) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -37,5 +38,6 @@ public class LoanAccountSummaryData {
         this.loanType = loanType;
         this.loanCycle = loanCycle;
         this.timeline = timeline;
+        this.inArrears = inArrears;
     }
 }
