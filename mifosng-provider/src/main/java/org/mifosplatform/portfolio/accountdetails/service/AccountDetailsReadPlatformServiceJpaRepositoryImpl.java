@@ -251,6 +251,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
 
                     .append(" l.closedon_date as closedOnDate,")
                     .append(" cbu.username as closedByUsername, cbu.firstname as closedByFirstname, cbu.lastname as closedByLastname,")
+                    .append(" la.overdue_since_date_derived as overdueSinceDate,")
                     .append(" l.writtenoffon_date as writtenOffOnDate, l.expected_maturedon_date as expectedMaturityDate")
 
                     .append(" from m_loan l ").append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id")
@@ -259,7 +260,8 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     .append(" left join m_appuser wbu on wbu.id = l.withdrawnon_userid")
                     .append(" left join m_appuser abu on abu.id = l.approvedon_userid")
                     .append(" left join m_appuser dbu on dbu.id = l.disbursedon_userid")
-                    .append(" left join m_appuser cbu on cbu.id = l.closedon_userid");
+                    .append(" left join m_appuser cbu on cbu.id = l.closedon_userid")
+                    .append(" left join m_loan_arrears_aging la on la.loan_id = l.id");
 
             return accountsSummary.toString();
         }
@@ -313,6 +315,12 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
 
             final LocalDate expectedMaturityDate = JdbcSupport.getLocalDate(rs, "expectedMaturityDate");
 
+            final LocalDate overdueSinceDate = JdbcSupport.getLocalDate(rs, "overdueSinceDate");
+            Boolean inArrears = true;
+            if (overdueSinceDate == null) {
+                inArrears = false;
+            }
+
             final LoanApplicationTimelineData timeline = new LoanApplicationTimelineData(submittedOnDate, submittedByUsername,
                     submittedByFirstname, submittedByLastname, rejectedOnDate, rejectedByUsername, rejectedByFirstname, rejectedByLastname,
                     withdrawnOnDate, withdrawnByUsername, withdrawnByFirstname, withdrawnByLastname, approvedOnDate, approvedByUsername,
@@ -321,7 +329,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     expectedMaturityDate, writtenOffOnDate, closedByUsername, closedByFirstname, closedByLastname);
 
             return new LoanAccountSummaryData(id, accountNo, externalId, productId, loanProductName, loanStatus, loanType, loanCycle,
-                    timeline);
+                    timeline, inArrears);
         }
     }
 
