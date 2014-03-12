@@ -25,6 +25,7 @@ import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
+import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
 
 /**
  * LoanRepaymentScheduleDetail encapsulates all the details of a
@@ -93,18 +94,21 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "arrearstolerance_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal inArrearsTolerance;
 
+    @Column(name = "grace_on_arrears_ageing", nullable = true)
+    private Integer graceOnArrearsAgeing;
+
     public static LoanProductRelatedDetail createFrom(final MonetaryCurrency currency, final BigDecimal principal,
             final BigDecimal nominalInterestRatePerPeriod, final PeriodFrequencyType interestRatePeriodFrequencyType,
             final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
             final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final Integer repaymentEvery,
             final PeriodFrequencyType repaymentPeriodFrequencyType, final Integer numberOfRepayments,
             final Integer graceOnPrincipalPayment, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
-            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance) {
+            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing) {
 
         return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
                 nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentPeriodFrequencyType,
                 numberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
-                inArrearsTolerance);
+                inArrearsTolerance, graceOnArrearsAgeing);
     }
 
     protected LoanProductRelatedDetail() {
@@ -117,7 +121,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final Integer repayEvery,
             final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfRepayments,
             final Integer graceOnPrincipalPayment, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
-            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance) {
+            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing) {
         this.currency = currency;
         this.principal = defaultPrincipal;
         this.nominalInterestRatePerPeriod = defaultNominalInterestRatePerPeriod;
@@ -137,6 +141,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         } else {
             this.inArrearsTolerance = inArrearsTolerance;
         }
+        this.graceOnArrearsAgeing = graceOnArrearsAgeing;
     }
 
     private Integer defaultToNullIfZero(final Integer value) {
@@ -356,6 +361,13 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             this.graceOnInterestCharged = newValue;
         }
 
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.graceOnArrearsAgeingParameterName, this.graceOnArrearsAgeing)) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.graceOnArrearsAgeingParameterName);
+            actualChanges.put(LoanProductConstants.graceOnArrearsAgeingParameterName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.graceOnArrearsAgeing = newValue;
+        }
+
         validateRepaymentPeriodWithGraceSettings();
 
         return actualChanges;
@@ -401,5 +413,9 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
     public void updatenterestPeriodFrequencyType(final PeriodFrequencyType interestPeriodFrequencyType) {
         this.interestPeriodFrequencyType = interestPeriodFrequencyType;
+    }
+
+    public Integer getGraceOnDueDate() {
+        return this.graceOnArrearsAgeing;
     }
 }

@@ -49,6 +49,7 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleG
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.mifosplatform.portfolio.loanaccount.service.LoanChargeAssembler;
+import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
@@ -194,6 +195,8 @@ public class LoanScheduleAssembler {
         final Integer graceOnInterestPayment = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestPayment", element);
         final Integer graceOnInterestCharged = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestCharged", element);
         final LocalDate interestChargedFromDate = this.fromApiJsonHelper.extractLocalDateNamed("interestChargedFromDate", element);
+        
+        final Integer graceOnArrearsAgeing = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(LoanProductConstants.graceOnArrearsAgeingParameterName, element);
 
         // other
         final BigDecimal inArrearsTolerance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element);
@@ -216,7 +219,7 @@ public class LoanScheduleAssembler {
                 interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod, principalMoney,
                 expectedDisbursementDate, repaymentsStartingFromDate, calculatedRepaymentsStartingFromDate, graceOnPrincipalPayment,
                 graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, inArrearsToleranceMoney,
-                loanProduct.isMultiDisburseLoan(), emiAmount, disbursementDatas, maxOutstandingBalance, loanVariationTermsData);
+                loanProduct.isMultiDisburseLoan(), emiAmount, disbursementDatas, maxOutstandingBalance, loanVariationTermsData,graceOnArrearsAgeing);
     }
 
     private List<DisbursementData> fetchDisbursementData(final JsonObject command) {

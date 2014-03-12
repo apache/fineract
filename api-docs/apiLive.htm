@@ -4832,6 +4832,13 @@ GET https://DomainName/mifosng-provider/api/v1/groups?paged=true
 							</td>
 						</tr>
 						<tr class=alt>
+							<td>graceOnArrearsAgeing</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer -  Used in Arrears calculation to only take into account loans that are more than graceOnArrearsAgeing days overdue.
+							</td>
+						</tr>
+						<tr class=alt>
 							<td>interestChargedFromDate</td>
 						</tr>
 						<tr>
@@ -5918,8 +5925,8 @@ Request Body:
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,linkAccountId,
-								fixedEmiAmount,maxOutstandingLoanBalance,disbursementData
+							<td>graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId,
+								 fixedEmiAmount, maxOutstandingLoanBalance, disbursementData, graceOnArrearsAgeing
 							</td>
 						</tr>
 					</table>
@@ -8186,7 +8193,13 @@ An enumeration that indicates the type of transaction processing strategy to be 
 							<td class=fielddesc>Optional: Integer - represents the number of repayment periods that should be interest-free.
 							</td>
 						</tr>
-
+						<tr class=alt>
+							<td>graceOnArrearsAgeing</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer -  Used in Arrears calculation to only take into account loans that are more than graceOnArrearsAgeing days overdue.
+							</td>
+						</tr>
 						<tr class=alt>
 							<td>accountingRule</td>
 						</tr>
@@ -9293,7 +9306,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>inArrearsTolerance, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, includeInBorrowerCycle,
+							<td>inArrearsTolerance, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, graceOnArrearsAgeing, charges, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, includeInBorrowerCycle,
 							useBorrowerCycle,principalVariationsForBorrowerCycle,
 							numberOfRepaymentVariationsForBorrowerCycle,
 							interestRateVariationsForBorrowerCycle,

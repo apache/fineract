@@ -126,10 +126,11 @@ public class LoanProductRelatedDetailTestHelper {
         final Integer graceOnPrincipalPayment = Integer.valueOf(0);
         final Integer graceOnInterestPayment = Integer.valueOf(0);
         final Integer graceOnInterestCharged = Integer.valueOf(0);
+        final Integer graceOnArrearsAgeing = Integer.valueOf(0);
 
         return new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType,
                 defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery, repaymentFrequencyType,
                 defaultNumberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
-                inArrearsTolerance);
+                inArrearsTolerance, graceOnArrearsAgeing);
     }
 }

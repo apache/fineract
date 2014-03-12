@@ -60,7 +60,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.interestRateVariationsForBorrowerCycleParameterName,
             LoanProductConstants.numberOfRepaymentVariationsForBorrowerCycleParameterName, LoanProductConstants.shortName,
             LoanProductConstants.multiDisburseLoanParameterName, LoanProductConstants.outstandingLoanBalanceParameterName,
-            LoanProductConstants.maxTrancheCountParameterName));
+            LoanProductConstants.maxTrancheCountParameterName, LoanProductConstants.graceOnArrearsAgeingParameterName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -251,6 +251,10 @@ public final class LoanProductDataValidator {
 
         final Integer graceOnInterestCharged = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestCharged", element);
         baseDataValidator.reset().parameter("graceOnInterestCharged").value(graceOnInterestCharged).zeroOrPositiveAmount();
+
+        final Integer graceOnArrearsAgeing = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
+                LoanProductConstants.graceOnArrearsAgeingParameterName, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.graceOnArrearsAgeingParameterName).value(graceOnArrearsAgeing).zeroOrPositiveAmount();
 
         // accounting related data validation
         final Integer accountingRuleType = this.fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());
@@ -517,6 +521,13 @@ public final class LoanProductDataValidator {
         if (this.fromApiJsonHelper.parameterExists("graceOnInterestCharged", element)) {
             final Integer graceOnInterestCharged = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestCharged", element);
             baseDataValidator.reset().parameter("graceOnInterestCharged").value(graceOnInterestCharged).zeroOrPositiveAmount();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.graceOnArrearsAgeingParameterName, element)) {
+            final Integer graceOnArrearsAgeing = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
+                    LoanProductConstants.graceOnArrearsAgeingParameterName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.graceOnArrearsAgeingParameterName).value(graceOnArrearsAgeing)
+                    .zeroOrPositiveAmount();
         }
 
         //

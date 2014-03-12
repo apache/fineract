@@ -23,6 +23,7 @@ import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.loanaccount.api.LoanApiConstants;
+import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,7 +46,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             "graceOnInterestPayment", "graceOnInterestCharged", "interestChargedFromDate", "submittedOnDate", "submittedOnNote", "locale",
             "dateFormat", "charges", "collateral", "syncDisbursementWithMeeting", "linkAccountId",
             LoanApiConstants.disbursementDataParameterName, LoanApiConstants.emiAmountParameterName,
-            LoanApiConstants.maxOutstandingBalanceParameterName));
+            LoanApiConstants.maxOutstandingBalanceParameterName,LoanProductConstants.graceOnArrearsAgeingParameterName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
