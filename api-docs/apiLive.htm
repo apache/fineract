@@ -1139,8 +1139,17 @@
 								<td><a href="#configs_global">Global Configuration</a></td>
 								<td>configurations</td>
 								<td></td>
-								<td><a href="#configs_globalconfig_retrieve">Retrieve
+								<td><a href="#configs_globalconfig_retrieve">List
 										Global Configuration</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td><a href="#configs_global">Global Configuration</a></td>
+								<td>configurations/{configId}</td>
+								<td></td>
+								<td><a href="#configs_globalconfig_retrieve_one">Retrieve
+										a Global Configuration</a></td>
 								<td><a href="#configs_globalconfig_update">Update
 										Global Configuration</a></td>
 								<td></td>
@@ -10358,6 +10367,29 @@ GET https://DomainName/api/v1/configurations
     },
   ]
 }
+					</code>
+				</div>
+			</div>
+
+<a id="configs_globalconfig_retrieve_one" name="configs_globalconfig_retrieve_one" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Global Configuration</h4>
+					<p>Returns a global enable/disable configurations.</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>configurations/1</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/configurations/1
+					</code>
+					<code class="method-response">
+    {
+    "name": "maker-checker",
+    "enabled": true,
+    "value": 0,
+    "id": 1
+    }
 					</code>
 				</div>
 			</div>
@@ -22589,7 +22621,15 @@ No Request Body:
 					<td><a href="#configs_global">Global Configuration</a></td>
 					<td>configurations</td>
 					<td></td>
-					<td><a href="#configs_globalconfig_retrieve">Retrieve Global Configuration</a></td>
+					<td><a href="#configs_globalconfig_retrieve">List Global Configuration</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>configurations/{configId}</td>
+					<td></td>
+					<td><a href="#configs_globalconfig_retrieve_one">Retrieve a Global Configuration</a></td>
 					<td><a href="#configs_globalconfig_update">Update Global Configuration</a></td>
 					<td></td>
 				</tr>

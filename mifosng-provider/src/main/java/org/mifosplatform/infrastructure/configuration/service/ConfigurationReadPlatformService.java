@@ -6,9 +6,12 @@
 package org.mifosplatform.infrastructure.configuration.service;
 
 import org.mifosplatform.infrastructure.configuration.data.GlobalConfigurationData;
+import org.mifosplatform.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 
 public interface ConfigurationReadPlatformService {
 
     GlobalConfigurationData retrieveGlobalConfiguration();
+    
+    GlobalConfigurationPropertyData retrieveGlobalConfiguration(Long configId);
 
 }
