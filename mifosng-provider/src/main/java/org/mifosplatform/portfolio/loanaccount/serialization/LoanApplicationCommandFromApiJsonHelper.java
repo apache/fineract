@@ -25,6 +25,7 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.loanaccount.api.LoanApiConstants;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
+import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
@@ -58,7 +59,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             "calendarId", // optional
             "syncDisbursementWithMeeting",// optional
             "linkAccountId", LoanApiConstants.disbursementDataParameterName, LoanApiConstants.emiAmountParameterName,
-            LoanApiConstants.maxOutstandingBalanceParameterName));
+            LoanApiConstants.maxOutstandingBalanceParameterName, LoanProductConstants.graceOnArrearsAgeingParameterName));
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
@@ -201,6 +202,10 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
         final Integer graceOnInterestCharged = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestCharged", element);
         baseDataValidator.reset().parameter("graceOnInterestCharged").value(graceOnInterestCharged).zeroOrPositiveAmount();
+
+        final Integer graceOnArrearsAgeing = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
+                LoanProductConstants.graceOnArrearsAgeingParameterName, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.graceOnArrearsAgeingParameterName).value(graceOnArrearsAgeing).zeroOrPositiveAmount();
 
         final String interestChargedFromDateParameterName = "interestChargedFromDate";
         if (this.fromApiJsonHelper.parameterExists(interestChargedFromDateParameterName, element)) {
@@ -539,6 +544,13 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         if (this.fromApiJsonHelper.parameterExists("graceOnInterestCharged", element)) {
             final Integer graceOnInterestCharged = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestCharged", element);
             baseDataValidator.reset().parameter("graceOnInterestCharged").value(graceOnInterestCharged).zeroOrPositiveAmount();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.graceOnArrearsAgeingParameterName, element)) {
+            final Integer graceOnArrearsAgeing = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
+                    LoanProductConstants.graceOnArrearsAgeingParameterName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.graceOnArrearsAgeingParameterName).value(graceOnArrearsAgeing)
+                    .zeroOrPositiveAmount();
         }
 
         final String interestChargedFromDateParameterName = "interestChargedFromDate";

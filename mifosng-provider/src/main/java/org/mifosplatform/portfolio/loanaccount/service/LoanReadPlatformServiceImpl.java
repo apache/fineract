@@ -433,7 +433,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.closedon_date as closedOnDate, cbu.username as closedByUsername, cbu.firstname as closedByFirstname, cbu.lastname as closedByLastname, l.writtenoffon_date as writtenOffOnDate, "
                     + " l.expected_firstrepaymenton_date as expectedFirstRepaymentOnDate, l.interest_calculated_from_date as interestChargedFromDate, l.expected_maturedon_date as expectedMaturityDate, "
                     + " l.principal_amount as principal,l.approved_principal as approvedPrincipal, l.arrearstolerance_amount as inArrearsTolerance, l.number_of_repayments as numberOfRepayments, l.repay_every as repaymentEvery,"
-                    + " l.grace_on_principal_periods as graceOnPrincipalPayment, l.grace_on_interest_periods as graceOnInterestPayment, l.grace_interest_free_periods as graceOnInterestCharged,"
+                    + " l.grace_on_principal_periods as graceOnPrincipalPayment, l.grace_on_interest_periods as graceOnInterestPayment, l.grace_interest_free_periods as graceOnInterestCharged,l.grace_on_arrears_ageing as graceOnArrearsAgeing,"
                     + " l.nominal_interest_rate_per_period as interestRatePerPeriod, l.annual_nominal_interest_rate as annualInterestRate, "
                     + " l.repayment_period_frequency_enum as repaymentFrequencyType, l.interest_period_frequency_enum as interestRateFrequencyType, "
                     + " l.term_frequency as termFrequency, l.term_period_frequency_enum as termPeriodFrequencyType, "
@@ -599,6 +599,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Integer graceOnPrincipalPayment = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "graceOnPrincipalPayment");
             final Integer graceOnInterestPayment = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "graceOnInterestPayment");
             final Integer graceOnInterestCharged = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "graceOnInterestCharged");
+            final Integer graceOnArrearsAgeing = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "graceOnArrearsAgeing");
 
             final Integer termFrequency = JdbcSupport.getInteger(rs, "termFrequency");
             final Integer termPeriodFrequencyTypeInt = JdbcSupport.getInteger(rs, "termPeriodFrequencyType");
@@ -709,7 +710,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     annualInterestRate, interestType, interestCalculationPeriodType, expectedFirstRepaymentOnDate, graceOnPrincipalPayment,
                     graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, timeline, loanSummary,
                     feeChargesDueAtDisbursementCharged, syncDisbursementWithMeeting, loanCounter, loanProductCounter, multiDisburseLoan,
-                    fixedEmiAmount, outstandingLoanBalance, inArrears);
+                    fixedEmiAmount, outstandingLoanBalance, inArrears, graceOnArrearsAgeing);
         }
     }
 

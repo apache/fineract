@@ -52,5 +52,7 @@ public interface LoanProductConstants {
     public static final String multiDisburseLoanParameterName = "multiDisburseLoan";
     public static final String maxTrancheCountParameterName = "maxTrancheCount";
     public static final String outstandingLoanBalanceParameterName = "outstandingLoanBalance";
+    
+    public static final String graceOnArrearsAgeingParameterName = "graceOnArrearsAgeing";
 
 }
