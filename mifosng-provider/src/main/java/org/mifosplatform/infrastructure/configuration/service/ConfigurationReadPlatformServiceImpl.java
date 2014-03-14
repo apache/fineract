@@ -43,9 +43,21 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
         return new GlobalConfigurationData(globalConfiguration);
     }
+    
+    @Override
+    public GlobalConfigurationPropertyData retrieveGlobalConfiguration(Long configId) {
+
+        this.context.authenticatedUser();
+
+        final String sql = "SELECT c.id, c.name, c.enabled, c.value FROM c_configuration c where c.id=? order by c.id";
+        final GlobalConfigurationPropertyData globalConfiguration = this.jdbcTemplate.queryForObject(sql, this.rm, new Object[] {configId});
+
+        return globalConfiguration;
+    }
 
     private static final class GlobalConfigurationRowMapper implements RowMapper<GlobalConfigurationPropertyData> {
 
+        
         @Override
         public GlobalConfigurationPropertyData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
