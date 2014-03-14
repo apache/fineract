@@ -18,6 +18,8 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.jobs.data.SchedulerDetailData;
 import org.mifosplatform.infrastructure.jobs.service.JobRegisterService;
+import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,13 +27,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class SchedulerApiResource {
 
+    private final PlatformSecurityContext context;
     private final JobRegisterService jobRegisterService;
     private final ToApiJsonSerializer<SchedulerDetailData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @Autowired
-    public SchedulerApiResource(final JobRegisterService jobRegisterService,
+    public SchedulerApiResource(final PlatformSecurityContext context, final JobRegisterService jobRegisterService,
             final ToApiJsonSerializer<SchedulerDetailData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper) {
+        this.context = context;
         this.jobRegisterService = jobRegisterService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
@@ -41,6 +45,7 @@ public class SchedulerApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveStatus(@Context final UriInfo uriInfo) {
+        this.context.authenticatedUser().validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
         final boolean isSchedulerRunning = this.jobRegisterService.isSchedulerRunning();
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         final SchedulerDetailData schedulerDetailData = new SchedulerDetailData(isSchedulerRunning);
@@ -52,6 +57,12 @@ public class SchedulerApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public Response changeSchedulerStatus(@QueryParam(SchedulerJobApiConstants.COMMAND) final String commandParam) {
+        // check the logged in user have permissions to update scheduler status
+        final boolean hasNotPermission = this.context.authenticatedUser().hasNotPermissionForAnyOf("ALL_FUNCTIONS", "UPDATE_SCHEDULER");
+        if (hasNotPermission) {
+            final String authorizationMessage = "User has no authority to update scheduler status";
+            throw new NoAuthorizationException(authorizationMessage);
+        }
         Response response = Response.status(400).build();
         if (is(commandParam, SchedulerJobApiConstants.COMMAND_START_SCHEDULER)) {
             this.jobRegisterService.startScheduler();

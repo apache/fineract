@@ -7,6 +7,7 @@ import java.util.Set;
 public class SchedulerJobApiConstants {
 
     public static final String JOB_RESOURCE_NAME = "schedulerjob";
+    public static final String SCHEDULER_RESOURCE_NAME = "SCHEDULER";
     // response parameters
     public static final String jobIdentifierParamName = "jobId";
     public static final String displayNameParamName = "displayName";
