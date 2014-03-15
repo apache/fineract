@@ -39,7 +39,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
 
         private final StringBuilder sqlBuilder = new StringBuilder(
                 "id, name,identifier, schema_name as schemaName, schema_server as schemaServer, schema_server_port as schemaServerPort, auto_update as autoUpdate, ")//
-                .append(" schema_username as schemaUsername, schema_password as schemaPassword , timezone_id as timezoneId ")//
+                .append(" schema_username as schemaUsername, schema_password as schemaPassword , timezone_id as timezoneId ,initial_size as initialSize,validation_interval as validationInterval,remove_abandoned as removeAbandoned,remove_abandoned_timeout as removeAbandonedTimeout,log_abandoned as logAbandoned,abondoned_when_percentage_full as abondonedWhenPercentageFull,test_on_borrow as testOnBorrow ")//
                 .append(" from tenants t");//
 
         public String schema() {
@@ -59,9 +59,17 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
             final String schemaPassword = rs.getString("schemaPassword");
             final String timezoneId = rs.getString("timezoneId");
             final boolean autoUpdateEnabled = rs.getBoolean("autoUpdate");
+            final int initialSize = rs.getInt("initialSize");
+            final boolean testOnBorrow = rs.getBoolean("testOnBorrow");
+            final long validationInterval = rs.getLong("validationInterval");
+            final boolean removeAbandoned = rs.getBoolean("removeAbandoned");
+            final int removeAbandonedTimeout = rs.getInt("removeAbandonedTimeout");
+            final boolean logAbandoned = rs.getBoolean("logAbandoned");
+            final int abandonWhenPercentageFull = rs.getInt("abondonedWhenPercentageFull");
 
             return new MifosPlatformTenant(id, tenantIdentifier, name, schemaName, schemaServer, schemaServerPort, schemaUsername,
-                    schemaPassword, timezoneId, autoUpdateEnabled);
+                    schemaPassword, timezoneId, autoUpdateEnabled,initialSize,testOnBorrow,validationInterval,removeAbandoned,removeAbandonedTimeout
+                    ,logAbandoned,abandonWhenPercentageFull);
         }
     }
 

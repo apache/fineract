@@ -73,7 +73,7 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         poolConfiguration.setUsername(tenant.getSchemaUsername());
         poolConfiguration.setPassword(tenant.getSchemaPassword());
 
-        poolConfiguration.setInitialSize(5);
+        poolConfiguration.setInitialSize(tenant.getInitialSize());
         // poolConfiguration.setMaxActive(5);
         // poolConfiguration.setMinIdle(1);
         // poolConfiguration.setMaxIdle(4);
@@ -82,14 +82,14 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         // poolConfiguration.setTimeBetweenEvictionRunsMillis(30000);
         // poolConfiguration.setMinEvictableIdleTimeMillis(60000);
 
-        poolConfiguration.setTestOnBorrow(true);
+        poolConfiguration.setTestOnBorrow(tenant.isTestOnBorrow());
         poolConfiguration.setValidationQuery("SELECT 1");
-        poolConfiguration.setValidationInterval(30000);
+        poolConfiguration.setValidationInterval(tenant.getValidationInterval());
 
-        poolConfiguration.setRemoveAbandoned(true);
-        poolConfiguration.setRemoveAbandonedTimeout(60);
-        poolConfiguration.setLogAbandoned(true);
-        poolConfiguration.setAbandonWhenPercentageFull(50);
+        poolConfiguration.setRemoveAbandoned(tenant.isRemoveAbandoned());
+        poolConfiguration.setRemoveAbandonedTimeout(tenant.getRemoveAbandonedTimeout());
+        poolConfiguration.setLogAbandoned(tenant.isLogAbandoned());
+        poolConfiguration.setAbandonWhenPercentageFull(tenant.getAbandonWhenPercentageFull());
 
         poolConfiguration.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
                 + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;org.apache.tomcat.jdbc.pool.interceptor.SlowQueryReport");

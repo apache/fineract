@@ -73,6 +73,13 @@ CREATE TABLE `tenants` (
   `schema_username` varchar(100) NOT NULL DEFAULT 'root',
   `schema_password` varchar(100) NOT NULL DEFAULT 'mysql',
   `auto_update` tinyint(1) NOT NULL DEFAULT '1',
+  `initial_size` int(5) DEFAULT NULL,
+  `validation_interval` int(60) DEFAULT NULL,
+  `remove_abandoned` varchar(10) DEFAULT NULL,
+  `remove_abandoned_timeout` int(10) DEFAULT NULL,
+  `log_abandoned` varchar(10) DEFAULT NULL,
+  `abondoned_when_percentage_full` int(10) DEFAULT NULL,
+  `test_on_borrow` varchar(10) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
