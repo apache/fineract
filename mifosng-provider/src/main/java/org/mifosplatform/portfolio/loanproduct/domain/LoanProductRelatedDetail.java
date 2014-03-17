@@ -163,6 +163,18 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public void setPrincipal(BigDecimal principal) {
         this.principal = principal;
     }
+    
+    public Integer graceOnInterestCharged() {
+        return this.graceOnInterestCharged;
+    }
+    
+    public Integer graceOnInterestPayment() {
+        return this.graceOnInterestPayment;
+    }
+    
+    public Integer graceOnPrincipalPayment() {
+        return this.graceOnPrincipalPayment;
+    }
 
     public Money getInArrearsTolerance() {
         return Money.of(this.currency, this.inArrearsTolerance);
