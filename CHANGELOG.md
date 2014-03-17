@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 16 Mar 2014 - 1.20.0.RELEASE
 1. 04 Mar 2014 - 1.19.0.RELEASE
 1. 23 Feb 2014 - 1.18.0.RELEASE
 1. 21 Feb 2014 - 1.17.1.RELEASE
@@ -58,6 +59,48 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+
+1.12.0.RELEASE
+=============
+Feature Release
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-216] - No. of days overdue before In Arrears Not in Mifos X
+ - [MIFOSX-992] - Password Expiry and Idle user Logout
+ - [MIFOSX-974] - Integration test cases for Savings functionality
+
+Bugs
+ - [MIFOSX-814] - Not able to create user with the current API parameters
+ - [MIFOSX-877] - Retrieve Loan by external ID results in 500 error in API
+ - [MIFOSX-879] - Sorting and Ordering not working on Loan as per API Documentation
+ - [MIFOSX-930] - In modify loan application (Undo disbursal - Undo approval) not able to delete the charges added before.
+ - [MIFOSX-945] - Not able to adjust the minimum opening balance amount in transactions page of savings account results in "Null point exception"
+ - [MIFOSX-955] - Error in Aging Detail stretchy report
+ - [MIFOSX-948] - No links to User Generated Documents in the api docs (called templates)
+
+
+Community App
+ - [MIFOSX-979] - show hide elements on user interface based on user permissions
+ - [MIFOSX-975] - Clearly represent Loans In Arrears in the Community app
+ - [MIFOSX-976] - Support editing values for global configurations
+ - [MIFOSX-985] - Implementing user permissions for scheduler job
+ - [MIFOSX-989] - Make easy to select particular entity in a table
+ - [MIFOSX-947] - Issue with checkboxes because of upgradation in Angular JS
+ - [MIFOSX-973] - Templates functionality is broken after Angular upgrade
+ - [MIFOSX-977] - Not able to view data in stretchy reports if duplicate values present in JSON array
+ - [MIFOSX-980] - issue with first repayment on the same day of disbursement
+ - [MIFOSX-981] - Not able to enter data into data tables for code values
+ - [MIFOSX-983] - Stretchy reports export csv including old results
+ - [MIFOSX-987] - Not able to add member under Group with the backdated.
+ - [MIFOSX-991] - Submit button is not working in currency configuration page
+ - [MIFOSX-907] - In Edit Datatable page "new name" is not working as expected
+ - [MIFOSX-909] - For the Loan under pending approval stage - modifications in the charges is not getting updated in "outstanding" column
+ - [MIFOSX-915] - Not able to submit the JLG loan application if "Interest charged from" field is attached
+ - [MIFOSX-919] - Charge on specified due date, added while submitting the loan application is not reflecting in preview repayments page
+ - [MIFOSX-952] - Not able to assign Moratorium for Interest in new loan application page for a client
 
 1.19.0.RELEASE
 =============
