@@ -140,7 +140,7 @@ public class ClientsApiResource {
                     staffInSelectedOfficeOnly);
             clientData = ClientData.templateOnTop(clientData, templateData);
             Collection<SavingsAccountData> savingAccountOptions = this.savingsAccountReadPlatformService.retrieveForLookup(
-                    clientId, true);
+                    clientId, null);
             if (savingAccountOptions != null && savingAccountOptions.size() > 0) {
                 clientData = ClientData.templateWithSavingAccountOptions(clientData, savingAccountOptions);
             }
