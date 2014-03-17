@@ -428,6 +428,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
                     } else {
                         this.amount = newValue;
                     }
+                    this.amountOutstanding = calculateOutstanding();
                 break;
                 case PERCENT_OF_AMOUNT:
                 case PERCENT_OF_AMOUNT_AND_INTEREST:

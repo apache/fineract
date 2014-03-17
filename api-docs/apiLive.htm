@@ -306,6 +306,218 @@
 			</div>
 
 			<div class="flybar-nav">
+				<h2 class="flybar-button">Savings</h2>
+				<div id="toc-menu-client" class="flybar-menu">
+					<div class="tocMatrix">
+						<table class=matrixHeading>
+							<tr class="matrixHeadingBG">
+								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
+										<table>
+											<tr>
+												<td>RESOURCES</td>
+											</tr>
+										</table>
+									</div></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">POST</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>create/complex
+													update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">GET</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>read</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">PUT</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">DELETE</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>delete</div></td>
+										</tr>
+									</table></td>
+							</tr>
+							<tr>
+								<td><a href="#savingsaccounts">Savings Accounts</a></td>
+								<td>savingsaccounts</td>
+								<td><a href="#savingsaccounts_create">Submit new savings application</a></td>
+								<td><a href="#savingsaccounts_list">List savings application/accounts</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>savingsaccounts/{accountId}</td>
+								<td></td>
+								<td><a href="#savingsaccounts_retrieve">Retrieve a savings application/account</a></td>
+								<td><a href="#savingsaccounts_update">Modify a savings application</a></td>
+								<td><a href="#savingsaccounts_delete">Delete a savings application</a></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}?command=approve</td>
+								<td><a href="#savingsaccounts_approve">Approve a savings application</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>savingsaccounts/{accountId}?command=undoApproval</td>
+								<td><a href="#savingsaccounts_undoapproval">Undo savings application approval</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}?command=reject</td>
+								<td><a href="#savingsaccounts_reject">Reject a savings application</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>savingsaccounts/{accountId}?command=withdraw</td>
+								<td><a href="#savingsaccounts_withdrawbyapplicant">Withdraw savings application</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}?command=activate</td>
+								<td><a href="#savingsaccounts_activate">Activate a savings account</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>savingsaccounts/{accountId}?command=close</td>
+								<td><a href="#savingsaccounts_close">Close a savings account</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}?command=calculateInterest</td>
+								<td><a href="#savingsaccounts_calculate_interest">Calculate interest on a savings account</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>savingsaccounts/{accountId}?command=postInterest</td>
+								<td><a href="#savingsaccounts_post_interest">Post interest on a savings account</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td><a href="#savingsaccounts_transactions">Savings Transactions</a></td>
+								<td>savingsaccounts/{accountId}/transactions?command=deposit</td>
+								<td><a href="#savingsaccounts_deposit">Make a deposit</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}/transactions?command=withdrawal</td>
+								<td><a href="#savingsaccounts_withdrawal">Make a withdrawal</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>savingsaccounts/{accountId}/transactions/{transactionId}?command=undo</td>
+								<td><a href="#savingsaccounts_undotransaction">Undo transaction</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>savingsaccounts/{accountId}/transactions/{transactionId}?command=modify</td>
+								<td><a href="#savingsaccounts_adjusttransaction">Adjust transaction</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}/transactions/template</td>
+								<td></td>
+								<td><a href="#savingsaccounts_transactions_template">Retrieve savings account transaction template</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}/transactions/{transactionId}</td>
+								<td></td>
+								<td><a href="#savingsaccounts_transaction">Retrieve savings account transaction</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td><a href="#savings_charges">Savings Account Charges</a></td>
+								<td>savingsaccounts/{accountId}/charges</td>
+								<td><a href="#savings_charges_create">Add a Savings Account Charge</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}/charges/{savingsAccountChargeId}</td>
+								<td></td>
+								<td><a href="#savings_charges_retrieve">Retrieve a Savings Account Charge</a></td>
+								<td><a href="#savings_charges_update">Modify a Savings Account Charge</a></td>
+								<td><a href="#savings_charges_delete">Delete a Savings Account Charge</a></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>savingsaccounts/{accountId}/charges/{savingsAccountChargeId}?command=paycharge</td>
+								<td><a href="#savings_charges_pay">Pay a Savings Account Charge</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>savingsaccounts/{accountId}/charges/{savingsAccountChargeId}?command=waive</td>
+								<td><a href="#savings_charges_waive">Waive a Savings Account Charge</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<div class="flybar-nav">
 				<h2 class="flybar-button">Loan</h2>
 				<div id="toc-menu-loan" class="flybar-menu">
 					<div class="tocMatrix">
@@ -373,7 +585,7 @@
 								<td>loans/{loanId}</td>
 								<td></td>
 								<td><a href="#loans_retrieve">Retrieve a Loan</a></td>
-								<td></td>
+								<td><a href="#loans_update">Update a Loan</a></td>
 								<td><a href="#loans_delete">Delete a Loan Application</a></td>
 							</tr>
 							<tr>
@@ -851,6 +1063,22 @@
 								<td><a href="#loanproducts_update">Update a Loan
 										Product</a></td>
 								<td></td>
+							</tr>
+							<tr class="alt">
+								<td><a href="#savingsproducts">Savings Product</a></td>
+								<td>savingsproducts</td>
+								<td><a href="#savingsproducts_create">Create a Savings product</a></td>
+								<td><a href="#savingsproducts_list">List Savings products</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsproducts/{productId}</td>
+								<td></td>
+								<td><a href="#savingsproducts_retrieve">Retrieve a savings product</a></td>
+								<td><a href="#savingsproducts_update">Update a savings product</a></td>
+								<td><a href="#savingsproducts_delete">Delete a savings product</a></td>
 							</tr>
 							<tr class="alt">
 								<td><a href="#configs">Currency</a></td>
@@ -1601,6 +1829,18 @@
                                 <td>accountingrules/template</td>
                                 <td><a href="#accountingrules_template">Retrieve Accounting Rule Template</a></td>
 	                        </tr>
+	                        <tr >
+								<td>savingproducts/template</td>
+								<td><a href="#savingsproducts_template">Retrieve Savings Product Template</a></td>
+							</tr>
+							<tr class="alt">
+								<td>savingsaccounts/template?clientId={clientId}</td>
+								<td><a href="#savingsaccounts_template">Retrieve savings template</a></td>
+							</tr>
+							<tr>
+								<td>savingsaccounts/{accountId}/transactions/template</td>
+								<td><a href="#savingsaccounts_transactions_template">Retrieve savings account transaction template</a></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -5757,6 +5997,37 @@ GET https://DomainName/mifosng-provider/api/v1/loans
       "inArrears":false
     }
   ]
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="loans_update" name="loans_update" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h2>Modify a loan application</h2>
+					<p>Loan application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">PUT https://Domain Name/api/v1/loans/{loanId}</code>
+					<code class="method-request">PUT loans/1              
+Content-Type: application/json
+No Request Body:
+{
+  "locale": "en", 
+  "principal": "5000",
+}
+					</code>
+					<code class="method-response">
+{
+  "officeId": 2,
+  "clientId": 1,
+  "loanId": 1,
+  "resourceId": 1,
+  "changes": {
+    "principal": 5000,
+    "locale": "en"
+  }
 }
 					</code>
 				</div>
@@ -22777,99 +23048,6 @@ No Request Body:
 				<td></td>
 				<td></td>
 			</tr>
-			</table>
-		</div>
-
-	<a id="betaapi_matrix" name="betaapi_matrix" class="old-syle-anchor">&nbsp;</a>
-	<div class=fullMatrixOuter>
-		<table width="80%">
-			<tr>
-				<td><h3>Beta API Matrix</h3></td>
-			</tr>
-		</table>
-			<table class=matrixHeading>
-				<tr class="matrixHeadingBG">
-					<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
-							<table>
-								<tr>
-									<td>RESOURCES</td>
-								</tr>
-							</table>
-						</div></td>
-					<td><table>
-							<tr>
-								<td><div class="matrixHeadingVerbs">POST</div></td>
-							</tr>
-							<tr>
-								<td><div class=matrixHeadingCommands>create/complex update</div></td>
-							</tr>
-						</table></td>
-					<td><table>
-							<tr>
-								<td><div class="matrixHeadingVerbs">GET</div></td>
-							</tr>
-							<tr>
-								<td><div class=matrixHeadingCommands>read</div></td>
-							</tr>
-						</table></td>
-					<td><table>
-							<tr>
-								<td><div class="matrixHeadingVerbs">PUT</div></td>
-							</tr>
-							<tr>
-								<td><div class=matrixHeadingCommands>update</div></td>
-							</tr>
-						</table></td>
-					<td><table>
-							<tr>
-								<td><div class="matrixHeadingVerbs">DELETE</div></td>
-							</tr>
-							<tr>
-								<td><div class=matrixHeadingCommands>delete</div></td>
-							</tr>
-						</table>
-					</td>
-				</tr>
-				<tr class="alt">
-					<td><a href="#cache">Cache</a></td>
-					<td>caches</td>
-					<td></td>
-					<td><a href="#caches_list">List Cache Types</a></td>
-					<td><a href="#caches_switch">Switch Cache</a></td>
-					<td></td>
-				</tr>
-				<tr class="alt">
-					<td><a href="#centers">Center</a></td>
-					<td>centers</td>
-					<td><a href="#centers_create">Create a Center</a></td>
-					<td><a href="#centers_list">List Centers</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-                    <td>centers/template</td>
-                    <td></td>
-                    <td><a href="#centers_template">Retrieve Center Template</a></td>
-                    <td></td>
-					<td></td>
-                </tr>
-				<tr class="alt">
-					<td></td>
-					<td>centers/{centerId}</td>
-					<td></td>
-					<td><a href="#centers_retrieve">Retrieve a Center</a></td>
-					<td><a href="#centers_update">Update a Center</a></td>
-					<td><a href="#centers_delete">Delete a Center</a></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>centers/{centerId}?command=activate</td>
-					<td><a href="#centers_activate">Activate a Center</a></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
 				<tr class="alt">
 					<td><a href="#savingsproducts">Savings Product</a></td>
 					<td>savingsproducts</td>
@@ -23058,6 +23236,99 @@ No Request Body:
 					<td></td>
 					<td>savingsaccounts/{accountId}/charges/{savingsAccountChargeId}?command=waive</td>
 					<td><a href="#savings_charges_waive">Waive a Savings Account Charge</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+			</table>
+		</div>
+
+	<a id="betaapi_matrix" name="betaapi_matrix" class="old-syle-anchor">&nbsp;</a>
+	<div class=fullMatrixOuter>
+		<table width="80%">
+			<tr>
+				<td><h3>Beta API Matrix</h3></td>
+			</tr>
+		</table>
+			<table class=matrixHeading>
+				<tr class="matrixHeadingBG">
+					<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
+							<table>
+								<tr>
+									<td>RESOURCES</td>
+								</tr>
+							</table>
+						</div></td>
+					<td><table>
+							<tr>
+								<td><div class="matrixHeadingVerbs">POST</div></td>
+							</tr>
+							<tr>
+								<td><div class=matrixHeadingCommands>create/complex update</div></td>
+							</tr>
+						</table></td>
+					<td><table>
+							<tr>
+								<td><div class="matrixHeadingVerbs">GET</div></td>
+							</tr>
+							<tr>
+								<td><div class=matrixHeadingCommands>read</div></td>
+							</tr>
+						</table></td>
+					<td><table>
+							<tr>
+								<td><div class="matrixHeadingVerbs">PUT</div></td>
+							</tr>
+							<tr>
+								<td><div class=matrixHeadingCommands>update</div></td>
+							</tr>
+						</table></td>
+					<td><table>
+							<tr>
+								<td><div class="matrixHeadingVerbs">DELETE</div></td>
+							</tr>
+							<tr>
+								<td><div class=matrixHeadingCommands>delete</div></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#cache">Cache</a></td>
+					<td>caches</td>
+					<td></td>
+					<td><a href="#caches_list">List Cache Types</a></td>
+					<td><a href="#caches_switch">Switch Cache</a></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#centers">Center</a></td>
+					<td>centers</td>
+					<td><a href="#centers_create">Create a Center</a></td>
+					<td><a href="#centers_list">List Centers</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+                    <td>centers/template</td>
+                    <td></td>
+                    <td><a href="#centers_template">Retrieve Center Template</a></td>
+                    <td></td>
+					<td></td>
+                </tr>
+				<tr class="alt">
+					<td></td>
+					<td>centers/{centerId}</td>
+					<td></td>
+					<td><a href="#centers_retrieve">Retrieve a Center</a></td>
+					<td><a href="#centers_update">Update a Center</a></td>
+					<td><a href="#centers_delete">Delete a Center</a></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>centers/{centerId}?command=activate</td>
+					<td><a href="#centers_activate">Activate a Center</a></td>
 					<td></td>
 					<td></td>
 					<td></td>
