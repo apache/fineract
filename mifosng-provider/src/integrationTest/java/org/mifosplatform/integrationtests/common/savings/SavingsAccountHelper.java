@@ -52,19 +52,19 @@ public class SavingsAccountHelper {
         return sdf.format(calendar.getTime());
     }
 
-    public Integer applyForSavingsApplication(final Integer clientID, final Integer savingsProductID) {
+    public Integer applyForSavingsApplication(final Integer ID, final Integer savingsProductID, final String accountType) {
         System.out.println("--------------------------------APPLYING FOR SAVINGS APPLICATION--------------------------------");
         final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
                 .withSubmittedOnDate(CREATED_DATE) //
-                .build(clientID.toString(), savingsProductID.toString());
+                .build(ID.toString(), savingsProductID.toString(), accountType);
         return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
                 savingsApplicationJSON, "savingsId");
     }
 
-    public HashMap updateSavingsAccount(final Integer clientID, final Integer savingsProductID, final Integer savingsId) {
+    public HashMap updateSavingsAccount(final Integer ID, final Integer savingsProductID, final Integer savingsId, final String accountType) {
         final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
                 .withSubmittedOnDate(CREATED_DATE_PLUS_ONE) //
-                .build(clientID.toString(), savingsProductID.toString());
+                .build(ID.toString(), savingsProductID.toString(), accountType);
 
         return Utils.performServerPut(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "/" + savingsId + "?"
                 + Utils.TENANT_IDENTIFIER, savingsApplicationJSON, CommonConstants.RESPONSE_CHANGES);
@@ -302,7 +302,7 @@ public class SavingsAccountHelper {
         return response;
     }
 
-    public ArrayList getSavingsChanrges(final Integer savingsID) {
+    public ArrayList getSavingsCharges(final Integer savingsID) {
         final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "/charges?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, URL, "");
     }
