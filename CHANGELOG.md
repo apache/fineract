@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 18 Mar 2014 - 1.20.1.RELEASE
 1. 16 Mar 2014 - 1.20.0.RELEASE
 1. 04 Mar 2014 - 1.19.0.RELEASE
 1. 23 Feb 2014 - 1.18.0.RELEASE
@@ -60,6 +61,13 @@ Releases
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
 
+
+1.20.1.RELEASE
+=============
+Bug Release
+
+Bugs
+ - [MIFOSX-995] - Grace periods not working when actualDisbursementDate != expectedDisbursementDate
 
 1.20.0.RELEASE
 =============

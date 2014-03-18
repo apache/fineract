@@ -1940,11 +1940,11 @@ public class Loan extends AbstractPersistable<Long> {
             loanVariationTermsData.add(data);
         }
 
-        final LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency,
-                loanTermPeriodFrequencyType, getDisbursementDate(), getExpectedFirstRepaymentOnDate(),
-                calculatedRepaymentsStartingFromDate, getInArrearsTolerance(), this.loanRepaymentScheduleDetail,
-                this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount, disbursementData, this.maxOutstandingLoanBalance,
-                loanVariationTermsData);
+        final LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms
+                .assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, getDisbursementDate(),
+                        getExpectedFirstRepaymentOnDate(), calculatedRepaymentsStartingFromDate, getInArrearsTolerance(),
+                        this.loanRepaymentScheduleDetail, this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount, disbursementData,
+                        this.maxOutstandingLoanBalance,loanVariationTermsData, getInterestChargedFromDate());
 
         final LoanScheduleModel loanSchedule = loanScheduleGenerator.generate(mc, applicationCurrency, loanApplicationTerms, charges(),
                 isHolidayEnabled, holidays, workingDays);

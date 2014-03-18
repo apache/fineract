@@ -126,9 +126,9 @@ public final class LoanApplicationTerms {
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency applicationCurrency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final LocalDate expectedDisbursementDate,
             final LocalDate repaymentsStartingFromDate, final LocalDate calculatedRepaymentsStartingFromDate,
-            final Money inArrearsTolerance, final LoanProductRelatedDetail loanProductRelatedDetail, final boolean multiDisburseLoan,
-            final BigDecimal emiAmount, final List<DisbursementData> disbursementDatas, final BigDecimal maxOutstandingBalance,
-            final List<LoanTermVariationsData> emiAmountVariations) {
+            final Money inArrearsTolerance, final LoanProductRelatedDetail loanProductRelatedDetail,
+            final boolean multiDisburseLoan,final BigDecimal emiAmount,final List<DisbursementData> disbursementDatas, 
+            final BigDecimal maxOutstandingBalance,final List<LoanTermVariationsData> emiAmountVariations, final LocalDate interestChargedFromDate) {
 
         final Integer numberOfRepayments = loanProductRelatedDetail.getNumberOfRepayments();
         final Integer repaymentEvery = loanProductRelatedDetail.getRepayEvery();
@@ -143,10 +143,9 @@ public final class LoanApplicationTerms {
         final Money principalMoney = loanProductRelatedDetail.getPrincipal();
 
         //
-        final Integer graceOnPrincipalPayment = 0;
-        final Integer graceOnInterestPayment = 0;
-        final Integer graceOnInterestCharged = 0;
-        final LocalDate interestChargedFromDate = null;
+        final Integer graceOnPrincipalPayment = loanProductRelatedDetail.graceOnPrincipalPayment() ;
+        final Integer graceOnInterestPayment = loanProductRelatedDetail.graceOnInterestPayment() ;
+        final Integer graceOnInterestCharged = loanProductRelatedDetail.graceOnInterestCharged();
 
         return new LoanApplicationTerms(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, amortizationMethod, interestMethod, interestRatePerPeriod,
