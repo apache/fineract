@@ -80,7 +80,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
 
-        final Collection<SavingsProductData> savingsProductDatas = this.savingsProductReadPlatformService.retrieveAllForLookupByType(true);
+        final Collection<SavingsProductData> savingsProductDatas = this.savingsProductReadPlatformService.retrieveAllForLookupByType(null);
 
         Collection<StaffData> staffOptions = null;
 

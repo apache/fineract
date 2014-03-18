@@ -209,7 +209,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final Locale locale = command.extractLocale();
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
-            CommandProcessingResult result = openOverdraftSavingsAccount(newClient, fmt);
+            CommandProcessingResult result = openSavingsAccount(newClient, fmt);
             if (result.getSavingsId() != null) {
                 this.clientRepository.save(newClient);
             }
@@ -298,7 +298,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final AppUser currentUser = this.context.authenticatedUser();
             client.activate(currentUser, fmt, activationDate);
-            CommandProcessingResult result = openOverdraftSavingsAccount(client, fmt);
+            CommandProcessingResult result = openSavingsAccount(client, fmt);
             this.clientRepository.saveAndFlush(client);
 
             return new CommandProcessingResultBuilder() //
@@ -315,20 +315,16 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         }
     }
 
-    private CommandProcessingResult openOverdraftSavingsAccount(final Client client, final DateTimeFormatter fmt) {
+    private CommandProcessingResult openSavingsAccount(final Client client, final DateTimeFormatter fmt) {
         CommandProcessingResult commandProcessingResult = CommandProcessingResult.empty();
         if (client.isActive() && client.SavingsProduct() != null) {
-            if (!client.SavingsProduct().isAllowOverdraft()) {
-                String defaultUserMessage = "Client's saving account must be a overdraft account";
-                throw new InvalidClientSavingProductException("saving.product", "must.be.ovrdraft.account", defaultUserMessage, client
-                        .SavingsProduct().getId(), client.getId());
-            }
             SavingsAccountDataDTO savingsAccountDataDTO = new SavingsAccountDataDTO(client, null, client.SavingsProduct(),
                     client.getActivationLocalDate(), client.activatedBy(), fmt);
             commandProcessingResult = this.savingsApplicationProcessWritePlatformService.createActiveApplication(savingsAccountDataDTO);
             if (commandProcessingResult.getSavingsId() != null) {
                 SavingsAccount savingsAccount = this.savingsRepository.findOne(commandProcessingResult.getSavingsId());
                 client.updateSavingsAccount(savingsAccount);
+                client.updateSavingsProduct(null);
             }
         }
         return commandProcessingResult;
@@ -503,11 +499,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             if(!savingsAccount.getClient().identifiedBy(clientId)){
                 String defaultUserMessage = "saving account must belongs to client";
                 throw new InvalidClientSavingProductException("saving.account", "must.belongs.to.client", defaultUserMessage, savingsId,
-                        clientForUpdate.getId());
-            }
-            if (!savingsAccount.allowOverdraft()) {
-                String defaultUserMessage = "Client's saving account must be a overdraft account";
-                throw new InvalidClientSavingProductException("saving.account", "must.be.ovrdraft.account", defaultUserMessage, savingsId,
                         clientForUpdate.getId());
             }
             clientForUpdate.updateSavingsAccount(savingsAccount);

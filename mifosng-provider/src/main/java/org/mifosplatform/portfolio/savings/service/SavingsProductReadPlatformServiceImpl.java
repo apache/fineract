@@ -201,10 +201,14 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
     }
 
     @Override
-    public Collection<SavingsProductData> retrieveAllForLookupByType(boolean isOverdraftType) {
-        final String sql = "select " + this.savingsProductLookupsRowMapper.schema() + " where sp.allow_overdraft=?";
+    public Collection<SavingsProductData> retrieveAllForLookupByType(Boolean isOverdraftType) {
+        String sql = "select " + this.savingsProductLookupsRowMapper.schema(); 
+         if(isOverdraftType != null){       
+               sql += " where sp.allow_overdraft=?";
+               return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, isOverdraftType);
+         }
 
-        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, isOverdraftType);
+        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper);
 
     }
 }
