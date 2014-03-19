@@ -22,7 +22,7 @@ public class JournalEntryHelper {
         this.responseSpec = responseSpec;
     }
 
-    public void checkJournalEntryForExpenseAccount(final Account expenseAccount, final String date, final JournalEntry accountEntries) {
+    public void checkJournalEntryForExpenseAccount(final Account expenseAccount, final String date, final JournalEntry... accountEntries) {
         checkJournalEntry(expenseAccount, date, accountEntries);
     }
 
@@ -30,8 +30,12 @@ public class JournalEntryHelper {
         checkJournalEntry(assetAccount, date, accountEntries);
     }
 
-    public void checkJournalEntryForIncomeAccount(final Account incomeAccount, final String date, final JournalEntry accountEntries) {
+    public void checkJournalEntryForIncomeAccount(final Account incomeAccount, final String date, final JournalEntry... accountEntries) {
         checkJournalEntry(incomeAccount, date, accountEntries);
+    }
+    
+    public void checkJournalEntryForLiabilityAccount(final Account liabilityAccount, final String date, final JournalEntry... accountEntries) {
+        checkJournalEntry(liabilityAccount, date, accountEntries);
     }
 
     private String getEntryValueFromJournalEntry(final ArrayList<HashMap> entryResponse, final int entryNumber) {

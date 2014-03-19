@@ -307,7 +307,7 @@ public class SavingsAccountHelper {
         return Utils.performServerGet(requestSpec, responseSpec, URL, "");
     }
 
-    public HashMap getSavingsChanrge(final Integer savingsID, final Integer savingsChargeId) {
+    public HashMap getSavingsCharge(final Integer savingsID, final Integer savingsChargeId) {
         final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "/charges/" + savingsChargeId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, URL, "");
     }
