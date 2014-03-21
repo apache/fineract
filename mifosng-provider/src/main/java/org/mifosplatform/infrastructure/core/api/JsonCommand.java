@@ -67,6 +67,13 @@ public final class JsonCommand {
                 null, null, null, null, null, null, url, productId);
     }
 
+    public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
+            final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
+            final Long groupId, final Long clientId, final Long loanId, final Long savingsId,final String url, final Long productId) {
+        return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, groupId, clientId,
+                loanId, savingsId, null, null, null, null, url, productId);
+    }
+    
     public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
             final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final Long codeId,
@@ -90,6 +97,7 @@ public final class JsonCommand {
         this.url = url;
         this.productId = productId;
     }
+    
 
     public String json() {
         return this.jsonCommand;
