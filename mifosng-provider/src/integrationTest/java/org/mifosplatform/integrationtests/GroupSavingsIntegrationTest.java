@@ -416,7 +416,7 @@ public class GroupSavingsIntegrationTest {
 
         this.savingsAccountHelper.payCharge((Integer) savingsChargeForPay.get("id"), savingsId,
                 ((Float) savingsChargeForPay.get("amount")).toString(), sdf.format(cal.getTime()));
-        HashMap paidCharge = this.savingsAccountHelper.getSavingsChanrge(savingsId, (Integer) savingsChargeForPay.get("id"));
+        HashMap paidCharge = this.savingsAccountHelper.getSavingsCharge(savingsId, (Integer) savingsChargeForPay.get("id"));
         assertEquals(savingsChargeForPay.get("amount"), paidCharge.get("amountPaid"));
 
         final Integer monthlyFeechargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
@@ -429,7 +429,7 @@ public class GroupSavingsIntegrationTest {
 
         HashMap savingsChargeForWaive = charges.get(1);
         this.savingsAccountHelper.waiveCharge((Integer) savingsChargeForWaive.get("id"), savingsId);
-        HashMap waiveCharge = this.savingsAccountHelper.getSavingsChanrge(savingsId, (Integer) savingsChargeForWaive.get("id"));
+        HashMap waiveCharge = this.savingsAccountHelper.getSavingsCharge(savingsId, (Integer) savingsChargeForWaive.get("id"));
         assertEquals(savingsChargeForWaive.get("amount"), waiveCharge.get("amountWaived"));
     }
 
