@@ -5,16 +5,9 @@
  */
 package org.mifosplatform.commands.service;
 
-import java.lang.reflect.Type;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.reflect.TypeToken;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.mifosplatform.commands.data.AuditData;
@@ -48,9 +41,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
-import com.google.common.reflect.TypeToken;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import java.lang.reflect.Type;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 @Service
 public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
@@ -98,7 +92,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             }
 
             String partSql = " aud.id as id, aud.action_name as actionName, aud.entity_name as entityName,"
-                    + " aud.resource_id as resourceId, aud.subresource_id as subresourceId,"
+                    + " aud.resource_id as resourceId, aud.subresource_id as subresourceId,aud.client_id as clientId, aud.loan_id as loanId,"
                     + " mk.username as maker, aud.made_on_date as madeOnDate, "
                     + "ck.username as checker, aud.checked_on_date as checkedOnDate, ev.enum_message_property as processingResult "
                     + commandAsJsonString + ", "
@@ -126,6 +120,8 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final String actionName = rs.getString("actionName");
             final String entityName = rs.getString("entityName");
             final Long resourceId = JdbcSupport.getLong(rs, "resourceId");
+            final Long clientId  = rs.getLong("clientId");
+            final Long loanId    = rs.getLong("loanId");
             final Long subresourceId = JdbcSupport.getLong(rs, "subresourceId");
             final String maker = rs.getString("maker");
             final DateTime madeOnDate = JdbcSupport.getDateTime(rs, "madeOnDate");
@@ -148,7 +144,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final String savingsAccountNo = rs.getString("savingsAccountNo");
 
             return new AuditData(id, actionName, entityName, resourceId, subresourceId, maker, madeOnDate, checker, checkedOnDate,
-                    processingResult, commandAsJson, officeName, groupLevelName, groupName, clientName, loanAccountNo, savingsAccountNo);
+                    processingResult, commandAsJson, officeName, groupLevelName, groupName, clientName, loanAccountNo, savingsAccountNo,clientId,loanId);
         }
     }
 
