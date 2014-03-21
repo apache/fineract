@@ -44,6 +44,7 @@ public class AccountingScenarioIntegrationTest {
     private final String LP_INTEREST_RATE = "1";
     private final String EXPECTED_DISBURSAL_DATE = "04 March 2011";
     private final String LOAN_APPLICATION_SUBMISSION_DATE = "3 March 2011";
+    private final String TRANSACTION_DATE = "10 January 2013";
     private final String LOAN_TERM_FREQUENCY = "10";
     private final String INDIVIDUAL_LOAN = "individual";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
@@ -52,16 +53,13 @@ public class AccountingScenarioIntegrationTest {
     public static final String WITHDRAWAL_AMOUNT = "3000";
     public static final String WITHDRAWAL_AMOUNT_ADJUSTED = "2000";
 
-    Float SP_OPENING_BALANCE = new Float(MINIMUM_OPENING_BALANCE);
+    Float SP_BALANCE = new Float(MINIMUM_OPENING_BALANCE);
     Float SP_DEPOSIT_AMOUNT = new Float(DEPOSIT_AMOUNT);
     Float SP_WITHDRAWAL_AMOUNT = new Float(WITHDRAWAL_AMOUNT);
     Float SP_WITHDRAWAL_AMOUNT_ADJUSTED = new Float(WITHDRAWAL_AMOUNT_ADJUSTED);
 
     private final String REPAYMENT_DATE[] = { "", "04 May 2011", "04 July 2011", "04 September 2011", "04 November 2011", "04 January 2012" };
     private final Float REPAYMENT_AMOUNT[] = { .0f, 2200.0f, 3000.0f, 900.0f, 2000.0f, 2500.0f };
-
-    private final String TRANSACTION_DATE[] = { "10 January 2013", "01 April 2013", "01 July 2013", "01 October 2013", "01 January 2014" };
-    private final Float INTEREST_POSTING_AMOUNT[] = { .0f, 65.0666f, 74.8424f, 77.5854f, 79.5656f };
 
     private final Float AMOUNT_TO_BE_WAIVE = 400.0f;
     private LoanTransactionHelper loanTransactionHelper;
@@ -229,44 +227,43 @@ public class AccountingScenarioIntegrationTest {
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         // Checking initial Account entries.
-        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(this.SP_OPENING_BALANCE, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(this.SP_OPENING_BALANCE,
+        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(this.SP_BALANCE, JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(this.SP_BALANCE,
                 JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.TRANSACTION_DATE[0], assetAccountInitialEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, this.TRANSACTION_DATE[0],
-                liablilityAccountInitialEntry);
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.TRANSACTION_DATE, assetAccountInitialEntry);
+        this.journalEntryHelper
+                .checkJournalEntryForLiabilityAccount(liabilityAccount, this.TRANSACTION_DATE, liablilityAccountInitialEntry);
 
         // First Transaction-Deposit
         this.savingsAccountHelper.depositToSavingsAccount(savingsID, DEPOSIT_AMOUNT, SavingsAccountHelper.TRANSACTION_DATE,
                 CommonConstants.RESPONSE_RESOURCE_ID);
-        Float openingBalance = SP_OPENING_BALANCE + SP_DEPOSIT_AMOUNT;
+        Float balance = SP_BALANCE + SP_DEPOSIT_AMOUNT;
         HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
-        assertEquals("Verifying opening Balance after Deposit", openingBalance, summary.get("accountBalance"));
+        assertEquals("Verifying Balance after Deposit", balance, summary.get("accountBalance"));
 
         System.out.println("----------------------Verifying Journal Entry after the Transaction Deposit----------------------------");
         final JournalEntry[] assetAccountFirstTransactionEntry = { new JournalEntry(this.SP_DEPOSIT_AMOUNT,
                 JournalEntry.TransactionType.DEBIT) };
         final JournalEntry[] liabililityAccountFirstTransactionEntry = { new JournalEntry(this.SP_DEPOSIT_AMOUNT,
                 JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.TRANSACTION_DATE[0], assetAccountFirstTransactionEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, this.TRANSACTION_DATE[0],
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.TRANSACTION_DATE, assetAccountFirstTransactionEntry);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, this.TRANSACTION_DATE,
                 liabililityAccountFirstTransactionEntry);
 
         // Second Transaction-Withdrawal
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsID, WITHDRAWAL_AMOUNT, SavingsAccountHelper.TRANSACTION_DATE,
                 CommonConstants.RESPONSE_RESOURCE_ID);
-        openingBalance -= SP_WITHDRAWAL_AMOUNT;
+        balance -= SP_WITHDRAWAL_AMOUNT;
         summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
-        assertEquals("Verifying opening Balance after Withdrawal", openingBalance, summary.get("accountBalance"));
+        assertEquals("Verifying Balance after Withdrawal", balance, summary.get("accountBalance"));
 
         System.out.println("-------------------Verifying Journal Entry after the Transaction Withdrawal----------------------");
         final JournalEntry[] assetAccountSecondTransactionEntry = { new JournalEntry(this.SP_WITHDRAWAL_AMOUNT,
                 JournalEntry.TransactionType.CREDIT) };
         final JournalEntry[] liabililityAccountSecondTransactionEntry = { new JournalEntry(this.SP_WITHDRAWAL_AMOUNT,
                 JournalEntry.TransactionType.DEBIT) };
-        this.journalEntryHelper
-                .checkJournalEntryForAssetAccount(assetAccount, this.TRANSACTION_DATE[0], assetAccountSecondTransactionEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, this.TRANSACTION_DATE[0],
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.TRANSACTION_DATE, assetAccountSecondTransactionEntry);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, this.TRANSACTION_DATE,
                 liabililityAccountSecondTransactionEntry);
 
         // Third Transaction-Add Charges for Withdrawal Fee
@@ -288,7 +285,7 @@ public class AccountingScenarioIntegrationTest {
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsID, WITHDRAWAL_AMOUNT_ADJUSTED,
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
-        openingBalance = openingBalance - SP_WITHDRAWAL_AMOUNT_ADJUSTED - chargeAmount;
+        balance = balance - SP_WITHDRAWAL_AMOUNT_ADJUSTED - chargeAmount;
 
         final JournalEntry[] liabililityAccountThirdTransactionEntry = {
                 new JournalEntry(chargeAmount, JournalEntry.TransactionType.DEBIT),
@@ -296,41 +293,13 @@ public class AccountingScenarioIntegrationTest {
         final JournalEntry[] assetAccountThirdTransactionEntry = { new JournalEntry(this.SP_WITHDRAWAL_AMOUNT_ADJUSTED,
                 JournalEntry.TransactionType.CREDIT) };
         final JournalEntry[] incomeAccountThirdTransactionEntry = { new JournalEntry(chargeAmount, JournalEntry.TransactionType.CREDIT) };
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.TRANSACTION_DATE[0], assetAccountThirdTransactionEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, this.TRANSACTION_DATE[0],
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.TRANSACTION_DATE, assetAccountThirdTransactionEntry);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, this.TRANSACTION_DATE,
                 liabililityAccountThirdTransactionEntry);
-        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, this.TRANSACTION_DATE[0],
-                incomeAccountThirdTransactionEntry);
+        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, this.TRANSACTION_DATE, incomeAccountThirdTransactionEntry);
 
-        // Verifying Opening Balance after applying Charge for Withdrawal Fee
-        assertEquals("Verifying opening Balance", openingBalance, summary.get("accountBalance"));
-
-        // Fourth Transaction-Interest Posting
-        final HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsID);
-        this.savingsAccountHelper.calculateInterestForSavings(savingsID);
-        summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
-        assertEquals(summaryBefore, summary);
-
-        this.savingsAccountHelper.postInterestForSavings(savingsID);
-        summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
-        Assert.assertFalse(summaryBefore.equals(summary));
-
-        System.out.println("---------------------Verifying Journal Entry after the Transaction Withdrawal----------------------");
-        for (int i = 1; i < INTEREST_POSTING_AMOUNT.length; i++) {
-            openingBalance += INTEREST_POSTING_AMOUNT[i];
-            summary = this.savingsAccountHelper.getSavingsSummary(savingsID);
-            final JournalEntry[] expenseAccountFourthTransactionEntry = { new JournalEntry(this.INTEREST_POSTING_AMOUNT[i],
-                    JournalEntry.TransactionType.DEBIT) };
-            final JournalEntry[] liabilityAccountFourthTransactionEntry = { new JournalEntry(this.INTEREST_POSTING_AMOUNT[i],
-                    JournalEntry.TransactionType.CREDIT) };
-            this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, TRANSACTION_DATE[i],
-                    expenseAccountFourthTransactionEntry);
-            this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, TRANSACTION_DATE[i],
-                    liabilityAccountFourthTransactionEntry);
-        }
-
-        // Verifying Opening Balance after Posting Interest to Savings Account
-        assertEquals("Verifying opening Balance", openingBalance, summary.get("accountBalance"));
+        // Verifying Balance after applying Charge for Withdrawal Fee
+        assertEquals("Verifying Balance", balance, summary.get("accountBalance"));
     }
 
     private Integer createSavingsProduct(final String minOpenningBalance, final Account... accounts) {
