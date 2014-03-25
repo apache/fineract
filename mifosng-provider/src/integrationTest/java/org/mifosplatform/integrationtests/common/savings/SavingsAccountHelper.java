@@ -20,7 +20,6 @@ public class SavingsAccountHelper {
     private final ResponseSpecification responseSpec;
 
     private static final String SAVINGS_ACCOUNT_URL = "/mifosng-provider/api/v1/savingsaccounts";
-    private static final String ACCOUNT_TRANSFER_URL = "/mifosng-provider/api/v1/accounttransfers";
     private static final String APPROVE_SAVINGS_COMMAND = "approve";
     private static final String UNDO_APPROVAL_SAVINGS_COMMAND = "undoApproval";
     private static final String ACTIVATE_SAVINGS_COMMAND = "activate";
@@ -40,9 +39,6 @@ public class SavingsAccountHelper {
     public static final String CREATED_DATE_MINUS_ONE = "07 January 2013";
     public static final String TRANSACTION_DATE = "10 January 2013";
     public static final String LAST_TRANSACTION_DATE = "11 January 2013";
-    public static final String ACCOUNT_TRANSFER_DATE = "01 March 2013";
-
-    public static final String ACCOUNT_TRANSFER_AMOUNT = "3200";
 
     public SavingsAccountHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
@@ -182,16 +178,6 @@ public class SavingsAccountHelper {
                 + chargeId + "?" + Utils.TENANT_IDENTIFIER, CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
-    public Integer toSavingsAccountTransfer(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId, final Integer toAccountId, final String toAccountType) {
-        System.out.println("--------------------------------ACCOUNT TRANSFER--------------------------------");
-        final String savingsAccountTransferJSON = new SavingsAccountTransferTestBuilder() //
-                .withTransferOnDate(ACCOUNT_TRANSFER_DATE) //
-                .withTransferAmount(ACCOUNT_TRANSFER_AMOUNT) //
-                .build(fromAccountId.toString(), fromClientId.toString(), toAccountId.toString(), toClientId.toString(), toAccountType);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, ACCOUNT_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER,
-                savingsAccountTransferJSON, "savingsId");
-    }
-
     private String getApproveSavingsAsJSON() {
         final HashMap<String, String> map = new HashMap<String, String>();
         map.put("locale", CommonConstants.locale);
@@ -229,7 +215,7 @@ public class SavingsAccountHelper {
         final HashMap<String, String> map = new HashMap<String, String>();
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
-        map.put("activatedOnDate", "10 January 2013");
+        map.put("activatedOnDate", "01 March 2013");
         String savingsAccountActivateJson = new Gson().toJson(map);
         System.out.println(savingsAccountActivateJson);
         return savingsAccountActivateJson;
