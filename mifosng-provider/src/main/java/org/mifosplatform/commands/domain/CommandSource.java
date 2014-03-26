@@ -183,4 +183,41 @@ public class CommandSource extends AbstractPersistable<Long> {
     public Long getProductId() {
         return this.productId;
     }
+
+    /**
+     * @return the clientId
+     */
+    public Long getClientId() {
+        return clientId;
+    }
+
+    /**
+     * @return the groupId
+     */
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    /**
+     * @return the loanId
+     */
+    public Long getLoanId() {
+        return loanId;
+    }
+
+    /**
+     * @return the officeId
+     */
+    public Long getOfficeId() {
+        return officeId;
+    }
+
+    /**
+     * @return the savingsId
+     */
+    public Long getSavingsId() {
+        return savingsId;
+    }
+    
+    
 }
