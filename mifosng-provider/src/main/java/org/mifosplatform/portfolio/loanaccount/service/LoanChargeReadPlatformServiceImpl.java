@@ -20,6 +20,7 @@ import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.service.ChargeDropdownReadPlatformService;
 import org.mifosplatform.portfolio.charge.service.ChargeEnumerations;
+import org.mifosplatform.portfolio.common.service.DropdownReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanInstallmentChargeData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,13 +34,16 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;
+    private final DropdownReadPlatformService dropdownReadPlatformService;
 
     @Autowired
     public LoanChargeReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final RoutingDataSource dataSource) {
+            final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final RoutingDataSource dataSource,
+            final DropdownReadPlatformService dropdownReadPlatformService) {
         this.context = context;
         this.chargeDropdownReadPlatformService = chargeDropdownReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.dropdownReadPlatformService = dropdownReadPlatformService;
     }
 
     private static final class LoanChargeMapper implements RowMapper<LoanChargeData> {
@@ -128,10 +132,11 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
                 .retrieveSavingsCalculationTypes();
         final List<EnumOptionData> savingsChargeTimeTypeOptions = this.chargeDropdownReadPlatformService
                 .retrieveSavingsCollectionTimeTypes();
+        final List<EnumOptionData> feeFrequencyOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();
 
         return ChargeData.template(null, allowedChargeCalculationTypeOptions, null, allowedChargeTimeOptions, null,
                 loansChargeCalculationTypeOptions, loansChargeTimeTypeOptions, savingsChargeCalculationTypeOptions,
-                savingsChargeTimeTypeOptions);
+                savingsChargeTimeTypeOptions, feeFrequencyOptions);
     }
 
     @Override
@@ -218,5 +223,16 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
             return new LoanInstallmentChargeData(installmentNumber, dueAsOfDate, amount, amountOutstanding, paid, waived);
         }
+    }
+
+    @Override
+    public Collection<Integer> retrieveOverdueInstallmentChargeFrequencyNumber(final Long installmentId,final Long chargeId) {
+        String sql = "select oic.frequency_number from m_loan_overdue_installment_charge oic  inner join m_loan_charge lc on lc.id=oic.loan_charge_id  where oic.loan_schedule_id = ? and lc.is_active = 1";
+        Object[] params = {installmentId};
+        if(chargeId != null){
+            sql += " and lc.charge_id = ? ";
+            params = new Object[]{installmentId,chargeId};
+        }
+        return this.jdbcTemplate.queryForList(sql, Integer.class, params);
     }
 }

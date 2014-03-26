@@ -17,7 +17,7 @@ public interface ChargeReadPlatformService {
 
     ChargeData retrieveNewChargeDetails();
 
-    Collection<ChargeData> retrieveLoanApplicableCharges(boolean feeChargesOnly);
+    Collection<ChargeData> retrieveLoanApplicableCharges(boolean feeChargesOnly, Integer[] excludeChargeTimes);
 
     Collection<ChargeData> retrieveLoanApplicablePenalties();
 
@@ -28,4 +28,6 @@ public interface ChargeReadPlatformService {
     Collection<ChargeData> retrieveSavingsAccountApplicablePenalties();
 
     Collection<ChargeData> retrieveSavingsProductCharges(Long savingsProductId);
+
+    Collection<ChargeData> retrieveLoanProductCharges(Long loanProductId, Integer chargeTime);
 }

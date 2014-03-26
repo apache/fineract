@@ -21,6 +21,8 @@ import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformServi
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.domain.ChargeAppliesTo;
 import org.mifosplatform.portfolio.charge.exception.ChargeNotFoundException;
+import org.mifosplatform.portfolio.common.service.CommonEnumerations;
+import org.mifosplatform.portfolio.common.service.DropdownReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -35,15 +37,18 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     private final PlatformSecurityContext context;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;
+    private final DropdownReadPlatformService dropdownReadPlatformService;
 
     @Autowired
     public ChargeReadPlatformServiceImpl(final PlatformSecurityContext context,
             final CurrencyReadPlatformService currencyReadPlatformService,
-            final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final RoutingDataSource dataSource) {
+            final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final RoutingDataSource dataSource,
+            final DropdownReadPlatformService dropdownReadPlatformService) {
         this.context = context;
         this.chargeDropdownReadPlatformService = chargeDropdownReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.currencyReadPlatformService = currencyReadPlatformService;
+        this.dropdownReadPlatformService = dropdownReadPlatformService;
     }
 
     @Override
@@ -90,10 +95,11 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 .retrieveSavingsCalculationTypes();
         final List<EnumOptionData> savingsChargeTimeTypeOptions = this.chargeDropdownReadPlatformService
                 .retrieveSavingsCollectionTimeTypes();
+        final List<EnumOptionData> feeFrequencyOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();
 
         return ChargeData.template(currencyOptions, allowedChargeCalculationTypeOptions, allowedChargeAppliesToOptions,
                 allowedChargeTimeOptions, chargePaymentOptions, loansChargeCalculationTypeOptions, loansChargeTimeTypeOptions,
-                savingsChargeCalculationTypeOptions, savingsChargeTimeTypeOptions);
+                savingsChargeCalculationTypeOptions, savingsChargeTimeTypeOptions, feeFrequencyOptions);
     }
 
     @Override
@@ -109,19 +115,45 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveLoanApplicableCharges(final boolean feeChargesOnly) {
+    public Collection<ChargeData> retrieveLoanProductCharges(final Long loanProductId, final Integer chargeTime) {
+
         this.context.authenticatedUser();
 
         final ChargeMapper rm = new ChargeMapper();
 
-        String sql = "select " + rm.chargeSchema()
-                + " where c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=? order by c.name ";
+        final String sql = "select " + rm.loanProductChargeSchema()
+                + " where c.is_deleted=0 and c.is_active=1 and plc.product_loan_id=? and c.charge_time_enum=?";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId, chargeTime });
+    }
+
+    @Override
+    public Collection<ChargeData> retrieveLoanApplicableCharges(final boolean feeChargesOnly, Integer[] excludeChargeTimes) {
+        this.context.authenticatedUser();
+
+        final ChargeMapper rm = new ChargeMapper();
+        String excludeClause = "";
+        Object[] params = new Object[] { ChargeAppliesTo.LOAN.getValue() };
+        if (excludeChargeTimes != null && excludeChargeTimes.length > 0) {
+            excludeClause = " and c.charge_time_enum not in(?) ";
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < excludeChargeTimes.length; i++) {
+                if (i != 0) {
+                    sb.append(",");
+                }
+                sb.append(excludeChargeTimes[i]);
+            }
+            params = new Object[] { ChargeAppliesTo.LOAN.getValue(), sb.toString() };
+        }
+        String sql = "select " + rm.chargeSchema() + " where c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=?"
+                + excludeClause + " order by c.name ";
         if (feeChargesOnly) {
             sql = "select " + rm.chargeSchema()
-                    + " where c.is_deleted=0 and c.is_active=1 and c.is_penalty=0 and c.charge_applies_to_enum=? order by c.name ";
+                    + " where c.is_deleted=0 and c.is_active=1 and c.is_penalty=0 and c.charge_applies_to_enum=? " + excludeClause
+                    + "order by c.name ";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.LOAN.getValue() });
+        return this.jdbcTemplate.query(sql, rm, params);
     }
 
     @Override
@@ -145,8 +177,8 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                     + "c.is_active as active, oc.name as currencyName, oc.decimal_places as currencyDecimalPlaces, "
                     + "oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
                     + "oc.internationalized_name_code as currencyNameCode, c.fee_on_day as feeOnDay, c.fee_on_month as feeOnMonth, "
-                    + "c.fee_interval as feeInterval,c.min_cap as minCap,c.max_cap as maxCap " + "from m_charge c "
-                    + "join m_organisation_currency oc on c.currency_code = oc.code";
+                    + "c.fee_interval as feeInterval, c.fee_frequency as feeFrequency,c.min_cap as minCap,c.max_cap as maxCap "
+                    + "from m_charge c " + "join m_organisation_currency oc on c.currency_code = oc.code";
         }
 
         public String loanProductChargeSchema() {
@@ -189,6 +221,11 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             final boolean active = rs.getBoolean("active");
 
             final Integer feeInterval = JdbcSupport.getInteger(rs, "feeInterval");
+            EnumOptionData feeFrequencyType = null;
+            final Integer feeFrequency = JdbcSupport.getInteger(rs, "feeFrequency");
+            if (feeFrequency != null) {
+                feeFrequencyType = CommonEnumerations.termFrequencyType(feeFrequency, "feeFrequency");
+            }
             MonthDay feeOnMonthDay = null;
             final Integer feeOnMonth = JdbcSupport.getInteger(rs, "feeOnMonth");
             final Integer feeOnDay = JdbcSupport.getInteger(rs, "feeOnDay");
@@ -199,7 +236,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             final BigDecimal maxCap = rs.getBigDecimal("maxCap");
 
             return ChargeData.instance(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType,
-                    chargePaymentMode, feeOnMonthDay, feeInterval, penalty, active, minCap, maxCap);
+                    chargePaymentMode, feeOnMonthDay, feeInterval, penalty, active, minCap, maxCap, feeFrequencyType);
         }
     }
 

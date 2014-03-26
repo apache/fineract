@@ -66,7 +66,7 @@ public interface LoanReadPlatformService {
      * result overdue installments with this charge already applied are not
      * returned.
      */
-    Collection<OverdueLoanScheduleData> retrieveAllLoansWithOverdueInstallmentsNotAlreadyPenalized(final Long penaltyWaitPeriod);
+    Collection<OverdueLoanScheduleData> retrieveAllLoansWithOverdueInstallments(final Long penaltyWaitPeriod);
 
     Integer retriveLoanCounter(Long groupId, Integer loanType, Long productId);
 

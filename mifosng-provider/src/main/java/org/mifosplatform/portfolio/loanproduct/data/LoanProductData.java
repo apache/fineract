@@ -21,11 +21,11 @@ import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
+import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
-import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 
 /**
@@ -658,5 +658,16 @@ public class LoanProductData {
     
     public Integer getGraceOnArrearsAgeing() {
         return this.graceOnArrearsAgeing;
+    }
+    
+    public Collection<ChargeData> overdueFeeCharges(){
+        Collection<ChargeData> overdueFeeCharges = new ArrayList<ChargeData>();
+        Collection<ChargeData> charges = charges();
+        for(ChargeData chargeData : charges){
+            if(chargeData.isOverdueInstallmentCharge()){
+                overdueFeeCharges.add(chargeData);
+            }
+        }
+        return overdueFeeCharges;
     }
 }

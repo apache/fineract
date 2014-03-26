@@ -6,7 +6,7 @@
 package org.mifosplatform.portfolio.loanaccount.loanschedule.domain;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
+import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 
 public interface PaymentPeriodsInOneYearCalculator {
 

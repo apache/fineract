@@ -5749,7 +5749,52 @@ GET https://DomainName/api/v1/loans/{loanId}
     "disbursementDetails":[{"id":71,"expectedDisbursementDate":[2013,11,1],"principal":22000.000000,"approvedPrincipal":22000.000000}],
     "fixedEmiAmount":1100.000000,
     "maxOutstandingLoanBalance":35000,
-    "canDisburse":false
+    "canDisburse":false,
+    "emiAmountVariations": [],
+  "inArrears": true,
+  "overdueCharges": [
+    {
+      "id": 20,
+      "name": "overdraft penality",
+      "active": true,
+      "penalty": true,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 3.000000,
+      "chargeTimeType": {
+        "id": 9,
+        "code": "chargeTimeType.overdueInstallment",
+        "value": "overdue fees"
+      },
+      "chargeAppliesTo": {
+        "id": 1,
+        "code": "chargeAppliesTo.loan",
+        "value": "Loan"
+      },
+      "chargeCalculationType": {
+        "id": 2,
+        "code": "chargeCalculationType.percent.of.amount",
+        "value": "% Amount"
+      },
+      "chargePaymentMode": {
+        "id": 0,
+        "code": "chargepaymentmode.regular",
+        "value": "Regular"
+      },
+      "feeInterval": 2,
+      "feeFrequency": {
+        "id": 1,
+        "code": "feeFrequencyperiodFrequencyType.weeks",
+        "value": "Weeks"
+      }
+    }
+  ]
   }
 }
 					</code>
@@ -12575,9 +12620,15 @@ Request Body:
 				<td>feeInterval</td>
 			</tr>
 			<tr>
-            	<td class=fielddesc>Fee to be applied on a specified interval (number of months).<br/>
-            		This field is mandatory if <i>chargeTimeType</i> is of type <b>Monthly Fee</b>
+            	<td class=fielddesc>Fee to be applied on a specified interval.<br/>
+            		This field is mandatory if <i>chargeTimeType</i> is of type <b>Monthly Fee</b> or <i>feeFrequency<i> is selcted
             	</td>
+            </tr>
+            <tr class=alt>
+				<td>feeFrequency</td>
+			</tr>
+            <tr>
+            	<td class=fielddesc>This field is Optional Used to indicate the recurring(days,weeks,months and Years) charge due date starting on system calculated date for overdue penalty.<br/></td>
             </tr>						
 		</table>
 	</div>
@@ -12627,6 +12678,16 @@ GET https://DomainName/api/v1/charges/template
       "id": 2,
       "code": "chargeCalculationType.percent.of.amount",
       "value": "% Amount"
+    },
+    {
+      "id": 3,
+      "code": "chargeCalculationType.percent.of.amount.and.interest",
+      "value": "% Loan Amount + Interest"
+    },
+    {
+      "id": 4,
+      "code": "chargeCalculationType.percent.of.interest",
+      "value": "% Interest"
     }
   ],
   "chargeAppliesToOptions": [
@@ -12671,6 +12732,21 @@ GET https://DomainName/api/v1/charges/template
       "id": 7,
       "code": "chargeTimeType.monthlyFee",
       "value": "Monthly Fee"
+    },
+    {
+      "id": 8,
+      "code": "chargeTimeType.instalmentFee",
+      "value": "Instalment Fee"
+    },
+    {
+      "id": 9,
+      "code": "chargeTimeType.overdueInstallment",
+      "value": "overdue fees"
+    },
+    {
+      "id": 10,
+      "code": "chargeTimeType.overdraftFee",
+      "value": "Overdraft Fee"
     }
   ],
   "chargePaymetModeOptions": [
@@ -12695,6 +12771,16 @@ GET https://DomainName/api/v1/charges/template
       "id": 2,
       "code": "chargeCalculationType.percent.of.amount",
       "value": "% Amount"
+    },
+    {
+      "id": 3,
+      "code": "chargeCalculationType.percent.of.amount.and.interest",
+      "value": "% Loan Amount + Interest"
+    },
+    {
+      "id": 4,
+      "code": "chargeCalculationType.percent.of.interest",
+      "value": "% Interest"
     }
   ],
   "loanChargeTimeTypeOptions": [
@@ -12707,6 +12793,16 @@ GET https://DomainName/api/v1/charges/template
       "id": 2,
       "code": "chargeTimeType.specifiedDueDate",
       "value": "Specified due date"
+    },
+    {
+      "id": 8,
+      "code": "chargeTimeType.instalmentFee",
+      "value": "Instalment Fee"
+    },
+    {
+      "id": 9,
+      "code": "chargeTimeType.overdueInstallment",
+      "value": "overdue fees"
     }
   ],
   "savingsChargeCalculationTypeOptions": [
@@ -12746,6 +12842,33 @@ GET https://DomainName/api/v1/charges/template
       "id": 7,
       "code": "chargeTimeType.monthlyFee",
       "value": "Monthly Fee"
+    },
+    {
+      "id": 10,
+      "code": "chargeTimeType.overdraftFee",
+      "value": "Overdraft Fee"
+    }
+  ],
+  "feeFrequencyOptions": [
+    {
+      "id": 0,
+      "code": "loanTermFrequency.periodFrequencyType.days",
+      "value": "Days"
+    },
+    {
+      "id": 1,
+      "code": "loanTermFrequency.periodFrequencyType.weeks",
+      "value": "Weeks"
+    },
+    {
+      "id": 2,
+      "code": "loanTermFrequency.periodFrequencyType.months",
+      "value": "Months"
+    },
+    {
+      "id": 3,
+      "code": "loanTermFrequency.periodFrequencyType.years",
+      "value": "Years"
     }
   ]
 }
@@ -12853,6 +12976,31 @@ Request Body:
 			<code class="method-response">
 {
 "resourceId": 6
+}
+			</code>
+			<code class="method-request">
+POST charges
+Content-Type: application/json 
+Request Body:
+{
+	"chargeAppliesTo":1,
+	"feeFrequency":1,
+	"feeInterval":"2",
+	"name":"overdue charge",
+	"currencyCode":"USD",
+	"chargeTimeType":9,
+	"chargeCalculationType":1,
+	"chargePaymentMode":0,
+	"amount":"50",
+	"active":true,
+	"penalty":"true",
+	"locale":"en",
+	"monthDayFormat":"dd MMM"
+}
+			</code>
+			<code class="method-response">
+{
+"resourceId": 7
 }
 			</code>										
 		</div>
