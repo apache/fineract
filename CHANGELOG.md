@@ -63,11 +63,11 @@ Releases
 1. 05 April 2013 - 0.11.0.beta
 
 
-1.20.0.RELEASE [In Progress]
+1.21.0.RELEASE [In Progress]
 =============
 Feature Release
 
-Important: Those updating from an existing installatin to 1.20.* release or higher should run the update https://github.com/openMF/mifosx/blob/develop/mifosng-db/mifosplatform_tenants_updates/update_to_v_1_21_release.sql on `mifosplatform-tenants` schema
+Important: Those updating from an existing installation to 1.21.* release or higher should run the update https://github.com/openMF/mifosx/blob/develop/mifosng-db/migrations/list_db/V2__externalize-connection-properties.sql on `mifosplatform-tenants` schema
 
 
 
