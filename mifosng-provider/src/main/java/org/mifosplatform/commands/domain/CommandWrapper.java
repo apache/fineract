@@ -37,13 +37,13 @@ public class CommandWrapper {
         return new CommandWrapper(commandId, actionName, entityName, resourceId, subresourceId, resourceGetUrl, productId);
     }
 
-    
     public static CommandWrapper fromExistingCommand(final Long commandId, final String actionName, final String entityName,
-            final Long resourceId, final Long subresourceId, final String resourceGetUrl, final Long productId,
-            final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId) {
-        return new CommandWrapper(commandId, actionName, entityName, resourceId, subresourceId, resourceGetUrl, productId);
+            final Long resourceId, final Long subresourceId, final String resourceGetUrl, final Long productId, final Long officeId,
+            final Long groupId, final Long clientId, final Long loanId, final Long savingsId) {
+        return new CommandWrapper(commandId, actionName, entityName, resourceId, subresourceId, resourceGetUrl, productId, officeId,
+                groupId, clientId, loanId, savingsId);
     }
-    
+
     private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
             final Long subresourceId, final String resourceGetUrl, final Long productId) {
         this.commandId = commandId;
@@ -91,10 +91,10 @@ public class CommandWrapper {
         this.templateId = templateId;
     }
 
-        public CommandWrapper(final Long commandId, final String actionName, final String entityName,
-            final Long resourceId, final Long subresourceId, final String resourceGetUrl, final Long productId,
-            final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId) {
-        
+    private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
+            final Long subresourceId, final String resourceGetUrl, final Long productId, final Long officeId, final Long groupId,
+            final Long clientId, final Long loanId, final Long savingsId) {
+
         this.commandId = commandId;
         this.officeId = officeId;
         this.groupId = groupId;
@@ -114,7 +114,7 @@ public class CommandWrapper {
         this.transactionId = null;
         this.productId = productId;
     }
-    
+
     public Long commandId() {
         return this.commandId;
     }
@@ -691,7 +691,7 @@ public class CommandWrapper {
     public boolean isRejectClientTransfer() {
         return this.actionName.equalsIgnoreCase("REJECTTRANSFER") && this.entityName.equalsIgnoreCase("CLIENT");
     }
-    
+
     public boolean isUpdateClientSavingsAccount() {
         return this.actionName.equalsIgnoreCase("UPDATESAVINGSACCOUNT") && this.entityName.equalsIgnoreCase("CLIENT");
     }

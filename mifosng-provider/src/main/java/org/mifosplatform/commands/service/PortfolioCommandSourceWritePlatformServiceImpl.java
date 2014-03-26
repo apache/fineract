@@ -86,14 +86,15 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
 
         final CommandWrapper wrapper = CommandWrapper.fromExistingCommand(makerCheckerId, commandSourceInput.getActionName(),
                 commandSourceInput.getEntityName(), commandSourceInput.resourceId(), commandSourceInput.subresourceId(),
-                commandSourceInput.getResourceGetUrl(), commandSourceInput.getProductId(), commandSourceInput.getOfficeId(), 
-                commandSourceInput.getGroupId(), commandSourceInput.getClientId(), commandSourceInput.getLoanId(), commandSourceInput.getSavingsId());
+                commandSourceInput.getResourceGetUrl(), commandSourceInput.getProductId(), commandSourceInput.getOfficeId(),
+                commandSourceInput.getGroupId(), commandSourceInput.getClientId(), commandSourceInput.getLoanId(),
+                commandSourceInput.getSavingsId());
         final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSourceInput.json());
         final JsonCommand command = JsonCommand.fromExistingCommand(makerCheckerId, commandSourceInput.json(), parsedCommand,
                 this.fromApiJsonHelper, commandSourceInput.getEntityName(), commandSourceInput.resourceId(),
-                commandSourceInput.subresourceId(), commandSourceInput.getGroupId(), commandSourceInput.getClientId(), commandSourceInput.getLoanId(),
-                commandSourceInput.getSavingsId(), commandSourceInput.getResourceGetUrl(), commandSourceInput.getProductId());
-        
+                commandSourceInput.subresourceId(), commandSourceInput.getGroupId(), commandSourceInput.getClientId(),
+                commandSourceInput.getLoanId(), commandSourceInput.getSavingsId(), commandSourceInput.getResourceGetUrl(),
+                commandSourceInput.getProductId());
 
         final boolean makerCheckerApproval = true;
         return this.processAndLogCommandService.processAndLogCommand(wrapper, command, makerCheckerApproval);
