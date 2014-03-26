@@ -126,8 +126,8 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final String actionName = rs.getString("actionName");
             final String entityName = rs.getString("entityName");
             final Long resourceId = JdbcSupport.getLong(rs, "resourceId");
-            final Long clientId = rs.getLong("clientId");
-            final Long loanId = rs.getLong("loanId");
+            final Long clientId = JdbcSupport.getLong(rs, "clientId");
+            final Long loanId = JdbcSupport.getLong(rs, "loanId");
             final Long subresourceId = JdbcSupport.getLong(rs, "subresourceId");
             final String maker = rs.getString("maker");
             final DateTime madeOnDate = JdbcSupport.getDateTime(rs, "madeOnDate");
