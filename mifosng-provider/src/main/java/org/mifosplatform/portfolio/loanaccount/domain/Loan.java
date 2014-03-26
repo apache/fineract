@@ -66,6 +66,7 @@ import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeAddedExcep
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.collateral.data.CollateralData;
 import org.mifosplatform.portfolio.collateral.domain.LoanCollateral;
+import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.loanaccount.api.LoanApiConstants;
@@ -92,7 +93,6 @@ import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
-import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -478,6 +478,8 @@ public class Loan extends AbstractPersistable<Long> {
             chargeAmt = loanCharge.getPercentage();
             if (loanCharge.isInstalmentFee()) {
                 totalChargeAmt = calculatePerInstallmentChargeAmount(loanCharge);
+            } else if (loanCharge.isOverdueInstallmentCharge()) {
+                totalChargeAmt = loanCharge.amountOutstanding();
             }
         } else {
             chargeAmt = loanCharge.amount();
@@ -1940,11 +1942,11 @@ public class Loan extends AbstractPersistable<Long> {
             loanVariationTermsData.add(data);
         }
 
-        final LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms
-                .assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, getDisbursementDate(),
-                        getExpectedFirstRepaymentOnDate(), calculatedRepaymentsStartingFromDate, getInArrearsTolerance(),
-                        this.loanRepaymentScheduleDetail, this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount, disbursementData,
-                        this.maxOutstandingLoanBalance,loanVariationTermsData, getInterestChargedFromDate());
+        final LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency,
+                loanTermPeriodFrequencyType, getDisbursementDate(), getExpectedFirstRepaymentOnDate(),
+                calculatedRepaymentsStartingFromDate, getInArrearsTolerance(), this.loanRepaymentScheduleDetail,
+                this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount, disbursementData, this.maxOutstandingLoanBalance,
+                loanVariationTermsData, getInterestChargedFromDate());
 
         final LoanScheduleModel loanSchedule = loanScheduleGenerator.generate(mc, applicationCurrency, loanApplicationTerms, charges(),
                 isHolidayEnabled, holidays, workingDays);
@@ -2430,18 +2432,17 @@ public class Loan extends AbstractPersistable<Long> {
         return possibleNextRepaymentDate;
     }
 
-    public Money possibleNextRepaymentAmount() {
-        final MonetaryCurrency currency = this.loanRepaymentScheduleDetail.getPrincipal().getCurrency();
-        Money possibleNextRepaymentAmount = Money.zero(currency);
+    public LoanRepaymentScheduleInstallment possibleNextRepaymentInstallment() {
+        LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = null;
 
         for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
             if (installment.isNotFullyPaidOff()) {
-                possibleNextRepaymentAmount = installment.getTotalOutstanding(currency);
+                loanRepaymentScheduleInstallment = installment;
                 break;
             }
         }
 
-        return possibleNextRepaymentAmount;
+        return loanRepaymentScheduleInstallment;
     }
 
     public LoanTransaction deriveDefaultInterestWaiverTransaction() {
@@ -3733,6 +3734,18 @@ public class Loan extends AbstractPersistable<Long> {
             }
         }
         return emiAmount;
+    }
+
+    public LoanRepaymentScheduleInstallment fetchRepaymentScheduleInstallment(final Integer installmentNumber) {
+        LoanRepaymentScheduleInstallment installment = null;
+        if (installmentNumber == null) { return installment; }
+        for (final LoanRepaymentScheduleInstallment scheduleInstallment : this.repaymentScheduleInstallments) {
+            if (scheduleInstallment.getInstallmentNumber().equals(installmentNumber)) {
+                installment = scheduleInstallment;
+                break;
+            }
+        }
+        return installment;
     }
 
 }

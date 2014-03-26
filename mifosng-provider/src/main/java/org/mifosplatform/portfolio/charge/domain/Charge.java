@@ -27,6 +27,7 @@ import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidation
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.exception.ChargeDueAtDisbursementCannotBePenaltyException;
+import org.mifosplatform.portfolio.charge.exception.ChargeMustBePenaltyException;
 import org.mifosplatform.portfolio.charge.exception.ChargeParameterUpdateNotSupportedException;
 import org.mifosplatform.portfolio.charge.service.ChargeEnumerations;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
@@ -81,6 +82,9 @@ public class Charge extends AbstractPersistable<Long> {
     @Column(name = "max_cap", scale = 6, precision = 19, nullable = true)
     private BigDecimal maxCap;
 
+    @Column(name = "fee_frequency", nullable = true)
+    private Integer feeFrequency;
+
     public static Charge fromJson(final JsonCommand command) {
 
         final String name = command.stringValueOfParameterNamed("name");
@@ -101,9 +105,10 @@ public class Charge extends AbstractPersistable<Long> {
         final Integer feeInterval = command.integerValueOfParameterNamed("feeInterval");
         final BigDecimal minCap = command.bigDecimalValueOfParameterNamed("minCap");
         final BigDecimal maxCap = command.bigDecimalValueOfParameterNamed("maxCap");
+        final Integer feeFrequency = command.integerValueOfParameterNamed("feeFrequency");
 
         return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculationType, penalty, active, paymentMode,
-                feeOnMonthDay, feeInterval, minCap, maxCap);
+                feeOnMonthDay, feeInterval, minCap, maxCap, feeFrequency);
     }
 
     protected Charge() {
@@ -113,7 +118,7 @@ public class Charge extends AbstractPersistable<Long> {
     private Charge(final String name, final BigDecimal amount, final String currencyCode, final ChargeAppliesTo chargeAppliesTo,
             final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean penalty,
             final boolean active, final ChargePaymentMode paymentMode, final MonthDay feeOnMonthDay, final Integer feeInterval,
-            final BigDecimal minCap, final BigDecimal maxCap) {
+            final BigDecimal minCap, final BigDecimal maxCap, final Integer feeFrequency) {
         this.name = name;
         this.amount = amount;
         this.currencyCode = currencyCode;
@@ -130,8 +135,9 @@ public class Charge extends AbstractPersistable<Long> {
         if (isMonthlyFee() || isAnnualFee()) {
             this.feeOnMonth = feeOnMonthDay.getMonthOfYear();
             this.feeOnDay = feeOnMonthDay.getDayOfMonth();
-            this.feeInterval = feeInterval;
         }
+        this.feeInterval = feeInterval;
+        this.feeFrequency = feeFrequency;
 
         if (isSavingsCharge()) {
 
@@ -154,7 +160,7 @@ public class Charge extends AbstractPersistable<Long> {
         } else if (isLoanCharge()) {
 
             if (penalty && chargeTime.isTimeOfDisbursement()) { throw new ChargeDueAtDisbursementCannotBePenaltyException(name); }
-
+            if (!penalty && chargeTime.isOverdueInstallment()) { throw new ChargeMustBePenaltyException(name); }
             if (!isAllowedLoanChargeTime()) {
                 baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTime)
                         .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
@@ -381,6 +387,18 @@ public class Charge extends AbstractPersistable<Long> {
             actualChanges.put("locale", localeAsInput);
             this.feeInterval = newValue;
         }
+        
+        final String feeFrequency = "feeFrequency";
+        if (command.isChangeInIntegerParameterNamed(feeFrequency, this.feeFrequency)) {
+            final Integer newValue = command.integerValueOfParameterNamed(feeFrequency);
+            actualChanges.put(feeFrequency, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.feeFrequency = newValue;
+        }
+        
+        if(this.feeFrequency != null){
+            baseDataValidator.reset().parameter("feeInterval").value(this.feeInterval).notNull();
+        }
 
         final String penaltyParamName = "penalty";
         if (command.isChangeInBooleanParameterNamed(penaltyParamName, this.penalty)) {
@@ -415,6 +433,7 @@ public class Charge extends AbstractPersistable<Long> {
 
         if (this.penalty && ChargeTimeType.fromInt(this.chargeTime).isTimeOfDisbursement()) { throw new ChargeDueAtDisbursementCannotBePenaltyException(
                 this.name); }
+        if (!penalty && ChargeTimeType.fromInt(this.chargeTime).isOverdueInstallment()) { throw new ChargeMustBePenaltyException(name); }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
 
@@ -438,9 +457,11 @@ public class Charge extends AbstractPersistable<Long> {
         final EnumOptionData chargeAppliesTo = ChargeEnumerations.chargeAppliesTo(this.chargeAppliesTo);
         final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(this.chargeCalculation);
         final EnumOptionData chargePaymentmode = ChargeEnumerations.chargePaymentMode(this.chargePaymentMode);
+        final EnumOptionData feeFrequencyType = ChargeEnumerations.chargePaymentMode(this.feeFrequency);
         final CurrencyData currency = new CurrencyData(this.currencyCode, null, 0, 0, null, null);
         return ChargeData.instance(getId(), this.name, this.amount, currency, chargeTimeType, chargeAppliesTo, chargeCalculationType,
-                chargePaymentmode, getFeeOnMonthDay(), this.feeInterval, this.penalty, this.active, this.minCap, this.maxCap);
+                chargePaymentmode, getFeeOnMonthDay(), this.feeInterval, this.penalty, this.active, this.minCap, this.maxCap,
+                feeFrequencyType);
     }
 
     public Integer getChargePaymentMode() {
@@ -455,6 +476,10 @@ public class Charge extends AbstractPersistable<Long> {
         return ChargeTimeType.fromInt(this.chargeTime).isAnnualFee();
     }
 
+    public boolean isOverdueInstallment() {
+        return ChargeTimeType.fromInt(this.chargeTime).isOverdueInstallment();
+    }
+
     public MonthDay getFeeOnMonthDay() {
         MonthDay feeOnMonthDay = null;
         if (this.feeOnDay != null && this.feeOnMonth != null) {
@@ -465,5 +490,9 @@ public class Charge extends AbstractPersistable<Long> {
 
     public Integer feeInterval() {
         return this.feeInterval;
+    }
+
+    public Integer feeFrequency() {
+        return this.feeFrequency;
     }
 }

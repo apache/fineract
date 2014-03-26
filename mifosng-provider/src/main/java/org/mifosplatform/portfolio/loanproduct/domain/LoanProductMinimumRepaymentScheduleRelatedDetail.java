@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.portfolio.loanproduct.domain;
 
+import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
+
 /**
  * Represents the bare minimum repayment details needed for activities related
  * to generating repayment schedules.

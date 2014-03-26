@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.loanproduct.service;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.accountdetails.service.AccountEnumerations;
+import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
@@ -17,7 +18,6 @@ import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodM
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductParamType;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductValueConditionType;
-import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 public class LoanEnumerations {
 

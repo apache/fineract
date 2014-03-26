@@ -96,6 +96,10 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
                     if (isChargeExistWithLoans || isChargeExistWithSavings) { throw new ChargeCannotBeUpdatedException(
                             "error.msg.charge.cannot.be.updated.it.is.used.in.loan", "This charge cannot be updated, it is used in loan"); }
                 }
+            }else if((changes.containsKey("feeFrequency") || changes.containsKey("feeInterval")) && chargeForUpdate.isLoanCharge()){
+                final Boolean isChargeExistWithLoans = isAnyLoanProductsAssociateWithThisCharge(chargeId);
+                if (isChargeExistWithLoans) { throw new ChargeCannotBeUpdatedException(
+                        "error.msg.charge.frequency.cannot.be.updated.it.is.used.in.loan", "This charge frequency cannot be updated, it is used in loan"); }
             }
 
             if (!changes.isEmpty()) {

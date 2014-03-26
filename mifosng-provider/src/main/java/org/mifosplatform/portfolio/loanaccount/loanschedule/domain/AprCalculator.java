@@ -7,7 +7,7 @@ package org.mifosplatform.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.BigDecimal;
 
-import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
+import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.springframework.stereotype.Component;
 
 @Component

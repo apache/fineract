@@ -75,7 +75,11 @@ public class LoanRepaymentScheduleProcessingWrapper {
                     } else {
                         cumulative = cumulative.plus(loanCharge.amount().divide(BigDecimal.valueOf(numberOfRepayments)));
                     }
-                } else if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)
+                }else if (loanCharge.isOverdueInstallmentCharge()
+                        && loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)
+                        && loanCharge.getChargeCalculation().isPercentageBased()) {
+                    cumulative = cumulative.plus(loanCharge.chargeAmount());
+                }else if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)
                         && loanCharge.getChargeCalculation().isPercentageBased()) {
                     BigDecimal amount = BigDecimal.ZERO;
                     if (loanCharge.getChargeCalculation().isPercentageOfAmountAndInterest()) {
@@ -162,6 +166,10 @@ public class LoanRepaymentScheduleProcessingWrapper {
                     } else {
                         cumulative = cumulative.plus(loanCharge.amount().divide(BigDecimal.valueOf(numberOfRepayments)));
                     }
+                }else if (loanCharge.isOverdueInstallmentCharge()
+                        && loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)
+                        && loanCharge.getChargeCalculation().isPercentageBased()) {
+                    cumulative = cumulative.plus(loanCharge.chargeAmount());
                 } else if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)
                         && loanCharge.getChargeCalculation().isPercentageBased()) {
                     BigDecimal amount = BigDecimal.ZERO;

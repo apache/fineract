@@ -113,6 +113,14 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
         return property.getValue();
     }
+    
+    @Override
+    public Long retrieveGraceOnPenaltyPostingPeriod() {
+        final String propertyName = "grace-on-penalty-posting";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
+        return property.getValue();
+    }
+
 
     @Override
     public boolean isPasswordForcedResetEnable() {

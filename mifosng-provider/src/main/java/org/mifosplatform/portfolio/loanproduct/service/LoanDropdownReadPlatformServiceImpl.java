@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionProcessingStrategyRepository;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
@@ -26,7 +27,6 @@ import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodM
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductValueConditionType;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
-import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

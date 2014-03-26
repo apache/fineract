@@ -3,12 +3,12 @@ package org.mifosplatform.portfolio.loanaccount;
 import java.math.BigDecimal;
 
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
-import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 /**
  * This class is used to keep in one place configurations for setting up
