@@ -44,7 +44,7 @@ public class MakercheckersApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "actionName", "entityName", "resourceId",
             "subresourceId", "maker", "madeOnDate", "checker", "checkedOnDate", "processingResult", "commandAsJson", "officeName",
-            "groupLevelName", "groupName", "clientName", "loanAccountNo", "savingsAccountNo"));
+            "groupLevelName", "groupName", "clientName", "loanAccountNo", "savingsAccountNo", "clientId", "loanId"));
 
     private final AuditReadPlatformService readPlatformService;
     private final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit;

@@ -45,13 +45,16 @@ public final class AuditData {
     private final String loanAccountNo;
     @SuppressWarnings("unused")
     private final String savingsAccountNo;
+    @SuppressWarnings("unused")
     private final Long clientId;
+    @SuppressWarnings("unused")
     private final Long loanId;
 
     public AuditData(final Long id, final String actionName, final String entityName, final Long resourceId, final Long subresourceId,
             final String maker, final DateTime madeOnDate, final String checker, final DateTime checkedOnDate,
             final String processingResult, final String commandAsJson, final String officeName, final String groupLevelName,
-            final String groupName, final String clientName, final String loanAccountNo, final String savingsAccountNo,final Long clientId, final Long loanId) {
+            final String groupName, final String clientName, final String loanAccountNo, final String savingsAccountNo,
+            final Long clientId, final Long loanId) {
 
         this.id = id;
         this.actionName = actionName;
