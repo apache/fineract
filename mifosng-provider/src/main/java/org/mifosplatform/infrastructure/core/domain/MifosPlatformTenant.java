@@ -24,11 +24,19 @@ public class MifosPlatformTenant {
     private final int removeAbandonedTimeout;
     private final boolean logAbandoned;
     private final int abandonWhenPercentageFull;
+    private final int maxActive;
+    private final int minIdle;
+    private final int maxIdle;
+    private final int suspectTimeout;
+    private final int timeBetweenEvictionRunsMillis;
+    private final int minEvictableIdleTimeMillis;
 
     public MifosPlatformTenant(final Long id, final String tenantIdentifier, final String name, final String schemaName,
-                               final String schemaServer, final String schemaServerPort, final String schemaUsername, final String schemaPassword,
-                               final String timezoneId, final boolean autoUpdateEnabled,final int initialSize,final boolean testOnBorrow,final long validationInterval,
-                               final boolean removeAbandoned,final int removeAbandonedTimeout,final boolean logAbandoned,final int abandonWhenPercentageFull) {
+            final String schemaServer, final String schemaServerPort, final String schemaUsername, final String schemaPassword,
+            final String timezoneId, final boolean autoUpdateEnabled, final int initialSize, final boolean testOnBorrow,
+            final long validationInterval, final boolean removeAbandoned, final int removeAbandonedTimeout, final boolean logAbandoned,
+            final int abandonWhenPercentageFull, final int maxActive, final int minIdle, final int maxIdle, final int suspectTimeout,
+            final int timeBetweenEvictionRunsMillis, final int minEvictableIdleTimeMillis) {
         this.id = id;
         this.tenantIdentifier = tenantIdentifier;
         this.name = name;
@@ -46,12 +54,38 @@ public class MifosPlatformTenant {
         this.removeAbandonedTimeout = removeAbandonedTimeout;
         this.logAbandoned = logAbandoned;
         this.abandonWhenPercentageFull = abandonWhenPercentageFull;
+        this.maxActive = maxActive;
+        this.minIdle = minIdle;
+        this.maxIdle = maxIdle;
+        this.suspectTimeout = suspectTimeout;
+        this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
+        this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
     }
 
     public String databaseURL() {
         final String url = new StringBuilder("jdbc:mysql://").append(this.schemaServer).append(':').append(this.schemaServerPort)
                 .append('/').append(this.schemaName).toString();
         return url;
+    }
+
+    public int getMaxActive() {
+        return this.maxActive;
+    }
+
+    public int getMinIdle() {
+        return this.minIdle;
+    }
+
+    public int getMaxIdle() {
+        return this.maxIdle;
+    }
+
+    public int getTimeBetweenEvictionRunsMillis() {
+        return this.timeBetweenEvictionRunsMillis;
+    }
+
+    public int getMinEvictableIdleTimeMillis() {
+        return this.minEvictableIdleTimeMillis;
     }
 
     public int getInitialSize() {
@@ -112,6 +146,10 @@ public class MifosPlatformTenant {
 
     public boolean isAutoUpdateEnabled() {
         return this.autoUpdateEnabled;
+    }
+
+    public int getSuspectTimeout() {
+        return this.suspectTimeout;
     }
 
 }

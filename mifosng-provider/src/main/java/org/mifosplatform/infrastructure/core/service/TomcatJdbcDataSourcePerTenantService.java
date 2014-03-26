@@ -74,13 +74,6 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         poolConfiguration.setPassword(tenant.getSchemaPassword());
 
         poolConfiguration.setInitialSize(tenant.getInitialSize());
-        // poolConfiguration.setMaxActive(5);
-        // poolConfiguration.setMinIdle(1);
-        // poolConfiguration.setMaxIdle(4);
-
-        // poolConfiguration.setSuspectTimeout(60);
-        // poolConfiguration.setTimeBetweenEvictionRunsMillis(30000);
-        // poolConfiguration.setMinEvictableIdleTimeMillis(60000);
 
         poolConfiguration.setTestOnBorrow(tenant.isTestOnBorrow());
         poolConfiguration.setValidationQuery("SELECT 1");
@@ -90,6 +83,18 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         poolConfiguration.setRemoveAbandonedTimeout(tenant.getRemoveAbandonedTimeout());
         poolConfiguration.setLogAbandoned(tenant.isLogAbandoned());
         poolConfiguration.setAbandonWhenPercentageFull(tenant.getAbandonWhenPercentageFull());
+
+        /**
+         * Vishwas- Do we need to enable the below properties and add
+         * ResetAbandonedTimer for long running batch Jobs?
+         **/
+        //poolConfiguration.setMaxActive(tenant.getMaxActive());
+        //poolConfiguration.setMinIdle(tenant.getMinIdle());
+        //poolConfiguration.setMaxIdle(tenant.getMaxIdle());
+
+        //poolConfiguration.setSuspectTimeout(tenant.getSuspectTimeout());
+        //poolConfiguration.setTimeBetweenEvictionRunsMillis(tenant.getTimeBetweenEvictionRunsMillis());
+        //poolConfiguration.setMinEvictableIdleTimeMillis(tenant.getMinEvictableIdleTimeMillis());
 
         poolConfiguration.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
                 + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;org.apache.tomcat.jdbc.pool.interceptor.SlowQueryReport");
