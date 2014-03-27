@@ -6059,8 +6059,21 @@ GET https://DomainName/mifosng-provider/api/v1/loans
 Content-Type: application/json
 No Request Body:
 {
-  "locale": "en", 
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "productId": 1,
   "principal": "5000",
+  "loanTermFrequency": 10,
+  "loanTermFrequencyType": 0,
+  "numberOfRepayments": 10,
+  "repaymentEvery": 1,
+  "repaymentFrequencyType": 0,
+  "interestRatePerPeriod": 2,
+  "interestType": 0,
+  "interestCalculationPeriodType": 0,
+  "amortizationType": 1,
+  "expectedDisbursementDate": "04 March 2014",
+  "transactionProcessingStrategyId": 1
 }
 					</code>
 					<code class="method-response">
@@ -15658,7 +15671,7 @@ Content-Type: application/json
 No Request Body:
 {
 	"locale": "en", 
-	"nominalAnnualInterestRate": "5.9999999999",
+	"nominalAnnualInterestRate": "5.9999999999"
 }
 	        </code>
 	        <code class="method-response">

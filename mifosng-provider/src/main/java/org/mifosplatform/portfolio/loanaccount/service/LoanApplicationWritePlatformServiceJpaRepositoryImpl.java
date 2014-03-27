@@ -421,13 +421,18 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 existingLoanApplication.updateLoanSchedule(loanSchedule);
             }
 
+            this.loanRepository.saveAndFlush(existingLoanApplication);
+
+            // FIXME: adding loan installment charges along with the other
+            // charges,
+            // is trying to add extra entries with null values. Because of that
+            // persisting charges separately
             final String chargesParamName = "charges";
             if (changes.containsKey(chargesParamName)) {
                 final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(command.parsedJson());
                 existingLoanApplication.updateLoanCharges(loanCharges);
+                this.loanRepository.saveAndFlush(existingLoanApplication);
             }
-
-            this.loanRepository.saveAndFlush(existingLoanApplication);
 
             final String submittedOnNote = command.stringValueOfParameterNamed("submittedOnNote");
             if (StringUtils.isNotBlank(submittedOnNote)) {
