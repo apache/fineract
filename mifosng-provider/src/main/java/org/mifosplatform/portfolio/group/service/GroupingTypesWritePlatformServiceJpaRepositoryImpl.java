@@ -17,6 +17,9 @@ import java.util.Set;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandProcessingService;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -77,6 +80,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     private final LoanRepository loanRepository;
     private final CodeValueRepositoryWrapper codeValueRepository;
     private final SavingsAccountRepository savingsRepository;
+    private final CommandProcessingService commandProcessingService;
 
     @Autowired
     public GroupingTypesWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -84,7 +88,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final OfficeRepository officeRepository, final StaffRepositoryWrapper staffRepository, final NoteRepository noteRepository,
             final GroupLevelRepository groupLevelRepository, final GroupingTypesDataValidator fromApiJsonDeserializer,
             final LoanRepository loanRepository, final SavingsAccountRepository savingsRepository,
-            final CodeValueRepositoryWrapper codeValueRepository) {
+            final CodeValueRepositoryWrapper codeValueRepository, final CommandProcessingService commandProcessingService) {
         this.context = context;
         this.groupRepository = groupRepository;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
@@ -96,6 +100,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         this.loanRepository = loanRepository;
         this.savingsRepository = savingsRepository;
         this.codeValueRepository = codeValueRepository;
+        this.commandProcessingService = commandProcessingService;
     }
 
     private CommandProcessingResult createGroupingType(final JsonCommand command, final GroupTypes groupingType, final Long centerId) {
@@ -144,6 +149,17 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final Group newGroup = Group.newGroup(groupOffice, staff, parentGroup, groupLevel, name, externalId, active, activationDate,
                     clientMembers, groupMembers, submittedOnDate, currentUser);
 
+            boolean rollbackTransaction = false;
+            if (newGroup.isActive()) {
+                if (newGroup.isCenter()) {
+                    final CommandWrapper commandWrapper = new CommandWrapperBuilder().activateCenter(null).build();
+                    rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
+                } else {
+                    final CommandWrapper commandWrapper = new CommandWrapperBuilder().activateGroup(null).build();
+                    rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
+                }
+            }
+
             // pre-save to generate id for use in group hierarchy
             this.groupRepository.save(newGroup);
 
@@ -156,6 +172,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     .withOfficeId(groupOffice.getId()) //
                     .withGroupId(newGroup.getId()) //
                     .withEntityId(newGroup.getId()) //
+                    .setRollbackTransaction(rollbackTransaction)//
                     .build();
 
         } catch (final DataIntegrityViolationException dve) {
