@@ -16,6 +16,8 @@ import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
+import org.mifosplatform.organisation.staff.data.StaffData;
+import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
 import org.mifosplatform.useradministration.data.AppUserData;
 import org.mifosplatform.useradministration.data.RoleData;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -36,16 +38,18 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
     private final OfficeReadPlatformService officeReadPlatformService;
     private final RoleReadPlatformService roleReadPlatformService;
     private final AppUserRepository appUserRepository;
-
+    private final StaffReadPlatformService staffReadPlatformService;
+    
     @Autowired
     public AppUserReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final OfficeReadPlatformService officeReadPlatformService, final RoleReadPlatformService roleReadPlatformService,
-            final AppUserRepository appUserRepository) {
+            final AppUserRepository appUserRepository, final StaffReadPlatformService staffReadPlatformService) {
         this.context = context;
         this.officeReadPlatformService = officeReadPlatformService;
         this.roleReadPlatformService = roleReadPlatformService;
         this.appUserRepository = appUserRepository;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.staffReadPlatformService = staffReadPlatformService;
     }
 
     /*
@@ -63,7 +67,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
 
-        final AppUserMapper mapper = new AppUserMapper(this.roleReadPlatformService);
+        final AppUserMapper mapper = new AppUserMapper(this.roleReadPlatformService, this.staffReadPlatformService);
         final String sql = "select " + mapper.schema();
 
         return this.jdbcTemplate.query(sql, mapper, new Object[] { hierarchySearchString });
@@ -108,16 +112,25 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 
         availableRoles.removeAll(selectedUserRoles);
 
+        final StaffData linkedStaff;
+        if(user.getStaff()!=null) {
+            linkedStaff = this.staffReadPlatformService.retrieveStaff(user.getStaffId());
+        } else {
+            linkedStaff = null;
+        }
+        
         return AppUserData.instance(user.getId(), user.getUsername(), user.getEmail(), user.getOffice().getId(),
-                user.getOffice().getName(), user.getFirstname(), user.getLastname(), availableRoles, selectedUserRoles);
+                user.getOffice().getName(), user.getFirstname(), user.getLastname(), availableRoles, selectedUserRoles, linkedStaff);
     }
 
     private static final class AppUserMapper implements RowMapper<AppUserData> {
 
         private final RoleReadPlatformService roleReadPlatformService;
+        private final StaffReadPlatformService staffReadPlatformService;
 
-        public AppUserMapper(final RoleReadPlatformService roleReadPlatformService) {
+        public AppUserMapper(final RoleReadPlatformService roleReadPlatformService, final StaffReadPlatformService staffReadPlatformService) {
             this.roleReadPlatformService = roleReadPlatformService;
+            this.staffReadPlatformService = staffReadPlatformService;
         }
 
         @Override
@@ -130,15 +143,20 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
             final String email = rs.getString("email");
             final Long officeId = JdbcSupport.getLong(rs, "officeId");
             final String officeName = rs.getString("officeName");
-
+            final Long staffId = JdbcSupport.getLong(rs, "staffId");
             final Collection<RoleData> selectedRoles = this.roleReadPlatformService.retrieveAppUserRoles(id);
 
-            return AppUserData.instance(id, username, email, officeId, officeName, firstname, lastname, null, selectedRoles);
-        }
+            final StaffData linkedStaff;
+            if(staffId!=null) {
+                linkedStaff = this.staffReadPlatformService.retrieveStaff(staffId);
+            } else {
+                linkedStaff = null;
+            }            
+            return AppUserData.instance(id, username, email, officeId, officeName, firstname, lastname, null, selectedRoles, linkedStaff);        }
 
         public String schema() {
             return " u.id as id, u.username as username, u.firstname as firstname, u.lastname as lastname, u.email as email,"
-                    + " u.office_id as officeId, o.name as officeName from m_appuser u "
+                    + " u.office_id as officeId, o.name as officeName, u.staff_id as staffId from m_appuser u "
                     + " join m_office o on o.id = u.office_id where o.hierarchy like ? and u.is_deleted=0 order by u.username";
         }
 
