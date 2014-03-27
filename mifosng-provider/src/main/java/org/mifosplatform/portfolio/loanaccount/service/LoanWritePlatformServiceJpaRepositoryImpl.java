@@ -263,18 +263,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 workingDays, allowTransactionsOnHoliday, allowTransactionsOnNonWorkingDay);
 
         if (!changes.isEmpty()) {
-            try {
-                this.loanRepository.saveAndFlush(loan);
-            } catch (final DataIntegrityViolationException e) {
-                final Throwable realCause = e.getCause();
-                final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-                final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
-                if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
-                    baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
-                }
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(
-                        "validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors); }
-            }
+            saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
@@ -287,18 +276,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             // disbursement, is trying to add 2 extra entries with null values.
             // which is causing issues
             ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactionForDisbursement();
-            try {
-                this.loanRepository.saveAndFlush(loan);
-            } catch (final DataIntegrityViolationException e) {
-                final Throwable realCause = e.getCause();
-                final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-                final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
-                if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
-                    baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
-                }
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(
-                        "validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors); }
-            }
+            saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
             if (changedTransactionDetail != null) {
                 for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
@@ -340,6 +318,21 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .build();
     }
 
+    private void saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {
+        try {
+            this.loanRepository.saveAndFlush(loan);
+        } catch (final DataIntegrityViolationException e) {
+            final Throwable realCause = e.getCause();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
+            if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
+                baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
+            }
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                    "Validation errors exist.", dataValidationErrors); }
+        }
+    }
+
     private LocalDate getCalculatedRepaymentsStartingFromDate(final LocalDate actualDisbursementDate, final Loan loan,
             final CalendarInstance calendarInstance) {
         final Calendar calendar = calendarInstance == null ? null : calendarInstance.getCalendar();
@@ -369,6 +362,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     /****
      * TODO Vishwas: Pair with Ashok and re-factor collection sheet code-base
+     * 
+     * May of the changes made to disburseLoan aren't being made here, should
+     * refactor to reuse disburseLoan ASAP
      *****/
     @Transactional
     @Override
@@ -438,19 +434,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 // disbursement, is trying to add 2 extra entries with null
                 // values. which is causing issues
                 ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactionForDisbursement();
-                try {
-                    this.loanRepository.saveAndFlush(loan);
-                } catch (final DataIntegrityViolationException e) {
-                    final Throwable realCause = e.getCause();
-                    final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-                    final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                            .resource("loan.transaction");
-                    if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
-                        baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
-                    }
-                    if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(
-                            "validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors); }
-                }
+                saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
                 if (changedTransactionDetail != null) {
                     for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                         this.loanTransactionRepository.save(mapEntry.getValue());
