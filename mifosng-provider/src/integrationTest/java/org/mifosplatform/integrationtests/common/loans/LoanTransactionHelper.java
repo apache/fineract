@@ -47,6 +47,13 @@ public class LoanTransactionHelper {
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "repaymentSchedule");
         return (ArrayList) response.get("periods");
     }
+    
+    public HashMap getLoanSummary(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer loanID) {
+        final String URL = "/mifosng-provider/api/v1/loans/" + loanID + "?associations=all&tenantIdentifier=default";
+        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "summary");
+        return response;
+    }
 
     public HashMap approveLoan(final String approvalDate, final Integer loanID) {
         return performLoanTransaction(createLoanOperationURL(APPROVE_LOAN_COMMAND, loanID), getApproveLoanAsJSON(approvalDate));
