@@ -44,7 +44,7 @@ public class AccountingScenarioIntegrationTest {
     private final String LP_INTEREST_RATE = "1";
     private final String EXPECTED_DISBURSAL_DATE = "04 March 2011";
     private final String LOAN_APPLICATION_SUBMISSION_DATE = "3 March 2011";
-    private final String TRANSACTION_DATE = "10 January 2013";
+    private final String TRANSACTION_DATE = "01 March 2013";
     private final String LOAN_TERM_FREQUENCY = "10";
     private final String INDIVIDUAL_LOAN = "individual";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";

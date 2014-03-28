@@ -37,8 +37,8 @@ public class SavingsAccountHelper {
     public static final String CREATED_DATE = "08 January 2013";
     public static final String CREATED_DATE_PLUS_ONE = "09 January 2013";
     public static final String CREATED_DATE_MINUS_ONE = "07 January 2013";
-    public static final String TRANSACTION_DATE = "10 January 2013";
-    public static final String LAST_TRANSACTION_DATE = "11 January 2013";
+    public static final String TRANSACTION_DATE = "01 March 2013";
+    public static final String LAST_TRANSACTION_DATE = "01 March 2013";
 
     public SavingsAccountHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
