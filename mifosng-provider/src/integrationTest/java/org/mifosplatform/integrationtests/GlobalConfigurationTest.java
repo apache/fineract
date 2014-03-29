@@ -59,15 +59,8 @@ public class GlobalConfigurationTest {
         // Verifying Value for penalty-wait-period after Updation
         Assert.assertEquals("Verifying Global Config Value after Updation", value, configDataAfter.get("value"));
 
-        // Updating Enabled Flag for maker-checker Global Configuration
-        configId = (Integer) globalConfig.get(0).get("id");
-        Assert.assertNotNull(configId);
-
-        configDataBefore = this.globalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
-                configId.toString());
-        Assert.assertNotNull(configDataBefore);
-
-        Boolean enabled = (Boolean) globalConfig.get(0).get("enabled");
+        // Updating Enabled Flag for penalty-wait-period Global Configuration
+        Boolean enabled = (Boolean) globalConfig.get(7).get("enabled");
 
         if (enabled == true) {
             enabled = false;
@@ -81,7 +74,7 @@ public class GlobalConfigurationTest {
         configDataAfter = this.globalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
                 configId.toString());
 
-        // Verifying Enabled Flag for maker-checker after Updation
+        // Verifying Enabled Flag for penalty-wait-period after Updation
         Assert.assertEquals("Verifying Enabled Flag Global Config after Updation", enabled, configDataAfter.get("enabled"));
 
     }
