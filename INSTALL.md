@@ -101,12 +101,7 @@ The two ways to get up and running with mifos platform is:
   mysql -uroot -pmysql mifosplatform-tenants < database/mifospltaform-tenants-first-time-install.sql
   ```
   
-  Step three (only for those updating an existing MifosX installation to version 1.21.*  or higher): upgrade the mifosplatform-tenants database with patch ```database/list_db/V2__externalize-connection-properties```
-  ```
-  mysql -uroot -pmysql mifosplatform-tenants < database/list_db/V2__externalize-connection-properties
-  ```
-  
-  Step four: create mifostenant-default database
+  Step three: create mifostenant-default database
   ```
   mysql -uroot -pmysql
   create database `mifostenant-default`;
@@ -115,9 +110,15 @@ The two ways to get up and running with mifos platform is:
 
 #### 2.2.2 Upgrade existing database(s)
 
+  Those  updating an existing MifosX installation to version 1.21.*  or higher would need to upgrade the *mifosplatform-tenants* database with patch ```database/list_db/V2__externalize-connection-properties```
+  ```
+  mysql -uroot -pmysql mifosplatform-tenants < database/list_db/V2__externalize-connection-properties
+  ```
+
   Any *tenant* databases will be upgraded automatically when the application starts if the *auto_update* field of the *tenants* database table is enabled(=1). This is the default setting.
   
   Upgrading your database in this way is the recomended way as it will upgrade any *tenants* setup in the *mifosplatform-tenants* database but can be disabled by setting the *auto_update* field of the tenant to zero.
+  
   
 ### 2.3 Tomcat 7 Setup
 
