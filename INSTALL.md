@@ -101,7 +101,12 @@ The two ways to get up and running with mifos platform is:
   mysql -uroot -pmysql mifosplatform-tenants < database/mifospltaform-tenants-first-time-install.sql
   ```
   
-  Step three: create mifostenant-default database
+  Step three (only for those updating an existing MifosX installation to version 1.21.*  or higher): upgrade the mifosplatform-tenants database with patch ```database/list_db/V2__externalize-connection-properties```
+  ```
+  mysql -uroot -pmysql mifosplatform-tenants < database/list_db/V2__externalize-connection-properties
+  ```
+  
+  Step four: create mifostenant-default database
   ```
   mysql -uroot -pmysql
   create database `mifostenant-default`;
@@ -226,6 +231,5 @@ The two ways to get up and running with mifos platform is:
 #### 2.3.7 Startup tomcat
   Startup tomcat:
   - Platform application should be available @ https://[server ip address]:8443/mifosng-provider/api/v1/offices?tenantIdentifier=default&pretty=true
-  - Reference application should be available @ https://[server ip address]:8443/IndividualLendingGeneralJavaScript/IndivLendHome.html?baseApiUrl=https://[server ip address]:8443/mifosng-provider/api/v1/
   - Community application should be available @ https://[server ip address]:8443/community-app?baseApiUrl=https://[server ip address]:8443/mifosng-provider/api/v1/
   - API docs should be available @ https://[server ip address]:8443/api-docs/apiLive.htm
