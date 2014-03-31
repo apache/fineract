@@ -12,7 +12,7 @@ The release artifact (.zip file) has the following structure:
   + api-docs ... folder contains html based documentation on the platform API for this release
   + database ... folder contains database setup and upgrade scripts required for installation
   + pentahoReports ... folder contains any out-of-the-box reports provided through pentaho
-  + apps ... folder contains apps like reference app and community app that speak to the platform
+  + apps ... folder contains apps like community app that speak to the platform
   |
   -- CHANGELOG.MD ... file documents changelog of project up to this release
   -- CONTRIBUTORS.MD ... file provides details on contributors to project
@@ -110,14 +110,14 @@ The two ways to get up and running with mifos platform is:
 
 #### 2.2.2 Upgrade existing database(s)
 
-  Those  updating an existing MifosX installation to version 1.21.*  or higher would need to upgrade the *mifosplatform-tenants* database with patch ```database/list_db/V2__externalize-connection-properties```
+  Those  updating an existing MifosX installation to version 1.21.*  or higher would need to upgrade the *mifosplatform-tenants* database with patch ```database/migrations/list_db/V2__externalize-connection-properties.sql```
   ```
-  mysql -uroot -pmysql mifosplatform-tenants < database/list_db/V2__externalize-connection-properties
+  mysql -uroot -pmysql mifosplatform-tenants < database/migrations/list_db/V2__externalize-connection-properties.sql
   ```
 
   Any *tenant* databases will be upgraded automatically when the application starts if the *auto_update* field of the *tenants* database table is enabled(=1). This is the default setting.
   
-  Upgrading your database in this way is the recomended way as it will upgrade any *tenants* setup in the *mifosplatform-tenants* database but can be disabled by setting the *auto_update* field of the tenant to zero.
+  Upgrading your database in this way is the recommended way as it will upgrade any *tenants* setup in the *mifosplatform-tenants* database but can be disabled by setting the *auto_update* field of the tenant to zero.
   
   
 ### 2.3 Tomcat 7 Setup
