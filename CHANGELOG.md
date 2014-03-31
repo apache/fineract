@@ -6,7 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
-1. ?? Mar 2014 - 1.21.0.RELEASE
+1. 30 Mar 2014 - 1.21.0.RELEASE
 1. 18 Mar 2014 - 1.20.1.RELEASE
 1. 16 Mar 2014 - 1.20.0.RELEASE
 1. 04 Mar 2014 - 1.19.0.RELEASE
@@ -63,12 +63,48 @@ Releases
 1. 05 April 2013 - 0.11.0.beta
 
 
-1.21.0.RELEASE [In Progress]
+1.21.0.RELEASE
 =============
-Feature Release
+This Feature release adds support for Automated Penalties for loans and externalizes the MySQL connection properties for a tenant along with other major fixes and improvements
 
 Important: Those updating from an existing installation to 1.21.* release or higher should run the update https://github.com/openMF/mifosx/blob/develop/mifosng-db/migrations/list_db/V2__externalize-connection-properties.sql on `mifosplatform-tenants` schema
 
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-1025] - Implement Overdue Penalties with recurrence and percentage based approach
+ - [MIFOSX-949] - Externalizing the PoolConfiguration of data source per tenant
+ - [MIFOSX-994] - Allow all savings account's(remove constrain for overdraft) as client default account
+ - [MIFOSX-1015] - Need to Add Pentaho report which generates data for client saving transactions transaction and loan repayment schedule
+ - [MIFOSX-1010] - stretchy report converted into Pentaho reports
+ - [MIFOSX-986] - transferring of clients in same group but different loan officer
+ - [MIFOSX-1013] - Add loanId and clientId in makercheckers api return
+ - [MIFOSX-942] - Moving savings products and savings accounts api documentation out of beta
+ - [MIFOSX-993] - JUnit Integration Test Cases for Group Savings
+ - [MIFOSX-1003] - JUnit Integration Test Cases for Accounting with Savings
+ - [MIFOSX-1012] - JUnit Test Cases for Fund Transfer in Savings
+ - [MIFOSX-1026] - JUnit Integration Test Cases for Global Configurations
+ - [MIFOSX-941] - Api Documentation for modify loan application is missing
+
+
+Bugs
+ - [MIFOSX-835] - For a Client (member of 2 Groups) taken JLG loan from 1 group, repayment amount is displaying in collection sheet of other Group
+ - [MIFOSX-880] - In new JLG Loan application interest on first repayment is not getting calculated as per Disbursement date
+ - [MIFOSX-909] - For the Loan under pending approval stage - modifications in the charges is not getting updated in "outstanding" column
+ - [MIFOSX-996] - Not able to modify Loan application through API
+ - [MIFOSX-1014] - approving maker checker for repayment and adjustments for work throws a 500 error
+ 
+Community App
+ - [MIFOSX-1002] - Issues with Angular JS and Require JS load on the community app
+ - [MIFOSX-957] - Dashboard reports wont work when connected to MIfos X backend other than https://demo.openmf.org
+ - [MIFOSX-1018] - User with all permission not able to change password of his own
+ - [MIFOSX-956] - Ability to print Repayment Schedule in active loan
+ - [MIFOSX-1005] - Improvement with respect to Accounting pages
+ - [MIFOSX-1016] - Cleaning XBRL reports ui(inline styles)
+ - [MIFOSX-990] - Navigation page is not working as expected
+ - [MIFOSX-999] - Issues with User Generated Documents
+ - [MIFOSX-953] - Associating checkbox to jobs are not working as expected.
+ - [MIFOSX-972] - Log in screen freezing problem
 
 
 1.20.1.RELEASE
