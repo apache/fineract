@@ -97,7 +97,7 @@ CREATE TABLE `tenants` (
 LOCK TABLES `tenants` WRITE;
 /*!40000 ALTER TABLE `tenants` DISABLE KEYS */;
 INSERT INTO `tenants` VALUES 
-(1,'default','default','mifostenant-default','Asia/Kolkata',NULL,NULL,NULL,NULL,'localhost','3306','root','mysql',1,5,30000,1,60,1,50,140,20,10,60,34000,60000);
+(1,'default','default','mifostenant-default','Asia/Kolkata',NULL,NULL,NULL,NULL,'localhost','3306','root','mysql',1,5,30000,1,60,1,50,1,40,20,10,60,34000,60000);
 /*!40000 ALTER TABLE `tenants` ENABLE KEYS */;
 UNLOCK TABLES;
 
