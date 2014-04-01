@@ -47,7 +47,7 @@ public class GlobalConfigurationTest {
                 configId.toString());
         Assert.assertNotNull(configDataBefore);
 
-        Integer value = this.globalConfigurationHelper.randomValueGenerator(1, 5);
+        Integer value = Utils.randomValueGenerator(1, 5);
 
         configId = this.globalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec,
                 configId.toString(), value.toString());
@@ -87,12 +87,17 @@ public class GlobalConfigurationTest {
         final ArrayList<HashMap> isCacheGlobalConfig = this.globalConfigurationHelper.getGlobalConfigurationIsCacheEnabled(
                 this.requestSpec, this.responseSpec);
         Assert.assertNotNull(isCacheGlobalConfig);
+        Integer cacheType = Utils.randomValueGenerator(0, 1);
+        Boolean enabled = (Boolean) isCacheGlobalConfig.get(cacheType).get("enabled");
 
-        Integer cacheType = this.globalConfigurationHelper.randomValueGenerator(1, 2);
-
+        if (cacheType == 0 && enabled == true) {
+            cacheType = 1;
+        } else if (cacheType == 1 && enabled == true) {
+            cacheType = 0;
+        }
+        cacheType += 1;
         HashMap changes = this.globalConfigurationHelper.updateIsCacheEnabledForGlobalConfiguration(this.requestSpec, this.responseSpec,
                 cacheType.toString());
-
         Assert.assertEquals("Verifying Is Cache Enabled Global Config after Updation", cacheType, changes.get("cacheType"));
     }
 }
