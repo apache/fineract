@@ -103,4 +103,10 @@ public class Utils {
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
         return randomStringGenerator(prefix, lenOfRandomSuffix);
     }
+    
+    public static int randomValueGenerator(int minValue, int maxValue) {
+        Random randValue = new Random();
+        int randomNum = randValue.nextInt((maxValue - minValue) + 1) + minValue;
+        return randomNum;
+    }
 }

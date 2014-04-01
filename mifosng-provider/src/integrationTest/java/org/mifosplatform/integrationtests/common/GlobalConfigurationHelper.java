@@ -87,9 +87,4 @@ public class GlobalConfigurationHelper {
         return new Gson().toJson(map);
     }
 
-    public static int randomValueGenerator(int minValue, int maxValue) {
-        Random randValue = new Random();
-        int randomNum = randValue.nextInt((maxValue - minValue) + 1) + minValue;
-        return randomNum;
-    }
 }
