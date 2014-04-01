@@ -1,5 +1,6 @@
 package org.mifosplatform.integrationtests.common.charges;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.mifosplatform.integrationtests.common.CommonConstants;
@@ -9,7 +10,7 @@ import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
-@SuppressWarnings({ "unused", "rawtypes" })
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class ChargesHelper {
 
     private static final String CHARGES_URL = "/mifosng-provider/api/v1/charges";
@@ -42,8 +43,8 @@ public class ChargesHelper {
     private static final Integer CHARGE_FEE_FREQUENCY_YEARS = 3;
 
     private final static boolean active = true;
-    private final static boolean penalty = false;
-    private final static boolean addfeefrequency = true;
+    private final static boolean penalty = true;
+    public final static boolean addfeefrequency = true;
     private final static String amount = "100";
     private final static String currencyCode = "USD";
     public final static String feeOnMonthDay = "04 March";
@@ -125,6 +126,7 @@ public class ChargesHelper {
     public static String getLoanSpecifiedDueDateJSON() {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("chargeTimeType", CHARGE_SPECIFIED_DUE_DATE);
+        map.put("penalty", ChargesHelper.penalty);
         String chargesCreateJson = new Gson().toJson(map);
         System.out.println(chargesCreateJson);
         return chargesCreateJson;
@@ -133,6 +135,7 @@ public class ChargesHelper {
     public static String getLoanInstallmentFeeJSON() {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("chargeTimeType", CHARGE_INSTALLMENT_FEE);
+        map.put("penalty", ChargesHelper.penalty);
         String chargesCreateJson = new Gson().toJson(map);
         System.out.println(chargesCreateJson);
         return chargesCreateJson;
@@ -140,7 +143,7 @@ public class ChargesHelper {
 
     public static String getLoanOverdueFeeJSON() {
         final HashMap<String, Object> map = populateDefaultsForLoan();
-        map.put("penalty", true);
+        map.put("penalty", ChargesHelper.penalty);
         map.put("chargeTimeType", CHARGE_OVERDUE_INSTALLMENT_FEE);
         String chargesCreateJson = new Gson().toJson(map);
         System.out.println(chargesCreateJson);
@@ -150,7 +153,6 @@ public class ChargesHelper {
     public static HashMap<String, Object> populateDefaultsForLoan() {
         final HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("active", ChargesHelper.active);
-        map.put("penalty", ChargesHelper.penalty);
         map.put("amount", ChargesHelper.amount);
         map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_LOAN);
         map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
@@ -160,7 +162,7 @@ public class ChargesHelper {
         map.put("monthDayFormat", ChargesHelper.monthDayFormat);
         map.put("name", Utils.randomNameGenerator("Charge_Loans_", 6));
         if (ChargesHelper.addfeefrequency) {
-            map.put("feeFrequency", ChargesHelper.CHARGE_FEE_FREQUENCY_MONTHS);
+            map.put("feeFrequency", ChargesHelper.CHARGE_FEE_FREQUENCY_DAYS);
             map.put("feeInterval", 2);
         }
         return map;
@@ -169,6 +171,21 @@ public class ChargesHelper {
     public static Integer createCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String request) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CHARGES_URL, request, "resourceId");
+    }
+
+    public static ArrayList<HashMap> getCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+        return (ArrayList) Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL + "?" + Utils.TENANT_IDENTIFIER, "");
+    }
+
+    public static HashMap getChargeById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer chargeId) {
+        return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, "");
+    }
+
+    public static HashMap getChargeChanges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer chargeId) {
+        return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER,
+                CommonConstants.RESPONSE_CHANGES);
     }
 
     public static HashMap updateCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -186,16 +203,86 @@ public class ChargesHelper {
     public static String getModifyChargeJSON() {
         final HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("locale", CommonConstants.locale);
-        map.put("amount", "200");
+        map.put("amount", "200.0");
         String json = new Gson().toJson(map);
         System.out.println(json);
         return json;
     }
 
-    public static String getModifyWithdrawalFeeChargeJSON() {
+    public static String getModifyWithdrawalFeeSavingsChargeJSON() {
         final HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("locale", CommonConstants.locale);
         map.put("chargeCalculationType", CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT);
+        String json = new Gson().toJson(map);
+        System.out.println(json);
+        return json;
+    }
+
+    public static String getModifyChargeAsPecentageAmountJSON() {
+        final HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("locale", CommonConstants.locale);
+        map.put("chargeCalculationType", CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT);
+        map.put("chargePaymentMode", CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
+        String json = new Gson().toJson(map);
+        System.out.println(json);
+        return json;
+    }
+
+    public static String getModifyChargeAsPecentageLoanAmountWithInterestJSON() {
+        final HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("locale", CommonConstants.locale);
+        map.put("chargeCalculationType", CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST);
+        map.put("chargePaymentMode", CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
+        String json = new Gson().toJson(map);
+        System.out.println(json);
+        return json;
+    }
+
+    public static String getModifyChargeAsPercentageInterestJSON() {
+        final HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("locale", CommonConstants.locale);
+        map.put("chargeCalculationType", CHARGE_CALCULATION_TYPE_PERCENTAGE_INTEREST);
+        map.put("chargePaymentMode", CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
+        String json = new Gson().toJson(map);
+        System.out.println(json);
+        return json;
+    }
+
+    public static String getModifyChargeFeeFrequencyAsDaysJSON() {
+        final HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("locale", CommonConstants.locale);
+        map.put("feeFrequency", ChargesHelper.CHARGE_FEE_FREQUENCY_DAYS);
+        map.put("feeInterval", 2);
+        String json = new Gson().toJson(map);
+        System.out.println(json);
+        return json;
+    }
+
+    public static String getModifyChargeFeeFrequencyAsWeeksJSON() {
+        final HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("locale", CommonConstants.locale);
+        map.put("feeFrequency", ChargesHelper.CHARGE_FEE_FREQUENCY_WEEKS);
+        map.put("feeInterval", 2);
+        String json = new Gson().toJson(map);
+        System.out.println(json);
+        return json;
+    }
+
+    public static String getModifyChargeFeeFrequencyAsMonthsJSON() {
+        final HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("locale", CommonConstants.locale);
+        map.put("feeFrequency", ChargesHelper.CHARGE_FEE_FREQUENCY_MONTHS);
+        map.put("feeInterval", 2);
+        String json = new Gson().toJson(map);
+        System.out.println(json);
+        return json;
+    }
+
+    public static String getModifyChargeFeeFrequencyAsYearsJSON() {
+        final HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("locale", CommonConstants.locale);
+        map.put("feeFrequency", ChargesHelper.CHARGE_FEE_FREQUENCY_YEARS);
+        map.put("feeInterval", 2);
         String json = new Gson().toJson(map);
         System.out.println(json);
         return json;
