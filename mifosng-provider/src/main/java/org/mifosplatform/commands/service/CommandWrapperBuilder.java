@@ -6,7 +6,6 @@
 package org.mifosplatform.commands.service;
 
 import org.mifosplatform.commands.domain.CommandWrapper;
-import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 
 public class CommandWrapperBuilder {
 
@@ -21,26 +20,41 @@ public class CommandWrapperBuilder {
     private Long subentityId;
     private String href;
     private String json = "{}";
-    private Long codeId;
     private String transactionId;
-    private String supportedEntityType;
-    private Long supportedEntityId;
     private Long productId;
-    private Long templateId;
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
-                this.entityName, this.entityId, this.subentityId, this.codeId, this.supportedEntityType, this.supportedEntityId, this.href,
-                this.json, this.transactionId, this.productId, this.templateId);
+                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId);
     }
 
     public CommandWrapperBuilder withLoanId(final Long withLoanId) {
         this.loanId = withLoanId;
         return this;
     }
+    
+    public CommandWrapperBuilder withSavingsId(final Long withSavingsId) {
+        this.savingsId = withSavingsId;
+        return this;
+    }
 
     public CommandWrapperBuilder withClientId(final Long withClientId) {
         this.clientId = withClientId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder withGroupId(final Long withGroupId) {
+        this.groupId = withGroupId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder withEntityName(final String withEntityName) {
+        this.entityName = withEntityName;
+        return this;
+    }
+    
+    public CommandWrapperBuilder withSubEntityId(final Long withSubEntityId) {
+        this.subentityId = withSubEntityId;
         return this;
     }
 
@@ -729,7 +743,7 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder createCodeValue(final Long codeId) {
         this.actionName = "CREATE";
         this.entityName = "CODEVALUE";
-        this.codeId = codeId;
+        this.entityId = codeId;
         this.href = "/codes/" + codeId + "/codevalues/template";
         return this;
     }
@@ -737,8 +751,8 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder updateCodeValue(final Long codeId, final Long codeValueId) {
         this.actionName = "UPDATE";
         this.entityName = "CODEVALUE";
-        this.entityId = codeValueId;
-        this.codeId = codeId;
+        this.subentityId = codeValueId;
+        this.entityId = codeId;
         this.href = "/codes/" + codeId + "/codevalues/" + codeValueId;
         return this;
     }
@@ -746,8 +760,8 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder deleteCodeValue(final Long codeId, final Long codeValueId) {
         this.actionName = "DELETE";
         this.entityName = "CODEVALUE";
-        this.entityId = codeValueId;
-        this.codeId = codeId;
+        this.subentityId = codeValueId;
+        this.entityId = codeId;
         this.href = "/codes/" + codeId + "/codevalues/" + codeValueId;
         return this;
     }
@@ -1048,11 +1062,13 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder createCalendar(final String supportedEntityType, final Long supportedEntityId) {
+    public CommandWrapperBuilder createCalendar(final CommandWrapper resourceDetails, final String supportedEntityType,
+            final Long supportedEntityId) {
         this.actionName = "CREATE";
         this.entityName = "CALENDAR";
-        this.supportedEntityType = supportedEntityType;
-        this.supportedEntityId = supportedEntityId;
+        this.clientId = resourceDetails.getClientId();
+        this.loanId = resourceDetails.getLoanId();
+        this.groupId = resourceDetails.getGroupId();
         this.href = "/" + supportedEntityType + "/" + supportedEntityId + "/calendars/template";
         return this;
     }
@@ -1073,34 +1089,51 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder createNote(final String entityName, final String resourceType, final Long resourceId) {
+    public CommandWrapperBuilder createNote(final CommandWrapper resourceDetails, final String resourceType, final Long resourceId) {
         this.actionName = "CREATE";
-        this.entityName = entityName;// Note supports multiple resources. Note
-                                     // Permissions are set for each resource.
-        this.supportedEntityType = resourceType;
-        this.supportedEntityId = resourceId;
+        this.entityName = resourceDetails.entityName();// Note supports multiple
+                                                       // resources. Note
+                                                       // Permissions are set
+                                                       // for each resource.
+        this.clientId = resourceDetails.getClientId();
+        this.loanId = resourceDetails.getLoanId();
+        this.savingsId = resourceDetails.getSavingsId();
+        this.groupId = resourceDetails.getGroupId();
+        this.subentityId = resourceDetails.subresourceId();
         this.href = "/" + resourceType + "/" + resourceId + "/notes/template";
         return this;
     }
 
-    public CommandWrapperBuilder updateNote(final String entityName, final String resourceType, final Long resourceId, final Long noteId) {
+    public CommandWrapperBuilder updateNote(final CommandWrapper resourceDetails, final String resourceType, final Long resourceId,
+            final Long noteId) {
         this.actionName = "UPDATE";
-        this.entityName = entityName;// Note supports multiple resources. Note
-                                     // Permissions are set for each resource.
+        this.entityName = resourceDetails.entityName();// Note supports multiple
+                                                       // resources. Note
+                                                       // Permissions are set
+                                                       // for each resource.
         this.entityId = noteId;
-        this.supportedEntityType = resourceType;
-        this.supportedEntityId = resourceId;
+        this.clientId = resourceDetails.getClientId();
+        this.loanId = resourceDetails.getLoanId();
+        this.savingsId = resourceDetails.getSavingsId();
+        this.groupId = resourceDetails.getGroupId();
+        this.subentityId = resourceDetails.subresourceId();
         this.href = "/" + resourceType + "/" + resourceId + "/notes";
         return this;
     }
 
-    public CommandWrapperBuilder deleteNote(final String entityName, final String resourceType, final Long resourceId, final Long noteId) {
+    public CommandWrapperBuilder deleteNote(final CommandWrapper resourceDetails, final String resourceType, final Long resourceId,
+            final Long noteId) {
         this.actionName = "DELETE";
-        this.entityName = entityName;// Note supports multiple resources. Note
-                                     // Permissions are set for each resource.
+        this.entityName = resourceDetails.entityName();// Note supports multiple
+                                                       // resources. Note
+                                                       // Permissions are set
+                                                       // for each resource.
         this.entityId = noteId;
-        this.supportedEntityType = resourceType;
-        this.supportedEntityId = resourceId;
+        this.clientId = resourceDetails.getClientId();
+        this.loanId = resourceDetails.getLoanId();
+        this.savingsId = resourceDetails.getSavingsId();
+        this.groupId = resourceDetails.getGroupId();
+        this.subentityId = resourceDetails.subresourceId();
         this.href = "/" + resourceType + "/" + resourceId + "/calendars/" + noteId;
         return this;
     }
@@ -1135,8 +1168,6 @@ public class CommandWrapperBuilder {
         this.entityName = "GROUP";
         this.entityId = groupId;
         this.groupId = groupId;
-        this.supportedEntityId = groupId;
-        this.supportedEntityType = CalendarEntityType.GROUPS.name();
         this.href = "/groups/" + groupId + "?command=saveCollectionSheet";
         return this;
     }
@@ -1275,8 +1306,7 @@ public class CommandWrapperBuilder {
         this.actionName = "SAVECOLLECTIONSHEET";
         this.entityName = "CENTER";
         this.entityId = centerId;
-        this.supportedEntityId = centerId;
-        this.supportedEntityType = CalendarEntityType.CENTERS.name();
+        this.groupId = centerId;
         this.href = "/centers/" + centerId + "?command=saveCollectionSheet";
         return this;
     }
@@ -1394,7 +1424,6 @@ public class CommandWrapperBuilder {
         this.actionName = "CREATE";
         this.entityName = "TEMPLATE";
         this.entityId = null;
-        this.templateId = null;
         this.href = "/templates";
         return this;
     }
@@ -1403,7 +1432,6 @@ public class CommandWrapperBuilder {
         this.actionName = "UPDATE";
         this.entityName = "TEMPLATE";
         this.entityId = templateId;
-        this.templateId = templateId;
         this.href = "/templates/" + templateId;
         return this;
     }
@@ -1412,7 +1440,6 @@ public class CommandWrapperBuilder {
         this.actionName = "DELETE";
         this.entityName = "TEMPLATE";
         this.entityId = templateId;
-        this.templateId = templateId;
         this.href = "/templates/" + templateId;
         return this;
     }
@@ -1476,11 +1503,13 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder createMeeting(final String supportedEntityType, final Long supportedEntityId) {
+    public CommandWrapperBuilder createMeeting(final CommandWrapper resourceDetails, final String supportedEntityType,
+            final Long supportedEntityId) {
         this.actionName = "CREATE";
         this.entityName = "MEETING";
-        this.supportedEntityType = supportedEntityType;
-        this.supportedEntityId = supportedEntityId;
+        this.clientId = resourceDetails.getClientId();
+        this.loanId = resourceDetails.getLoanId();
+        this.groupId = resourceDetails.getGroupId();
         this.href = "/" + supportedEntityType + "/" + supportedEntityId + "/meetings";
         return this;
     }
@@ -1505,8 +1534,6 @@ public class CommandWrapperBuilder {
         this.actionName = "SAVEORUPDATEATTENDANCE";
         this.entityName = "MEETING";
         this.entityId = entityId;
-        this.supportedEntityType = supportedEntityType;
-        this.supportedEntityId = supportedEntityId;
         this.href = "/" + supportedEntityType + "/" + supportedEntityId + "/meetings/" + entityId + "?command=saveOrUpdateAttendance";
         return this;
     }

@@ -11,7 +11,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -38,9 +37,7 @@ public class CalendarInstance extends AbstractPersistable<Long> {
 
     }
 
-    public static CalendarInstance fromJson(final Calendar calendar, final JsonCommand command) {
-        final Long entityId = command.getSupportedEntityId();
-        final Integer entityTypeId = CalendarEntityType.valueOf(command.getSupportedEntityType().toUpperCase()).getValue();
+    public static CalendarInstance fromJson(final Calendar calendar, final Long entityId, final Integer entityTypeId) {
         return new CalendarInstance(calendar, entityId, entityTypeId);
     }
 

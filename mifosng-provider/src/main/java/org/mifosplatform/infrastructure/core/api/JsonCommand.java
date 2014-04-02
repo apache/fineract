@@ -45,44 +45,35 @@ public final class JsonCommand {
     private final Long loanId;
     private final Long savingsId;
     private final String entityName;
-    private final Long codeId;
-    private final String supportedEntityType;
-    private final Long supportedEntityId;
     private final String transactionId;
     private final String url;
     private final Long productId;
 
     public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
             final String entityName, final Long resourceId, final Long subresourceId, final Long groupId, final Long clientId,
-            final Long loanId, final Long savingsId, final Long codeId, final String supportedEntityType, final Long supportedEntityId,
-            final String transactionId, final String url, final Long productId) {
+            final Long loanId, final Long savingsId, final String transactionId, final String url, final Long productId) {
         return new JsonCommand(null, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, groupId,
-                clientId, loanId, savingsId, codeId, supportedEntityType, supportedEntityId, transactionId, url, productId);
+                clientId, loanId, savingsId, transactionId, url, productId);
     }
 
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
             final String url, final Long productId) {
         return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, null, null,
-                null, null, null, null, null, null, url, productId);
+                null, null, null, url, productId);
     }
 
-    /***
-     * Vishwas TODO: If we are recreating this command from the database, all
-     * properties should be set. Presence of NULL properties means we can expect
-     * errors!
-     ***/
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
-            final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String url, final Long productId) {
+            final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId, final String url,
+            final Long productId) {
         return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, groupId,
-                clientId, loanId, savingsId, null, null, null, null, url, productId);
+                clientId, loanId, savingsId, transactionId, url, productId);
     }
 
     public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
-            final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final Long codeId,
-            final String supportedEntityType, final Long supportedEntityId, final String transactionId, final String url,
+            final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId, final String url,
             final Long productId) {
         this.commandId = commandId;
         this.jsonCommand = jsonCommand;
@@ -95,9 +86,6 @@ public final class JsonCommand {
         this.clientId = clientId;
         this.loanId = loanId;
         this.savingsId = savingsId;
-        this.codeId = codeId;
-        this.supportedEntityType = supportedEntityType;
-        this.supportedEntityId = supportedEntityId;
         this.transactionId = transactionId;
         this.url = url;
         this.productId = productId;
@@ -150,18 +138,6 @@ public final class JsonCommand {
 
     public Long getSavingsId() {
         return this.savingsId;
-    }
-
-    public Long getCodeId() {
-        return this.codeId;
-    }
-
-    public Long getSupportedEntityId() {
-        return this.supportedEntityId;
-    }
-
-    public String getSupportedEntityType() {
-        return this.supportedEntityType;
     }
 
     public String getTransactionId() {

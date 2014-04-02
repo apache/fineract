@@ -1739,7 +1739,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     final JsonElement parsedCommand = this.fromApiJsonHelper.parse(overdueInstallment.toString());
 
                     final JsonCommand command = JsonCommand.from(overdueInstallment.toString(), parsedCommand, this.fromApiJsonHelper,
-                            null, null, null, null, null, overdueInstallment.getLoanId(), null, null, null, null, null, null, null);
+                            null, null, null, null, null, overdueInstallment.getLoanId(), null, null, null, null);
 
                     applyChargeToOverdueLoanInstallment(overdueInstallment.getLoanId(), overdueInstallment.getChargeId(),
                             overdueInstallment.getPeriodNumber(), command);

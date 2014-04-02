@@ -79,21 +79,28 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
     public CommandProcessingResult createCalendar(final JsonCommand command) {
 
         this.fromApiJsonDeserializer.validateForCreate(command.json());
-        final Long entityId = command.getSupportedEntityId();
-        final CalendarEntityType entityType = CalendarEntityType.valueOf(command.getSupportedEntityType().toUpperCase());
+        Long entityId = null;
+        CalendarEntityType entityType = CalendarEntityType.INVALID;
         LocalDate entityActivationDate = null;
         Group centerOrGroup = null;
-        if (entityType.isCenter() || entityType.isGroup()) {
-            centerOrGroup = this.groupRepository.findOneWithNotFoundDetection(entityId);
+        if (command.getGroupId() != null) {
+            centerOrGroup = this.groupRepository.findOneWithNotFoundDetection(command.getGroupId());
             entityActivationDate = centerOrGroup.getActivationLocalDate();
-        } else if (entityType.isLoan()) {
-            final Loan loan = this.loanRepository.findOne(entityId);
+            entityType = centerOrGroup.isCenter() ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
+            entityId = command.getGroupId();
+        } else if (command.getLoanId() != null) {
+            final Loan loan = this.loanRepository.findOne(command.getLoanId());
             entityActivationDate = (loan.getApprovedOnDate() == null) ? loan.getSubmittedOnDate() : loan.getApprovedOnDate();
-        } else if (entityType.isLoan()) {
-            final Client client = this.clientRepository.findOneWithNotFoundDetection(entityId);
+            entityType = CalendarEntityType.LOANS;
+            entityId = command.getLoanId();
+        } else if (command.getClientId() != null) {
+            final Client client = this.clientRepository.findOneWithNotFoundDetection(command.getClientId());
             entityActivationDate = client.getActivationLocalDate();
+            entityType = CalendarEntityType.CLIENTS;
+            entityId = command.getClientId();
         }
-
+        
+        final Integer entityTypeId = entityType.getValue();
         final Calendar newCalendar = Calendar.fromJson(command);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
@@ -108,17 +115,14 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
                     .failWithCodeNoParameterAddedToErrorCode(errorMessage);
         }
 
-        if (entityType.isCenter() || entityType.isGroup()) {
-            Long centerOrGroupId = entityId;
+        if (centerOrGroup != null) {
+            Long centerOrGroupId = centerOrGroup.getId();
             Integer centerOrGroupEntityTypeId = entityType.getValue();
 
-            if (entityType.isGroup()) {
-                @SuppressWarnings("null")
-                final Group parent = centerOrGroup.getParent();
-                if (parent != null) {
-                    centerOrGroupId = parent.getId();
-                    centerOrGroupEntityTypeId = CalendarEntityType.CENTERS.getValue();
-                }
+            final Group parent = centerOrGroup.getParent();
+            if (parent != null) {
+                centerOrGroupId = parent.getId();
+                centerOrGroupEntityTypeId = CalendarEntityType.CENTERS.getValue();
             }
 
             final CalendarInstance collectionCalendarInstance = this.calendarInstanceRepository
@@ -134,12 +138,15 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
 
         this.calendarRepository.save(newCalendar);
 
-        final CalendarInstance newCalendarInstance = CalendarInstance.fromJson(newCalendar, command);
+        final CalendarInstance newCalendarInstance = CalendarInstance.fromJson(newCalendar, entityId, entityTypeId);
         this.calendarInstanceRepository.save(newCalendarInstance);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(newCalendar.getId()) //
+                .withClientId(command.getClientId()) //
+                .withGroupId(command.getGroupId()) //
+                .withLoanId(command.getLoanId()) //
                 .build();
 
     }

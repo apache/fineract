@@ -40,6 +40,7 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
+import org.mifosplatform.portfolio.calendar.exception.CalendarEntityTypeNotSupportedException;
 import org.mifosplatform.portfolio.calendar.service.CalendarDropdownReadPlatformService;
 import org.mifosplatform.portfolio.calendar.service.CalendarReadPlatformService;
 import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
@@ -167,8 +168,12 @@ public class CalendarsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createCalendar(@PathParam("entityType") final String entityType, @PathParam("entityId") final Long entityId,
             final String apiRequestBodyAsJson) {
+        
+        final CalendarEntityType calendarEntityType = CalendarEntityType.getEntityType(entityType);
+        if (calendarEntityType == null) { throw new CalendarEntityTypeNotSupportedException(entityType); }
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createCalendar(entityType, entityId)
+        final CommandWrapper resourceDetails = getResourceDetails(calendarEntityType, entityId);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createCalendar(resourceDetails, entityType, entityId)
                 .withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -214,6 +219,27 @@ public class CalendarsApiResource {
         final List<EnumOptionData> repeatsOnDayOptions = this.dropdownReadPlatformService.retrieveCalendarWeekDaysTypeOptions();
         return CalendarData.withTemplateOptions(calendarData, entityTypeOptions, calendarTypeOptions, remindByOptions, frequencyOptions,
                 repeatsOnDayOptions);
+    }
+
+    private CommandWrapper getResourceDetails(final CalendarEntityType type, final Long entityId) {
+        CommandWrapperBuilder resourceDetails = new CommandWrapperBuilder();
+        switch (type) {
+            case CENTERS:
+                resourceDetails.withGroupId(entityId);
+            break;
+            case CLIENTS:
+                resourceDetails.withClientId(entityId);
+            break;
+            case GROUPS:
+                resourceDetails.withGroupId(entityId);
+            break;
+            case LOANS:
+                resourceDetails.withLoanId(entityId);
+            break;
+            case INVALID:
+            break;
+        }
+        return resourceDetails.build();
     }
 
 }

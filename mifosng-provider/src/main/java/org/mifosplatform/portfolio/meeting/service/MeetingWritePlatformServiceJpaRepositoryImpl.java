@@ -106,16 +106,30 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
     }
 
     private CalendarInstance getCalendarInstance(final JsonCommand command) {
+
         final Long calendarId = command.longValueOfParameterNamed(calendarIdParamName);
-        Long entityId = command.getSupportedEntityId();
         final Calendar calendarForUpdate = this.calendarRepository.findOne(calendarId);
         if (calendarForUpdate == null) { throw new CalendarNotFoundException(calendarId); }
-        CalendarEntityType entityType = CalendarEntityType.valueOf(command.getSupportedEntityType().toUpperCase());
-        // If group is within a center then center entityType should be passed
-        // for retrieving CalendarInstance.
-        if (CalendarEntityType.isGroup(command.getSupportedEntityType().toUpperCase())) {
+
+        Long entityId = null;// command.getSupportedEntityId();
+        CalendarEntityType entityType = CalendarEntityType.INVALID;// CalendarEntityType.valueOf(command.getSupportedEntityType().toUpperCase());
+        if (command.getLoanId() != null) {
+            entityId = command.getLoanId();
+            entityType = CalendarEntityType.LOANS;
+        } else if (command.getClientId() != null) {
+            entityId = command.getClientId();
+            entityType = CalendarEntityType.CLIENTS;
+        } else if (command.getGroupId() != null) {
+            entityId = command.getGroupId();
+            entityType = CalendarEntityType.GROUPS;
+            /*
+             * If group is within a center then center entityType should be
+             * passed for retrieving CalendarInstance.
+             */
             final Group group = this.groupRepository.findOne(entityId);
-            if (group.isChildGroup()) {
+            if (group.isCenter()) {
+                entityType = CalendarEntityType.CENTERS;
+            } else if (group.isChildGroup()) {
                 entityType = CalendarEntityType.CENTERS;
                 entityId = group.getParent().getId();
             }
@@ -124,7 +138,7 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
         final CalendarInstance calendarInstance = this.calendarInstanceRepository.findByCalendarIdAndEntityIdAndEntityTypeId(
                 calendarForUpdate.getId(), entityId, entityType.getValue());
         if (calendarInstance == null) {
-            final String postFix = "for." + command.getSupportedEntityType() + "not.found";
+            final String postFix = "for." + entityType.name().toLowerCase() + "not.found";
             final String defaultUserMessage = "No Calendar Instance details found for group with identifier " + entityId
                     + " and calendar with identifier " + calendarId;
             throw new CalendarInstanceNotFoundException(postFix, defaultUserMessage, entityId, calendarId);

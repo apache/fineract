@@ -74,7 +74,7 @@ public class NotesApiResource {
 
         if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
 
-        this.context.authenticatedUser().validateHasReadPermission(getResourceNameForPermissions(noteType));
+        this.context.authenticatedUser().validateHasReadPermission(getResourceDetails(noteType, resourceId).entityName());
 
         final Integer noteTypeId = noteType.getValue();
 
@@ -95,7 +95,7 @@ public class NotesApiResource {
 
         if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
 
-        this.context.authenticatedUser().validateHasReadPermission(getResourceNameForPermissions(noteType));
+        this.context.authenticatedUser().validateHasReadPermission(getResourceDetails(noteType, resourceId).entityName());
 
         final Integer noteTypeId = noteType.getValue();
 
@@ -115,8 +115,8 @@ public class NotesApiResource {
 
         if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
 
-        final String resourceNameForPermissions = getResourceNameForPermissions(noteType);
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createNote(resourceNameForPermissions, resourceType, resourceId)
+        final CommandWrapper resourceDetails = getResourceDetails(noteType, resourceId);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createNote(resourceDetails, resourceType, resourceId)
                 .withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -135,10 +135,10 @@ public class NotesApiResource {
 
         if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
 
-        final String resourceNameForPermissions = getResourceNameForPermissions(noteType);
+        final CommandWrapper resourceDetails = getResourceDetails(noteType, resourceId);
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder()
-                .updateNote(resourceNameForPermissions, resourceType, resourceId, noteId).withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateNote(resourceDetails, resourceType, resourceId, noteId)
+                .withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -156,38 +156,46 @@ public class NotesApiResource {
 
         if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
 
-        final String resourceNameForPermissions = getResourceNameForPermissions(noteType);
+        final CommandWrapper resourceDetails = getResourceDetails(noteType, resourceId);
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteNote(resourceNameForPermissions, resourceType, resourceId,
-                noteId).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteNote(resourceDetails, resourceType, resourceId, noteId)
+                .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
 
-    private String getResourceNameForPermissions(final NoteType type) {
+    private CommandWrapper getResourceDetails(final NoteType type, final Long resourceId) {
+        CommandWrapperBuilder resourceDetails = new CommandWrapperBuilder();
         String resourceNameForPermissions = "INVALIDNOTE";
         switch (type) {
             case CLIENT:
                 resourceNameForPermissions = "CLIENTNOTE";
+                resourceDetails.withClientId(resourceId);
             break;
             case LOAN:
                 resourceNameForPermissions = "LOANNOTE";
+                resourceDetails.withLoanId(resourceId);
             break;
             case LOAN_TRANSACTION:
                 resourceNameForPermissions = "LOANTRANSACTIONNOTE";
+                // updating loanId, to distinguish saving transaction note and loan transaction note as we are using subEntityId for both.
+                resourceDetails.withLoanId(resourceId);
+                resourceDetails.withSubEntityId(resourceId);
             break;
             case SAVING_ACCOUNT:
                 resourceNameForPermissions = "SAVINGNOTE";
+                resourceDetails.withSavingsId(resourceId);
             break;
             case GROUP:
                 resourceNameForPermissions = "GROUPNOTE";
+                resourceDetails.withGroupId(resourceId);
             break;
 
         }
 
-        return resourceNameForPermissions;
+        return resourceDetails.withEntityName(resourceNameForPermissions).build();
     }
 
 }

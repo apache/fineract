@@ -27,6 +27,6 @@ public class UpdateCodeValueCommandHandler implements NewCommandSourceHandler {
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.updateCodeValue(command.entityId(), command);
+        return this.writePlatformService.updateCodeValue(command.subentityId(), command);
     }
 }

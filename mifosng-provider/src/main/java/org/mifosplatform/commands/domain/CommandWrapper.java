@@ -21,12 +21,8 @@ public class CommandWrapper {
     private final Long subentityId;
     private final String href;
     private final String json;
-    private final Long codeId;
     private final String transactionId;
-    private final String supportedEntityType;
-    private final Long supportedEntityId;
     private final Long productId;
-    private Long templateId;
 
     public static CommandWrapper wrap(final String actionName, final String entityName, final Long resourceId, final Long subresourceId) {
         return new CommandWrapper(null, actionName, entityName, resourceId, subresourceId, null, null);
@@ -39,9 +35,9 @@ public class CommandWrapper {
 
     public static CommandWrapper fromExistingCommand(final Long commandId, final String actionName, final String entityName,
             final Long resourceId, final Long subresourceId, final String resourceGetUrl, final Long productId, final Long officeId,
-            final Long groupId, final Long clientId, final Long loanId, final Long savingsId) {
+            final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId) {
         return new CommandWrapper(commandId, actionName, entityName, resourceId, subresourceId, resourceGetUrl, productId, officeId,
-                groupId, clientId, loanId, savingsId);
+                groupId, clientId, loanId, savingsId, transactionId);
     }
 
     private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
@@ -57,9 +53,6 @@ public class CommandWrapper {
         this.taskPermissionName = actionName + "_" + entityName;
         this.entityId = resourceId;
         this.subentityId = subresourceId;
-        this.codeId = null;
-        this.supportedEntityType = null;
-        this.supportedEntityId = null;
         this.href = resourceGetUrl;
         this.json = null;
         this.transactionId = null;
@@ -67,9 +60,8 @@ public class CommandWrapper {
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
-            final String actionName, final String entityName, final Long entityId, final Long subentityId, final Long codeId,
-            final String supportedEntityType, final Long supportedEntityId, final String href, final String json,
-            final String transactionId, final Long productId, final Long templateId) {
+            final String actionName, final String entityName, final Long entityId, final Long subentityId, final String href,
+            final String json, final String transactionId, final Long productId) {
         this.commandId = null;
         this.officeId = officeId;
         this.groupId = groupId;
@@ -81,19 +73,15 @@ public class CommandWrapper {
         this.taskPermissionName = actionName + "_" + entityName;
         this.entityId = entityId;
         this.subentityId = subentityId;
-        this.codeId = codeId;
-        this.supportedEntityType = supportedEntityType;
-        this.supportedEntityId = supportedEntityId;
         this.href = href;
         this.json = json;
         this.transactionId = transactionId;
         this.productId = productId;
-        this.templateId = templateId;
     }
 
     private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
             final Long subresourceId, final String resourceGetUrl, final Long productId, final Long officeId, final Long groupId,
-            final Long clientId, final Long loanId, final Long savingsId) {
+            final Long clientId, final Long loanId, final Long savingsId, final String transactionId) {
 
         this.commandId = commandId;
         this.officeId = officeId;
@@ -106,12 +94,9 @@ public class CommandWrapper {
         this.taskPermissionName = actionName + "_" + entityName;
         this.entityId = resourceId;
         this.subentityId = subresourceId;
-        this.codeId = null;
-        this.supportedEntityType = null;
-        this.supportedEntityId = null;
         this.href = resourceGetUrl;
         this.json = null;
-        this.transactionId = null;
+        this.transactionId = transactionId;
         this.productId = productId;
     }
 
@@ -159,10 +144,6 @@ public class CommandWrapper {
         return this.taskPermissionName;
     }
 
-    public Long getCodeId() {
-        return this.codeId;
-    }
-
     public String getHref() {
         return this.href;
     }
@@ -173,10 +154,6 @@ public class CommandWrapper {
 
     public String getTransactionId() {
         return this.transactionId;
-    }
-
-    public Long getTemplateId() {
-        return this.templateId;
     }
 
     public String getEntityName() {
@@ -205,14 +182,6 @@ public class CommandWrapper {
 
     public Long getSavingsId() {
         return this.savingsId;
-    }
-
-    public Long getSupportedEntityId() {
-        return this.supportedEntityId;
-    }
-
-    public String getSupportedEntityType() {
-        return this.supportedEntityType;
     }
 
     public Long getProductId() {

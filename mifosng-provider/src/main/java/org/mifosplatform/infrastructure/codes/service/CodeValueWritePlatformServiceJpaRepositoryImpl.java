@@ -59,7 +59,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
-            final Long codeId = command.getCodeId();
+            final Long codeId = command.entityId();
             final Code code = this.codeRepository.findOne(codeId);
             final CodeValue codeValue = CodeValue.fromJson(code, command);
             this.codeValueRepository.save(codeValue);
