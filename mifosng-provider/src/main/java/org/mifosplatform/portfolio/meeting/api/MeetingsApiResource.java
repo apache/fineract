@@ -37,6 +37,7 @@ import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
+import org.mifosplatform.portfolio.calendar.exception.CalendarEntityTypeNotSupportedException;
 import org.mifosplatform.portfolio.calendar.service.CalendarReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
@@ -163,7 +164,11 @@ public class MeetingsApiResource {
     public String createMeeting(@PathParam("entityType") final String entityType, @PathParam("entityId") final Long entityId,
             final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createMeeting(entityType, entityId)
+        final CalendarEntityType calendarEntityType = CalendarEntityType.getEntityType(entityType);
+        if (calendarEntityType == null) { throw new CalendarEntityTypeNotSupportedException(entityType); }
+
+        final CommandWrapper resourceDetails = getResourceDetails(calendarEntityType, entityId);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createMeeting(resourceDetails, entityType, entityId)
                 .withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -226,4 +231,26 @@ public class MeetingsApiResource {
     private boolean is(final String commandParam, final String commandValue) {
         return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
+
+    private CommandWrapper getResourceDetails(final CalendarEntityType type, final Long entityId) {
+        CommandWrapperBuilder resourceDetails = new CommandWrapperBuilder();
+        switch (type) {
+            case CENTERS:
+                resourceDetails.withGroupId(entityId);
+            break;
+            case CLIENTS:
+                resourceDetails.withClientId(entityId);
+            break;
+            case GROUPS:
+                resourceDetails.withGroupId(entityId);
+            break;
+            case LOANS:
+                resourceDetails.withLoanId(entityId);
+            break;
+            case INVALID:
+            break;
+        }
+        return resourceDetails.build();
+    }
+
 }

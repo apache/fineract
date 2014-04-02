@@ -34,6 +34,10 @@ public enum NoteType {
         return this.code;
     }
 
+    public String getApiUrl() {
+        return this.apiUrl;
+    }
+
     private static final Map<Integer, NoteType> intToEnumMap = new HashMap<Integer, NoteType>();
     private static int minValue;
     private static int maxValue;

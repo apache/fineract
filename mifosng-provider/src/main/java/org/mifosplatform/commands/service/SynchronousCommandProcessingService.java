@@ -69,7 +69,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         }
         commandSourceResult.updateResourceId(result.resourceId());
         commandSourceResult.updateForAudit(result.getOfficeId(), result.getGroupId(), result.getClientId(), result.getLoanId(),
-                result.getSavingsId(), result.getProductId());
+                result.getSavingsId(), result.getProductId(), result.getTransactionId());
 
         String changesOnlyJson = null;
         if (result.hasChanges()) {
@@ -85,7 +85,21 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             this.commandSourceRepository.save(commandSourceResult);
         }
 
-        if ((rollbackTransaction || result.isRollbackTransaction()) && !isApprovedByChecker) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(commandSourceResult); }
+        if ((rollbackTransaction || result.isRollbackTransaction()) && !isApprovedByChecker) {
+            /*
+             * JournalEntry will generate a new transactionId every time.
+             * Updating the transactionId with old transactionId, because as
+             * there are no entries are created with new transactionId, will
+             * throw an error when checker approves the transaction
+             */
+            commandSourceResult.updateTransaction(command.getTransactionId());
+            /*
+             * Update CommandSource json data with JsonCommand json data, line
+             * 77 and 81 may update the json data
+             */
+            commandSourceResult.updateJsonTo(command.json());
+            throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(commandSourceResult);
+        }
         result.setRollbackTransaction(null);
         return result;
     }

@@ -57,7 +57,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
     private CommandProcessingResult createClientNote(final JsonCommand command) {
 
-        final Long resourceId = command.getSupportedEntityId();
+        final Long resourceId = command.getClientId();
 
         final Client client = this.clientRepository.findOneWithNotFoundDetection(resourceId);
         if (client == null) { throw new ClientNotFoundException(resourceId); }
@@ -85,7 +85,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
     private CommandProcessingResult createGroupNote(final JsonCommand command) {
 
-        final Long resourceId = command.getSupportedEntityId();
+        final Long resourceId = command.getGroupId();
 
         final Group group = this.groupRepository.findOne(resourceId);
         if (group == null) { throw new GroupNotFoundException(resourceId); }
@@ -103,7 +103,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
     private CommandProcessingResult createLoanNote(final JsonCommand command) {
 
-        final Long resourceId = command.getSupportedEntityId();
+        final Long resourceId = command.getLoanId();
 
         final Loan loan = this.loanRepository.findOne(resourceId);
         if (loan == null) { throw new LoanNotFoundException(resourceId); }
@@ -125,7 +125,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
     private CommandProcessingResult createLoanTransactionNote(final JsonCommand command) {
 
-        final Long resourceId = command.getSupportedEntityId();
+        final Long resourceId = command.subentityId();
 
         final LoanTransaction loanTransaction = this.loanTransactionRepository.findOne(resourceId);
         if (loanTransaction == null) { throw new LoanTransactionNotFoundException(resourceId); }
@@ -173,7 +173,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         this.fromApiJsonDeserializer.validateNote(command.json());
 
-        final String resourceUrl = command.getSupportedEntityType();
+        final String resourceUrl = getResourceUrlFromCommand(command); //command.getSupportedEntityType();
         final NoteType type = NoteType.fromApiUrl(resourceUrl);
         switch (type) {
             case CLIENT: {
@@ -197,13 +197,36 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
     }
 
+    private String getResourceUrlFromCommand(JsonCommand command) {
+
+        final String resourceUrl;
+
+        if (command.getClientId() != null) {
+            resourceUrl = NoteType.CLIENT.getApiUrl();
+        } else if (command.getGroupId() != null) {
+            resourceUrl = NoteType.GROUP.getApiUrl();
+        } else if (command.getLoanId() != null) {
+            if (command.subentityId() != null) {
+                resourceUrl = NoteType.LOAN_TRANSACTION.getApiUrl();
+            } else {
+                resourceUrl = NoteType.LOAN.getApiUrl();
+            }
+        } else if (command.getSavingsId() != null) {
+            //TODO: SAVING_TRANSACTION type need to be add.
+            resourceUrl = NoteType.SAVING_ACCOUNT.getApiUrl();
+        } else {
+            resourceUrl = "";
+        }
+
+        return resourceUrl;
+    }
+
     private CommandProcessingResult updateClientNote(final JsonCommand command) {
 
-        final Long resourceId = command.getSupportedEntityId();
+        final Long resourceId = command.getClientId();
         final Long noteId = command.entityId();
-        final String resourceUrl = command.getSupportedEntityType();
 
-        final NoteType type = NoteType.fromApiUrl(resourceUrl);
+        final NoteType type = NoteType.CLIENT;
 
         final Client client = this.clientRepository.findOneWithNotFoundDetection(resourceId);
 
@@ -227,11 +250,10 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
     private CommandProcessingResult updateGroupNote(final JsonCommand command) {
 
-        final Long resourceId = command.getSupportedEntityId();
+        final Long resourceId = command.getGroupId();
         final Long noteId = command.entityId();
-        final String resourceUrl = command.getSupportedEntityType();
 
-        final NoteType type = NoteType.fromApiUrl(resourceUrl);
+        final NoteType type = NoteType.GROUP;
 
         final Group group = this.groupRepository.findOne(resourceId);
         if (group == null) { throw new GroupNotFoundException(resourceId); }
@@ -255,11 +277,10 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
     private CommandProcessingResult updateLoanNote(final JsonCommand command) {
 
-        final Long resourceId = command.getSupportedEntityId();
+        final Long resourceId = command.getLoanId();
         final Long noteId = command.entityId();
-        final String resourceUrl = command.getSupportedEntityType();
 
-        final NoteType type = NoteType.fromApiUrl(resourceUrl);
+        final NoteType type = NoteType.LOAN;
 
         final Loan loan = this.loanRepository.findOne(resourceId);
         if (loan == null) { throw new LoanNotFoundException(resourceId); }
@@ -280,11 +301,10 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
     private CommandProcessingResult updateLoanTransactionNote(final JsonCommand command) {
 
-        final Long resourceId = command.getSupportedEntityId();
+        final Long resourceId = command.subentityId();
         final Long noteId = command.entityId();
-        final String resourceUrl = command.getSupportedEntityType();
 
-        final NoteType type = NoteType.fromApiUrl(resourceUrl);
+        final NoteType type = NoteType.LOAN_TRANSACTION;
 
         final LoanTransaction loanTransaction = this.loanTransactionRepository.findOne(resourceId);
         if (loanTransaction == null) { throw new LoanTransactionNotFoundException(resourceId); }
@@ -346,7 +366,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         this.fromApiJsonDeserializer.validateNote(command.json());
 
-        final String resourceUrl = command.getSupportedEntityType();
+        final String resourceUrl = getResourceUrlFromCommand(command); //command.getSupportedEntityType();
         final NoteType type = NoteType.fromApiUrl(resourceUrl);
 
         switch (type) {
@@ -383,25 +403,29 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
     }
 
     private Note getNoteForDelete(final JsonCommand command) {
-        final String resourceUrl = command.getSupportedEntityType();
-        final Long resourceId = command.getSupportedEntityId();
+        final String resourceUrl = getResourceUrlFromCommand(command);// command.getSupportedEntityType();
         final Long noteId = command.entityId();
         final NoteType type = NoteType.fromApiUrl(resourceUrl);
+        Long resourceId = null;
         Note noteForUpdate = null;
         switch (type) {
             case CLIENT: {
+                resourceId = command.getClientId();
                 noteForUpdate = this.noteRepository.findByClientIdAndId(resourceId, noteId);
             }
             break;
             case GROUP: {
+                resourceId = command.getGroupId();
                 noteForUpdate = this.noteRepository.findByGroupIdAndId(resourceId, noteId);
             }
             break;
             case LOAN: {
+                resourceId = command.getLoanId();
                 noteForUpdate = this.noteRepository.findByLoanIdAndId(resourceId, noteId);
             }
             break;
             case LOAN_TRANSACTION: {
+                resourceId = command.subentityId();
                 noteForUpdate = this.noteRepository.findByLoanTransactionIdAndId(resourceId, noteId);
             }
             break;
