@@ -47,7 +47,7 @@ public class GlobalConfigurationTest {
                 configId.toString());
         Assert.assertNotNull(configDataBefore);
 
-        Integer value = Utils.randomValueGenerator(1, 5);
+        Integer value = (Integer) configDataBefore.get("value") + 1;
 
         configId = this.globalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec,
                 configId.toString(), value.toString());
@@ -83,21 +83,26 @@ public class GlobalConfigurationTest {
     public void testGlobalConfigurationIsCacheEnabled() {
         this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
 
-        // Retrieving Is Cache Enabled Global Configuration details
-        final ArrayList<HashMap> isCacheGlobalConfig = this.globalConfigurationHelper.getGlobalConfigurationIsCacheEnabled(
-                this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(isCacheGlobalConfig);
-        Integer cacheType = Utils.randomValueGenerator(0, 1);
-        Boolean enabled = (Boolean) isCacheGlobalConfig.get(cacheType).get("enabled");
+        for (Integer cacheType = 1; cacheType <= 2; cacheType++) {
+            // Retrieving Is Cache Enabled Global Configuration details
+            final ArrayList<HashMap> isCacheGlobalConfig = this.globalConfigurationHelper.getGlobalConfigurationIsCacheEnabled(
+                    this.requestSpec, this.responseSpec);
+            Assert.assertNotNull(isCacheGlobalConfig);
+            HashMap cacheTypeAsHashMap = (HashMap) isCacheGlobalConfig.get(cacheType - 1).get("cacheType");
+            String cacheTypeCode = (String) cacheTypeAsHashMap.get("value");
+            Boolean enabled = (Boolean) isCacheGlobalConfig.get(cacheType - 1).get("enabled");
 
-        if (cacheType == 0 && enabled == true) {
-            cacheType = 1;
-        } else if (cacheType == 1 && enabled == true) {
-            cacheType = 0;
+            Integer cacheTypeId = (Integer) cacheTypeAsHashMap.get("id");
+
+            if (cacheTypeCode.compareTo("No cache") == 0 && enabled == true) {
+                cacheTypeId += 1;
+            } else if (cacheTypeCode.compareTo("Single node") == 0 && enabled == true) {
+                cacheTypeId -= 1;
+            }
+
+            HashMap changes = this.globalConfigurationHelper.updateIsCacheEnabledForGlobalConfiguration(this.requestSpec,
+                    this.responseSpec, cacheTypeId.toString());
+            Assert.assertEquals("Verifying Is Cache Enabled Global Config after Updation", cacheTypeId, changes.get("cacheType"));
         }
-        cacheType += 1;
-        HashMap changes = this.globalConfigurationHelper.updateIsCacheEnabledForGlobalConfiguration(this.requestSpec, this.responseSpec,
-                cacheType.toString());
-        Assert.assertEquals("Verifying Is Cache Enabled Global Config after Updation", cacheType, changes.get("cacheType"));
     }
 }

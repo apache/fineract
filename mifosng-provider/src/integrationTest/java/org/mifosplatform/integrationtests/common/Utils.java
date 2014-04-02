@@ -22,8 +22,8 @@ import com.jayway.restassured.specification.ResponseSpecification;
 public class Utils {
 
     public static final String TENANT_IDENTIFIER = "tenantIdentifier=default";
-    
-    private static final String LOGIN_URL = "/mifosng-provider/api/v1/authentication?username=mifos&password=password&"+TENANT_IDENTIFIER;
+
+    private static final String LOGIN_URL = "/mifosng-provider/api/v1/authentication?username=mifos&password=password&" + TENANT_IDENTIFIER;
 
     public static void initializeRESTAssured() {
         RestAssured.baseURI = "https://localhost";
@@ -57,6 +57,7 @@ public class Utils {
             final String postURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().post(postURL)
                 .andReturn().asString();
+        if (jsonAttributeToGetBack == null) { return (T) json; }
         return (T) from(json).get(jsonAttributeToGetBack);
     }
 
@@ -103,10 +104,5 @@ public class Utils {
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
         return randomStringGenerator(prefix, lenOfRandomSuffix);
     }
-    
-    public static int randomValueGenerator(int minValue, int maxValue) {
-        Random randValue = new Random();
-        int randomNum = randValue.nextInt((maxValue - minValue) + 1) + minValue;
-        return randomNum;
-    }
+
 }

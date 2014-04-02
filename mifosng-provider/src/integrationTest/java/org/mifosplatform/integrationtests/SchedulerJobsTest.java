@@ -15,11 +15,12 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
-@SuppressWarnings({ "unused", "rawtypes", "unchecked", "static-access" })
+@SuppressWarnings({ "rawtypes", "unchecked", "static-access" })
 public class SchedulerJobsTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
+    private ResponseSpecification responseSpecForSchedulerJob;
     private SchedulerJobHelper schedulerJobHelper;
 
     @Before
@@ -27,35 +28,62 @@ public class SchedulerJobsTest {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("X-Mifos-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.responseSpecForSchedulerJob = new ResponseSpecBuilder().expectStatusCode(202).build();
     }
 
     @Test
     public void testSchedulerJobs() {
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
 
+        // Retrieving All Scheduler Jobs
         ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(allSchedulerJobsData);
 
-        Integer jobId = Utils.randomValueGenerator(1, 9);
-
-        HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-        Assert.assertNotNull(schedulerJob);
-
-        Boolean active = (Boolean) schedulerJob.get("active");
-
-        if (active == true) {
-            active = false;
-        } else {
-            active = true;
-        }
-
-        HashMap changes = this.schedulerJobHelper.updateSchedulerJob(this.requestSpec, this.responseSpec, jobId.toString(),
-                active.toString());
-        Assert.assertEquals("Verifying Scheduler Job Updation", active, changes.get("active"));
-
+        // Retrieving Status of Scheduler
         HashMap schedulerStatus = this.schedulerJobHelper.getSchedulerStatus(this.requestSpec, this.responseSpec);
         Boolean status = (Boolean) schedulerStatus.get("active");
+        if (status == true) {
+            this.schedulerJobHelper.updateSchedulerStatus(this.requestSpec, this.responseSpecForSchedulerJob, "stop");
+            schedulerStatus = this.schedulerJobHelper.getSchedulerStatus(this.requestSpec, this.responseSpec);
+            // Verifying Status of the Scheduler after updation
+            Assert.assertEquals("Verifying Scheduler Job Status", false, schedulerStatus.get("active"));
+        } else {
+            this.schedulerJobHelper.updateSchedulerStatus(this.requestSpec, this.responseSpecForSchedulerJob, "start");
+            schedulerStatus = this.schedulerJobHelper.getSchedulerStatus(this.requestSpec, this.responseSpec);
+            // Verifying Status of the Scheduler after updation
+            Assert.assertEquals("Verifying Scheduler Job Status", true, schedulerStatus.get("active"));
+        }
+
+        for (Integer jobId = 1; jobId <= 9; jobId++) {
+
+            // Retrieving Scheduler Job by ID
+            HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+            Assert.assertNotNull(schedulerJob);
+
+            Boolean active = (Boolean) schedulerJob.get("active");
+
+            if (active == true) {
+                active = false;
+            } else {
+                active = true;
+            }
+
+            // Updating Scheduler Job
+            HashMap changes = this.schedulerJobHelper.updateSchedulerJob(this.requestSpec, this.responseSpec, jobId.toString(),
+                    active.toString());
+            // Verifying Scheduler Job updation
+            Assert.assertEquals("Verifying Scheduler Job Updation", active, changes.get("active"));
+
+            // Executing Scheduler Job
+            this.schedulerJobHelper.runSchedulerJob(this.requestSpec, this.responseSpecForSchedulerJob, jobId.toString());
+            ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
+                    jobId.toString());
+            // Verifying the Status of the Recently executed Scheduler Job
+            Assert.assertEquals("Verifying Last Scheduler Job Status", "success",
+                    jobHistoryData.get(((jobHistoryData.size()) - 1)).get("status"));
+        }
 
     }
 }
