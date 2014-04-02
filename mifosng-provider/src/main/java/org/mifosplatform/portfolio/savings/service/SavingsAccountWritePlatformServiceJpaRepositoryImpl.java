@@ -309,25 +309,27 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Transactional
     private void postInterest(final SavingsAccount account) {
-        final Set<Long> existingTransactionIds = new HashSet<Long>();
-        final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
-        updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
-        final LocalDate today = DateUtils.getLocalDateOfTenant();
-        final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
+        if (account.getNominalAnnualInterestRate().compareTo(BigDecimal.ZERO) == 1) {
+            final Set<Long> existingTransactionIds = new HashSet<Long>();
+            final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
+            updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
+            final LocalDate today = DateUtils.getLocalDateOfTenant();
+            final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
 
-        account.postInterest(mc, today);
+            account.postInterest(mc, today);
 
-        // for generating transaction id's
-        List<SavingsAccountTransaction> transactions = account.getTransactions();
-        for (SavingsAccountTransaction accountTransaction : transactions) {
-            if (accountTransaction.getId() == null) {
-                this.savingsAccountTransactionRepository.save(accountTransaction);
+            // for generating transaction id's
+            List<SavingsAccountTransaction> transactions = account.getTransactions();
+            for (SavingsAccountTransaction accountTransaction : transactions) {
+                if (accountTransaction.getId() == null) {
+                    this.savingsAccountTransactionRepository.save(accountTransaction);
+                }
             }
+
+            this.savingAccountRepository.save(account);
+
+            postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
         }
-
-        this.savingAccountRepository.save(account);
-
-        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
     }
 
     @CronTarget(jobName = JobName.POST_INTEREST_FOR_SAVINGS)

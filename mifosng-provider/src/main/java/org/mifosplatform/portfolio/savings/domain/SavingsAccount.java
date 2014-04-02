@@ -1164,6 +1164,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return this.client;
     }
 
+    public BigDecimal getNominalAnnualInterestRate() {
+        return this.nominalAnnualInterestRate;
+    }
+
     public Map<String, Object> approveApplication(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();

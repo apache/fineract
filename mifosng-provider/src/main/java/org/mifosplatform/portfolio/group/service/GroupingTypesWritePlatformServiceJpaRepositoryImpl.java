@@ -159,6 +159,11 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
                 }
             }
+            
+            if (!newGroup.isCenter() && newGroup.hasActiveClients()) {
+                final CommandWrapper commandWrapper = new CommandWrapperBuilder().associateClientsToGroup(newGroup.getId()).build();
+                rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
+            }
 
             // pre-save to generate id for use in group hierarchy
             this.groupRepository.save(newGroup);
