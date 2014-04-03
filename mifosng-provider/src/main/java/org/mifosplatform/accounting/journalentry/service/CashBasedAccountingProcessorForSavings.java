@@ -86,9 +86,12 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
              * Applications
              **/
             else if (savingsTransactionDTO.getTransactionType().isInterestPosting()) {
-                this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
-                        CASH_ACCOUNTS_FOR_SAVINGS.INTEREST_ON_SAVINGS, CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL, savingsProductId,
-                        paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
+                //Post journal entry if earned interest amount is greater than zero
+                if (savingsTransactionDTO.getAmount().compareTo(BigDecimal.ZERO) == 1) {
+                    this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
+                            CASH_ACCOUNTS_FOR_SAVINGS.INTEREST_ON_SAVINGS, CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL, savingsProductId,
+                            paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
+                }
             }
 
             /** Handle Fees Deductions and reversals of Fees Deductions **/
