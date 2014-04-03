@@ -37,10 +37,6 @@ public class SchedulerJobsTest {
     public void testSchedulerJobs() {
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
 
-        // Retrieving All Scheduler Jobs
-        ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(allSchedulerJobsData);
-
         // Retrieving Status of Scheduler
         HashMap schedulerStatus = this.schedulerJobHelper.getSchedulerStatus(this.requestSpec, this.responseSpec);
         Boolean status = (Boolean) schedulerStatus.get("active");
@@ -56,7 +52,13 @@ public class SchedulerJobsTest {
             Assert.assertEquals("Verifying Scheduler Job Status", true, schedulerStatus.get("active"));
         }
 
-        for (Integer jobId = 1; jobId <= 9; jobId++) {
+        // Retrieving All Scheduler Jobs
+        ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(allSchedulerJobsData);
+
+        for (Integer jobIndex = 0; jobIndex <= ((allSchedulerJobsData.size()) - 1); jobIndex++) {
+
+            Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
 
             // Retrieving Scheduler Job by ID
             HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
@@ -86,4 +88,5 @@ public class SchedulerJobsTest {
         }
 
     }
+
 }
