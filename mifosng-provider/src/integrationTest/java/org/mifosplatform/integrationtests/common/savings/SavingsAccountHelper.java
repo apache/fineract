@@ -353,7 +353,8 @@ public class SavingsAccountHelper {
         map.put("feeOnMonthDay", "15 January");
         map.put("locale", CommonConstants.locale);
         map.put("monthDayFormat", "dd MMMM");
-
+        map.put("dateFormat", "dd MMMM yyy");
+        map.put("dueDate", "10 January 2013");
         String json = new Gson().toJson(map);
         return json;
     }

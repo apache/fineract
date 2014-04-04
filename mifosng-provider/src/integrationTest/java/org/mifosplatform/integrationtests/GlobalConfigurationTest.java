@@ -83,20 +83,26 @@ public class GlobalConfigurationTest {
     public void testGlobalConfigurationIsCacheEnabled() {
         this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
 
-        for (Integer cacheType = 1; cacheType <= 2; cacheType++) {
-            // Retrieving Is Cache Enabled Global Configuration details
-            final ArrayList<HashMap> isCacheGlobalConfig = this.globalConfigurationHelper.getGlobalConfigurationIsCacheEnabled(
+     // Retrieving Is Cache Enabled Global Configuration details
+        ArrayList<HashMap> isCacheGlobalConfig = this.globalConfigurationHelper.getGlobalConfigurationIsCacheEnabled(
+                this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(isCacheGlobalConfig);
+
+        for (Integer cacheType = 0; cacheType <= ((isCacheGlobalConfig.size()) - 1); cacheType++) {
+
+         // Retrieving Is Cache Enabled Global Configuration details
+            isCacheGlobalConfig = this.globalConfigurationHelper.getGlobalConfigurationIsCacheEnabled(
                     this.requestSpec, this.responseSpec);
             Assert.assertNotNull(isCacheGlobalConfig);
-            HashMap cacheTypeAsHashMap = (HashMap) isCacheGlobalConfig.get(cacheType - 1).get("cacheType");
-            String cacheTypeCode = (String) cacheTypeAsHashMap.get("value");
-            Boolean enabled = (Boolean) isCacheGlobalConfig.get(cacheType - 1).get("enabled");
-
+            
+            HashMap cacheTypeAsHashMap = (HashMap) isCacheGlobalConfig.get(cacheType).get("cacheType");
             Integer cacheTypeId = (Integer) cacheTypeAsHashMap.get("id");
+            String cacheTypeValue = (String) cacheTypeAsHashMap.get("value");
+            Boolean enabled = (Boolean) isCacheGlobalConfig.get(cacheType).get("enabled");
 
-            if (cacheTypeCode.compareTo("No cache") == 0 && enabled == true) {
+            if (cacheTypeValue.compareTo("No cache") == 0 && enabled == true) {
                 cacheTypeId += 1;
-            } else if (cacheTypeCode.compareTo("Single node") == 0 && enabled == true) {
+            } else if (cacheTypeValue.compareTo("Single node") == 0 && enabled == true) {
                 cacheTypeId -= 1;
             }
 
