@@ -231,6 +231,11 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         if (StringUtils.isNotBlank(extraCriteria.toString())) {
             extraCriteria.delete(0, 4);
         }
+        
+        final Long staffId = searchCriteria.getStaffId();
+        if (staffId != null) {
+            extraCriteria.append(" and g.staff_id = ").append(staffId);
+        }
 
         return extraCriteria.toString();
     }

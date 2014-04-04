@@ -20,10 +20,13 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.data.PaginationParameters;
 import org.mifosplatform.infrastructure.core.data.PaginationParametersDataValidator;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
@@ -126,7 +129,12 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         if (StringUtils.isNotBlank(extraCriteria.toString())) {
             extraCriteria.delete(0, 4);
         }
-
+        
+        final Long staffId = searchCriteria.getStaffId();
+        if (staffId != null) {
+            extraCriteria.append(" and g.staff_id = ").append(staffId);
+        }
+        
         return extraCriteria.toString();
     }
 
@@ -501,6 +509,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
     @Override
     public Collection<StaffCenterData> retriveAllCentersByMeetingDate(final Long officeId, final Date meetingDate, final Long staffId) {
+        validateForGenerateCollectionSheet(staffId);
         final CenterCalendarDataMapper centerCalendarMapper = new CenterCalendarDataMapper();
         String sql = centerCalendarMapper.schema();
         Collection<CenterData> centerDataArray = null;
@@ -523,7 +532,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
                 } else {
                     for (StaffCenterData staffCenterData : staffCenterDataArray) {
                         flag = false;
-                        if (staffCenterData.getStaffId() == centerData.staffId()) {
+                        if (staffCenterData.getStaffId().equals(centerData.staffId())) {
                             staffCenterData.getMeetingFallCenters().add(centerData);
                             flag = true;
                             break;
@@ -540,5 +549,16 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             }
         }
         return staffCenterDataArray;
+    }
+    
+    public void validateForGenerateCollectionSheet(final Long staffId) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("productivecollectionsheet");
+        baseDataValidator.reset().parameter("staffId").value(staffId).notNull();
+        
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
+        
     }
 }
