@@ -198,7 +198,7 @@ public class AccountingScenarioIntegrationTest {
                 .withInterestRatePerPeriod(this.LP_INTEREST_RATE).withInterestTypeAsFlatBalance()
                 .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
                 .withExpectedDisbursementDate(this.EXPECTED_DISBURSAL_DATE).withSubmittedOnDate(this.LOAN_APPLICATION_SUBMISSION_DATE)
-                .withLoanType(this.INDIVIDUAL_LOAN).build(clientID.toString(), loanProductID.toString());
+                .withLoanType(this.INDIVIDUAL_LOAN).build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 

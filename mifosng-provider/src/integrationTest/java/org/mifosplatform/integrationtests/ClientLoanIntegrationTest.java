@@ -83,7 +83,7 @@ public class ClientLoanIntegrationTest {
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
                 .withExpectedDisbursementDate("20 September 2011") //
                 .withSubmittedOnDate("20 September 2011") //
-                .build(clientID.toString(), loanProductID.toString());
+                .build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
