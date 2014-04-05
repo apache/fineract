@@ -118,6 +118,7 @@ public class ChargesHelper {
     public static String getLoanDisbursementJSON() {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("chargeTimeType", CHARGE_DISBURSEMENT_FEE);
+        map.put("chargePaymentMode", ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
         String chargesCreateJson = new Gson().toJson(map);
         System.out.println(chargesCreateJson);
         return chargesCreateJson;
@@ -126,7 +127,18 @@ public class ChargesHelper {
     public static String getLoanSpecifiedDueDateJSON() {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("chargeTimeType", CHARGE_SPECIFIED_DUE_DATE);
+        map.put("chargePaymentMode", ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
         map.put("penalty", ChargesHelper.penalty);
+        String chargesCreateJson = new Gson().toJson(map);
+        System.out.println(chargesCreateJson);
+        return chargesCreateJson;
+    }
+    
+    public static String getLoanSpecifiedDueDateWithAccountTransferJSON() {
+        final HashMap<String, Object> map = populateDefaultsForLoan();
+        map.put("chargeTimeType", CHARGE_SPECIFIED_DUE_DATE);
+        map.put("penalty", ChargesHelper.penalty);
+        map.put("chargePaymentMode", ChargesHelper.CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
         String chargesCreateJson = new Gson().toJson(map);
         System.out.println(chargesCreateJson);
         return chargesCreateJson;
@@ -135,6 +147,7 @@ public class ChargesHelper {
     public static String getLoanInstallmentFeeJSON() {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("chargeTimeType", CHARGE_INSTALLMENT_FEE);
+        map.put("chargePaymentMode", ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
         map.put("penalty", ChargesHelper.penalty);
         String chargesCreateJson = new Gson().toJson(map);
         System.out.println(chargesCreateJson);
@@ -144,6 +157,7 @@ public class ChargesHelper {
     public static String getLoanOverdueFeeJSON() {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("penalty", ChargesHelper.penalty);
+        map.put("chargePaymentMode", ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
         map.put("chargeTimeType", CHARGE_OVERDUE_INSTALLMENT_FEE);
         String chargesCreateJson = new Gson().toJson(map);
         System.out.println(chargesCreateJson);
@@ -156,7 +170,6 @@ public class ChargesHelper {
         map.put("amount", ChargesHelper.amount);
         map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_LOAN);
         map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
-        map.put("chargePaymentMode", ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
         map.put("currencyCode", ChargesHelper.currencyCode);
         map.put("locale", CommonConstants.locale);
         map.put("monthDayFormat", ChargesHelper.monthDayFormat);

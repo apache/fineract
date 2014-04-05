@@ -45,8 +45,8 @@ public class AccountTransferTest {
     public static final String TO_LOAN_ACCOUNT_TYPE = "1";
     public static final String TO_SAVINGS_ACCOUNT_TYPE = "2";
 
-    private final String LOAN_APPROVAL_DATE = "01 March 2013";
-    private final String LOAN_DISBURSAL_DATE = "01 March 2013";
+    public static final String LOAN_APPROVAL_DATE = "01 March 2013";
+    public static final String LOAN_DISBURSAL_DATE = "01 March 2013";
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -330,7 +330,7 @@ public class AccountTransferTest {
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
                 .withExpectedDisbursementDate("10 January 2013") //
                 .withSubmittedOnDate("10 January 2013") //
-                .build(clientID.toString(), loanProductID.toString());
+                .build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 }

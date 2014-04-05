@@ -47,12 +47,16 @@ public class LoanTransactionHelper {
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "repaymentSchedule");
         return (ArrayList) response.get("periods");
     }
-    
-    public HashMap getLoanSummary(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer loanID) {
+
+    public HashMap getLoanSummary(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer loanID) {
         final String URL = "/mifosng-provider/api/v1/loans/" + loanID + "?associations=all&tenantIdentifier=default";
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "summary");
         return response;
+    }
+
+    public ArrayList getLoanCharges(final Integer loanId) {
+        final String GET_LOAN_CHARGES_URL = "/mifosng-provider/api/v1/loans/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL, "");
     }
 
     public HashMap approveLoan(final String approvalDate, final Integer loanID) {
@@ -92,6 +96,13 @@ public class LoanTransactionHelper {
     public HashMap withdrawLoanApplicationByClient(final String date, final Integer loanID) {
         return performLoanTransaction(createLoanOperationURL(WITHDRAW_LOAN_APPLICATION_COMMAND, loanID),
                 getWithdrawLoanApplicationBodyAsJSON(date));
+    }
+
+    public Integer addChargesForLoan(final Integer loanId, final String request) {
+        System.out.println("--------------------------------- ADD CHARGES FOR LOAN --------------------------------");
+        final String ADD_CHARGES_URL = "/mifosng-provider/api/v1/loans/" + loanId + "/charges";
+        final HashMap response = Utils.performServerPost(requestSpec, responseSpec, ADD_CHARGES_URL, request, "");
+        return (Integer) response.get("resourceId");
     }
 
     private String getDisburseLoanAsJSON(final String actualDisbursementDate) {
@@ -149,6 +160,18 @@ public class LoanTransactionHelper {
         map.put("note", " Loan Withdrawn By Client!!!");
         return new Gson().toJson(map);
 
+    }
+
+    public static String getSpecifiedDueDateChargesForLoanAsJSON(final String chargeId) {
+        final HashMap<String, String> map = new HashMap<String, String>();
+        map.put("locale", "en_GB");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("amount", "100");
+        map.put("dueDate", "12 January 2013");
+        map.put("chargeId", chargeId);
+        String json = new Gson().toJson(map);
+        System.out.println(json);
+        return json;
     }
 
     public String getLoanCalculationBodyAsJSON(final String productID) {

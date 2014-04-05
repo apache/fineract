@@ -33,7 +33,7 @@ public class LoanApplicationTestBuilder {
     private String submittedOnDate = "";
     private String loanType = "individual";
 
-    public String build(final String ID, final String loanProductId) {
+    public String build(final String ID, final String loanProductId, final String savingsID) {
 
         final HashMap<String, String> map = new HashMap<String, String>();
         map.put("dateFormat", "dd MMMM yyyy");
@@ -58,6 +58,9 @@ public class LoanApplicationTestBuilder {
         map.put("expectedDisbursementDate", this.expectedDisbursmentDate);
         map.put("submittedOnDate", this.submittedOnDate);
         map.put("loanType", this.loanType);
+        if (savingsID != null) {
+            map.put("linkAccountId", savingsID);
+        }
         return new Gson().toJson(map);
     }
 

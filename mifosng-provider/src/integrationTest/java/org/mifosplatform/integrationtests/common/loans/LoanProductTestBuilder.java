@@ -12,7 +12,7 @@ public class LoanProductTestBuilder {
 
     private static final String LOCALE = "en_GB";
     private static final String DIGITS_AFTER_DECIMAL = "2";
-    private static final String INR = "INR";
+    private static final String USD = "USD";
     private static final String DAYS = "0";
     private static final String WEEK = "1";
     private static final String MONTHS = "2";
@@ -43,7 +43,7 @@ public class LoanProductTestBuilder {
     private String inArrearsTolerance = "0";
     private final String transactionProcessingStrategy = MIFOS_STANDARD_STRATEGY;
     private String accountingRule = NONE;
-    private final String currencyCode = INR;
+    private final String currencyCode = USD;
     private String amortizationType = EQUAL_INSTALLMENTS;
     private String minPrincipal = "1000.00";
     private String maxPrincipal = "100000.00";

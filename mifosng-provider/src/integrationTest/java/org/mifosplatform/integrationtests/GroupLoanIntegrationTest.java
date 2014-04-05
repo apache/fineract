@@ -85,7 +85,7 @@ public class GroupLoanIntegrationTest {
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
                 .withExpectedDisbursementDate("20 September 2011") //
                 .withSubmittedOnDate("20 September 2011") //
-                .withLoanType("group").build(groupID.toString(), loanProductID.toString());
+                .withLoanType("group").build(groupID.toString(), loanProductID.toString(), null);
         System.out.println(loanApplicationJSON);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }

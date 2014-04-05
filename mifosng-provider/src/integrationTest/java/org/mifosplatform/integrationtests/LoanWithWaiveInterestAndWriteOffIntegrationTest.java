@@ -129,7 +129,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod(this.RATE_OF_INTEREST_PER_PERIOD)
                 .withInterestTypeAsFlatBalance().withAmortizationTypeAsEqualInstallments()
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate(this.EXPECTED_DISBURSAL_DATE)
-                .withSubmittedOnDate(this.LOAN_APPLICATION_SUBMISSION_DATE).build(clientID.toString(), loanProductID.toString());
+                .withSubmittedOnDate(this.LOAN_APPLICATION_SUBMISSION_DATE).build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 }
