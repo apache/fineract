@@ -10,7 +10,7 @@ The release artifact (.zip file) has the following structure:
   + mifosplatform-X.Y.Z.RELEASE  ... parent folder which will have the release number on it
   |
   + api-docs ... folder contains html based documentation on the platform API for this release
-  + database ... folder contains database setup and upgrade scripts required for installation
+  + database ... folder contains database setup and upgrade scripts along with sample data required for installation
   + pentahoReports ... folder contains any out-of-the-box reports provided through pentaho
   + apps ... folder contains apps like community app that speak to the platform
   |
@@ -120,8 +120,7 @@ The two ways to get up and running with mifos platform is:
   Upgrading your database in this way is the recommended way as it will upgrade any *tenants* setup in the *mifosplatform-tenants* database but can be disabled by setting the *auto_update* field of the tenant to zero.
   
 #### 2.2.3 Load *mifostenant-default* schema with Sample Data (Optional)
-  Every release ships with sample data (offices, users, customers, loan products, savings products and a chart of accounts)
-  The same can be restored by running the following command
+  Every release ships with sample data (offices, users, customers, loan products, savings products and a chart of accounts). The same can be restored by running the following command
   
    ```
   mysql -uroot -pmysql mifostenant-default < database/migrations/sample_data/load_sample_data.sql
