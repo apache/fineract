@@ -13,6 +13,7 @@ import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidation
 import org.mifosplatform.infrastructure.core.service.RoutingDataSourceServiceFactory;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
+import org.mifosplatform.infrastructure.jobs.exception.JobExecutionException;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountAnnualFeeData;
 import org.mifosplatform.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
@@ -225,23 +226,32 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
     @Override
     @CronTarget(jobName = JobName.PAY_DUE_SAVINGS_CHARGES)
-    public void applyDueChargesForSavings() {
+    public void applyDueChargesForSavings() throws JobExecutionException {
         final Collection<SavingsAccountAnnualFeeData> chargesDueData = this.savingsAccountChargeReadPlatformService
                 .retrieveChargesWithDue();
-        
+        final StringBuilder errorMsg = new StringBuilder();
+
         for (final SavingsAccountAnnualFeeData savingsAccountReference : chargesDueData) {
             try {
-                this.savingsAccountWritePlatformService.applyChargeDue(savingsAccountReference.getId(), savingsAccountReference.getAccountId());
+                this.savingsAccountWritePlatformService.applyChargeDue(savingsAccountReference.getId(),
+                        savingsAccountReference.getAccountId());
             } catch (final PlatformApiDataValidationException e) {
                 final List<ApiParameterError> errors = e.getErrors();
                 for (final ApiParameterError error : errors) {
-                    logger.error("Apply Charges due for savings failed for account:" + savingsAccountReference.getAccountNo() + " with message "
-                            + error.getDeveloperMessage());
+                    logger.error("Apply Charges due for savings failed for account:" + savingsAccountReference.getAccountNo()
+                            + " with message " + error.getDeveloperMessage());
+                    errorMsg.append("Apply Charges due for savings failed for account:").append(savingsAccountReference.getAccountNo())
+                            .append(" with message ").append(error.getDeveloperMessage());
                 }
             }
         }
-        
+
         logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Savings accounts affected by update: " + chargesDueData.size());
+
+        /*
+         * throw exception if any charge payment fails.
+         */
+        if (errorMsg.length() > 0) { throw new JobExecutionException(errorMsg.toString()); }
     }
-   
+
 }

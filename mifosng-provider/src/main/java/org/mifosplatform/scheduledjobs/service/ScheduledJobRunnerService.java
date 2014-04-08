@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.scheduledjobs.service;
 
+import org.mifosplatform.infrastructure.jobs.exception.JobExecutionException;
+
 public interface ScheduledJobRunnerService {
 
     void updateLoanSummaryDetails();
@@ -15,5 +17,5 @@ public interface ScheduledJobRunnerService {
 
     void applyAnnualFeeForSavings();
     
-    void applyDueChargesForSavings();
+    void applyDueChargesForSavings() throws JobExecutionException;
 }
