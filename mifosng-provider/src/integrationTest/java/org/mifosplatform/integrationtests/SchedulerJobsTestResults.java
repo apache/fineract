@@ -13,6 +13,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mifosplatform.integrationtests.common.ClientHelper;
 import org.mifosplatform.integrationtests.common.CommonConstants;
+import org.mifosplatform.integrationtests.common.GlobalConfigurationHelper;
+import org.mifosplatform.integrationtests.common.HolidayHelper;
 import org.mifosplatform.integrationtests.common.SchedulerJobHelper;
 import org.mifosplatform.integrationtests.common.Utils;
 import org.mifosplatform.integrationtests.common.charges.ChargesHelper;
@@ -39,6 +41,8 @@ public class SchedulerJobsTestResults {
     private SchedulerJobHelper schedulerJobHelper;
     private SavingsAccountHelper savingsAccountHelper;
     private LoanTransactionHelper loanTransactionHelper;
+    private HolidayHelper holidayHelper;
+    private GlobalConfigurationHelper globalConfigurationHelper;
 
     @Before
     public void setup() {
@@ -208,7 +212,7 @@ public class SchedulerJobsTestResults {
         final Integer loanProductID = createLoanProduct();
         Assert.assertNotNull(loanProductID);
 
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, savingsId);
+        final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), savingsId.toString());
         Assert.assertNotNull(loanID);
 
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
@@ -270,6 +274,93 @@ public class SchedulerJobsTestResults {
 
     }
 
+    @Test
+    public void testApplyHolidaysToLoansJobOutcome() throws InterruptedException {
+        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        this.holidayHelper = new HolidayHelper(this.requestSpec, this.responseSpec);
+        this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientID);
+
+        Integer holidayId = this.holidayHelper.createHolidays(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(holidayId);
+
+        holidayId = this.holidayHelper.activateHolidays(this.requestSpec, this.responseSpec, holidayId.toString());
+        Assert.assertNotNull(holidayId);
+
+        final Integer loanProductID = createLoanProduct();
+        Assert.assertNotNull(loanProductID);
+
+        final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null);
+        Assert.assertNotNull(loanID);
+
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan(AccountTransferTest.LOAN_APPROVAL_DATE, loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(AccountTransferTest.LOAN_DISBURSAL_DATE, loanID);
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+        // Retrieving All Global Configuration details
+        final ArrayList<HashMap> globalConfig = this.globalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec,
+                this.responseSpec);
+        Assert.assertNotNull(globalConfig);
+
+        // Updating Value for reschedule-repayments-on-holidays Global
+        // Configuration
+        Integer configId = (Integer) globalConfig.get(3).get("id");
+        Assert.assertNotNull(configId);
+
+        HashMap configData = this.globalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
+                configId.toString());
+        Assert.assertNotNull(configData);
+
+        Boolean enabled = (Boolean) globalConfig.get(3).get("enabled");
+
+        if (enabled == false) {
+            enabled = true;
+            configId = this.globalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec,
+                    configId.toString(), enabled);
+        }
+
+        ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(allSchedulerJobsData);
+
+        Integer jobId = (Integer) allSchedulerJobsData.get(4).get("jobId");
+
+        final ArrayList<HashMap> repaymentScheduleDataBeforeJob = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
+                this.responseSpec, loanID);
+
+        // Executing Scheduler Job
+        this.schedulerJobHelper.runSchedulerJob(this.requestSpec, this.responseSpecForSchedulerJob, jobId.toString());
+        ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
+                jobId.toString());
+
+        // Retrieving Scheduler Job by ID
+        HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+        Assert.assertNotNull(schedulerJob);
+
+        // Waiting for Job to complete
+        while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
+            Thread.sleep(120000);
+            schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+            Assert.assertNotNull(schedulerJob);
+            System.out.println("Job is Still Running");
+
+            // Verifying the Status of the Recently executed Scheduler Job
+            Assert.assertEquals("Verifying Last Scheduler Job Status", "success",
+                    jobHistoryData.get(((jobHistoryData.size()) - 1)).get("status"));
+
+            final ArrayList<HashMap> repaymentScheduleDataAfterJob = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
+                    this.responseSpec, loanID);
+        }
+
+    }
+
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String minOpenningBalance) {
         System.out.println("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
@@ -285,7 +376,7 @@ public class SchedulerJobsTestResults {
     private Integer createLoanProduct() {
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("12,000.00") //
+                .withPrincipal("15,000.00") //
                 .withNumberOfRepayments("4") //
                 .withRepaymentAfterEvery("1") //
                 .withRepaymentTypeAsMonth() //
@@ -297,10 +388,10 @@ public class SchedulerJobsTestResults {
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
-    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, final Integer savingsID) {
+    private Integer applyForLoanApplication(final String clientID, final String loanProductID, final String savingsID) {
         System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal("12,000.00") //
+                .withPrincipal("15,000.00") //
                 .withLoanTermFrequency("4") //
                 .withLoanTermFrequencyAsMonths() //
                 .withNumberOfRepayments("4") //
@@ -312,7 +403,7 @@ public class SchedulerJobsTestResults {
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
                 .withExpectedDisbursementDate("10 January 2013") //
                 .withSubmittedOnDate("10 January 2013") //
-                .build(clientID.toString(), loanProductID.toString(), savingsID.toString());
+                .build(clientID, loanProductID, savingsID);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 }
