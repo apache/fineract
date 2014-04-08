@@ -11,7 +11,7 @@ import com.jayway.restassured.specification.RequestSender;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
-@SuppressWarnings({ "unused" })
+@SuppressWarnings({ "unused", "rawtypes" })
 public class HolidayHelper {
 
     private static final String HOLIDAYS_URL = "/mifosng-provider/api/v1/holidays";
@@ -61,6 +61,14 @@ public class HolidayHelper {
     public static Integer activateHolidays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String holidayID) {
         final String ACTIVATE_HOLIDAY_URL = HOLIDAYS_URL + "/" + holidayID + "?command=activate"; 
         return Utils.performServerPost(requestSpec, responseSpec, ACTIVATE_HOLIDAY_URL, getActivateHolidayDataAsJSON(), "resourceId");
+    }
+    
+    public static HashMap getSchedulerJobById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String holidayID) {
+        final String GET_HOLIDAY_BY_ID_URL = HOLIDAYS_URL + "/" + holidayID + "?tenantIdentifier=default";
+        System.out.println("------------------------ RETRIEVING HOLIDAY BY ID -------------------------");
+        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_HOLIDAY_BY_ID_URL, "");
+        return response;
     }
 
 }

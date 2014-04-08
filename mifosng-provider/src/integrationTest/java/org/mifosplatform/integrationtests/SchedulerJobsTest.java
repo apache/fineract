@@ -34,7 +34,7 @@ public class SchedulerJobsTest {
     }
 
     @Test
-    public void testSchedulerJobs() {
+    public void testSchedulerJobs() throws InterruptedException {
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
 
         // Retrieving Status of Scheduler
@@ -80,11 +80,24 @@ public class SchedulerJobsTest {
 
             // Executing Scheduler Job
             this.schedulerJobHelper.runSchedulerJob(this.requestSpec, this.responseSpecForSchedulerJob, jobId.toString());
+
+            // Retrieving Scheduler Job by ID
+            schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+            Assert.assertNotNull(schedulerJob);
+
+            // Waiting for Job to complete
+            while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
+                Thread.sleep(120000);
+                schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+                Assert.assertNotNull(schedulerJob);
+                System.out.println("Job is Still Running");
+            }
             ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
                     jobId.toString());
+
             // Verifying the Status of the Recently executed Scheduler Job
             Assert.assertEquals("Verifying Last Scheduler Job Status", "success",
-                    jobHistoryData.get(((jobHistoryData.size()) - 1)).get("status"));
+                    jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
         }
 
     }
