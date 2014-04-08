@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.common.domain;
 
+
 public enum PeriodFrequencyType {
     DAYS(0, "periodFrequencyType.days"), //
     WEEKS(1, "periodFrequencyType.weeks"), //
@@ -47,5 +48,13 @@ public enum PeriodFrequencyType {
             }
         }
         return repaymentFrequencyType;
+    }
+
+    public boolean isMonthly() {
+        return this.value.equals(PeriodFrequencyType.MONTHS.getValue());
+    }
+
+    public boolean isYearly() {
+        return this.value.equals(PeriodFrequencyType.MONTHS.getValue());
     }
 }

@@ -5,12 +5,12 @@
  */
 package org.mifosplatform.portfolio.account.service;
 
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.fromAccountIdParamName;
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.fromAccountTypeParamName;
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.toAccountIdParamName;
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.toAccountTypeParamName;
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.transferAmountParamName;
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.transferDateParamName;
+import static org.mifosplatform.portfolio.account.AccountDetailConstants.fromAccountIdParamName;
+import static org.mifosplatform.portfolio.account.AccountDetailConstants.fromAccountTypeParamName;
+import static org.mifosplatform.portfolio.account.AccountDetailConstants.toAccountIdParamName;
+import static org.mifosplatform.portfolio.account.AccountDetailConstants.toAccountTypeParamName;
+import static org.mifosplatform.portfolio.account.api.AccountTransfersApiConstants.transferAmountParamName;
+import static org.mifosplatform.portfolio.account.api.AccountTransfersApiConstants.transferDateParamName;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -25,9 +25,12 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.mifosplatform.portfolio.account.data.AccountTransferDTO;
 import org.mifosplatform.portfolio.account.data.AccountTransfersDataValidator;
-import org.mifosplatform.portfolio.account.domain.AccountTransfer;
 import org.mifosplatform.portfolio.account.domain.AccountTransferAssembler;
+import org.mifosplatform.portfolio.account.domain.AccountTransferDetailRepository;
+import org.mifosplatform.portfolio.account.domain.AccountTransferDetails;
 import org.mifosplatform.portfolio.account.domain.AccountTransferRepository;
+import org.mifosplatform.portfolio.account.domain.AccountTransferTransaction;
+import org.mifosplatform.portfolio.account.domain.AccountTransferType;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
@@ -53,13 +56,15 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     private final LoanAssembler loanAccountAssembler;
     private final LoanAccountDomainService loanAccountDomainService;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
+    private final AccountTransferDetailRepository accountTransferDetailRepository;
 
     @Autowired
     public AccountTransfersWritePlatformServiceImpl(final AccountTransfersDataValidator accountTransfersDataValidator,
             final AccountTransferAssembler accountTransferAssembler, final AccountTransferRepository accountTransferRepository,
             final SavingsAccountAssembler savingsAccountAssembler, final SavingsAccountDomainService savingsAccountDomainService,
             final LoanAssembler loanAssembler, final LoanAccountDomainService loanAccountDomainService,
-            final SavingsAccountWritePlatformService savingsAccountWritePlatformService) {
+            final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
+            final AccountTransferDetailRepository accountTransferDetailRepository) {
         this.accountTransfersDataValidator = accountTransfersDataValidator;
         this.accountTransferAssembler = accountTransferAssembler;
         this.accountTransferRepository = accountTransferRepository;
@@ -68,6 +73,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         this.loanAccountAssembler = loanAssembler;
         this.loanAccountDomainService = loanAccountDomainService;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
+        this.accountTransferDetailRepository = accountTransferDetailRepository;
     }
 
     @Transactional
@@ -90,7 +96,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
 
         final PaymentDetail paymentDetail = null;
         Long fromSavingsAccountId = null;
-        Long transferTransactionId = null;
+        Long transferDetailId = null;
         if (isSavingsToSavingsAccountTransfer(fromAccountType, toAccountType)) {
 
             fromSavingsAccountId = command.longValueOfParameterNamed(fromAccountIdParamName);
@@ -105,10 +111,10 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount, fmt,
                     transactionDate, transactionAmount, paymentDetail);
 
-            final AccountTransfer transferTransaction = this.accountTransferAssembler.assembleSavingsToSavingsTransfer(command, withdrawal,
-                    deposit);
-            this.accountTransferRepository.saveAndFlush(transferTransaction);
-            transferTransactionId = transferTransaction.getId();
+            final AccountTransferDetails accountTransferDetails = this.accountTransferAssembler.assembleSavingsToSavingsTransfer(command,
+                    fromSavingsAccount, toSavingsAccount, withdrawal, deposit);
+            this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
+            transferDetailId = accountTransferDetails.getId();
 
         } else if (isSavingsToLoanAccountTransfer(fromAccountType, toAccountType)) {
             //
@@ -124,10 +130,10 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             final LoanTransaction loanRepaymentTransaction = this.loanAccountDomainService.makeRepayment(toLoanAccount,
                     new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, null);
 
-            final AccountTransfer transferTransaction = this.accountTransferAssembler.assembleSavingsToLoanTransfer(command,
+            final AccountTransferDetails accountTransferDetails = this.accountTransferAssembler.assembleSavingsToLoanTransfer(command,
                     fromSavingsAccount, toLoanAccount, withdrawal, loanRepaymentTransaction);
-            this.accountTransferRepository.saveAndFlush(transferTransaction);
-            transferTransactionId = transferTransaction.getId();
+            this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
+            transferDetailId = accountTransferDetails.getId();
 
         } else if (isLoanToSavingsAccountTransfer(fromAccountType, toAccountType)) {
             // FIXME - kw - ADD overpaid loan to savings account transfer
@@ -146,16 +152,16 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount, fmt,
                     transactionDate, transactionAmount, paymentDetail);
 
-            final AccountTransfer transferTransaction = this.accountTransferAssembler.assembleLoanToSavingsTransfer(command,
+            final AccountTransferDetails accountTransferDetails = this.accountTransferAssembler.assembleLoanToSavingsTransfer(command,
                     fromLoanAccount, toSavingsAccount, deposit, loanRefundTransaction);
-            this.accountTransferRepository.saveAndFlush(transferTransaction);
-            transferTransactionId = transferTransaction.getId();
+            this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
+            transferDetailId = accountTransferDetails.getId();
 
         } else {
 
         }
 
-        final CommandProcessingResultBuilder builder = new CommandProcessingResultBuilder().withEntityId(transferTransactionId);
+        final CommandProcessingResultBuilder builder = new CommandProcessingResultBuilder().withEntityId(transferDetailId);
 
         if (fromAccountType.isSavingsAccount()) {
 
@@ -168,7 +174,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     @Override
     @Transactional
     public void reverseTransfersWithFromAccountType(final Long accountNumber, final PortfolioAccountType accountTypeId) {
-        List<AccountTransfer> acccountTransfers = null;
+        List<AccountTransferTransaction> acccountTransfers = null;
         if (accountTypeId.isLoanAccount()) {
             acccountTransfers = this.accountTransferRepository.findByFromLoanId(accountNumber);
         }
@@ -181,7 +187,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     @Override
     @Transactional
     public void reverseAllTransactions(final Long accountId, final PortfolioAccountType accountTypeId) {
-        List<AccountTransfer> acccountTransfers = null;
+        List<AccountTransferTransaction> acccountTransfers = null;
         if (accountTypeId.isLoanAccount()) {
             acccountTransfers = this.accountTransferRepository.findAllByLoanId(accountId);
         }
@@ -193,20 +199,21 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     /**
      * @param acccountTransfers
      */
-    private void undoTransactions(final List<AccountTransfer> acccountTransfers) {
-        for (final AccountTransfer accountTransfer : acccountTransfers) {
+    private void undoTransactions(final List<AccountTransferTransaction> acccountTransfers) {
+        for (final AccountTransferTransaction accountTransfer : acccountTransfers) {
             if (accountTransfer.getFromLoanTransaction() != null) {
                 this.loanAccountDomainService.reverseTransfer(accountTransfer.getFromLoanTransaction());
             } else if (accountTransfer.getToLoanTransaction() != null) {
                 this.loanAccountDomainService.reverseTransfer(accountTransfer.getToLoanTransaction());
             }
             if (accountTransfer.getFromTransaction() != null) {
-                this.savingsAccountWritePlatformService.undoTransaction(accountTransfer.getFromAccount().getId(), accountTransfer
-                        .getFromTransaction().getId(), true);
+                this.savingsAccountWritePlatformService.undoTransaction(accountTransfer.accountTransferDetails().fromSavingsAccount()
+                        .getId(), accountTransfer.getFromTransaction().getId(), true);
             }
             if (accountTransfer.getToSavingsTransaction() != null) {
-                this.savingsAccountWritePlatformService.undoTransaction(accountTransfer.getToSavingsAccount().getId(), accountTransfer
-                        .getToSavingsTransaction().getId(), true);
+                this.savingsAccountWritePlatformService.undoTransaction(
+                        accountTransfer.accountTransferDetails().toSavingsAccount().getId(), accountTransfer.getToSavingsTransaction()
+                                .getId(), true);
             }
             accountTransfer.reverse();
             this.accountTransferRepository.save(accountTransfer);
@@ -217,25 +224,93 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     @Transactional
     public Long transferFunds(final AccountTransferDTO accountTransferDTO) {
         Long transferTransactionId = null;
+        AccountTransferDetails accountTransferDetails = accountTransferDTO.getAccountTransferDetails();
         if (isSavingsToLoanAccountTransfer(accountTransferDTO.getFromAccountType(), accountTransferDTO.getToAccountType())) {
             //
-            final SavingsAccount fromSavingsAccount = this.savingsAccountAssembler.assembleFrom(accountTransferDTO.getFromAccountId());
+            SavingsAccount fromSavingsAccount = null;
+            Loan toLoanAccount = null;
+            if (accountTransferDetails == null) {
+                fromSavingsAccount = this.savingsAccountAssembler.assembleFrom(accountTransferDTO.getFromAccountId());
+                toLoanAccount = this.loanAccountAssembler.assembleFrom(accountTransferDTO.getToAccountId());
+            } else {
+                fromSavingsAccount = accountTransferDetails.fromSavingsAccount();
+                this.savingsAccountAssembler.setHelpers(fromSavingsAccount);
+                toLoanAccount = accountTransferDetails.toLoanAccount();
+                this.loanAccountAssembler.setHelpers(toLoanAccount);
+            }
 
             final SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(fromSavingsAccount,
                     accountTransferDTO.getFmt(), accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
                     accountTransferDTO.getPaymentDetail(), fromSavingsAccount.isWithdrawalFeeApplicableForTransfer());
 
-            final Loan toLoanAccount = this.loanAccountAssembler.assembleFrom(accountTransferDTO.getToAccountId());
+            LoanTransaction loanTransaction = null;
 
-            final LoanTransaction loanRepaymentTransaction = this.loanAccountDomainService.makeChargePayment(toLoanAccount,
-                    accountTransferDTO.getChargeId(), accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
-                    accountTransferDTO.getPaymentDetail(), null, null, accountTransferDTO.getToTransferType(),
-                    accountTransferDTO.getLoanInstallmentNumber());
+            if (AccountTransferType.fromInt(accountTransferDTO.getTransferType()).isChargePayment()) {
+                loanTransaction = this.loanAccountDomainService.makeChargePayment(toLoanAccount, accountTransferDTO.getChargeId(),
+                        accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
+                        accountTransferDTO.getPaymentDetail(), null, null, accountTransferDTO.getToTransferType(),
+                        accountTransferDTO.getLoanInstallmentNumber());
 
-            final AccountTransfer transferTransaction = this.accountTransferAssembler.assembleSavingsToLoanTransfer(accountTransferDTO,
-                    fromSavingsAccount, toLoanAccount, withdrawal, loanRepaymentTransaction);
-            this.accountTransferRepository.saveAndFlush(transferTransaction);
-            transferTransactionId = transferTransaction.getId();
+            } else {
+                loanTransaction = this.loanAccountDomainService.makeRepayment(toLoanAccount, new CommandProcessingResultBuilder(),
+                        accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
+                        accountTransferDTO.getPaymentDetail(), null, null);
+            }
+
+            accountTransferDetails = this.accountTransferAssembler.assembleSavingsToLoanTransfer(accountTransferDTO, fromSavingsAccount,
+                    toLoanAccount, withdrawal, loanTransaction);
+            this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
+            transferTransactionId = accountTransferDetails.getId();
+        } else if (isSavingsToSavingsAccountTransfer(accountTransferDTO.getFromAccountType(), accountTransferDTO.getToAccountType())) {
+
+            SavingsAccount fromSavingsAccount = null;
+            SavingsAccount toSavingsAccount = null;
+            if (accountTransferDetails == null) {
+                fromSavingsAccount = this.savingsAccountAssembler.assembleFrom(accountTransferDTO.getFromAccountId());
+                toSavingsAccount = this.savingsAccountAssembler.assembleFrom(accountTransferDTO.getToAccountId());
+            } else {
+                fromSavingsAccount = accountTransferDetails.fromSavingsAccount();
+                this.savingsAccountAssembler.setHelpers(fromSavingsAccount);
+                toSavingsAccount = accountTransferDetails.toSavingsAccount();
+                this.savingsAccountAssembler.setHelpers(toSavingsAccount);
+            }
+            final SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(fromSavingsAccount,
+                    accountTransferDTO.getFmt(), accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
+                    accountTransferDTO.getPaymentDetail(), fromSavingsAccount.isWithdrawalFeeApplicableForTransfer());
+
+            final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount,
+                    accountTransferDTO.getFmt(), accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
+                    accountTransferDTO.getPaymentDetail());
+
+            accountTransferDetails = this.accountTransferAssembler.assembleSavingsToSavingsTransfer(accountTransferDTO, fromSavingsAccount,
+                    toSavingsAccount, withdrawal, deposit);
+            this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
+            transferTransactionId = accountTransferDetails.getId();
+
+        } else if (isLoanToSavingsAccountTransfer(accountTransferDTO.getFromAccountType(), accountTransferDTO.getToAccountType())) {
+
+            Loan fromLoanAccount = null;
+            SavingsAccount toSavingsAccount = null;
+            if (accountTransferDetails == null) {
+                fromLoanAccount = this.loanAccountAssembler.assembleFrom(accountTransferDTO.getFromAccountId());
+                toSavingsAccount = this.savingsAccountAssembler.assembleFrom(accountTransferDTO.getToAccountId());
+            } else {
+                fromLoanAccount = accountTransferDetails.fromLoanAccount();
+                this.loanAccountAssembler.setHelpers(fromLoanAccount);
+                toSavingsAccount = accountTransferDetails.toSavingsAccount();
+                this.savingsAccountAssembler.setHelpers(toSavingsAccount);
+            }
+            final LoanTransaction loanRefundTransaction = this.loanAccountDomainService.makeRefund(accountTransferDTO.getFromAccountId(),
+                    new CommandProcessingResultBuilder(), accountTransferDTO.getTransactionDate(),
+                    accountTransferDTO.getTransactionAmount(), accountTransferDTO.getPaymentDetail(), null, null);
+
+            final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount,
+                    accountTransferDTO.getFmt(), accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
+                    accountTransferDTO.getPaymentDetail());
+            accountTransferDetails = this.accountTransferAssembler.assembleLoanToSavingsTransfer(accountTransferDTO, fromLoanAccount,
+                    toSavingsAccount, deposit, loanRefundTransaction);
+            this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
+            transferTransactionId = accountTransferDetails.getId();
         }
 
         return transferTransactionId;
@@ -244,7 +319,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     @Override
     @Transactional
     public void updateLoanTransaction(final Long loanTransactionId, final LoanTransaction newLoanTransaction) {
-        final AccountTransfer transferTransaction = this.accountTransferRepository.findByToLoanTransactionId(loanTransactionId);
+        final AccountTransferTransaction transferTransaction = this.accountTransferRepository.findByToLoanTransactionId(loanTransactionId);
         if (transferTransaction != null) {
             transferTransaction.updateToLoanTransaction(newLoanTransaction);
             this.accountTransferRepository.save(transferTransaction);

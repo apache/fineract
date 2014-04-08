@@ -7,7 +7,11 @@ package org.mifosplatform.portfolio.loanaccount.loanschedule.domain;
 
 import java.util.List;
 
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
+import org.joda.time.Months;
+import org.joda.time.Weeks;
+import org.joda.time.Years;
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.holiday.service.HolidayUtil;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
@@ -79,6 +83,45 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             break;
         }
         return dueRepaymentPeriodDate;
+    }
+
+    @Override
+    public Boolean isDateFallsInSchedule(final PeriodFrequencyType frequency, final int repaidEvery, final LocalDate startDate,
+            final LocalDate date) {
+        boolean isScheduledDate = false;
+        switch (frequency) {
+            case DAYS:
+                int diff = Days.daysBetween(startDate, date).getDays();
+                isScheduledDate = (diff % repaidEvery) == 0;
+            break;
+            case WEEKS:
+                int weekDiff =Weeks.weeksBetween(startDate, date).getWeeks();
+                isScheduledDate = (weekDiff % repaidEvery) == 0;
+                if(isScheduledDate){
+                    LocalDate modifiedDate = startDate.plusWeeks(weekDiff);
+                    isScheduledDate = modifiedDate.isEqual(date);
+                }
+            break;
+            case MONTHS:
+                int monthDiff =Months.monthsBetween(startDate, date).getMonths();
+                isScheduledDate = (monthDiff % repaidEvery) == 0;
+                if(isScheduledDate){
+                    LocalDate modifiedDate = startDate.plusMonths(monthDiff);
+                    isScheduledDate = modifiedDate.isEqual(date);
+                }
+            break;
+            case YEARS:
+                int yearDiff =Years.yearsBetween(startDate, date).getYears();
+                isScheduledDate = (yearDiff % repaidEvery) == 0;
+                if(isScheduledDate){
+                    LocalDate modifiedDate = startDate.plusYears(yearDiff);
+                    isScheduledDate = modifiedDate.isEqual(date);
+                }
+            break;
+            case INVALID:
+            break;
+        }
+        return isScheduledDate;
     }
 
     @Override

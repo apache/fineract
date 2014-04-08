@@ -32,7 +32,7 @@ public class CommandWrapperBuilder {
         this.loanId = withLoanId;
         return this;
     }
-    
+
     public CommandWrapperBuilder withSavingsId(final Long withSavingsId) {
         this.savingsId = withSavingsId;
         return this;
@@ -42,17 +42,17 @@ public class CommandWrapperBuilder {
         this.clientId = withClientId;
         return this;
     }
-    
+
     public CommandWrapperBuilder withGroupId(final Long withGroupId) {
         this.groupId = withGroupId;
         return this;
     }
-    
+
     public CommandWrapperBuilder withEntityName(final String withEntityName) {
         this.entityName = withEntityName;
         return this;
     }
-    
+
     public CommandWrapperBuilder withSubEntityId(final Long withSubEntityId) {
         this.subentityId = withSubEntityId;
         return this;
@@ -949,6 +949,30 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createStandingInstruction() {
+        this.actionName = "CREATE";
+        this.entityName = "STANDINGINSTRUCTION";
+        this.entityId = null;
+        this.href = "/standinginstructions";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateStandingInstruction(final Long standingInstructionId) {
+        this.actionName = "UPDATE";
+        this.entityName = "STANDINGINSTRUCTION";
+        this.entityId = standingInstructionId;
+        this.href = "/standinginstructions";
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteStandingInstruction(final Long standingInstructionId) {
+        this.actionName = "DELETE";
+        this.entityName = "STANDINGINSTRUCTION";
+        this.entityId = standingInstructionId;
+        this.href = "/standinginstructions";
+        return this;
+    }
+
     public CommandWrapperBuilder savingsAccountDeposit(final Long accountId) {
         this.actionName = "DEPOSIT";
         this.entityName = "SAVINGSACCOUNT";
@@ -1452,7 +1476,7 @@ public class CommandWrapperBuilder {
         this.href = "/clients/" + clientId + "?command=assignStaff";
         return this;
     }
-    
+
     public CommandWrapperBuilder updateClientSavingsAccount(final Long clientId) {
         this.actionName = "UPDATESAVINGSACCOUNT";
         this.entityName = "CLIENT";
@@ -1461,7 +1485,6 @@ public class CommandWrapperBuilder {
         this.href = "/clients/" + clientId + "?command=updateSavingsAccount";
         return this;
     }
-
 
     public CommandWrapperBuilder createProductMix(final Long productId) {
         this.actionName = "CREATE";

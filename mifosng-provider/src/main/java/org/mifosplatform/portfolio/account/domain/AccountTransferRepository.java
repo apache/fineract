@@ -12,14 +12,14 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface AccountTransferRepository extends JpaRepository<AccountTransfer, Long>, JpaSpecificationExecutor<AccountTransfer> {
+public interface AccountTransferRepository extends JpaRepository<AccountTransferTransaction, Long>, JpaSpecificationExecutor<AccountTransferTransaction> {
 
-    @Query("from AccountTransfer at where at.fromLoanAccount.id= :accountNumber and at.reversed=false")
-    List<AccountTransfer> findByFromLoanId(@Param("accountNumber") Long accountNumber);
+    @Query("from AccountTransferTransaction att where att.accountTransferDetails.fromLoanAccount.id= :accountNumber and att.reversed=false")
+    List<AccountTransferTransaction> findByFromLoanId(@Param("accountNumber") Long accountNumber);
 
-    @Query("from AccountTransfer at where (at.fromLoanAccount.id= :accountNumber or at.toLoanAccount.id=:accountNumber) and at.reversed=false")
-    List<AccountTransfer> findAllByLoanId(@Param("accountNumber") Long accountNumber);
+    @Query("from AccountTransferTransaction att where (att.accountTransferDetails.fromLoanAccount.id= :accountNumber or att.accountTransferDetails.toLoanAccount.id=:accountNumber) and att.reversed=false")
+    List<AccountTransferTransaction> findAllByLoanId(@Param("accountNumber") Long accountNumber);
 
-    @Query("from AccountTransfer at where at.toLoanTransaction.id= :loanTransactionId and at.reversed=false")
-    AccountTransfer findByToLoanTransactionId(@Param("loanTransactionId") Long loanTransactionId);
+    @Query("from AccountTransferTransaction att where att.toLoanTransaction.id= :loanTransactionId and att.reversed=false")
+    AccountTransferTransaction findByToLoanTransactionId(@Param("loanTransactionId") Long loanTransactionId);
 }

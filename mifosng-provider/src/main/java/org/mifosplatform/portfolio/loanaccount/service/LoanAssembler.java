@@ -135,6 +135,11 @@ public class LoanAssembler {
         return loanAccount;
     }
 
+    public void setHelpers(final Loan loanAccount) {
+        loanAccount.setHelpers(defaultLoanLifecycleStateMachine(), this.loanSummaryWrapper,
+                this.loanRepaymentScheduleTransactionProcessorFactory);
+    }
+
     public Loan assembleFrom(final JsonCommand command, final AppUser currentUser) {
         final JsonElement element = command.parsedJson();
 

@@ -15,9 +15,11 @@ public interface AccountTransfersReadPlatformService {
     AccountTransferData retrieveTemplate(Long fromOfficeId, Long fromClientId, Long fromAccountId, Integer fromAccountType,
             Long toOfficeId, Long toClientId, Long toAccountId, Integer toAccountType);
 
-    Page<AccountTransferData> retrieveAll(SearchParameters searchParameters);
+    Page<AccountTransferData> retrieveAll(SearchParameters searchParameters, Long accountDetailId);
 
     AccountTransferData retrieveOne(Long transferId);
 
     boolean isAccountTransfer(Long transactionId, PortfolioAccountType accountType);
+
+    Page<AccountTransferData> retrieveByStandingInstruction(Long id, SearchParameters searchParameters);
 }

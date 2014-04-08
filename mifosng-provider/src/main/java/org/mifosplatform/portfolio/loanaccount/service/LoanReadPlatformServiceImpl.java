@@ -983,8 +983,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " left JOIN m_payment_detail pd ON tr.payment_detail_id = pd.id"
                     + " left join m_code_value cv on pd.payment_type_cv_id = cv.id"
                     + " left join m_office office on office.id=tr.office_id"
-                    + " left join m_savings_account_transfer fromtran on fromtran.from_loan_transaction_id = tr.id "
-                    + " left join m_savings_account_transfer totran on totran.to_loan_transaction_id = tr.id ";
+                    + " left join m_account_transfer_transaction fromtran on fromtran.from_loan_transaction_id = tr.id "
+                    + " left join m_account_transfer_transaction totran on totran.to_loan_transaction_id = tr.id ";
         }
 
         @Override
@@ -1071,8 +1071,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " totran.description as toTransferDescription "
                     + " from m_loan l join m_loan_transaction tr on tr.loan_id = l.id"
                     + " join m_currency rc on rc.`code` = l.currency_code "
-                    + " left join m_savings_account_transfer fromtran on fromtran.from_loan_transaction_id = tr.id "
-                    + " left join m_savings_account_transfer totran on totran.to_loan_transaction_id = tr.id ";
+                    + " left join m_account_transfer_transaction fromtran on fromtran.from_loan_transaction_id = tr.id "
+                    + " left join m_account_transfer_transaction totran on totran.to_loan_transaction_id = tr.id ";
         }
 
         @Override

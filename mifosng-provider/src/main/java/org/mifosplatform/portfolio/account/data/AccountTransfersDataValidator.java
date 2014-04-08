@@ -5,19 +5,11 @@
  */
 package org.mifosplatform.portfolio.account.data;
 
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.ACCOUNT_TRANSFER_RESOURCE_NAME;
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.REQUEST_DATA_PARAMETERS;
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.fromAccountIdParamName;
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.fromAccountTypeParamName;
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.fromClientIdParamName;
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.fromOfficeIdParamName;
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.toAccountIdParamName;
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.toAccountTypeParamName;
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.toClientIdParamName;
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.toOfficeIdParamName;
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.transferAmountParamName;
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.transferDateParamName;
-import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.transferDescriptionParamName;
+import static org.mifosplatform.portfolio.account.api.AccountTransfersApiConstants.ACCOUNT_TRANSFER_RESOURCE_NAME;
+import static org.mifosplatform.portfolio.account.api.AccountTransfersApiConstants.REQUEST_DATA_PARAMETERS;
+import static org.mifosplatform.portfolio.account.api.AccountTransfersApiConstants.transferAmountParamName;
+import static org.mifosplatform.portfolio.account.api.AccountTransfersApiConstants.transferDateParamName;
+import static org.mifosplatform.portfolio.account.api.AccountTransfersApiConstants.transferDescriptionParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -43,10 +35,13 @@ import com.google.gson.reflect.TypeToken;
 public class AccountTransfersDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
+    private final AccountTransfersDetailDataValidator accountTransfersDetailDataValidator;
 
     @Autowired
-    public AccountTransfersDataValidator(final FromJsonHelper fromApiJsonHelper) {
+    public AccountTransfersDataValidator(final FromJsonHelper fromApiJsonHelper,
+            final AccountTransfersDetailDataValidator accountTransfersDetailDataValidator) {
         this.fromApiJsonHelper = fromApiJsonHelper;
+        this.accountTransfersDetailDataValidator = accountTransfersDetailDataValidator;
     }
 
     public void validate(final JsonCommand command) {
@@ -64,31 +59,7 @@ public class AccountTransfersDataValidator {
 
         final JsonElement element = command.parsedJson();
 
-        final Long fromOfficeId = this.fromApiJsonHelper.extractLongNamed(fromOfficeIdParamName, element);
-        baseDataValidator.reset().parameter(fromOfficeIdParamName).value(fromOfficeId).notNull().integerGreaterThanZero();
-
-        final Long fromClientId = this.fromApiJsonHelper.extractLongNamed(fromClientIdParamName, element);
-        baseDataValidator.reset().parameter(fromClientIdParamName).value(fromClientId).notNull().integerGreaterThanZero();
-
-        final Long fromAccountId = this.fromApiJsonHelper.extractLongNamed(fromAccountIdParamName, element);
-        baseDataValidator.reset().parameter(fromAccountIdParamName).value(fromAccountId).notNull().integerGreaterThanZero();
-
-        final Integer fromAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(fromAccountTypeParamName, element);
-        baseDataValidator.reset().parameter(fromAccountTypeParamName).value(fromAccountType)
-                .isOneOfTheseValues(Integer.valueOf(1), Integer.valueOf(2));
-
-        final Long toOfficeId = this.fromApiJsonHelper.extractLongNamed(toOfficeIdParamName, element);
-        baseDataValidator.reset().parameter(toOfficeIdParamName).value(toOfficeId).notNull().integerGreaterThanZero();
-
-        final Long toClientId = this.fromApiJsonHelper.extractLongNamed(toClientIdParamName, element);
-        baseDataValidator.reset().parameter(toClientIdParamName).value(toClientId).notNull().integerGreaterThanZero();
-
-        final Long toAccountId = this.fromApiJsonHelper.extractLongNamed(toAccountIdParamName, element);
-        baseDataValidator.reset().parameter(toAccountIdParamName).value(toAccountId).notNull().integerGreaterThanZero();
-
-        final Integer toAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(toAccountTypeParamName, element);
-        baseDataValidator.reset().parameter(toAccountTypeParamName).value(toAccountType)
-                .isOneOfTheseValues(Integer.valueOf(1), Integer.valueOf(2));
+        this.accountTransfersDetailDataValidator.validate(command, baseDataValidator);
 
         final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(transferDateParamName, element);
         baseDataValidator.reset().parameter(transferDateParamName).value(transactionDate).notNull();

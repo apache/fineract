@@ -16,6 +16,7 @@ import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.property.RRule;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
 import org.quartz.CronExpression;
 import org.springframework.util.ObjectUtils;
 
@@ -763,6 +764,24 @@ public class DataValidatorBuilder {
             final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
                     defaultEnglishMessage.toString(), this.parameter, this.value);
             this.dataValidationErrors.add(error);
+        }
+        return this;
+    }
+
+    public DataValidatorBuilder validateDateAfter(final LocalDate date) {
+        if (this.value == null && this.ignoreNullValue) { return this; }
+
+        if (this.value != null && date != null) {
+            final LocalDate dateVal = (LocalDate) this.value;
+            if (date.isAfter(dateVal)) {
+                final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
+                        .append(this.parameter).append(".is.less.than.date");
+                final StringBuilder defaultEnglishMessage = new StringBuilder("The ").append(this.parameter)
+                        .append(" must be greter than provided date").append(date);
+                final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                        defaultEnglishMessage.toString(), this.parameter, dateVal, date);
+                this.dataValidationErrors.add(error);
+            }
         }
         return this;
     }
