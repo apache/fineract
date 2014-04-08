@@ -230,6 +230,10 @@ public class SavingsAccountAssembler {
         return account;
     }
 
+    public void setHelpers(final SavingsAccount account) {
+        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+    }
+
     /**
      * Assembles a new {@link SavingsAccount} from JSON details passed in
      * request inheriting details where relevant from chosen

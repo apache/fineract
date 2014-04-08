@@ -341,7 +341,7 @@ public class CommandWrapper {
     public boolean isTemplateRessource() {
         return this.entityName.equalsIgnoreCase("Template");
     }
-
+    
     public boolean isApproveLoanApplication() {
         return this.actionName.equalsIgnoreCase("APPROVE") && this.entityName.equalsIgnoreCase("LOAN");
     }
@@ -388,6 +388,10 @@ public class CommandWrapper {
 
     public boolean isUpdateDisbursementDate() {
         return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL");
+    }
+
+    public boolean isStandingInstruction() {
+        return this.entityName.equalsIgnoreCase("STANDINGINSTRUCTION");
     }
 
     public boolean isCloseLoanAsObligationsMet() {

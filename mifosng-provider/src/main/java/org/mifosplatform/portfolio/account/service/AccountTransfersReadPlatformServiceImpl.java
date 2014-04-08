@@ -188,11 +188,16 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     }
 
     @Override
-    public Page<AccountTransferData> retrieveAll(final SearchParameters searchParameters) {
+    public Page<AccountTransferData> retrieveAll(final SearchParameters searchParameters,final  Long accountDetailId) {
 
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(this.accountTransfersMapper.schema());
+        Object[] finalObjectArray = {};
+        if(accountDetailId != null){
+            sqlBuilder.append(" where att.account_transfer_details_id=?");
+            finalObjectArray = new Object[]{ accountDetailId };
+        }
 
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
@@ -209,9 +214,6 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             }
         }
 
-        final Object[] objectArray = new Object[2];
-        final int arrayPos = 0;
-        final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), finalObjectArray,
                 this.accountTransfersMapper);
@@ -221,7 +223,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     public AccountTransferData retrieveOne(final Long transferId) {
 
         try {
-            final String sql = "select " + this.accountTransfersMapper.schema() + " where sat.id = ?";
+            final String sql = "select " + this.accountTransfersMapper.schema() + " where att.id = ?";
 
             return this.jdbcTemplate.queryForObject(sql, this.accountTransfersMapper, new Object[] { transferId });
         } catch (final EmptyResultDataAccessException e) {
@@ -235,11 +237,11 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
         public AccountTransfersMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
-            sqlBuilder.append("sat.id as id, sat.is_reversed as isReversed,");
-            sqlBuilder.append("sat.transaction_date as transferDate, sat.amount as transferAmount,");
-            sqlBuilder.append("sat.description as transferDescription,");
-            sqlBuilder.append("sat.currency_code as currencyCode, sat.currency_digits as currencyDigits,");
-            sqlBuilder.append("sat.currency_multiplesof as inMultiplesOf, ");
+            sqlBuilder.append("att.id as id, att.is_reversed as isReversed,");
+            sqlBuilder.append("att.transaction_date as transferDate, att.amount as transferAmount,");
+            sqlBuilder.append("att.description as transferDescription,");
+            sqlBuilder.append("att.currency_code as currencyCode, att.currency_digits as currencyDigits,");
+            sqlBuilder.append("att.currency_multiplesof as inMultiplesOf, ");
             sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
             sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
             sqlBuilder.append("fromoff.id as fromOfficeId, fromoff.name as fromOfficeName,");
@@ -254,18 +256,21 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             sqlBuilder.append("fromsavtran.transaction_type_enum as fromSavingsAccountTransactionType,");
             sqlBuilder.append("tosavtran.id as toSavingsAccountTransactionId,");
             sqlBuilder.append("tosavtran.transaction_type_enum as toSavingsAccountTransactionType");
-            sqlBuilder.append(" FROM m_savings_account_transfer sat ");
-            sqlBuilder.append("join m_currency curr on curr.code = sat.currency_code ");
-            sqlBuilder.append("join m_office fromoff on fromoff.id = sat.from_office_id ");
-            sqlBuilder.append("join m_office tooff on tooff.id = sat.to_office_id ");
-            sqlBuilder.append("join m_client fromclient on fromclient.id = sat.from_client_id ");
-            sqlBuilder.append("join m_client toclient on toclient.id = sat.to_client_id ");
-            sqlBuilder.append("left join m_savings_account fromsavacc on fromsavacc.id = sat.from_savings_account_id ");
-            sqlBuilder.append("left join m_loan fromloanacc on fromloanacc.id = sat.from_loan_account_id ");
-            sqlBuilder.append("left join m_savings_account tosavacc on tosavacc.id = sat.to_savings_account_id ");
-            sqlBuilder.append("left join m_loan toloanacc on toloanacc.id = sat.to_loan_account_id ");
-            sqlBuilder.append("left join m_savings_account_transaction fromsavtran on fromsavtran.id = sat.from_savings_transaction_id ");
-            sqlBuilder.append("left join m_savings_account_transaction tosavtran on tosavtran.id = sat.to_savings_transaction_id ");
+            sqlBuilder.append(" FROM m_account_transfer_transaction att ");
+            sqlBuilder.append("left join m_account_transfer_details atd on atd.id = att.account_transfer_details_id ");
+            sqlBuilder.append("join m_currency curr on curr.code = att.currency_code ");
+            sqlBuilder.append("join m_office fromoff on fromoff.id = atd.from_office_id ");
+            sqlBuilder.append("join m_office tooff on tooff.id = atd.to_office_id ");
+            sqlBuilder.append("join m_client fromclient on fromclient.id = atd.from_client_id ");
+            sqlBuilder.append("join m_client toclient on toclient.id = atd.to_client_id ");
+            sqlBuilder.append("left join m_savings_account fromsavacc on fromsavacc.id = atd.from_savings_account_id ");
+            sqlBuilder.append("left join m_loan fromloanacc on fromloanacc.id = atd.from_loan_account_id ");
+            sqlBuilder.append("left join m_savings_account tosavacc on tosavacc.id = atd.to_savings_account_id ");
+            sqlBuilder.append("left join m_loan toloanacc on toloanacc.id = atd.to_loan_account_id ");
+            sqlBuilder.append("left join m_savings_account_transaction fromsavtran on fromsavtran.id = att.from_savings_transaction_id ");
+            sqlBuilder.append("left join m_savings_account_transaction tosavtran on tosavtran.id = att.to_savings_transaction_id ");
+            sqlBuilder.append("left join m_loan_transaction fromloantran on fromloantran.id = att.from_savings_transaction_id ");
+            sqlBuilder.append("left join m_loan_transaction toloantran on toloantran.id = att.to_savings_transaction_id ");
 
             this.schemaSql = sqlBuilder.toString();
         }
@@ -345,7 +350,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
     @Override
     public boolean isAccountTransfer(final Long transactionId, final PortfolioAccountType accountType) {
-        final StringBuilder sql = new StringBuilder("select count(*) from m_savings_account_transfer at where ");
+        final StringBuilder sql = new StringBuilder("select count(*) from m_account_transfer_transaction at where ");
         if (accountType.isLoanAccount()) {
             sql.append("at.from_loan_transaction_id=").append(transactionId).append(" or at.to_loan_transaction_id=").append(transactionId);
         } else {
@@ -355,6 +360,39 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
         final int count = this.jdbcTemplate.queryForInt(sql.toString());
         return count > 0;
+    }
+
+    @Override
+    public Page<AccountTransferData> retrieveByStandingInstruction(final Long id, final SearchParameters searchParameters) {
+
+        final StringBuilder sqlBuilder = new StringBuilder(200);
+        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder
+                .append(this.accountTransfersMapper.schema())
+                .append(" join m_account_transfer_standing_instructions atsi on atsi.account_transfer_details_id = att.account_transfer_details_id ");
+        sqlBuilder.append(" where atsi.id = ?");
+
+        if (searchParameters != null) {
+            if (searchParameters.isOrderByRequested()) {
+                sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
+
+                if (searchParameters.isSortOrderProvided()) {
+                    sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+                }
+            }
+
+            if (searchParameters.isLimited()) {
+                sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+                if (searchParameters.isOffset()) {
+                    sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+                }
+            }
+        }
+
+        final Object[] finalObjectArray = { id };
+        final String sqlCountRows = "SELECT FOUND_ROWS()";
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), finalObjectArray,
+                this.accountTransfersMapper);
     }
 
 }

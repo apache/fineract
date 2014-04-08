@@ -6,6 +6,7 @@ import java.util.Locale;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
+import org.mifosplatform.portfolio.account.domain.AccountTransferDetails;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 
 public class AccountTransferDTO {
@@ -24,12 +25,14 @@ public class AccountTransferDTO {
     private final Integer toTransferType;
     private final Long chargeId;
     private final Integer loanInstallmentNumber;
+    private final Integer transferType;
+    private final AccountTransferDetails accountTransferDetails;
 
     public AccountTransferDTO(final LocalDate transactionDate, final BigDecimal transactionAmount,
             final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType, final Long fromAccountId,
             final Long toAccountId, final String description, final Locale locale, final DateTimeFormatter fmt,
             final PaymentDetail paymentDetail, final Integer fromTransferType, final Integer toTransferType, final Long chargeId,
-            Integer loanInstallmentNumber) {
+            Integer loanInstallmentNumber, Integer transferType, final AccountTransferDetails accountTransferDetails) {
         this.transactionDate = transactionDate;
         this.transactionAmount = transactionAmount;
         this.fromAccountType = fromAccountType;
@@ -44,6 +47,8 @@ public class AccountTransferDTO {
         this.toTransferType = toTransferType;
         this.chargeId = chargeId;
         this.loanInstallmentNumber = loanInstallmentNumber;
+        this.transferType = transferType;
+        this.accountTransferDetails = accountTransferDetails;
     }
 
     public LocalDate getTransactionDate() {
@@ -100,6 +105,16 @@ public class AccountTransferDTO {
 
     public Integer getLoanInstallmentNumber() {
         return this.loanInstallmentNumber;
+    }
+
+    
+    public Integer getTransferType() {
+        return this.transferType;
+    }
+
+    
+    public AccountTransferDetails getAccountTransferDetails() {
+        return this.accountTransferDetails;
     }
 
 }

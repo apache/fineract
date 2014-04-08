@@ -300,6 +300,54 @@
 								</td>
 								<td></td>
 							</tr>
+							<tr class="alt">
+								<td><a href="#standinginstruction">Standing Instructions</a></td>
+								<td>standinginstructions</td>
+								<td><a href="#standinginstruction_create">Create Standing Instruction</a></td>
+								<td><a href="#standinginstructions_retrieve">Retrive a Standing Instruction</a></td>
+								<td><a href="#standinginstruction_update">Update Standing Instruction</a></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td></td>
+								<td></td>
+								<td><a href="#standinginstructions_list">List Standing Instructions</a></td>
+								<td><a href="#standinginstruction_delete">Delete Standing Instruction(status change)</a></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td></td>
+								<td></td>
+								<td><a href="#standinginstruction_template">Retrive Standing Instruction Template</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td><a href="#accounttransfers">Account Transfer</a></td>
+								<td>accounttransfers</td>
+								<td><a href="#accounttransfers_create">Create Account Transfer</a></td>
+								<td><a href="#accounttransfers_retrieve">Retrive a Account Transfer</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td></td>
+								<td></td>
+								<td><a href="#accounttransfers_list">List Account Transfer</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td></td>
+								<td></td>
+								<td><a href="#accounttransfers_template">Retrive Account Transfer Template</a></td>
+								<td></td>
+								<td></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -17422,6 +17470,1437 @@ No Request Body:
 	    </div>
 	</div>
 <!-- end of acount transfers api -->
+
+<!-- Start Account Trasfer Standing Instrution-->
+
+<a id="standinginstruction" name="standinginstruction" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Standing Instruction:</h2>
+	        <p>Ability to be able to transfer monetary funds from one account to another.</p>
+	        <p>Note: At present only savings account to savings account and savings account to Loan account.</p>
+	      	<table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Parameters</div></td></tr>
+
+				<tr class=alt><td>name</td></tr>
+				<tr><td class=fielddesc>Standing Instruction Name.</td></tr>
+
+	            <tr class=alt><td>fromOfficeId</td></tr>
+				<tr><td class=fielddesc>The id of the office/branch from which the transfer is made.</td></tr>
+
+				<tr class=alt><td>fromClientId</td></tr>
+				<tr><td class=fielddesc>The id of the client from which the transfer is made.</td></tr>
+
+				<tr class=alt><td>fromAccountType</td></tr>
+				<tr><td class=fielddesc>The type of account from which the transfer is made. 1=Loan Account, 2=Savings Account</td></tr>
+
+				<tr class=alt><td>fromAccountId</td></tr>
+				<tr><td class=fielddesc>The id of the account from which the transfer is made.</td></tr>
+
+				<tr class=alt><td>toOfficeId</td></tr>
+				<tr><td class=fielddesc>The id of the office/branch to which the transfer is made.</td></tr>
+
+				<tr class=alt><td>toClientId</td></tr>
+				<tr><td class=fielddesc>The id of the client to which the transfer is made.</td></tr>
+
+				<tr class=alt><td>toAccountType</td></tr>
+				<tr><td class=fielddesc>The type of account to which the transfer is made. 1=Loan Account, 2=Savings Account</td></tr>
+
+				<tr class=alt><td>toAccountId</td></tr>
+				<tr><td class=fielddesc>The id of the account to which the transfer is made. The accouont must be <i>active</i> and must have the same currency as that of the selected <b>fromAccountId</b>.</td></tr>
+
+				<tr class=alt><td>priority</td></tr>
+				<tr><td class=fielddesc>The priority of instruction while executiing instructions. 1= URGENT,2 = HIGH, 3 = MEDIUM, 4 = LOW </td></tr>
+
+				<tr class=alt><td>transferType</td></tr>
+				<tr><td class=fielddesc>The type of account transfer from which account to which. 1=Account Transfer(savings to savings), 2=Loan Repayment</td></tr>
+
+				<tr class=alt><td>instructionType</td></tr>
+				<tr><td class=fielddesc>The Standing instruction amount for transfer type while execution of standing instruction. 1. FIXED, 2.DUES</td></tr>
+
+				<tr class=alt><td>status</td></tr>
+				<tr><td class=fielddesc>The Standing instruction state. 1. Active, 2.Disabled,3.deleted</td></tr>
+
+				<tr class=alt><td>recurrenceType</td></tr>
+				<tr><td class=fielddesc>The Standing instruction schedule type for execution.. 1. Periodic, 2.As per dues</td></tr>
+
+				<tr class=alt><td>validFrom</td></tr>
+				<tr><td class=fielddesc>The Standing instruction's Start date.</td></tr>
+
+	        </table>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Parameters</div></td></tr>
+
+				<tr class=alt><td>amount</td></tr>
+				<tr><td class=fielddesc>Transfer amount while running the instruction. must be provided if <b>instructionType</b> is fixed</td></tr>
+
+				<tr class=alt><td>validTill</td></tr>
+				<tr><td class=fielddesc>The Standing instruction's Start date.</td></tr>
+
+				<tr class=alt><td>recurrenceFrequency</td></tr>
+				<tr><td class=fielddesc>The periodic frequency of standing instruction.must be provided if <b>recurrenceType</b> is Periodic. 0=days,1= weeks,2=months,3=years</td></tr>
+
+				<tr class=alt><td>recurrenceInterval</td></tr>
+				<tr><td class=fielddesc>The periodic frequency interval of standing instruction.must be provided if <b>recurrenceType</b> is Periodic</td></tr>
+
+				<tr class=alt><td>recurrenceOnMonthDay</td></tr>
+				<tr><td class=fielddesc>The Month and Day of periodic frequency.must be provided if <b>recurrenceFrequency</b> is months or years</td></tr>
+
+
+			</table>
+	    </div>
+	</div>
+
+	<a id="standinginstruction_template" name="standinginstruction_template" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Standing Instruction Template:</h2>
+	            <p>This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+	                <ul>
+	                <li class=normalli>Field Defaults</li>   
+	                <li class=normalli>Allowed Value Lists</li>    
+	                </ul>
+	            </p>
+	        <p>Example Requests:</p>
+	        <div class=apiClick>standinginstructions/template?fromAccountType=2&fromOfficeId=1</div>
+	        <br/>
+	        <div class=apiClick>standinginstructions/template?fromAccountType=2&fromOfficeId=1&fromClientId=1&transferType=1</div>
+	        <br/>
+	        <div class=apiClick>standinginstructions/template?fromClientId=1&fromAccountType=2&fromAccountId=1&transferType=1</div>
+	        <br/>
+	    </div> 
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/standinginstructions/template?fromAccountType=2&fromOfficeId=1
+	        </code>
+			<code class="method-response">
+				{
+  "fromOffice": {
+    "id": 1,
+    "name": "Head Office",
+    "nameDecorated": "Head Office",
+    "externalId": "1",
+    "openingDate": [
+      2009,
+      1,
+      1
+    ],
+    "hierarchy": "."
+  },
+  "fromAccountType": {
+    "id": 2,
+    "code": "accountType.savings",
+    "value": "Savings Account"
+  },
+  "fromOfficeOptions": [
+    {
+      "id": 1,
+      "name": "Head Office",
+      "nameDecorated": "Head Office"
+    }
+  ],
+  "fromClientOptions": [
+    {
+      "id": 1,
+      "displayName": "Client_FirstName_2VRAG Client_LastName_9QCY",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 2,
+      "displayName": "Client_FirstName_ZYDN2 Client_LastName_XVOP",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 3,
+      "displayName": "Client_FirstName_89LYT Client_LastName_4EY6",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 4,
+      "displayName": "Client_FirstName_PRCBG Client_LastName_JZU2",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 5,
+      "displayName": "Client_FirstName_J37GR Client_LastName_1T3X",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 6,
+      "displayName": "Client_FirstName_ZVHM2 Client_LastName_RUGS",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 7,
+      "displayName": "Client_FirstName_RBALP Client_LastName_437P",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 8,
+      "displayName": "Client_FirstName_R7M4V Client_LastName_Q5ED",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 9,
+      "displayName": "Client_FirstName_WIBDE Client_LastName_U91T",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 10,
+      "displayName": "Client_FirstName_26QJT Client_LastName_BEHD",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 11,
+      "displayName": "Client_FirstName_W071M Client_LastName_L7Z2",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 12,
+      "displayName": "Client_FirstName_QUHDJ Client_LastName_S4C5",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 13,
+      "displayName": "Client_FirstName_MNP4W Client_LastName_J8Y3",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 14,
+      "displayName": "Client_FirstName_TL6I8 Client_LastName_5YHG",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 15,
+      "displayName": "Client_FirstName_LUTBO Client_LastName_DITS",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 16,
+      "displayName": "Client_FirstName_UE39Z Client_LastName_PUWZ",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 17,
+      "displayName": "Client_FirstName_M8SD2 Client_LastName_J6QK",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 18,
+      "displayName": "Client_FirstName_SG8NF Client_LastName_BM1J",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 19,
+      "displayName": "Client_FirstName_BW0C8 Client_LastName_LGV9",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 20,
+      "displayName": "Client_FirstName_9KYLE Client_LastName_I0GJ",
+      "officeId": 1,
+      "officeName": "Head Office"
+    }
+  ],
+  "fromAccountTypeOptions": [
+    {
+      "id": 2,
+      "code": "accountType.savings",
+      "value": "Savings Account"
+    },
+    {
+      "id": 1,
+      "code": "accountType.loan",
+      "value": "Loan Account"
+    }
+  ],
+  "toOfficeOptions": [
+    {
+      "id": 1,
+      "name": "Head Office",
+      "nameDecorated": "Head Office"
+    }
+  ],
+  "toAccountTypeOptions": [
+    {
+      "id": 1,
+      "code": "accountType.loan",
+      "value": "Loan Account"
+    },
+    {
+      "id": 2,
+      "code": "accountType.savings",
+      "value": "Savings Account"
+    }
+  ],
+  "transferTypeOptions": [
+    {
+      "id": 1,
+      "code": "accountTransferType.account.transfer",
+      "value": "Account Transfer"
+    },
+    {
+      "id": 2,
+      "code": "accountTransferType.loan.repayment",
+      "value": "Loan Repayment"
+    }
+  ],
+  "statusOptions": [
+    {
+      "id": 1,
+      "code": "standingInstructionStatus.active",
+      "value": "Active"
+    },
+    {
+      "id": 2,
+      "code": "standingInstructionStatus.disabled",
+      "value": "Disabled"
+    }
+  ],
+  "instructionTypeOptions": [
+    {
+      "id": 1,
+      "code": "standingInstructionType.fixed",
+      "value": "Fixed"
+    },
+    {
+      "id": 2,
+      "code": "standingInstructionType.dues",
+      "value": "Dues"
+    }
+  ],
+  "priorityOptions": [
+    {
+      "id": 1,
+      "code": "standingInstructionPriority.urgent",
+      "value": "Urgent Priority"
+    },
+    {
+      "id": 2,
+      "code": "standingInstructionPriority.high",
+      "value": "High Priority"
+    },
+    {
+      "id": 3,
+      "code": "standingInstructionPriority.medium",
+      "value": "Medium Priority"
+    },
+    {
+      "id": 4,
+      "code": "standingInstructionPriority.low",
+      "value": "Low Priority"
+    }
+  ],
+  "recurrenceTypeOptions": [
+    {
+      "id": 1,
+      "code": "accountTransferRecurrenceType.periodic",
+      "value": "Periodic Recurrence"
+    },
+    {
+      "id": 2,
+      "code": "accountTransferRecurrenceType.as.per.dues",
+      "value": "As Per Dues Recurrence"
+    }
+  ],
+  "recurrenceFrequencyOptions": [
+    {
+      "id": 0,
+      "code": "frequencyperiodFrequencyType.days",
+      "value": "Days"
+    },
+    {
+      "id": 1,
+      "code": "frequencyperiodFrequencyType.weeks",
+      "value": "Weeks"
+    },
+    {
+      "id": 2,
+      "code": "frequencyperiodFrequencyType.months",
+      "value": "Months"
+    },
+    {
+      "id": 3,
+      "code": "frequencyperiodFrequencyType.years",
+      "value": "Years"
+    }
+  ]
+}
+			</code>
+	    </div>
+
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/standinginstructions/template?fromAccountType=2&fromOfficeId=1&fromClientId=1&transferType=1
+	        </code>
+			<code class="method-response">
+				{
+  "fromOffice": {
+    "id": 1,
+    "name": "Head Office",
+    "nameDecorated": "Head Office",
+    "externalId": "1",
+    "openingDate": [
+      2009,
+      1,
+      1
+    ],
+    "hierarchy": "."
+  },
+  "fromClient": {
+    "id": 1,
+    "accountNo": "000000001",
+    "externalId": "ID_UTMYOEQ",
+    "status": {
+      "id": 300,
+      "code": "clientStatusType.active",
+      "value": "Active"
+    },
+    "active": true,
+    "activationDate": [
+      2011,
+      1,
+      1
+    ],
+    "firstname": "Client_FirstName_2VRAG",
+    "lastname": "Client_LastName_9QCY",
+    "displayName": "Client_FirstName_2VRAG Client_LastName_9QCY",
+    "officeId": 1,
+    "officeName": "Head Office",
+    "timeline": {
+      "submittedOnDate": [
+        2011,
+        1,
+        1
+      ],
+      "submittedByUsername": "mifos",
+      "submittedByFirstname": "App",
+      "submittedByLastname": "Administrator",
+      "activatedOnDate": [
+        2011,
+        1,
+        1
+      ],
+      "activatedByUsername": "mifos",
+      "activatedByFirstname": "App",
+      "activatedByLastname": "Administrator"
+    },
+    "groups": []
+  },
+  "fromAccountType": {
+    "id": 2,
+    "code": "accountType.savings",
+    "value": "Savings Account"
+  },
+  "fromOfficeOptions": [
+    {
+      "id": 1,
+      "name": "Head Office",
+      "nameDecorated": "Head Office"
+    }
+  ],
+  "fromClientOptions": [
+    {
+      "id": 1,
+      "displayName": "Client_FirstName_2VRAG Client_LastName_9QCY",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 2,
+      "displayName": "Client_FirstName_ZYDN2 Client_LastName_XVOP",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 3,
+      "displayName": "Client_FirstName_89LYT Client_LastName_4EY6",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 4,
+      "displayName": "Client_FirstName_PRCBG Client_LastName_JZU2",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 5,
+      "displayName": "Client_FirstName_J37GR Client_LastName_1T3X",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 6,
+      "displayName": "Client_FirstName_ZVHM2 Client_LastName_RUGS",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 7,
+      "displayName": "Client_FirstName_RBALP Client_LastName_437P",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 8,
+      "displayName": "Client_FirstName_R7M4V Client_LastName_Q5ED",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 9,
+      "displayName": "Client_FirstName_WIBDE Client_LastName_U91T",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 10,
+      "displayName": "Client_FirstName_26QJT Client_LastName_BEHD",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 11,
+      "displayName": "Client_FirstName_W071M Client_LastName_L7Z2",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 12,
+      "displayName": "Client_FirstName_QUHDJ Client_LastName_S4C5",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 13,
+      "displayName": "Client_FirstName_MNP4W Client_LastName_J8Y3",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 14,
+      "displayName": "Client_FirstName_TL6I8 Client_LastName_5YHG",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 15,
+      "displayName": "Client_FirstName_LUTBO Client_LastName_DITS",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 16,
+      "displayName": "Client_FirstName_UE39Z Client_LastName_PUWZ",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 17,
+      "displayName": "Client_FirstName_M8SD2 Client_LastName_J6QK",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 18,
+      "displayName": "Client_FirstName_SG8NF Client_LastName_BM1J",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 19,
+      "displayName": "Client_FirstName_BW0C8 Client_LastName_LGV9",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 20,
+      "displayName": "Client_FirstName_9KYLE Client_LastName_I0GJ",
+      "officeId": 1,
+      "officeName": "Head Office"
+    }
+  ],
+  "fromAccountTypeOptions": [
+    {
+      "id": 2,
+      "code": "accountType.savings",
+      "value": "Savings Account"
+    }
+  ],
+  "fromAccountOptions": [],
+  "toOfficeOptions": [
+    {
+      "id": 1,
+      "name": "Head Office",
+      "nameDecorated": "Head Office"
+    }
+  ],
+  "toAccountTypeOptions": [
+    {
+      "id": 1,
+      "code": "accountType.loan",
+      "value": "Loan Account"
+    }
+  ],
+  "transferTypeOptions": [
+    {
+      "id": 1,
+      "code": "accountTransferType.account.transfer",
+      "value": "Account Transfer"
+    },
+    {
+      "id": 2,
+      "code": "accountTransferType.loan.repayment",
+      "value": "Loan Repayment"
+    }
+  ],
+  "statusOptions": [
+    {
+      "id": 1,
+      "code": "standingInstructionStatus.active",
+      "value": "Active"
+    },
+    {
+      "id": 2,
+      "code": "standingInstructionStatus.disabled",
+      "value": "Disabled"
+    }
+  ],
+  "instructionTypeOptions": [
+    {
+      "id": 1,
+      "code": "standingInstructionType.fixed",
+      "value": "Fixed"
+    },
+    {
+      "id": 2,
+      "code": "standingInstructionType.dues",
+      "value": "Dues"
+    }
+  ],
+  "priorityOptions": [
+    {
+      "id": 1,
+      "code": "standingInstructionPriority.urgent",
+      "value": "Urgent Priority"
+    },
+    {
+      "id": 2,
+      "code": "standingInstructionPriority.high",
+      "value": "High Priority"
+    },
+    {
+      "id": 3,
+      "code": "standingInstructionPriority.medium",
+      "value": "Medium Priority"
+    },
+    {
+      "id": 4,
+      "code": "standingInstructionPriority.low",
+      "value": "Low Priority"
+    }
+  ],
+  "recurrenceTypeOptions": [
+    {
+      "id": 1,
+      "code": "accountTransferRecurrenceType.periodic",
+      "value": "Periodic Recurrence"
+    },
+    {
+      "id": 2,
+      "code": "accountTransferRecurrenceType.as.per.dues",
+      "value": "As Per Dues Recurrence"
+    }
+  ],
+  "recurrenceFrequencyOptions": [
+    {
+      "id": 0,
+      "code": "frequencyperiodFrequencyType.days",
+      "value": "Days"
+    },
+    {
+      "id": 1,
+      "code": "frequencyperiodFrequencyType.weeks",
+      "value": "Weeks"
+    },
+    {
+      "id": 2,
+      "code": "frequencyperiodFrequencyType.months",
+      "value": "Months"
+    },
+    {
+      "id": 3,
+      "code": "frequencyperiodFrequencyType.years",
+      "value": "Years"
+    }
+  ]
+}
+			</code>
+	    </div>
+
+	   	<div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/standinginstructions/template?fromAccountType=2&fromOfficeId=1&fromClientId=1&transferType=2&fromAccountId=1
+	        </code>
+			<code class="method-response">
+{
+  "fromOffice": {
+    "id": 1,
+    "name": "Head Office",
+    "nameDecorated": "Head Office",
+    "externalId": "1",
+    "openingDate": [
+      2009,
+      1,
+      1
+    ],
+    "hierarchy": "."
+  },
+  "fromClient": {
+    "id": 3,
+    "accountNo": "000000003",
+    "externalId": "ID_ECEAKAP",
+    "status": {
+      "id": 300,
+      "code": "clientStatusType.active",
+      "value": "Active"
+    },
+    "active": true,
+    "activationDate": [
+      2011,
+      3,
+      4
+    ],
+    "firstname": "Client_FirstName_89LYT",
+    "lastname": "Client_LastName_4EY6",
+    "displayName": "Client_FirstName_89LYT Client_LastName_4EY6",
+    "officeId": 1,
+    "officeName": "Head Office",
+    "timeline": {
+      "submittedOnDate": [
+        2011,
+        3,
+        4
+      ],
+      "submittedByUsername": "mifos",
+      "submittedByFirstname": "App",
+      "submittedByLastname": "Administrator",
+      "activatedOnDate": [
+        2011,
+        3,
+        4
+      ],
+      "activatedByUsername": "mifos",
+      "activatedByFirstname": "App",
+      "activatedByLastname": "Administrator"
+    },
+    "groups": []
+  },
+  "fromAccountType": {
+    "id": 2,
+    "code": "accountType.savings",
+    "value": "Savings Account"
+  },
+  "fromAccount": {
+    "id": 1,
+    "accountNo": "000000001",
+    "clientId": 3,
+    "clientName": "Client_FirstName_89LYT Client_LastName_4EY6",
+    "productId": 1,
+    "productName": "SAVINGS_PRODUCT_MVA619",
+    "fieldOfficerId": 0,
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 4,
+      "inMultiplesOf": 0,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    }
+  },
+  "fromOfficeOptions": [
+    {
+      "id": 1,
+      "name": "Head Office",
+      "nameDecorated": "Head Office"
+    }
+  ],
+  "fromClientOptions": [
+    {
+      "id": 1,
+      "displayName": "Client_FirstName_2VRAG Client_LastName_9QCY",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 2,
+      "displayName": "Client_FirstName_ZYDN2 Client_LastName_XVOP",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 3,
+      "displayName": "Client_FirstName_89LYT Client_LastName_4EY6",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 4,
+      "displayName": "Client_FirstName_PRCBG Client_LastName_JZU2",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 5,
+      "displayName": "Client_FirstName_J37GR Client_LastName_1T3X",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 6,
+      "displayName": "Client_FirstName_ZVHM2 Client_LastName_RUGS",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 7,
+      "displayName": "Client_FirstName_RBALP Client_LastName_437P",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 8,
+      "displayName": "Client_FirstName_R7M4V Client_LastName_Q5ED",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 9,
+      "displayName": "Client_FirstName_WIBDE Client_LastName_U91T",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 10,
+      "displayName": "Client_FirstName_26QJT Client_LastName_BEHD",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 11,
+      "displayName": "Client_FirstName_W071M Client_LastName_L7Z2",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 12,
+      "displayName": "Client_FirstName_QUHDJ Client_LastName_S4C5",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 13,
+      "displayName": "Client_FirstName_MNP4W Client_LastName_J8Y3",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 14,
+      "displayName": "Client_FirstName_TL6I8 Client_LastName_5YHG",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 15,
+      "displayName": "Client_FirstName_LUTBO Client_LastName_DITS",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 16,
+      "displayName": "Client_FirstName_UE39Z Client_LastName_PUWZ",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 17,
+      "displayName": "Client_FirstName_M8SD2 Client_LastName_J6QK",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 18,
+      "displayName": "Client_FirstName_SG8NF Client_LastName_BM1J",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 19,
+      "displayName": "Client_FirstName_BW0C8 Client_LastName_LGV9",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 20,
+      "displayName": "Client_FirstName_9KYLE Client_LastName_I0GJ",
+      "officeId": 1,
+      "officeName": "Head Office"
+    }
+  ],
+  "fromAccountTypeOptions": [
+    {
+      "id": 2,
+      "code": "accountType.savings",
+      "value": "Savings Account"
+    }
+  ],
+  "fromAccountOptions": [
+    {
+      "id": 1,
+      "accountNo": "000000001",
+      "clientId": 3,
+      "clientName": "Client_FirstName_89LYT Client_LastName_4EY6",
+      "productId": 1,
+      "productName": "SAVINGS_PRODUCT_MVA619",
+      "fieldOfficerId": 0,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 4,
+        "inMultiplesOf": 0,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      }
+    }
+  ],
+  "toOfficeOptions": [
+    {
+      "id": 1,
+      "name": "Head Office",
+      "nameDecorated": "Head Office"
+    }
+  ],
+  "toAccountTypeOptions": [
+    {
+      "id": 1,
+      "code": "accountType.loan",
+      "value": "Loan Account"
+    }
+  ],
+  "transferTypeOptions": [
+    {
+      "id": 1,
+      "code": "accountTransferType.account.transfer",
+      "value": "Account Transfer"
+    },
+    {
+      "id": 2,
+      "code": "accountTransferType.loan.repayment",
+      "value": "Loan Repayment"
+    }
+  ],
+  "statusOptions": [
+    {
+      "id": 1,
+      "code": "standingInstructionStatus.active",
+      "value": "Active"
+    },
+    {
+      "id": 2,
+      "code": "standingInstructionStatus.disabled",
+      "value": "Disabled"
+    }
+  ],
+  "instructionTypeOptions": [
+    {
+      "id": 1,
+      "code": "standingInstructionType.fixed",
+      "value": "Fixed"
+    },
+    {
+      "id": 2,
+      "code": "standingInstructionType.dues",
+      "value": "Dues"
+    }
+  ],
+  "priorityOptions": [
+    {
+      "id": 1,
+      "code": "standingInstructionPriority.urgent",
+      "value": "Urgent Priority"
+    },
+    {
+      "id": 2,
+      "code": "standingInstructionPriority.high",
+      "value": "High Priority"
+    },
+    {
+      "id": 3,
+      "code": "standingInstructionPriority.medium",
+      "value": "Medium Priority"
+    },
+    {
+      "id": 4,
+      "code": "standingInstructionPriority.low",
+      "value": "Low Priority"
+    }
+  ],
+  "recurrenceTypeOptions": [
+    {
+      "id": 1,
+      "code": "accountTransferRecurrenceType.periodic",
+      "value": "Periodic Recurrence"
+    },
+    {
+      "id": 2,
+      "code": "accountTransferRecurrenceType.as.per.dues",
+      "value": "As Per Dues Recurrence"
+    }
+  ],
+  "recurrenceFrequencyOptions": [
+    {
+      "id": 0,
+      "code": "frequencyperiodFrequencyType.days",
+      "value": "Days"
+    },
+    {
+      "id": 1,
+      "code": "frequencyperiodFrequencyType.weeks",
+      "value": "Weeks"
+    },
+    {
+      "id": 2,
+      "code": "frequencyperiodFrequencyType.months",
+      "value": "Months"
+    },
+    {
+      "id": 3,
+      "code": "frequencyperiodFrequencyType.years",
+      "value": "Years"
+    }
+  ]
+}
+			</code>
+	    </div>
+
+	</div>
+
+	<a id="standinginstruction_create" name="standinginstruction_create" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Create new Standing Instruction</h2>
+	        <p>Ability to create new instruction for transfer of monetary funds from one account to another.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/standinginstructions</code>
+	        <code class="method-request">POST standinginstructions/              
+Content-Type: application/json
+No Request Body:
+{
+	"fromOfficeId":1,
+	"fromClientId":1,
+	"fromAccountType":2,
+	"name":"standing instruction",
+	"transferType":1,
+	"priority":2,
+	"status":1,
+	"fromAccountId":1,
+	"toOfficeId":1,
+	"toClientId":1,
+	"toAccountType":2,
+	"toAccountId":3,
+	"instructionType":1,
+	"amount":"221",
+	"validFrom":"08 April 2014",
+	"recurrenceType":1,
+	"recurrenceInterval":"1",
+	"recurrenceFrequency":2,
+	"locale":"en",
+	"dateFormat":"dd MMMM yyyy",
+	"recurrenceOnMonthDay":"02 April",
+	"monthDayFormat":"dd MMMM"
+}
+	        </code>
+	        <code class="method-response">
+{
+  	
+"clientId":1,
+"resourceId":65
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="standinginstruction_update" name="standinginstruction_update" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Update Standing Instruction</h2>
+	        <p>Ability to modify existing instruction for transfer of monetary funds from one account to another. </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">PUT https://Domain Name/api/v1/standinginstructions/1?command=update</code>
+	        <code class="method-request">PUT standinginstructions/1?command=update       
+Content-Type: application/json
+No Request Body:
+{
+	"recurrenceInterval":"2"
+}
+	        </code>
+	        <code class="method-response">
+{
+	"resourceId":20,
+	"changes":{
+		"recurrenceInterval":2
+	}
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="standinginstruction_delete" name="standinginstruction_delete" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Delete Standing Instruction</h2>
+	        <p>Ability to modify existing instruction for transfer of monetary funds from one account to another. </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">PUT https://Domain Name/api/v1/standinginstructions/1?command=delete</code>
+	        <code class="method-request">PUT standinginstructions/1?command=delete       
+Content-Type: application/json
+No Request Body:
+{
+	
+}
+	        </code>
+	        <code class="method-response">
+{
+	"resourceId":20,
+	"changes":{
+		"status":3
+	}
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="standinginstructions_list" name="standinginstructions_list" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h2>List Standing Instructions</h2>
+            <p>Example Requests:</p> 
+            <div class=apiClick>standinginstructions</div>
+            <br>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://Domain Name/api/v1/standinginstructions</code>
+            <code class="method-response">
+{
+  "totalFilteredRecords": 2,
+  "pageItems": [
+    {
+      "id": 1,
+      "accountDetailId": 6,
+      "name": "test standing",
+      "fromOffice": {
+        "id": 1,
+        "name": "Head Office"
+      },
+      "fromClient": {
+        "id": 1,
+        "displayName": "Test test",
+        "officeId": 1,
+        "officeName": "Head Office"
+      },
+      "fromAccountType": {
+        "id": 2,
+        "code": "accountType.savings",
+        "value": "Savings Account"
+      },
+      "fromAccount": {
+        "id": 14,
+        "accountNo": "000000014",
+        "productId": 1,
+        "productName": "savings old"
+      },
+      "toOffice": {
+        "id": 1,
+        "name": "Head Office"
+      },
+      "toClient": {
+        "id": 1,
+        "displayName": "Test test",
+        "officeId": 1,
+        "officeName": "Head Office"
+      },
+      "toAccountType": {
+        "id": 2,
+        "code": "accountType.savings",
+        "value": "Savings Account"
+      },
+      "toAccount": {
+        "id": 3,
+        "accountNo": "000000003",
+        "productId": 4,
+        "productName": "account overdraft"
+      },
+      "transferType": {
+        "id": 1,
+        "code": "accountTransferType.account.transfer",
+        "value": "Account Transfer"
+      },
+      "priority": {
+        "id": 3,
+        "code": "standingInstructionPriority.medium",
+        "value": "Medium Priority"
+      },
+      "instructionType": {
+        "id": 1,
+        "code": "standingInstructionType.fixed",
+        "value": "Fixed"
+      },
+      "status": {
+        "id": 3,
+        "code": "standingInstructionStatus.deleted",
+        "value": "Deleted"
+      },
+      "amount": 150.000000,
+      "validFrom": [
+        2014,
+        4,
+        3
+      ],
+      "recurrenceType": {
+        "id": 1,
+        "code": "accountTransferRecurrenceType.periodic",
+        "value": "Periodic Recurrence"
+      },
+      "recurrenceFrequency": {
+        "id": 2,
+        "code": "recurrenceperiodFrequencyType.months",
+        "value": "Months"
+      },
+      "recurrenceInterval": 1,
+      "recurrenceOnMonthDay": [
+        4,
+        3
+      ]
+    },
+    {
+      "id": 2,
+      "accountDetailId": 7,
+      "name": "test standing 2",
+      "fromOffice": {
+        "id": 1,
+        "name": "Head Office"
+      },
+      "fromClient": {
+        "id": 1,
+        "displayName": "Test test",
+        "officeId": 1,
+        "officeName": "Head Office"
+      },
+      "fromAccountType": {
+        "id": 2,
+        "code": "accountType.savings",
+        "value": "Savings Account"
+      },
+      "fromAccount": {
+        "id": 14,
+        "accountNo": "000000014",
+        "productId": 1,
+        "productName": "savings old"
+      },
+      "toOffice": {
+        "id": 1,
+        "name": "Head Office"
+      },
+      "toClient": {
+        "id": 1,
+        "displayName": "Test test",
+        "officeId": 1,
+        "officeName": "Head Office"
+      },
+      "toAccountType": {
+        "id": 2,
+        "code": "accountType.savings",
+        "value": "Savings Account"
+      },
+      "toAccount": {
+        "id": 3,
+        "accountNo": "000000003",
+        "productId": 4,
+        "productName": "account overdraft"
+      },
+      "transferType": {
+        "id": 1,
+        "code": "accountTransferType.account.transfer",
+        "value": "Account Transfer"
+      },
+      "priority": {
+        "id": 2,
+        "code": "standingInstructionPriority.high",
+        "value": "High Priority"
+      },
+      "instructionType": {
+        "id": 1,
+        "code": "standingInstructionType.fixed",
+        "value": "Fixed"
+      },
+      "status": {
+        "id": 3,
+        "code": "standingInstructionStatus.deleted",
+        "value": "Deleted"
+      },
+      "amount": 100.000000,
+      "validFrom": [
+        2014,
+        4,
+        3
+      ],
+      "recurrenceType": {
+        "id": 1,
+        "code": "accountTransferRecurrenceType.periodic",
+        "value": "Periodic Recurrence"
+      },
+      "recurrenceFrequency": {
+        "id": 2,
+        "code": "recurrenceperiodFrequencyType.months",
+        "value": "Months"
+      },
+      "recurrenceInterval": 1,
+      "recurrenceOnMonthDay": [
+        2,
+        1
+      ]
+    }
+  ]
+}			</code>
+        </div>
+    </div>
+        
+	<a id="standinginstructions_retrieve" name="standinginstructions_retrieve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Standing Instruction:</h2>
+	        <p>Example Requests : </p>
+	        <div class=apiClick>standinginstructions/1</div>
+	        <br>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://DomainName/api/v1/standinginstructions/{standingInstructionId}</code>
+	        <code class="method-response">
+{
+  "id": 1,
+  "accountDetailId": 6,
+  "name": "test standing",
+  "fromOffice": {
+    "id": 1,
+    "name": "Head Office"
+  },
+  "fromClient": {
+    "id": 1,
+    "displayName": "Test test",
+    "officeId": 1,
+    "officeName": "Head Office"
+  },
+  "fromAccountType": {
+    "id": 2,
+    "code": "accountType.savings",
+    "value": "Savings Account"
+  },
+  "fromAccount": {
+    "id": 14,
+    "accountNo": "000000014",
+    "productId": 1,
+    "productName": "savings old"
+  },
+  "toOffice": {
+    "id": 1,
+    "name": "Head Office"
+  },
+  "toClient": {
+    "id": 1,
+    "displayName": "Test test",
+    "officeId": 1,
+    "officeName": "Head Office"
+  },
+  "toAccountType": {
+    "id": 2,
+    "code": "accountType.savings",
+    "value": "Savings Account"
+  },
+  "toAccount": {
+    "id": 3,
+    "accountNo": "000000003",
+    "productId": 4,
+    "productName": "account overdraft"
+  },
+  "transferType": {
+    "id": 1,
+    "code": "accountTransferType.account.transfer",
+    "value": "Account Transfer"
+  },
+  "priority": {
+    "id": 3,
+    "code": "standingInstructionPriority.medium",
+    "value": "Medium Priority"
+  },
+  "instructionType": {
+    "id": 1,
+    "code": "standingInstructionType.fixed",
+    "value": "Fixed"
+  },
+  "status": {
+    "id": 3,
+    "code": "standingInstructionStatus.deleted",
+    "value": "Deleted"
+  },
+  "amount": 150.000000,
+  "validFrom": [
+    2014,
+    4,
+    3
+  ],
+  "recurrenceType": {
+    "id": 1,
+    "code": "accountTransferRecurrenceType.periodic",
+    "value": "Periodic Recurrence"
+  },
+  "recurrenceFrequency": {
+    "id": 2,
+    "code": "recurrenceperiodFrequencyType.months",
+    "value": "Months"
+  },
+  "recurrenceInterval": 1,
+  "recurrenceOnMonthDay": [
+    4,
+    3
+  ]
+}
+	        </code>
+	    </div>
+	</div>
+
+<!-- End Account Trasfer Standing Instrution-->
     
 <!-- start of datatables api docs -->
 			<a id="datatables" name="datatables" class="old-syle-anchor">&nbsp;</a>
