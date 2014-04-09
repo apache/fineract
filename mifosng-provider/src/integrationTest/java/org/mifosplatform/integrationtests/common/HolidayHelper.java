@@ -63,7 +63,7 @@ public class HolidayHelper {
         return Utils.performServerPost(requestSpec, responseSpec, ACTIVATE_HOLIDAY_URL, getActivateHolidayDataAsJSON(), "resourceId");
     }
     
-    public static HashMap getSchedulerJobById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+    public static HashMap getHolidayById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String holidayID) {
         final String GET_HOLIDAY_BY_ID_URL = HOLIDAYS_URL + "/" + holidayID + "?tenantIdentifier=default";
         System.out.println("------------------------ RETRIEVING HOLIDAY BY ID -------------------------");
