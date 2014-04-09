@@ -1,22 +1,25 @@
 package org.mifosplatform.integrationtests;
 
-import static org.junit.Assert.assertEquals;
-
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mifosplatform.integrationtests.common.ClientHelper;
-import org.mifosplatform.integrationtests.common.CommonConstants;
 import org.mifosplatform.integrationtests.common.GlobalConfigurationHelper;
 import org.mifosplatform.integrationtests.common.HolidayHelper;
 import org.mifosplatform.integrationtests.common.SchedulerJobHelper;
 import org.mifosplatform.integrationtests.common.Utils;
+import org.mifosplatform.integrationtests.common.accounting.Account;
+import org.mifosplatform.integrationtests.common.accounting.AccountHelper;
+import org.mifosplatform.integrationtests.common.accounting.GLAccountBuilder;
+import org.mifosplatform.integrationtests.common.accounting.JournalEntry;
+import org.mifosplatform.integrationtests.common.accounting.JournalEntryHelper;
 import org.mifosplatform.integrationtests.common.charges.ChargesHelper;
 import org.mifosplatform.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.mifosplatform.integrationtests.common.loans.LoanProductTestBuilder;
@@ -35,14 +38,26 @@ import com.jayway.restassured.specification.ResponseSpecification;
 @SuppressWarnings({ "unused", "unchecked", "rawtypes", "static-access", "cast" })
 public class SchedulerJobsTestResults {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
+    private final String DATE_OF_JOINING = "01 January 2011";
+
+    private final String TRANSACTION_DATE = "01 March 2013";
+    public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
+    public static final String MINIMUM_OPENING_BALANCE = "1000";
+    public static final String LOAN_APPROVAL_DATE = "01 March 2013";
+    public static final String LOAN_DISBURSAL_DATE = "01 March 2013";
+
+    Float SP_BALANCE = new Float(MINIMUM_OPENING_BALANCE);
+
+    private static ResponseSpecification responseSpec;
+    private static RequestSpecification requestSpec;
     private ResponseSpecification responseSpecForSchedulerJob;
     private SchedulerJobHelper schedulerJobHelper;
     private SavingsAccountHelper savingsAccountHelper;
     private LoanTransactionHelper loanTransactionHelper;
     private HolidayHelper holidayHelper;
     private GlobalConfigurationHelper globalConfigurationHelper;
+    private AccountHelper accountHelper;
+    private JournalEntryHelper journalEntryHelper;
 
     @Before
     public void setup() {
@@ -52,6 +67,8 @@ public class SchedulerJobsTestResults {
         this.requestSpec.header("X-Mifos-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.responseSpecForSchedulerJob = new ResponseSpecBuilder().expectStatusCode(202).build();
+        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
     }
 
     @Test
@@ -359,7 +376,7 @@ public class SchedulerJobsTestResults {
         final ArrayList<HashMap> repaymentScheduleDataAfterJob = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
                 this.responseSpec, loanID);
 
-        HashMap holidayData = this.holidayHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, holidayId.toString());
+        HashMap holidayData = this.holidayHelper.getHolidayById(this.requestSpec, this.responseSpec, holidayId.toString());
         ArrayList<Integer> repaymentsRescheduledDate = (ArrayList<Integer>) holidayData.get("repaymentsRescheduledTo");
 
         ArrayList<Integer> rescheduleDateAfter = (ArrayList<Integer>) repaymentScheduleDataAfterJob.get(2).get("fromDate");
@@ -444,6 +461,134 @@ public class SchedulerJobsTestResults {
                 (Float) summaryAfter.get("accountBalance"));
     }
 
+    @Test
+    public void testUpdateAccountingRunningBalancesJobOutcome() throws InterruptedException {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        final Account assetAccount = this.accountHelper.createAssetAccount();
+        final Account incomeAccount = this.accountHelper.createIncomeAccount();
+        final Account expenseAccount = this.accountHelper.createExpenseAccount();
+        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+
+        final Integer accountID = assetAccount.getAccountID();
+
+        final Integer savingsProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE, assetAccount, incomeAccount, expenseAccount,
+                liabilityAccount);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, this.DATE_OF_JOINING);
+        final Integer savingsID = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsID);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsID);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsID);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        // Checking initial Account entries.
+        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(this.SP_BALANCE, JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(this.SP_BALANCE, JournalEntry.TransactionType.CREDIT) };
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.TRANSACTION_DATE, assetAccountInitialEntry);
+        this.journalEntryHelper
+                .checkJournalEntryForLiabilityAccount(liabilityAccount, this.TRANSACTION_DATE, liablilityAccountInitialEntry);
+
+        ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(allSchedulerJobsData);
+
+        Integer jobId = (Integer) allSchedulerJobsData.get(8).get("jobId");
+
+        HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+        Assert.assertNotNull(schedulerJob);
+
+        // Executing Scheduler Job
+        this.schedulerJobHelper.runSchedulerJob(this.requestSpec, this.responseSpecForSchedulerJob, jobId.toString());
+
+        schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+        Assert.assertNotNull(schedulerJob);
+
+        // Waiting for Job to complete
+        while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
+            Thread.sleep(120000);
+            schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+            Assert.assertNotNull(schedulerJob);
+            System.out.println("Job is Still Running");
+        }
+
+        ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
+                jobId.toString());
+
+        // Verifying the Status of the Recently executed Scheduler Job
+        Assert.assertEquals("Verifying Last Scheduler Job Status", "success", jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
+
+        final HashMap runningBalanceAfter = this.accountHelper.getAccountingWithRunningBalanceById(accountID.toString());
+
+        final Integer INT_BALANCE = new Integer(MINIMUM_OPENING_BALANCE);
+
+        Assert.assertEquals("Verifying Account Running Balance after running Update Accounting Running Balances Scheduler Job",
+                INT_BALANCE, runningBalanceAfter.get("organizationRunningBalance"));
+
+    }
+
+    @Test
+    public void testUpdateLoanArrearsAgingJobOutcome() throws InterruptedException {
+        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientID);
+
+        final Integer loanProductID = createLoanProduct();
+        Assert.assertNotNull(loanProductID);
+
+        final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null);
+        Assert.assertNotNull(loanID);
+
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan(LOAN_APPROVAL_DATE, loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(LOAN_DISBURSAL_DATE, loanID);
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+        ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(allSchedulerJobsData);
+
+        Integer jobId = (Integer) allSchedulerJobsData.get(1).get("jobId");
+
+        // Executing Scheduler Job
+        this.schedulerJobHelper.runSchedulerJob(this.requestSpec, this.responseSpecForSchedulerJob, jobId.toString());
+
+        // Retrieving Scheduler Job by ID
+        HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+        Assert.assertNotNull(schedulerJob);
+
+        // Waiting for Job to complete
+        while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
+            Thread.sleep(120000);
+            schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+            Assert.assertNotNull(schedulerJob);
+            System.out.println("Job is Still Running");
+        }
+
+        ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
+                jobId.toString());
+
+        // Verifying the Status of the Recently executed Scheduler Job
+        Assert.assertEquals("Verifying Last Scheduler Job Status", "success", jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
+
+        HashMap loanSummaryData = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
+
+        Float totalLoanArrearsAging = (Float) loanSummaryData.get("principalOverdue") + (Float) loanSummaryData.get("interestOverdue");
+
+        Assert.assertEquals("Verifying Arrears Aging after Running Update Loan Arrears Aging Scheduler Job", totalLoanArrearsAging,
+                loanSummaryData.get("totalOverdue"));
+
+    }
+
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String minOpenningBalance) {
         System.out.println("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
@@ -453,6 +598,15 @@ public class SchedulerJobsTestResults {
                 .withInterestPostingPeriodTypeAsMonthly() //
                 .withInterestCalculationPeriodTypeAsDailyBalance() //
                 .withMinimumOpenningBalance(minOpenningBalance).build();
+        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    }
+
+    private static Integer createSavingsProduct(final String minOpenningBalance, final Account... accounts) {
+        System.out.println("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
+        final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily() //
+                .withInterestPostingPeriodTypeAsQuarterly() //
+                .withInterestCalculationPeriodTypeAsDailyBalance() //
+                .withMinimumOpenningBalance(minOpenningBalance).withAccountingRuleAsCashBased(accounts).build();
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
     }
 

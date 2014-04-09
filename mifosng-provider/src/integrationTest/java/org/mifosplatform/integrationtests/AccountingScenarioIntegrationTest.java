@@ -30,11 +30,11 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({ "rawtypes", "unchecked", "static-access" })
 public class AccountingScenarioIntegrationTest {
 
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
+    private static RequestSpecification requestSpec;
+    private static ResponseSpecification responseSpec;
 
     private final String DATE_OF_JOINING = "01 January 2011";
 
@@ -228,8 +228,7 @@ public class AccountingScenarioIntegrationTest {
 
         // Checking initial Account entries.
         final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(this.SP_BALANCE, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(this.SP_BALANCE,
-                JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(this.SP_BALANCE, JournalEntry.TransactionType.CREDIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.TRANSACTION_DATE, assetAccountInitialEntry);
         this.journalEntryHelper
                 .checkJournalEntryForLiabilityAccount(liabilityAccount, this.TRANSACTION_DATE, liablilityAccountInitialEntry);
@@ -278,9 +277,6 @@ public class AccountingScenarioIntegrationTest {
         HashMap paidCharge = this.savingsAccountHelper.getSavingsCharge(savingsID, (Integer) savingsChargeForPay.get("id"));
         Float chargeAmount = (Float) paidCharge.get("amount");
 
-        // assertEquals(savingsChargeForPay.get("amount"),
-        // paidCharge.get("amountPaid"));
-
         // Withdrawal after adding Charge of type Withdrawal Fee
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsID, WITHDRAWAL_AMOUNT_ADJUSTED,
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
@@ -302,7 +298,7 @@ public class AccountingScenarioIntegrationTest {
         assertEquals("Verifying Balance", balance, summary.get("accountBalance"));
     }
 
-    private Integer createSavingsProduct(final String minOpenningBalance, final Account... accounts) {
+    public static Integer createSavingsProduct(final String minOpenningBalance, final Account... accounts) {
         System.out.println("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
         final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily() //
                 .withInterestPostingPeriodTypeAsQuarterly() //
