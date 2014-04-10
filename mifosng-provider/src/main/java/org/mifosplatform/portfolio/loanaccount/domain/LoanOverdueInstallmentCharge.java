@@ -17,17 +17,14 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_loan_overdue_installment_charge")
 public class LoanOverdueInstallmentCharge extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_charge_id", referencedColumnName = "id", nullable = false)
     private LoanCharge loancharge;
 
-    @SuppressWarnings("unused")
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_schedule_id", referencedColumnName = "id", nullable = false)
     private LoanRepaymentScheduleInstallment installment;
     
-    @SuppressWarnings("unused")
     @Column(name="frequency_number")
     private Integer frequencyNumber;
 

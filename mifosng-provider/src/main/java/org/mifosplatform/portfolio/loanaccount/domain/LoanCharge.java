@@ -114,7 +114,6 @@ public class LoanCharge extends AbstractPersistable<Long> {
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
     
-    @SuppressWarnings("unused")
     @OneToOne(mappedBy = "loancharge", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.LAZY)
     private LoanOverdueInstallmentCharge overdueInstallmentCharge;
 

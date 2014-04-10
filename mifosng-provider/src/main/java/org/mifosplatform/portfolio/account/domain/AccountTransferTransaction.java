@@ -48,24 +48,19 @@ public class AccountTransferTransaction extends AbstractPersistable<Long> {
     @JoinColumn(name = "from_loan_transaction_id", nullable = true)
     private LoanTransaction fromLoanTransaction;
 
-    @SuppressWarnings("unused")
     @Column(name = "is_reversed", nullable = false)
     private boolean reversed = false;
 
-    @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "transaction_date")
     private Date date;
 
-    @SuppressWarnings("unused")
     @Embedded
     private MonetaryCurrency currency;
 
-    @SuppressWarnings("unused")
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
 
-    @SuppressWarnings("unused")
     @Column(name = "description", length = 100)
     private String description;
 

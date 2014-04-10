@@ -30,12 +30,10 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_account_transfer_details")
 public class AccountTransferDetails extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "from_office_id", nullable = false)
     private Office fromOffice;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "from_client_id", nullable = false)
     private Client fromClient;
@@ -44,12 +42,10 @@ public class AccountTransferDetails extends AbstractPersistable<Long> {
     @JoinColumn(name = "from_savings_account_id", nullable = true)
     private SavingsAccount fromSavingsAccount;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "to_office_id", nullable = false)
     private Office toOffice;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "to_client_id", nullable = false)
     private Client toClient;

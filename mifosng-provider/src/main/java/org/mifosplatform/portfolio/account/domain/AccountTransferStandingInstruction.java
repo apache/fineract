@@ -46,7 +46,6 @@ public class AccountTransferStandingInstruction extends AbstractPersistable<Long
     @JoinColumn(name = "account_transfer_details_id", nullable = true)
     private AccountTransferDetails accountTransferDetails;
 
-    @SuppressWarnings("unused")
     @Column(name = "name")
     private String name;
 
@@ -85,7 +84,6 @@ public class AccountTransferStandingInstruction extends AbstractPersistable<Long
     @Column(name = "recurrence_on_month")
     private Integer recurrenceOnMonth;
 
-    @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "last_run_date")
     private Date latsRunDate;
