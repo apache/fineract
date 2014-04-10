@@ -21,6 +21,7 @@ public class CommandProcessingResultBuilder {
     private Long savingsId;
     private String resourceIdentifier;
     private Long entityId;
+    private Long subEntityId;
     private String transactionId;
     private Map<String, Object> changes;
     private Long productId;
@@ -28,7 +29,8 @@ public class CommandProcessingResultBuilder {
 
     public CommandProcessingResult build() {
         return CommandProcessingResult.fromDetails(this.commandId, this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId,
-                this.resourceIdentifier, this.entityId, this.transactionId, this.changes, this.productId,this.rollbackTransaction);
+                this.resourceIdentifier, this.entityId, this.transactionId, this.changes, this.productId, this.rollbackTransaction,
+                this.subEntityId);
     }
 
     public CommandProcessingResultBuilder withCommandId(final Long withCommandId) {
@@ -48,6 +50,11 @@ public class CommandProcessingResultBuilder {
 
     public CommandProcessingResultBuilder withEntityId(final Long withEntityId) {
         this.entityId = withEntityId;
+        return this;
+    }
+    
+    public CommandProcessingResultBuilder withSubEntityId(final Long withSubEntityId) {
+        this.subEntityId = withSubEntityId;
         return this;
     }
 

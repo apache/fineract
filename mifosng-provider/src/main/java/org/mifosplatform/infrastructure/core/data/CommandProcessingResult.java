@@ -21,6 +21,7 @@ public class CommandProcessingResult {
     private final Long loanId;
     private final Long savingsId;
     private final Long resourceId;
+    private final Long subResourceId;
     private final String transactionId;
     private final Map<String, Object> changes;
     @SuppressWarnings("unused")
@@ -30,9 +31,9 @@ public class CommandProcessingResult {
 
     public static CommandProcessingResult fromDetails(final Long commandId, final Long officeId, final Long groupId, final Long clientId,
             final Long loanId, final Long savingsId, final String resourceIdentifier, final Long entityId, final String transactionId,
-            final Map<String, Object> changes, final Long productId,final Boolean rollbackTransaction) {
+            final Map<String, Object> changes, final Long productId, final Boolean rollbackTransaction, final Long subResourceId) {
         return new CommandProcessingResult(commandId, officeId, groupId, clientId, loanId, savingsId, resourceIdentifier, entityId,
-                transactionId, changes, productId,rollbackTransaction);
+                transactionId, changes, productId, rollbackTransaction, subResourceId);
     }
 
     public static CommandProcessingResult commandOnlyResult(final Long commandId) {
@@ -82,11 +83,12 @@ public class CommandProcessingResult {
         this.transactionId = null;
         this.changes = new HashMap<String, Object>();
         this.productId = null;
+        this.subResourceId = null;
     }
 
     private CommandProcessingResult(final Long commandId, final Long officeId, final Long groupId, final Long clientId, final Long loanId,
             final Long savingsId, final String resourceIdentifier, final Long resourceId, final String transactionId,
-            final Map<String, Object> changesOnly, final Long productId, Boolean rollbackTransaction) {
+            final Map<String, Object> changesOnly, final Long productId, Boolean rollbackTransaction, final Long subResourceId) {
         this.commandId = commandId;
         this.officeId = officeId;
         this.groupId = groupId;
@@ -99,6 +101,7 @@ public class CommandProcessingResult {
         this.transactionId = transactionId;
         this.productId = productId;
         this.rollbackTransaction = rollbackTransaction;
+        this.subResourceId = subResourceId;
     }
 
     private CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId, final Map<String, Object> changesOnly) {
@@ -117,6 +120,7 @@ public class CommandProcessingResult {
         this.commandId = commandId;
         this.changes = changesOnly;
         this.productId = null;
+        this.subResourceId = null;
     }
 
     public Long commandId() {
@@ -172,13 +176,15 @@ public class CommandProcessingResult {
         return this.productId;
     }
 
-    
     public boolean isRollbackTransaction() {
-        return this.rollbackTransaction!=null && this.rollbackTransaction;
+        return this.rollbackTransaction != null && this.rollbackTransaction;
     }
 
-    
     public void setRollbackTransaction(Boolean rollbackTransaction) {
         this.rollbackTransaction = rollbackTransaction;
+    }
+
+    public Long getSubResourceId() {
+        return subResourceId;
     }
 }
