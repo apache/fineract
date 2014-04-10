@@ -125,7 +125,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
     public List<ClientScoresOverview> retrieveClientSurveyScoreOverview(String surveyName, Long clientId)
     {
 
-        final String sql = "SELECT tz.id, lkh.name, lkh.code, poverty_line, tz.date, tz.score FROM "+surveyName+" tz"
+        final String sql = "SELECT  tz.id, lkh.name, lkh.code, poverty_line, tz.date, tz.score FROM "+surveyName+" tz"
         +" JOIN ppi_likelihoods_ppi lkp on lkp.ppi_name = '"+surveyName+"' AND enabled = '"+ LikelihoodStatus.ENABLED
         +"' JOIN ppi_scores sc on score_from  <= tz.score AND score_to >=tz.score"
         +" JOIN ppi_poverty_line pvl on pvl.likelihood_ppi_id = lkp.id AND pvl.score_id = sc.id"
@@ -144,12 +144,70 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
                     rs.getLong("score"),
                     rs.getDouble("poverty_line"),
                     new LocalDate(rs.getTimestamp("date").getTime()),
-                    rs.getLong("id")
+                    rs.getLong("id"),
+                    surveyName
             ));
         }
 
 
         return scoresOverviews ;
+    }
+
+    public List<ClientScoresOverview> retrieveClientSurveyScoreOverview(Long clientId)
+    {
+        final String surveyNameSql = retrieveAllSurveyNameSQL();
+        final SqlRowSet surveyNames = this.jdbcTemplate.queryForRowSet(surveyNameSql);
+
+        ArrayList<String> sqls = new ArrayList<String>();
+
+        while(surveyNames .next())
+        {
+            sqls.add( "SELECT '"+surveyNames.getString("name") +"' as surveyName, tz.id, lkh.name, lkh.code, poverty_line, tz.date, tz.score FROM "+surveyNames.getString("name")+" tz"
+                    +" JOIN ppi_likelihoods_ppi lkp on lkp.ppi_name = '"+surveyNames.getString("name")+"' AND enabled = '"+ LikelihoodStatus.ENABLED
+                    +"' JOIN ppi_scores sc on score_from  <= tz.score AND score_to >=tz.score"
+                    +" JOIN ppi_poverty_line pvl on pvl.likelihood_ppi_id = lkp.id AND pvl.score_id = sc.id"
+                    +" JOIN ppi_likelihoods lkh on lkh.id = lkp.likelihood_id "
+                    +" WHERE  client_id = "+clientId );
+        }
+
+        List<ClientScoresOverview> scoresOverviews = new ArrayList<ClientScoresOverview>();
+
+        for(String sql:sqls)
+        {
+           final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+
+
+
+            while(rs.next())
+            {
+                scoresOverviews.add(new ClientScoresOverview(
+                        rs.getString("code"),
+                        rs.getString("name"),
+                        rs.getLong("score"),
+                        rs.getDouble("poverty_line"),
+                        new LocalDate(rs.getTimestamp("date").getTime()),
+                        rs.getLong("id"),
+                        rs.getString("surveyName")
+                ));
+            }
+
+        }
+
+        return scoresOverviews ;
+    }
+
+    private  String retrieveAllSurveyNameSQL()
+    {
+        // PERMITTED datatables
+        return "select cf.name from x_registered_table "
+                + " join c_configuration cf on x_registered_table.registered_table_name = cf.name "
+                + " where exists"
+                + " (select 'f'" + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
+                + " left join m_role_permission rp on rp.role_id = r.id" + " left join m_permission p on p.id = rp.permission_id"
+                + " where ur.appuser_id = " + this.context.authenticatedUser().getId()
+                + " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
+                + " and x_registered_table.category = "+ DataTableApiConstant.CATEGORY_PPI
+                + " order by application_table_name, registered_table_name";
     }
 
     public GenericResultsetData retrieveSurveyEntry(String surveyName, Long clientId, Long entryId)

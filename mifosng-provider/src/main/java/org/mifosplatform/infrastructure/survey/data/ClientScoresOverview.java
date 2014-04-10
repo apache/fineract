@@ -7,6 +7,7 @@ import org.joda.time.LocalDate;
  */
 public class ClientScoresOverview {
 
+    final private String surveyName;
     final private long id ;
     final private String likelihoodCode ;
     final private String likelihoodName;
@@ -19,7 +20,8 @@ public class ClientScoresOverview {
                                 final long score,
                                 final Double povertyLine,
                                 final LocalDate date,
-                                final long resourceId) {
+                                final long resourceId,
+                                final String surveyName) {
 
         this.likelihoodCode = likelihoodCode;
         this.likelihoodName = likelihoodName;
@@ -27,6 +29,7 @@ public class ClientScoresOverview {
         this.povertyLine = povertyLine;
         this.date = date;
         this.id = resourceId;
+        this.surveyName = surveyName;
 
     }
 }

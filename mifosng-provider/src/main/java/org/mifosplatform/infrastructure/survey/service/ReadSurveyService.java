@@ -17,6 +17,7 @@ public interface ReadSurveyService {
     SurveyDataTableData retrieveSurvey(String surveyName);
 
     List<ClientScoresOverview>retrieveClientSurveyScoreOverview(String surveyName, Long clientId);
+    List<ClientScoresOverview>retrieveClientSurveyScoreOverview(Long clientId);
 
     GenericResultsetData retrieveSurveyEntry(String surveyName, Long clientId, Long entryId);
 
