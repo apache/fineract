@@ -96,7 +96,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(newNote.getId()) //
-                .withClientId(group.getId()) //
+                .withGroupId(group.getId()) //
                 .withOfficeId(group.officeId()) //
                 .build();
     }
@@ -116,10 +116,8 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(newNote.getId()) //
-                .withClientId(loan.getClientId()) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withLoanId(loan.getId()) //
-                .withGroupId(loan.getGroupId()) //
                 .build();
     }
 
@@ -140,10 +138,8 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(newNote.getId()) //
-                .withClientId(loan.getClientId()).withOfficeId(loan.getOfficeId()).withLoanId(loan.getId()).withGroupId(loan.getGroupId())// Loan
-                                                                                                                                          // can
-                                                                                                                                          // be
-                                                                                                                                          // associated
+                .withOfficeId(loan.getOfficeId())//
+                .withLoanId(loan.getId())// Loan can be associated
                 .build();
     }
 
@@ -295,8 +291,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         }
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(noteForUpdate.getId())
-                .withClientId(loan.getClientId()).withLoanId(loan.getId()).withGroupId(loan.getGroupId()).withOfficeId(loan.getOfficeId())
-                .with(changes).build();
+                .withLoanId(loan.getId()).withOfficeId(loan.getOfficeId()).with(changes).build();
     }
 
     private CommandProcessingResult updateLoanTransactionNote(final JsonCommand command) {
@@ -321,8 +316,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         }
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(noteForUpdate.getId())
-                .withClientId(loan.getClientId()).withLoanId(loan.getId()).withGroupId(loan.getGroupId()).withOfficeId(loan.getOfficeId())
-                .with(changes).build();
+                .withLoanId(loan.getId()).withOfficeId(loan.getOfficeId()).with(changes).build();
     }
 
     // private CommandProcessingResult updateSavingAccountNote(final JsonCommand
