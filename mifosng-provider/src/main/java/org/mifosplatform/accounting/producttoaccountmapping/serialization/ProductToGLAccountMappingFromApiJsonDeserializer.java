@@ -190,16 +190,16 @@ public final class ProductToGLAccountMappingFromApiJsonDeserializer {
                     SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), element);
             baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue())
                     .value(overdraftAccount).notNull().integerGreaterThanZero();
-            
+
             final Long incomeFromInterest = this.fromApiJsonHelper.extractLongNamed(
                     SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue(), element);
             baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue())
                     .value(incomeFromInterest).notNull().integerGreaterThanZero();
-            
+
             final Long writtenOff = this.fromApiJsonHelper.extractLongNamed(
                     SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), element);
-            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue())
-                    .value(writtenOff).notNull().integerGreaterThanZero();
+            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue()).value(writtenOff)
+                    .notNull().integerGreaterThanZero();
 
         }
 
@@ -211,7 +211,8 @@ public final class ProductToGLAccountMappingFromApiJsonDeserializer {
     }
 
     private boolean isAccrualBasedAccounting(final Integer accountingRuleType) {
-        return AccountingRuleType.ACCRUAL_BASED.getValue().equals(accountingRuleType);
+        return AccountingRuleType.ACCRUAL_PERIODIC.getValue().equals(accountingRuleType)
+                || AccountingRuleType.ACCRUAL_UPFRONT.getValue().equals(accountingRuleType);
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {

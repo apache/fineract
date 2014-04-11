@@ -124,10 +124,10 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
                 element);
         final Long transfersInSuspenseAccountId = this.fromApiJsonHelper.extractLongNamed(
                 SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(), element);
-        final Long overdraftControlId = this.fromApiJsonHelper.extractLongNamed(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(),
-                element);
-        final Long incomeFromInterest = this.fromApiJsonHelper.extractLongNamed(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue(),
-                element);
+        final Long overdraftControlId = this.fromApiJsonHelper.extractLongNamed(
+                SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), element);
+        final Long incomeFromInterest = this.fromApiJsonHelper.extractLongNamed(
+                SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue(), element);
         final Long writeOffId = this.fromApiJsonHelper.extractLongNamed(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(),
                 element);
         switch (accountingRuleType) {
@@ -144,7 +144,11 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
                 changes.put(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue(), incomeFromInterest);
                 changes.put(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), writeOffId);
             break;
-            case ACCRUAL_BASED:
+            case ACCRUAL_PERIODIC:
+            break;
+            case ACCRUAL_UPFRONT:
+            break;
+            default:
             break;
         }
         return changes;
@@ -169,7 +173,7 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
                 mergeSavingsToAssetAccountMappingChanges(element, SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue(),
                         savingsProductId, CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_REFERENCE.getValue(),
                         CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_REFERENCE.toString(), changes);
-                
+
                 mergeSavingsToAssetAccountMappingChanges(element, SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(),
                         savingsProductId, CASH_ACCOUNTS_FOR_SAVINGS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(),
                         CASH_ACCOUNTS_FOR_SAVINGS.OVERDRAFT_PORTFOLIO_CONTROL.toString(), changes);
@@ -203,7 +207,11 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
                         savingsProductId, CASH_ACCOUNTS_FOR_SAVINGS.TRANSFERS_SUSPENSE.getValue(),
                         CASH_ACCOUNTS_FOR_SAVINGS.TRANSFERS_SUSPENSE.toString(), changes);
             break;
-            case ACCRUAL_BASED:
+            case ACCRUAL_PERIODIC:
+            break;
+            case ACCRUAL_UPFRONT:
+            break;
+            default:
             break;
         }
     }

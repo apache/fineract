@@ -538,8 +538,18 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         return AccountingRuleType.CASH_BASED.getValue().equals(this.accountingRule);
     }
 
+    // TODO this entire block is currently unnecessary as Savings does not have
+    // accrual accounting
     public boolean isAccrualBasedAccountingEnabled() {
-        return AccountingRuleType.ACCRUAL_BASED.getValue().equals(this.accountingRule);
+        return isUpfrontAccrualAccounting() || isPeriodicAccrualAccounting();
+    }
+
+    public boolean isPeriodicAccrualAccounting() {
+        return AccountingRuleType.ACCRUAL_PERIODIC.getValue().equals(this.accountingRule);
+    }
+
+    public boolean isUpfrontAccrualAccounting() {
+        return AccountingRuleType.ACCRUAL_UPFRONT.getValue().equals(this.accountingRule);
     }
 
     public Integer getAccountingType() {

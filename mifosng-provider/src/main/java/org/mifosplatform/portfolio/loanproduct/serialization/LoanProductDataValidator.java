@@ -254,7 +254,8 @@ public final class LoanProductDataValidator {
 
         final Integer graceOnArrearsAgeing = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
                 LoanProductConstants.graceOnArrearsAgeingParameterName, element);
-        baseDataValidator.reset().parameter(LoanProductConstants.graceOnArrearsAgeingParameterName).value(graceOnArrearsAgeing).zeroOrPositiveAmount();
+        baseDataValidator.reset().parameter(LoanProductConstants.graceOnArrearsAgeingParameterName).value(graceOnArrearsAgeing)
+                .zeroOrPositiveAmount();
 
         // accounting related data validation
         final Integer accountingRuleType = this.fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());
@@ -973,7 +974,15 @@ public final class LoanProductDataValidator {
     }
 
     private boolean isAccrualBasedAccounting(final Integer accountingRuleType) {
-        return AccountingRuleType.ACCRUAL_BASED.getValue().equals(accountingRuleType);
+        return isUpfrontAccrualAccounting(accountingRuleType) || isPeriodicAccounting(accountingRuleType);
+    }
+
+    private boolean isUpfrontAccrualAccounting(final Integer accountingRuleType) {
+        return AccountingRuleType.ACCRUAL_UPFRONT.getValue().equals(accountingRuleType);
+    }
+
+    private boolean isPeriodicAccounting(final Integer accountingRuleType) {
+        return AccountingRuleType.ACCRUAL_PERIODIC.getValue().equals(accountingRuleType);
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
