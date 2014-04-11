@@ -1321,7 +1321,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 .append(" or (if(ls.interest_waived_derived is null , ls.interest_amount,(ls.interest_amount-ls.interest_waived_derived)) <> if(ls.accrual_interest_derived is null,0,ls.accrual_interest_derived)))")
                 .append("  and loan.loan_status_id=? and mpl.accounting_type=?");
         return this.jdbcTemplate.query(sqlBuilder.toString(), mapper, new Object[] { LoanStatus.ACTIVE.getValue(),
-                AccountingRuleType.ACCRUAL_BASED.getValue() });
+                AccountingRuleType.ACCRUAL_PERIODIC.getValue() });
     }
 
     private static final class LoanScheduleAccrualMapper implements RowMapper<LoanScheduleAccrualData> {
