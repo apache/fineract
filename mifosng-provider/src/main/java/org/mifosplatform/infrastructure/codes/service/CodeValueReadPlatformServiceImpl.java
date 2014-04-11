@@ -10,10 +10,12 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
+import org.mifosplatform.infrastructure.codes.exception.CodeValueNotFoundException;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -74,12 +76,19 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
     @Override
     public CodeValueData retrieveCodeValue(final Long codeValueId) {
 
-        this.context.authenticatedUser();
+    	try {
+			this.context.authenticatedUser();
 
-        final CodeValueDataMapper rm = new CodeValueDataMapper();
-        final String sql = "select " + rm.schema() + "where cv.id = ? order by position";
+			final CodeValueDataMapper rm = new CodeValueDataMapper();
+			final String sql = "select " + rm.schema()
+					+ "where cv.id = ? order by position";
 
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeValueId });
+			return this.jdbcTemplate.queryForObject(sql, rm,
+					new Object[] { codeValueId });
+		} catch (final EmptyResultDataAccessException e) {
+			throw new CodeValueNotFoundException(codeValueId);
+		}
+
 
     }
 }
