@@ -34,7 +34,8 @@ public enum LoanTransactionType {
     WITHDRAW_TRANSFER(14, "loanTransactionType.withdrawTransfer"), //
     REJECT_TRANSFER(15, "loanTransactionType.rejectTransfer"),
 
-    REFUND(16, "loanTransactionType.refund"), CHARGE_PAYMENT(17, "loanTransactionType.chargePayment");
+    REFUND(16, "loanTransactionType.refund"), CHARGE_PAYMENT(17, "loanTransactionType.chargePayment"),
+    ACCRUAL_ACCOUNTING(17,"loanTransactionType.accrualAccounting");
 
     private final Integer value;
     private final String code;

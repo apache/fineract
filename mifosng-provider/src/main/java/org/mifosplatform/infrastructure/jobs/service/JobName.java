@@ -12,7 +12,8 @@ public enum JobName {
     ACCOUNTING_RUNNING_BALANCE_UPDATE("Update Accounting Running Balances"), //
     PAY_DUE_SAVINGS_CHARGES("Pay Due Savings Charges"), //
     APPLY_CHARGE_TO_OVERDUE_LOAN_INSTALLMENT("Apply penalty to overdue loans"),
-    EXECUTE_STANDING_INSTRUCTIONS("Execute Standing Instruction");
+    EXECUTE_STANDING_INSTRUCTIONS("Execute Standing Instruction"),
+    ADD_ACCRUAL_ENTRIES("Add Accrual Transactions");
 
     private final String name;
 
