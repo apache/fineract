@@ -173,6 +173,17 @@ public class LoanTransactionHelper {
         System.out.println(json);
         return json;
     }
+    
+    public static String getDisbursementChargesForLoanAsJSON(final String chargeId) {
+        final HashMap<String, String> map = new HashMap<String, String>();
+        map.put("locale", "en_GB");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("amount", "100");
+        map.put("chargeId", chargeId);
+        String json = new Gson().toJson(map);
+        System.out.println(json);
+        return json;
+    }
 
     public String getLoanCalculationBodyAsJSON(final String productID) {
         final HashMap<String, String> map = new HashMap<String, String>();
