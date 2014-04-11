@@ -177,7 +177,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             outstandingLoanBalance = command.bigDecimalValueOfParameterNamed(LoanProductConstants.outstandingLoanBalanceParameterName);
             maxTrancheCount = command.integerValueOfParameterNamed(LoanProductConstants.maxTrancheCountParameterName);
         }
-        
+
         final Integer graceOnArrearsAgeing = command.integerValueOfParameterNamed(LoanProductConstants.graceOnArrearsAgeingParameterName);
 
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
@@ -186,7 +186,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment,
                 graceOnInterestCharged, amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle,
                 startDate, closeDate, externalId, useBorrowerCycle, loanProductBorrowerCycleVariations, multiDisburseLoan, maxTrancheCount,
-                outstandingLoanBalance,graceOnArrearsAgeing);
+                outstandingLoanBalance, graceOnArrearsAgeing);
     }
 
     /**
@@ -396,7 +396,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final AccountingRuleType accountingRuleType, final boolean includeInBorrowerCycle, final LocalDate startDate,
             final LocalDate closeDate, final String externalId, final boolean useBorrowerCycle,
             final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations, final boolean multiDisburseLoan,
-            final Integer maxTrancheCount, final BigDecimal outstandingLoanBalance,final Integer graceOnArrearsAgeing) {
+            final Integer maxTrancheCount, final BigDecimal outstandingLoanBalance, final Integer graceOnArrearsAgeing) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -414,7 +414,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         this.loanProductRelatedDetail = new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod,
                 interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery,
                 repaymentFrequencyType, defaultNumberOfInstallments, graceOnPrincipalPayment, graceOnInterestPayment,
-                graceOnInterestCharged, amortizationMethod, inArrearsTolerance,graceOnArrearsAgeing);
+                graceOnInterestCharged, amortizationMethod, inArrearsTolerance, graceOnArrearsAgeing);
 
         this.loanProductRelatedDetail.validateRepaymentPeriodWithGraceSettings();
 
@@ -614,7 +614,15 @@ public class LoanProduct extends AbstractPersistable<Long> {
     }
 
     public boolean isAccrualBasedAccountingEnabled() {
-        return AccountingRuleType.ACCRUAL_BASED.getValue().equals(this.accountingRule);
+        return isUpfrontAccrualAccounting() || isPeriodicAccrualAccounting();
+    }
+
+    public boolean isUpfrontAccrualAccounting() {
+        return AccountingRuleType.ACCRUAL_UPFRONT.getValue().equals(this.accountingRule);
+    }
+
+    public boolean isPeriodicAccrualAccounting() {
+        return AccountingRuleType.ACCRUAL_PERIODIC.getValue().equals(this.accountingRule);
     }
 
     public Money getPrincipalAmount() {

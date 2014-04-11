@@ -92,8 +92,9 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, null);
                 this.loanProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, loanProductId, null);
             break;
-            case ACCRUAL_BASED:
-
+            case ACCRUAL_UPFRONT:
+                // Fall Through
+            case ACCRUAL_PERIODIC:
                 // assets (including receivables)
                 this.loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), loanProductId,
@@ -170,17 +171,16 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_PENALTIES.getValue());
-                
+
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_INTEREST.getValue());
-                
 
                 // expenses
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToExpenseAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.INTEREST_ON_SAVINGS.getValue());
-                
+
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToExpenseAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.LOSSES_WRITTEN_OFF.getValue());
@@ -197,8 +197,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.savingsProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, savingProductId, null);
                 this.savingsProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, savingProductId, null);
             break;
-            /*** Do not have accrual based accounting for now ***/
-            case ACCRUAL_BASED:
+            default:
             break;
         }
 

@@ -3238,7 +3238,8 @@ public class Loan extends AbstractPersistable<Long> {
         accountingBridgeData.put("currency", currencyData);
         accountingBridgeData.put("calculatedInterest", this.summary.getTotalInterestCharged());
         accountingBridgeData.put("cashBasedAccountingEnabled", isCashBasedAccountingEnabledOnLoanProduct());
-        accountingBridgeData.put("accrualBasedAccountingEnabled", isAccrualBasedAccountingEnabledOnLoanProduct());
+        accountingBridgeData.put("upfrontAccrualBasedAccountingEnabled", isAccrualBasedAccountingEnabledOnLoanProduct());
+        accountingBridgeData.put("periodicAccrualBasedAccountingEnabled", isAccrualBasedAccountingEnabledOnLoanProduct());
 
         final List<Map<String, Object>> newLoanTransactions = new ArrayList<Map<String, Object>>();
         for (final LoanTransaction transaction : this.loanTransactions) {

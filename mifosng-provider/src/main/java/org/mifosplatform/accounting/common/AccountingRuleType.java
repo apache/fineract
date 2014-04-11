@@ -12,7 +12,8 @@ public enum AccountingRuleType {
 
     NONE(1, "accountingRuleType.none"), //
     CASH_BASED(2, "accountingRuleType.cash"), //
-    ACCRUAL_BASED(3, "accountingRuleType.accrual");
+    ACCRUAL_PERIODIC(3, "accountingRuleType.accrual.periodic"), //
+    ACCRUAL_UPFRONT(4, "accountingRuleType.accrual.upfront"); //
 
     private final Integer value;
     private final String code;
