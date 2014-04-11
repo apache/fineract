@@ -27,6 +27,7 @@ import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
@@ -304,7 +305,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final PortfolioAccountData savingAccountData = this.accountAssociationsReadPlatformService.retriveLoanAssociation(loanId);
             final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(actualDisbursementDate, entrySet.getValue(),
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN, savingAccountData.accountId(), loanId, "Loan Charge Payment",
-                    locale, fmt, null, null, LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue(), entrySet.getKey(), null, AccountTransferType.CHARGE_PAYMENT.getValue(), null);
+                    locale, fmt, null, null, LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue(), entrySet.getKey(), null,
+                    AccountTransferType.CHARGE_PAYMENT.getValue(), null);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
         }
 
@@ -1207,7 +1209,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
         final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, amount, PortfolioAccountType.SAVINGS,
                 PortfolioAccountType.LOAN, portfolioAccountData.accountId(), loanId, "Loan Charge Payment", locale, fmt, null, null,
-                LoanTransactionType.CHARGE_PAYMENT.getValue(), loanChargeId, loanInstallmentNumber, AccountTransferType.CHARGE_PAYMENT.getValue(), null);
+                LoanTransactionType.CHARGE_PAYMENT.getValue(), loanChargeId, loanInstallmentNumber,
+                AccountTransferType.CHARGE_PAYMENT.getValue(), null);
         this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
 
         return new CommandProcessingResultBuilder() //
@@ -1252,7 +1255,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(new LocalDate(),
                             chargeData.getAmountOutstanding(), PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN,
                             portfolioAccountData.accountId(), chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
-                            LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(), null, AccountTransferType.CHARGE_PAYMENT.getValue(), null);
+                            LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(), null,
+                            AccountTransferType.CHARGE_PAYMENT.getValue(), null);
                     transferFeeCharge(sb, accountTransferDTO);
                 }
             }
@@ -1734,6 +1738,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .retrieveAllLoansWithOverdueInstallments(penaltyWaitPeriodValue);
 
         if (!overdueLoanScheduledInstallments.isEmpty()) {
+            final StringBuilder sb = new StringBuilder();
             for (final OverdueLoanScheduleData overdueInstallment : overdueLoanScheduledInstallments) {
                 try {
 
@@ -1750,9 +1755,26 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     for (final ApiParameterError error : errors) {
                         logger.error("Apply Charges due for overdue loans failed for account:" + overdueInstallment.getLoanId()
                                 + " with message " + error.getDeveloperMessage());
+                        sb.append("Apply Charges due for overdue loans failed for account:").append(overdueInstallment.getLoanId())
+                                .append(" with message ").append(error.getDeveloperMessage());
                     }
+                } catch (final AbstractPlatformDomainRuleException ex) {
+                    logger.error("Apply Charges due for overdue loans failed for account:" + overdueInstallment.getLoanId()
+                            + " with message " + ex.getDefaultUserMessage());
+                    sb.append("Apply Charges due for overdue loans failed for account:").append(overdueInstallment.getLoanId())
+                            .append(" with message ").append(ex.getDefaultUserMessage());
+                } catch (Exception e) {
+                    Throwable realCause = e;
+                    if (e.getCause() != null) {
+                        realCause = e.getCause();
+                    }
+                    logger.error("Apply Charges due for overdue loans failed for account:" + overdueInstallment.getLoanId()
+                            + " with message " + realCause.getMessage());
+                    sb.append("Apply Charges due for overdue loans failed for account:").append(overdueInstallment.getLoanId())
+                            .append(" with message ").append(realCause.getMessage());
                 }
             }
+            if (sb.length() > 0) { throw new JobExecutionException(sb.toString()); }
         }
     }
 
