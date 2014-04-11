@@ -309,6 +309,10 @@ public class LoanEnumerations {
                 optionData = new LoanTransactionEnumData(LoanTransactionType.CHARGE_PAYMENT.getValue().longValue(),
                         LoanTransactionType.CHARGE_PAYMENT.getCode(), "Charge Payment");
             break;
+            case ACCRUAL_ACCOUNTING:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.ACCRUAL_ACCOUNTING.getValue().longValue(),
+                        LoanTransactionType.ACCRUAL_ACCOUNTING.getCode(), "Accrual Accounting");
+            break;
             default:
             break;
         }

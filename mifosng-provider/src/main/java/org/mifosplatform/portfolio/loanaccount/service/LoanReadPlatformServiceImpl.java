@@ -16,6 +16,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
+import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -53,6 +54,7 @@ import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanApplicationTimelineData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanSummaryData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTermVariationsData;
@@ -62,6 +64,7 @@ import org.mifosplatform.portfolio.loanaccount.data.RepaymentScheduleRelatedLoan
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
@@ -1301,6 +1304,71 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final LoanTermVariationsData loanTermVariationsData = new LoanTermVariationsData(id,
                     LoanEnumerations.loanvariationType(LoanTermVariationType.EMI_AMOUNT), variationApplicableFrom, termValue);
             return loanTermVariationsData;
+        }
+
+    }
+
+    @Override
+    public Collection<LoanScheduleAccrualData> retriveScheduleAccrualData() {
+
+        LoanScheduleAccrualMapper mapper = new LoanScheduleAccrualMapper();
+        final StringBuilder sqlBuilder = new StringBuilder(400);
+        sqlBuilder
+                .append("select ")
+                .append(mapper.schema())
+                .append(" where ((if(ls.fee_charges_waived_derived is null , ls.fee_charges_amount,(ls.fee_charges_amount-ls.fee_charges_waived_derived)) <> if(ls.accrual_fee_charges_derived is null,0, ls.accrual_fee_charges_derived))")
+                .append(" or (if(ls.penalty_charges_waived_derived is null , ls.penalty_charges_amount,(ls.penalty_charges_amount-ls.penalty_charges_waived_derived)) <> if(ls.accrual_penalty_charges_derived is null,0,ls.accrual_penalty_charges_derived))")
+                .append(" or (if(ls.interest_waived_derived is null , ls.interest_amount,(ls.interest_amount-ls.interest_waived_derived)) <> if(ls.accrual_interest_derived is null,0,ls.accrual_interest_derived)))")
+                .append("  and loan.loan_status_id=? and mpl.accounting_type=?");
+        return this.jdbcTemplate.query(sqlBuilder.toString(), mapper, new Object[] { LoanStatus.ACTIVE.getValue(),
+                AccountingRuleType.ACCRUAL_BASED.getValue() });
+    }
+
+    private static final class LoanScheduleAccrualMapper implements RowMapper<LoanScheduleAccrualData> {
+
+        public String schema() {
+            final StringBuilder sqlBuilder = new StringBuilder(400);
+            sqlBuilder
+                    .append("loan.id as loanId ,if(loan.client_id is null,mg.office_id,mc.office_id) as officeId,")
+                    .append("ls.duedate as duedate,ls.id as scheduleId,loan.product_id as productId,")
+                    .append("if(ls.interest_waived_derived is null,ls.interest_amount,(ls.interest_amount-ls.interest_waived_derived)) as interest,")
+                    .append("if(ls.penalty_charges_waived_derived is null , ls.penalty_charges_amount,(ls.penalty_charges_amount-ls.penalty_charges_waived_derived)) as penalty,")
+                    .append("if(ls.fee_charges_waived_derived is null , ls.fee_charges_amount,(ls.fee_charges_amount-ls.fee_charges_waived_derived)) as charges,")
+                    .append("ls.accrual_interest_derived as accinterest,ls.accrual_fee_charges_derived as accfeecharege,ls.accrual_penalty_charges_derived as accpenalty,")
+                    .append(" loan.currency_code as currencyCode,loan.currency_digits as currencyDigits,loan.currency_multiplesof as inMultiplesOf,")
+                    .append("curr.display_symbol as currencyDisplaySymbol,curr.name as currencyName,curr.internationalized_name_code as currencyNameCode")
+                    .append(" from m_loan_repayment_schedule ls ").append(" left join m_loan loan on loan.id=ls.loan_id ")
+                    .append(" left join m_product_loan mpl on mpl.id = loan.product_id")
+                    .append(" left join m_client mc on mc.id = loan.client_id ").append(" left join m_group mg on mg.id = loan.group_id")
+                    .append(" left join m_currency curr on curr.code = loan.currency_code");
+            return sqlBuilder.toString();
+        }
+
+        @Override
+        public LoanScheduleAccrualData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+
+            final Long loanId = rs.getLong("loanId");
+            final Long officeId = rs.getLong("officeId");
+            final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "duedate");
+            final Long repaymentScheduleId = rs.getLong("scheduleId");
+            final Long loanProductId = rs.getLong("productId");
+            final BigDecimal interestIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "interest");
+            final BigDecimal feeIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "charges");
+            final BigDecimal penaltyIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "penalty");
+            final BigDecimal accruedInterestIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "accinterest");
+            final BigDecimal accruedFeeIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "accfeecharege");
+            final BigDecimal accruedPenaltyIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "accpenalty");
+
+            final String currencyCode = rs.getString("currencyCode");
+            final String currencyName = rs.getString("currencyName");
+            final String currencyNameCode = rs.getString("currencyNameCode");
+            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
+            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
+                    currencyDisplaySymbol, currencyNameCode);
+            return new LoanScheduleAccrualData(loanId, officeId, dueDate, repaymentScheduleId, loanProductId, interestIncome, feeIncome,
+                    penaltyIncome, accruedInterestIncome, accruedFeeIncome, accruedPenaltyIncome, currencyData);
         }
 
     }

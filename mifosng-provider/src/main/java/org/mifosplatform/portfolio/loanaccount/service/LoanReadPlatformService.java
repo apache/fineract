@@ -13,6 +13,7 @@ import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
@@ -77,4 +78,6 @@ public interface LoanReadPlatformService {
     DisbursementData retrieveLoanDisbursementDetail(Long loanId, Long disbursementId);
 
     Collection<LoanTermVariationsData> retrieveLoanTermVariations(Long loanId, Integer termType);
+
+    Collection<LoanScheduleAccrualData> retriveScheduleAccrualData();
 }
