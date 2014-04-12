@@ -39,62 +39,67 @@ public class GlobalConfigurationTest {
                 this.responseSpec);
         Assert.assertNotNull(globalConfig);
 
-        // Updating Value for penalty-wait-period Global Configuration
-        Integer configId = (Integer) globalConfig.get(7).get("id");
-        Assert.assertNotNull(configId);
+        String configName = "penalty-wait-period";
+        for (Integer configIndex = 0; configIndex < (globalConfig.size() - 1); configIndex++) {
+            if (globalConfig.get(configIndex).get("name").equals(configName)) {
+                Integer configId = (Integer) globalConfig.get(configIndex).get("id");
+                Assert.assertNotNull(configId);
 
-        HashMap configDataBefore = this.globalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
-                configId.toString());
-        Assert.assertNotNull(configDataBefore);
+                HashMap configDataBefore = this.globalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
+                        configId.toString());
+                Assert.assertNotNull(configDataBefore);
 
-        Integer value = (Integer) configDataBefore.get("value") + 1;
+                Integer value = (Integer) configDataBefore.get("value") + 1;
 
-        configId = this.globalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec,
-                configId.toString(), value.toString());
-        Assert.assertNotNull(configId);
+                // Updating Value for penalty-wait-period Global Configuration
+                configId = this.globalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec,
+                        configId.toString(), value.toString());
+                Assert.assertNotNull(configId);
 
-        HashMap configDataAfter = this.globalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
-                configId.toString());
+                HashMap configDataAfter = this.globalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
+                        configId.toString());
 
-        // Verifying Value for penalty-wait-period after Updation
-        Assert.assertEquals("Verifying Global Config Value after Updation", value, configDataAfter.get("value"));
+                // Verifying Value for penalty-wait-period after Updation
+                Assert.assertEquals("Verifying Global Config Value after Updation", value, configDataAfter.get("value"));
 
-        // Updating Enabled Flag for penalty-wait-period Global Configuration
-        Boolean enabled = (Boolean) globalConfig.get(7).get("enabled");
+                // Updating Enabled Flag for penalty-wait-period Global
+                // Configuration
+                Boolean enabled = (Boolean) globalConfig.get(configIndex).get("enabled");
 
-        if (enabled == true) {
-            enabled = false;
-        } else {
-            enabled = true;
+                if (enabled == true) {
+                    enabled = false;
+                } else {
+                    enabled = true;
+                }
+
+                configId = this.globalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec,
+                        configId.toString(), enabled);
+
+                configDataAfter = this.globalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
+                        configId.toString());
+
+                // Verifying Enabled Flag for penalty-wait-period after Updation
+                Assert.assertEquals("Verifying Enabled Flag Global Config after Updation", enabled, configDataAfter.get("enabled"));
+                break;
+            }
         }
-
-        configId = this.globalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec,
-                configId.toString(), enabled);
-
-        configDataAfter = this.globalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
-                configId.toString());
-
-        // Verifying Enabled Flag for penalty-wait-period after Updation
-        Assert.assertEquals("Verifying Enabled Flag Global Config after Updation", enabled, configDataAfter.get("enabled"));
-
     }
 
     @Test
     public void testGlobalConfigurationIsCacheEnabled() {
         this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
 
-     // Retrieving Is Cache Enabled Global Configuration details
-        ArrayList<HashMap> isCacheGlobalConfig = this.globalConfigurationHelper.getGlobalConfigurationIsCacheEnabled(
-                this.requestSpec, this.responseSpec);
+        // Retrieving Is Cache Enabled Global Configuration details
+        ArrayList<HashMap> isCacheGlobalConfig = this.globalConfigurationHelper.getGlobalConfigurationIsCacheEnabled(this.requestSpec,
+                this.responseSpec);
         Assert.assertNotNull(isCacheGlobalConfig);
 
         for (Integer cacheType = 0; cacheType <= ((isCacheGlobalConfig.size()) - 1); cacheType++) {
 
-         // Retrieving Is Cache Enabled Global Configuration details
-            isCacheGlobalConfig = this.globalConfigurationHelper.getGlobalConfigurationIsCacheEnabled(
-                    this.requestSpec, this.responseSpec);
+            // Retrieving Is Cache Enabled Global Configuration details
+            isCacheGlobalConfig = this.globalConfigurationHelper.getGlobalConfigurationIsCacheEnabled(this.requestSpec, this.responseSpec);
             Assert.assertNotNull(isCacheGlobalConfig);
-            
+
             HashMap cacheTypeAsHashMap = (HashMap) isCacheGlobalConfig.get(cacheType).get("cacheType");
             Integer cacheTypeId = (Integer) cacheTypeAsHashMap.get("id");
             String cacheTypeValue = (String) cacheTypeAsHashMap.get("value");

@@ -1,6 +1,8 @@
 package org.mifosplatform.integrationtests.common.loans;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.mifosplatform.integrationtests.common.Utils;
@@ -49,9 +51,16 @@ public class LoanProductTestBuilder {
     private String maxPrincipal = "100000.00";
     private Account[] accountList = null;
 
-    public String build() {
-        final HashMap<String, String> map = new HashMap<String, String>();
+    public String build(final String chargeId) {
+        final HashMap<String, Object> map = new HashMap<String, Object>();
 
+        if (chargeId != null) {
+            List<HashMap<String, String>> charges = new ArrayList<HashMap<String, String>>();
+            HashMap<String, String> chargeMap = new HashMap<String, String>();
+            chargeMap.put("id", chargeId);
+            charges.add(chargeMap);
+            map.put("charges", charges);
+        }
         map.put("name", this.nameOfLoanProduct);
         map.put("shortName", this.shortName);
         map.put("currencyCode", this.currencyCode);

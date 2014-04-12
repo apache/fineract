@@ -173,7 +173,7 @@ public class LoanTransactionHelper {
         System.out.println(json);
         return json;
     }
-    
+
     public static String getDisbursementChargesForLoanAsJSON(final String chargeId) {
         final HashMap<String, String> map = new HashMap<String, String>();
         map.put("locale", "en_GB");
