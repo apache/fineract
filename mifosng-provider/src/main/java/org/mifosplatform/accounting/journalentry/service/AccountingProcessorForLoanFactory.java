@@ -27,9 +27,10 @@ public class AccountingProcessorForLoanFactory {
         if (loanDTO.isCashBasedAccountingEnabled()) {
             accountingProcessorForLoan = this.applicationContext.getBean("cashBasedAccountingProcessorForLoan",
                     AccountingProcessorForLoan.class);
-        }
-
-        else if (loanDTO.isAccrualBasedAccountingEnabled()) {
+        } else if (loanDTO.isUpfrontAccrualBasedAccountingEnabled()) {
+            accountingProcessorForLoan = this.applicationContext.getBean("accrualBasedAccountingProcessorForLoan",
+                    AccountingProcessorForLoan.class);
+        } else if (loanDTO.isPeriodicAccrualBasedAccountingEnabled()) {
             accountingProcessorForLoan = this.applicationContext.getBean("accrualBasedAccountingProcessorForLoan",
                     AccountingProcessorForLoan.class);
         }

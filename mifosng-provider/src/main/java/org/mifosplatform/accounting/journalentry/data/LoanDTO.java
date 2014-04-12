@@ -15,19 +15,21 @@ public class LoanDTO {
 
     private String currencyCode;
     private boolean cashBasedAccountingEnabled;
-    private boolean accrualBasedAccountingEnabled;
+    final boolean upfrontAccrualBasedAccountingEnabled;
+    final boolean periodicAccrualBasedAccountingEnabled;
     private List<LoanTransactionDTO> newLoanTransactions;
 
     public LoanDTO(final Long loanId, final Long loanProductId, final Long officeId, final String currencyCode,
-            final boolean cashBasedAccountingEnabled, final boolean accrualBasedAccountingEnabled,
-            final List<LoanTransactionDTO> newLoanTransactions) {
+            final boolean cashBasedAccountingEnabled, final boolean upfrontAccrualBasedAccountingEnabled,
+            final boolean periodicAccrualBasedAccountingEnabled, final List<LoanTransactionDTO> newLoanTransactions) {
         this.loanId = loanId;
         this.loanProductId = loanProductId;
         this.officeId = officeId;
         this.cashBasedAccountingEnabled = cashBasedAccountingEnabled;
-        this.accrualBasedAccountingEnabled = accrualBasedAccountingEnabled;
         this.newLoanTransactions = newLoanTransactions;
         this.currencyCode = currencyCode;
+        this.upfrontAccrualBasedAccountingEnabled = upfrontAccrualBasedAccountingEnabled;
+        this.periodicAccrualBasedAccountingEnabled = periodicAccrualBasedAccountingEnabled;
     }
 
     public Long getLoanId() {
@@ -62,12 +64,12 @@ public class LoanDTO {
         this.cashBasedAccountingEnabled = cashBasedAccountingEnabled;
     }
 
-    public boolean isAccrualBasedAccountingEnabled() {
-        return this.accrualBasedAccountingEnabled;
+    public boolean isUpfrontAccrualBasedAccountingEnabled() {
+        return this.upfrontAccrualBasedAccountingEnabled;
     }
 
-    public void setAccrualBasedAccountingEnabled(final boolean accrualBasedAccountingEnabled) {
-        this.accrualBasedAccountingEnabled = accrualBasedAccountingEnabled;
+    public boolean isPeriodicAccrualBasedAccountingEnabled() {
+        return this.periodicAccrualBasedAccountingEnabled;
     }
 
     public List<LoanTransactionDTO> getNewLoanTransactions() {
