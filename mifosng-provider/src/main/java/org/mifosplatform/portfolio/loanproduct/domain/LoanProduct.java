@@ -614,14 +614,14 @@ public class LoanProduct extends AbstractPersistable<Long> {
     }
 
     public boolean isAccrualBasedAccountingEnabled() {
-        return isUpfrontAccrualAccounting() || isPeriodicAccrualAccounting();
+        return isUpfrontAccrualAccountingEnabled() || isPeriodicAccrualAccountingEnabled();
     }
 
-    public boolean isUpfrontAccrualAccounting() {
+    public boolean isUpfrontAccrualAccountingEnabled() {
         return AccountingRuleType.ACCRUAL_UPFRONT.getValue().equals(this.accountingRule);
     }
 
-    public boolean isPeriodicAccrualAccounting() {
+    public boolean isPeriodicAccrualAccountingEnabled() {
         return AccountingRuleType.ACCRUAL_PERIODIC.getValue().equals(this.accountingRule);
     }
 

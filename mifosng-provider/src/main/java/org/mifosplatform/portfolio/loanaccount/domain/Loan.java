@@ -555,7 +555,7 @@ public class Loan extends AbstractPersistable<Long> {
             }
         }
 
-        final LoanTransaction applyLoanChargeTransaction = LoanTransaction.applyLoanCharge(this, getOffice(), chargeAmount,
+        final LoanTransaction applyLoanChargeTransaction = LoanTransaction.accrueLoanCharge(this, getOffice(), chargeAmount,
                 transactionDate, feeCharges, penaltyCharges);
         this.loanTransactions.add(applyLoanChargeTransaction);
         return applyLoanChargeTransaction;
@@ -1787,9 +1787,17 @@ public class Loan extends AbstractPersistable<Long> {
             }
 
             final Money interestApplied = Money.of(getCurrency(), this.summary.getTotalInterestCharged());
-            final LoanTransaction interestAppliedTransaction = LoanTransaction.applyInterest(getOffice(), this, interestApplied,
-                    actualDisbursementDate);
-            this.loanTransactions.add(interestAppliedTransaction);
+
+            /**
+             * Add an interest applied transaction of the interest is accrued
+             * upfront (Up front accrual)
+             **/
+
+            if (isUpfrontAccrualAccountingEnabledOnLoanProduct()) {
+                final LoanTransaction interestAppliedTransaction = LoanTransaction.accrueInterest(getOffice(), this, interestApplied,
+                        actualDisbursementDate);
+                this.loanTransactions.add(interestAppliedTransaction);
+            }
 
             // changedTransactionDetail =
             // reprocessTransactionForDisbursement(changedTransactionDetail);
@@ -1990,7 +1998,13 @@ public class Loan extends AbstractPersistable<Long> {
                         disbursentMoney = disbursentMoney.plus(charge.amount());
                     }
                 } else {
-                    handleChargeAppliedTransaction(charge, disbursedOn);
+                    /**
+                     * create a Charge applied transaction if Upfront Accrual is
+                     * enabled
+                     **/
+                    if (isUpfrontAccrualAccountingEnabledOnLoanProduct()) {
+                        handleChargeAppliedTransaction(charge, disbursedOn);
+                    }
                 }
             }
             if (disbursentMoney.isGreaterThanZero()) {
@@ -3208,8 +3222,12 @@ public class Loan extends AbstractPersistable<Long> {
         return this.loanProduct.isCashBasedAccountingEnabled();
     }
 
-    private Boolean isAccrualBasedAccountingEnabledOnLoanProduct() {
-        return this.loanProduct.isAccrualBasedAccountingEnabled();
+    public Boolean isUpfrontAccrualAccountingEnabledOnLoanProduct() {
+        return this.loanProduct.isUpfrontAccrualAccountingEnabled();
+    }
+
+    private Boolean isPeriodicAccrualAccountingEnabledOnLoanProduct() {
+        return this.loanProduct.isPeriodicAccrualAccountingEnabled();
     }
 
     private Long productId() {
@@ -3238,8 +3256,8 @@ public class Loan extends AbstractPersistable<Long> {
         accountingBridgeData.put("currency", currencyData);
         accountingBridgeData.put("calculatedInterest", this.summary.getTotalInterestCharged());
         accountingBridgeData.put("cashBasedAccountingEnabled", isCashBasedAccountingEnabledOnLoanProduct());
-        accountingBridgeData.put("upfrontAccrualBasedAccountingEnabled", isAccrualBasedAccountingEnabledOnLoanProduct());
-        accountingBridgeData.put("periodicAccrualBasedAccountingEnabled", isAccrualBasedAccountingEnabledOnLoanProduct());
+        accountingBridgeData.put("upfrontAccrualBasedAccountingEnabled", isUpfrontAccrualAccountingEnabledOnLoanProduct());
+        accountingBridgeData.put("periodicAccrualBasedAccountingEnabled", isPeriodicAccrualAccountingEnabledOnLoanProduct());
 
         final List<Map<String, Object>> newLoanTransactions = new ArrayList<Map<String, Object>>();
         for (final LoanTransaction transaction : this.loanTransactions) {

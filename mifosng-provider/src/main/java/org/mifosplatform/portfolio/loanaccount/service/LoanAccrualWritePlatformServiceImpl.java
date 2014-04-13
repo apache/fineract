@@ -116,8 +116,8 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         TransactionStatus transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
         try {
             this.jdbcTemplate.update(transactionSql, scheduleAccrualData.getLoanId(), scheduleAccrualData.getOfficeId(),
-                    LoanTransactionType.ACCRUAL_ACCOUNTING.getValue(), scheduleAccrualData.getDueDate(), amount, interestportion,
-                    feeportion, penaltyportion);
+                    LoanTransactionType.ACCRUAL.getValue(), scheduleAccrualData.getDueDate(), amount, interestportion, feeportion,
+                    penaltyportion);
             final Long transactonId = this.jdbcTemplate.queryForLong("SELECT LAST_INSERT_ID()");
 
             Map<String, Object> transactionMap = toMapData(transactonId, amount, interestportion, feeportion, penaltyportion,
@@ -158,7 +158,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             final BigDecimal feeportion, final BigDecimal penaltyportion, final LoanScheduleAccrualData loanScheduleAccrualData) {
         final Map<String, Object> thisTransactionData = new LinkedHashMap<String, Object>();
 
-        final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.ACCRUAL_ACCOUNTING);
+        final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.ACCRUAL);
 
         thisTransactionData.put("id", id);
         thisTransactionData.put("officeId", loanScheduleAccrualData.getOfficeId());

@@ -985,9 +985,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final ChangedTransactionDetail changedTransactionDetail = loan.addLoanCharge(loanCharge, existingTransactionIds,
                 existingReversedTransactionIds);
 
-        // we want to apply charge transactions only for those loans charges
-        // that are applied when a loan is active
-        if (loan.status().isActive()) {
+        /**
+         * we want to apply charge transactions only for those loans charges
+         * that are applied when a loan is active and the loan product uses
+         * Upfront Accruals
+         **/
+        if (loan.isUpfrontAccrualAccountingEnabledOnLoanProduct() && (loan.status().isActive())) {
             final LoanTransaction applyLoanChargeTransaction = loan.handleChargeAppliedTransaction(loanCharge, null);
             this.loanTransactionRepository.save(applyLoanChargeTransaction);
             /***
@@ -1847,9 +1850,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final ChangedTransactionDetail changedTransactionDetail = loan.addLoanCharge(loanCharge, existingTransactionIds,
                     existingReversedTransactionIds);
 
-            // we want to apply charge transactions only for those loans charges
-            // that are applied when a loan is active
-            if (loan.status().isActive()) {
+            /**
+             * we want to apply charge transactions only for those loans charges
+             * that are applied when a loan is active and the loan product has
+             * Upfront Accrual accounting enabled
+             **/
+            if (loan.isUpfrontAccrualAccountingEnabledOnLoanProduct() && loan.status().isActive()) {
                 final LoanTransaction applyLoanChargeTransaction = loan.handleChargeAppliedTransaction(loanCharge, null);
                 this.loanTransactionRepository.save(applyLoanChargeTransaction);
                 this.loanRepository.saveAndFlush(loan);
