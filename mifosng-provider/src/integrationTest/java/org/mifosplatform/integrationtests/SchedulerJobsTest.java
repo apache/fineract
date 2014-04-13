@@ -56,7 +56,7 @@ public class SchedulerJobsTest {
         ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(allSchedulerJobsData);
 
-        for (Integer jobIndex = 0; jobIndex <= ((allSchedulerJobsData.size()) - 1); jobIndex++) {
+        for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
 
             Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
 

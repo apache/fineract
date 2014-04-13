@@ -64,7 +64,7 @@ public class ClientLoanIntegrationTest {
                 .withInterestRateFrequencyTypeAsMonths() //
                 .withAmortizationTypeAsEqualInstallments() //
                 .withInterestTypeAsDecliningBalance() //
-                .build();
+                .build(null);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 

@@ -37,7 +37,7 @@ public class LoanWithdrawnByApplicantIntegrationTest {
     @Test
     public void loanWithdrawnByApplicant() {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build());
+        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build(null));
         final Integer loanID = applyForLoanApplication(clientID, loanProductID);
 
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);

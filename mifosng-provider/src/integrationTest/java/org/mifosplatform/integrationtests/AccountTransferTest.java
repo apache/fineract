@@ -311,7 +311,7 @@ public class AccountTransferTest {
                 .withInterestRateFrequencyTypeAsMonths() //
                 .withAmortizationTypeAsEqualInstallments() //
                 .withInterestTypeAsDecliningBalance() //
-                .build();
+                .build(null);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
