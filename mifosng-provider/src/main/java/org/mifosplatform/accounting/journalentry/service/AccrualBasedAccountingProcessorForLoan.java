@@ -39,14 +39,9 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                 createJournalEntriesForDisbursements(loanDTO, loanTransactionDTO, office);
             }
 
-            /*** Handle Interest Postings ***/
-            if (loanTransactionDTO.getTransactionType().isApplyInterest()) {
-                createJournalEntriesForInterestPostings(loanDTO, loanTransactionDTO, office);
-            }
-
-            /*** Handle Apply charges ***/
-            else if (loanTransactionDTO.getTransactionType().isApplyCharges()) {
-                createJournalEntriesForApplyCharges(loanDTO, loanTransactionDTO, office);
+            /*** Handle Accruals ***/
+            if (loanTransactionDTO.getTransactionType().isAccrual()) {
+                createJournalEntriesForAccruals(loanDTO, loanTransactionDTO, office);
             }
 
             /***
@@ -96,37 +91,6 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                 ACCRUAL_ACCOUNTS_FOR_LOAN.FUND_SOURCE, loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
                 disbursalAmount, isReversed);
 
-    }
-
-    /**
-     * Recognise the receivable interest <br/>
-     * Debit "Interest Receivable" and Credit "Income from Interest"
-     * 
-     * @param loanDTO
-     * @param loanTransactionDTO
-     * @param office
-     */
-    private void createJournalEntriesForInterestPostings(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
-            final Office office) {
-
-        // loan properties
-        final Long loanProductId = loanDTO.getLoanProductId();
-        final Long loanId = loanDTO.getLoanId();
-        final String currencyCode = loanDTO.getCurrencyCode();
-
-        // transaction properties
-        final String transactionId = loanTransactionDTO.getTransactionId();
-        final Date transactionDate = loanTransactionDTO.getTransactionDate();
-        final BigDecimal amount = loanTransactionDTO.getAmount();
-        final boolean isReversed = loanTransactionDTO.isReversed();
-        final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
-
-        // create journal entries for recognising interest (or reversal)
-        if (amount != null && !(amount.compareTo(BigDecimal.ZERO) == 0)) {
-            this.helper.createAccrualBasedJournalEntriesAndReversalsForLoan(office, currencyCode,
-                    ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_RECEIVABLE, ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS, loanProductId,
-                    paymentTypeId, loanId, transactionId, transactionDate, amount, isReversed);
-        }
     }
 
     /**
@@ -238,8 +202,8 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
     }
 
     /**
-     * Create Journal Entries for application of charges (fees and payments)
-     * using the following rules <br/>
+     * Recognize the receivable interest <br/>
+     * Debit "Interest Receivable" and Credit "Income from Interest"
      * 
      * <b>Fees:</b> Debit <i>Fees Receivable</i> and credit <i>Income from
      * Fees</i> <br/>
@@ -253,7 +217,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
      * @param loanTransactionDTO
      * @param office
      */
-    private void createJournalEntriesForApplyCharges(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO, final Office office) {
+    private void createJournalEntriesForAccruals(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO, final Office office) {
 
         // loan properties
         final Long loanProductId = loanDTO.getLoanProductId();
@@ -263,11 +227,18 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         // transaction properties
         final String transactionId = loanTransactionDTO.getTransactionId();
         final Date transactionDate = loanTransactionDTO.getTransactionDate();
+        final BigDecimal interestAmount = loanTransactionDTO.getInterest();
         final BigDecimal feesAmount = loanTransactionDTO.getFees();
         final BigDecimal penaltiesAmount = loanTransactionDTO.getPenalties();
         final boolean isReversed = loanTransactionDTO.isReversed();
         final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
 
+        // create journal entries for recognizing interest (or reversal)
+        if (interestAmount != null && !(interestAmount.compareTo(BigDecimal.ZERO) == 0)) {
+            this.helper.createAccrualBasedJournalEntriesAndReversalsForLoan(office, currencyCode,
+                    ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_RECEIVABLE, ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS, loanProductId,
+                    paymentTypeId, loanId, transactionId, transactionDate, interestAmount, isReversed);
+        }
         // create journal entries for the fees application (or reversal)
         if (feesAmount != null && !(feesAmount.compareTo(BigDecimal.ZERO) == 0)) {
             this.helper.createAccrualBasedJournalEntriesAndReversalsForLoan(office, currencyCode,
@@ -275,7 +246,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                     loanId, transactionId, transactionDate, feesAmount, isReversed);
         }
         // create journal entries for the penalties application (or reversal)
-        else if (penaltiesAmount != null && !(penaltiesAmount.compareTo(BigDecimal.ZERO) == 0)) {
+        if (penaltiesAmount != null && !(penaltiesAmount.compareTo(BigDecimal.ZERO) == 0)) {
             this.helper.createAccrualBasedJournalEntriesAndReversalsForLoan(office, currencyCode,
                     ACCRUAL_ACCOUNTS_FOR_LOAN.PENALTIES_RECEIVABLE, ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES, loanProductId,
                     paymentTypeId, loanId, transactionId, transactionDate, penaltiesAmount, isReversed);

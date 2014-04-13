@@ -127,9 +127,18 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return new LoanTransaction(loan, office, LoanTransactionType.WAIVE_INTEREST, waived.getAmount(), waiveDate, null);
     }
 
-    public static LoanTransaction applyInterest(final Office office, final Loan loan, final Money amount,
+    public static LoanTransaction accrueInterest(final Office office, final Loan loan, final Money amount,
             final LocalDate interestAppliedDate) {
-        return new LoanTransaction(loan, office, LoanTransactionType.APPLY_INTEREST, amount.getAmount(), interestAppliedDate, null);
+        BigDecimal principalPortion = null;
+        BigDecimal feesPortion = null;
+        BigDecimal penaltiesPortion = null;
+        BigDecimal interestPortion = amount.getAmount();
+        BigDecimal overPaymentPortion = null;
+        boolean reversed = false;
+        PaymentDetail paymentDetail = null;
+        String externalId = null;
+        return new LoanTransaction(loan, office, LoanTransactionType.ACCRUAL.getValue(), interestAppliedDate.toDate(), interestPortion,
+                principalPortion, interestPortion, feesPortion, penaltiesPortion, overPaymentPortion, reversed, paymentDetail, externalId);
     }
 
     public static LoanTransaction initiateTransfer(final Office office, final Loan loan, final LocalDate transferDate) {
@@ -165,10 +174,11 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
                 loanTransaction.reversed, loanTransaction.paymentDetail, loanTransaction.externalId);
     }
 
-    public static LoanTransaction applyLoanCharge(final Loan loan, final Office office, final Money amount, final LocalDate applyDate,
+    public static LoanTransaction accrueLoanCharge(final Loan loan, final Office office, final Money amount, final LocalDate applyDate,
             final Money feeCharges, final Money penaltyCharges) {
-        final LoanTransaction applyCharge = new LoanTransaction(loan, office, LoanTransactionType.APPLY_CHARGES, amount.getAmount(),
-                applyDate, null);
+        String externalId = null;
+        final LoanTransaction applyCharge = new LoanTransaction(loan, office, LoanTransactionType.ACCRUAL, amount.getAmount(), applyDate,
+                externalId);
         applyCharge.updateChargesComponents(feeCharges, penaltyCharges);
         return applyCharge;
     }

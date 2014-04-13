@@ -277,13 +277,9 @@ public class LoanEnumerations {
                 optionData = new LoanTransactionEnumData(LoanTransactionType.WAIVE_CHARGES.getValue().longValue(),
                         LoanTransactionType.WAIVE_CHARGES.getCode(), "Waive loan charges");
             break;
-            case APPLY_CHARGES:
-                optionData = new LoanTransactionEnumData(LoanTransactionType.APPLY_CHARGES.getValue().longValue(),
-                        LoanTransactionType.APPLY_CHARGES.getCode(), "Apply Charge");
-            break;
-            case APPLY_INTEREST:
-                optionData = new LoanTransactionEnumData(LoanTransactionType.APPLY_INTEREST.getValue().longValue(),
-                        LoanTransactionType.APPLY_INTEREST.getCode(), "Apply Interest");
+            case ACCRUAL:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.ACCRUAL.getValue().longValue(),
+                        LoanTransactionType.ACCRUAL.getCode(), "Accrual");
             break;
             case APPROVE_TRANSFER:
                 optionData = new LoanTransactionEnumData(LoanTransactionType.APPROVE_TRANSFER.getValue().longValue(),
@@ -308,10 +304,6 @@ public class LoanEnumerations {
             case CHARGE_PAYMENT:
                 optionData = new LoanTransactionEnumData(LoanTransactionType.CHARGE_PAYMENT.getValue().longValue(),
                         LoanTransactionType.CHARGE_PAYMENT.getCode(), "Charge Payment");
-            break;
-            case ACCRUAL_ACCOUNTING:
-                optionData = new LoanTransactionEnumData(LoanTransactionType.ACCRUAL_ACCOUNTING.getValue().longValue(),
-                        LoanTransactionType.ACCRUAL_ACCOUNTING.getCode(), "Accrual Accounting");
             break;
             default:
             break;
