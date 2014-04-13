@@ -30,7 +30,8 @@ public class LoanProductTestBuilder {
     // private static final String RBI_INDIA_STRATEGY ="4";
     private static final String NONE = "1";
     private static final String CASH_BASED = "2";
-    private static final String ACCRUAL_BASED = "3";
+    private static final String ACCRUAL_PERIODIC = "3";
+    private static final String ACCRUAL_UPFRONT = "4";
 
     private String nameOfLoanProduct = Utils.randomNameGenerator("LOAN_PRODUCT_", 6);
     private String shortName = Utils.randomNameGenerator("", 4);
@@ -81,7 +82,7 @@ public class LoanProductTestBuilder {
         map.put("minPrincipal", this.minPrincipal);
         map.put("maxPrincipal", this.maxPrincipal);
 
-        if (this.accountingRule.equals(ACCRUAL_BASED)) {
+        if (this.accountingRule.equals(ACCRUAL_UPFRONT) || this.accountingRule.equals(ACCRUAL_PERIODIC)) {
             map.putAll(getAccountMappingForAccrualBased());
         } else if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());
@@ -195,8 +196,14 @@ public class LoanProductTestBuilder {
         return this;
     }
 
-    public LoanProductTestBuilder withAccountingRuleAsAccrualBased(final Account[] account_list) {
-        this.accountingRule = ACCRUAL_BASED;
+    public LoanProductTestBuilder withAccountingRuleUpfrontAccrual(final Account[] account_list) {
+        this.accountingRule = ACCRUAL_UPFRONT;
+        this.accountList = account_list;
+        return this;
+    }
+
+    public LoanProductTestBuilder withAccountingRulePeriodicAccrual(final Account[] account_list) {
+        this.accountingRule = ACCRUAL_PERIODIC;
         this.accountList = account_list;
         return this;
     }

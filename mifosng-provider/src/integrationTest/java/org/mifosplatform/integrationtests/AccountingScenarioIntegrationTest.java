@@ -86,7 +86,8 @@ public class AccountingScenarioIntegrationTest {
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
         final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
-        final Integer loanProductID = createLoanProduct(assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
+        final Integer loanProductID = createLoanProductWithUpfrontAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
+                overpaymentAccount);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, this.DATE_OF_JOINING);
         final Integer loanID = applyForLoanApplication(clientID, loanProductID);
@@ -181,12 +182,13 @@ public class AccountingScenarioIntegrationTest {
         System.out.println("Repayment 5 Done  ......");
     }
 
-    private Integer createLoanProduct(final Account... accounts) {
+    private Integer createLoanProductWithUpfrontAccrualAccountingEnabled(final Account... accounts) {
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(this.LP_PRINCIPAL.toString()).withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery(this.LP_REPAYMENT_PERIOD).withNumberOfRepayments(this.LP_REPAYMENTS).withRepaymentTypeAsMonth()
                 .withinterestRatePerPeriod(this.LP_INTEREST_RATE).withInterestRateFrequencyTypeAsMonths()
-                .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRuleAsAccrualBased(accounts).build(null);
+                .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRuleUpfrontAccrual(accounts)
+                .build(null);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
