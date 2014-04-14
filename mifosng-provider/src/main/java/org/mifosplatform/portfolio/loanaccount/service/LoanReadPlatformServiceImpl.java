@@ -487,7 +487,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " la.total_overdue_derived as totalOverdue,"
                     + " la.overdue_since_date_derived as overdueSinceDate,"
                     + " l.sync_disbursement_with_meeting as syncDisbursementWithMeeting,"
-                    + " l.loan_counter as loanCounter, l.loan_product_counter as loanProductCounter"
+                    + " l.loan_counter as loanCounter, l.loan_product_counter as loanProductCounter,"
+                    + " l.is_npa as isNPA "
                     + " from m_loan l" //
                     + " join m_product_loan lp on lp.id = l.product_id" //
                     + " join m_currency rc on rc.`code` = l.currency_code" //
@@ -709,6 +710,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Integer loanCounter = JdbcSupport.getInteger(rs, "loanCounter");
             final Integer loanProductCounter = JdbcSupport.getInteger(rs, "loanProductCounter");
             final BigDecimal fixedEmiAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "fixedEmiAmount");
+            final Boolean isNPA = rs.getBoolean("isNPA");
 
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupData,
                     loanType, loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
@@ -718,7 +720,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     annualInterestRate, interestType, interestCalculationPeriodType, expectedFirstRepaymentOnDate, graceOnPrincipalPayment,
                     graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, timeline, loanSummary,
                     feeChargesDueAtDisbursementCharged, syncDisbursementWithMeeting, loanCounter, loanProductCounter, multiDisburseLoan,
-                    fixedEmiAmount, outstandingLoanBalance, inArrears, graceOnArrearsAgeing);
+                    fixedEmiAmount, outstandingLoanBalance, inArrears, graceOnArrearsAgeing, isNPA);
         }
     }
 
@@ -1319,7 +1321,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 .append(" where ((if(ls.fee_charges_waived_derived is null , ls.fee_charges_amount,(ls.fee_charges_amount-ls.fee_charges_waived_derived)) <> if(ls.accrual_fee_charges_derived is null,0, ls.accrual_fee_charges_derived))")
                 .append(" or (if(ls.penalty_charges_waived_derived is null , ls.penalty_charges_amount,(ls.penalty_charges_amount-ls.penalty_charges_waived_derived)) <> if(ls.accrual_penalty_charges_derived is null,0,ls.accrual_penalty_charges_derived))")
                 .append(" or (if(ls.interest_waived_derived is null , ls.interest_amount,(ls.interest_amount-ls.interest_waived_derived)) <> if(ls.accrual_interest_derived is null,0,ls.accrual_interest_derived)))")
-                .append("  and loan.loan_status_id=? and mpl.accounting_type=?");
+                .append("  and loan.loan_status_id=? and mpl.accounting_type=? and loan.is_npa=0");
         return this.jdbcTemplate.query(sqlBuilder.toString(), mapper, new Object[] { LoanStatus.ACTIVE.getValue(),
                 AccountingRuleType.ACCRUAL_PERIODIC.getValue() });
     }

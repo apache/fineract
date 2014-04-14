@@ -72,6 +72,7 @@ public class LoanProductData {
     private final Integer graceOnInterestPayment;
     private final Integer graceOnInterestCharged;
     private final Integer graceOnArrearsAgeing;
+    private final Integer overdueDaysForNPA;
 
     // charges
     private final Collection<ChargeData> charges;
@@ -144,6 +145,7 @@ public class LoanProductData {
         final Integer graceOnInterestPayment = null;
         final Integer graceOnInterestCharged = null;
         final Integer graceOnArrearsAgeing = null;
+        final Integer overdueDaysForNPA = null;
         final Collection<ChargeData> charges = null;
         final Collection<LoanProductBorrowerCycleVariationData> principalVariations = new ArrayList<LoanProductBorrowerCycleVariationData>(
                 1);
@@ -168,7 +170,7 @@ public class LoanProductData {
                 transactionProcessingStrategyName, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges,
                 accountingType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariations,
                 interestRateVariations, numberOfRepaymentVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
-                graceOnArrearsAgeing);
+                graceOnArrearsAgeing, overdueDaysForNPA);
     }
 
     public static LoanProductData lookupWithCurrency(final Long id, final String name, final CurrencyData currency) {
@@ -199,6 +201,7 @@ public class LoanProductData {
         final Integer graceOnInterestPayment = null;
         final Integer graceOnInterestCharged = null;
         final Integer graceOnArrearsAgeing = null;
+        final Integer overdueDaysForNPA = null;
 
         final Collection<ChargeData> charges = null;
         final EnumOptionData accountingType = null;
@@ -226,7 +229,7 @@ public class LoanProductData {
                 transactionProcessingStrategyName, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges,
                 accountingType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariations,
                 interestRateVariations, numberOfRepaymentVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
-                graceOnArrearsAgeing);
+                graceOnArrearsAgeing, overdueDaysForNPA);
     }
 
     public static LoanProductData sensibleDefaultsForNewLoanProductCreation() {
@@ -263,6 +266,7 @@ public class LoanProductData {
         final Integer graceOnInterestPayment = null;
         final Integer graceOnInterestCharged = null;
         final Integer graceOnArrearsAgeing = null;
+        final Integer overdueDaysForNPA = null;
 
         final Collection<ChargeData> charges = null;
         final Collection<LoanProductBorrowerCycleVariationData> principalVariationsForBorrowerCycle = new ArrayList<LoanProductBorrowerCycleVariationData>(
@@ -290,7 +294,7 @@ public class LoanProductData {
                 transactionProcessingStrategyName, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges,
                 accountingType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId,
                 principalVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle, numberOfRepaymentVariationsForBorrowerCycle,
-                multiDisburseLoan, maxTrancheCount, outstandingLoanBalance, graceOnArrearsAgeing);
+                multiDisburseLoan, maxTrancheCount, outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA);
     }
 
     public static LoanProductData withAccountingDetails(final LoanProductData productData, final Map<String, Object> accountingMappings,
@@ -318,7 +322,7 @@ public class LoanProductData {
             Collection<LoanProductBorrowerCycleVariationData> principalVariations,
             Collection<LoanProductBorrowerCycleVariationData> interestRateVariations,
             Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariations, Boolean multiDisburseLoan,
-            Integer maxTrancheCount, BigDecimal outstandingLoanBalance, final Integer graceOnArrearsAgeing) {
+            Integer maxTrancheCount, BigDecimal outstandingLoanBalance, final Integer graceOnArrearsAgeing, final Integer overdueDaysForNPA) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -383,6 +387,7 @@ public class LoanProductData {
         this.outstandingLoanBalance = outstandingLoanBalance;
         this.maxTrancheCount = maxTrancheCount;
         this.graceOnArrearsAgeing = graceOnArrearsAgeing;
+        this.overdueDaysForNPA = overdueDaysForNPA;
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
@@ -469,6 +474,7 @@ public class LoanProductData {
         this.accountingRuleOptions = accountingRuleOptions;
         this.valueConditionTypeOptions = valueConditionTypeOptions;
         this.graceOnArrearsAgeing = productData.graceOnArrearsAgeing;
+        this.overdueDaysForNPA = productData.overdueDaysForNPA;
 
     }
 
@@ -655,16 +661,15 @@ public class LoanProductData {
         return this.outstandingLoanBalance;
     }
 
-    
     public Integer getGraceOnArrearsAgeing() {
         return this.graceOnArrearsAgeing;
     }
-    
-    public Collection<ChargeData> overdueFeeCharges(){
+
+    public Collection<ChargeData> overdueFeeCharges() {
         Collection<ChargeData> overdueFeeCharges = new ArrayList<ChargeData>();
         Collection<ChargeData> charges = charges();
-        for(ChargeData chargeData : charges){
-            if(chargeData.isOverdueInstallmentCharge()){
+        for (ChargeData chargeData : charges) {
+            if (chargeData.isOverdueInstallmentCharge()) {
                 overdueFeeCharges.add(chargeData);
             }
         }

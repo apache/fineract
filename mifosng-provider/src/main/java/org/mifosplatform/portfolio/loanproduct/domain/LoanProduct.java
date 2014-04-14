@@ -116,6 +116,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanProduct", orphanRemoval = true)
     private Set<LoanProductBorrowerCycleVariations> borrowerCycleVariations = new HashSet<LoanProductBorrowerCycleVariations>();
 
+    @Column(name = "overdue_days_for_npa", nullable = true)
+    private Integer overdueDaysForNPA;
+
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator) {
 
@@ -180,13 +183,15 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
         final Integer graceOnArrearsAgeing = command.integerValueOfParameterNamed(LoanProductConstants.graceOnArrearsAgeingParameterName);
 
+        final Integer overdueDaysForNPA = command.integerValueOfParameterNamed(LoanProductConstants.overdueDaysForNPAParameterName);
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
                 annualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentFrequencyType,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment,
                 graceOnInterestCharged, amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle,
                 startDate, closeDate, externalId, useBorrowerCycle, loanProductBorrowerCycleVariations, multiDisburseLoan, maxTrancheCount,
-                outstandingLoanBalance, graceOnArrearsAgeing);
+                outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA);
     }
 
     /**
@@ -396,7 +401,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final AccountingRuleType accountingRuleType, final boolean includeInBorrowerCycle, final LocalDate startDate,
             final LocalDate closeDate, final String externalId, final boolean useBorrowerCycle,
             final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations, final boolean multiDisburseLoan,
-            final Integer maxTrancheCount, final BigDecimal outstandingLoanBalance, final Integer graceOnArrearsAgeing) {
+            final Integer maxTrancheCount, final BigDecimal outstandingLoanBalance, final Integer graceOnArrearsAgeing,
+            final Integer overdueDaysForNPA) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -442,6 +448,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             borrowerCycleVariations.updateLoanProduct(this);
         }
         this.loanProducTrancheDetails = new LoanProductTrancheDetails(multiDisburseLoan, maxTrancheCount, outstandingLoanBalance);
+        this.overdueDaysForNPA = overdueDaysForNPA;
     }
 
     public MonetaryCurrency getCurrency() {
@@ -605,6 +612,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
             this.externalId = newValue;
         }
         loanProducTrancheDetails.update(command, actualChanges, localeAsInput);
+
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.overdueDaysForNPAParameterName, this.overdueDaysForNPA)) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.overdueDaysForNPAParameterName);
+            actualChanges.put(LoanProductConstants.overdueDaysForNPAParameterName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.overdueDaysForNPA = newValue;
+        }
 
         return actualChanges;
     }

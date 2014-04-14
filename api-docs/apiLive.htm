@@ -5800,6 +5800,7 @@ GET https://DomainName/api/v1/loans/{loanId}
     "canDisburse":false,
     "emiAmountVariations": [],
   "inArrears": true,
+  "isNPA":false,
   "overdueCharges": [
     {
       "id": 20,
@@ -6087,7 +6088,8 @@ GET https://DomainName/mifosng-provider/api/v1/loans
         ]
       },
       "feeChargesAtDisbursementCharged": 0,
-      "inArrears":false
+      "inArrears":false,
+      "isNPA":false
     }
   ]
 }
@@ -9656,7 +9658,8 @@ GET https://DomainName/api/v1/loanproducts/{productId}
         "glCode": "11"
       }
     },
-    "multiDisburseLoan":true,"maxTrancheCount":3,"outstandingLoanBalance":36000.000000
+    "multiDisburseLoan":true,"maxTrancheCount":3,"outstandingLoanBalance":36000.000000,
+    "overdueDaysForNPA":2
   ]
 }
 					</code>
@@ -9698,7 +9701,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							numberOfRepaymentVariationsForBorrowerCycle,
 							interestRateVariationsForBorrowerCycle,
 							multiDisburseLoan,maxTrancheCount,
-							outstandingLoanBalance
+							outstandingLoanBalance,overdueDaysForNPA
 							</td>
 						</tr>
 
@@ -9769,6 +9772,7 @@ Request Body:
 "feeToIncomeAccountMappings":[],
 "penaltyToIncomeAccountMappings":[],
 "charges":[],
+"overdueDaysForNPA":2,
 "dateFormat":"dd MMMM yyyy",
 "locale":"en",
 "fundSourceAccountId":1,

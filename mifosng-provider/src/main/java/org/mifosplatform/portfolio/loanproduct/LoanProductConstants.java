@@ -54,5 +54,7 @@ public interface LoanProductConstants {
     public static final String outstandingLoanBalanceParameterName = "outstandingLoanBalance";
     
     public static final String graceOnArrearsAgeingParameterName = "graceOnArrearsAgeing";
+    
+    public static final String overdueDaysForNPAParameterName = "overdueDaysForNPA";
 
 }

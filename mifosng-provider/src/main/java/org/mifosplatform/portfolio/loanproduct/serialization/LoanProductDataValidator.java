@@ -60,7 +60,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.interestRateVariationsForBorrowerCycleParameterName,
             LoanProductConstants.numberOfRepaymentVariationsForBorrowerCycleParameterName, LoanProductConstants.shortName,
             LoanProductConstants.multiDisburseLoanParameterName, LoanProductConstants.outstandingLoanBalanceParameterName,
-            LoanProductConstants.maxTrancheCountParameterName, LoanProductConstants.graceOnArrearsAgeingParameterName));
+            LoanProductConstants.maxTrancheCountParameterName, LoanProductConstants.graceOnArrearsAgeingParameterName,
+            LoanProductConstants.overdueDaysForNPAParameterName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -255,7 +256,12 @@ public final class LoanProductDataValidator {
         final Integer graceOnArrearsAgeing = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
                 LoanProductConstants.graceOnArrearsAgeingParameterName, element);
         baseDataValidator.reset().parameter(LoanProductConstants.graceOnArrearsAgeingParameterName).value(graceOnArrearsAgeing)
-                .zeroOrPositiveAmount();
+                .integerZeroOrGreater();
+
+        final Integer overdueDaysForNPA = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
+                LoanProductConstants.overdueDaysForNPAParameterName, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.overdueDaysForNPAParameterName).value(overdueDaysForNPA)
+                .integerZeroOrGreater();
 
         // accounting related data validation
         final Integer accountingRuleType = this.fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());
@@ -528,7 +534,14 @@ public final class LoanProductDataValidator {
             final Integer graceOnArrearsAgeing = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
                     LoanProductConstants.graceOnArrearsAgeingParameterName, element);
             baseDataValidator.reset().parameter(LoanProductConstants.graceOnArrearsAgeingParameterName).value(graceOnArrearsAgeing)
-                    .zeroOrPositiveAmount();
+                    .integerZeroOrGreater();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.overdueDaysForNPAParameterName, element)) {
+            final Integer overdueDaysForNPA = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
+                    LoanProductConstants.overdueDaysForNPAParameterName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.overdueDaysForNPAParameterName).value(overdueDaysForNPA)
+                    .integerZeroOrGreater();
         }
 
         //
