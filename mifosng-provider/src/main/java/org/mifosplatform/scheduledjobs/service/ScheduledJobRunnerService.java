@@ -18,4 +18,6 @@ public interface ScheduledJobRunnerService {
     void applyAnnualFeeForSavings();
     
     void applyDueChargesForSavings() throws JobExecutionException;
+
+    void updateNPA();
 }

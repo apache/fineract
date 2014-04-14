@@ -13,7 +13,8 @@ public enum JobName {
     PAY_DUE_SAVINGS_CHARGES("Pay Due Savings Charges"), //
     APPLY_CHARGE_TO_OVERDUE_LOAN_INSTALLMENT("Apply penalty to overdue loans"),
     EXECUTE_STANDING_INSTRUCTIONS("Execute Standing Instruction"),
-    ADD_ACCRUAL_ENTRIES("Add Accrual Transactions");
+    ADD_ACCRUAL_ENTRIES("Add Accrual Transactions"),
+    UPDATE_NPA("Update Non Performing Assets");
 
     private final String name;
 

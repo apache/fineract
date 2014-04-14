@@ -61,8 +61,10 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         updateSqlBuilder.append("SUM(IFNULL(mr.interest_completed_derived,0)) as interest_repaid_derived,");
         updateSqlBuilder.append("SUM(IFNULL(mr.interest_waived_derived,0)) as interest_waived_derived,");
         updateSqlBuilder.append("SUM(IFNULL(mr.interest_writtenoff_derived,0)) as interest_writtenoff_derived,");
-        updateSqlBuilder.append("SUM(IFNULL(mr.fee_charges_amount,0)) + IFNULL((select SUM(lc.amount) from  m_loan_charge lc where lc.loan_id=ml.id and lc.is_active=1 and lc.charge_id=1),0) as fee_charges_charged_derived,");
-        updateSqlBuilder.append("SUM(IFNULL(mr.fee_charges_completed_derived,0)) + IFNULL((select SUM(lc.amount_paid_derived) from  m_loan_charge lc where lc.loan_id=ml.id and lc.is_active=1 and lc.charge_id=1),0) as fee_charges_repaid_derived,");
+        updateSqlBuilder
+                .append("SUM(IFNULL(mr.fee_charges_amount,0)) + IFNULL((select SUM(lc.amount) from  m_loan_charge lc where lc.loan_id=ml.id and lc.is_active=1 and lc.charge_id=1),0) as fee_charges_charged_derived,");
+        updateSqlBuilder
+                .append("SUM(IFNULL(mr.fee_charges_completed_derived,0)) + IFNULL((select SUM(lc.amount_paid_derived) from  m_loan_charge lc where lc.loan_id=ml.id and lc.is_active=1 and lc.charge_id=1),0) as fee_charges_repaid_derived,");
         updateSqlBuilder.append("SUM(IFNULL(mr.fee_charges_waived_derived,0)) as fee_charges_waived_derived,");
         updateSqlBuilder.append("SUM(IFNULL(mr.fee_charges_writtenoff_derived,0)) as fee_charges_writtenoff_derived,");
         updateSqlBuilder.append("SUM(IFNULL(mr.penalty_charges_amount,0)) as penalty_charges_charged_derived,");
@@ -216,8 +218,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                     logger.error("Apply annual fee failed for account:" + savingsAccountReference.getAccountNo() + " with message "
                             + error.getDeveloperMessage());
                 }
-            } catch (final Exception ex){
-                //need to handle this scenario
+            } catch (final Exception ex) {
+                // need to handle this scenario
             }
         }
 
@@ -252,6 +254,31 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
          * throw exception if any charge payment fails.
          */
         if (errorMsg.length() > 0) { throw new JobExecutionException(errorMsg.toString()); }
+    }
+
+    @Transactional
+    @Override
+    @CronTarget(jobName = JobName.UPDATE_NPA)
+    public void updateNPA() {
+
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
+
+        jdbcTemplate.update("UPDATE m_loan ml SET ml.is_npa=0");
+
+        final StringBuilder updateSqlBuilder = new StringBuilder(900);
+
+        updateSqlBuilder.append("UPDATE m_loan as ml,");
+        updateSqlBuilder.append(" (select loan.id from m_loan_repayment_schedule mr ");
+        updateSqlBuilder
+                .append(" INNER JOIN  m_loan loan on mr.loan_id = loan.id INNER JOIN m_product_loan mpl on mpl.id = loan.product_id  ");
+        updateSqlBuilder.append("WHERE loan.loan_status_id = 300 and mr.completed_derived is false ");
+        updateSqlBuilder
+                .append(" and mr.duedate < SUBDATE(CURDATE(),INTERVAL  ifnull(mpl.overdue_days_for_npa,0) day) group by loan.id)  as sl ");
+        updateSqlBuilder.append("SET ml.is_npa=1 where ml.id=sl.id");
+
+        final int result = jdbcTemplate.update(updateSqlBuilder.toString());
+
+        logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by update: " + result);
     }
 
 }
