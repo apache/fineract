@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.commands.service;
 
+import org.joda.time.DateTime;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.domain.CommandSourceRepository;
 import org.mifosplatform.commands.domain.CommandWrapper;
@@ -16,6 +17,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.jobs.service.SchedulerJobRunnerReadService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -126,5 +128,15 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
     private boolean validateIsUpdateAllowed() {
         return this.schedulerJobRunnerReadService.isUpdatesAllowed();
 
+    }
+
+    @Override
+    public Long rejectEntry(final Long makerCheckerId) {
+        final CommandSource commandSourceInput = validateMakerCheckerTransaction(makerCheckerId);
+        validateIsUpdateAllowed();
+        final AppUser maker = this.context.authenticatedUser();
+        commandSourceInput.markAsRejected(maker, DateTime.now());
+        this.commandSourceRepository.save(commandSourceInput);
+        return makerCheckerId ;
     }
 }

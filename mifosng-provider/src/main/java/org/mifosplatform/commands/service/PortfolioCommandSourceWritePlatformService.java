@@ -14,5 +14,7 @@ public interface PortfolioCommandSourceWritePlatformService {
 
     CommandProcessingResult approveEntry(Long id);
 
+    Long rejectEntry(Long id);
+
     Long deleteEntry(Long makerCheckerId);
 }

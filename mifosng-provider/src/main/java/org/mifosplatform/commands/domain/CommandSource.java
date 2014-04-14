@@ -111,6 +111,12 @@ public class CommandSource extends AbstractPersistable<Long> {
         this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
     }
 
+    public void markAsRejected(final AppUser checker, final DateTime checkedOnDate){
+        this.checker = checker;
+        this.checkedOnDate = checkedOnDate.toDate();
+        this.processingResult = CommandProcessingResultType.REJECTED.getValue();
+    }
+
     public void updateResourceId(final Long resourceId) {
         this.resourceId = resourceId;
     }
