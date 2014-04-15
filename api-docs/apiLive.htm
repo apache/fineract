@@ -8545,13 +8545,13 @@ Request Body:
 	<td class=fielddesc>
 An enumeration that indicates the type of transaction processing strategy to be used. This relates to functionality that is also known as <b>Payment Application Logic</b>.
 	
-<p>A number of out of the box appraches exist, some are custom to specific MFIs, some are more general and indicate the order in which payments are processed.</p>
+<p>A number of out of the box approaches exist, some are custom to specific MFIs, some are more general and indicate the order in which payments are processed.</p>
 
 <p>Refer to the <a href="#paymentapplicationlogic">Payment Application Logic / Transaction Processing Strategy<a> section in the appendix for more detailed overview of each available <b>payment application logic</b> provided out of the box.</p>
 
 <i>List of current approaches</i>:<br/>
 <ul>
-	<li>1 = Mifos style (Similiar to Old Mifos)</li>
+	<li>1 = Mifos style (Similar to Old Mifos)</li>
 	<li>2 = Heavensfamily (Custom MFI approach)</li>
 	<li>3 = Creocore (Custom MFI approach)</li>
 	<li>4 = RBI (India)</li>
@@ -8595,7 +8595,7 @@ An enumeration that indicates the type of transaction processing strategy to be 
 						<tr>
 							<td class=fielddesc>Specifies if accounting is enabled for the particular
 								product and the type of the accounting rule to be used
-								<span>Example Values:</span>1=NONE,2=CASH_BASED, 3=ACCRUAL_BASED</td>
+								<span>Example Values:</span>1=NONE, 2=CASH_BASED, 3=ACCRUAL_PERIODIC, 4=ACCRUAL_UPFRONT</td>
 						</tr>
 						</td>
 						</tr>
@@ -9714,7 +9714,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 								writeOffAccountId, transfersInSuspenseAccountId, overpaymentLiabilityAccountId</td>
 						</tr>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Additional Mandatory Fields for Accrual(3) based accounting</div></td>
+							<td><div class="mifosXHeading2">Additional Mandatory Fields for periodic (3) and upfront (4)accrual accounting</div></td>
 						</tr>
 						<tr class=alt>
 							<td>fundSourceAccountId, loanPortfolioAccountId, interestOnLoanAccountId, 
