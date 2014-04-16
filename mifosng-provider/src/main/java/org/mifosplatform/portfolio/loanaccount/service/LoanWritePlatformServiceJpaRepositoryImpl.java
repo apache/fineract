@@ -960,18 +960,34 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LoanCharge loanCharge = LoanCharge.createNewFromJson(loan, chargeDefinition, command);
 
-        if (!loan.hasCurrencyCodeOf(chargeDefinition.getCurrencyCode())) {
-            final String errorMessage = "Charge and Loan must have the same currency.";
-            throw new InvalidCurrencyException("loanCharge", "attach.to.loan", errorMessage);
-        }
         if (chargeDefinition.isOverdueInstallment()) {
 
             final String defaultUserMessage = "Installment charge cannot be added to the loan.";
             throw new LoanChargeCannotBeAddedException("loanCharge", "overdue.charge", defaultUserMessage, null, chargeDefinition.getName());
         }
 
+        addCharge(loan, chargeDefinition, loanCharge);
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loanCharge.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .build();
+    }
+
+    private void addCharge(final Loan loan, final Charge chargeDefinition, final LoanCharge loanCharge) {
+
+        if (!loan.hasCurrencyCodeOf(chargeDefinition.getCurrencyCode())) {
+            final String errorMessage = "Charge and Loan must have the same currency.";
+            throw new InvalidCurrencyException("loanCharge", "attach.to.loan", errorMessage);
+        }
+
         if (loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
-            final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService.retriveLoanAssociation(loanId);
+            final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService.retriveLoanAssociation(loan
+                    .getId());
             if (portfolioAccountData == null) {
                 final String errorMessage = loanCharge.name() + "Charge  requires linked savings account for payment";
                 throw new LinkedAccountRequiredException("loanCharge.add", errorMessage, loanCharge.name());
@@ -990,9 +1006,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
          * that are applied when a loan is active and the loan product uses
          * Upfront Accruals
          **/
-        if (loan.isUpfrontAccrualAccountingEnabledOnLoanProduct() && (loan.status().isActive())) {
-            final LoanTransaction applyLoanChargeTransaction = loan.handleChargeAppliedTransaction(loanCharge, null);
-            this.loanTransactionRepository.save(applyLoanChargeTransaction);
+        if (loan.status().isActive()) {
+            if (loan.isUpfrontAccrualAccountingEnabledOnLoanProduct()) {
+                final LoanTransaction applyLoanChargeTransaction = loan.handleChargeAppliedTransaction(loanCharge, null);
+                this.loanTransactionRepository.save(applyLoanChargeTransaction);
+            }
             /***
              * TODO Vishwas Batch save is giving me a
              * HibernateOptimisticLockingFailureException, looping and saving
@@ -1000,7 +1018,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
              * entered only in edge cases (when a payment is made before the
              * latest payment recorded against the loan)
              ***/
-            this.loanRepository.saveAndFlush(loan);
+            this.loanRepository.save(loan);
             if (changedTransactionDetail != null) {
                 for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                     this.loanTransactionRepository.save(mapEntry.getValue());
@@ -1014,15 +1032,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             // we post Journal entries only for loans in active status
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         }
-
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(loanCharge.getId()) //
-                .withOfficeId(loan.getOfficeId()) //
-                .withClientId(loan.getClientId()) //
-                .withGroupId(loan.getGroupId()) //
-                .withLoanId(loanId) //
-                .build();
     }
 
     @Transactional
@@ -1831,49 +1840,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             final LoanCharge loanCharge = LoanCharge.createNewFromJson(loan, chargeDefinition, command, entry.getValue());
 
-            if (!loan.hasCurrencyCodeOf(chargeDefinition.getCurrencyCode())) {
-                final String errorMessage = "Charge and Loan must have the same currency.";
-                throw new InvalidCurrencyException("loanCharge", "attach.to.loan", errorMessage);
-            }
-
-            if (loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
-                final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService
-                        .retriveLoanAssociation(loanId);
-                if (portfolioAccountData == null) {
-                    final String errorMessage = loanCharge.name() + "Charge  requires linked savings account for payment";
-                    throw new LinkedAccountRequiredException("loanCharge.add", errorMessage, loanCharge.name());
-                }
-            }
-
             LoanOverdueInstallmentCharge overdueInstallmentCharge = new LoanOverdueInstallmentCharge(loanCharge, installment,
                     entry.getKey());
             loanCharge.updateOverdueInstallmentCharge(overdueInstallmentCharge);
-            final List<Long> existingTransactionIds = new ArrayList<Long>();
-            final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
-            this.loanChargeRepository.save(loanCharge);
 
-            final ChangedTransactionDetail changedTransactionDetail = loan.addLoanCharge(loanCharge, existingTransactionIds,
-                    existingReversedTransactionIds);
-
-            /**
-             * we want to apply charge transactions only for those loans charges
-             * that are applied when a loan is active and the loan product has
-             * Upfront Accrual accounting enabled
-             **/
-            if (loan.isUpfrontAccrualAccountingEnabledOnLoanProduct() && loan.status().isActive()) {
-                final LoanTransaction applyLoanChargeTransaction = loan.handleChargeAppliedTransaction(loanCharge, null);
-                this.loanTransactionRepository.save(applyLoanChargeTransaction);
-                this.loanRepository.saveAndFlush(loan);
-                if (changedTransactionDetail != null) {
-                    for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                        this.loanTransactionRepository.save(mapEntry.getValue());
-                        this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
-                    }
-                }
-
-                // we post Journal entries only for loans in active status
-                postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
-            }
+            addCharge(loan, chargeDefinition, loanCharge);
         }
     }
 
