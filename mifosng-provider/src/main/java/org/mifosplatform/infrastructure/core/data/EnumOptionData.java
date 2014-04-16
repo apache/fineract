@@ -14,7 +14,6 @@ public class EnumOptionData {
 
     private final Long id;
     private final String code;
-    @SuppressWarnings("unused")
     private final String value;
 
     public EnumOptionData(final Long id, final String code, final String value) {
@@ -30,4 +29,10 @@ public class EnumOptionData {
     public String getCode() {
         return this.code;
     }
+    
+    public String getValue() {
+        return this.value;
+    }
+    
+    
 }

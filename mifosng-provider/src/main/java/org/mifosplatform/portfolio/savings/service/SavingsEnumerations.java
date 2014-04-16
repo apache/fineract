@@ -5,7 +5,14 @@
  */
 package org.mifosplatform.portfolio.savings.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.portfolio.savings.DepositAccountOnClosureType;
+import org.mifosplatform.portfolio.savings.DepositAccountType;
+import org.mifosplatform.portfolio.savings.PreClosurePenalInterestOnType;
+import org.mifosplatform.portfolio.savings.RecurringDepositType;
 import org.mifosplatform.portfolio.savings.SavingsAccountTransactionType;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
@@ -133,59 +140,70 @@ public class SavingsEnumerations {
         final boolean isWithdrawnByApplicant = type.isApplicationWithdrawnByApplicant();
         final boolean isActive = type.isActive();
         final boolean isClosed = type.isClosed();
+        final boolean isPrematureClosed = type.isPreMatureClosure();
         final boolean isTransferInProgress = type.isTransferInProgress();
         final boolean isTransferOnHold = type.isTransferOnHold();
 
         SavingsAccountStatusEnumData optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.INVALID.getValue().longValue(),
                 SavingsAccountStatusType.INVALID.getCode(), "Invalid", submittedAndPendingApproval, isApproved, isRejected,
-                isWithdrawnByApplicant, isActive, isClosed, isTransferInProgress, isTransferOnHold);
+                isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
 
         switch (type) {
             case INVALID:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.INVALID.getValue().longValue(),
                         SavingsAccountStatusType.INVALID.getCode(), "Invalid", submittedAndPendingApproval, isApproved, isRejected,
-                        isWithdrawnByApplicant, isActive, isClosed, isTransferInProgress, isTransferOnHold);
+                        isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
             break;
             case SUBMITTED_AND_PENDING_APPROVAL:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getValue()
                         .longValue(), SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getCode(), "Submitted and pending approval",
-                        submittedAndPendingApproval, isApproved, isRejected, isWithdrawnByApplicant, isActive, isClosed,
+                        submittedAndPendingApproval, isApproved, isRejected, isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed,
                         isTransferInProgress, isTransferOnHold);
             break;
             case REJECTED:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.REJECTED.getValue().longValue(),
                         SavingsAccountStatusType.REJECTED.getCode(), "Rejected", submittedAndPendingApproval, isApproved, isRejected,
-                        isWithdrawnByApplicant, isActive, isClosed, isTransferInProgress, isTransferOnHold);
+                        isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
             break;
             case WITHDRAWN_BY_APPLICANT:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.WITHDRAWN_BY_APPLICANT.getValue().longValue(),
                         SavingsAccountStatusType.WITHDRAWN_BY_APPLICANT.getCode(), "Withdrawn by applicant", submittedAndPendingApproval,
-                        isApproved, isRejected, isWithdrawnByApplicant, isActive, isClosed, isTransferInProgress, isTransferOnHold);
+                        isApproved, isRejected, isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
             break;
             case APPROVED:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.APPROVED.getValue().longValue(),
                         SavingsAccountStatusType.APPROVED.getCode(), "Approved", submittedAndPendingApproval, isApproved, isRejected,
-                        isWithdrawnByApplicant, isActive, isClosed, isTransferInProgress, isTransferOnHold);
+                        isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
             break;
             case ACTIVE:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.ACTIVE.getValue().longValue(),
                         SavingsAccountStatusType.ACTIVE.getCode(), "Active", submittedAndPendingApproval, isApproved, isRejected,
-                        isWithdrawnByApplicant, isActive, isClosed, isTransferInProgress, isTransferOnHold);
+                        isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
             break;
             case CLOSED:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.CLOSED.getValue().longValue(),
                         SavingsAccountStatusType.CLOSED.getCode(), "Closed", submittedAndPendingApproval, isApproved, isRejected,
-                        isWithdrawnByApplicant, isActive, isClosed, isTransferInProgress, isTransferOnHold);
+                        isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
             break;
             case TRANSFER_IN_PROGRESS:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.TRANSFER_IN_PROGRESS.getValue().longValue(),
                         SavingsAccountStatusType.TRANSFER_IN_PROGRESS.getCode(), "Transfer in progress", submittedAndPendingApproval,
-                        isApproved, isRejected, isWithdrawnByApplicant, isActive, isClosed, isTransferInProgress, isTransferOnHold);
+                        isApproved, isRejected, isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
             break;
             case TRANSFER_ON_HOLD:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.TRANSFER_IN_PROGRESS.getValue().longValue(),
                         SavingsAccountStatusType.TRANSFER_ON_HOLD.getCode(), "Transfer in progress", submittedAndPendingApproval,
-                        isApproved, isRejected, isWithdrawnByApplicant, isActive, isClosed, isTransferInProgress, isTransferOnHold);
+                        isApproved, isRejected, isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
+            break;
+            case PRE_MATURE_CLOSURE:
+                optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.PRE_MATURE_CLOSURE.getValue().longValue(),
+                        SavingsAccountStatusType.PRE_MATURE_CLOSURE.getCode(), "Premature Closed", submittedAndPendingApproval,
+                        isApproved, isRejected, isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
+            break;
+            case MATURED:
+                optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.MATURED.getValue().longValue(),
+                        SavingsAccountStatusType.MATURED.getCode(), "Matured", submittedAndPendingApproval,
+                        isApproved, isRejected, isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
             break;
             default:
             break;
@@ -361,5 +379,306 @@ public class SavingsEnumerations {
         }
 
         return optionData;
+    }
+
+    public static EnumOptionData preClosurePenaltyInterestOnType(final Integer type) {
+        return preClosurePenaltyInterestOnType(PreClosurePenalInterestOnType.fromInt(type));
+    }
+
+    public static EnumOptionData preClosurePenaltyInterestOnType(final PreClosurePenalInterestOnType type) {
+        EnumOptionData optionData = new EnumOptionData(PreClosurePenalInterestOnType.INVALID.getValue().longValue(),
+                PreClosurePenalInterestOnType.INVALID.getCode(), "Invalid");
+
+        switch (type) {
+            case INVALID:
+            break;
+            case WHOLE_TERM:
+                optionData = new EnumOptionData(PreClosurePenalInterestOnType.WHOLE_TERM.getValue().longValue(),
+                        PreClosurePenalInterestOnType.WHOLE_TERM.getCode(), "Whole term");
+            break;
+            case TILL_PREMATURE_WITHDRAWAL:
+                optionData = new EnumOptionData(PreClosurePenalInterestOnType.TILL_PREMATURE_WITHDRAWAL.getValue().longValue(),
+                        PreClosurePenalInterestOnType.TILL_PREMATURE_WITHDRAWAL.getCode(), "Till Premature Withdrawal");
+            break;
+        }
+
+        return optionData;
+    }
+
+    public static List<EnumOptionData> preClosurePenaltyInterestOnType(final PreClosurePenalInterestOnType[] types) {
+        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        for (final PreClosurePenalInterestOnType type : types) {
+            if (!type.isInvalid()) {
+                optionDatas.add(preClosurePenaltyInterestOnType(type));
+            }
+        }
+        return optionDatas;
+    }
+
+    public static EnumOptionData recurringDepositType(final Integer type) {
+        return recurringDepositType(RecurringDepositType.fromInt(type));
+    }
+
+    public static EnumOptionData recurringDepositType(final RecurringDepositType type) {
+        EnumOptionData optionData = new EnumOptionData(RecurringDepositType.INVALID.getValue().longValue(),
+                RecurringDepositType.INVALID.getCode(), "Invalid");
+
+        switch (type) {
+            case INVALID:
+            break;
+            case VOLUNTARY:
+                optionData = new EnumOptionData(RecurringDepositType.VOLUNTARY.getValue().longValue(),
+                        RecurringDepositType.VOLUNTARY.getCode(), "Voluntary");
+            break;
+            case MANDATORY:
+                optionData = new EnumOptionData(RecurringDepositType.MANDATORY.getValue().longValue(),
+                        RecurringDepositType.MANDATORY.getCode(), "Mandatory");
+            break;
+        }
+
+        return optionData;
+    }
+
+    public static List<EnumOptionData> recurringDepositType(final RecurringDepositType[] types) {
+        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        for (final RecurringDepositType type : types) {
+            if (!type.isInvalid()) {
+                optionDatas.add(recurringDepositType(type));
+            }
+        }
+        return optionDatas;
+    }
+
+    public static EnumOptionData recurringDepositFrequencyType(final int id) {
+        return recurringDepositFrequencyType(SavingsPeriodFrequencyType.fromInt(id));
+    }
+
+    public static EnumOptionData recurringDepositFrequencyType(final SavingsPeriodFrequencyType type) {
+        final String codePrefix = "recurring.deposit.";
+        EnumOptionData optionData = new EnumOptionData(SavingsPeriodFrequencyType.INVALID.getValue().longValue(),
+                SavingsPeriodFrequencyType.INVALID.getCode(), "Invalid");
+        switch (type) {
+            case INVALID:
+            break;
+            case DAYS:
+                optionData = new EnumOptionData(SavingsPeriodFrequencyType.DAYS.getValue().longValue(), codePrefix
+                        + SavingsPeriodFrequencyType.DAYS.getCode(), "Days");
+            break;
+            case WEEKS:
+                optionData = new EnumOptionData(SavingsPeriodFrequencyType.WEEKS.getValue().longValue(), codePrefix
+                        + SavingsPeriodFrequencyType.WEEKS.getCode(), "Weeks");
+            break;
+            case MONTHS:
+                optionData = new EnumOptionData(SavingsPeriodFrequencyType.MONTHS.getValue().longValue(), codePrefix
+                        + SavingsPeriodFrequencyType.MONTHS.getCode(), "Months");
+            break;
+            case YEARS:
+                optionData = new EnumOptionData(SavingsPeriodFrequencyType.YEARS.getValue().longValue(), codePrefix
+                        + SavingsPeriodFrequencyType.YEARS.getCode(), "Years");
+            break;
+        }
+        return optionData;
+    }
+
+    public static List<EnumOptionData> recurringDepositFrequencyType(final SavingsPeriodFrequencyType[] types) {
+        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        for (final SavingsPeriodFrequencyType type : types) {
+            if (!type.isInvalid()) {
+                optionDatas.add(recurringDepositFrequencyType(type));
+            }
+        }
+        return optionDatas;
+    }
+
+    public static EnumOptionData depositTermFrequencyType(final int id) {
+        return depositTermFrequencyType(SavingsPeriodFrequencyType.fromInt(id));
+    }
+
+    public static EnumOptionData depositTermFrequencyType(final SavingsPeriodFrequencyType type) {
+        final String codePrefix = "deposit.term.";
+        EnumOptionData optionData = new EnumOptionData(SavingsPeriodFrequencyType.INVALID.getValue().longValue(),
+                SavingsPeriodFrequencyType.INVALID.getCode(), "Invalid");
+        switch (type) {
+            case INVALID:
+            break;
+            case DAYS:
+                optionData = new EnumOptionData(SavingsPeriodFrequencyType.DAYS.getValue().longValue(), codePrefix
+                        + SavingsPeriodFrequencyType.DAYS.getCode(), "Days");
+            break;
+            case WEEKS:
+                optionData = new EnumOptionData(SavingsPeriodFrequencyType.WEEKS.getValue().longValue(), codePrefix
+                        + SavingsPeriodFrequencyType.WEEKS.getCode(), "Weeks");
+            break;
+            case MONTHS:
+                optionData = new EnumOptionData(SavingsPeriodFrequencyType.MONTHS.getValue().longValue(), codePrefix
+                        + SavingsPeriodFrequencyType.MONTHS.getCode(), "Months");
+            break;
+            case YEARS:
+                optionData = new EnumOptionData(SavingsPeriodFrequencyType.YEARS.getValue().longValue(), codePrefix
+                        + SavingsPeriodFrequencyType.YEARS.getCode(), "Years");
+            break;
+        }
+        return optionData;
+    }
+
+    public static List<EnumOptionData> depositTermFrequencyType(final SavingsPeriodFrequencyType[] types) {
+        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        for (final SavingsPeriodFrequencyType type : types) {
+            if (!type.isInvalid()) {
+                optionDatas.add(recurringDepositFrequencyType(type));
+            }
+        }
+        return optionDatas;
+    }
+
+    public static EnumOptionData inMultiplesOfDepositTermFrequencyType(final int id) {
+        return depositTermFrequencyType(SavingsPeriodFrequencyType.fromInt(id));
+    }
+
+    public static EnumOptionData inMultiplesOfDepositTermFrequencyType(final SavingsPeriodFrequencyType type) {
+        final String codePrefix = "inmultiples.of.deposit.term.";
+        EnumOptionData optionData = new EnumOptionData(SavingsPeriodFrequencyType.INVALID.getValue().longValue(),
+                SavingsPeriodFrequencyType.INVALID.getCode(), "Invalid");
+        switch (type) {
+            case INVALID:
+            break;
+            case DAYS:
+                optionData = new EnumOptionData(SavingsPeriodFrequencyType.DAYS.getValue().longValue(), codePrefix
+                        + SavingsPeriodFrequencyType.DAYS.getCode(), "Days");
+            break;
+            case WEEKS:
+                optionData = new EnumOptionData(SavingsPeriodFrequencyType.WEEKS.getValue().longValue(), codePrefix
+                        + SavingsPeriodFrequencyType.WEEKS.getCode(), "Weeks");
+            break;
+            case MONTHS:
+                optionData = new EnumOptionData(SavingsPeriodFrequencyType.MONTHS.getValue().longValue(), codePrefix
+                        + SavingsPeriodFrequencyType.MONTHS.getCode(), "Months");
+            break;
+            case YEARS:
+                optionData = new EnumOptionData(SavingsPeriodFrequencyType.YEARS.getValue().longValue(), codePrefix
+                        + SavingsPeriodFrequencyType.YEARS.getCode(), "Years");
+            break;
+        }
+        return optionData;
+    }
+
+    public static List<EnumOptionData> inMultiplesOfDepositTermFrequencyType(final SavingsPeriodFrequencyType[] types) {
+        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        for (final SavingsPeriodFrequencyType type : types) {
+            if (!type.isInvalid()) {
+                optionDatas.add(recurringDepositFrequencyType(type));
+            }
+        }
+        return optionDatas;
+    }
+
+    public static EnumOptionData depositType(final int id) {
+        return depositType(DepositAccountType.fromInt(id));
+    }
+
+    public static EnumOptionData depositType(final DepositAccountType type) {
+        EnumOptionData optionData = new EnumOptionData(DepositAccountType.INVALID.getValue().longValue(),
+                DepositAccountType.INVALID.getCode(), "Invalid");
+        switch (type) {
+            case INVALID:
+            break;
+            case SAVINGS_DEPOSIT:
+                optionData = new EnumOptionData(DepositAccountType.SAVINGS_DEPOSIT.getValue().longValue(), DepositAccountType.SAVINGS_DEPOSIT.getCode(), "Savings");
+            break;
+            case FIXED_DEPOSIT:
+                optionData = new EnumOptionData(DepositAccountType.FIXED_DEPOSIT.getValue().longValue(), DepositAccountType.FIXED_DEPOSIT.getCode(), "Fixed Deposit");
+            break;
+            case RECURRING_DEPOSIT:
+                optionData = new EnumOptionData(DepositAccountType.RECURRING_DEPOSIT.getValue().longValue(), DepositAccountType.RECURRING_DEPOSIT.getCode(), "Recurring Deposit");
+            break;
+            case CURRENT_DEPOSIT:
+                optionData = new EnumOptionData(DepositAccountType.CURRENT_DEPOSIT.getValue().longValue(), DepositAccountType.CURRENT_DEPOSIT.getCode(), "Current Deposit");
+            break;
+        }
+        return optionData;
+    }
+
+    public static List<EnumOptionData> depositType(final DepositAccountType[] types) {
+        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        for (final DepositAccountType type : types) {
+            if (!type.isInvalid()) {
+                optionDatas.add(depositType(type));
+            }
+        }
+        return optionDatas;
+    }
+    
+    public static EnumOptionData depositPeriodFrequency(final int id) {
+        return depositPeriodFrequency(SavingsPeriodFrequencyType.fromInt(id));
+    }
+
+    public static EnumOptionData depositPeriodFrequency(final SavingsPeriodFrequencyType type) {
+        final String codePrefix = "deposit.period.";
+        EnumOptionData optionData = new EnumOptionData(SavingsPeriodFrequencyType.INVALID.getValue().longValue(),
+                SavingsPeriodFrequencyType.INVALID.getCode(), "Invalid");
+        switch (type) {
+            case INVALID:
+            break;
+            case DAYS:
+                optionData = new EnumOptionData(SavingsPeriodFrequencyType.DAYS.getValue().longValue(), codePrefix
+                        + SavingsPeriodFrequencyType.DAYS.getCode(), "Days");
+            break;
+            case WEEKS:
+                optionData = new EnumOptionData(SavingsPeriodFrequencyType.WEEKS.getValue().longValue(), codePrefix
+                        + SavingsPeriodFrequencyType.WEEKS.getCode(), "Weeks");
+            break;
+            case MONTHS:
+                optionData = new EnumOptionData(SavingsPeriodFrequencyType.MONTHS.getValue().longValue(), codePrefix
+                        + SavingsPeriodFrequencyType.MONTHS.getCode(), "Months");
+            break;
+            case YEARS:
+                optionData = new EnumOptionData(SavingsPeriodFrequencyType.YEARS.getValue().longValue(), codePrefix
+                        + SavingsPeriodFrequencyType.YEARS.getCode(), "Years");
+            break;
+        }
+        return optionData;
+    }
+
+    public static List<EnumOptionData> depositPeriodFrequency(final SavingsPeriodFrequencyType[] types) {
+        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        for (final SavingsPeriodFrequencyType type : types) {
+            if (!type.isInvalid()) {
+                optionDatas.add(recurringDepositFrequencyType(type));
+            }
+        }
+        return optionDatas;
+    }
+    
+    public static EnumOptionData depositAccountOnClosureType(final int id) {
+        return depositAccountOnClosureType(DepositAccountOnClosureType.fromInt(id));
+    }
+
+    public static EnumOptionData depositAccountOnClosureType(final DepositAccountOnClosureType type) {
+        EnumOptionData optionData = new EnumOptionData(DepositAccountOnClosureType.INVALID.getValue().longValue(),
+                DepositAccountOnClosureType.INVALID.getCode(), "Invalid");
+        switch (type) {
+            case INVALID:
+            break;
+            case WITHDRAW_DEPOSIT:
+                optionData = new EnumOptionData(DepositAccountOnClosureType.WITHDRAW_DEPOSIT.getValue().longValue(), DepositAccountOnClosureType.WITHDRAW_DEPOSIT.getCode(), "Withdra Deposit");
+            break;
+            case TRANSFER_TO_SAVINGS:
+                optionData = new EnumOptionData(DepositAccountOnClosureType.TRANSFER_TO_SAVINGS.getValue().longValue(), DepositAccountOnClosureType.TRANSFER_TO_SAVINGS.getCode(), "Transfer to Savings");
+            break;
+            case REINVEST:
+                optionData = new EnumOptionData(DepositAccountOnClosureType.REINVEST.getValue().longValue(), DepositAccountOnClosureType.REINVEST.getCode(), "Re-Invest");
+            break;
+        }
+        return optionData;
+    }
+
+    public static List<EnumOptionData> depositAccountOnClosureType(final DepositAccountOnClosureType[] types) {
+        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        for (final DepositAccountOnClosureType type : types) {
+            if (!type.isInvalid()) {
+                optionDatas.add(depositAccountOnClosureType(type));
+            }
+        }
+        return optionDatas;
     }
 }

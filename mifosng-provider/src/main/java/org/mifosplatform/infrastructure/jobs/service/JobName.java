@@ -14,7 +14,8 @@ public enum JobName {
     APPLY_CHARGE_TO_OVERDUE_LOAN_INSTALLMENT("Apply penalty to overdue loans"),
     EXECUTE_STANDING_INSTRUCTIONS("Execute Standing Instruction"),
     ADD_ACCRUAL_ENTRIES("Add Accrual Transactions"),
-    UPDATE_NPA("Update Non Performing Assets");
+    UPDATE_NPA("Update Non Performing Assets"),
+    UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS("Update Deposit Accounts Maturity details");
 
     private final String name;
 

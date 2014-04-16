@@ -28,13 +28,15 @@ public class SavingsAccountStatusEnumData {
     @SuppressWarnings("unused")
     private final boolean closed;
     @SuppressWarnings("unused")
+    private final boolean prematureClosed;
+    @SuppressWarnings("unused")
     private final boolean transferInProgress;
     @SuppressWarnings("unused")
     private final boolean transferOnHold;
 
     public SavingsAccountStatusEnumData(final Long id, final String code, final String value, final boolean submittedAndPendingApproval,
             final boolean approved, final boolean rejected, final boolean withdrawnByApplicant, final boolean active, final boolean closed,
-            final boolean transferInProgress, final boolean transferOnHold) {
+            final boolean prematureClosed, final boolean transferInProgress, final boolean transferOnHold) {
         this.id = id;
         this.code = code;
         this.value = value;
@@ -44,6 +46,7 @@ public class SavingsAccountStatusEnumData {
         this.withdrawnByApplicant = withdrawnByApplicant;
         this.active = active;
         this.closed = closed;
+        this.prematureClosed = prematureClosed;
         this.transferInProgress = transferInProgress;
         this.transferOnHold = transferOnHold;
     }

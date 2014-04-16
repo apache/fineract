@@ -183,6 +183,13 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, clientOffice.getHierarchy());
             }
 
+            CodeValue gender = null;
+            final Long genderId = command.longValueOfParameterNamed(ClientApiConstants.genderIdParamName);
+            if (genderId != null) {
+                gender = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.GENDER,
+                        genderId);
+            }
+
             SavingsProduct savingsProduct = null;
             final Long savingsProductId = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
             if (savingsProductId != null) {
@@ -191,7 +198,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             }
 
-            final Client newClient = Client.createNew(currentUser, clientOffice, clientParentGroup, staff, savingsProduct, command);
+            final Client newClient = Client.createNew(currentUser, clientOffice, clientParentGroup, staff, savingsProduct, gender, command);
             boolean rollbackTransaction = false;
             if (newClient.isActive()) {
                 final CommandWrapper commandWrapper = new CommandWrapperBuilder().activateClient(null).build();
@@ -496,7 +503,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         if (savingsId != null) {
             savingsAccount = this.savingsRepository.findOne(savingsId);
             if (savingsAccount == null) { throw new SavingsAccountNotFoundException(savingsId); }
-            if(!savingsAccount.getClient().identifiedBy(clientId)){
+            if (!savingsAccount.getClient().identifiedBy(clientId)) {
                 String defaultUserMessage = "saving account must belongs to client";
                 throw new InvalidClientSavingProductException("saving.account", "must.belongs.to.client", defaultUserMessage, savingsId,
                         clientForUpdate.getId());

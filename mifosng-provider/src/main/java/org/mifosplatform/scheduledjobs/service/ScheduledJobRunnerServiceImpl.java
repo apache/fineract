@@ -15,7 +15,11 @@ import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.exception.JobExecutionException;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
+import org.mifosplatform.portfolio.savings.DepositAccountType;
+import org.mifosplatform.portfolio.savings.data.DepositAccountData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountAnnualFeeData;
+import org.mifosplatform.portfolio.savings.service.DepositAccountReadPlatformService;
+import org.mifosplatform.portfolio.savings.service.DepositAccountWritePlatformService;
 import org.mifosplatform.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
 import org.mifosplatform.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.slf4j.Logger;
@@ -33,14 +37,20 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     private final RoutingDataSourceServiceFactory dataSourceServiceFactory;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
     private final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService;
+    private final DepositAccountReadPlatformService depositAccountReadPlatformService;
+    private final DepositAccountWritePlatformService depositAccountWritePlatformService;
 
     @Autowired
     public ScheduledJobRunnerServiceImpl(final RoutingDataSourceServiceFactory dataSourceServiceFactory,
             final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
-            final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService) {
+            final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService,
+            final DepositAccountReadPlatformService depositAccountReadPlatformService,
+            final DepositAccountWritePlatformService depositAccountWritePlatformService) {
         this.dataSourceServiceFactory = dataSourceServiceFactory;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
+        this.depositAccountReadPlatformService = depositAccountReadPlatformService;
+        this.depositAccountWritePlatformService = depositAccountWritePlatformService;
     }
 
     @Transactional
@@ -279,6 +289,30 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         final int result = jdbcTemplate.update(updateSqlBuilder.toString());
 
         logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by update: " + result);
+    }
+
+    @Override
+    @CronTarget(jobName = JobName.UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS)
+    public void updateMaturityDetailsOfDepositAccounts() {
+
+        final Collection<DepositAccountData> depositAccounts = this.depositAccountReadPlatformService.retrieveForMaturityUpdate();
+
+        for (final DepositAccountData depositAccount : depositAccounts) {
+            try {
+                final DepositAccountType depositAccountType = DepositAccountType.fromInt(depositAccount.depositType().getId().intValue());
+                this.depositAccountWritePlatformService.updateMaturityDetails(depositAccount.id(), depositAccountType);
+            } catch (final PlatformApiDataValidationException e) {
+                final List<ApiParameterError> errors = e.getErrors();
+                for (final ApiParameterError error : errors) {
+                    logger.error("Update maturity details failed for account:" + depositAccount.accountNo() + " with message "
+                            + error.getDeveloperMessage());
+                }
+            } catch (final Exception ex) {
+                // need to handle this scenario
+            }
+        }
+
+        logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Deposit accounts affected by update: " + depositAccounts.size());
     }
 
 }

@@ -15,7 +15,7 @@ public class ClientApiConstants {
 
     public static final String CLIENT_RESOURCE_NAME = "client";
     public static final String CLIENT_CLOSURE_REASON = "ClientClosureReason";
-
+    public static final String GENDER = "Gender";
     // general
     public static final String localeParamName = "locale";
     public static final String dateFormatParamName = "dateFormat";
@@ -40,6 +40,9 @@ public class ClientApiConstants {
     public static final String submittedOnDateParamName = "submittedOnDate";
     public static final String savingsProductIdParamName = "savingsProductId";
     public static final String savingsAccountIdParamName = "savingsAccountId";
+    public static final String dateOfBirthParamName = "dateOfBirth";
+    public static final String genderIdParamName = "genderId";
+    public static final String genderParamName = "gender";
     // response parameters
     public static final String statusParamName = "status";
     public static final String hierarchyParamName = "hierarchy";
@@ -64,11 +67,12 @@ public class ClientApiConstants {
     public static final Set<String> CLIENT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, groupIdParamName, accountNoParamName, externalIdParamName, mobileNoParamName, firstnameParamName,
             middlenameParamName, lastnameParamName, fullnameParamName, officeIdParamName, activeParamName, activationDateParamName,
-            staffIdParamName, submittedOnDateParamName, savingsProductIdParamName));
+            staffIdParamName, submittedOnDateParamName, savingsProductIdParamName, dateOfBirthParamName, genderIdParamName));
 
     public static final Set<String> CLIENT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, accountNoParamName, externalIdParamName, mobileNoParamName, firstnameParamName, middlenameParamName,
-            lastnameParamName, fullnameParamName, activeParamName, activationDateParamName, staffIdParamName, savingsProductIdParamName));
+            lastnameParamName, fullnameParamName, activeParamName, activationDateParamName, staffIdParamName, savingsProductIdParamName,
+            dateOfBirthParamName, genderIdParamName));
 
     /**
      * These parameters will match the class level parameters of
@@ -79,7 +83,8 @@ public class ClientApiConstants {
             externalIdParamName, statusParamName, activeParamName, activationDateParamName, firstnameParamName, middlenameParamName,
             lastnameParamName, fullnameParamName, displayNameParamName, mobileNoParamName, officeIdParamName, officeNameParamName,
             transferToOfficeIdParamName, transferToOfficeNameParamName, hierarchyParamName, imageIdParamName, imagePresentParamName,
-            staffIdParamName, staffNameParamName, timelineParamName, groupsParamName, officeOptionsParamName, staffOptionsParamName));
+            staffIdParamName, staffNameParamName, timelineParamName, groupsParamName, officeOptionsParamName, staffOptionsParamName,
+            dateOfBirthParamName, genderParamName));
 
     public static final Set<String> ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, activationDateParamName));

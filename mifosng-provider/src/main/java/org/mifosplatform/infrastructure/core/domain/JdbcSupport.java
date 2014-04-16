@@ -51,10 +51,23 @@ public class JdbcSupport {
         final Integer value = (Integer) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Integer.class);
         return defaultToNullIfZero(value);
     }
+    
+    public static Long getLongDefaultToNullIfZero(final ResultSet rs, final String columnName) throws SQLException {
+        final Long value = (Long) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Long.class);
+        return defaultToNullIfZero(value);
+    }
 
     private static Integer defaultToNullIfZero(final Integer value) {
         Integer result = value;
         if (result != null && Integer.valueOf(0).equals(value)) {
+            result = null;
+        }
+        return result;
+    }
+    
+    private static Long defaultToNullIfZero(final Long value) {
+        Long result = value;
+        if (result != null && Long.valueOf(0).equals(value)) {
             result = null;
         }
         return result;

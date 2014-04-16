@@ -105,6 +105,14 @@ public final class Client extends AbstractPersistable<Long> {
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;
 
+    @Column(name = "date_of_birth", nullable = true)
+    @Temporal(TemporalType.DATE)
+    private Date dateOfBirth;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "gender_cv_id", nullable = true)
+    private CodeValue gender;
+
     @ManyToOne
     @JoinColumn(name = "staff_id")
     private Staff staff;
@@ -144,13 +152,13 @@ public final class Client extends AbstractPersistable<Long> {
     @ManyToOne
     @JoinColumn(name = "default_savings_product", nullable = true)
     private SavingsProduct savingsProduct;
-    
+
     @ManyToOne
     @JoinColumn(name = "default_savings_account", nullable = true)
     private SavingsAccount savingsAccount;
 
     public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
-            final SavingsProduct savingsProduct, final JsonCommand command) {
+            final SavingsProduct savingsProduct, final CodeValue gender, final JsonCommand command) {
 
         final String accountNo = command.stringValueOfParameterNamed(ClientApiConstants.accountNoParamName);
         final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
@@ -160,6 +168,8 @@ public final class Client extends AbstractPersistable<Long> {
         final String middlename = command.stringValueOfParameterNamed(ClientApiConstants.middlenameParamName);
         final String lastname = command.stringValueOfParameterNamed(ClientApiConstants.lastnameParamName);
         final String fullname = command.stringValueOfParameterNamed(ClientApiConstants.fullnameParamName);
+
+        final LocalDate dataOfBirth = command.localDateValueOfParameterNamed(ClientApiConstants.dateOfBirthParamName);
 
         ClientStatus status = ClientStatus.PENDING;
         boolean active = false;
@@ -182,9 +192,10 @@ public final class Client extends AbstractPersistable<Long> {
         if (command.hasParameter(ClientApiConstants.submittedOnDateParamName)) {
             submittedOnDate = command.localDateValueOfParameterNamed(ClientApiConstants.submittedOnDateParamName);
         }
-
+        final SavingsAccount account = null;
         return new Client(currentUser, status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname,
-                activationDate, officeJoiningDate, externalId, mobileNo, staff, submittedOnDate, savingsProduct, null);
+                activationDate, officeJoiningDate, externalId, mobileNo, staff, submittedOnDate, savingsProduct, account, dataOfBirth,
+                gender);
     }
 
     protected Client() {
@@ -194,7 +205,8 @@ public final class Client extends AbstractPersistable<Long> {
     private Client(final AppUser currentUser, final ClientStatus status, final Office office, final Group clientParentGroup,
             final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
             final LocalDate activationDate, final LocalDate officeJoiningDate, final String externalId, final String mobileNo,
-            final Staff staff, final LocalDate submittedOnDate, final SavingsProduct savingsProduct,final SavingsAccount savingsAccount) {
+            final Staff staff, final LocalDate submittedOnDate, final SavingsProduct savingsProduct, final SavingsAccount savingsAccount,
+            final LocalDate dateOfBirth, final CodeValue gender) {
 
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
@@ -259,6 +271,13 @@ public final class Client extends AbstractPersistable<Long> {
         this.staff = staff;
         this.savingsProduct = savingsProduct;
         this.savingsAccount = savingsAccount;
+
+        if(gender != null){
+            this.gender = gender;
+        }
+        if (dateOfBirth != null) {
+            this.dateOfBirth = dateOfBirth.toDateTimeAtStartOfDay().toDate();
+        }
 
         deriveDisplayName();
         validate();
@@ -666,11 +685,11 @@ public final class Client extends AbstractPersistable<Long> {
         return this.activatedBy;
     }
 
-	public SavingsAccount savingsAccount() {
-		return this.savingsAccount;
-	}
+    public SavingsAccount savingsAccount() {
+        return this.savingsAccount;
+    }
 
-	public void updateSavingsAccount(SavingsAccount savingsAccount) {
-		this.savingsAccount = savingsAccount;
-	}
+    public void updateSavingsAccount(SavingsAccount savingsAccount) {
+        this.savingsAccount = savingsAccount;
+    }
 }

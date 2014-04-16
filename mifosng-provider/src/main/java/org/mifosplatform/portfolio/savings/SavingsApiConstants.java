@@ -35,6 +35,7 @@ public class SavingsApiConstants {
     public static String closeAction = ".close";
     public static String payChargeTransactionAction = ".paycharge";
     public static String waiveChargeTransactionAction = ".waivecharge";
+    public static String updateMaturityDetailsAction = ".updateMaturityDetails";
 
     // command
     public static String COMMAND_UNDO_TRANSACTION = "undo";

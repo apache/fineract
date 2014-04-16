@@ -30,8 +30,13 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -67,6 +72,7 @@ import org.mifosplatform.portfolio.charge.exception.SavingsAccountChargeNotFound
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.group.domain.Group;
+import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
@@ -88,89 +94,92 @@ import com.google.gson.JsonArray;
 @Entity
 @Table(name = "m_savings_account", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "sa_account_no_UNIQUE"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "sa_external_id_UNIQUE") })
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "deposit_type_enum", discriminatorType = DiscriminatorType.INTEGER)
+@DiscriminatorValue("100")
 public class SavingsAccount extends AbstractPersistable<Long> {
 
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
-    private String accountNumber;
+    protected String accountNumber;
 
     @Column(name = "external_id", nullable = true)
-    private String externalId;
+    protected String externalId;
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "client_id", nullable = true)
-    private Client client;
+    protected Client client;
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "group_id", nullable = true)
-    private Group group;
+    protected Group group;
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
-    private SavingsProduct product;
+    protected SavingsProduct product;
 
     @ManyToOne
     @JoinColumn(name = "field_officer_id", nullable = true)
-    private Staff fieldOfficer;
+    protected Staff fieldOfficer;
 
     @Column(name = "status_enum", nullable = false)
-    private Integer status;
+    protected Integer status;
 
     @Column(name = "account_type_enum", nullable = false)
-    private Integer accountType;
+    protected Integer accountType;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "submittedon_date", nullable = true)
-    private Date submittedOnDate;
+    protected Date submittedOnDate;
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "submittedon_userid", nullable = true)
-    private AppUser submittedBy;
+    protected AppUser submittedBy;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "rejectedon_date")
-    private Date rejectedOnDate;
+    protected Date rejectedOnDate;
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "rejectedon_userid", nullable = true)
-    private AppUser rejectedBy;
+    protected AppUser rejectedBy;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "withdrawnon_date")
-    private Date withdrawnOnDate;
+    protected Date withdrawnOnDate;
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "withdrawnon_userid", nullable = true)
-    private AppUser withdrawnBy;
+    protected AppUser withdrawnBy;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "approvedon_date")
-    private Date approvedOnDate;
+    protected Date approvedOnDate;
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "approvedon_userid", nullable = true)
-    private AppUser approvedBy;
+    protected AppUser approvedBy;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "activatedon_date", nullable = true)
-    private Date activatedOnDate;
+    protected Date activatedOnDate;
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "activatedon_userid", nullable = true)
-    private AppUser activatedBy;
+    protected AppUser activatedBy;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "closedon_date")
-    private Date closedOnDate;
+    protected Date closedOnDate;
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "closedon_userid", nullable = true)
-    private AppUser closedBy;
+    protected AppUser closedBy;
 
     @Embedded
-    private MonetaryCurrency currency;
+    protected MonetaryCurrency currency;
 
     @Column(name = "nominal_annual_interest_rate", scale = 6, precision = 19, nullable = false)
-    private BigDecimal nominalAnnualInterestRate;
+    protected BigDecimal nominalAnnualInterestRate;
 
     /**
      * The interest period is the span of time at the end of which savings in a
@@ -180,35 +189,35 @@ public class SavingsAccount extends AbstractPersistable<Long> {
      * enumeration.
      */
     @Column(name = "interest_compounding_period_enum", nullable = false)
-    private Integer interestCompoundingPeriodType;
+    protected Integer interestCompoundingPeriodType;
 
     /**
      * A value from the {@link SavingsPostingInterestPeriodType} enumeration.
      */
     @Column(name = "interest_posting_period_enum", nullable = false)
-    private Integer interestPostingPeriodType;
+    protected Integer interestPostingPeriodType;
 
     /**
      * A value from the {@link SavingsInterestCalculationType} enumeration.
      */
     @Column(name = "interest_calculation_type_enum", nullable = false)
-    private Integer interestCalculationType;
+    protected Integer interestCalculationType;
 
     /**
      * A value from the {@link SavingsInterestCalculationDaysInYearType}
      * enumeration.
      */
     @Column(name = "interest_calculation_days_in_year_type_enum", nullable = false)
-    private Integer interestCalculationDaysInYearType;
+    protected Integer interestCalculationDaysInYearType;
 
     @Column(name = "min_required_opening_balance", scale = 6, precision = 19, nullable = true)
-    private BigDecimal minRequiredOpeningBalance;
+    protected BigDecimal minRequiredOpeningBalance;
 
     @Column(name = "lockin_period_frequency", nullable = true)
-    private Integer lockinPeriodFrequency;
+    protected Integer lockinPeriodFrequency;
 
     @Column(name = "lockin_period_frequency_enum", nullable = true)
-    private Integer lockinPeriodFrequencyType;
+    protected Integer lockinPeriodFrequencyType;
 
     /**
      * When account becomes <code>active</code> this field is derived if
@@ -217,10 +226,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
      */
     @Temporal(TemporalType.DATE)
     @Column(name = "lockedin_until_date_derived", nullable = true)
-    private Date lockedInUntilDate;
+    protected Date lockedInUntilDate;
 
     @Column(name = "withdrawal_fee_for_transfer", nullable = true)
-    private boolean withdrawalFeeApplicableForTransfer;
+    protected boolean withdrawalFeeApplicableForTransfer;
 
     @Column(name = "allow_overdraft")
     private boolean allowOverdraft;
@@ -229,23 +238,26 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     private BigDecimal overdraftLimit;
 
     @Embedded
-    private SavingsAccountSummary summary;
+    protected SavingsAccountSummary summary;
 
     @OrderBy(value = "dateOf, createdDate, id")
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true)
-    private final List<SavingsAccountTransaction> transactions = new ArrayList<SavingsAccountTransaction>();
+    protected final List<SavingsAccountTransaction> transactions = new ArrayList<SavingsAccountTransaction>();
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true)
-    private Set<SavingsAccountCharge> charges = new HashSet<SavingsAccountCharge>();
+    protected Set<SavingsAccountCharge> charges = new HashSet<SavingsAccountCharge>();
 
     @Transient
-    private boolean accountNumberRequiresAutoGeneration = false;
+    protected boolean accountNumberRequiresAutoGeneration = false;
     @Transient
-    private SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
+    protected SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
     @Transient
-    private SavingsHelper savingsHelper;
+    protected SavingsHelper savingsHelper;
+
+    @Column(name = "deposit_type_enum", insertable = false, updatable = false)
+    private Integer depositType;
 
     protected SavingsAccount() {
         //
@@ -268,7 +280,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 withdrawalFeeApplicableForTransfer, savingsAccountCharges, allowOverdraft, overdraftLimit);
     }
 
-    private SavingsAccount(final Client client, final Group group, final SavingsProduct product, final Staff fieldOfficer,
+    protected SavingsAccount(final Client client, final Group group, final SavingsProduct product, final Staff fieldOfficer,
             final String accountNo, final String externalId, final SavingsAccountStatusType status, final AccountType accountType,
             final LocalDate submittedOnDate, final AppUser submittedBy, final BigDecimal nominalAnnualInterestRate,
             final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
@@ -394,13 +406,13 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
             // update existing transactions so derived balance fields are
             // correct.
-            recalculateDailyBalances(openingAccountBalance);
+            recalculateDailyBalances(openingAccountBalance, interestPostingUpToDate);
         }
 
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
     }
 
-    private SavingsAccountTransaction findInterestPostingTransactionFor(final LocalDate postingDate) {
+    protected SavingsAccountTransaction findInterestPostingTransactionFor(final LocalDate postingDate) {
 
         SavingsAccountTransaction postingTransation = null;
 
@@ -436,7 +448,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         // update existing transactions so derived balance fields are
         // correct.
-        recalculateDailyBalances(openingAccountBalance);
+        recalculateDailyBalances(openingAccountBalance, upToInterestCalculationDate);
 
         // 1. default to calculate interest based on entire history OR
         // 2. determine latest 'posting period' and find interest credited to
@@ -459,12 +471,12 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         Money periodStartingBalance = Money.zero(this.currency);
 
         final SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType.fromInt(this.interestCalculationType);
-        final BigDecimal interestRateAsFraction = this.nominalAnnualInterestRate.divide(BigDecimal.valueOf(100l), mc);
+        final BigDecimal interestRateAsFraction = getEffectiveInterestRateAsFraction(mc, upToInterestCalculationDate);
         for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
 
             final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance,
-                    retreiveOrderedListOfTransactions(), this.currency, compoundingPeriodType, interestCalculationType,
-                    interestRateAsFraction, daysInYearType.getValue());
+                    retreiveOrderedNonInterestPostingTransactions(), this.currency, compoundingPeriodType, interestCalculationType,
+                    interestRateAsFraction, daysInYearType.getValue(), upToInterestCalculationDate);
 
             periodStartingBalance = postingPeriod.closingBalance();
 
@@ -479,7 +491,12 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return allPostingPeriods;
     }
 
-    private List<SavingsAccountTransaction> retreiveOrderedListOfTransactions() {
+    @SuppressWarnings("unused")
+    protected BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate upToInterestCalculationDate) {
+        return this.nominalAnnualInterestRate.divide(BigDecimal.valueOf(100l), mc);
+    }
+
+    protected List<SavingsAccountTransaction> retreiveOrderedNonInterestPostingTransactions() {
         final List<SavingsAccountTransaction> listOfTransactionsSorted = retreiveListOfTransactions();
 
         final List<SavingsAccountTransaction> orderedNonInterestPostingTransactions = new ArrayList<SavingsAccountTransaction>();
@@ -493,7 +510,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return orderedNonInterestPostingTransactions;
     }
 
-    private List<SavingsAccountTransaction> retreiveListOfTransactions() {
+    protected List<SavingsAccountTransaction> retreiveListOfTransactions() {
         final List<SavingsAccountTransaction> listOfTransactionsSorted = new ArrayList<SavingsAccountTransaction>();
         listOfTransactionsSorted.addAll(this.transactions);
 
@@ -502,7 +519,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return listOfTransactionsSorted;
     }
 
-    private void recalculateDailyBalances(final Money openingAccountBalance) {
+    protected void recalculateDailyBalances(final Money openingAccountBalance, final LocalDate interestPostingUpToDate) {
 
         Money runningBalance = openingAccountBalance.copy();
 
@@ -556,7 +573,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             accountTransactionsSorted = retreiveListOfTransactions();
         }
         // loop over transactions in reverse
-        LocalDate endOfBalanceDate = DateUtils.getLocalDateOfTenant();
+        LocalDate endOfBalanceDate = interestPostingUpToDate;
         for (int i = accountTransactionsSorted.size() - 1; i >= 0; i--) {
             final SavingsAccountTransaction transaction = accountTransactionsSorted.get(i);
             if (transaction.isNotReversed()) {
@@ -796,21 +813,26 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return transactionDate.isAfter(DateUtils.getLocalDateOfTenant());
     }
 
-    private BigDecimal getAccountBalance() {
+    protected BigDecimal getAccountBalance() {
         return this.summary.getAccountBalance(this.currency).getAmount();
     }
 
     public void modifyApplication(final JsonCommand command, final Map<String, Object> actualChanges) {
-
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.modifyApplicationAction);
+        this.modifyApplication(command, actualChanges, baseDataValidator);
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    }
+
+    public void modifyApplication(final JsonCommand command, final Map<String, Object> actualChanges,
+            final DataValidatorBuilder baseDataValidator) {
 
         final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
-
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            return;
         }
 
         final String localeAsInput = command.locale();
@@ -954,15 +976,17 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             this.overdraftLimit = null;
         }
 
-        validateLockinDetails();
-
+        validateLockinDetails(baseDataValidator);
     }
 
-    private void validateLockinDetails() {
+    private void validateLockinDetails(final DataValidatorBuilder baseDataValidator) {
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
+        /*
+         * final List<ApiParameterError> dataValidationErrors = new
+         * ArrayList<ApiParameterError>(); final DataValidatorBuilder
+         * baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+         * .resource(resourceName);
+         */
 
         if (this.lockinPeriodFrequency == null) {
             baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(this.lockinPeriodFrequencyType).ignoreIfNull()
@@ -978,8 +1002,6 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(this.lockinPeriodFrequencyType).notNull()
                     .inMinMaxRange(0, 3);
         }
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
     public Map<String, Object> deriveAccountingBridgeData(final CurrencyData currencyData, final Set<Long> existingTransactionIds,
@@ -1115,17 +1137,19 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return this.currency;
     }
 
-    public void validateNewApplicationState(final LocalDate todayDateOfTenant) {
+    public void validateNewApplicationState(final LocalDate todayDateOfTenant, final String resourceName) {
 
-        validateLockinDetails();
         // validateWithdrawalFeeDetails();
         // validateAnnualFeeDetails();
 
         final LocalDate submittedOn = getSubmittedOnLocalDate();
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.summitalAction);
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(resourceName
+                + SavingsApiConstants.summitalAction);
+
+        validateLockinDetails(baseDataValidator);
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
 
         if (submittedOn.isAfter(todayDateOfTenant)) {
             baseDataValidator.reset().parameter(SavingsApiConstants.submittedOnDateParamName).value(submittedOn)
@@ -1144,7 +1168,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
-    private LocalDate getSubmittedOnLocalDate() {
+    protected LocalDate getSubmittedOnLocalDate() {
         LocalDate submittedOn = null;
         if (this.submittedOnDate != null) {
             submittedOn = new LocalDate(this.submittedOnDate);
@@ -1301,7 +1325,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         Date nextDueDate = null;
 
         LocalDate lastAnnualFeeTransactionDate = null;
-        for (final SavingsAccountTransaction transaction : retreiveOrderedListOfTransactions()) {
+        for (final SavingsAccountTransaction transaction : retreiveOrderedNonInterestPostingTransactions()) {
             if (transaction.isAnnualFeeAndNotReversed()) {
                 if (lastAnnualFeeTransactionDate == null) {
                     lastAnnualFeeTransactionDate = transaction.transactionLocalDate();
@@ -1522,7 +1546,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
-    private void processAccountUponActivation(final DateTimeFormatter fmt) {
+    protected void processAccountUponActivation(final DateTimeFormatter fmt) {
         final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
         if (minRequiredOpeningBalance.isGreaterThanZero()) {
             final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, getActivationLocalDate(),
@@ -1536,7 +1560,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
             // update existing transactions so derived balance fields are
             // correct.
-            recalculateDailyBalances(openingAccountBalance);
+            recalculateDailyBalances(openingAccountBalance, DateUtils.getLocalDateOfTenant());
         }
 
         // update annual fee due date
@@ -1631,7 +1655,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
-    private void validateActivityNotBeforeClientOrGroupTransferDate(final SavingsEvent event, final LocalDate activityDate) {
+    protected void validateActivityNotBeforeClientOrGroupTransferDate(final SavingsEvent event, final LocalDate activityDate) {
         if (this.client != null && this.client.getOfficeJoiningLocalDate() != null) {
             final LocalDate clientOfficeJoiningDate = this.client.getOfficeJoiningLocalDate();
             if (activityDate.isBefore(clientOfficeJoiningDate)) { throw new SavingsActivityPriorToClientTransferException(event.toString(),
@@ -2005,8 +2029,15 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
-	public boolean allowOverdraft() {
-		return this.allowOverdraft;
-	}
+    public boolean allowOverdraft() {
+        return this.allowOverdraft;
+    }
 
+    public LocalDate accountSubmittedOrActivationDate() {
+        return getActivationLocalDate() == null ? getSubmittedOnLocalDate() : getActivationLocalDate();
+    }
+
+    public DepositAccountType depositAccountType() {
+        return DepositAccountType.fromInt(depositType);
+    }
 }
