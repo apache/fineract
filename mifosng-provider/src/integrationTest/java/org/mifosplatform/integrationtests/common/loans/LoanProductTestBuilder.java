@@ -42,6 +42,7 @@ public class LoanProductTestBuilder {
     private String interestRatePerPeriod = "2";
     private String interestRateFrequencyType = MONTHS;
     private String interestType = FLAT_BALANCE;
+    private String overdueDaysForNPA = "5";
     private String interestCalculationPeriodType = CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD;
     private String inArrearsTolerance = "0";
     private final String transactionProcessingStrategy = MIFOS_STANDARD_STRATEGY;
@@ -81,6 +82,7 @@ public class LoanProductTestBuilder {
         map.put("accountingRule", this.accountingRule);
         map.put("minPrincipal", this.minPrincipal);
         map.put("maxPrincipal", this.maxPrincipal);
+        map.put("overdueDaysForNPA", this.overdueDaysForNPA);
 
         if (this.accountingRule.equals(ACCRUAL_UPFRONT) || this.accountingRule.equals(ACCRUAL_PERIODIC)) {
             map.putAll(getAccountMappingForAccrualBased());
@@ -167,6 +169,11 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withInterestTypeAsDecliningBalance() {
         this.interestType = DECLINING_BALANCE;
+        return this;
+    }
+
+    public LoanProductTestBuilder withOverdueDaysForNPA(String days) {
+        this.overdueDaysForNPA = days;
         return this;
     }
 

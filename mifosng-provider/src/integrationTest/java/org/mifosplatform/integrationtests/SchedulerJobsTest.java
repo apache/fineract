@@ -87,7 +87,7 @@ public class SchedulerJobsTest {
 
             // Waiting for Job to complete
             while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
-                Thread.sleep(120000);
+                Thread.sleep(15000);
                 schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
                 Assert.assertNotNull(schedulerJob);
                 System.out.println("Job is Still Running");

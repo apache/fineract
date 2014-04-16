@@ -1781,18 +1781,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
     }
 
+    @SuppressWarnings("null")
     @Transactional
     public void applyChargeToOverdueLoanInstallment(final Long loanId, final Long loanChargeId, final Integer periodNumber,
             final JsonCommand command) {
 
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
-        checkClientOrGroupActive(loan);
-
         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(loanChargeId);
-        final LoanRepaymentScheduleInstallment installment = loan.fetchRepaymentScheduleInstallment(periodNumber);
 
-        Collection<Integer> frequencyNumbers = loanChargeReadPlatformService.retrieveOverdueInstallmentChargeFrequencyNumber(
-                installment.getId(), chargeDefinition.getId());
+        Collection<Integer> frequencyNumbers = loanChargeReadPlatformService.retrieveOverdueInstallmentChargeFrequencyNumber(loanId,
+                chargeDefinition.getId(), periodNumber);
 
         Integer feeFrequency = chargeDefinition.feeFrequency();
         final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
@@ -1820,6 +1817,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         for (Integer frequency : frequencyNumbers) {
             scheduleDates.remove(frequency);
+        }
+
+        Loan loan = null;
+        LoanRepaymentScheduleInstallment installment = null;
+        if (!scheduleDates.isEmpty()) {
+            loan = this.loanAssembler.assembleFrom(loanId);
+            checkClientOrGroupActive(loan);
+            installment = loan.fetchRepaymentScheduleInstallment(periodNumber);
         }
 
         for (Map.Entry<Integer, LocalDate> entry : scheduleDates.entrySet()) {
