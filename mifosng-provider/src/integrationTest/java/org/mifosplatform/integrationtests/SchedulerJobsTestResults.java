@@ -108,49 +108,17 @@ public class SchedulerJobsTestResults {
         savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
-        ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(allSchedulerJobsData);
-
-        // Integer jobId = (Integer) allSchedulerJobsData.get(3).get("jobId");
-
+        HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
         String JobName = "Apply Annual Fee For Savings";
-        for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
-            if (allSchedulerJobsData.get(jobIndex).get("displayName").equals(JobName)) {
-                Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
 
-                HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        excuteJob(JobName);
+        final HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, annualFeeChargeId);
 
-                // Executing Scheduler Job
-                this.schedulerJobHelper.runSchedulerJob(this.requestSpec, this.responseSpecForSchedulerJob, jobId.toString());
+        Float chargeAmount = (Float) chargeData.get("amount");
 
-                // Retrieving Scheduler Job by ID
-                HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                Assert.assertNotNull(schedulerJob);
-
-                // Waiting for Job to Complete
-                while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
-                    Thread.sleep(120000);
-                    schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                    Assert.assertNotNull(schedulerJob);
-                    System.out.println("Job is Still Running");
-                }
-
-                ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
-                        jobId.toString());
-
-                // Verifying the Status of the Recently executed Scheduler Job
-                Assert.assertEquals("Verifying Last Scheduler Job Status", "success",
-                        jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
-                final HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, annualFeeChargeId);
-
-                Float chargeAmount = (Float) chargeData.get("amount");
-
-                final HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
-                Assert.assertEquals("Verifying Annual Fee after Running Scheduler Job for Apply Anual Fee", chargeAmount,
-                        (Float) summaryAfter.get("totalAnnualFees"));
-                break;
-            }
-        }
+        final HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        Assert.assertEquals("Verifying Annual Fee after Running Scheduler Job for Apply Anual Fee", chargeAmount,
+                (Float) summaryAfter.get("totalAnnualFees"));
 
     }
 
@@ -179,46 +147,16 @@ public class SchedulerJobsTestResults {
         savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
-        ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(allSchedulerJobsData);
+        final HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
-        // Integer jobId = (Integer) allSchedulerJobsData.get(5).get("jobId");
         String JobName = "Post Interest For Savings";
-        for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
-            if (allSchedulerJobsData.get(jobIndex).get("displayName").equals(JobName)) {
-                Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
 
-                final HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        excuteJob(JobName);
+        final HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
-                // Executing Scheduler Job
-                this.schedulerJobHelper.runSchedulerJob(this.requestSpec, this.responseSpecForSchedulerJob, jobId.toString());
+        Assert.assertNotSame("Verifying the Balance after running Post Interest for Savings Job", summaryBefore.get("accountBalance"),
+                summaryAfter.get("accountBalance"));
 
-                // Retrieving Scheduler Job by ID
-                HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                Assert.assertNotNull(schedulerJob);
-
-                // Waiting for Job to complete
-                while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
-                    Thread.sleep(120000);
-                    schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                    Assert.assertNotNull(schedulerJob);
-                    System.out.println("Job is Still Running");
-                }
-
-                ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
-                        jobId.toString());
-
-                // Verifying the Status of the Recently executed Scheduler Job
-                Assert.assertEquals("Verifying Last Scheduler Job Status", "success",
-                        jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
-
-                final HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
-
-                Assert.assertNotSame("Verifying the Balance after running Post Interest for Savings Job",
-                        summaryBefore.get("accountBalance"), summaryAfter.get("accountBalance"));
-                break;
-            }
-        }
     }
 
     @Test
@@ -270,53 +208,20 @@ public class SchedulerJobsTestResults {
 
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan(AccountTransferTest.LOAN_DISBURSAL_DATE, loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        final HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
-        ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(allSchedulerJobsData);
-
-        // Integer jobId = (Integer) allSchedulerJobsData.get(6).get("jobId");
         String JobName = "Transfer Fee For Loans From Savings";
-        for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
-            if (allSchedulerJobsData.get(jobIndex).get("displayName").equals(JobName)) {
-                Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
+        excuteJob(JobName);
+        final HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
-                final HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        final HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, specifiedDueDateChargeId);
 
-                // Executing Scheduler Job
-                this.schedulerJobHelper.runSchedulerJob(this.requestSpec, this.responseSpecForSchedulerJob, jobId.toString());
+        Float chargeAmount = (Float) chargeData.get("amount");
 
-                // Retrieving Scheduler Job by ID
-                HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                Assert.assertNotNull(schedulerJob);
+        final Float balance = (Float) summaryBefore.get("accountBalance") - chargeAmount;
 
-                // Waiting for Job to complete
-                while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
-                    Thread.sleep(120000);
-                    schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                    Assert.assertNotNull(schedulerJob);
-                    System.out.println("Job is Still Running");
-                }
-
-                ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
-                        jobId.toString());
-
-                // Verifying the Status of the Recently executed Scheduler Job
-                Assert.assertEquals("Verifying Last Scheduler Job Status", "success",
-                        jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
-
-                final HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
-
-                final HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, specifiedDueDateChargeId);
-
-                Float chargeAmount = (Float) chargeData.get("amount");
-
-                final Float balance = (Float) summaryBefore.get("accountBalance") - chargeAmount;
-
-                Assert.assertEquals("Verifying the Balance after running Transfer Fee for Loans from Savings", balance,
-                        (Float) summaryAfter.get("accountBalance"));
-                break;
-            }
-        }
+        Assert.assertEquals("Verifying the Balance after running Transfer Fee for Loans from Savings", balance,
+                (Float) summaryAfter.get("accountBalance"));
 
     }
 
@@ -369,57 +274,25 @@ public class SchedulerJobsTestResults {
             configId = this.globalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec,
                     configId.toString(), enabled);
         }
+        final ArrayList<HashMap> repaymentScheduleDataBeforeJob = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
+                this.responseSpec, loanID);
 
-        ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(allSchedulerJobsData);
+        holidayId = this.holidayHelper.activateHolidays(this.requestSpec, this.responseSpec, holidayId.toString());
+        Assert.assertNotNull(holidayId);
 
-        // Integer jobId = (Integer) allSchedulerJobsData.get(4).get("jobId");
         String JobName = "Apply Holidays To Loans";
-        for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
-            if (allSchedulerJobsData.get(jobIndex).get("displayName").equals(JobName)) {
-                Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
 
-                final ArrayList<HashMap> repaymentScheduleDataBeforeJob = this.loanTransactionHelper.getLoanRepaymentSchedule(
-                        this.requestSpec, this.responseSpec, loanID);
+        excuteJob(JobName);
+        final ArrayList<HashMap> repaymentScheduleDataAfterJob = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
+                this.responseSpec, loanID);
 
-                holidayId = this.holidayHelper.activateHolidays(this.requestSpec, this.responseSpec, holidayId.toString());
-                Assert.assertNotNull(holidayId);
+        HashMap holidayData = this.holidayHelper.getHolidayById(this.requestSpec, this.responseSpec, holidayId.toString());
+        ArrayList<Integer> repaymentsRescheduledDate = (ArrayList<Integer>) holidayData.get("repaymentsRescheduledTo");
 
-                // Executing Scheduler Job
-                this.schedulerJobHelper.runSchedulerJob(this.requestSpec, this.responseSpecForSchedulerJob, jobId.toString());
+        ArrayList<Integer> rescheduleDateAfter = (ArrayList<Integer>) repaymentScheduleDataAfterJob.get(2).get("fromDate");
 
-                // Retrieving Scheduler Job by ID
-                HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                Assert.assertNotNull(schedulerJob);
-
-                // Waiting for Job to complete
-                while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
-                    Thread.sleep(120000);
-                    schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                    Assert.assertNotNull(schedulerJob);
-                    System.out.println("Job is Still Running");
-                }
-
-                ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
-                        jobId.toString());
-
-                // Verifying the Status of the Recently executed Scheduler Job
-                Assert.assertEquals("Verifying Last Scheduler Job Status", "success",
-                        jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
-
-                final ArrayList<HashMap> repaymentScheduleDataAfterJob = this.loanTransactionHelper.getLoanRepaymentSchedule(
-                        this.requestSpec, this.responseSpec, loanID);
-
-                HashMap holidayData = this.holidayHelper.getHolidayById(this.requestSpec, this.responseSpec, holidayId.toString());
-                ArrayList<Integer> repaymentsRescheduledDate = (ArrayList<Integer>) holidayData.get("repaymentsRescheduledTo");
-
-                ArrayList<Integer> rescheduleDateAfter = (ArrayList<Integer>) repaymentScheduleDataAfterJob.get(2).get("fromDate");
-
-                Assert.assertEquals("Verifying Repayment Rescheduled Date after Running Apply Holidays to Loans Scheduler Job",
-                        repaymentsRescheduledDate, repaymentsRescheduledDate);
-                break;
-            }
-        }
+        Assert.assertEquals("Verifying Repayment Rescheduled Date after Running Apply Holidays to Loans Scheduler Job",
+                repaymentsRescheduledDate, repaymentsRescheduledDate);
 
     }
 
@@ -456,54 +329,22 @@ public class SchedulerJobsTestResults {
         savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
-        ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(allSchedulerJobsData);
+        HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
-        // Integer jobId = (Integer) allSchedulerJobsData.get(7).get("jobId");
         String JobName = "Pay Due Savings Charges";
-        for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
-            if (allSchedulerJobsData.get(jobIndex).get("displayName").equals(JobName)) {
-                Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
 
-                HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                Assert.assertNotNull(schedulerJob);
+        excuteJob(JobName);
+        HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
-                HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        final HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, specifiedDueDateChargeId);
 
-                // Executing Scheduler Job
-                this.schedulerJobHelper.runSchedulerJob(this.requestSpec, this.responseSpecForSchedulerJob, jobId.toString());
+        Float chargeAmount = (Float) chargeData.get("amount");
 
-                schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                Assert.assertNotNull(schedulerJob);
+        final Float balance = (Float) summaryBefore.get("accountBalance") - chargeAmount;
 
-                // Waiting for Job to complete
-                while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
-                    Thread.sleep(120000);
-                    schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                    Assert.assertNotNull(schedulerJob);
-                    System.out.println("Job is Still Running");
-                }
+        Assert.assertEquals("Verifying the Balance after running Pay due Savings Charges", balance,
+                (Float) summaryAfter.get("accountBalance"));
 
-                ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
-                        jobId.toString());
-
-                // Verifying the Status of the Recently executed Scheduler Job
-                Assert.assertEquals("Verifying Last Scheduler Job Status", "success",
-                        jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
-
-                HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
-
-                final HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, specifiedDueDateChargeId);
-
-                Float chargeAmount = (Float) chargeData.get("amount");
-
-                final Float balance = (Float) summaryBefore.get("accountBalance") - chargeAmount;
-
-                Assert.assertEquals("Verifying the Balance after running Pay due Savings Charges", balance,
-                        (Float) summaryAfter.get("accountBalance"));
-                break;
-            }
-        }
     }
 
     @Test
@@ -539,48 +380,15 @@ public class SchedulerJobsTestResults {
         this.journalEntryHelper
                 .checkJournalEntryForLiabilityAccount(liabilityAccount, this.TRANSACTION_DATE, liablilityAccountInitialEntry);
 
-        ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(allSchedulerJobsData);
-
-        // Integer jobId = (Integer) allSchedulerJobsData.get(8).get("jobId");
         String JobName = "Update Accounting Running Balances";
-        for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
-            if (allSchedulerJobsData.get(jobIndex).get("displayName").equals(JobName)) {
-                Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
 
-                HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                Assert.assertNotNull(schedulerJob);
+        excuteJob(JobName);
+        final HashMap runningBalanceAfter = this.accountHelper.getAccountingWithRunningBalanceById(accountID.toString());
 
-                // Executing Scheduler Job
-                this.schedulerJobHelper.runSchedulerJob(this.requestSpec, this.responseSpecForSchedulerJob, jobId.toString());
+        final Integer INT_BALANCE = new Integer(MINIMUM_OPENING_BALANCE);
 
-                schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                Assert.assertNotNull(schedulerJob);
-
-                // Waiting for Job to complete
-                while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
-                    Thread.sleep(120000);
-                    schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                    Assert.assertNotNull(schedulerJob);
-                    System.out.println("Job is Still Running");
-                }
-
-                ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
-                        jobId.toString());
-
-                // Verifying the Status of the Recently executed Scheduler Job
-                Assert.assertEquals("Verifying Last Scheduler Job Status", "success",
-                        jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
-
-                final HashMap runningBalanceAfter = this.accountHelper.getAccountingWithRunningBalanceById(accountID.toString());
-
-                final Integer INT_BALANCE = new Integer(MINIMUM_OPENING_BALANCE);
-
-                Assert.assertEquals("Verifying Account Running Balance after running Update Accounting Running Balances Scheduler Job",
-                        INT_BALANCE, runningBalanceAfter.get("organizationRunningBalance"));
-                break;
-            }
-        }
+        Assert.assertEquals("Verifying Account Running Balance after running Update Accounting Running Balances Scheduler Job",
+                INT_BALANCE, runningBalanceAfter.get("organizationRunningBalance"));
 
     }
 
@@ -607,47 +415,15 @@ public class SchedulerJobsTestResults {
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan(AccountTransferTest.LOAN_DISBURSAL_DATE, loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
-        ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(allSchedulerJobsData);
-
-        // Integer jobId = (Integer) allSchedulerJobsData.get(1).get("jobId");
         String JobName = "Update Loan Arrears Ageing";
-        for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
-            if (allSchedulerJobsData.get(jobIndex).get("displayName").equals(JobName)) {
-                Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
 
-                // Executing Scheduler Job
-                this.schedulerJobHelper.runSchedulerJob(this.requestSpec, this.responseSpecForSchedulerJob, jobId.toString());
+        this.excuteJob(JobName);
+        HashMap loanSummaryData = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
 
-                // Retrieving Scheduler Job by ID
-                HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                Assert.assertNotNull(schedulerJob);
+        Float totalLoanArrearsAging = (Float) loanSummaryData.get("principalOverdue") + (Float) loanSummaryData.get("interestOverdue");
 
-                // Waiting for Job to complete
-                while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
-                    Thread.sleep(120000);
-                    schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                    Assert.assertNotNull(schedulerJob);
-                    System.out.println("Job is Still Running");
-                }
-
-                ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
-                        jobId.toString());
-
-                // Verifying the Status of the Recently executed Scheduler Job
-                Assert.assertEquals("Verifying Last Scheduler Job Status", "success",
-                        jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
-
-                HashMap loanSummaryData = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
-
-                Float totalLoanArrearsAging = (Float) loanSummaryData.get("principalOverdue")
-                        + (Float) loanSummaryData.get("interestOverdue");
-
-                Assert.assertEquals("Verifying Arrears Aging after Running Update Loan Arrears Aging Scheduler Job", totalLoanArrearsAging,
-                        loanSummaryData.get("totalOverdue"));
-                break;
-            }
-        }
+        Assert.assertEquals("Verifying Arrears Aging after Running Update Loan Arrears Aging Scheduler Job", totalLoanArrearsAging,
+                loanSummaryData.get("totalOverdue"));
 
     }
 
@@ -695,52 +471,20 @@ public class SchedulerJobsTestResults {
 
         HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
 
-        ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(allSchedulerJobsData);
-
-        // Integer jobId = (Integer) allSchedulerJobsData.get(2).get("jobId");
         String JobName = "Update Loan Paid In Advance";
-        for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
-            if (allSchedulerJobsData.get(jobIndex).get("displayName").equals(JobName)) {
-                Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
+        excuteJob(JobName);
+        // Retrieving Loan Repayment Schedule after the successful
+        // completion of
+        // Update Loan Paid in Advance Scheduler Job
+        ArrayList<HashMap> loanScheduleAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
+                loanID);
 
-                // Executing Scheduler Job
-                this.schedulerJobHelper.runSchedulerJob(this.requestSpec, this.responseSpecForSchedulerJob, jobId.toString());
+        loanSummary = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
 
-                // Retrieving Scheduler Job by ID
-                HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                Assert.assertNotNull(schedulerJob);
+        Float totalPaidInAdvance = (Float) loanScheduleAfter.get(1).get("totalPaidInAdvanceForPeriod");
 
-                // Waiting for Job to complete
-                while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
-                    Thread.sleep(120000);
-                    schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                    Assert.assertNotNull(schedulerJob);
-                    System.out.println("Job is Still Running");
-                }
-
-                ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
-                        jobId.toString());
-
-                // Verifying the Status of the Recently executed Scheduler Job
-                Assert.assertEquals("Verifying Last Scheduler Job Status", "success",
-                        jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
-
-                // Retrieving Loan Repayment Schedule after the successful
-                // completion of
-                // Update Loan Paid in Advance Scheduler Job
-                ArrayList<HashMap> loanScheduleAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
-                        this.responseSpec, loanID);
-
-                loanSummary = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
-
-                Float totalPaidInAdvance = (Float) loanScheduleAfter.get(1).get("totalPaidInAdvanceForPeriod");
-
-                Assert.assertEquals("Verifying Loan Repayment in Advance after Running Update Loan Paid in Advance Scheduler Job",
-                        totalDueForCurrentPeriod, totalPaidInAdvance);
-                break;
-            }
-        }
+        Assert.assertEquals("Verifying Loan Repayment in Advance after Running Update Loan Paid in Advance Scheduler Job",
+                totalDueForCurrentPeriod, totalPaidInAdvance);
 
     }
 
@@ -790,45 +534,13 @@ public class SchedulerJobsTestResults {
 
         HashMap loanSummaryBefore = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
 
-        ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(allSchedulerJobsData);
-
-        // Integer jobId = (Integer) allSchedulerJobsData.get(0).get("jobId");
         String JobName = "Update loan Summary";
-        for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
-            if (allSchedulerJobsData.get(jobIndex).get("displayName").equals(JobName)) {
-                Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
-
-                // Executing Scheduler Job
-                this.schedulerJobHelper.runSchedulerJob(this.requestSpec, this.responseSpecForSchedulerJob, jobId.toString());
-
-                // Retrieving Scheduler Job by ID
-                HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                Assert.assertNotNull(schedulerJob);
-
-                // Waiting for Job to complete
-                while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
-                    Thread.sleep(120000);
-                    schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                    Assert.assertNotNull(schedulerJob);
-                    System.out.println("Job is Still Running");
-                }
-
-                ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
-                        jobId.toString());
-
-                // Verifying the Status of the Recently executed Scheduler Job
-                Assert.assertEquals("Verifying Last Scheduler Job Status", "success",
-                        jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
-
-                Float expectedSummaryAfterJob = (Float) loanSummaryBefore.get("totalExpectedRepayment")
-                        - (Float) loanSummaryBefore.get("feeChargesPaid");
-                HashMap loanSummaryAfter = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
-                Assert.assertEquals("Verifying Loan Summary after Running Update Loan Summary Scheduler Job", expectedSummaryAfterJob,
-                        (Float) loanSummaryAfter.get("totalExpectedRepayment"));
-                break;
-            }
-        }
+        excuteJob(JobName);
+        Float expectedSummaryAfterJob = (Float) loanSummaryBefore.get("totalExpectedRepayment")
+                - (Float) loanSummaryBefore.get("feeChargesPaid");
+        HashMap loanSummaryAfter = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
+        Assert.assertEquals("Verifying Loan Summary after Running Update Loan Summary Scheduler Job", expectedSummaryAfterJob,
+                (Float) loanSummaryAfter.get("totalExpectedRepayment"));
 
     }
 
@@ -894,55 +606,23 @@ public class SchedulerJobsTestResults {
                 MONTH_DAY);
         Assert.assertNotNull(standingInstructionId);
 
-        ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
-        Assert.assertNotNull(allSchedulerJobsData);
-
-        // Integer jobId = (Integer) allSchedulerJobsData.get(9).get("jobId");
         String JobName = "Execute Standing Instruction";
-        for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
-            if (allSchedulerJobsData.get(jobIndex).get("displayName").equals(JobName)) {
-                Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
+        excuteJob(JobName);
+        HashMap fromSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(fromSavingsId);
+        Float fromSavingsBalanceAfter = (Float) fromSavingsSummaryAfter.get("accountBalance");
 
-                // Executing Scheduler Job
-                this.schedulerJobHelper.runSchedulerJob(this.requestSpec, this.responseSpecForSchedulerJob, jobId.toString());
+        HashMap toSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(toSavingsId);
+        Float toSavingsBalanceAfter = (Float) toSavingsSummaryAfter.get("accountBalance");
 
-                // Retrieving Scheduler Job by ID
-                HashMap schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                Assert.assertNotNull(schedulerJob);
+        final HashMap standingInstructionData = this.standingInstructionsHelper
+                .getStandingInstructionById(standingInstructionId.toString());
+        Float expectedFromSavingsBalance = fromSavingsBalanceBefore - (Float) standingInstructionData.get("amount");
+        Float expectedToSavingsBalance = toSavingsBalanceBefore + (Float) standingInstructionData.get("amount");
 
-                // Waiting for Job to complete
-                while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
-                    Thread.sleep(120000);
-                    schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
-                    Assert.assertNotNull(schedulerJob);
-                    System.out.println("Job is Still Running");
-                }
-
-                ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
-                        jobId.toString());
-
-                // Verifying the Status of the Recently executed Scheduler Job
-                Assert.assertEquals("Verifying Last Scheduler Job Status", "success",
-                        jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
-
-                HashMap fromSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(fromSavingsId);
-                Float fromSavingsBalanceAfter = (Float) fromSavingsSummaryAfter.get("accountBalance");
-
-                HashMap toSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(toSavingsId);
-                Float toSavingsBalanceAfter = (Float) toSavingsSummaryAfter.get("accountBalance");
-
-                final HashMap standingInstructionData = this.standingInstructionsHelper.getStandingInstructionById(standingInstructionId
-                        .toString());
-                Float expectedFromSavingsBalance = fromSavingsBalanceBefore - (Float) standingInstructionData.get("amount");
-                Float expectedToSavingsBalance = toSavingsBalanceBefore + (Float) standingInstructionData.get("amount");
-
-                Assert.assertEquals("Verifying From Savings Balance after Successful completion of Scheduler Job",
-                        expectedFromSavingsBalance, fromSavingsBalanceAfter);
-                Assert.assertEquals("Verifying To Savings Balance after Successful completion of Scheduler Job", expectedToSavingsBalance,
-                        toSavingsBalanceAfter);
-                break;
-            }
-        }
+        Assert.assertEquals("Verifying From Savings Balance after Successful completion of Scheduler Job", expectedFromSavingsBalance,
+                fromSavingsBalanceAfter);
+        Assert.assertEquals("Verifying To Savings Balance after Successful completion of Scheduler Job", expectedToSavingsBalance,
+                toSavingsBalanceAfter);
 
     }
 
@@ -977,10 +657,57 @@ public class SchedulerJobsTestResults {
         ArrayList<HashMap> repaymentScheduleDataBefore = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
                 this.responseSpec, loanID);
 
+        String JobName = "Apply penalty to overdue loans";
+        excuteJob(JobName);
+
+        final HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, overdueFeeChargeId);
+
+        Float chargeAmount = (Float) chargeData.get("amount");
+
+        ArrayList<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
+                this.responseSpec, loanID);
+
+        Assert.assertEquals("Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job",
+                chargeAmount, (Float) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"));
+
+    }
+
+    @Test
+    public void testUpdateOverdueDaysForNPA() throws InterruptedException {
+        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientID);
+
+        final Integer loanProductID = createLoanProduct(null);
+        Assert.assertNotNull(loanProductID);
+
+        final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null);
+        Assert.assertNotNull(loanID);
+
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan(AccountTransferTest.LOAN_APPROVAL_DATE, loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(AccountTransferTest.LOAN_DISBURSAL_DATE, loanID);
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+        final Boolean isNPABefore = (Boolean) this.loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, loanID, "isNPA");
+        Assert.assertFalse(isNPABefore);
+        // Integer jobId = (Integer) allSchedulerJobsData.get(1).get("jobId");
+        String JobName = "Update Non Performing Assets";
+        excuteJob(JobName);
+        final Boolean isNPAAfter = (Boolean) this.loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, loanID, "isNPA");
+        Assert.assertTrue(isNPAAfter);
+    }
+
+    private void excuteJob(String JobName) throws InterruptedException {
         ArrayList<HashMap> allSchedulerJobsData = this.schedulerJobHelper.getAllSchedulerJobs(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(allSchedulerJobsData);
 
-        String JobName = "Apply penalty to overdue loans";
         for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
             if (allSchedulerJobsData.get(jobIndex).get("displayName").equals(JobName)) {
                 Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
@@ -994,7 +721,7 @@ public class SchedulerJobsTestResults {
 
                 // Waiting for Job to complete
                 while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
-                    Thread.sleep(120000);
+                    Thread.sleep(15000);
                     schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
                     Assert.assertNotNull(schedulerJob);
                     System.out.println("Job is Still Running");
@@ -1007,20 +734,9 @@ public class SchedulerJobsTestResults {
                 Assert.assertEquals("Verifying Last Scheduler Job Status", "success",
                         jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
 
-                final HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, overdueFeeChargeId);
-
-                Float chargeAmount = (Float) chargeData.get("amount");
-
-                ArrayList<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
-                        this.responseSpec, loanID);
-
-                Assert.assertEquals("Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job",
-                        chargeAmount, (Float) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"));
-
                 break;
             }
         }
-
     }
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

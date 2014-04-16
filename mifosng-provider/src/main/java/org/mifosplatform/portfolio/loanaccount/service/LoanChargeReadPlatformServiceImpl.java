@@ -226,12 +226,14 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
     }
 
     @Override
-    public Collection<Integer> retrieveOverdueInstallmentChargeFrequencyNumber(final Long installmentId,final Long chargeId) {
-        String sql = "select oic.frequency_number from m_loan_overdue_installment_charge oic  inner join m_loan_charge lc on lc.id=oic.loan_charge_id  where oic.loan_schedule_id = ? and lc.is_active = 1";
-        Object[] params = {installmentId};
-        if(chargeId != null){
+    public Collection<Integer> retrieveOverdueInstallmentChargeFrequencyNumber(final Long loanId, final Long chargeId,
+            final Integer periodNumber) {
+        String sql = "select oic.frequency_number from m_loan_overdue_installment_charge oic  inner join m_loan_charge lc on lc.id=oic.loan_charge_id inner join m_loan_repayment_schedule rs on rs.id = oic.loan_schedule_id inner join m_loan loan on loan.id=rs.loan_id "
+                + "where lc.is_active = 1 and loan.id = ? and rs.installment=?";
+        Object[] params = { loanId, periodNumber };
+        if (chargeId != null) {
             sql += " and lc.charge_id = ? ";
-            params = new Object[]{installmentId,chargeId};
+            params = new Object[] { loanId, periodNumber, chargeId };
         }
         return this.jdbcTemplate.queryForList(sql, Integer.class, params);
     }

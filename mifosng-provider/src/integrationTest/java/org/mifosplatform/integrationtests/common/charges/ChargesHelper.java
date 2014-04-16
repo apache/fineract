@@ -44,7 +44,6 @@ public class ChargesHelper {
 
     private final static boolean active = true;
     private final static boolean penalty = true;
-    public final static boolean addfeefrequency = true;
     private final static String amount = "100";
     private final static String currencyCode = "USD";
     public final static String feeOnMonthDay = "04 March";
@@ -133,7 +132,7 @@ public class ChargesHelper {
         System.out.println(chargesCreateJson);
         return chargesCreateJson;
     }
-    
+
     public static String getLoanSpecifiedDueDateWithAccountTransferJSON() {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("chargeTimeType", CHARGE_SPECIFIED_DUE_DATE);
@@ -159,6 +158,9 @@ public class ChargesHelper {
         map.put("penalty", ChargesHelper.penalty);
         map.put("chargePaymentMode", ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
         map.put("chargeTimeType", CHARGE_OVERDUE_INSTALLMENT_FEE);
+        map.put("feeFrequency", ChargesHelper.CHARGE_FEE_FREQUENCY_MONTHS);
+        map.put("feeOnMonthDay", ChargesHelper.feeOnMonthDay);
+        map.put("feeInterval", 2);
         String chargesCreateJson = new Gson().toJson(map);
         System.out.println(chargesCreateJson);
         return chargesCreateJson;
@@ -174,10 +176,6 @@ public class ChargesHelper {
         map.put("locale", CommonConstants.locale);
         map.put("monthDayFormat", ChargesHelper.monthDayFormat);
         map.put("name", Utils.randomNameGenerator("Charge_Loans_", 6));
-        if (ChargesHelper.addfeefrequency) {
-            map.put("feeFrequency", ChargesHelper.CHARGE_FEE_FREQUENCY_DAYS);
-            map.put("feeInterval", 2);
-        }
         return map;
     }
 

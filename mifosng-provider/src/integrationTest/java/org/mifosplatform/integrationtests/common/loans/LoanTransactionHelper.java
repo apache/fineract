@@ -54,6 +54,12 @@ public class LoanTransactionHelper {
         return response;
     }
 
+    public Object getLoanDetail(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer loanID,
+            final String param) {
+        final String URL = "/mifosng-provider/api/v1/loans/" + loanID + "?associations=all&tenantIdentifier=default";
+        return Utils.performServerGet(requestSpec, responseSpec, URL, param);
+    }
+
     public ArrayList getLoanCharges(final Integer loanId) {
         final String GET_LOAN_CHARGES_URL = "/mifosng-provider/api/v1/loans/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL, "");
