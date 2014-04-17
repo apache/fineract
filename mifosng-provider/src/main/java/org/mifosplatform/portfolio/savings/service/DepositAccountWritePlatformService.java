@@ -27,8 +27,6 @@ public interface DepositAccountWritePlatformService {
 
     CommandProcessingResult undoTransaction(Long savingsId, Long transactionId, boolean allowAccountTransferModification, final DepositAccountType depositAccountType);
 
-    void postInterestForAccounts();
-
     CommandProcessingResult adjustDepositTransaction(Long savingsId, Long transactionId, JsonCommand command, final DepositAccountType depositAccountType);
 
     CommandProcessingResult close(Long savingsId, JsonCommand command, final DepositAccountType depositAccountType);
