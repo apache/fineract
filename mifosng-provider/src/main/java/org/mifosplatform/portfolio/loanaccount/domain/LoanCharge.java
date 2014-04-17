@@ -113,17 +113,17 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
-    
+
     @OneToOne(mappedBy = "loancharge", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.LAZY)
     private LoanOverdueInstallmentCharge overdueInstallmentCharge;
 
-
     public static LoanCharge createNewFromJson(final Loan loan, final Charge chargeDefinition, final JsonCommand command) {
         final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
-        return createNewFromJson(loan, chargeDefinition, command,dueDate);
+        return createNewFromJson(loan, chargeDefinition, command, dueDate);
     }
 
-    public static LoanCharge createNewFromJson(final Loan loan, final Charge chargeDefinition, final JsonCommand command,final LocalDate dueDate) {
+    public static LoanCharge createNewFromJson(final Loan loan, final Charge chargeDefinition, final JsonCommand command,
+            final LocalDate dueDate) {
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
 
         final ChargeTimeType chargeTime = null;
@@ -457,8 +457,11 @@ public class LoanCharge extends AbstractPersistable<Long> {
                 case PERCENT_OF_INTEREST:
                     this.percentage = newValue;
                     this.amountPercentageAppliedTo = amount;
-                    BigDecimal loanCharge = this.loan.calculatePerInstallmentChargeAmount(
-                            ChargeCalculationType.fromInt(this.chargeCalculation), this.percentage);
+                    BigDecimal loanCharge = BigDecimal.ZERO;
+                    if (isInstalmentFee()) {
+                        loanCharge = this.loan.calculatePerInstallmentChargeAmount(ChargeCalculationType.fromInt(this.chargeCalculation),
+                                this.percentage);
+                    }
                     if (loanCharge.compareTo(BigDecimal.ZERO) == 0) {
                         loanCharge = percentageOf(this.amountPercentageAppliedTo);
                     }
@@ -833,7 +836,6 @@ public class LoanCharge extends AbstractPersistable<Long> {
         return totalChargeAmount;
     }
 
-    
     public void updateOverdueInstallmentCharge(LoanOverdueInstallmentCharge overdueInstallmentCharge) {
         this.overdueInstallmentCharge = overdueInstallmentCharge;
     }
