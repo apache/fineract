@@ -34,8 +34,6 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
-import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
-import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.holiday.service.HolidayWritePlatformService;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
@@ -306,17 +304,6 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         this.savingAccountRepository.save(account);
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
-    }
-
-    @CronTarget(jobName = JobName.POST_INTEREST_FOR_SAVINGS)
-    @Override
-    public void postInterestForAccounts() {
-        final List<SavingsAccount> savingsAccounts = this.savingAccountRepository.findSavingAccountByStatus(SavingsAccountStatusType.ACTIVE
-                .getValue());
-        for (final SavingsAccount savingsAccount : savingsAccounts) {
-            this.depositAccountAssembler.assignSavingAccountHelpers(savingsAccount);
-            postInterest(savingsAccount);
-        }
     }
 
     @Override
