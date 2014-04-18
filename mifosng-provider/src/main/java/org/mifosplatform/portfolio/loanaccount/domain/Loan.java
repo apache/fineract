@@ -1012,6 +1012,7 @@ public class Loan extends AbstractPersistable<Long> {
         if (!actualChanges.isEmpty()) {
             final boolean recalculateLoanSchedule = !(actualChanges.size() == 1 && actualChanges.containsKey("inArrearsTolerance"));
             actualChanges.put("recalculateLoanSchedule", recalculateLoanSchedule);
+            isChargesModified = true;
         }
 
         final String dateFormatAsInput = command.dateFormat();
@@ -1182,33 +1183,31 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         final String chargesParamName = "charges";
-        if (command.parameterExists(chargesParamName)) {
 
-            if (isChargesModified) {
-                actualChanges.put(chargesParamName, getLoanCharges(possiblyModifedLoanCharges));
+        if (isChargesModified) {
+            actualChanges.put(chargesParamName, getLoanCharges(possiblyModifedLoanCharges));
 
-                actualChanges.put(chargesParamName, getLoanCharges(possiblyModifedLoanCharges));
-                actualChanges.put("recalculateLoanSchedule", true);
+            actualChanges.put(chargesParamName, getLoanCharges(possiblyModifedLoanCharges));
+            actualChanges.put("recalculateLoanSchedule", true);
 
-                for (final LoanCharge loanCharge : possiblyModifedLoanCharges) {
-                    final BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
-                    BigDecimal chargeAmt = BigDecimal.ZERO;
-                    BigDecimal totalChargeAmt = BigDecimal.ZERO;
-                    if (loanCharge.getChargeCalculation().isPercentageBased()) {
-                        chargeAmt = loanCharge.getPercentage();
-                        if (loanCharge.isInstalmentFee()) {
-                            totalChargeAmt = calculatePerInstallmentChargeAmount(loanCharge);
-                        }
-                    } else {
-                        chargeAmt = loanCharge.amount();
-                        if (loanCharge.isInstalmentFee()) {
-                            chargeAmt = chargeAmt.divide(BigDecimal.valueOf(repaymentScheduleDetail().getNumberOfRepayments()));
-                        }
+            for (final LoanCharge loanCharge : possiblyModifedLoanCharges) {
+                final BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
+                BigDecimal chargeAmt = BigDecimal.ZERO;
+                BigDecimal totalChargeAmt = BigDecimal.ZERO;
+                if (loanCharge.getChargeCalculation().isPercentageBased()) {
+                    chargeAmt = loanCharge.getPercentage();
+                    if (loanCharge.isInstalmentFee()) {
+                        totalChargeAmt = calculatePerInstallmentChargeAmount(loanCharge);
                     }
-                    loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, repaymentScheduleDetail().getNumberOfRepayments(),
-                            totalChargeAmt);
-                    validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
+                } else {
+                    chargeAmt = loanCharge.amount();
+                    if (loanCharge.isInstalmentFee()) {
+                        chargeAmt = chargeAmt.divide(BigDecimal.valueOf(repaymentScheduleDetail().getNumberOfRepayments()));
+                    }
                 }
+                loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, repaymentScheduleDetail().getNumberOfRepayments(),
+                        totalChargeAmt);
+                validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
             }
         }
 
