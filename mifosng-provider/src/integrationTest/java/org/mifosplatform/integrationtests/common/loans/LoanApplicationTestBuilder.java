@@ -1,6 +1,9 @@
 package org.mifosplatform.integrationtests.common.loans;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.google.gson.Gson;
 
@@ -32,10 +35,11 @@ public class LoanApplicationTestBuilder {
     private String expectedDisbursmentDate = "";
     private String submittedOnDate = "";
     private String loanType = "individual";
+    private List<HashMap> charges = new ArrayList<HashMap>();
 
     public String build(final String ID, final String loanProductId, final String savingsID) {
 
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en_GB");
         if (this.loanType == "group") {
@@ -58,6 +62,9 @@ public class LoanApplicationTestBuilder {
         map.put("expectedDisbursementDate", this.expectedDisbursmentDate);
         map.put("submittedOnDate", this.submittedOnDate);
         map.put("loanType", this.loanType);
+        if (charges != null) {
+            map.put("charges", charges);
+        }
         if (savingsID != null) {
             map.put("linkAccountId", savingsID);
         }
@@ -161,6 +168,11 @@ public class LoanApplicationTestBuilder {
 
     public LoanApplicationTestBuilder withSubmittedOnDate(final String loanApplicationSubmittedDate) {
         this.submittedOnDate = loanApplicationSubmittedDate;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withCharges(final List<HashMap> charges) {
+        this.charges = charges;
         return this;
     }
 
