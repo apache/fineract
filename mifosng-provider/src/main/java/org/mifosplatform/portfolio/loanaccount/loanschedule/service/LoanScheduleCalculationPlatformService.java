@@ -10,5 +10,5 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleM
 
 public interface LoanScheduleCalculationPlatformService {
 
-    LoanScheduleModel calculateLoanSchedule(JsonQuery query);
+    LoanScheduleModel calculateLoanSchedule(JsonQuery query, Boolean validateParams);
 }

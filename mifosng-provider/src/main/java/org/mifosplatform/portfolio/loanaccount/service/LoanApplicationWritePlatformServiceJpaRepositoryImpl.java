@@ -417,7 +417,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 final JsonElement parsedQuery = this.fromJsonHelper.parse(command.json());
                 final JsonQuery query = JsonQuery.from(command.json(), parsedQuery, this.fromJsonHelper);
 
-                final LoanScheduleModel loanSchedule = this.calculationPlatformService.calculateLoanSchedule(query);
+                final LoanScheduleModel loanSchedule = this.calculationPlatformService.calculateLoanSchedule(query, false);
                 existingLoanApplication.updateLoanSchedule(loanSchedule);
             }
 
