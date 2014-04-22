@@ -28,6 +28,7 @@ public class LoanTransactionDTO {
     private final BigDecimal fees;
     private final BigDecimal penalties;
     private final BigDecimal overPayment;
+    private final BigDecimal recoveryPayment;
 
     /*** Boolean values determines if the transaction is reversed ***/
     private final boolean reversed;
@@ -38,7 +39,7 @@ public class LoanTransactionDTO {
 
     public LoanTransactionDTO(final Long officeId, final Long paymentTypeId, final String transactionId, final Date transactionDate,
             final LoanTransactionEnumData transactionType, final BigDecimal amount, final BigDecimal principal, final BigDecimal interest,
-            final BigDecimal fees, final BigDecimal penalties, final BigDecimal overPayment, final boolean reversed,
+            final BigDecimal fees, final BigDecimal penalties, final BigDecimal overPayment, final BigDecimal recoveryPayment, final boolean reversed,
             final List<ChargePaymentDTO> feePayments, final List<ChargePaymentDTO> penaltyPayments) {
         this.paymentTypeId = paymentTypeId;
         this.transactionId = transactionId;
@@ -53,6 +54,7 @@ public class LoanTransactionDTO {
         this.feePayments = feePayments;
         this.penaltyPayments = penaltyPayments;
         this.overPayment = overPayment;
+        this.recoveryPayment = recoveryPayment;
         this.officeId = officeId;
     }
 
@@ -94,6 +96,10 @@ public class LoanTransactionDTO {
 
     public BigDecimal getOverPayment() {
         return this.overPayment;
+    }
+
+    public BigDecimal getRecoveryPayment() {
+        return this.recoveryPayment;
     }
 
     public boolean isReversed() {

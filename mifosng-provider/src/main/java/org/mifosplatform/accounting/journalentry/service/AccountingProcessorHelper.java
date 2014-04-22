@@ -96,6 +96,7 @@ public class AccountingProcessorHelper {
             final BigDecimal fees = (BigDecimal) map.get("feeChargesPortion");
             final BigDecimal penalties = (BigDecimal) map.get("penaltyChargesPortion");
             final BigDecimal overPayments = (BigDecimal) map.get("overPaymentPortion");
+            final BigDecimal recoveryPayments = (BigDecimal) map.get("recoveryPaymentPortion");
             final boolean reversed = (Boolean) map.get("reversed");
             final Long paymentTypeId = (Long) map.get("paymentTypeId");
 
@@ -120,7 +121,7 @@ public class AccountingProcessorHelper {
             }
 
             final LoanTransactionDTO transaction = new LoanTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
-                    transactionDate, transactionType, amount, principal, interest, fees, penalties, overPayments, reversed,
+                    transactionDate, transactionType, amount, principal, interest, fees, penalties, overPayments, recoveryPayments, reversed,
                     feePaymentDetails, penaltyPaymentDetails);
 
             newLoanTransactions.add(transaction);

@@ -5,36 +5,9 @@
  */
 package org.mifosplatform.portfolio.loanaccount.domain;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
@@ -74,21 +47,8 @@ import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
 import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
-import org.mifosplatform.portfolio.loanaccount.exception.ExceedingTrancheCountException;
-import org.mifosplatform.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
-import org.mifosplatform.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
-import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationDateException;
-import org.mifosplatform.portfolio.loanaccount.exception.LoanDisbursalException;
-import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentDateException;
-import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
-import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerUnassignmentDateException;
-import org.mifosplatform.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
+import org.mifosplatform.portfolio.loanaccount.exception.*;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.*;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
@@ -98,9 +58,12 @@ import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import java.util.*;
 
 @Entity
 @Table(name = "m_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "loan_account_no_UNIQUE"),
@@ -303,6 +266,9 @@ public class Loan extends AbstractPersistable<Long> {
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
     private final Set<LoanTermVariations> loanTermVariations = new HashSet<LoanTermVariations>();
+
+    @Column(name = "total_recovered_derived", scale = 6, precision = 19)
+    private BigDecimal totalRecovered;
 
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
@@ -991,6 +957,9 @@ public class Loan extends AbstractPersistable<Long> {
         } else {
             final Money overpaidBy = calculateTotalOverpayment();
             this.totalOverpaid = overpaidBy.getAmountDefaultedToNullIfZero();
+
+            final Money recoveredAmount = calculateTotalRecoveredPayments();
+            this.totalRecovered   =  recoveredAmount.getAmountDefaultedToNullIfZero();
 
             final Money principal = this.loanRepaymentScheduleDetail.getPrincipal();
             this.summary.updateSummary(loanCurrency(), principal, this.repaymentScheduleInstallments, this.loanSummaryWrapper,
@@ -2172,6 +2141,26 @@ public class Loan extends AbstractPersistable<Long> {
 
         return changedTransactionDetail;
     }
+    public ChangedTransactionDetail makeRecoveryRepayment(final LoanTransaction repaymentTransaction,
+                                                  final LoanLifecycleStateMachine loanLifecycleStateMachine, final List<Long> existingTransactionIds,
+                                                  final List<Long> existingReversedTransactionIds, final boolean allowTransactionsOnHoliday, final List<Holiday> holidays,
+                                                  final WorkingDays workingDays, final boolean allowTransactionsOnNonWorkingDay) {
+
+        validateAccountStatus(LoanEvent.LOAN_WRITTEN_OFF);
+        validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.WRITE_OFF_OUTSTANDING, repaymentTransaction.getTransactionDate());
+
+        validateRepaymentDateIsOnHoliday(repaymentTransaction.getTransactionDate(), allowTransactionsOnHoliday, holidays);
+        validateRepaymentDateIsOnNonWorkingDay(repaymentTransaction.getTransactionDate(), workingDays, allowTransactionsOnNonWorkingDay);
+
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
+
+        final ChangedTransactionDetail changedTransactionDetail = handleRecoveryRepayment(repaymentTransaction,
+                loanLifecycleStateMachine, null);
+
+        return changedTransactionDetail;
+    }
+
 
     public void makeChargePayment(final Long chargeId, final LoanLifecycleStateMachine loanLifecycleStateMachine,
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
@@ -2230,6 +2219,77 @@ public class Loan extends AbstractPersistable<Long> {
         }
         updateLoanSummaryDerivedFields();
         doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
+    }
+
+    private ChangedTransactionDetail handleRecoveryRepayment(final LoanTransaction loanTransaction,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransaction adjustedTransaction){
+        ChangedTransactionDetail changedTransactionDetail = null;
+
+        final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_WRITTEN_OFF,
+                LoanStatus.fromInt(this.loanStatus));
+        this.loanStatus = statusEnum.getValue();
+
+        loanTransaction.updateLoan(this);
+
+        final boolean isTransactionChronologicallyLatest = isChronologicallyLatestRepaymentOrWaiver(loanTransaction, this.loanTransactions);
+
+        if (loanTransaction.isNotZero(loanCurrency())) {
+            this.loanTransactions.add(loanTransaction);
+        }
+
+        if (!loanTransaction.isRecoveryRepayment()) {
+            final String errorMessage = "A transaction of type recovery repayment was expected but not received.";
+            throw new InvalidLoanTransactionTypeException("transaction", "is.not.a.recovery.repayment.transaction", errorMessage);
+        }
+
+        final LocalDate loanTransactionDate = loanTransaction.getTransactionDate();
+        if (loanTransactionDate.isBefore(getWrittenOffDate())) {
+            final String errorMessage = "The transaction date cannot be before the loan written-off date: "
+                    + getWrittenOffDate().toString();
+            throw new InvalidLoanStateTransitionException("transaction", "cannot.be.before.written-off.date", errorMessage,
+                    loanTransactionDate, getWrittenOffDate());
+        }
+
+        if (loanTransactionDate.isAfter(DateUtils.getLocalDateOfTenant())) {
+            final String errorMessage = "The transaction date cannot be in the future.";
+            throw new InvalidLoanStateTransitionException("transaction", "cannot.be.a.future.date", errorMessage, loanTransactionDate);
+        }
+
+        if (this.loanProduct.isMultiDisburseLoan() && adjustedTransaction == null) {
+            BigDecimal totalDisbursed = getDisbursedAmount();
+            if (totalDisbursed.compareTo(this.summary.getTotalPrincipalRepaid()) < 0) {
+                final String errorMessage = "The transaction cannot be done before the loan disbursement: "
+                        + getApprovedOnDate().toString();
+                throw new InvalidLoanStateTransitionException("transaction", "cannot.be.done.before.disbursement", errorMessage);
+            }
+        }
+
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
+                .determineProcessor(this.transactionProcessingStrategy);
+        if (isTransactionChronologicallyLatest && adjustedTransaction == null) {
+            loanRepaymentScheduleTransactionProcessor.handleTransaction(loanTransaction, getCurrency(), this.repaymentScheduleInstallments,
+                    charges());
+        } else {
+            final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
+            changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(),
+                    allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, charges());
+            for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+                mapEntry.getValue().updateLoan(this);
+            }
+            /***
+             * Commented since throwing exception if external id present for one
+             * of the transactions. for this need to save the reversed
+             * transactions first and then new transactions.
+             */
+            // this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
+        }
+
+        updateLoanSummaryDerivedFields();
+
+       // doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
+
+        return changedTransactionDetail;
+
     }
 
     private ChangedTransactionDetail handleRepaymentOrWaiverTransaction(final LoanTransaction loanTransaction,
@@ -2588,6 +2648,12 @@ public class Loan extends AbstractPersistable<Long> {
         return totalPaidInRepayments.minus(cumulativeTotalPaidOnInstallments);
     }
 
+    public Money calculateTotalRecoveredPayments(){
+       Money totalRecoveredPayments = getTotalRecoveredPayments();
+       //in case logic for reversing recovered payment is implemented handle subtraction from totalRecoveredPayments
+        return totalRecoveredPayments;
+    }
+
     private MonetaryCurrency loanCurrency() {
         return this.loanRepaymentScheduleDetail.getCurrency();
     }
@@ -2929,6 +2995,14 @@ public class Loan extends AbstractPersistable<Long> {
         return disbursementDate;
     }
 
+    public LocalDate getWrittenOffDate(){
+        LocalDate writtenOffDate = null;
+        if (this.writtenOffOnDate != null) {
+            writtenOffDate = new LocalDate(this.writtenOffOnDate);
+        }
+        return writtenOffDate;
+    }
+
     public LocalDate getExpectedDisbursedOnLocalDateForTemplate() {
 
         LocalDate expectedDisbursementDate = null;
@@ -2994,6 +3068,17 @@ public class Loan extends AbstractPersistable<Long> {
             }
         }
 
+        return cumulativePaid;
+    }
+
+    public Money getTotalRecoveredPayments(){
+        Money cumulativePaid = Money.zero(loanCurrency());
+
+        for(final LoanTransaction recoveredPayment : this.loanTransactions){
+            if(recoveredPayment.isRecoveryRepayment()) {
+                cumulativePaid = cumulativePaid.plus(recoveredPayment.getRecoveredPaymentPortion(loanCurrency())) ;
+            }
+        }
         return cumulativePaid;
     }
 
@@ -3678,6 +3763,14 @@ public class Loan extends AbstractPersistable<Long> {
                     final String defaultUserMessage = "Edit disbursement is not allowed. Loan Account is not active.";
                     final ApiParameterError error = ApiParameterError.generalError(
                             "error.msg.loan.edit.disbursement.account.is.not.active", defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
+            case LOAN_WRITTEN_OFF:
+                if(!isClosedWrittenOff()){
+                    final String defaultUserMessage = "Active Loan Account is not allowed for recovery repayment. Loan Account is Active.";
+                    final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.close.account.is.not.active",
+                            defaultUserMessage);
                     dataValidationErrors.add(error);
                 }
             break;

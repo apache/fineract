@@ -5,26 +5,6 @@
  */
 package org.mifosplatform.portfolio.loanaccount.domain;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
-
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
@@ -39,6 +19,10 @@ import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.springframework.data.jpa.domain.AbstractPersistable;
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * All monetary transactions against a loan are modelled through this entity.
@@ -95,6 +79,9 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanTransaction", orphanRemoval = true)
     private Set<LoanChargePaidBy> loanChargesPaid = new HashSet<LoanChargePaidBy>();
 
+    @Column(name = "recovered_portion_derived", scale = 6, precision = 19, nullable = true)
+    private BigDecimal recoveredPaymentPortion;
+
     protected LoanTransaction() {
         this.loan = null;
         this.dateOf = null;
@@ -110,6 +97,10 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     public static LoanTransaction repayment(final Office office, final Money amount, final PaymentDetail paymentDetail,
             final LocalDate paymentDate, final String externalId) {
         return new LoanTransaction(null, office, LoanTransactionType.REPAYMENT, paymentDetail, amount.getAmount(), paymentDate, externalId);
+    }
+    public static LoanTransaction recoveryRepayment(final Office office, final Money amount, final PaymentDetail paymentDetail,
+                                            final LocalDate paymentDate, final String externalId) {
+        return new LoanTransaction(null, office, LoanTransactionType.RECOVERY_REPAYMENT, paymentDetail, amount.getAmount(), paymentDate, externalId);
     }
 
     public static LoanTransaction loanPayment(final Loan loan, final Office office, final Money amount, final PaymentDetail paymentDetail,
@@ -296,6 +287,11 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         this.overPaymentPortion = defaultToNullIfZero(getOverPaymentPortion(currency).plus(overPayment).getAmount());
     }
 
+    public void updateRecoveredPayments(final Money recoveredPayment){
+        final MonetaryCurrency currency = recoveredPayment.getCurrency();
+        this.recoveredPaymentPortion = defaultToNullIfZero(getRecoveredPaymentPortion(currency).plus(recoveredPayment).getAmount());
+    }
+
     public Money getPrincipalPortion(final MonetaryCurrency currency) {
         return Money.of(currency, this.principalPortion);
     }
@@ -318,6 +314,10 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     public Money getOverPaymentPortion(final MonetaryCurrency currency) {
         return Money.of(currency, this.overPaymentPortion);
+    }
+
+    public Money getRecoveredPaymentPortion(final MonetaryCurrency currency){
+        return Money.of(currency,this.recoveredPaymentPortion) ;
     }
 
     public Money getAmount(final MonetaryCurrency currency) {
@@ -471,6 +471,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         thisTransactionData.put("feeChargesPortion", this.feeChargesPortion);
         thisTransactionData.put("penaltyChargesPortion", this.penaltyChargesPortion);
         thisTransactionData.put("overPaymentPortion", this.overPaymentPortion);
+        thisTransactionData.put("recoveryPaymentPortion", this.recoveredPaymentPortion);
 
         if (this.paymentDetail != null) {
             thisTransactionData.put("paymentTypeId", this.paymentDetail.getPaymentType().getId());

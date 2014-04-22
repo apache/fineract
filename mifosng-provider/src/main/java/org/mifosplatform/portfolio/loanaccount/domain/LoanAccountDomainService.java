@@ -5,16 +5,19 @@
  */
 package org.mifosplatform.portfolio.loanaccount.domain;
 
-import java.math.BigDecimal;
-
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
+
+import java.math.BigDecimal;
 
 public interface LoanAccountDomainService {
 
     LoanTransaction makeRepayment(Loan loan, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId);
+
+    LoanTransaction makeLoanRecoveryRepayment(Loan loan, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
+                                              BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId);
 
     LoanTransaction makeRefund(Long accountId, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId);

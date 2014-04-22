@@ -106,7 +106,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
         for (final LoanTransaction loanTransaction : transactionstoBeProcessed) {
 
-            if (loanTransaction.isRepayment() || loanTransaction.isInterestWaiver()) {
+            if (loanTransaction.isRepayment() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
                 // pass through for new transactions
                 if (loanTransaction.getId() == null) {
                     loanTransaction.resetDerivedComponents();
@@ -202,7 +202,10 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             }
         }
 
-        if (transactionAmountUnprocessed.isGreaterThanZero()) {
+        if(loanTransaction.isRecoveryRepayment()){
+            loanTransaction.updateRecoveredPayments(transactionAmountUnprocessed);
+            System.out.println(loanTransaction.getRecoveredPaymentPortion(currency)) ;
+        }else if(transactionAmountUnprocessed.isGreaterThanZero() && !loanTransaction.isRecoveryRepayment()) {
             onLoanOverpayment(loanTransaction, transactionAmountUnprocessed);
             loanTransaction.updateOverPayments(transactionAmountUnprocessed);
         }

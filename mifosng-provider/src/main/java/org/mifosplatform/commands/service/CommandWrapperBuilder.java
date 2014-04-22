@@ -576,6 +576,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder loanRecoveryPaymentTransaction(final Long loanId){
+        this.actionName = "RECOVERYPAYMENT";
+        this.entityName = "LOAN";
+        this.entityId = null;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions/template?command=recoverypayment";
+        return this;
+    }
+
     public CommandWrapperBuilder waiveInterestPortionTransaction(final Long loanId) {
         this.actionName = "WAIVEINTERESTPORTION";
         this.entityName = "LOAN";

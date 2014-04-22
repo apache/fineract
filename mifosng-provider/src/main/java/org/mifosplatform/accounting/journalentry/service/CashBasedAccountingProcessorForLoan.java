@@ -56,6 +56,12 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
                 createJournalEntriesForRepayments(loanDTO, loanTransactionDTO, office);
             }
 
+
+            /** Logic for handling recovery payments **/
+            else if (loanTransactionDTO.getTransactionType().isRecoveryRepayment()) {
+                createJournalEntriesForRecoveryRepayments(loanDTO, loanTransactionDTO, office);
+            }
+
             /** Logic for Refunds of Overpayments **/
             else if (loanTransactionDTO.getTransactionType().isRefund()) {
                 createJournalEntriesForRefund(loanDTO, loanTransactionDTO, office);
@@ -142,7 +148,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
      * (loan portfolio for principal repayments, Interest on loans for interest
      * repayments, Income from fees for fees payment and Income from penalties
      * for penalty payment)
-     * 
+     *
      * In case the loan transaction is a reversal, all debits are turned into
      * credits and vice versa
      */
@@ -201,6 +207,43 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE, loanProductId,
                 paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount, isReversal);
     }
+
+    /**
+     * Create a single Debit to fund source and multiple credits if applicable
+     * (loan portfolio for principal repayments, Interest on loans for interest
+     * repayments, Income from fees for fees payment and Income from penalties
+     * for penalty payment)
+     *
+     * In case the loan transaction is a reversal, all debits are turned into
+     * credits and vice versa
+     */
+    private void createJournalEntriesForRecoveryRepayments(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO, final Office office) {
+        // loan properties
+        final Long loanProductId = loanDTO.getLoanProductId();
+        final Long loanId = loanDTO.getLoanId();
+        final String currencyCode = loanDTO.getCurrencyCode();
+
+        // transaction properties
+        final String transactionId = loanTransactionDTO.getTransactionId();
+        final Date transactionDate = loanTransactionDTO.getTransactionDate();
+        final BigDecimal recoveryPaymentAmount = loanTransactionDTO.getRecoveryPayment();
+        final boolean isReversal = loanTransactionDTO.isReversed();
+        final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
+
+        BigDecimal totalDebitAmount = new BigDecimal(0);
+
+        if (recoveryPaymentAmount != null && !(recoveryPaymentAmount.compareTo(BigDecimal.ZERO) == 0)) {
+            totalDebitAmount = totalDebitAmount.add(recoveryPaymentAmount);
+            this.helper.createCreditJournalEntryOrReversalForLoan(office, currencyCode, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_RECOVERY, loanProductId,
+                    paymentTypeId, loanId, transactionId, transactionDate, recoveryPaymentAmount, isReversal);
+        }
+
+        /*** create a single debit entry (or reversal) for the entire amount **/
+        this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE, loanProductId,
+                paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount, isReversal);
+    }
+
+
 
     /**
      * Credit loan Portfolio and Debit Suspense Account for a Transfer
