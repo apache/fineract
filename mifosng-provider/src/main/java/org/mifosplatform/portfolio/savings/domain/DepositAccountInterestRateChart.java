@@ -12,12 +12,13 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.mifosplatform.portfolio.interestratechart.domain.InterestRateChart;
 import org.mifosplatform.portfolio.interestratechart.domain.InterestRateChartFields;
@@ -35,7 +36,8 @@ public class DepositAccountInterestRateChart extends AbstractPersistable<Long> {
     @JoinColumn(name = "savings_account_id", nullable = false)
     private SavingsAccount account;
 
-    @OneToMany(mappedBy = "depositAccountInterestRateChart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(mappedBy = "depositAccountInterestRateChart", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<DepositAccountInterestRateChartSlabs> chartSlabs = new HashSet<DepositAccountInterestRateChartSlabs>();
 
     protected DepositAccountInterestRateChart() {
