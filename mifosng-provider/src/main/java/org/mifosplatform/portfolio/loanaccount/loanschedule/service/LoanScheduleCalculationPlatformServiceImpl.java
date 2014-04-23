@@ -16,6 +16,7 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.mifosplatform.portfolio.loanaccount.serialization.CalculateLoanScheduleQueryFromApiJsonHelper;
+import org.mifosplatform.portfolio.loanaccount.serialization.LoanApplicationCommandFromApiJsonHelper;
 import org.mifosplatform.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
@@ -33,23 +34,28 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     private final LoanProductRepository loanProductRepository;
     private final LoanProductDataValidator loanProductCommandFromApiJsonDeserializer;
     private final LoanReadPlatformService loanReadPlatformService;
+    private final LoanApplicationCommandFromApiJsonHelper loanApiJsonDeserializer;
 
     @Autowired
     public LoanScheduleCalculationPlatformServiceImpl(final CalculateLoanScheduleQueryFromApiJsonHelper fromApiJsonDeserializer,
             final LoanScheduleAssembler loanScheduleAssembler, final FromJsonHelper fromJsonHelper,
             final LoanProductRepository loanProductRepository, final LoanProductDataValidator loanProductCommandFromApiJsonDeserializer,
-            final LoanReadPlatformService loanReadPlatformService) {
+            final LoanReadPlatformService loanReadPlatformService, final LoanApplicationCommandFromApiJsonHelper loanApiJsonDeserializer) {
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanScheduleAssembler = loanScheduleAssembler;
         this.fromJsonHelper = fromJsonHelper;
         this.loanProductRepository = loanProductRepository;
         this.loanProductCommandFromApiJsonDeserializer = loanProductCommandFromApiJsonDeserializer;
         this.loanReadPlatformService = loanReadPlatformService;
+        this.loanApiJsonDeserializer = loanApiJsonDeserializer;
     }
 
     @Override
-    public LoanScheduleModel calculateLoanSchedule(final JsonQuery query) {
+    public LoanScheduleModel calculateLoanSchedule(final JsonQuery query, Boolean validateParams) {
 
+        if (validateParams) {
+            this.loanApiJsonDeserializer.validateForCreate(query.json());
+        }
         this.fromApiJsonDeserializer.validate(query.json());
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
