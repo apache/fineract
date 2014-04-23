@@ -215,7 +215,7 @@ public class SavingsAccountHelper {
         final HashMap<String, String> map = new HashMap<String, String>();
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
-        map.put("activatedOnDate", "01 March 2013");
+        map.put("activatedOnDate", TRANSACTION_DATE);
         String savingsAccountActivateJson = new Gson().toJson(map);
         System.out.println(savingsAccountActivateJson);
         return savingsAccountActivateJson;
