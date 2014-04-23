@@ -10,10 +10,12 @@ import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstan
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.attendanceTypeParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.bulkDisbursementTransactionsParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.bulkRepaymentTransactionsParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.bulkSavingsDueTransactionsParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.calendarIdParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.clientIdParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.clientsAttendanceParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.loanIdParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.savingsIdParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.noteParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.transactionAmountParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.transactionDateParamName;
@@ -80,6 +82,8 @@ public class CollectionSheetTransactionDataValidator {
         validateDisbursementTransactions(element, baseDataValidator);
 
         validateRepaymentTransactions(element, baseDataValidator);
+        
+        validateSavingsDueTransactions(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -142,6 +146,29 @@ public class CollectionSheetTransactionDataValidator {
                     baseDataValidator.reset().parameter("bulktransaction" + "[" + i + "].loan.id").value(loanId).notNull()
                             .integerGreaterThanZero();
                     baseDataValidator.reset().parameter("bulktransaction" + "[" + i + "].disbursement.amount").value(disbursementAmount)
+                            .notNull().zeroOrPositiveAmount();
+                }
+            }
+        }
+    }
+    
+    private void validateSavingsDueTransactions(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
+        final JsonObject topLevelJsonElement = element.getAsJsonObject();
+        final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+        if (element.isJsonObject()) {
+            if (topLevelJsonElement.has(bulkSavingsDueTransactionsParamName)
+                    && topLevelJsonElement.get(bulkSavingsDueTransactionsParamName).isJsonArray()) {
+                final JsonArray array = topLevelJsonElement.get(bulkSavingsDueTransactionsParamName).getAsJsonArray();
+
+                for (int i = 0; i < array.size(); i++) {
+                    final JsonObject savingsTransactionElement = array.get(i).getAsJsonObject();
+                    final Long savingsId = this.fromApiJsonHelper.extractLongNamed(savingsIdParamName, savingsTransactionElement);
+                    final BigDecimal dueAmount = this.fromApiJsonHelper.extractBigDecimalNamed(transactionAmountParamName,
+                            savingsTransactionElement, locale);
+
+                    baseDataValidator.reset().parameter("bulktransaction" + "[" + i + "].savings.id").value(savingsId).notNull()
+                            .integerGreaterThanZero();
+                    baseDataValidator.reset().parameter("bulktransaction" + "[" + i + "].due.amount").value(dueAmount)
                             .notNull().zeroOrPositiveAmount();
                 }
             }

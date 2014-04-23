@@ -5,15 +5,20 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.bulkSavingsDueTransactionsParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.savingsIdParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.transactionAmountParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.transactionDateParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.adjustAdvanceTowardsFuturePaymentsParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.allowWithdrawalParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.chartIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositAmountParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositPeriodFrequencyIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositPeriodParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.expectedFirstDepositOnDateParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositAmountParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositFrequencyParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositFrequencyTypeIdParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositTypeIdParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.isCalendarInheritedParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.isMandatoryDepositParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.mandatoryRecommendedDepositAmountParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountNoParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.clientIdParamName;
@@ -33,10 +38,19 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.submittedO
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.staff.domain.Staff;
@@ -52,14 +66,15 @@ import org.mifosplatform.portfolio.group.exception.CenterNotActiveException;
 import org.mifosplatform.portfolio.group.exception.ClientNotInGroupException;
 import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
 import org.mifosplatform.portfolio.interestratechart.domain.InterestRateChart;
+import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.portfolio.savings.DepositAccountOnClosureType;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
-import org.mifosplatform.portfolio.savings.RecurringDepositType;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
 import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.mifosplatform.portfolio.savings.exception.FixedDepositProductNotFoundException;
 import org.mifosplatform.portfolio.savings.exception.RecurringDepositProductNotFoundException;
 import org.mifosplatform.portfolio.savings.exception.SavingsProductNotFoundException;
@@ -67,7 +82,9 @@ import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 @Service
 public class DepositAccountAssembler {
@@ -83,6 +100,7 @@ public class DepositAccountAssembler {
     private final SavingsAccountChargeAssembler savingsAccountChargeAssembler;
     private final FromJsonHelper fromApiJsonHelper;
     private final DepositProductAssembler depositProductAssembler;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public DepositAccountAssembler(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
@@ -92,7 +110,9 @@ public class DepositAccountAssembler {
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper,
             final DepositProductAssembler depositProductAssembler,
             final RecurringDepositProductRepository recurringDepositProductRepository,
-            final AccountTransfersReadPlatformService accountTransfersReadPlatformService) {
+            final AccountTransfersReadPlatformService accountTransfersReadPlatformService,
+            final ConfigurationDomainService configurationDomainService) {
+
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
@@ -104,6 +124,7 @@ public class DepositAccountAssembler {
         this.depositProductAssembler = depositProductAssembler;
         this.recurringDepositProductRepository = recurringDepositProductRepository;
         this.savingsHelper = new SavingsHelper(accountTransfersReadPlatformService);
+        this.configurationDomainService = configurationDomainService;
     }
 
     /**
@@ -246,7 +267,9 @@ public class DepositAccountAssembler {
             productChart = product.applicableChart(submittedOnDate);
         }
 
-        accountChart = DepositAccountInterestRateChart.from(productChart);
+        if (productChart != null) {
+            accountChart = DepositAccountInterestRateChart.from(productChart);
+        }
 
         SavingsAccount account = null;
         if (depositAccountType.isFixedDeposit()) {
@@ -287,6 +310,7 @@ public class DepositAccountAssembler {
         if (account != null) {
             account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
             account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), depositAccountType.resourceName());
+            updateIncentiveAttributes(account.getClient(), account.accountSubmittedOrActivationDate());
         }
 
         return account;
@@ -295,8 +319,15 @@ public class DepositAccountAssembler {
     public SavingsAccount assembleFrom(final Long savingsId, DepositAccountType depositAccountType) {
         final SavingsAccount account = this.savingsAccountRepository.findOneWithNotFoundDetection(savingsId, depositAccountType);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
-
+        updateIncentiveAttributes(account.getClient(), account.accountSubmittedOrActivationDate());
         return account;
+    }
+
+    private void updateIncentiveAttributes(final Client client, final LocalDate compareOnDate) {
+        if (client == null) return;
+        final Long ageLimitForSeniorCitizen = this.configurationDomainService.ageLimitForSeniorCitizen();
+        final Long ageLimitForChildren = this.configurationDomainService.ageLimitForChildren();
+        client.updateIncentiveAttributes(ageLimitForChildren, ageLimitForSeniorCitizen, compareOnDate);
     }
 
     public void assignSavingAccountHelpers(final SavingsAccount savingsAccount) {
@@ -334,44 +365,71 @@ public class DepositAccountAssembler {
     public DepositAccountRecurringDetail assembleAccountRecurringDetail(final JsonCommand command,
             final DepositRecurringDetail prodRecurringDetail) {
 
-        RecurringDepositType recurringDepositType = null;
-        Integer recurringDepositTypeValue = null;
+        final BigDecimal recurringDepositAmount = command.bigDecimalValueOfParameterNamed(mandatoryRecommendedDepositAmountParamName);
+        boolean isMandatoryDeposit;
+        boolean allowWithdrawal;
+        boolean adjustAdvanceTowardsFuturePayments;
+        boolean isCalendarInherited;
 
-        final BigDecimal recurringDepositAmount = command.bigDecimalValueOfParameterNamed(recurringDepositAmountParamName);
-
-        if (command.parameterExists(recurringDepositTypeIdParamName)) {
-            recurringDepositTypeValue = command.integerValueOfParameterNamed(recurringDepositTypeIdParamName);
+        if (command.parameterExists(isMandatoryDepositParamName)) {
+            isMandatoryDeposit = command.booleanObjectValueOfParameterNamed(isMandatoryDepositParamName);
         } else {
-            recurringDepositTypeValue = prodRecurringDetail.recurringDepositType();
+            isMandatoryDeposit = prodRecurringDetail.isMandatoryDeposit();
         }
 
-        if (recurringDepositTypeValue != null) {
-            recurringDepositType = RecurringDepositType.fromInt(recurringDepositTypeValue);
-        }
-
-        SavingsPeriodFrequencyType recurringDepositFrequencyType = null;
-        Integer recurringDepositFrequencyTypeValue = null;
-        if (command.parameterExists(recurringDepositFrequencyTypeIdParamName)) {
-            recurringDepositFrequencyTypeValue = command.integerValueOfParameterNamed(recurringDepositFrequencyTypeIdParamName);
+        if (command.parameterExists(allowWithdrawalParamName)) {
+            allowWithdrawal = command.booleanObjectValueOfParameterNamed(allowWithdrawalParamName);
         } else {
-            recurringDepositFrequencyTypeValue = prodRecurringDetail.recurringDepositFrequencyTypeId();
+            allowWithdrawal = prodRecurringDetail.allowWithdrawal();
         }
 
-        if (recurringDepositFrequencyTypeValue != null) {
-            recurringDepositFrequencyType = SavingsPeriodFrequencyType.fromInt(recurringDepositFrequencyTypeValue);
-        }
-
-        Integer recurringDepositFrequency = null;
-        if (command.parameterExists(recurringDepositFrequencyTypeIdParamName)) {
-            recurringDepositFrequency = command.integerValueOfParameterNamed(recurringDepositFrequencyParamName);
+        if (command.parameterExists(adjustAdvanceTowardsFuturePaymentsParamName)) {
+            adjustAdvanceTowardsFuturePayments = command.booleanObjectValueOfParameterNamed(adjustAdvanceTowardsFuturePaymentsParamName);
         } else {
-            recurringDepositFrequency = prodRecurringDetail.recurringDepositFrequency();
+            adjustAdvanceTowardsFuturePayments = prodRecurringDetail.adjustAdvanceTowardsFuturePayments();
         }
 
-        final DepositRecurringDetail depositRecurringDetail = DepositRecurringDetail.createFrom(recurringDepositType,
-                recurringDepositFrequency, recurringDepositFrequencyType);
+        if (command.parameterExists(isCalendarInheritedParamName)) {
+            isCalendarInherited = command.booleanObjectValueOfParameterNamed(isCalendarInheritedParamName);
+        } else {
+            isCalendarInherited = false;
+        }
+
+        final DepositRecurringDetail depositRecurringDetail = DepositRecurringDetail.createFrom(isMandatoryDeposit, allowWithdrawal,
+                adjustAdvanceTowardsFuturePayments);
         final DepositAccountRecurringDetail depositAccountRecurringDetail = DepositAccountRecurringDetail.createNew(recurringDepositAmount,
-                depositRecurringDetail, null);
+                depositRecurringDetail, null, isCalendarInherited);
         return depositAccountRecurringDetail;
+    }
+    
+    public Collection<SavingsAccountTransactionDTO> assembleBulkMandatorySavingsAccountTransactionDTOs(final JsonCommand command){
+        final String json = command.json();
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        final Collection<SavingsAccountTransactionDTO> savingsAccountTransactions = new ArrayList<SavingsAccountTransactionDTO>();
+        final PaymentDetail paymentDetail = null;
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
+        final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(element.getAsJsonObject());
+        final JsonObject topLevelJsonElement = element.getAsJsonObject();
+        final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+        final DateTimeFormatter formatter = DateTimeFormat.forPattern(dateFormat).withLocale(locale);
+        
+        if (element.isJsonObject()) {
+            if (topLevelJsonElement.has(bulkSavingsDueTransactionsParamName)
+                    && topLevelJsonElement.get(bulkSavingsDueTransactionsParamName).isJsonArray()) {
+                final JsonArray array = topLevelJsonElement.get(bulkSavingsDueTransactionsParamName).getAsJsonArray();
+
+                for (int i = 0; i < array.size(); i++) {
+                    final JsonObject savingsTransactionElement = array.get(i).getAsJsonObject();
+                    final Long savingsId = this.fromApiJsonHelper.extractLongNamed(savingsIdParamName, savingsTransactionElement);
+                    final BigDecimal dueAmount = this.fromApiJsonHelper.extractBigDecimalNamed(transactionAmountParamName,
+                            savingsTransactionElement, locale);
+                    final SavingsAccountTransactionDTO savingsAccountTransactionDTO = new SavingsAccountTransactionDTO(formatter, transactionDate, dueAmount, paymentDetail, new Date(), savingsId);
+                    savingsAccountTransactions.add(savingsAccountTransactionDTO);
+                }
+            }
+        }
+        
+        return savingsAccountTransactions;
     }
 }

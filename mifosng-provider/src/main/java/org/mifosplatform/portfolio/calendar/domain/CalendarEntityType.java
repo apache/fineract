@@ -11,7 +11,7 @@ import java.util.Map;
 public enum CalendarEntityType {
 
     INVALID(0, "calendarEntityType.invalid"), CLIENTS(1, "calendarEntityType.clients"), GROUPS(2, "calendarEntityType.groups"), LOANS(3,
-            "calendarEntityType.loans"), CENTERS(4, "calendarEntityType.centers");
+            "calendarEntityType.loans"), CENTERS(4, "calendarEntityType.centers"), SAVINGS(5, "calendarEntityType.savings");
 
     private final Integer value;
     private final String code;
@@ -125,6 +125,18 @@ public enum CalendarEntityType {
 
     public static CalendarEntityType getEntityType(String entityType) {
         return entityNameToEnumMap.get(entityType.toLowerCase());
+    }
+    
+    public static boolean isSavings(final Integer value) {
+        return CalendarEntityType.SAVINGS.value.equals(value) ? true : false;
+    }
+
+    public static boolean isSavings(final String name) {
+        return CalendarEntityType.SAVINGS.name().equalsIgnoreCase(name) ? true : false;
+    }
+    
+    public boolean isSavings() {
+        return this.value.equals(CalendarEntityType.SAVINGS.getValue());
     }
 
 }

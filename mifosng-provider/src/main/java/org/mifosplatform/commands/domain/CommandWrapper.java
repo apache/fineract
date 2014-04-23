@@ -5,7 +5,6 @@
  */
 package org.mifosplatform.commands.domain;
 
-import org.mifosplatform.portfolio.savings.DepositAccountType;
 
 public class CommandWrapper {
 
@@ -28,8 +27,6 @@ public class CommandWrapper {
     
     @SuppressWarnings("unused")
     private Long templateId;
-    private Long interestRatechartId;
-    private DepositAccountType depositAccountType;
 
     public static CommandWrapper wrap(final String actionName, final String entityName, final Long resourceId, final Long subresourceId) {
         return new CommandWrapper(null, actionName, entityName, resourceId, subresourceId, null, null);
@@ -68,8 +65,7 @@ public class CommandWrapper {
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
             final String actionName, final String entityName, final Long entityId, final Long subentityId, final String href,
-            final String json, final String transactionId, final Long productId, final Long templateId, Long interestRatechartId,
-            DepositAccountType depositAccountType) {
+            final String json, final String transactionId, final Long productId, final Long templateId) {
 
         this.commandId = null;
         this.officeId = officeId;
@@ -87,8 +83,6 @@ public class CommandWrapper {
         this.transactionId = transactionId;
         this.productId = productId;
         this.templateId = templateId;
-        this.interestRatechartId = interestRatechartId;
-        this.depositAccountType = depositAccountType;
     }
 
     private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
@@ -720,10 +714,6 @@ public class CommandWrapper {
         return this.entityName.equalsIgnoreCase("CACHE");
     }
 
-    public Long interestRatechartId() {
-        return this.interestRatechartId;
-    }
-
     // Begin - Deposit product
     public boolean isFixedDepositProductResource() {
         return this.entityName.equalsIgnoreCase("FIXEDDEPOSITPRODUCT");
@@ -737,53 +727,101 @@ public class CommandWrapper {
 
     // Begin - Deposit accounts
     public boolean isDepositAccountResource() {
-        return this.entityName.equalsIgnoreCase("FIXEDDEPOSITACCOUNT") || this.entityName.equalsIgnoreCase("RECURRINGDEPOSITACCOUNT");
+        return isFixedDepositAccountResource() || isRecurringDepositAccountResource();
     }
     
-    public boolean isRejectionOfDepositAccountApplication() {
-        return this.actionName.equalsIgnoreCase("REJECT") && isDepositAccountResource();
+    public boolean isFixedDepositAccountResource() {
+        return this.entityName.equalsIgnoreCase("FIXEDDEPOSITACCOUNT");
     }
     
-    public boolean isWithdrawFromDepositAccountApplicationByApplicant() {
-        return this.actionName.equalsIgnoreCase("WITHDRAW") && isDepositAccountResource();
+    public boolean isRecurringDepositAccountResource() {
+        return this.entityName.equalsIgnoreCase("RECURRINGDEPOSITACCOUNT");
     }
     
-    public boolean isApprovalOfDepositAccountApplication() {
-        return this.actionName.equalsIgnoreCase("APPROVE") && isDepositAccountResource();
+    public boolean isFixedDepositAccountCreate() {
+        return isCreate() && isFixedDepositAccountResource();
+    }
+    
+    public boolean isRecurringDepositAccountCreate() {
+        return isCreate() && isRecurringDepositAccountResource();
+    }
+    
+    public boolean isFixedDepositAccountUpdate() {
+        return isUpdate() && isFixedDepositAccountResource();
+    }
+    
+    public boolean isRecurringDepositAccountUpdate() {
+        return isUpdate() && isRecurringDepositAccountResource();
+    }
+    
+    public boolean isFixedDepositAccountDelete() {
+        return isDelete() && isFixedDepositAccountResource();
+    }
+    
+    public boolean isRecurringDepositAccountDelete() {
+        return isDelete() && isRecurringDepositAccountResource();
+    }
+    
+    public boolean isRejectionOfFixedDepositAccountApplication() {
+        return this.actionName.equalsIgnoreCase("REJECT") && isFixedDepositAccountResource();
+    }
+    
+    public boolean isRejectionOfRecurringDepositAccountApplication() {
+        return this.actionName.equalsIgnoreCase("REJECT") && isRecurringDepositAccountResource();
+    }
+    
+    public boolean isWithdrawFixedDepositAccountApplicationByApplicant() {
+        return this.actionName.equalsIgnoreCase("WITHDRAW") && isFixedDepositAccountResource();
+    }
+    
+    public boolean isWithdrawRecurringDepositAccountApplicationByApplicant() {
+        return this.actionName.equalsIgnoreCase("WITHDRAW") && isRecurringDepositAccountResource();
+    }
+    
+    public boolean isApprovalOfFixedDepositAccountApplication() {
+        return this.actionName.equalsIgnoreCase("APPROVE") && isFixedDepositAccountResource();
+    }
+    
+    public boolean isApprovalOfRecurringDepositAccountApplication() {
+        return this.actionName.equalsIgnoreCase("APPROVE") && isRecurringDepositAccountResource();
     }
  
-    public boolean isUndoApprovalOfDepositAccountApplication() {
-        return this.actionName.equalsIgnoreCase("APPROVALUNDO") && isDepositAccountResource();
+    public boolean isUndoApprovalOfFixedDepositAccountApplication() {
+        return this.actionName.equalsIgnoreCase("APPROVALUNDO") && isFixedDepositAccountResource();
+    }
+    
+    public boolean isUndoApprovalOfRecurringDepositAccountApplication() {
+        return this.actionName.equalsIgnoreCase("APPROVALUNDO") && isRecurringDepositAccountResource();
     }
     
     //Account transaction actions
 
-    public boolean isDepositAccountDeposit() {
-        return this.actionName.equalsIgnoreCase("DEPOSIT") && isDepositAccountResource();
+    public boolean isDeposit() {
+        return this.actionName.equalsIgnoreCase("DEPOSIT");
     }
-    
-    public boolean isDepositAccountWithdrawal() {
-        return this.actionName.equalsIgnoreCase("WITHDRAWAL") && isDepositAccountResource();
+       
+    public boolean isWithdrawal() {
+        return this.actionName.equalsIgnoreCase("WITHDRAWAL");
     }
  
-    public boolean isDepositAccountActivation() {
-        return this.actionName.equalsIgnoreCase("ACTIVATE") && isDepositAccountResource();
+    public boolean isActivation() {
+        return this.actionName.equalsIgnoreCase("ACTIVATE");
     }
     
-    public boolean isDepositAccountInterestCalculation() {
-        return this.actionName.equalsIgnoreCase("CALCULATEINTEREST") && isDepositAccountResource();
+    public boolean isInterestCalculation() {
+        return this.actionName.equalsIgnoreCase("CALCULATEINTEREST");
     }
     
-    public boolean isDepositAccountInterestPosting() {
-        return this.actionName.equalsIgnoreCase("POSTINTEREST") && isDepositAccountResource();
+    public boolean isInterestPosting() {
+        return this.actionName.equalsIgnoreCase("POSTINTEREST");
     }
-    
-    public boolean isDepositAccountUndoTransaction() {
-        return this.actionName.equalsIgnoreCase("UNDOTRANSACTION") && isDepositAccountResource();
+   
+    public boolean isUndoTransaction() {
+        return this.actionName.equalsIgnoreCase("UNDOTRANSACTION");
     }
 
-    public boolean isAdjustDeopsitAccountTransaction() {
-        return this.actionName.equalsIgnoreCase("ADJUSTTRANSACTION") && isDepositAccountResource();
+    public boolean isAdjustTransaction() {
+        return this.actionName.equalsIgnoreCase("ADJUSTTRANSACTION");
     }
     
     public boolean isDepositAccountClose() {
@@ -795,8 +833,4 @@ public class CommandWrapper {
     }
     
     // End - Deposit accounts
-    
-    public DepositAccountType depositAccountType(){
-        return this.depositAccountType;
-    }
 }

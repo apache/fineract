@@ -65,7 +65,7 @@ public class DepositProductTermAndPreClosure extends AbstractPersistable<Long> {
         }
         
         if(this.depositProductAmountDetails != null) {
-        	actualChanges.putAll(this.depositProductAmountDetails.update(command, baseDataValidator));
+        	actualChanges.putAll(this.depositProductAmountDetails.update(command));
         }
         return actualChanges;
     }

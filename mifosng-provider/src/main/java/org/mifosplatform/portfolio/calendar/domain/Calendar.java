@@ -128,6 +128,23 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
         this.secondReminder = secondReminder;
     }
 
+    public static Calendar createRepeatingCalendar(final String title, final LocalDate startDate, final Integer typeId,
+            final CalendarFrequencyType frequencyType, final Integer interval, final Integer repeatsOnDay) {
+
+        final String description = null;
+        final String location = null;
+        final LocalDate endDate = null;
+        final Integer duration = null;
+        final boolean repeating = true;
+        final Integer remindById = null;
+        final Integer firstReminder = null;
+        final Integer secondReminder = null;
+        final String recurrence = constructRecurrence(frequencyType, interval, repeatsOnDay);
+
+        return new Calendar(title, description, location, startDate, endDate, duration, typeId, repeating, recurrence, remindById,
+                firstReminder, secondReminder);
+    }
+
     public static Calendar fromJson(final JsonCommand command) {
 
         // final Long entityId = command.getSupportedEntityId();
@@ -301,6 +318,25 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
         return actualChanges;
     }
+    
+    @SuppressWarnings("null")
+    public Map<String, Object> updateRepeatingCalendar(final LocalDate calendarStartDate, final CalendarFrequencyType frequencyType, final Integer interval, final Integer repeatsOnDay){
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(9);
+        
+        if(calendarStartDate != null & this.startDate != null){
+            if(!calendarStartDate.equals(this.getStartDateLocalDate())){
+                actualChanges.put("startDate", calendarStartDate);
+                this.startDate = calendarStartDate.toDate();
+            }
+        }
+        
+        final String newRecurrence = Calendar.constructRecurrence(frequencyType, interval, repeatsOnDay);
+        if (!StringUtils.isBlank(this.recurrence) && !newRecurrence.equalsIgnoreCase(this.recurrence)) {
+            actualChanges.put("recurrence", newRecurrence);
+            this.recurrence = newRecurrence;
+        }
+        return actualChanges;
+    }
 
     public String getTitle() {
         return this.title;
@@ -419,27 +455,36 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
         }
 
         if (repeating) {
-            final StringBuilder recurrenceBuilder = new StringBuilder(200);
             final Integer frequency = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.FREQUENCY.getValue());
             final CalendarFrequencyType frequencyType = CalendarFrequencyType.fromInt(frequency);
-            recurrenceBuilder.append("FREQ=");
-            recurrenceBuilder.append(frequencyType.toString().toUpperCase());
             final Integer interval = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue());
-            if (interval > 1) {
-                recurrenceBuilder.append(";INTERVAL=");
-                recurrenceBuilder.append(interval);
-            }
+            Integer repeatsOnDay = null;
             if (frequencyType.isWeekly()) {
-                final Integer repeatsOnDay = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue());
-                final CalendarWeekDaysType weekDays = CalendarWeekDaysType.fromInt(repeatsOnDay);
-                if (!weekDays.isInvalid()) {
-                    recurrenceBuilder.append(";BYDAY=");
-                    recurrenceBuilder.append(weekDays.toString().toUpperCase());
-                }
+                repeatsOnDay = command.integerValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue());
             }
-            return recurrenceBuilder.toString();
+
+            return constructRecurrence(frequencyType, interval, repeatsOnDay);
         }
         return "";
+    }
+
+    private static String constructRecurrence(final CalendarFrequencyType frequencyType, final Integer interval, final Integer repeatsOnDay) {
+        final StringBuilder recurrenceBuilder = new StringBuilder(200);
+
+        recurrenceBuilder.append("FREQ=");
+        recurrenceBuilder.append(frequencyType.toString().toUpperCase());
+        if (interval > 1) {
+            recurrenceBuilder.append(";INTERVAL=");
+            recurrenceBuilder.append(interval);
+        }
+        if (frequencyType.isWeekly()) {
+            final CalendarWeekDaysType weekDays = CalendarWeekDaysType.fromInt(repeatsOnDay);
+            if (!weekDays.isInvalid()) {
+                recurrenceBuilder.append(";BYDAY=");
+                recurrenceBuilder.append(weekDays.toString().toUpperCase());
+            }
+        }
+        return recurrenceBuilder.toString();
     }
 
     public boolean isValidRecurringDate(final LocalDate compareDate) {

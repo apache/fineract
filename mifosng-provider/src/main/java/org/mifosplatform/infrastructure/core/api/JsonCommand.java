@@ -21,7 +21,6 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.domain.BasicPasswordEncodablePlatformUser;
 import org.mifosplatform.infrastructure.security.domain.PlatformUser;
 import org.mifosplatform.infrastructure.security.service.PlatformPasswordEncoder;
-import org.mifosplatform.portfolio.savings.DepositAccountType;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -49,35 +48,28 @@ public final class JsonCommand {
     private final String transactionId;
     private final String url;
     private final Long productId;
-    private final Long interestRateChartId;
-    private final DepositAccountType depositAccountType;
 
     public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
             final String entityName, final Long resourceId, final Long subresourceId, final Long groupId, final Long clientId,
-            final Long loanId, final Long savingsId, final String transactionId, final String url, final Long productId,
-            final Long interestRateChartId, final DepositAccountType depositAccountType) {
+            final Long loanId, final Long savingsId, final String transactionId, final String url, final Long productId) {
         return new JsonCommand(null, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, groupId,
-                clientId, loanId, savingsId, transactionId, url, productId, interestRateChartId, depositAccountType);
+                clientId, loanId, savingsId, transactionId, url, productId);
 
     }
 
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
             final String url, final Long productId) {
-        final Long interestRateChartId = null;
-        final DepositAccountType depositAccountType = null;
         return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, null, null,
-                null, null, null, url, productId, interestRateChartId, depositAccountType);
+                null, null, null, url, productId);
     }
 
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
             final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId, final String url,
             final Long productId) {
-        final Long interestRateChartId = null;
-        final DepositAccountType depositAccountType = null;
         return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, groupId,
-                clientId, loanId, savingsId, transactionId, url, productId, interestRateChartId, depositAccountType);
+                clientId, loanId, savingsId, transactionId, url, productId);
 
     }
 
@@ -85,13 +77,13 @@ public final class JsonCommand {
         final String jsonCommand = command.fromApiJsonHelper.toJson(parsedCommand);
         return new JsonCommand(command.commandId, jsonCommand, parsedCommand, command.fromApiJsonHelper, command.entityName,
                 command.resourceId, command.subresourceId, command.groupId, command.clientId, command.loanId, command.savingsId,
-                command.transactionId, command.url, command.productId, command.interestRateChartId, command.depositAccountType);
+                command.transactionId, command.url, command.productId);
     }
 
     public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
             final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId, final String url,
-            final Long productId, final Long interestRateChartId, final DepositAccountType depositAccountType) {
+            final Long productId) {
 
         this.commandId = commandId;
         this.jsonCommand = jsonCommand;
@@ -107,8 +99,6 @@ public final class JsonCommand {
         this.transactionId = transactionId;
         this.url = url;
         this.productId = productId;
-        this.interestRateChartId = interestRateChartId;
-        this.depositAccountType = depositAccountType;
     }
 
     public String json() {
@@ -503,12 +493,5 @@ public final class JsonCommand {
     public void checkForUnsupportedParameters(final Type typeOfMap, final String json, final Set<String> requestDataParameters) {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, requestDataParameters);
     }
-
-    public Long interestRateChartId() {
-        return this.interestRateChartId;
-    }
-
-    public DepositAccountType depositAccounttype() {
-        return this.depositAccountType;
-    }
+   
 }

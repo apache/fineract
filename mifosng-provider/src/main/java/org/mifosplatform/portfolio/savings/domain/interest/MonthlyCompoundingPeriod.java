@@ -118,6 +118,8 @@ public class MonthlyCompoundingPeriod implements CompoundingPeriod {
                 // break;
                 case INVALID:
                 break;
+                default:
+                    break;
             }
 
             interestEarned = interestEarned.add(interestOnBalanceUnrounded);

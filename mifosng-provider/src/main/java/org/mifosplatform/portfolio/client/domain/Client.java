@@ -32,6 +32,7 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
+import org.joda.time.Years;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -45,6 +46,7 @@ import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.mifosplatform.portfolio.group.domain.Group;
+import org.mifosplatform.portfolio.interestratechart.data.ClientIncentiveAttributes;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsProduct;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -156,6 +158,9 @@ public final class Client extends AbstractPersistable<Long> {
     @ManyToOne
     @JoinColumn(name = "default_savings_account", nullable = true)
     private SavingsAccount savingsAccount;
+
+    @Transient
+    private ClientIncentiveAttributes incentiveAttributes;
 
     public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
             final SavingsProduct savingsProduct, final CodeValue gender, final JsonCommand command) {
@@ -272,7 +277,7 @@ public final class Client extends AbstractPersistable<Long> {
         this.savingsProduct = savingsProduct;
         this.savingsAccount = savingsAccount;
 
-        if(gender != null){
+        if (gender != null) {
             this.gender = gender;
         }
         if (dateOfBirth != null) {
@@ -691,5 +696,42 @@ public final class Client extends AbstractPersistable<Long> {
 
     public void updateSavingsAccount(SavingsAccount savingsAccount) {
         this.savingsAccount = savingsAccount;
+    }
+
+    public ClientIncentiveAttributes incentiveAttributes() {
+        return this.incentiveAttributes;
+    }
+
+    public void updateIncentiveAttributes(final Long ageLimitForChildren, final Long ageLimitForSeniorCitizen, final LocalDate compareOnDate) {
+        boolean isFemale = false;
+        boolean isChild = false;
+        boolean isSeniorCitizen = false;
+
+        if (this.gender != null) {
+            // FIXME: this needs to be handled in better way
+            if (this.gender.label().equalsIgnoreCase("FEMALE")) {
+                isFemale = true;
+            }
+        }
+
+        if (this.dateOfBirth != null) {
+            final LocalDate dobLacalDate = LocalDate.fromDateFields(this.dateOfBirth);
+            final int age = Years.yearsBetween(dobLacalDate, compareOnDate).getYears();
+            
+            if (age >= ageLimitForSeniorCitizen.intValue()) {
+                isSeniorCitizen = true;
+            }
+
+            if (age <= ageLimitForChildren.intValue()) {
+                isChild = true;
+            }
+        }
+
+        this.incentiveAttributes = ClientIncentiveAttributes.instance(isFemale, isChild, isSeniorCitizen);
+
+    }
+
+    public CodeValue gender() {
+        return this.gender;
     }
 }

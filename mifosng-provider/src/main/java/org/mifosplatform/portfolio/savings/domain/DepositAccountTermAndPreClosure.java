@@ -5,11 +5,13 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.dateFormatParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositAmountParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositPeriodFrequencyIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositPeriodParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.expectedFirstDepositOnDateParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.localeParamName;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -32,9 +34,7 @@ import org.joda.time.Weeks;
 import org.joda.time.Years;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
-import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.savings.DepositAccountOnClosureType;
-import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -132,13 +132,12 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
 
         final String localeAsInput = command.locale();
         final String dateFormat = command.dateFormat();
-
-        if (command.isChangeInLocalDateParameterNamed(expectedFirstDepositOnDateParamName, getExpectedFirstDepositOnDate())) {
+        if (command.isChangeInLocalDateParameterNamed(expectedFirstDepositOnDateParamName, this.getExpectedFirstDepositOnDate())) {
             final LocalDate newValue = command.localDateValueOfParameterNamed(expectedFirstDepositOnDateParamName);
             final String newValueAsString = command.stringValueOfParameterNamed(expectedFirstDepositOnDateParamName);
             actualChanges.put(expectedFirstDepositOnDateParamName, newValueAsString);
-            actualChanges.put(SavingsApiConstants.localeParamName, localeAsInput);
-            actualChanges.put(SavingsApiConstants.dateFormatParamName, dateFormat);
+            actualChanges.put(localeParamName, localeAsInput);
+            actualChanges.put(dateFormatParamName, dateFormat);
             this.expectedFirstDepositOnDate = newValue.toDate();
         }
 
@@ -263,10 +262,10 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
         return DepositAccountOnClosureType.fromInt(this.onAccountClosureType).isTransferToSavings();
     }
 
-    public DepositAccountTermAndPreClosure deepCopy(Money depositAmount) {
+    public DepositAccountTermAndPreClosure copy(BigDecimal depositAmount) {
         final SavingsAccount account = null;
         final BigDecimal maturityAmount = null;
-        final BigDecimal actualDepositAmount = null;
+        final BigDecimal actualDepositAmount = depositAmount;
         final LocalDate maturityDate = null;
         final Integer depositPeriod = this.depositPeriod;
         final SavingsPeriodFrequencyType depositPeriodFrequency = SavingsPeriodFrequencyType.fromInt(this.depositPeriodFrequency);
@@ -285,8 +284,15 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
         this.expectedFirstDepositOnDate = expectedFirstDepositOnDate.toDate();
     }
 
-    
     public boolean isTransferInterestToLinkedAccount() {
         return this.transferInterestToLinkedAccount;
+    }
+
+    public boolean isAfterExpectedFirstDepositDate(final LocalDate compareDate) {
+        boolean isAfterExpectedFirstDepositDate = false;
+        if (this.expectedFirstDepositOnDate != null) {
+            isAfterExpectedFirstDepositDate = compareDate.isAfter(getExpectedFirstDepositOnDate());
+        }
+        return isAfterExpectedFirstDepositDate;
     }
 }

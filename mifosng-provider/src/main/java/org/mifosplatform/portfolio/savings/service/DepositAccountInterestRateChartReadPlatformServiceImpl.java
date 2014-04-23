@@ -18,7 +18,7 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
-import org.mifosplatform.portfolio.interestratechart.InterestRateChartPeriodType;
+import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.interestratechart.service.InterestRateChartDropdownReadPlatformService;
 import org.mifosplatform.portfolio.interestratechart.service.InterestRateChartEnumerations;
 import org.mifosplatform.portfolio.savings.data.DepositAccountInterestRateChartData;
@@ -114,6 +114,8 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
                     .append("ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, ")
                     .append("ircd.from_period as ircdFromPeriod, ircd.to_period as ircdToPeriod, ircd.amount_range_from as ircdAmountRangeFrom, ")
                     .append("ircd.amount_range_to as ircdAmountRangeTo, ircd.annual_interest_rate as ircdAnnualInterestRate, ")
+                    .append("ircd.interest_rate_for_female as ircdInterestRateForFemale, ircd.interest_rate_for_children as ircdInterestRateForChildren, ")
+                    .append("ircd.interest_rate_for_senior_citizen as ircdInterestRateForSeniorCitizen, ")
                     .append("curr.code as currencyCode, curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ")
                     .append("curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf, ")
                     .append("sa.id as accountId, sa.account_no as accountNumber ")
@@ -183,9 +185,9 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
             final LocalDate endDate = JdbcSupport.getLocalDate(rs, "ircEndDate");
             final Long accountId = rs.getLong("accountId");
             final String accountNumber = rs.getString("accountNumber");
-            final Collection<EnumOptionData> periodTypes = InterestRateChartEnumerations.periodType(InterestRateChartPeriodType.values());
-            return DepositAccountInterestRateChartData.instance(id, name, description, fromDate, endDate, accountId, accountNumber,
-                    null, periodTypes);
+            final Collection<EnumOptionData> periodTypes = InterestRateChartEnumerations.periodType(PeriodFrequencyType.values());
+            return DepositAccountInterestRateChartData.instance(id, name, description, fromDate, endDate, accountId, accountNumber, null,
+                    periodTypes);
         }
 
     }
@@ -231,6 +233,9 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
             final BigDecimal amountRangeFrom = rs.getBigDecimal("ircdAmountRangeFrom");
             final BigDecimal amountRangeTo = rs.getBigDecimal("ircdAmountRangeTo");
             final BigDecimal annualInterestRate = rs.getBigDecimal("ircdAnnualInterestRate");
+            final BigDecimal interestRateForFemale = rs.getBigDecimal("ircdInterestRateForFemale");
+            final BigDecimal interestRateForChildren = rs.getBigDecimal("ircdInterestRateForChildren");
+            final BigDecimal interestRateForSeniorCitizen = rs.getBigDecimal("ircdInterestRateForSeniorCitizen");
 
             // currency Slabs
             final String currencyCode = rs.getString("currencyCode");
@@ -244,7 +249,8 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
                     currencyDisplaySymbol, currencyNameCode);
 
             return DepositAccountInterestRateChartSlabData.instance(id, description, periodType, fromPeriod, toPeriod, amountRangeFrom,
-                    amountRangeTo, annualInterestRate, currency);
+                    amountRangeTo, annualInterestRate, interestRateForFemale, interestRateForChildren, interestRateForSeniorCitizen,
+                    currency);
         }
 
     }

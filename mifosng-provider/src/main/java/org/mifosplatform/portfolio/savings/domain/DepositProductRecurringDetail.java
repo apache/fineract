@@ -15,7 +15,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -43,10 +42,10 @@ public class DepositProductRecurringDetail extends AbstractPersistable<Long> {
         this.product = (RecurringDepositProduct) product;
     }
 
-    public Map<String, Object> update(final JsonCommand command, final DataValidatorBuilder baseDataValidator) {
+    public Map<String, Object> update(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(10);
         if (this.recurringDetail != null) {
-            actualChanges.putAll(this.recurringDetail.update(command, baseDataValidator));
+            actualChanges.putAll(this.recurringDetail.update(command));
         }
         return actualChanges;
     }

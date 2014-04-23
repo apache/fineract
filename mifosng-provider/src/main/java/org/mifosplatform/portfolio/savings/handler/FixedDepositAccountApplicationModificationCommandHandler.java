@@ -14,12 +14,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class DepositAccountApplicationWithdrawnByApplicantCommandHandler implements NewCommandSourceHandler {
+public class FixedDepositAccountApplicationModificationCommandHandler implements NewCommandSourceHandler {
 
     private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
 
     @Autowired
-    public DepositAccountApplicationWithdrawnByApplicantCommandHandler(
+    public FixedDepositAccountApplicationModificationCommandHandler(
             final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
         this.depositAccountWritePlatformService = depositAccountWritePlatformService;
     }
@@ -27,7 +27,6 @@ public class DepositAccountApplicationWithdrawnByApplicantCommandHandler impleme
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.applicantWithdrawsFromApplication(command.entityId(), command,
-                command.depositAccounttype());
+        return this.depositAccountWritePlatformService.modifyFDApplication(command.entityId(), command);
     }
 }

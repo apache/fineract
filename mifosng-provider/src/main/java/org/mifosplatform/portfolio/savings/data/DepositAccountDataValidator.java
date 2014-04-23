@@ -5,16 +5,17 @@
  */
 package org.mifosplatform.portfolio.savings.data;
 
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.adjustAdvanceTowardsFuturePaymentsParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.allowWithdrawalParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositAmountParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositPeriodFrequencyIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositPeriodParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.inMultiplesOfDepositTermParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.inMultiplesOfDepositTermTypeIdParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestFreeFromPeriodParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestFreePeriodApplicableParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestFreePeriodFrequencyTypeIdParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestFreeToPeriodParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.isCalendarInheritedParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.isMandatoryDepositParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.linkedAccountParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.mandatoryRecommendedDepositAmountParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.maxDepositTermParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.maxDepositTermTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.minDepositTermParamName;
@@ -22,9 +23,8 @@ import static org.mifosplatform.portfolio.savings.DepositsApiConstants.minDeposi
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.preClosurePenalApplicableParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.preClosurePenalInterestOnTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.preClosurePenalInterestParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositFrequencyParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositFrequencyTypeIdParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositTypeIdParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringFrequencyParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringFrequencyTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountNoParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.amountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeIdParamName;
@@ -62,11 +62,10 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.portfolio.interestratechart.InterestRateChartPeriodType;
+import org.mifosplatform.portfolio.calendar.domain.CalendarFrequencyType;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.DepositsApiConstants;
 import org.mifosplatform.portfolio.savings.PreClosurePenalInterestOnType;
-import org.mifosplatform.portfolio.savings.RecurringDepositType;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
@@ -93,7 +92,7 @@ public class DepositAccountDataValidator {
         this.productDataValidator = productDataValidator;
     }
 
-    private void validateFixedDepositForSubmit(final String json) {
+    public void validateFixedDepositForSubmit(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -113,7 +112,7 @@ public class DepositAccountDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    private void validateFixedDepositForUpdate(final String json) {
+    public void validateFixedDepositForUpdate(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -133,7 +132,7 @@ public class DepositAccountDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    private void validateRecurringDepositForSubmit(final String json) {
+    public void validateRecurringDepositForSubmit(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -154,7 +153,7 @@ public class DepositAccountDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    private void validateRecurringDepositForUpdate(final String json) {
+    public void validateRecurringDepositForUpdate(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -253,13 +252,16 @@ public class DepositAccountDataValidator {
             baseDataValidator.reset().parameter(minRequiredOpeningBalanceParamName).value(minOpeningBalance).zeroOrPositiveAmount();
         }
 
+        boolean isLockinPeriodFrequencyValidated = false;
+        boolean isLockinPeriodFrequencyTypeValidated = false;
         if (this.fromApiJsonHelper.parameterExists(lockinPeriodFrequencyParamName, element)) {
-
+            isLockinPeriodFrequencyValidated = true;
             final Integer lockinPeriodFrequency = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(lockinPeriodFrequencyParamName,
                     element);
             baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequency).integerZeroOrGreater();
 
             if (lockinPeriodFrequency != null) {
+                isLockinPeriodFrequencyTypeValidated = true;
                 final Integer lockinPeriodFrequencyType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
                         lockinPeriodFrequencyTypeParamName, element);
                 baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).notNull()
@@ -267,12 +269,12 @@ public class DepositAccountDataValidator {
             }
         }
 
-        if (this.fromApiJsonHelper.parameterExists(lockinPeriodFrequencyTypeParamName, element)) {
+        if (!isLockinPeriodFrequencyTypeValidated && this.fromApiJsonHelper.parameterExists(lockinPeriodFrequencyTypeParamName, element)) {
             final Integer lockinPeriodFrequencyType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
                     lockinPeriodFrequencyTypeParamName, element);
             baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).inMinMaxRange(0, 3);
 
-            if (lockinPeriodFrequencyType != null) {
+            if (lockinPeriodFrequencyType != null && !isLockinPeriodFrequencyValidated) {
                 final Integer lockinPeriodFrequency = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(lockinPeriodFrequencyParamName,
                         element);
                 baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequency).notNull()
@@ -425,31 +427,6 @@ public class DepositAccountDataValidator {
     }
 
     private void validatePreClosureDetailForSubmit(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
-        if (fromApiJsonHelper.parameterExists(interestFreePeriodApplicableParamName, element)) {
-
-            final boolean interestFreePeriodApplicable = fromApiJsonHelper.extractBooleanNamed(interestFreePeriodApplicableParamName,
-                    element);
-
-            if (interestFreePeriodApplicable) {
-                final Integer interestFreeFromPeriod = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestFreeFromPeriodParamName,
-                        element);
-                baseDataValidator.reset().parameter(interestFreeFromPeriodParamName).value(interestFreeFromPeriod)
-                        .cantBeBlankWhenParameterProvidedIs(interestFreePeriodApplicableParamName, interestFreePeriodApplicable)
-                        .integerZeroOrGreater();
-
-                final Integer interestFreeToPeriod = fromApiJsonHelper
-                        .extractIntegerSansLocaleNamed(interestFreeToPeriodParamName, element);
-                baseDataValidator.reset().parameter(interestFreeToPeriodParamName).value(interestFreeToPeriod)
-                        .cantBeBlankWhenParameterProvidedIs(interestFreePeriodApplicableParamName, interestFreePeriodApplicable)
-                        .integerZeroOrGreater().integerGreaterThanNumber(interestFreeFromPeriod);
-
-                final Integer periodFrequencyType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                        interestFreePeriodFrequencyTypeIdParamName, element);
-                baseDataValidator.reset().parameter(interestFreePeriodFrequencyTypeIdParamName).value(periodFrequencyType)
-                        .cantBeBlankWhenParameterProvidedIs(interestFreePeriodApplicableParamName, interestFreePeriodApplicable)
-                        .isOneOfTheseValues(InterestRateChartPeriodType.integerValues());
-            }
-        }
 
         if (fromApiJsonHelper.parameterExists(preClosurePenalApplicableParamName, element)) {
             final boolean preClosurePenalApplicable = fromApiJsonHelper.extractBooleanNamed(preClosurePenalApplicableParamName, element);
@@ -549,38 +526,106 @@ public class DepositAccountDataValidator {
     }
 
     private void validateRecurringDetailForSubmit(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
-        if (fromApiJsonHelper.parameterExists(recurringDepositTypeIdParamName, element)) {
-            final Integer rdTypeId = fromApiJsonHelper.extractIntegerSansLocaleNamed(recurringDepositTypeIdParamName, element);
-            baseDataValidator.reset().parameter(recurringDepositTypeIdParamName).value(rdTypeId).notNull()
-                    .isOneOfTheseValues(RecurringDepositType.integerValues());
+
+        final BigDecimal mandatoryRecommendedDepositAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(mandatoryRecommendedDepositAmountParamName, element);
+        baseDataValidator.reset().parameter(mandatoryRecommendedDepositAmountParamName).value(mandatoryRecommendedDepositAmount).notNull().positiveAmount();
+
+        if (this.fromApiJsonHelper.parameterExists(isMandatoryDepositParamName, element)) {
+            final Boolean isMandatoryDeposit = this.fromApiJsonHelper.extractBooleanNamed(isMandatoryDepositParamName, element);
+            baseDataValidator.reset().parameter(isMandatoryDepositParamName).value(isMandatoryDeposit).ignoreIfNull()
+                    .validateForBooleanValue();
         }
 
-        if (fromApiJsonHelper.parameterExists(recurringDepositFrequencyParamName, element)) {
-            final Integer rdFrequency = fromApiJsonHelper.extractIntegerSansLocaleNamed(recurringDepositFrequencyParamName, element);
-            baseDataValidator.reset().parameter(recurringDepositFrequencyParamName).value(rdFrequency).notNull().integerGreaterThanZero();
+        if (this.fromApiJsonHelper.parameterExists(allowWithdrawalParamName, element)) {
+            final Boolean allowWithdrawal = this.fromApiJsonHelper.extractBooleanNamed(allowWithdrawalParamName, element);
+            baseDataValidator.reset().parameter(allowWithdrawalParamName).value(allowWithdrawal).ignoreIfNull().validateForBooleanValue();
         }
 
-        if (fromApiJsonHelper.parameterExists(recurringDepositFrequencyTypeIdParamName, element)) {
-            final Integer rdFrequencyTypeId = fromApiJsonHelper.extractIntegerSansLocaleNamed(recurringDepositFrequencyTypeIdParamName,
-                    element);
-            baseDataValidator.reset().parameter(recurringDepositFrequencyTypeIdParamName).value(rdFrequencyTypeId).notNull()
-                    .isOneOfTheseValues(SavingsPeriodFrequencyType.integerValues());
+        if (this.fromApiJsonHelper.parameterExists(adjustAdvanceTowardsFuturePaymentsParamName, element)) {
+            final Boolean adjustAdvanceTowardsFuturePayments = this.fromApiJsonHelper.extractBooleanNamed(
+                    adjustAdvanceTowardsFuturePaymentsParamName, element);
+            baseDataValidator.reset().parameter(adjustAdvanceTowardsFuturePaymentsParamName).value(adjustAdvanceTowardsFuturePayments)
+                    .ignoreIfNull().validateForBooleanValue();
+        }
+
+        // First validate if string is empty
+        final String isCalendarInheritedString = this.fromApiJsonHelper.extractStringNamed(isCalendarInheritedParamName, element);
+        if (StringUtils.isBlank(isCalendarInheritedString)) {
+            baseDataValidator.reset().parameter(isCalendarInheritedParamName).value(isCalendarInheritedString).notBlank();
+        } else {
+            // validate the boolean value
+            final Boolean isCalendarInherited = this.fromApiJsonHelper.extractBooleanNamed(isCalendarInheritedParamName, element);
+            baseDataValidator.reset().parameter(isCalendarInheritedParamName).value(isCalendarInherited).notNull()
+                    .validateForBooleanValue();
+            if (!isCalendarInherited) {
+                final Integer frequencyType = this.fromApiJsonHelper
+                        .extractIntegerSansLocaleNamed(recurringFrequencyTypeParamName, element);
+                baseDataValidator.reset().parameter(recurringFrequencyTypeParamName).value(frequencyType).notBlank()
+                        .inMinMaxRange(CalendarFrequencyType.getMinValue(), CalendarFrequencyType.getMaxValue());
+
+                final Integer frequency = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(recurringFrequencyParamName, element);
+                baseDataValidator.reset().parameter(recurringFrequencyParamName).value(frequency).notNull().integerGreaterThanZero();
+
+                /*
+                 * if (CalendarFrequencyType.fromInt(frequency).isWeekly()) {
+                 * final Integer repeatsOnDay =
+                 * this.fromApiJsonHelper.extractIntegerSansLocaleNamed
+                 * (repeatsOnDayParamName, element);
+                 * baseDataValidator.reset().parameter
+                 * (repeatsOnDayParamName).value(repeatsOnDay).notBlank()
+                 * .inMinMaxRange(CalendarWeekDaysType.getMinValue(),
+                 * CalendarWeekDaysType.getMaxValue()); }
+                 */
+            }
         }
     }
 
     private void validateRecurringDetailForUpdate(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
-        this.productDataValidator.validateRecurringDepositUpdate(element, baseDataValidator);
-    }
+        if (this.fromApiJsonHelper.parameterExists(isMandatoryDepositParamName, element)) {
+            final Boolean isMandatoryDeposit = this.fromApiJsonHelper.extractBooleanNamed(isMandatoryDepositParamName, element);
+            baseDataValidator.reset().parameter(isMandatoryDepositParamName).value(isMandatoryDeposit).ignoreIfNull()
+                    .validateForBooleanValue();
+        }
 
-    public void validateForSubmit(final String json, final DepositAccountType depositAccountType) {
+        if (this.fromApiJsonHelper.parameterExists(allowWithdrawalParamName, element)) {
+            final Boolean allowWithdrawal = this.fromApiJsonHelper.extractBooleanNamed(allowWithdrawalParamName, element);
+            baseDataValidator.reset().parameter(allowWithdrawalParamName).value(allowWithdrawal).ignoreIfNull().validateForBooleanValue();
+        }
 
-        if (depositAccountType.isFixedDeposit()) {
-            this.validateFixedDepositForSubmit(json);
-        } else if (depositAccountType.isRecurringDeposit()) {
-            this.validateRecurringDepositForSubmit(json);
-        } else {
-            // FIXME: AA handle unsupported deposit account type
-            // throw unsupported account type exception
+        if (this.fromApiJsonHelper.parameterExists(adjustAdvanceTowardsFuturePaymentsParamName, element)) {
+            final Boolean adjustAdvanceTowardsFuturePayments = this.fromApiJsonHelper.extractBooleanNamed(
+                    adjustAdvanceTowardsFuturePaymentsParamName, element);
+            baseDataValidator.reset().parameter(adjustAdvanceTowardsFuturePaymentsParamName).value(adjustAdvanceTowardsFuturePayments)
+                    .ignoreIfNull().validateForBooleanValue();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(isCalendarInheritedParamName, element)) {
+            final Boolean isCalendarInherited = this.fromApiJsonHelper.extractBooleanNamed(isCalendarInheritedParamName, element);
+            baseDataValidator.reset().parameter(isCalendarInheritedParamName).value(isCalendarInherited).notNull()
+                    .validateForBooleanValue();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(recurringFrequencyTypeParamName, element)) {
+            final Integer frequencyType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(recurringFrequencyTypeParamName, element);
+            baseDataValidator.reset().parameter(recurringFrequencyTypeParamName).value(frequencyType).notBlank()
+                    .inMinMaxRange(CalendarFrequencyType.getMinValue(), CalendarFrequencyType.getMaxValue());
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(recurringFrequencyParamName, element)) {
+            final Integer frequency = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(recurringFrequencyParamName, element);
+            baseDataValidator.reset().parameter(recurringFrequencyParamName).value(frequency).notNull().integerGreaterThanZero();
+            /*
+             * if (this.fromApiJsonHelper.parameterExists(repeatsOnDayParamName,
+             * element)) { if
+             * (CalendarFrequencyType.fromInt(frequency).isWeekly()) { final
+             * Integer repeatsOnDay =
+             * this.fromApiJsonHelper.extractIntegerSansLocaleNamed
+             * (repeatsOnDayParamName, element);
+             * baseDataValidator.reset().parameter
+             * (repeatsOnDayParamName).value(repeatsOnDay).notBlank()
+             * .inMinMaxRange(CalendarWeekDaysType.getMinValue(),
+             * CalendarWeekDaysType.getMaxValue()); } }
+             */
         }
     }
 
@@ -647,19 +692,6 @@ public class DepositAccountDataValidator {
                 }
             }
         }
-    }
-
-    public void validateForUpdate(final String json, final DepositAccountType depositAccountType) {
-
-        if (depositAccountType.isFixedDeposit()) {
-            this.validateFixedDepositForUpdate(json);
-        } else if (depositAccountType.isRecurringDeposit()) {
-            this.validateRecurringDepositForUpdate(json);
-        } else {
-            // FIXME: AA handle unsupported deposit account type
-            // throw unsupported account type exception
-        }
-
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {

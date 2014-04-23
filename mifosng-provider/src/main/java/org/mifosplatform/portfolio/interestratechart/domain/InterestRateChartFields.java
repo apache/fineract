@@ -84,7 +84,7 @@ public class InterestRateChartFields {
             this.fromDate = newValue.toDate();
         }
 
-        if (command.isChangeInLocalDateParameterNamed(endDateParamName, getFromDateAsLocalDate())) {
+        if (command.isChangeInLocalDateParameterNamed(endDateParamName, getEndDateAsLocalDate())) {
             final LocalDate newValue = command.localDateValueOfParameterNamed(endDateParamName);
             final String newValueAsString = command.stringValueOfParameterNamed(endDateParamName);
             actualChanges.put(endDateParamName, newValueAsString);
@@ -135,7 +135,7 @@ public class InterestRateChartFields {
         final LocalDateInterval thisInterval = LocalDateInterval.create(thisFromDate, thisEndDate);
         final LocalDateInterval thatInterval = LocalDateInterval.create(thatFromDate, thatEndDate);
         
-        if(thisInterval.containsPortionOf(thatInterval) || thisInterval.contains(thatInterval)){
+        if(thisInterval.containsPortionOf(thatInterval) || thatInterval.containsPortionOf(thisInterval)){
             return true;
         }
         return false;// no overlapping

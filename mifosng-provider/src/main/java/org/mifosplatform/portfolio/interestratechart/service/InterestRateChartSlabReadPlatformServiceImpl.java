@@ -62,6 +62,11 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
         return InterestRateChartSlabData.withTemplate(chartSlab, this.chartDropdownReadPlatformService.retrievePeriodTypeOptions());
     }
 
+    @Override
+    public InterestRateChartSlabData retrieveTemplate() {
+        return InterestRateChartSlabData.template(this.chartDropdownReadPlatformService.retrievePeriodTypeOptions());
+    }
+
     private static final class InterestRateChartSlabsMapper implements RowMapper<InterestRateChartSlabData> {
 
         private final String schemaSql;
@@ -77,6 +82,8 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
                     .append("ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, ")
                     .append("ircd.from_period as ircdFromPeriod, ircd.to_period as ircdToPeriod, ircd.amount_range_from as ircdAmountRangeFrom, ")
                     .append("ircd.amount_range_to as ircdAmountRangeTo, ircd.annual_interest_rate as ircdAnnualInterestRate, ")
+                    .append("ircd.interest_rate_for_female as ircdInterestRateForFemale, ircd.interest_rate_for_children as ircdInterestRateForChildren, ")
+                    .append("ircd.interest_rate_for_senior_citizen as ircdInterestRateForSeniorCitizen, ")
                     .append("curr.code as currencyCode, curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ")
                     .append("curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf ")
                     .append("from ").append("m_interest_rate_slab ircd ")
@@ -99,6 +106,9 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
             final BigDecimal amountRangeFrom = rs.getBigDecimal("ircdAmountRangeFrom");
             final BigDecimal amountRangeTo = rs.getBigDecimal("ircdAmountRangeTo");
             final BigDecimal annualInterestRate = rs.getBigDecimal("ircdAnnualInterestRate");
+            final BigDecimal interestRateForFemale = rs.getBigDecimal("ircdInterestRateForFemale");
+            final BigDecimal interestRateForChildren = rs.getBigDecimal("ircdInterestRateForChildren");
+            final BigDecimal interestRateForSeniorCitizen = rs.getBigDecimal("ircdInterestRateForSeniorCitizen");
 
             // currency Slabs
             final String currencyCode = rs.getString("currencyCode");
@@ -112,7 +122,7 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
                     currencyDisplaySymbol, currencyNameCode);
 
             return InterestRateChartSlabData.instance(id, description, periodType, fromPeriod, toPeriod, amountRangeFrom, amountRangeTo,
-                    annualInterestRate, currency);
+                    annualInterestRate, interestRateForFemale, interestRateForChildren, interestRateForSeniorCitizen, currency);
         }
 
     }

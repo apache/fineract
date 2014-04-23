@@ -20,6 +20,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
+import org.mifosplatform.portfolio.interestratechart.data.ClientIncentiveAttributes;
 import org.mifosplatform.portfolio.interestratechart.domain.InterestRateChart;
 import org.mifosplatform.portfolio.interestratechart.domain.InterestRateChartFields;
 import org.mifosplatform.portfolio.interestratechart.domain.InterestRateChartSlab;
@@ -50,8 +51,9 @@ public class DepositAccountInterestRateChart extends AbstractPersistable<Long> {
         for (InterestRateChartSlab interestRateChartSlab : chartSlabs) {
             depostiChartSlabs.add(DepositAccountInterestRateChartSlabs.from(interestRateChartSlab.slabFields(), null));
         }
-        final DepositAccountInterestRateChart depositChart = new DepositAccountInterestRateChart(productChart.chartFields(), null, depostiChartSlabs);
-        //update deposit account interest rate chart ference to chart Slabs
+        final DepositAccountInterestRateChart depositChart = new DepositAccountInterestRateChart(productChart.chartFields(), null,
+                depostiChartSlabs);
+        // update deposit account interest rate chart ference to chart Slabs
         depositChart.updateChartSlabsReference();
         return depositChart;
     }
@@ -63,13 +65,13 @@ public class DepositAccountInterestRateChart extends AbstractPersistable<Long> {
         this.chartSlabs = chartSlabs;
     }
 
-    private void updateChartSlabsReference(){
+    private void updateChartSlabsReference() {
         final Set<DepositAccountInterestRateChartSlabs> chartSlabs = setOfChartSlabs();
         for (DepositAccountInterestRateChartSlabs chartSlab : chartSlabs) {
             chartSlab.updateChartReference(this);
         }
     }
-    
+
     public Set<DepositAccountInterestRateChartSlabs> setOfChartSlabs() {
         if (this.chartSlabs == null) {
             this.chartSlabs = new HashSet<DepositAccountInterestRateChartSlabs>();
@@ -85,11 +87,6 @@ public class DepositAccountInterestRateChart extends AbstractPersistable<Long> {
         }
         return null;
     }
-
-    /*private boolean removeChartSlab(DepositAccountInterestRateChartSlabs chartSlab) {
-        final Set<DepositAccountInterestRateChartSlabs> chartSlabs = setOfChartSlabs();
-        return chartSlabs.remove(chartSlab);
-    }*/
 
     public LocalDate getFromDateAsLocalDate() {
         return this.chartFields.getFromDateAsLocalDate();
@@ -107,26 +104,43 @@ public class DepositAccountInterestRateChart extends AbstractPersistable<Long> {
         return this.account;
     }
 
-    /*private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-    }*/
-
     public InterestRateChartFields chartFields() {
         return this.chartFields;
     }
-    
-    public void updateDepositAccountReference(final SavingsAccount account){
+
+    public void updateDepositAccountReference(final SavingsAccount account) {
         this.account = account;
     }
-    
-    public BigDecimal getApplicableInterestRate(final BigDecimal depositAmount, final LocalDate periodStartDate, final LocalDate periodEndDate){
+
+    public BigDecimal getApplicableInterestRate(final BigDecimal depositAmount,
+            final LocalDate periodStartDate, final LocalDate periodEndDate, final ClientIncentiveAttributes incentiveAttributes) {
         BigDecimal effectiveInterestRate = BigDecimal.ZERO;
         for (DepositAccountInterestRateChartSlabs slab : setOfChartSlabs()) {
-            if(slab.slabFields().isBetweenPeriod(periodStartDate, periodEndDate) && slab.slabFields().isAmountBetween(depositAmount)){
-                effectiveInterestRate = slab.slabFields().annualInterestRate();
+            if (slab.slabFields().isBetweenPeriod(periodStartDate, periodEndDate) && slab.slabFields().isAmountBetween(depositAmount)) {
+
+                if (incentiveAttributes == null) {
+                    effectiveInterestRate = slab.slabFields().annualInterestRate();
+                } else {
+                    if (incentiveAttributes.isSeniorCitizen()) {
+                        effectiveInterestRate = slab.slabFields().interestRateForSeniorCitizen();
+                    }
+                    if (incentiveAttributes.isFemale()) {
+
+                        effectiveInterestRate = slab.slabFields().interestRateForFemale();
+                    }
+                    if (incentiveAttributes.isChild()) {
+                        effectiveInterestRate = slab.slabFields().interestRateForChildren();
+                    }
+                }
+
+                // effectiveInterestRate is zero or null then reset to default
+                // interest rate.
+                if (effectiveInterestRate == null || effectiveInterestRate.compareTo(BigDecimal.ZERO) == 0) {
+                    effectiveInterestRate = slab.slabFields().annualInterestRate();
+                }
             }
         }
-       
+
         return effectiveInterestRate;
     }
 }

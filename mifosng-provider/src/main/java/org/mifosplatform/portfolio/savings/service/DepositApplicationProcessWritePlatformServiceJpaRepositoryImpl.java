@@ -5,7 +5,9 @@
  */
 package org.mifosplatform.portfolio.savings.service;
 
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.linkedAccountParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.isCalendarInheritedParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringFrequencyParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringFrequencyTypeParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
 
 import java.math.MathContext;
@@ -22,6 +24,7 @@ import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
@@ -31,11 +34,19 @@ import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
 import org.mifosplatform.portfolio.account.domain.AccountAssociations;
 import org.mifosplatform.portfolio.account.domain.AccountAssociationsRepository;
+import org.mifosplatform.portfolio.calendar.domain.Calendar;
+import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
+import org.mifosplatform.portfolio.calendar.domain.CalendarFrequencyType;
+import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
+import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
+import org.mifosplatform.portfolio.calendar.domain.CalendarType;
+import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
+import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
 import org.mifosplatform.portfolio.group.exception.CenterNotActiveException;
@@ -88,6 +99,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final SavingsAccountChargeAssembler savingsAccountChargeAssembler;
     private final AccountAssociationsRepository accountAssociationsRepository;
     private final FromJsonHelper fromJsonHelper;
+    private final CalendarInstanceRepository calendarInstanceRepository;
 
     @Autowired
     public DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -100,7 +112,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler,
             final FixedDepositAccountRepository fixedDepositAccountRepository,
             final RecurringDepositAccountRepository recurringDepositAccountRepository,
-            final AccountAssociationsRepository accountAssociationsRepository, final FromJsonHelper fromJsonHelper) {
+            final AccountAssociationsRepository accountAssociationsRepository, final FromJsonHelper fromJsonHelper,
+            final CalendarInstanceRepository calendarInstanceRepository) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.depositAccountAssembler = depositAccountAssembler;
@@ -117,6 +130,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.recurringDepositAccountRepository = recurringDepositAccountRepository;
         this.accountAssociationsRepository = accountAssociationsRepository;
         this.fromJsonHelper = fromJsonHelper;
+        this.calendarInstanceRepository = calendarInstanceRepository;
     }
 
     /*
@@ -149,23 +163,18 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
     @Transactional
     @Override
-    public CommandProcessingResult submitApplication(final JsonCommand command, final DepositAccountType depositAccountType) {
+    public CommandProcessingResult submitFDApplication(final JsonCommand command) {
         try {
-            this.depositAccountDataValidator.validateForSubmit(command.json(), depositAccountType);
+            this.depositAccountDataValidator.validateFixedDepositForSubmit(command.json());
             final AppUser submittedBy = this.context.authenticatedUser();
 
-            final SavingsAccount account = this.depositAccountAssembler.assembleFrom(command, submittedBy, depositAccountType);
+            final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFrom(command, submittedBy,
+                    DepositAccountType.FIXED_DEPOSIT);
 
             final MathContext mc = MathContext.DECIMAL64;
 
-            if (depositAccountType.isFixedDeposit()) {
-                ((FixedDepositAccount) account).updateMaturityDateAndAmountBeforeAccountActivation(mc);
-                this.fixedDepositAccountRepository.saveAndFlush((FixedDepositAccount) account);
-            } else if (depositAccountType.isRecurringDeposit()) {
-                final LocalDate transactionStartDate = ((RecurringDepositAccount) account).depositStartDate();
-                ((RecurringDepositAccount) account).updateMaturityDateAndAmount(mc, transactionStartDate);
-                this.recurringDepositAccountRepository.save((RecurringDepositAccount) account);
-            }
+            account.updateMaturityDateAndAmountBeforeAccountActivation(mc);
+            this.fixedDepositAccountRepository.save(account);
 
             if (account.isAccountNumberRequiresAutoGeneration()) {
                 final AccountNumberGenerator accountNoGenerator = this.accountIdentifierGeneratorFactory
@@ -186,6 +195,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             }
 
             final Long savingsId = account.getId();
+
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withEntityId(savingsId) //
@@ -202,84 +212,185 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
     @Transactional
     @Override
-    public CommandProcessingResult modifyApplication(final Long accountId, final JsonCommand command,
-            final DepositAccountType depositAccountType) {
+    public CommandProcessingResult submitRDApplication(final JsonCommand command) {
         try {
-            this.depositAccountDataValidator.validateForUpdate(command.json(), depositAccountType);
+            this.depositAccountDataValidator.validateRecurringDepositForSubmit(command.json());
+            final AppUser submittedBy = this.context.authenticatedUser();
+
+            final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(command,
+                    submittedBy, DepositAccountType.RECURRING_DEPOSIT);
+
+            this.recurringDepositAccountRepository.save(account);
+
+            if (account.isAccountNumberRequiresAutoGeneration()) {
+                final AccountNumberGenerator accountNoGenerator = this.accountIdentifierGeneratorFactory
+                        .determineSavingsAccountNoGenerator(account.getId());
+                account.updateAccountNo(accountNoGenerator.generate());
+            }
+
+            final Long savingsId = account.getId();
+            final CalendarInstance calendarInstance = getCalendarInstance(command, account);
+            this.calendarInstanceRepository.save(calendarInstance);
+
+            // FIXME: Avoid save separately (Calendar instance requires account
+            // details)
+            final MathContext mc = MathContext.DECIMAL64;
+            final Calendar calendar = calendarInstance.getCalendar();
+            final PeriodFrequencyType frequencyType = CalendarFrequencyType.from(CalendarUtils.getFrequency(calendar.getRecurrence()));
+            Integer frequency = CalendarUtils.getInterval(calendar.getRecurrence());
+            frequency = frequency == -1 ? 1 : frequency;
+            account.generateSchedule(frequencyType, frequency);
+            account.updateMaturityDateAndAmount(mc);
+            account.validateApplicableInterestRate();
+            this.savingAccountRepository.save(account);
+
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(savingsId) //
+                    .withOfficeId(account.officeId()) //
+                    .withClientId(account.clientId()) //
+                    .withGroupId(account.groupId()) //
+                    .withSavingsId(savingsId) //
+                    .build();
+        } catch (final DataAccessException dve) {
+            handleDataIntegrityIssues(command, dve);
+            return CommandProcessingResult.empty();
+        }
+    }
+
+    private CalendarInstance getCalendarInstance(final JsonCommand command, RecurringDepositAccount account) {
+        CalendarInstance calendarInstance = null;
+        final boolean isCalendarInherited = command.booleanPrimitiveValueOfParameterNamed(isCalendarInheritedParamName);
+
+        if (isCalendarInherited) {
+            Set<Group> groups = account.getClient().getGroups();
+            Long groupId = null;
+            if (groups.isEmpty()) {
+                final String defaultUserMessage = "Client does not belong to group/center. Cannot follow group/center meeting frequency.";
+                throw new GeneralPlatformDomainRuleException(
+                        "error.msg.recurring.deposit.account.cannot.create.not.belongs.to.any.groups.to.follow.meeting.frequency",
+                        defaultUserMessage, account.clientId());
+            } else if (groups.size() > 1) {
+                final String defaultUserMessage = "Client belongs to more than one group. Cannot support recurring deposit.";
+                throw new GeneralPlatformDomainRuleException(
+                        "error.msg.recurring.deposit.account.cannot.create.belongs.to.multiple.groups", defaultUserMessage,
+                        account.clientId());
+            } else {
+                Group group = groups.iterator().next();
+                Group parent = group.getParent();
+                Integer entityType = CalendarEntityType.GROUPS.getValue();
+                if (parent != null) {
+                    groupId = parent.getId();
+                    entityType = CalendarEntityType.CENTERS.getValue();
+                } else {
+                    groupId = group.getId();
+                }
+                CalendarInstance parentCalendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
+                        groupId, entityType, CalendarType.COLLECTION.getValue());
+                calendarInstance = CalendarInstance.from(parentCalendarInstance.getCalendar(), account.getId(),
+                        CalendarEntityType.SAVINGS.getValue());
+            }
+        } else {
+            LocalDate calendarStartDate = account.depositStartDate();
+            final Integer frequencyType = command.integerValueSansLocaleOfParameterNamed(recurringFrequencyTypeParamName);
+            final PeriodFrequencyType periodFrequencyType = PeriodFrequencyType.fromInt(frequencyType);
+            final Integer frequency = command.integerValueSansLocaleOfParameterNamed(recurringFrequencyParamName);
+
+            final Integer repeatsOnDay = calendarStartDate.getDayOfWeek();
+            final String title = "recurring_savings_" + account.getId();
+            final Calendar calendar = Calendar.createRepeatingCalendar(title, calendarStartDate, CalendarType.COLLECTION.getValue(),
+                    CalendarFrequencyType.from(periodFrequencyType), frequency, repeatsOnDay);
+            calendarInstance = CalendarInstance.from(calendar, account.getId(), CalendarEntityType.SAVINGS.getValue());
+        }
+        if (calendarInstance == null) {
+            final String defaultUserMessage = "No valid recurring details available for recurring depost account creation.";
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.recurring.deposit.account.cannot.create.no.valid.recurring.details.available", defaultUserMessage,
+                    account.clientId());
+        }
+        return calendarInstance;
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult modifyFDApplication(final Long accountId, final JsonCommand command) {
+        try {
+            this.depositAccountDataValidator.validateFixedDepositForUpdate(command.json());
 
             final Map<String, Object> changes = new LinkedHashMap<String, Object>(20);
 
-            final SavingsAccount account = this.depositAccountAssembler.assembleFrom(accountId, depositAccountType);
+            final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFrom(accountId,
+                    DepositAccountType.FIXED_DEPOSIT);
             checkClientOrGroupActive(account);
             account.modifyApplication(command, changes);
-            account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), depositAccountType.resourceName());
+            account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), DepositAccountType.FIXED_DEPOSIT.resourceName());
 
             if (!changes.isEmpty()) {
-
-                if (changes.containsKey(SavingsApiConstants.clientIdParamName)) {
-                    final Long clientId = command.longValueOfParameterNamed(SavingsApiConstants.clientIdParamName);
-                    if (clientId != null) {
-                        final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-                        if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
-                        account.update(client);
-                    } else {
-                        final Client client = null;
-                        account.update(client);
-                    }
-                }
-
-                if (changes.containsKey(SavingsApiConstants.groupIdParamName)) {
-                    final Long groupId = command.longValueOfParameterNamed(SavingsApiConstants.groupIdParamName);
-                    if (groupId != null) {
-                        final Group group = this.groupRepository.findOne(groupId);
-                        if (group == null) { throw new GroupNotFoundException(groupId); }
-                        if (group.isNotActive()) {
-                            if (group.isCenter()) { throw new CenterNotActiveException(groupId); }
-                            throw new GroupNotActiveException(groupId);
-                        }
-                        account.update(group);
-                    } else {
-                        final Group group = null;
-                        account.update(group);
-                    }
-                }
-
-                if (changes.containsKey(SavingsApiConstants.productIdParamName)) {
-                    final Long productId = command.longValueOfParameterNamed(SavingsApiConstants.productIdParamName);
-                    final SavingsProduct product = this.savingsProductRepository.findOne(productId);
-                    if (product == null) { throw new SavingsProductNotFoundException(productId); }
-
-                    account.update(product);
-                }
-
-                if (changes.containsKey(SavingsApiConstants.fieldOfficerIdParamName)) {
-                    final Long fieldOfficerId = command.longValueOfParameterNamed(SavingsApiConstants.fieldOfficerIdParamName);
-                    Staff fieldOfficer = null;
-                    if (fieldOfficerId != null) {
-                        fieldOfficer = this.staffRepository.findOneWithNotFoundDetection(fieldOfficerId);
-                    } else {
-                        changes.put(SavingsApiConstants.fieldOfficerIdParamName, "");
-                    }
-                    account.update(fieldOfficer);
-                }
-
-                if (changes.containsKey("charges")) {
-                    final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(command.parsedJson(),
-                            account.getCurrency().getCode());
-                    final boolean updated = account.update(charges);
-                    if (!updated) {
-                        changes.remove("charges");
-                    }
-                }
+                updateFDAndRDCommonChanges(changes, command, account);
                 final MathContext mc = MathContext.DECIMAL64;
-                if (depositAccountType.isFixedDeposit()) {
-                    ((FixedDepositAccount) account).updateMaturityDateAndAmountBeforeAccountActivation(mc);
-                } else if (depositAccountType.isRecurringDeposit()) {
-                    final LocalDate transactionStartDate = ((RecurringDepositAccount) account).depositStartDate();
-                    ((RecurringDepositAccount) account).updateMaturityDateAndAmount(mc, transactionStartDate);
-                }
+                account.updateMaturityDateAndAmountBeforeAccountActivation(mc);
+                this.savingAccountRepository.save(account);
+            }
 
-                this.savingAccountRepository.saveAndFlush(account);
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(accountId) //
+                    .withOfficeId(account.officeId()) //
+                    .withClientId(account.clientId()) //
+                    .withGroupId(account.groupId()) //
+                    .withSavingsId(accountId) //
+                    .with(changes) //
+                    .build();
+        } catch (final DataAccessException dve) {
+            handleDataIntegrityIssues(command, dve);
+            return new CommandProcessingResult(Long.valueOf(-1));
+        }
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult modifyRDApplication(final Long accountId, final JsonCommand command) {
+        try {
+            this.depositAccountDataValidator.validateRecurringDepositForUpdate(command.json());
+
+            final Map<String, Object> changes = new LinkedHashMap<String, Object>(20);
+
+            final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(accountId,
+                    DepositAccountType.RECURRING_DEPOSIT);
+            checkClientOrGroupActive(account);
+            account.modifyApplication(command, changes);
+            account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), DepositAccountType.RECURRING_DEPOSIT.resourceName());
+
+            if (!changes.isEmpty()) {
+                updateFDAndRDCommonChanges(changes, command, account);
+                final MathContext mc = MathContext.DECIMAL64;
+                final CalendarInstance calendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
+                        accountId, CalendarEntityType.SAVINGS.getValue(), CalendarType.COLLECTION.getValue());
+                final Calendar calendar = calendarInstance.getCalendar();
+                final PeriodFrequencyType frequencyType = CalendarFrequencyType.from(CalendarUtils.getFrequency(calendar.getRecurrence()));
+                Integer frequency = CalendarUtils.getInterval(calendar.getRecurrence());
+                frequency = frequency == -1 ? 1 : frequency;
+                account.generateSchedule(frequencyType, frequency);
+                account.updateMaturityDateAndAmount(mc);
+                account.validateApplicableInterestRate();
+                this.savingAccountRepository.save(account);
+
+            }
+
+            // update calendar details
+            if (!account.isCalendarInherited()) {
+                final LocalDate calendarStartDate = account.depositStartDate();
+                final Integer frequencyType = command.integerValueSansLocaleOfParameterNamed(recurringFrequencyTypeParamName);
+                final PeriodFrequencyType periodFrequencyType = PeriodFrequencyType.fromInt(frequencyType);
+                final Integer frequency = command.integerValueSansLocaleOfParameterNamed(recurringFrequencyParamName);
+                final Integer repeatsOnDay = calendarStartDate.getDayOfWeek();
+
+                CalendarInstance calendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
+                        accountId, CalendarEntityType.SAVINGS.getValue(), CalendarType.COLLECTION.getValue());
+                Calendar calendar = calendarInstance.getCalendar();
+                calendar.updateRepeatingCalendar(calendarStartDate, CalendarFrequencyType.from(periodFrequencyType), frequency,
+                        repeatsOnDay);
+                this.calendarInstanceRepository.save(calendarInstance);
             }
 
             boolean isLinkedAccRequired = command.booleanPrimitiveValueOfParameterNamed(transferInterestToSavingsParamName);
@@ -338,6 +449,66 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         }
     }
 
+    private void updateFDAndRDCommonChanges(final Map<String, Object> changes, final JsonCommand command, final SavingsAccount account) {
+
+        if (changes.containsKey(SavingsApiConstants.clientIdParamName)) {
+            final Long clientId = command.longValueOfParameterNamed(SavingsApiConstants.clientIdParamName);
+            if (clientId != null) {
+                final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+                if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
+                account.update(client);
+            } else {
+                final Client client = null;
+                account.update(client);
+            }
+        }
+
+        if (changes.containsKey(SavingsApiConstants.groupIdParamName)) {
+            final Long groupId = command.longValueOfParameterNamed(SavingsApiConstants.groupIdParamName);
+            if (groupId != null) {
+                final Group group = this.groupRepository.findOne(groupId);
+                if (group == null) { throw new GroupNotFoundException(groupId); }
+                if (group.isNotActive()) {
+                    if (group.isCenter()) { throw new CenterNotActiveException(groupId); }
+                    throw new GroupNotActiveException(groupId);
+                }
+                account.update(group);
+            } else {
+                final Group group = null;
+                account.update(group);
+            }
+        }
+
+        if (changes.containsKey(SavingsApiConstants.productIdParamName)) {
+            final Long productId = command.longValueOfParameterNamed(SavingsApiConstants.productIdParamName);
+            final SavingsProduct product = this.savingsProductRepository.findOne(productId);
+            if (product == null) { throw new SavingsProductNotFoundException(productId); }
+
+            account.update(product);
+        }
+
+        if (changes.containsKey(SavingsApiConstants.fieldOfficerIdParamName)) {
+            final Long fieldOfficerId = command.longValueOfParameterNamed(SavingsApiConstants.fieldOfficerIdParamName);
+            Staff fieldOfficer = null;
+            if (fieldOfficerId != null) {
+                fieldOfficer = this.staffRepository.findOneWithNotFoundDetection(fieldOfficerId);
+            } else {
+                changes.put(SavingsApiConstants.fieldOfficerIdParamName, "");
+            }
+            account.update(fieldOfficer);
+        }
+
+        if (changes.containsKey("charges")) {
+            final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(command.parsedJson(), account
+                    .getCurrency().getCode());
+            final boolean updated = account.update(charges);
+            if (!updated) {
+                changes.remove("charges");
+            }
+        }
+
+    }
+
     @Transactional
     @Override
     public CommandProcessingResult deleteApplication(final Long savingsId, final DepositAccountType depositAccountType) {
@@ -347,8 +518,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
         if (account.isNotSubmittedAndPendingApproval()) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                    .resource(DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME + DepositsApiConstants.deleteApplicationAction);
+            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(depositAccountType
+                    .resourceName() + DepositsApiConstants.deleteApplicationAction);
 
             baseDataValidator.reset().parameter(DepositsApiConstants.activatedOnDateParamName)
                     .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");

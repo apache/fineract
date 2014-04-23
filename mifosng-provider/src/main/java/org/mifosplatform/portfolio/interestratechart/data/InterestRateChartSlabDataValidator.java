@@ -14,6 +14,9 @@ import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSla
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.descriptionParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.fromPeriodParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.interestRateForChildrenParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.interestRateForFemaleParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.interestRateForSeniorCitizenParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.periodTypeParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.toPeriodParamName;
 
@@ -30,7 +33,7 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.portfolio.interestratechart.InterestRateChartPeriodType;
+import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -61,17 +64,16 @@ public class InterestRateChartSlabDataValidator {
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final JsonObject objectElement = element.getAsJsonObject();
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(objectElement);
-        
+
         final String currencyCode = this.fromApiJsonHelper.extractStringNamed(currencyCodeParamName, element);
         baseDataValidator.reset().parameter(currencyCodeParamName).value(currencyCode).notBlank().notExceedingLengthOf(3);
-        
+
         validateChartSlabsCreate(element, baseDataValidator, locale);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     public void validateChartSlabsCreate(final JsonElement element, final DataValidatorBuilder baseDataValidator, final Locale locale) {
-        
 
         if (this.fromApiJsonHelper.parameterExists(descriptionParamName, element)) {
             final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParamName, element);
@@ -80,7 +82,7 @@ public class InterestRateChartSlabDataValidator {
 
         final Integer periodType = this.fromApiJsonHelper.extractIntegerNamed(periodTypeParamName, element, locale);
         baseDataValidator.reset().parameter(periodTypeParamName).value(periodType).notNull()
-                .isOneOfTheseValues(InterestRateChartPeriodType.integerValues());
+                .isOneOfTheseValues(PeriodFrequencyType.integerValues());
 
         Integer toPeriod = null;
 
@@ -117,6 +119,25 @@ public class InterestRateChartSlabDataValidator {
 
         final BigDecimal annualInterestRate = this.fromApiJsonHelper.extractBigDecimalNamed(annualInterestRateParamName, element, locale);
         baseDataValidator.reset().parameter(annualInterestRateParamName).value(annualInterestRate).notNull().zeroOrPositiveAmount();
+
+        if (this.fromApiJsonHelper.parameterExists(interestRateForFemaleParamName, element)) {
+            final BigDecimal interestRateForFemale = this.fromApiJsonHelper.extractBigDecimalNamed(interestRateForFemaleParamName, element,
+                    locale);
+            baseDataValidator.reset().parameter(interestRateForFemaleParamName).value(interestRateForFemale).notNull().zeroOrPositiveAmount();
+        }
+        
+        if (this.fromApiJsonHelper.parameterExists(interestRateForChildrenParamName, element)) {
+            final BigDecimal interestRateForChildren = this.fromApiJsonHelper.extractBigDecimalNamed(interestRateForChildrenParamName, element,
+                    locale);
+            baseDataValidator.reset().parameter(interestRateForChildrenParamName).value(interestRateForChildren).notNull().zeroOrPositiveAmount();
+        }
+        
+        if (this.fromApiJsonHelper.parameterExists(interestRateForSeniorCitizenParamName, element)) {
+            final BigDecimal interestRateForSeniorCitizen = this.fromApiJsonHelper.extractBigDecimalNamed(interestRateForSeniorCitizenParamName, element,
+                    locale);
+            baseDataValidator.reset().parameter(interestRateForSeniorCitizenParamName).value(interestRateForSeniorCitizen).notNull().zeroOrPositiveAmount();
+        }
+
     }
 
     public void validateUpdate(final String json) {
@@ -138,7 +159,6 @@ public class InterestRateChartSlabDataValidator {
     }
 
     public void validateChartSlabsUpdate(final JsonElement element, final DataValidatorBuilder baseDataValidator, final Locale locale) {
-        
 
         if (this.fromApiJsonHelper.parameterExists(descriptionParamName, element)) {
             final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParamName, element);
@@ -148,7 +168,7 @@ public class InterestRateChartSlabDataValidator {
         if (this.fromApiJsonHelper.parameterExists(periodTypeParamName, element)) {
             final Integer periodType = this.fromApiJsonHelper.extractIntegerNamed(periodTypeParamName, element, locale);
             baseDataValidator.reset().parameter(periodTypeParamName).value(periodType).notNull()
-                    .isOneOfTheseValues(InterestRateChartPeriodType.integerValues());
+                    .isOneOfTheseValues(PeriodFrequencyType.integerValues());
         }
 
         Integer fromPeriod = null;
@@ -191,6 +211,24 @@ public class InterestRateChartSlabDataValidator {
             final BigDecimal annualInterestRate = this.fromApiJsonHelper.extractBigDecimalNamed(annualInterestRateParamName, element,
                     locale);
             baseDataValidator.reset().parameter(annualInterestRateParamName).value(annualInterestRate).notNull().zeroOrPositiveAmount();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(interestRateForFemaleParamName, element)) {
+            final BigDecimal interestRateForFemale = this.fromApiJsonHelper.extractBigDecimalNamed(interestRateForFemaleParamName, element,
+                    locale);
+            baseDataValidator.reset().parameter(interestRateForFemaleParamName).value(interestRateForFemale).notNull().zeroOrPositiveAmount();
+        }
+        
+        if (this.fromApiJsonHelper.parameterExists(interestRateForChildrenParamName, element)) {
+            final BigDecimal interestRateForChildren = this.fromApiJsonHelper.extractBigDecimalNamed(interestRateForChildrenParamName, element,
+                    locale);
+            baseDataValidator.reset().parameter(interestRateForChildrenParamName).value(interestRateForChildren).notNull().zeroOrPositiveAmount();
+        }
+        
+        if (this.fromApiJsonHelper.parameterExists(interestRateForSeniorCitizenParamName, element)) {
+            final BigDecimal interestRateForSeniorCitizen = this.fromApiJsonHelper.extractBigDecimalNamed(interestRateForSeniorCitizenParamName, element,
+                    locale);
+            baseDataValidator.reset().parameter(interestRateForSeniorCitizenParamName).value(interestRateForSeniorCitizen).notNull().zeroOrPositiveAmount();
         }
         
         if (this.fromApiJsonHelper.parameterExists(currencyCodeParamName, element)) {

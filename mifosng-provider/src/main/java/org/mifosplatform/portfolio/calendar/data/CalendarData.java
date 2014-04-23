@@ -326,4 +326,12 @@ public class CalendarData {
                 compareDate); }
         return false;
     }
+    
+    public Integer interval(){
+        return this.interval;
+    }
+    
+    public EnumOptionData frequencyType(){
+        return this.frequency;
+    }
 }

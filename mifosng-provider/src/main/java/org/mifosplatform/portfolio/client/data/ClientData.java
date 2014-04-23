@@ -65,11 +65,9 @@ final public class ClientData implements Comparable<ClientData> {
     // template
     private final Collection<OfficeData> officeOptions;
     private final Collection<StaffData> staffOptions;
-    @SuppressWarnings("unused")
     private final Collection<CodeValueData> closureReasons;
     private final Collection<SavingsProductData> savingProductOptions;
     private final Collection<SavingsAccountData> savingAccountOptions;
-    @SuppressWarnings("unused")
     private final Collection<CodeValueData> genderOptions;
 
     public static ClientData template(final Long officeId, final LocalDate joinedDate, final Collection<OfficeData> officeOptions,
@@ -87,7 +85,7 @@ final public class ClientData implements Comparable<ClientData> {
                 clientData.transferToOfficeId, clientData.transferToOfficeName, clientData.id, clientData.firstname, clientData.middlename,
                 clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId, clientData.mobileNo,
                 clientData.dateOfBirth, clientData.gender, clientData.activationDate, clientData.imageId, clientData.staffId,
-                clientData.staffName, templateData.officeOptions, clientData.groups, templateData.staffOptions, null, null, null,
+                clientData.staffName, templateData.officeOptions, clientData.groups, templateData.staffOptions, templateData.closureReasons, templateData.genderOptions, clientData.timeline,
                 templateData.savingProductOptions, clientData.savingsProductId, clientData.savingsProductName, clientData.savingsAccountId,
                 clientData.savingAccountOptions);
 

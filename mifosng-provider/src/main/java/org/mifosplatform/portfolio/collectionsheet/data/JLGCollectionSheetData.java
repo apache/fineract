@@ -11,6 +11,7 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
+import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 
 /**
  * Immutable data object for join liability group's collection sheet.
@@ -19,14 +20,27 @@ public class JLGCollectionSheetData {
 
     private final LocalDate dueDate;
     private final Collection<LoanProductData> loanProducts;
-    private final Collection<JLGGroupData> groups;
     @SuppressWarnings("unused")
+    private final Collection<SavingsProductData> savingsProducts;
+    private final Collection<JLGGroupData> groups;
     private final List<EnumOptionData> attendanceTypeOptions;
 
-    public JLGCollectionSheetData(final LocalDate date, final Collection<LoanProductData> loanProducts,
+    public static JLGCollectionSheetData instance(final LocalDate date, final Collection<LoanProductData> loanProducts,
             final Collection<JLGGroupData> groups, final List<EnumOptionData> attendanceTypeOptions) {
-        this.dueDate = date;
+        return new JLGCollectionSheetData(date, loanProducts, null, groups, attendanceTypeOptions);
+    }
+
+    public static JLGCollectionSheetData withSavingsProducts(final JLGCollectionSheetData data,
+            final Collection<SavingsProductData> savingsProducts) {
+
+        return new JLGCollectionSheetData(data.dueDate, data.loanProducts, savingsProducts, data.groups, data.attendanceTypeOptions);
+    }
+
+    private JLGCollectionSheetData(LocalDate dueDate, Collection<LoanProductData> loanProducts,
+            Collection<SavingsProductData> savingsProducts, Collection<JLGGroupData> groups, List<EnumOptionData> attendanceTypeOptions) {
+        this.dueDate = dueDate;
         this.loanProducts = loanProducts;
+        this.savingsProducts = savingsProducts;
         this.groups = groups;
         this.attendanceTypeOptions = attendanceTypeOptions;
     }
@@ -42,4 +56,5 @@ public class JLGCollectionSheetData {
     public Collection<LoanProductData> getLoanProducts() {
         return this.loanProducts;
     }
+
 }

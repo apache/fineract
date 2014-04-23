@@ -82,6 +82,7 @@ import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.mifosplatform.portfolio.savings.domain.interest.PostingPeriod;
 import org.mifosplatform.portfolio.savings.exception.InsufficientAccountBalanceException;
+import org.mifosplatform.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
 import org.mifosplatform.portfolio.savings.exception.SavingsActivityPriorToClientTransferException;
 import org.mifosplatform.portfolio.savings.exception.SavingsTransferTransactionsCannotBeUndoneException;
 import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
@@ -583,13 +584,16 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         if (isTransactionsModified) {
             accountTransactionsSorted = retreiveListOfTransactions();
         }
-        // loop over transactions in reverse
+        resetAccountTransactionsEndOfDayBalances(accountTransactionsSorted, interestPostingUpToDate);
+    }
+    
+    protected void resetAccountTransactionsEndOfDayBalances(final List<SavingsAccountTransaction> accountTransactionsSorted, final LocalDate interestPostingUpToDate) {
+     // loop over transactions in reverse
         LocalDate endOfBalanceDate = interestPostingUpToDate;
         for (int i = accountTransactionsSorted.size() - 1; i >= 0; i--) {
             final SavingsAccountTransaction transaction = accountTransactionsSorted.get(i);
             if (transaction.isNotReversed() && !transaction.isInterestPostingAndNotReversed()) {
                 transaction.updateCumulativeBalanceAndDates(this.currency, endOfBalanceDate);
-
                 // this transactions transaction date is end of balance date for
                 // previous transaction.
                 endOfBalanceDate = transaction.transactionLocalDate().minusDays(1);
@@ -598,11 +602,12 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public SavingsAccountTransaction deposit(final SavingsAccountTransactionDTO transactionDTO) {
-
+        final String resourceTypeName = depositAccountType().resourceName();
         if (isNotActive()) {
             final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.account.is.not.active",
-                    defaultUserMessage, "transactionDate", transactionDTO.getTransactionDate().toString(transactionDTO.getFormatter()));
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg." + resourceTypeName
+                    + ".transaction.account.is.not.active", defaultUserMessage, "transactionDate", transactionDTO.getTransactionDate()
+                    .toString(transactionDTO.getFormatter()));
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
             dataValidationErrors.add(error);
@@ -612,7 +617,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         if (isDateInTheFuture(transactionDTO.getTransactionDate())) {
             final String defaultUserMessage = "Transaction date cannot be in the future.";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.in.the.future",
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg." + resourceTypeName + ".transaction.in.the.future",
                     defaultUserMessage, "transactionDate", transactionDTO.getTransactionDate().toString(transactionDTO.getFormatter()));
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
@@ -625,8 +630,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final Object[] defaultUserArgs = Arrays.asList(transactionDTO.getTransactionDate().toString(transactionDTO.getFormatter()),
                     getActivationLocalDate().toString(transactionDTO.getFormatter())).toArray();
             final String defaultUserMessage = "Transaction date cannot be before accounts activation date.";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.before.activation.date",
-                    defaultUserMessage, "transactionDate", defaultUserArgs);
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg." + resourceTypeName
+                    + ".transaction.before.activation.date", defaultUserMessage, "transactionDate", defaultUserArgs);
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
             dataValidationErrors.add(error);
@@ -785,7 +790,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 //
                 final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
                 final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                        .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + transactionAction);
+                        .resource(depositAccountType().resourceName() + transactionAction);
 
                 if (this.allowOverdraft) {
                     Money limit = runningBalance.zero();
@@ -803,7 +808,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
     }
 
-    private boolean isAccountLocked(final LocalDate transactionDate) {
+    protected boolean isAccountLocked(final LocalDate transactionDate) {
         boolean isLocked = false;
         final boolean accountHasLockedInSetting = this.lockedInUntilDate != null;
         if (accountHasLockedInSetting) {
@@ -1308,24 +1313,20 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             }
         }
 
-        if (transactionToUndo == null) {
-            // throw non found exception
-
-        } else {
-            validateAttemptToUndoTransferRelatedTransactions(transactionToUndo);
-            validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_UNDO_TRANSACTION,
-                    transactionToUndo.transactionLocalDate());
-            transactionToUndo.reverse();
-            if (transactionToUndo.isChargeTransaction() || transactionToUndo.isWaiveCharge()) {
-                // undo charge
-                final Set<SavingsAccountChargePaidBy> chargesPaidBy = transactionToUndo.getSavingsAccountChargesPaid();
-                for (final SavingsAccountChargePaidBy savingsAccountChargePaidBy : chargesPaidBy) {
-                    final SavingsAccountCharge chargeToUndo = savingsAccountChargePaidBy.getSavingsAccountCharge();
-                    if (transactionToUndo.isChargeTransaction()) {
-                        chargeToUndo.undoPayment(this.getCurrency(), transactionToUndo.getAmount(this.getCurrency()));
-                    } else if (transactionToUndo.isWaiveCharge()) {
-                        chargeToUndo.undoWaiver(this.getCurrency(), transactionToUndo.getAmount(this.getCurrency()));
-                    }
+        if (transactionToUndo == null) { throw new SavingsAccountTransactionNotFoundException(this.getId(), transactionId); }
+        
+        validateAttemptToUndoTransferRelatedTransactions(transactionToUndo);
+        validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_UNDO_TRANSACTION, transactionToUndo.transactionLocalDate());
+        transactionToUndo.reverse();
+        if (transactionToUndo.isChargeTransaction() || transactionToUndo.isWaiveCharge()) {
+            // undo charge
+            final Set<SavingsAccountChargePaidBy> chargesPaidBy = transactionToUndo.getSavingsAccountChargesPaid();
+            for (final SavingsAccountChargePaidBy savingsAccountChargePaidBy : chargesPaidBy) {
+                final SavingsAccountCharge chargeToUndo = savingsAccountChargePaidBy.getSavingsAccountCharge();
+                if (transactionToUndo.isChargeTransaction()) {
+                    chargeToUndo.undoPayment(this.getCurrency(), transactionToUndo.getAmount(this.getCurrency()));
+                } else if (transactionToUndo.isWaiveCharge()) {
+                    chargeToUndo.undoWaiver(this.getCurrency(), transactionToUndo.getAmount(this.getCurrency()));
                 }
             }
         }
@@ -1478,7 +1479,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.activateAction);
+                .resource(depositAccountType().resourceName() + SavingsApiConstants.activateAction);
 
         final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.APPROVED.hasStateOf(currentStatus)) {
@@ -2042,5 +2043,11 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     protected boolean isTransferInterestToOtherAccount() {
         return false;
+    }
+
+    public boolean accountSubmittedAndActivationOnSameDate() {
+        if (getSubmittedOnLocalDate() == null || getActivationLocalDate() == null) { return false; }
+        return getActivationLocalDate().isEqual(getSubmittedOnLocalDate());
+
     }
 }

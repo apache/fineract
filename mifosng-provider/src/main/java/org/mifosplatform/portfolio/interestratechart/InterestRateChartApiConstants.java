@@ -29,16 +29,19 @@ public class InterestRateChartApiConstants {
     public static final String descriptionParamName = "description";
     public static final String fromDateParamName = "fromDate";
     public static final String endDateParamName = "endDate";
-    public static final String savingsProductIdParamName = "savingsProductId";
-    public static final String savingsProductNameParamName = "savingsProductName";
+    public static final String productIdParamName = "productId";
+    public static final String productNameParamName = "productName";
 
     // interest rate chart Slabs parameters
-    public static final String periodTypeParamName = "periodType";
-    public static final String fromPeriodParamName = "fromPeriod";
-    public static final String toPeriodParamName = "toPeriod";
-    public static final String amountRangeFromParamName = "amountRangeFrom";
-    public static final String amountRangeToParamName = "amountRangeTo";
-    public static final String annualInterestRateParamName = "annualInterestRate";
+//    public static final String periodTypeParamName = "periodType";
+//    public static final String fromPeriodParamName = "fromPeriod";
+//    public static final String toPeriodParamName = "toPeriod";
+//    public static final String amountRangeFromParamName = "amountRangeFrom";
+//    public static final String amountRangeToParamName = "amountRangeTo";
+//    public static final String annualInterestRateParamName = "annualInterestRate";
+//    public static final String interestRateForFemaleParamName = "interestRateForFemale";
+//    public static final String interestRateForChildrenParamName = "interestRateForChildren";
+//    public static final String interestRateForSeniorCitizenParamName = "interestRateForSeniorCitizen";
 
     // associations
     public static final String chartSlabs = "chartSlabs";
@@ -47,7 +50,7 @@ public class InterestRateChartApiConstants {
     public static final String deleteParamName = "delete";
 
     public static final Set<String> INTERESTRATE_CHART_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
-            dateFormatParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, savingsProductIdParamName,
+            dateFormatParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, productIdParamName,
             chartSlabs));
 
     public static final Set<String> INTERESTRATE_CHART_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,

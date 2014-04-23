@@ -13,7 +13,6 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 
 /**
  * RecurringDepositProductAmountDetails encapsulates all recurring Deposit
@@ -47,7 +46,7 @@ public class DepositProductAmountDetails {
         this.maxDepositAmount = maxDepositAmount;
     }
 
-    public Map<String, Object> update(final JsonCommand command, final DataValidatorBuilder baseDataValidator) {
+    public Map<String, Object> update(final JsonCommand command) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(20);
 

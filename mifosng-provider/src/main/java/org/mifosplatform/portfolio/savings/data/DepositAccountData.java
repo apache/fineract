@@ -29,8 +29,8 @@ public class DepositAccountData {
     protected final String groupName;
     protected final Long clientId;
     protected final String clientName;
-    protected final Long savingsProductId;
-    protected final String savingsProductName;
+    protected final Long depositProductId;
+    protected final String depositProductName;
     protected final Long fieldOfficerId;
     protected final String fieldOfficerName;
     protected final SavingsAccountStatusEnumData status;
@@ -177,8 +177,8 @@ public class DepositAccountData {
         this.groupName = groupName;
         this.clientId = clientId;
         this.clientName = clientName;
-        this.savingsProductId = productId;
-        this.savingsProductName = productName;
+        this.depositProductId = productId;
+        this.depositProductName = productName;
         this.fieldOfficerId = fieldofficerId;
         this.fieldOfficerName = fieldofficerName;
         this.status = status;
@@ -244,7 +244,7 @@ public class DepositAccountData {
     }
 
     public Long productId() {
-        return this.savingsProductId;
+        return this.depositProductId;
     }
 
     public CurrencyData currency() {

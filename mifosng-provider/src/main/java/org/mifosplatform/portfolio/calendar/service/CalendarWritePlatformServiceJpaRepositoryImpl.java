@@ -138,7 +138,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
 
         this.calendarRepository.save(newCalendar);
 
-        final CalendarInstance newCalendarInstance = CalendarInstance.fromJson(newCalendar, entityId, entityTypeId);
+        final CalendarInstance newCalendarInstance = CalendarInstance.from(newCalendar, entityId, entityTypeId);
         this.calendarInstanceRepository.save(newCalendarInstance);
 
         return new CommandProcessingResultBuilder() //

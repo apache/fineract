@@ -13,19 +13,12 @@ public interface DepositsDropdownReadPlatformService {
 
     // fixed deposit product dropdowns
 
-    Collection<EnumOptionData> retrieveInterestFreePeriodFrequencyTypeOptions();
-
     Collection<EnumOptionData> retrievePreClosurePenalInterestOnTypeOptions();
 
-    // RECURRING deposit product dropdowns
-    Collection<EnumOptionData> retrieveRecurringDepositTypeOptions();
-
-    Collection<EnumOptionData> retrieveRecurringDepositFrequencyTypeOptions();
-
-    Collection<EnumOptionData> retrieveDepositTermTypeOptions();
+    /*Collection<EnumOptionData> retrieveDepositTermTypeOptions();
 
     Collection<EnumOptionData> retrieveInMultiplesOfDepositTermTypeOptions();
     
-    Collection<EnumOptionData> retrieveDepositPeriodFrequencyOptions();
+    Collection<EnumOptionData> retrieveDepositPeriodFrequencyOptions();*/
 
 }

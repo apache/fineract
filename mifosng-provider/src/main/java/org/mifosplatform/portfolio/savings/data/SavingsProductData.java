@@ -330,4 +330,15 @@ public class SavingsProductData {
     public int accountingRuleTypeId() {
         return this.accountingRule.getId().intValue();
     }
+    
+    @Override
+    public boolean equals(final Object obj) {
+        final SavingsProductData productData = (SavingsProductData) obj;
+        return productData.id.compareTo(this.id) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.hashCode();
+    }
 }

@@ -8,10 +8,15 @@ package org.mifosplatform.portfolio.calendar.domain;
 import java.util.Collection;
 import java.util.List;
 
+import org.mifosplatform.portfolio.group.domain.Group;
+import org.mifosplatform.portfolio.loanaccount.domain.Loan;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import ch.qos.logback.core.net.server.Client;
 
 public interface CalendarInstanceRepository extends JpaRepository<CalendarInstance, Long>, JpaSpecificationExecutor<CalendarInstance> {
 
@@ -19,6 +24,12 @@ public interface CalendarInstanceRepository extends JpaRepository<CalendarInstan
 
     Collection<CalendarInstance> findByEntityIdAndEntityTypeId(Long entityId, Integer entityTypeId);
 
+    /**
+     * @param entityId : Id of {@link Client}, {@link Group}, {@link Loan} or {@link SavingsAccount}.
+     * @param entityTypeId: {@link CalendarEntityType}
+     * @param calendarTypeId: {@link CalendarType}
+     * @return
+     */
     CalendarInstance findByEntityIdAndEntityTypeIdAndCalendarTypeId(Long entityId, Integer entityTypeId, Integer calendarTypeId);
 
     @Query("from CalendarInstance ci where ci.entityId = :loanId and ci.entityTypeId = :entityTypeId")

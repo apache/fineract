@@ -5,6 +5,9 @@
  */
 package org.mifosplatform.portfolio.common.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public enum PeriodFrequencyType {
     DAYS(0, "periodFrequencyType.days"), //
@@ -56,5 +59,20 @@ public enum PeriodFrequencyType {
 
     public boolean isYearly() {
         return this.value.equals(PeriodFrequencyType.MONTHS.getValue());
+    }
+    
+    public boolean isInvalid() {
+        return this.value.equals(PeriodFrequencyType.INVALID.getValue());
+    }
+    
+    public static Object[] integerValues() {
+        final List<Integer> values = new ArrayList<Integer>();
+        for (final PeriodFrequencyType enumType : values()) {
+            if (!enumType.isInvalid()) {
+                values.add(enumType.getValue());
+            }
+        }
+
+        return values.toArray();
     }
 }

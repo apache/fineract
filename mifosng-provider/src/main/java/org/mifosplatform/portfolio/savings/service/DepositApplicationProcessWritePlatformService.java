@@ -11,9 +11,13 @@ import org.mifosplatform.portfolio.savings.DepositAccountType;
 
 public interface DepositApplicationProcessWritePlatformService {
 
-    CommandProcessingResult submitApplication(JsonCommand command, DepositAccountType depositAccountType);
+    CommandProcessingResult submitFDApplication(JsonCommand command);
+    
+    CommandProcessingResult submitRDApplication(JsonCommand command);
 
-    CommandProcessingResult modifyApplication(Long accountId, JsonCommand command, DepositAccountType depositAccountType);
+    CommandProcessingResult modifyFDApplication(Long accountId, JsonCommand command);
+    
+    CommandProcessingResult modifyRDApplication(Long accountId, JsonCommand command);
 
     CommandProcessingResult deleteApplication(Long accountId, DepositAccountType depositAccountType);
 

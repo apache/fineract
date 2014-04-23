@@ -112,7 +112,7 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
             changes.putAll(accountingMappingChanges);
 
             if (!changes.isEmpty()) {
-                this.recurringDepositProductRepository.saveAndFlush(product);
+                this.recurringDepositProductRepository.save(product);
             }
 
             return new CommandProcessingResultBuilder() //

@@ -14,18 +14,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class PostInterestDepositAccountCommandHandler implements NewCommandSourceHandler {
+public class FixedDepositTransactionAdjustmentCommandHandler implements NewCommandSourceHandler {
 
     private final DepositAccountWritePlatformService depositAccountWritePlatformService;
 
     @Autowired
-    public PostInterestDepositAccountCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
+    public FixedDepositTransactionAdjustmentCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
         this.depositAccountWritePlatformService = depositAccountWritePlatformService;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.postInterest(command.entityId(), command.depositAccounttype());
+        final Long transactionId = Long.valueOf(command.getTransactionId());
+        return this.depositAccountWritePlatformService.adjustFDTransaction(command.entityId(), transactionId, command);
     }
 }

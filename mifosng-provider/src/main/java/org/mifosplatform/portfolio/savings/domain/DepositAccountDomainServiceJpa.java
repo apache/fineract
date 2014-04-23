@@ -26,14 +26,15 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
-import org.mifosplatform.portfolio.account.domain.AccountTransferDetailRepository;
-import org.mifosplatform.portfolio.account.domain.AccountTransferDetails;
-import org.mifosplatform.portfolio.account.domain.AccountTransferTransaction;
+import org.mifosplatform.portfolio.account.PortfolioAccountType;
+import org.mifosplatform.portfolio.account.data.AccountTransferDTO;
 import org.mifosplatform.portfolio.account.domain.AccountTransferType;
+import org.mifosplatform.portfolio.account.service.AccountTransfersWritePlatformService;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
+import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,26 +49,26 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
-    private final AccountTransferDetailRepository accountTransferDetailRepository;
     private final DepositAccountAssembler depositAccountAssembler;
     private final SavingsAccountDomainService savingsAccountDomainService;
+    private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
 
     @Autowired
     public DepositAccountDomainServiceJpa(final SavingsAccountRepositoryWrapper savingsAccountRepository,
             final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
-            final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
-            final AccountTransferDetailRepository accountTransferDetailRepository, final DepositAccountAssembler depositAccountAssembler,
-            final SavingsAccountDomainService savingsAccountDomainService) {
+            final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory, final DepositAccountAssembler depositAccountAssembler,
+            final SavingsAccountDomainService savingsAccountDomainService,
+            final AccountTransfersWritePlatformService accountTransfersWritePlatformService) {
         this.savingsAccountRepository = savingsAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
         this.accountIdentifierGeneratorFactory = accountIdentifierGeneratorFactory;
-        this.accountTransferDetailRepository = accountTransferDetailRepository;
         this.depositAccountAssembler = depositAccountAssembler;
         this.savingsAccountDomainService = savingsAccountDomainService;
+        this.accountTransfersWritePlatformService = accountTransfersWritePlatformService;
     }
 
     @Transactional
@@ -102,12 +103,36 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
 
     @Transactional
     @Override
-    public SavingsAccountTransaction handleDeposit(final SavingsAccount account, final DateTimeFormatter fmt,
+    public SavingsAccountTransaction handleFDDeposit(final FixedDepositAccount account, final DateTimeFormatter fmt,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail) {
+
+        return this.savingsAccountDomainService.handleDeposit(account, fmt, transactionDate, transactionAmount, paymentDetail);
+    }
+
+    @Transactional
+    @Override
+    public SavingsAccountTransaction handleRDDeposit(final RecurringDepositAccount account, final DateTimeFormatter fmt,
+            final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail) {
+
+        final MathContext mc = MathContext.DECIMAL64;
+        final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(account, fmt, transactionDate,
+                transactionAmount, paymentDetail);
+
+        account.handleScheduleInstallments(deposit);
+        account.updateMaturityDateAndAmount(mc);
+        account.updateOverduePayments(DateUtils.getLocalDateOfTenant());
+        return deposit;
+    }
+
+    @Transactional
+    @Override
+    public Long handleFDAccountClosure(final FixedDepositAccount account, final PaymentDetail paymentDetail, final AppUser user,
+            final JsonCommand command, final LocalDate tenantsTodayDate, final Map<String, Object> changes) {
 
         final Set<Long> existingTransactionIds = new HashSet<Long>();
         final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
+/*<<<<<<< HEAD
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
                 paymentDetail, new Date());
         final SavingsAccountTransaction deposit = account.deposit(transactionDTO);
@@ -119,108 +144,107 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         } else {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
             account.calculateInterestUsing(mc, today, isInterestTransfer);
+=======
+*/
+        final MathContext mc = MathContext.DECIMAL64;
+        final Locale locale = command.extractLocale();
+        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
+        Long savingsTransactionId = null;
+        account.postMaturityInterest();
+        if (account.isReinvestOnClosure()) {
+            FixedDepositAccount reinvestedDeposit = account.reInvest(account.getAccountBalance());
+            this.depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
+            reinvestedDeposit.updateMaturityDateAndAmountBeforeAccountActivation(mc);
+            this.savingsAccountRepository.save(reinvestedDeposit);
+            autoGenerateAccountNumber(reinvestedDeposit);
+            final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
+                    paymentDetail, false);
+            savingsTransactionId = withdrawal.getId();
+        } else if (account.isTransferToSavingsOnClosure()) {
+            final Long toSavingsId = command.longValueOfParameterNamed(toSavingsAccountIdParamName);
+            final String transferDescription = command.stringValueOfParameterNamed(transferDescriptionParamName);
+            final SavingsAccount toSavingsAccount = this.depositAccountAssembler.assembleFrom(toSavingsId,
+                    DepositAccountType.SAVINGS_DEPOSIT);
+
+            final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(closedDate, account.getAccountBalance(),
+                    PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, locale, fmt, null, null,
+                    null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account);
+            this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+        } else {
+            final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
+                    paymentDetail, false);
+            savingsTransactionId = withdrawal.getId();
         }
-
-        saveTransactionToGenerateTransactionId(deposit);
-
+        
+        account.close(user, command, tenantsTodayDate, changes);
         this.savingsAccountRepository.save(account);
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
 
-        return deposit;
+        return savingsTransactionId;
     }
 
     @Transactional
     @Override
-    public SavingsAccountTransaction handleAccountClosure(final SavingsAccount account, final PaymentDetail paymentDetail,
-            final AppUser user, final JsonCommand command, final LocalDate tenantsTodayDate, final Map<String, Object> changes) {
+    public Long handleRDAccountClosure(final RecurringDepositAccount account, final PaymentDetail paymentDetail, final AppUser user,
+            final JsonCommand command, final LocalDate tenantsTodayDate, final Map<String, Object> changes) {
 
         final Set<Long> existingTransactionIds = new HashSet<Long>();
         final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
 
-        final DepositAccountType depositAccountType = account.depositAccountType();
-        SavingsAccountTransaction withdrawal = null;
         final MathContext mc = MathContext.DECIMAL64;
-        if (depositAccountType.isFixedDeposit()) {
-            final FixedDepositAccount fdAccount = (FixedDepositAccount) account;
-            withdrawal = fdAccount.close(user, command, tenantsTodayDate, paymentDetail, changes);
-            final Money transactionAmount = withdrawal.getAmount(fdAccount.getCurrency());
-            final LocalDate transactionDate = withdrawal.transactionLocalDate();
-            if (fdAccount.isReinvestOnClosure()) {
-                FixedDepositAccount reinvestedDeposit = fdAccount.reInvest(transactionAmount);
-                fdAccount.updateMaturityDateAndAmountBeforeAccountActivation(mc);
-                this.savingsAccountRepository.save(reinvestedDeposit);
-                autoGenerateAccountNumber(reinvestedDeposit);
-            } else if (fdAccount.isTransferToSavingsOnClosure()) {
-                final Locale locale = command.extractLocale();
-                final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
-                final Long toSavingsId = command.longValueOfParameterNamed(toSavingsAccountIdParamName);
-                final String transferDescription = command.stringValueOfParameterNamed(transferDescriptionParamName);
-                final SavingsAccount toSavingsAccount = this.depositAccountAssembler.assembleFrom(toSavingsId,
-                        DepositAccountType.SAVINGS_DEPOSIT);
-                final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount, fmt,
-                        withdrawal.transactionLocalDate(), transactionAmount.getAmount(), null);
+        final Locale locale = command.extractLocale();
+        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
+        Long savingsTransactionId = null;
+        account.postMaturityInterest();
+        final BigDecimal transactionAmount = account.getAccountBalance();
+        if (account.isReinvestOnClosure()) {
+            RecurringDepositAccount reinvestedDeposit = account.reInvest(transactionAmount);
+            depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
+            reinvestedDeposit.updateMaturityDateAndAmount(mc);
+            reinvestedDeposit.processAccountUponActivation(fmt);
+            reinvestedDeposit.updateMaturityDateAndAmount(mc);
+            this.savingsAccountRepository.save(reinvestedDeposit);
 
-                final AccountTransferDetails accountTransferDetails = AccountTransferDetails.savingsToSavingsTransfer(fdAccount.office(),
-                        fdAccount.getClient(), fdAccount, toSavingsAccount.office(), toSavingsAccount.getClient(), toSavingsAccount,
-                        AccountTransferType.ACCOUNT_TRANSFER.getValue());
-                AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.savingsToSavingsTransfer(
-                        accountTransferDetails, withdrawal, deposit, transactionDate, transactionAmount, transferDescription);
-
-                accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
-
-                this.accountTransferDetailRepository.save(accountTransferDetails);
+            Money amountForDeposit = reinvestedDeposit.activateWithBalance();
+            if (amountForDeposit.isGreaterThanZero()) {
+                handleRDDeposit(reinvestedDeposit, fmt, reinvestedDeposit.getActivationLocalDate(), amountForDeposit.getAmount(),
+                        paymentDetail);
             }
-        } else if (depositAccountType.isRecurringDeposit()) {
-            final RecurringDepositAccount rdAccount = (RecurringDepositAccount) account;
-            withdrawal = rdAccount.close(user, command, tenantsTodayDate, paymentDetail, changes);
-            final Money transactionAmount = withdrawal.getAmount(rdAccount.getCurrency());
-            final LocalDate transactionDate = withdrawal.transactionLocalDate();
-            if (rdAccount.isReinvestOnClosure()) {
-                RecurringDepositAccount reinvestedDeposit = rdAccount.reInvest(transactionAmount);
-                depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
-                final Locale locale = command.extractLocale();
-                final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
-                final LocalDate transactionStartDate = reinvestedDeposit.getActivationLocalDate();
-                final LocalDate nextTransactionStartDate = reinvestedDeposit.nextDepositDate(transactionStartDate);
-                reinvestedDeposit.updateMaturityDateAndAmount(mc, nextTransactionStartDate);
-                this.savingsAccountRepository.save(reinvestedDeposit);
-                Money amountForDeposit = reinvestedDeposit.activateWithBalance();
-                if (amountForDeposit.isGreaterThanZero()) {
-                    handleDeposit(reinvestedDeposit, fmt, reinvestedDeposit.getActivationLocalDate(), amountForDeposit.getAmount(), null);
-                }
-                reinvestedDeposit.updateMaturityDateAndAmount(mc, nextTransactionStartDate);
+            reinvestedDeposit.updateMaturityDateAndAmount(mc);
+            this.savingsAccountRepository.save(reinvestedDeposit);
+            autoGenerateAccountNumber(reinvestedDeposit);
 
-                this.savingsAccountRepository.save(reinvestedDeposit);
-                autoGenerateAccountNumber(reinvestedDeposit);
-            } else if (rdAccount.isTransferToSavingsOnClosure()) {
-                final Locale locale = command.extractLocale();
-                final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
-                final Long toSavingsId = command.longValueOfParameterNamed(toSavingsAccountIdParamName);
-                final String transferDescription = command.stringValueOfParameterNamed(transferDescriptionParamName);
-                final SavingsAccount toSavingsAccount = this.depositAccountAssembler.assembleFrom(toSavingsId,
-                        DepositAccountType.SAVINGS_DEPOSIT);
-                final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount, fmt,
-                        withdrawal.transactionLocalDate(), transactionAmount.getAmount(), null);
+            final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
+                    paymentDetail, false);
+            savingsTransactionId = withdrawal.getId();
 
-                final AccountTransferDetails accountTransferDetails = AccountTransferDetails.savingsToSavingsTransfer(rdAccount.office(),
-                        rdAccount.getClient(), rdAccount, toSavingsAccount.office(), toSavingsAccount.getClient(), toSavingsAccount,
-                        AccountTransferType.ACCOUNT_TRANSFER.getValue());
-                AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.savingsToSavingsTransfer(
-                        accountTransferDetails, withdrawal, deposit, transactionDate, transactionAmount, transferDescription);
+        } else if (account.isTransferToSavingsOnClosure()) {
+            final Long toSavingsId = command.longValueOfParameterNamed(toSavingsAccountIdParamName);
+            final String transferDescription = command.stringValueOfParameterNamed(transferDescriptionParamName);
+            final SavingsAccount toSavingsAccount = this.depositAccountAssembler.assembleFrom(toSavingsId,
+                    DepositAccountType.SAVINGS_DEPOSIT);
 
-                accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
-
-                this.accountTransferDetailRepository.save(accountTransferDetails);
-            }
+            final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(closedDate, transactionAmount,
+                    PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, locale, fmt, null, null,
+                    null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account);
+            this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+        } else {
+            final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
+                    paymentDetail, false);
+            savingsTransactionId = withdrawal.getId();
         }
+
+        account.close(user, command, tenantsTodayDate, changes);
 
         this.savingsAccountRepository.save(account);
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
 
-        return withdrawal;
+        return savingsTransactionId;
     }
 
     private void autoGenerateAccountNumber(final SavingsAccount account) {
@@ -234,75 +258,79 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
 
     @Transactional
     @Override
-    public SavingsAccountTransaction handleAccountPreMatureClosure(final SavingsAccount account, final PaymentDetail paymentDetail,
+    public Long handleFDAccountPreMatureClosure(final FixedDepositAccount account, final PaymentDetail paymentDetail, final AppUser user,
+            final JsonCommand command, final LocalDate tenantsTodayDate, final Map<String, Object> changes) {
+
+        final Set<Long> existingTransactionIds = new HashSet<Long>();
+        final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
+        updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
+
+        final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
+        final Locale locale = command.extractLocale();
+        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        Long savingsTransactionId = null;
+        // post interest
+        account.postPreMaturityInterest(closedDate);
+
+        if (account.isTransferToSavingsOnClosure()) {
+
+            final Long toSavingsId = command.longValueOfParameterNamed(toSavingsAccountIdParamName);
+            final String transferDescription = command.stringValueOfParameterNamed(transferDescriptionParamName);
+            final SavingsAccount toSavingsAccount = this.depositAccountAssembler.assembleFrom(toSavingsId,
+                    DepositAccountType.SAVINGS_DEPOSIT);
+            final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(closedDate, account.getAccountBalance(),
+                    PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, locale, fmt, null, null,
+                    null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account);
+            this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+        } else {
+            final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
+                    paymentDetail, false);
+            savingsTransactionId = withdrawal.getId();
+        }
+
+        account.prematureClosure(user, command, tenantsTodayDate, changes);
+
+        this.savingsAccountRepository.save(account);
+
+        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
+        return savingsTransactionId;
+    }
+
+    @Transactional
+    @Override
+    public Long handleRDAccountPreMatureClosure(final RecurringDepositAccount account, final PaymentDetail paymentDetail,
             final AppUser user, final JsonCommand command, final LocalDate tenantsTodayDate, final Map<String, Object> changes) {
 
         final Set<Long> existingTransactionIds = new HashSet<Long>();
         final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
 
-        final DepositAccountType depositAccountType = account.depositAccountType();
-        SavingsAccountTransaction withdrawal = null;
-        if (depositAccountType.isFixedDeposit()) {
-            final FixedDepositAccount fdAccount = (FixedDepositAccount) account;
-            withdrawal = fdAccount.prematureClosure(user, command, tenantsTodayDate, paymentDetail, changes);
-            final Money transactionAmount = withdrawal.getAmount(fdAccount.getCurrency());
-            final LocalDate transactionDate = withdrawal.transactionLocalDate();
-            if (fdAccount.isTransferToSavingsOnClosure()) {
-                final Locale locale = command.extractLocale();
-                final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
-                final Long toSavingsId = command.longValueOfParameterNamed(toSavingsAccountIdParamName);
-                final String transferDescription = command.stringValueOfParameterNamed(transferDescriptionParamName);
-                final SavingsAccount toSavingsAccount = this.depositAccountAssembler.assembleFrom(toSavingsId,
-                        DepositAccountType.SAVINGS_DEPOSIT);
-                final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount, fmt,
-                        withdrawal.transactionLocalDate(), transactionAmount.getAmount(), null);
+        final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
+        final Locale locale = command.extractLocale();
+        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        Long savingsTransactionId = null;
+        // post interest
+        account.postPreMaturityInterest(closedDate);
 
-                final AccountTransferDetails accountTransferDetails = AccountTransferDetails.savingsToSavingsTransfer(fdAccount.office(),
-                        fdAccount.getClient(), fdAccount, toSavingsAccount.office(), toSavingsAccount.getClient(), toSavingsAccount,
-                        AccountTransferType.ACCOUNT_TRANSFER.getValue());
-                AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.savingsToSavingsTransfer(
-                        accountTransferDetails, withdrawal, deposit, transactionDate, transactionAmount, transferDescription);
-
-                accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
-
-                this.accountTransferDetailRepository.save(accountTransferDetails);
-            }
-        } else if (depositAccountType.isRecurringDeposit()) {
-            final RecurringDepositAccount rdAccount = (RecurringDepositAccount) account;
-            withdrawal = rdAccount.prematureClosure(user, command, tenantsTodayDate, paymentDetail, changes);
-            final Money transactionAmount = withdrawal.getAmount(rdAccount.getCurrency());
-            final LocalDate transactionDate = withdrawal.transactionLocalDate();
-            if (rdAccount.isTransferToSavingsOnClosure()) {
-                final Locale locale = command.extractLocale();
-                final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
-                final Long toSavingsId = command.longValueOfParameterNamed(toSavingsAccountIdParamName);
-                final String transferDescription = command.stringValueOfParameterNamed(transferDescriptionParamName);
-                final SavingsAccount toSavingsAccount = this.depositAccountAssembler.assembleFrom(toSavingsId,
-                        DepositAccountType.SAVINGS_DEPOSIT);
-                final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount, fmt,
-                        transactionDate, transactionAmount.getAmount(), null);
-
-                final AccountTransferDetails accountTransferDetails = AccountTransferDetails.savingsToSavingsTransfer(rdAccount.office(),
-                        rdAccount.getClient(), rdAccount, toSavingsAccount.office(), toSavingsAccount.getClient(), toSavingsAccount,
-                        AccountTransferType.ACCOUNT_TRANSFER.getValue());
-                AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.savingsToSavingsTransfer(
-                        accountTransferDetails, withdrawal, deposit, transactionDate, transactionAmount, transferDescription);
-
-                accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
-
-                this.accountTransferDetailRepository.save(accountTransferDetails);
-            }
-        }
-        if (withdrawal != null) {
-            saveTransactionToGenerateTransactionId(withdrawal);
+        if (account.isTransferToSavingsOnClosure()) {
+            final Long toSavingsId = command.longValueOfParameterNamed(toSavingsAccountIdParamName);
+            final String transferDescription = command.stringValueOfParameterNamed(transferDescriptionParamName);
+            final SavingsAccount toSavingsAccount = this.depositAccountAssembler.assembleFrom(toSavingsId,
+                    DepositAccountType.SAVINGS_DEPOSIT);
+            final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(closedDate, account.getAccountBalance(),
+                    PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, locale, fmt, null, null,
+                    null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account);
+            this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+        } else {
+            final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
+                    paymentDetail, false);
+            savingsTransactionId = withdrawal.getId();
         }
 
+        account.prematureClosure(user, command, tenantsTodayDate, changes);
         this.savingsAccountRepository.save(account);
-
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
-
-        return withdrawal;
+        return savingsTransactionId;
     }
 
     private Long saveTransactionToGenerateTransactionId(final SavingsAccountTransaction transaction) {

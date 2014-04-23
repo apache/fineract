@@ -47,13 +47,6 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
         this.chartDropdownReadPlatformService = chartDropdownReadPlatformService;
     }
 
-    /*
-     * @Override public Collection<InterestRateChartData> retrieveAll(Long
-     * productId) {
-     * 
-     * // TODO return null; }
-     */
-
     @Override
     public InterestRateChartData retrieveOne(Long chartId) {
         try {
@@ -64,14 +57,6 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
             throw new InterestRateChartNotFoundException(chartId);
         }
     }
-
-    /*
-     * @Override public Collection<InterestRateChartData>
-     * retrieveAllWithSlabs() { this.context.authenticatedUser(); final String
-     * sql = "select " + this.chartExtractor.schema() +
-     * " order by irc.id, ircd.id "; return this.jdbcTemplate.query(sql,
-     * this.chartExtractor); }
-     */
 
     @Override
     public Collection<InterestRateChartData> retrieveAllWithSlabs(Long productId) {
@@ -143,6 +128,8 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
                     .append("ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, ")
                     .append("ircd.from_period as ircdFromPeriod, ircd.to_period as ircdToPeriod, ircd.amount_range_from as ircdAmountRangeFrom, ")
                     .append("ircd.amount_range_to as ircdAmountRangeTo, ircd.annual_interest_rate as ircdAnnualInterestRate, ")
+                    .append("ircd.interest_rate_for_female as ircdInterestRateForFemale, ircd.interest_rate_for_children as ircdInterestRateForChildren, ")
+                    .append("ircd.interest_rate_for_senior_citizen as ircdInterestRateForSeniorCitizen, ")
                     .append("curr.code as currencyCode, curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ")
                     .append("curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf, ")
                     .append("sp.id as savingsProductId, sp.name as savingsProductName ")
@@ -198,7 +185,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
             sqlBuilder.append("irc.id as ircId, irc.name as ircName, irc.description as ircDescription, ")
-                    .append("irc.from_date as ircFromDate, irc.end_date as ircEndDate, irc.is_active_chart as isActiveChart, ")
+                    .append("irc.from_date as ircFromDate, irc.end_date as ircEndDate, ")
                     .append("sp.id as savingsProductId, sp.name as savingsProductName ").append("from ")
                     .append("m_interest_rate_chart irc ")
                     .append("left join m_deposit_product_interest_rate_chart dpirc on irc.id=dpirc.interest_rate_chart_id ")
@@ -213,10 +200,10 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
             final String description = rs.getString("ircDescription");
             final LocalDate fromDate = JdbcSupport.getLocalDate(rs, "ircFromDate");
             final LocalDate endDate = JdbcSupport.getLocalDate(rs, "ircEndDate");
-            final Long savingsProductId = rs.getLong("savingsProductId");
+            final Long savingsProductId = JdbcSupport.getLongDefaultToNullIfZero(rs, "savingsProductId");
             final String savingsProductName = rs.getString("savingsProductName");
 
-            return InterestRateChartData.instance(id, name, description, fromDate, endDate, savingsProductId, savingsProductName, null);
+            return InterestRateChartData.instance(id, name, description, fromDate, endDate, savingsProductId, savingsProductName);
         }
 
     }
@@ -237,6 +224,8 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
                     .append("ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, ")
                     .append("ircd.from_period as ircdFromPeriod, ircd.to_period as ircdToPeriod, ircd.amount_range_from as ircdAmountRangeFrom, ")
                     .append("ircd.amount_range_to as ircdAmountRangeTo, ircd.annual_interest_rate as ircdAnnualInterestRate, ")
+                    .append("ircd.interest_rate_for_female as ircdInterestRateForFemale, ircd.interest_rate_for_children as ircdInterestRateForChildren, ")
+                    .append("ircd.interest_rate_for_senior_citizen as ircdInterestRateForSeniorCitizen, ")
                     .append("curr.code as currencyCode, curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ")
                     .append("curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf ")
                     .append("from ").append("m_interest_rate_slab ircd ")
@@ -259,6 +248,9 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
             final BigDecimal amountRangeFrom = rs.getBigDecimal("ircdAmountRangeFrom");
             final BigDecimal amountRangeTo = rs.getBigDecimal("ircdAmountRangeTo");
             final BigDecimal annualInterestRate = rs.getBigDecimal("ircdAnnualInterestRate");
+            final BigDecimal interestRateForFemale = rs.getBigDecimal("ircdInterestRateForFemale");
+            final BigDecimal interestRateForChildren = rs.getBigDecimal("ircdInterestRateForChildren");
+            final BigDecimal interestRateForSeniorCitizen = rs.getBigDecimal("ircdInterestRateForSeniorCitizen");
 
             // currency Slabs
             final String currencyCode = rs.getString("currencyCode");
@@ -272,7 +264,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
                     currencyDisplaySymbol, currencyNameCode);
 
             return InterestRateChartSlabData.instance(id, description, periodType, fromPeriod, toPeriod, amountRangeFrom, amountRangeTo,
-                    annualInterestRate, currency);
+                    annualInterestRate, interestRateForFemale, interestRateForChildren, interestRateForSeniorCitizen, currency);
         }
 
     }

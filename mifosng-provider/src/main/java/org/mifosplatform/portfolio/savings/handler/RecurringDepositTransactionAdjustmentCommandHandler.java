@@ -8,25 +8,25 @@ package org.mifosplatform.portfolio.savings.handler;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.portfolio.savings.service.DepositApplicationProcessWritePlatformService;
+import org.mifosplatform.portfolio.savings.service.DepositAccountWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class DepositAccountApplicationApprovalUndoCommandHandler implements NewCommandSourceHandler {
+public class RecurringDepositTransactionAdjustmentCommandHandler implements NewCommandSourceHandler {
 
-    private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
+    private final DepositAccountWritePlatformService depositAccountWritePlatformService;
 
     @Autowired
-    public DepositAccountApplicationApprovalUndoCommandHandler(
-            final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
+    public RecurringDepositTransactionAdjustmentCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
         this.depositAccountWritePlatformService = depositAccountWritePlatformService;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.undoApplicationApproval(command.entityId(), command, command.depositAccounttype());
+        final Long transactionId = Long.valueOf(command.getTransactionId());
+        return this.depositAccountWritePlatformService.adjustRDTransaction(command.entityId(), transactionId, command);
     }
 }

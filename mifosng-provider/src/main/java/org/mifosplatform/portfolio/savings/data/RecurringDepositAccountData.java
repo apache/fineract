@@ -25,73 +25,65 @@ import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 public class RecurringDepositAccountData extends DepositAccountData {
 
     // additional fields
-    private boolean interestFreePeriodApplicable;
-    private Integer interestFreeFromPeriod;
-    private Integer interestFreeToPeriod;
-    private EnumOptionData interestFreePeriodFrequencyType;
-    private boolean preClosurePenalApplicable;
-    private BigDecimal preClosurePenalInterest;
-    private EnumOptionData preClosurePenalInterestOnType;
-    private Integer minDepositTerm;
-    private Integer maxDepositTerm;
-    private EnumOptionData minDepositTermType;
-    private EnumOptionData maxDepositTermType;
-    private Integer inMultiplesOfDepositTerm;
-    private EnumOptionData inMultiplesOfDepositTermType;
-    private BigDecimal depositAmount;
-    private BigDecimal maturityAmount;
-    private LocalDate maturityDate;
-    private Integer depositPeriod;
-    private EnumOptionData depositPeriodFrequency;
-    private BigDecimal recurringDepositAmount;
-    private EnumOptionData recurringDepositType;
-    private Integer recurringDepositFrequency;
-    private EnumOptionData recurringDepositFrequencyType;
-    private LocalDate expectedFirstDepositOnDate;
+    private final boolean preClosurePenalApplicable;
+    private final BigDecimal preClosurePenalInterest;
+    private final EnumOptionData preClosurePenalInterestOnType;
+    private final Integer minDepositTerm;
+    private final Integer maxDepositTerm;
+    private final EnumOptionData minDepositTermType;
+    private final EnumOptionData maxDepositTermType;
+    private final Integer inMultiplesOfDepositTerm;
+    private final EnumOptionData inMultiplesOfDepositTermType;
+    private final BigDecimal depositAmount;
+    private final BigDecimal maturityAmount;
+    private final LocalDate maturityDate;
+    private final Integer depositPeriod;
+    private final EnumOptionData depositPeriodFrequency;
+    private final BigDecimal mandatoryRecommendedDepositAmount;
+    private final BigDecimal totalOverdueAmount;
+    private final Integer noOfOverdueInstallments;
+    private final boolean isMandatoryDeposit;
+    private final boolean allowWithdrawal;
+    private final boolean adjustAdvanceTowardsFuturePayments;
+    private final LocalDate expectedFirstDepositOnDate;
+    private final boolean isCalendarInherited;
+    private final Integer recurringFrequency;
+    private final EnumOptionData recurringFrequencyType;
 
     // used for account close
-    private EnumOptionData onAccountClosure;
+    private final EnumOptionData onAccountClosure;
 
-    private Collection<EnumOptionData> interestFreePeriodTypeOptions;
-    private Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions;
-    private Collection<EnumOptionData> recurringDepositTypeOptions;
-    private Collection<EnumOptionData> recurringDepositFrequencyTypeOptions;
-    private Collection<EnumOptionData> depositTermTypeOptions;
-    private Collection<EnumOptionData> inMultiplesOfDepositTermTypeOptions;
-    private Collection<EnumOptionData> depositPeriodFrequencyOptions;
-    private Collection<SavingsAccountData> savingsAccounts;
+    private final Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions;
+    private final Collection<EnumOptionData> periodFrequencyTypeOptions;
+    private final Collection<SavingsAccountData> savingsAccounts;
 
     // for account close
-    private Collection<EnumOptionData> onAccountClosureOptions;
-    private Collection<CodeValueData> paymentTypeOptions;
+    private final Collection<EnumOptionData> onAccountClosureOptions;
+    private final Collection<CodeValueData> paymentTypeOptions;
 
     public static RecurringDepositAccountData instance(final DepositAccountData depositAccountData,
-            final boolean interestFreePeriodApplicable, final Integer interestFreeFromPeriod, final Integer interestFreeToPeriod,
-            final EnumOptionData interestFreePeriodFrequencyType, final boolean preClosurePenalApplicable,
-            final BigDecimal preClosurePenalInterest, final EnumOptionData preClosurePenalInterestOnType, final Integer minDepositTerm,
-            final Integer maxDepositTerm, final EnumOptionData minDepositTermType, final EnumOptionData maxDepositTermType,
-            final Integer inMultiplesOfDepositTerm, final EnumOptionData inMultiplesOfDepositTermType, final BigDecimal depositAmount,
-            final BigDecimal maturityAmount, final LocalDate maturityDate, final Integer depositPeriod,
-            final EnumOptionData depositPeriodFrequency, final BigDecimal recurringDepositAmount,
-            final EnumOptionData recurringDepositType, final Integer recurringDepositFrequency,
-            final EnumOptionData recurringDepositFrequencyType, final EnumOptionData onAccountClosure,
-            final LocalDate expectedFirstDepositOnDate) {
+            final boolean preClosurePenalApplicable, final BigDecimal preClosurePenalInterest,
+            final EnumOptionData preClosurePenalInterestOnType, final Integer minDepositTerm, final Integer maxDepositTerm,
+            final EnumOptionData minDepositTermType, final EnumOptionData maxDepositTermType, final Integer inMultiplesOfDepositTerm,
+            final EnumOptionData inMultiplesOfDepositTermType, final BigDecimal depositAmount, final BigDecimal maturityAmount,
+            final LocalDate maturityDate, final Integer depositPeriod, final EnumOptionData depositPeriodFrequency,
+            final BigDecimal mandatoryRecommendedDepositAmount, final EnumOptionData onAccountClosure,
+            final LocalDate expectedFirstDepositOnDate, final BigDecimal totalOverdueAmount, final Integer noOfOverdueInstallments,
+            final boolean isMandatoryDeposit, final boolean allowWithdrawal, final boolean adjustAdvanceTowardsFuturePayments, final boolean isCalendarInherited) {
 
-        final Collection<EnumOptionData> interestFreePeriodTypeOptions = null;
         final Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions = null;
-        final Collection<EnumOptionData> depositTermTypeOptions = null;
-        final Collection<EnumOptionData> inMultiplesOfDepositTermTypeOptions = null;
-        final Collection<EnumOptionData> recurringDepositTypeOptions = null;
-        final Collection<EnumOptionData> recurringDepositFrequencyTypeOptions = null;
-        final Collection<EnumOptionData> depositPeriodFrequencyOptions = null;
+        final Collection<EnumOptionData> periodFrequencyTypeOptions = null;
+
         final EnumOptionData depositType = SavingsEnumerations.depositType(DepositAccountType.FIXED_DEPOSIT.getValue());
         final Collection<EnumOptionData> onAccountClosureOptions = null;
         final Collection<CodeValueData> paymentTypeOptions = null;
         final Collection<SavingsAccountData> savingsAccountDatas = null;
+        final Integer recurringFrequency = null;
+        final EnumOptionData recurringFrequencyType = null;
 
         return new RecurringDepositAccountData(depositAccountData.id, depositAccountData.accountNo, depositAccountData.externalId,
                 depositAccountData.groupId, depositAccountData.groupName, depositAccountData.clientId, depositAccountData.clientName,
-                depositAccountData.savingsProductId, depositAccountData.savingsProductName, depositAccountData.fieldOfficerId,
+                depositAccountData.depositProductId, depositAccountData.depositProductName, depositAccountData.fieldOfficerId,
                 depositAccountData.fieldOfficerName, depositAccountData.status, depositAccountData.timeline, depositAccountData.currency,
                 depositAccountData.nominalAnnualInterestRate, depositAccountData.interestCompoundingPeriodType,
                 depositAccountData.interestPostingPeriodType, depositAccountData.interestCalculationType,
@@ -103,20 +95,18 @@ public class RecurringDepositAccountData extends DepositAccountData {
                 depositAccountData.interestCalculationTypeOptions, depositAccountData.interestCalculationDaysInYearTypeOptions,
                 depositAccountData.lockinPeriodFrequencyTypeOptions, depositAccountData.withdrawalFeeTypeOptions,
                 depositAccountData.charges, depositAccountData.chargeOptions, depositAccountData.accountChart,
-                depositAccountData.chartTemplate, interestFreePeriodApplicable, interestFreeFromPeriod, interestFreeToPeriod,
-                interestFreePeriodFrequencyType, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnType,
-                interestFreePeriodTypeOptions, preClosurePenalInterestOnTypeOptions, minDepositTerm, maxDepositTerm, minDepositTermType,
-                maxDepositTermType, inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate,
-                depositPeriod, depositPeriodFrequency, recurringDepositAmount, depositTermTypeOptions, inMultiplesOfDepositTermTypeOptions,
-                recurringDepositType, recurringDepositFrequency, recurringDepositFrequencyType, recurringDepositTypeOptions,
-                recurringDepositFrequencyTypeOptions, depositPeriodFrequencyOptions, depositType, onAccountClosure,
-                onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas, expectedFirstDepositOnDate);
+                depositAccountData.chartTemplate, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnType,
+                preClosurePenalInterestOnTypeOptions, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
+                inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
+                depositPeriodFrequency, mandatoryRecommendedDepositAmount, periodFrequencyTypeOptions, depositType, onAccountClosure,
+                onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas, expectedFirstDepositOnDate, totalOverdueAmount,
+                noOfOverdueInstallments, isMandatoryDeposit, allowWithdrawal, adjustAdvanceTowardsFuturePayments, isCalendarInherited, recurringFrequency, recurringFrequencyType);
     }
 
-    public static RecurringDepositAccountData withInterestChart(final RecurringDepositAccountData account,
-            final DepositAccountInterestRateChartData accountChart) {
+    public static RecurringDepositAccountData withInterestChartAndRecurringDetails(final RecurringDepositAccountData account,
+            final DepositAccountInterestRateChartData accountChart, final Integer recurringFrequency, final EnumOptionData recurringFrequencyType) {
         return new RecurringDepositAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
-                account.clientId, account.clientName, account.savingsProductId, account.savingsProductName, account.fieldOfficerId,
+                account.clientId, account.clientName, account.depositProductId, account.depositProductName, account.fieldOfficerId,
                 account.fieldOfficerName, account.status, account.timeline, account.currency, account.nominalAnnualInterestRate,
                 account.interestCompoundingPeriodType, account.interestPostingPeriodType, account.interestCalculationType,
                 account.interestCalculationDaysInYearType, account.minRequiredOpeningBalance, account.lockinPeriodFrequency,
@@ -125,17 +115,15 @@ public class RecurringDepositAccountData extends DepositAccountData {
                 account.interestPostingPeriodTypeOptions, account.interestCalculationTypeOptions,
                 account.interestCalculationDaysInYearTypeOptions, account.lockinPeriodFrequencyTypeOptions,
                 account.withdrawalFeeTypeOptions, account.charges, account.chargeOptions, accountChart, account.chartTemplate,
-                account.interestFreePeriodApplicable, account.interestFreeFromPeriod, account.interestFreeToPeriod,
-                account.interestFreePeriodFrequencyType, account.preClosurePenalApplicable, account.preClosurePenalInterest,
-                account.preClosurePenalInterestOnType, account.interestFreePeriodTypeOptions, account.preClosurePenalInterestOnTypeOptions,
-                account.minDepositTerm, account.maxDepositTerm, account.minDepositTermType, account.maxDepositTermType,
-                account.inMultiplesOfDepositTerm, account.inMultiplesOfDepositTermType, account.depositAmount, account.maturityAmount,
-                account.maturityDate, account.depositPeriod, account.depositPeriodFrequency, account.recurringDepositAmount,
-                account.depositTermTypeOptions, account.inMultiplesOfDepositTermTypeOptions, account.recurringDepositType,
-                account.recurringDepositFrequency, account.recurringDepositFrequencyType, account.recurringDepositTypeOptions,
-                account.recurringDepositFrequencyTypeOptions, account.depositPeriodFrequencyOptions, account.depositType,
+                account.preClosurePenalApplicable, account.preClosurePenalInterest, account.preClosurePenalInterestOnType,
+                account.preClosurePenalInterestOnTypeOptions, account.minDepositTerm, account.maxDepositTerm, account.minDepositTermType,
+                account.maxDepositTermType, account.inMultiplesOfDepositTerm, account.inMultiplesOfDepositTermType, account.depositAmount,
+                account.maturityAmount, account.maturityDate, account.depositPeriod, account.depositPeriodFrequency,
+                account.mandatoryRecommendedDepositAmount, account.periodFrequencyTypeOptions, account.depositType,
                 account.onAccountClosure, account.onAccountClosureOptions, account.paymentTypeOptions, account.savingsAccounts,
-                account.expectedFirstDepositOnDate);
+                account.expectedFirstDepositOnDate, account.totalOverdueAmount, account.noOfOverdueInstallments,
+                account.isMandatoryDeposit, account.allowWithdrawal, account.adjustAdvanceTowardsFuturePayments,
+                account.isCalendarInherited, recurringFrequency, recurringFrequencyType);
     }
 
     public static RecurringDepositAccountData withTemplateOptions(final RecurringDepositAccountData account,
@@ -153,24 +141,17 @@ public class RecurringDepositAccountData extends DepositAccountData {
             final Collection<EnumOptionData> withdrawalFeeTypeOptions = null;
             final Collection<ChargeData> chargeOptions = null;
 
-            final Collection<EnumOptionData> interestFreePeriodTypeOptions = null;
             final Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions = null;
-            final Collection<EnumOptionData> depositTermTypeOptions = null;
-            final Collection<EnumOptionData> inMultiplesOfDepositTermTypeOptions = null;
-            final Collection<EnumOptionData> recurringDepositTypeOptions = null;
-            final Collection<EnumOptionData> recurringDepositFrequencyTypeOptions = null;
-            final Collection<EnumOptionData> depositPeriodFrequencyOptions = null;
+            final Collection<EnumOptionData> periodFrequencyTypeOptions = null;
 
             return withTemplateOptions(account, productOptions, fieldOfficerOptions, interestCompoundingPeriodTypeOptions,
                     interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                     lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, transactions, charges, chargeOptions,
-                    interestFreePeriodTypeOptions, preClosurePenalInterestOnTypeOptions, depositTermTypeOptions,
-                    inMultiplesOfDepositTermTypeOptions, recurringDepositTypeOptions, recurringDepositFrequencyTypeOptions,
-                    depositPeriodFrequencyOptions);
+                    preClosurePenalInterestOnTypeOptions, periodFrequencyTypeOptions);
         }
 
         return new RecurringDepositAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
-                account.clientId, account.clientName, account.savingsProductId, account.savingsProductName, account.fieldOfficerId,
+                account.clientId, account.clientName, account.depositProductId, account.depositProductName, account.fieldOfficerId,
                 account.fieldOfficerName, account.status, account.timeline, account.currency, account.nominalAnnualInterestRate,
                 account.interestCompoundingPeriodType, account.interestPostingPeriodType, account.interestCalculationType,
                 account.interestCalculationDaysInYearType, account.minRequiredOpeningBalance, account.lockinPeriodFrequency,
@@ -179,17 +160,15 @@ public class RecurringDepositAccountData extends DepositAccountData {
                 template.interestPostingPeriodTypeOptions, template.interestCalculationTypeOptions,
                 template.interestCalculationDaysInYearTypeOptions, template.lockinPeriodFrequencyTypeOptions,
                 template.withdrawalFeeTypeOptions, charges, template.chargeOptions, account.accountChart, account.chartTemplate,
-                account.interestFreePeriodApplicable, account.interestFreeFromPeriod, account.interestFreeToPeriod,
-                account.interestFreePeriodFrequencyType, account.preClosurePenalApplicable, account.preClosurePenalInterest,
-                account.preClosurePenalInterestOnType, template.interestFreePeriodTypeOptions,
+                account.preClosurePenalApplicable, account.preClosurePenalInterest, account.preClosurePenalInterestOnType,
                 template.preClosurePenalInterestOnTypeOptions, account.minDepositTerm, account.maxDepositTerm, account.minDepositTermType,
                 account.maxDepositTermType, account.inMultiplesOfDepositTerm, account.inMultiplesOfDepositTermType, account.depositAmount,
                 account.maturityAmount, account.maturityDate, account.depositPeriod, account.depositPeriodFrequency,
-                account.recurringDepositAmount, template.depositTermTypeOptions, template.inMultiplesOfDepositTermTypeOptions,
-                account.recurringDepositType, account.recurringDepositFrequency, account.recurringDepositFrequencyType,
-                template.recurringDepositTypeOptions, template.recurringDepositFrequencyTypeOptions,
-                template.depositPeriodFrequencyOptions, account.depositType, account.onAccountClosure, account.onAccountClosureOptions,
-                account.paymentTypeOptions, account.savingsAccounts, account.expectedFirstDepositOnDate);
+                account.mandatoryRecommendedDepositAmount, template.periodFrequencyTypeOptions, account.depositType,
+                account.onAccountClosure, account.onAccountClosureOptions, account.paymentTypeOptions, account.savingsAccounts,
+                account.expectedFirstDepositOnDate, account.totalOverdueAmount, account.noOfOverdueInstallments,
+                account.isMandatoryDeposit, account.allowWithdrawal, account.adjustAdvanceTowardsFuturePayments,
+                account.isCalendarInherited, account.recurringFrequency, account.recurringFrequencyType);
 
     }
 
@@ -201,15 +180,11 @@ public class RecurringDepositAccountData extends DepositAccountData {
             final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
             final Collection<SavingsAccountTransactionData> transactions, final Collection<SavingsAccountChargeData> charges,
-            final Collection<ChargeData> chargeOptions, final Collection<EnumOptionData> interestFreePeriodTypeOptions,
-            final Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions, final Collection<EnumOptionData> depositTermTypeOptions,
-            final Collection<EnumOptionData> inMultiplesOfDepositTermTypeOptions,
-            final Collection<EnumOptionData> recurringDepositTypeOptions,
-            final Collection<EnumOptionData> recurringDepositFrequencyTypeOptions,
-            final Collection<EnumOptionData> depositPeriodFrequencyOptions) {
+            final Collection<ChargeData> chargeOptions, final Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions,
+            final Collection<EnumOptionData> periodFrequencyTypeOptions) {
 
         return new RecurringDepositAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
-                account.clientId, account.clientName, account.savingsProductId, account.savingsProductName, account.fieldOfficerId,
+                account.clientId, account.clientName, account.depositProductId, account.depositProductName, account.fieldOfficerId,
                 account.fieldOfficerName, account.status, account.timeline, account.currency, account.nominalAnnualInterestRate,
                 account.interestCompoundingPeriodType, account.interestPostingPeriodType, account.interestCalculationType,
                 account.interestCalculationDaysInYearType, account.minRequiredOpeningBalance, account.lockinPeriodFrequency,
@@ -217,16 +192,15 @@ public class RecurringDepositAccountData extends DepositAccountData {
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
                 withdrawalFeeTypeOptions, charges, chargeOptions, account.accountChart, account.chartTemplate,
-                account.interestFreePeriodApplicable, account.interestFreeFromPeriod, account.interestFreeToPeriod,
-                account.interestFreePeriodFrequencyType, account.preClosurePenalApplicable, account.preClosurePenalInterest,
-                account.preClosurePenalInterestOnType, interestFreePeriodTypeOptions, preClosurePenalInterestOnTypeOptions,
-                account.minDepositTerm, account.maxDepositTerm, account.minDepositTermType, account.maxDepositTermType,
-                account.inMultiplesOfDepositTerm, account.inMultiplesOfDepositTermType, account.depositAmount, account.maturityAmount,
-                account.maturityDate, account.depositPeriod, account.depositPeriodFrequency, account.recurringDepositAmount,
-                depositTermTypeOptions, inMultiplesOfDepositTermTypeOptions, account.recurringDepositType,
-                account.recurringDepositFrequency, account.recurringDepositFrequencyType, recurringDepositTypeOptions,
-                recurringDepositFrequencyTypeOptions, depositPeriodFrequencyOptions, account.depositType, account.onAccountClosure,
-                account.onAccountClosureOptions, account.paymentTypeOptions, account.savingsAccounts, account.expectedFirstDepositOnDate);
+                account.preClosurePenalApplicable, account.preClosurePenalInterest, account.preClosurePenalInterestOnType,
+                preClosurePenalInterestOnTypeOptions, account.minDepositTerm, account.maxDepositTerm, account.minDepositTermType,
+                account.maxDepositTermType, account.inMultiplesOfDepositTerm, account.inMultiplesOfDepositTermType, account.depositAmount,
+                account.maturityAmount, account.maturityDate, account.depositPeriod, account.depositPeriodFrequency,
+                account.mandatoryRecommendedDepositAmount, periodFrequencyTypeOptions, account.depositType, account.onAccountClosure,
+                account.onAccountClosureOptions, account.paymentTypeOptions, account.savingsAccounts, account.expectedFirstDepositOnDate,
+                account.totalOverdueAmount, account.noOfOverdueInstallments, account.isMandatoryDeposit, account.allowWithdrawal,
+                account.adjustAdvanceTowardsFuturePayments, account.isCalendarInherited, account.recurringFrequency,
+                account.recurringFrequencyType);
     }
 
     public static RecurringDepositAccountData withClientTemplate(final Long clientId, final String clientName, final Long groupId,
@@ -268,10 +242,6 @@ public class RecurringDepositAccountData extends DepositAccountData {
 
         final DepositAccountInterestRateChartData accountChart = null;
         final DepositAccountInterestRateChartData chartTemplate = null;
-        final boolean interestFreePeriodApplicable = false;
-        final Integer interestFreeFromPeriod = null;
-        final Integer interestFreeToPeriod = null;
-        final EnumOptionData interestFreePeriodFrequencyType = null;
         final boolean preClosurePenalApplicable = false;
         final BigDecimal preClosurePenalInterest = null;
         final EnumOptionData preClosurePenalInterestOnType = null;
@@ -286,25 +256,27 @@ public class RecurringDepositAccountData extends DepositAccountData {
         final LocalDate maturityDate = null;
         final Integer depositPeriod = null;
         final EnumOptionData depositPeriodFrequency = null;
-        final BigDecimal recurringDepositAmount = null;
+        final BigDecimal mandatoryRecommendedDepositAmount = null;
         final EnumOptionData onAccountClosure = null;
 
-        final Collection<EnumOptionData> interestFreePeriodTypeOptions = null;
         final Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions = null;
-        final Collection<EnumOptionData> depositTermTypeOptions = null;
-        final Collection<EnumOptionData> inMultiplesOfDepositTermTypeOptions = null;
+        final Collection<EnumOptionData> periodFrequencyTypeOptions = null;
 
-        final EnumOptionData recurringDepositType = null;
-        final Integer recurringDepositFrequency = null;
-        final EnumOptionData recurringDepositFrequencyType = null;
-        final Collection<EnumOptionData> recurringDepositTypeOptions = null;
-        final Collection<EnumOptionData> recurringDepositFrequencyTypeOptions = null;
-        final Collection<EnumOptionData> depositPeriodFrequencyOptions = null;
         final EnumOptionData depositType = SavingsEnumerations.depositType(DepositAccountType.RECURRING_DEPOSIT.getValue());
         final Collection<EnumOptionData> onAccountClosureOptions = null;
         final Collection<CodeValueData> paymentTypeOptions = null;
         final Collection<SavingsAccountData> savingsAccountDatas = null;
         final LocalDate expectedFirstDepositOnDate = null;
+
+        final BigDecimal totalOverdueAmount = null;
+        final Integer noOfOverdueInstallments = null;
+        final boolean isMandatoryDeposit = false;
+        final boolean allowWithdrawal = false;
+        final boolean adjustAdvanceTowardsFuturePayments = false;
+
+        final boolean isCalendarInherited = false;
+        final Integer recurringFrequency = null;
+        final EnumOptionData recurringFrequencyType = null;
 
         return new RecurringDepositAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                 fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestPeriodType,
@@ -312,19 +284,18 @@ public class RecurringDepositAccountData extends DepositAccountData {
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, transactions, productOptions,
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
-                withdrawalFeeTypeOptions, charges, chargeOptions, accountChart, chartTemplate, interestFreePeriodApplicable,
-                interestFreeFromPeriod, interestFreeToPeriod, interestFreePeriodFrequencyType, preClosurePenalApplicable,
-                preClosurePenalInterest, preClosurePenalInterestOnType, interestFreePeriodTypeOptions,
-                preClosurePenalInterestOnTypeOptions, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
-                inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
-                depositPeriodFrequency, recurringDepositAmount, depositTermTypeOptions, inMultiplesOfDepositTermTypeOptions,
-                recurringDepositType, recurringDepositFrequency, recurringDepositFrequencyType, recurringDepositTypeOptions,
-                recurringDepositFrequencyTypeOptions, depositPeriodFrequencyOptions, depositType, onAccountClosure,
-                onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas, expectedFirstDepositOnDate);
+                withdrawalFeeTypeOptions, charges, chargeOptions, accountChart, chartTemplate, preClosurePenalApplicable,
+                preClosurePenalInterest, preClosurePenalInterestOnType, preClosurePenalInterestOnTypeOptions, minDepositTerm,
+                maxDepositTerm, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTerm, inMultiplesOfDepositTermType,
+                depositAmount, maturityAmount, maturityDate, depositPeriod, depositPeriodFrequency, mandatoryRecommendedDepositAmount,
+                periodFrequencyTypeOptions, depositType, onAccountClosure, onAccountClosureOptions, paymentTypeOptions,
+                savingsAccountDatas, expectedFirstDepositOnDate, totalOverdueAmount, noOfOverdueInstallments, isMandatoryDeposit,
+                allowWithdrawal, adjustAdvanceTowardsFuturePayments, isCalendarInherited, recurringFrequency, recurringFrequencyType);
     }
 
-    public static RecurringDepositAccountData preClosureDetails(final Long accountId, BigDecimal maturityAmount,
-            final Collection<EnumOptionData> onAccountClosureOptions, final Collection<CodeValueData> paymentTypeOptions, final Collection<SavingsAccountData> savingsAccountDatas) {
+    public static RecurringDepositAccountData preClosureDetails(final Long accountId, final BigDecimal maturityAmount,
+            final Collection<EnumOptionData> onAccountClosureOptions, final Collection<CodeValueData> paymentTypeOptions,
+            final Collection<SavingsAccountData> savingsAccountDatas) {
 
         final String accountNo = null;
         final String externalId = null;
@@ -361,10 +332,6 @@ public class RecurringDepositAccountData extends DepositAccountData {
 
         final DepositAccountInterestRateChartData accountChart = null;
         final DepositAccountInterestRateChartData chartTemplate = null;
-        final boolean interestFreePeriodApplicable = false;
-        final Integer interestFreeFromPeriod = null;
-        final Integer interestFreeToPeriod = null;
-        final EnumOptionData interestFreePeriodFrequencyType = null;
         final boolean preClosurePenalApplicable = false;
         final BigDecimal preClosurePenalInterest = null;
         final EnumOptionData preClosurePenalInterestOnType = null;
@@ -378,20 +345,10 @@ public class RecurringDepositAccountData extends DepositAccountData {
         final LocalDate maturityDate = null;
         final Integer depositPeriod = null;
         final EnumOptionData depositPeriodFrequency = null;
-        final BigDecimal recurringDepositAmount = null;
+        final BigDecimal mandatoryRecommendedDepositAmount = null;
         final EnumOptionData onAccountClosure = null;
-
-        final Collection<EnumOptionData> interestFreePeriodTypeOptions = null;
         final Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions = null;
-        final Collection<EnumOptionData> depositTermTypeOptions = null;
-        final Collection<EnumOptionData> inMultiplesOfDepositTermTypeOptions = null;
-
-        final EnumOptionData recurringDepositType = null;
-        final Integer recurringDepositFrequency = null;
-        final EnumOptionData recurringDepositFrequencyType = null;
-        final Collection<EnumOptionData> recurringDepositTypeOptions = null;
-        final Collection<EnumOptionData> recurringDepositFrequencyTypeOptions = null;
-        final Collection<EnumOptionData> depositPeriodFrequencyOptions = null;
+        final Collection<EnumOptionData> periodFrequencyTypeOptions = null;
         final EnumOptionData depositType = SavingsEnumerations.depositType(DepositAccountType.RECURRING_DEPOSIT.getValue());
 
         final Long groupId = null;
@@ -400,28 +357,36 @@ public class RecurringDepositAccountData extends DepositAccountData {
         final String clientName = null;
         final LocalDate expectedFirstDepositOnDate = null;
 
+        final BigDecimal totalOverdueAmount = null;
+        final Integer noOfOverdueInstallments = null;
+        final boolean isMandatoryDeposit = false;
+        final boolean allowWithdrawal = false;
+        final boolean adjustAdvanceTowardsFuturePayments = false;
+        final boolean isCalendarInherited = false;
+        final Integer recurringFrequency = null;
+        final EnumOptionData recurringFrequencyType = null;
+
         return new RecurringDepositAccountData(accountId, accountNo, externalId, groupId, groupName, clientId, clientName, productId,
                 productName, fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, transactions, productOptions,
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
-                withdrawalFeeTypeOptions, charges, chargeOptions, accountChart, chartTemplate, interestFreePeriodApplicable,
-                interestFreeFromPeriod, interestFreeToPeriod, interestFreePeriodFrequencyType, preClosurePenalApplicable,
-                preClosurePenalInterest, preClosurePenalInterestOnType, interestFreePeriodTypeOptions,
-                preClosurePenalInterestOnTypeOptions, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
-                inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
-                depositPeriodFrequency, recurringDepositAmount, depositTermTypeOptions, inMultiplesOfDepositTermTypeOptions,
-                recurringDepositType, recurringDepositFrequency, recurringDepositFrequencyType, recurringDepositTypeOptions,
-                recurringDepositFrequencyTypeOptions, depositPeriodFrequencyOptions, depositType, onAccountClosure,
-                onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas, expectedFirstDepositOnDate);
+                withdrawalFeeTypeOptions, charges, chargeOptions, accountChart, chartTemplate, preClosurePenalApplicable,
+                preClosurePenalInterest, preClosurePenalInterestOnType, preClosurePenalInterestOnTypeOptions, minDepositTerm,
+                maxDepositTerm, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTerm, inMultiplesOfDepositTermType,
+                depositAmount, maturityAmount, maturityDate, depositPeriod, depositPeriodFrequency, mandatoryRecommendedDepositAmount,
+                periodFrequencyTypeOptions, depositType, onAccountClosure, onAccountClosureOptions, paymentTypeOptions,
+                savingsAccountDatas, expectedFirstDepositOnDate, totalOverdueAmount, noOfOverdueInstallments, isMandatoryDeposit,
+                allowWithdrawal, adjustAdvanceTowardsFuturePayments, isCalendarInherited, recurringFrequency, recurringFrequencyType);
     }
 
     public static RecurringDepositAccountData withClosureTemplateDetails(final RecurringDepositAccountData account,
-            final Collection<EnumOptionData> onAccountClosureOptions, final Collection<CodeValueData> paymentTypeOptions, final Collection<SavingsAccountData> savingsAccountDatas) {
+            final Collection<EnumOptionData> onAccountClosureOptions, final Collection<CodeValueData> paymentTypeOptions,
+            final Collection<SavingsAccountData> savingsAccountDatas) {
 
         return new RecurringDepositAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
-                account.clientId, account.clientName, account.savingsProductId, account.savingsProductName, account.fieldOfficerId,
+                account.clientId, account.clientName, account.depositProductId, account.depositProductName, account.fieldOfficerId,
                 account.fieldOfficerName, account.status, account.timeline, account.currency, account.nominalAnnualInterestRate,
                 account.interestCompoundingPeriodType, account.interestPostingPeriodType, account.interestCalculationType,
                 account.interestCalculationDaysInYearType, account.minRequiredOpeningBalance, account.lockinPeriodFrequency,
@@ -430,17 +395,15 @@ public class RecurringDepositAccountData extends DepositAccountData {
                 account.interestPostingPeriodTypeOptions, account.interestCalculationTypeOptions,
                 account.interestCalculationDaysInYearTypeOptions, account.lockinPeriodFrequencyTypeOptions,
                 account.withdrawalFeeTypeOptions, account.charges, account.chargeOptions, account.accountChart, account.chartTemplate,
-                account.interestFreePeriodApplicable, account.interestFreeFromPeriod, account.interestFreeToPeriod,
-                account.interestFreePeriodFrequencyType, account.preClosurePenalApplicable, account.preClosurePenalInterest,
-                account.preClosurePenalInterestOnType, account.interestFreePeriodTypeOptions, account.preClosurePenalInterestOnTypeOptions,
-                account.minDepositTerm, account.maxDepositTerm, account.minDepositTermType, account.maxDepositTermType,
-                account.inMultiplesOfDepositTerm, account.inMultiplesOfDepositTermType, account.depositAmount, account.maturityAmount,
-                account.maturityDate, account.depositPeriod, account.depositPeriodFrequency, account.recurringDepositAmount,
-                account.depositTermTypeOptions, account.inMultiplesOfDepositTermTypeOptions, account.recurringDepositType,
-                account.recurringDepositFrequency, account.recurringDepositFrequencyType, account.recurringDepositTypeOptions,
-                account.recurringDepositFrequencyTypeOptions, account.depositPeriodFrequencyOptions, account.depositType,
+                account.preClosurePenalApplicable, account.preClosurePenalInterest, account.preClosurePenalInterestOnType,
+                account.preClosurePenalInterestOnTypeOptions, account.minDepositTerm, account.maxDepositTerm, account.minDepositTermType,
+                account.maxDepositTermType, account.inMultiplesOfDepositTerm, account.inMultiplesOfDepositTermType, account.depositAmount,
+                account.maturityAmount, account.maturityDate, account.depositPeriod, account.depositPeriodFrequency,
+                account.mandatoryRecommendedDepositAmount, account.periodFrequencyTypeOptions, account.depositType,
                 account.onAccountClosure, onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas,
-                account.expectedFirstDepositOnDate);
+                account.expectedFirstDepositOnDate, account.totalOverdueAmount, account.noOfOverdueInstallments,
+                account.isMandatoryDeposit, account.allowWithdrawal, account.adjustAdvanceTowardsFuturePayments,
+                account.isCalendarInherited, account.recurringFrequency, account.recurringFrequencyType);
     }
 
     private RecurringDepositAccountData(final Long id, final String accountNo, final String externalId, final Long groupId,
@@ -460,23 +423,19 @@ public class RecurringDepositAccountData extends DepositAccountData {
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
             final Collection<SavingsAccountChargeData> charges, final Collection<ChargeData> chargeOptions,
             final DepositAccountInterestRateChartData accountChart, final DepositAccountInterestRateChartData chartTemplate,
-            final boolean interestFreePeriodApplicable, final Integer interestFreeFromPeriod, final Integer interestFreeToPeriod,
-            final EnumOptionData interestFreePeriodFrequencyType, final boolean preClosurePenalApplicable,
-            final BigDecimal preClosurePenalInterest, final EnumOptionData preClosurePenalInterestOnType,
-            final Collection<EnumOptionData> interestFreePeriodTypeOptions,
-            final Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions, final Integer minDepositTerm,
-            final Integer maxDepositTerm, final EnumOptionData minDepositTermType, final EnumOptionData maxDepositTermType,
-            final Integer inMultiplesOfDepositTerm, final EnumOptionData inMultiplesOfDepositTermType, final BigDecimal depositAmount,
-            final BigDecimal maturityAmount, final LocalDate maturityDate, final Integer depositPeriod,
-            final EnumOptionData depositPeriodFrequency, final BigDecimal recurringDepositAmount,
-            final Collection<EnumOptionData> depositTermTypeOptions, Collection<EnumOptionData> inMultiplesOfDepositTermTypeOptions,
-            final EnumOptionData recurringDepositType, final Integer recurringDepositFrequency,
-            final EnumOptionData recurringDepositFrequencyType, final Collection<EnumOptionData> recurringDepositTypeOptions,
-            final Collection<EnumOptionData> recurringDepositFrequencyTypeOptions,
-            final Collection<EnumOptionData> depositPeriodFrequencyOptions, final EnumOptionData depositType,
-            final EnumOptionData onAccountClosure, final Collection<EnumOptionData> onAccountClosureOptions,
-            final Collection<CodeValueData> paymentTypeOptions, final Collection<SavingsAccountData> savingsAccountDatas,
-            final LocalDate expectedFirstDepositOnDate) {
+            final boolean preClosurePenalApplicable, final BigDecimal preClosurePenalInterest,
+            final EnumOptionData preClosurePenalInterestOnType, final Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions,
+            final Integer minDepositTerm, final Integer maxDepositTerm, final EnumOptionData minDepositTermType,
+            final EnumOptionData maxDepositTermType, final Integer inMultiplesOfDepositTerm,
+            final EnumOptionData inMultiplesOfDepositTermType, final BigDecimal depositAmount, final BigDecimal maturityAmount,
+            final LocalDate maturityDate, final Integer depositPeriod, final EnumOptionData depositPeriodFrequency,
+            final BigDecimal mandatoryRecommendedDepositAmount, final Collection<EnumOptionData> periodFrequencyTypeOptions,
+            final EnumOptionData depositType, final EnumOptionData onAccountClosure,
+            final Collection<EnumOptionData> onAccountClosureOptions, final Collection<CodeValueData> paymentTypeOptions,
+            final Collection<SavingsAccountData> savingsAccountDatas, final LocalDate expectedFirstDepositOnDate,
+            final BigDecimal totalOverdueAmount, final Integer noOfOverdueInstallments, final boolean isMandatoryDeposit,
+            final boolean allowWithdrawal, final boolean adjustAdvanceTowardsFuturePayments, final boolean isCalendarInherited,
+            final Integer recurringFrequency, final EnumOptionData recurringFrequencyType) {
 
         super(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName, fieldofficerId,
                 fieldofficerName, status, timeline, currency, nominalAnnualInterestRate, interestPeriodType, interestPostingPeriodType,
@@ -486,10 +445,6 @@ public class RecurringDepositAccountData extends DepositAccountData {
                 interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, charges,
                 chargeOptions, accountChart, chartTemplate, depositType);
 
-        this.interestFreePeriodApplicable = interestFreePeriodApplicable;
-        this.interestFreeFromPeriod = interestFreeFromPeriod;
-        this.interestFreeToPeriod = interestFreeToPeriod;
-        this.interestFreePeriodFrequencyType = interestFreePeriodFrequencyType;
         this.preClosurePenalApplicable = preClosurePenalApplicable;
         this.preClosurePenalInterest = preClosurePenalInterest;
         this.preClosurePenalInterestOnType = preClosurePenalInterestOnType;
@@ -504,20 +459,20 @@ public class RecurringDepositAccountData extends DepositAccountData {
         this.maturityDate = maturityDate;
         this.depositPeriod = depositPeriod;
         this.depositPeriodFrequency = depositPeriodFrequency;
-        this.recurringDepositAmount = recurringDepositAmount;
-        this.recurringDepositFrequencyType = recurringDepositFrequencyType;
-        this.recurringDepositFrequency = recurringDepositFrequency;
-        this.recurringDepositType = recurringDepositType;
         this.expectedFirstDepositOnDate = expectedFirstDepositOnDate;
+        this.mandatoryRecommendedDepositAmount = mandatoryRecommendedDepositAmount;
+        this.totalOverdueAmount = totalOverdueAmount;
+        this.noOfOverdueInstallments = noOfOverdueInstallments;
+        this.isMandatoryDeposit = isMandatoryDeposit;
+        this.allowWithdrawal = allowWithdrawal;
+        this.adjustAdvanceTowardsFuturePayments = adjustAdvanceTowardsFuturePayments;
 
-        // template data
-        this.interestFreePeriodTypeOptions = interestFreePeriodTypeOptions;
+        this.isCalendarInherited = isCalendarInherited;
+        this.recurringFrequency = recurringFrequency;
+        this.recurringFrequencyType = recurringFrequencyType;
+
         this.preClosurePenalInterestOnTypeOptions = preClosurePenalInterestOnTypeOptions;
-        this.recurringDepositTypeOptions = recurringDepositTypeOptions;
-        this.recurringDepositFrequencyTypeOptions = recurringDepositFrequencyTypeOptions;
-        this.depositTermTypeOptions = depositTermTypeOptions;
-        this.inMultiplesOfDepositTermTypeOptions = inMultiplesOfDepositTermTypeOptions;
-        this.depositPeriodFrequencyOptions = depositPeriodFrequencyOptions;
+        this.periodFrequencyTypeOptions = periodFrequencyTypeOptions;
         this.onAccountClosure = onAccountClosure;
         this.savingsAccounts = savingsAccountDatas;
 

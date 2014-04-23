@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.calendar.domain;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.springframework.util.StringUtils;
 
 public enum CalendarFrequencyType {
@@ -83,5 +84,45 @@ public enum CalendarFrequencyType {
 
     public boolean isInvalid() {
         return this.value.equals(CalendarFrequencyType.INVALID.value);
+    }
+
+    /** To convert from period frequency type tp calendar frequency type.
+     * This method requires code refactoring.
+     * @param periodFrequencyType
+     * @return
+     */
+    public static CalendarFrequencyType from(final PeriodFrequencyType periodFrequencyType) {
+        switch (periodFrequencyType) {
+            case DAYS:
+                return CalendarFrequencyType.DAILY;
+            case WEEKS:
+                return CalendarFrequencyType.WEEKLY;
+            case MONTHS:
+                return CalendarFrequencyType.MONTHLY;
+            case YEARS:
+                return CalendarFrequencyType.YEARLY;
+            default:
+                return CalendarFrequencyType.INVALID;
+        }
+    }
+    
+    /** To convert from period frequency type tp calendar frequency type.
+     * This method requires code refactoring.
+     * @param frequencyType
+     * @return
+     */
+    public static PeriodFrequencyType from(final CalendarFrequencyType frequencyType) {
+        switch (frequencyType) {
+            case DAILY:
+                return PeriodFrequencyType.DAYS;
+            case WEEKLY:
+                return PeriodFrequencyType.WEEKS;
+            case MONTHLY:
+                return PeriodFrequencyType.MONTHS;
+            case YEARLY:
+                return PeriodFrequencyType.YEARS;
+            default:
+                return PeriodFrequencyType.INVALID;
+        }
     }
 }

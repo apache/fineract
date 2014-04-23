@@ -34,4 +34,8 @@ public interface ConfigurationDomainService {
     Long retrievePasswordLiveTime();
 
     Long retrieveGraceOnPenaltyPostingPeriod();
+    
+    Long ageLimitForSeniorCitizen();
+    
+    Long ageLimitForChildren();
 }

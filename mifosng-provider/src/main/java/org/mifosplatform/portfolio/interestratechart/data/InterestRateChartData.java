@@ -22,8 +22,8 @@ public class InterestRateChartData {
     private final String description;
     private final LocalDate fromDate;
     private final LocalDate endDate;
-    private final Long savingsProductId;
-    private final String savingsProductName;
+    private final Long productId;
+    private final String productName;
 
     // associations
     private Set<InterestRateChartSlabData> chartSlabs;
@@ -32,8 +32,9 @@ public class InterestRateChartData {
     private Collection<EnumOptionData> periodTypes;
 
     public static InterestRateChartData instance(Long id, String name, String description, LocalDate fromDate, LocalDate endDate,
-            Long savingsProductId, String savingsProductName, Set<InterestRateChartSlabData> chartSlabs) {
+            Long savingsProductId, String savingsProductName) {
         Collection<EnumOptionData> periodTypes = null;
+        Set<InterestRateChartSlabData> chartSlabs = null;
         return new InterestRateChartData(id, name, description, fromDate, endDate, savingsProductId, savingsProductName, chartSlabs,
                 periodTypes);
     }
@@ -41,14 +42,14 @@ public class InterestRateChartData {
     public static InterestRateChartData withSlabs(InterestRateChartData interestRateChartData,
             Set<InterestRateChartSlabData> chartSlabs) {
         return new InterestRateChartData(interestRateChartData.id, interestRateChartData.name, interestRateChartData.description,
-                interestRateChartData.fromDate, interestRateChartData.endDate, interestRateChartData.savingsProductId,
-                interestRateChartData.savingsProductName, chartSlabs, interestRateChartData.periodTypes);
+                interestRateChartData.fromDate, interestRateChartData.endDate, interestRateChartData.productId,
+                interestRateChartData.productName, chartSlabs, interestRateChartData.periodTypes);
     }
 
     public static InterestRateChartData withTemplate(InterestRateChartData interestRateChartData, Collection<EnumOptionData> periodTypes) {
         return new InterestRateChartData(interestRateChartData.id, interestRateChartData.name, interestRateChartData.description,
-                interestRateChartData.fromDate, interestRateChartData.endDate, interestRateChartData.savingsProductId,
-                interestRateChartData.savingsProductName, interestRateChartData.chartSlabs, periodTypes);
+                interestRateChartData.fromDate, interestRateChartData.endDate, interestRateChartData.productId,
+                interestRateChartData.productName, interestRateChartData.chartSlabs, periodTypes);
     }
 
     public static InterestRateChartData template(Collection<EnumOptionData> periodTypes) {
@@ -73,8 +74,8 @@ public class InterestRateChartData {
         this.fromDate = fromDate;
         this.endDate = endDate;
         this.chartSlabs = chartSlabs;
-        this.savingsProductId = savingsProductId;
-        this.savingsProductName = savingsProductName;
+        this.productId = savingsProductId;
+        this.productName = savingsProductName;
         this.periodTypes = periodTypes;
     }
 

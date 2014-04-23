@@ -8,25 +8,25 @@ package org.mifosplatform.portfolio.savings.handler;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.portfolio.savings.service.DepositApplicationProcessWritePlatformService;
+import org.mifosplatform.portfolio.savings.DepositAccountType;
+import org.mifosplatform.portfolio.savings.service.DepositAccountWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class DepositAccountApplicationModificationCommandHandler implements NewCommandSourceHandler {
+public class PostInterestFixedDepositAccountCommandHandler implements NewCommandSourceHandler {
 
-    private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
+    private final DepositAccountWritePlatformService depositAccountWritePlatformService;
 
     @Autowired
-    public DepositAccountApplicationModificationCommandHandler(
-            final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
+    public PostInterestFixedDepositAccountCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
         this.depositAccountWritePlatformService = depositAccountWritePlatformService;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.modifyApplication(command.entityId(), command, command.depositAccounttype());
+        return this.depositAccountWritePlatformService.postInterest(command.entityId(), DepositAccountType.FIXED_DEPOSIT);
     }
 }

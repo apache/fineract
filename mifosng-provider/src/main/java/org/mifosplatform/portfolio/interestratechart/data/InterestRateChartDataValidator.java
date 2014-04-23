@@ -14,7 +14,7 @@ import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApi
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.fromDateParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.idParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.nameParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.savingsProductIdParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.productIdParamName;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -112,9 +112,9 @@ public class InterestRateChartDataValidator {
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        if (this.fromApiJsonHelper.parameterExists(savingsProductIdParamName, element)) {
-            final Long savingsProductId = this.fromApiJsonHelper.extractLongNamed(savingsProductIdParamName, element);
-            baseDataValidator.reset().parameter(savingsProductIdParamName).value(savingsProductId).notNull().integerGreaterThanZero();
+        if (this.fromApiJsonHelper.parameterExists(productIdParamName, element)) {
+            final Long savingsProductId = this.fromApiJsonHelper.extractLongNamed(productIdParamName, element);
+            baseDataValidator.reset().parameter(productIdParamName).value(savingsProductId).notNull().integerGreaterThanZero();
         }
 
         if (this.fromApiJsonHelper.parameterExists(nameParamName, element)) {

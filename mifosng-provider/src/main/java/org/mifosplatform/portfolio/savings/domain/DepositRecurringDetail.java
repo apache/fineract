@@ -5,9 +5,9 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositFrequencyParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositFrequencyTypeIdParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositTypeIdParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.adjustAdvanceTowardsFuturePaymentsParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.allowWithdrawalParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.isMandatoryDepositParamName;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,10 +16,6 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
-import org.mifosplatform.portfolio.savings.RecurringDepositType;
-import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
-import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 
 /**
  * DepositRecurringDetail encapsulates all the details of a
@@ -29,77 +25,68 @@ import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 @Embeddable
 public class DepositRecurringDetail {
 
-    @Column(name = "recurring_deposit_type_enum", nullable = true)
-    private Integer recurringDepositType;
+    @Column(name = "is_mandatory", nullable = true)
+    private boolean isMandatoryDeposit;
 
-    @Column(name = "recurring_deposit_frequency", nullable = true)
-    private Integer recurringDepositFrequency;
+    @Column(name = "allow_withdrawal", nullable = true)
+    private boolean allowWithdrawal;
 
-    @Column(name = "recurring_deposit_frequency_type_enum", nullable = true)
-    private Integer recurringDepositFrequencyType;
-
-    public static DepositRecurringDetail createFrom(final RecurringDepositType recurringDepositType,
-            final Integer recurringDepositFrequency, final SavingsPeriodFrequencyType recurringDepositFrequencyType) {
-
-        return new DepositRecurringDetail(recurringDepositType, recurringDepositFrequency, recurringDepositFrequencyType);
-    }
+    @Column(name = "adjust_advance_towards_future_payments", nullable = true)
+    private boolean adjustAdvanceTowardsFuturePayments;
 
     protected DepositRecurringDetail() {
         //
     }
 
-    private DepositRecurringDetail(final RecurringDepositType recurringDepositType, final Integer recurringDepositFrequency,
-            final SavingsPeriodFrequencyType recurringDepositFrequencyType) {
-        this.recurringDepositFrequency = recurringDepositFrequency;
-        this.recurringDepositFrequencyType = recurringDepositFrequencyType.getValue();
-        this.recurringDepositType = recurringDepositType.getValue();
+    public static DepositRecurringDetail createFrom(final boolean isMandatoryDeposit, boolean allowWithdrawal,
+            boolean adjustAdvanceTowardsFuturePayments) {
+
+        return new DepositRecurringDetail(isMandatoryDeposit, allowWithdrawal, adjustAdvanceTowardsFuturePayments);
     }
 
-    public Map<String, Object> update(final JsonCommand command, @SuppressWarnings("unused") final DataValidatorBuilder baseDataValidator) {
+    private DepositRecurringDetail(final boolean isMandatoryDeposit, boolean allowWithdrawal, boolean adjustAdvanceTowardsFuturePayments) {
+        this.isMandatoryDeposit = isMandatoryDeposit;
+        this.allowWithdrawal = allowWithdrawal;
+        this.adjustAdvanceTowardsFuturePayments = adjustAdvanceTowardsFuturePayments;
+    }
+
+    public Map<String, Object> update(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(10);
 
-        if (command.isChangeInIntegerParameterNamed(recurringDepositFrequencyParamName, this.recurringDepositFrequency)) {
-            final Integer newValue = command.integerValueOfParameterNamed(recurringDepositFrequencyParamName);
-            actualChanges.put(recurringDepositFrequencyParamName, newValue);
-            this.recurringDepositFrequency = newValue;
+        if (command.isChangeInBooleanParameterNamed(isMandatoryDepositParamName, this.isMandatoryDeposit)) {
+            final boolean newValue = command.booleanObjectValueOfParameterNamed(isMandatoryDepositParamName);
+            actualChanges.put(isMandatoryDepositParamName, newValue);
+            this.isMandatoryDeposit = newValue;
         }
 
-        if (command.isChangeInIntegerParameterNamed(recurringDepositFrequencyTypeIdParamName, this.recurringDepositFrequencyType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(recurringDepositFrequencyTypeIdParamName);
-            actualChanges.put(recurringDepositFrequencyTypeIdParamName, SavingsEnumerations.recurringDepositFrequencyType(newValue));
-            this.recurringDepositFrequencyType = newValue;
+        if (command.isChangeInBooleanParameterNamed(allowWithdrawalParamName, this.allowWithdrawal)) {
+            final boolean newValue = command.booleanObjectValueOfParameterNamed(allowWithdrawalParamName);
+            actualChanges.put(allowWithdrawalParamName, newValue);
+            this.allowWithdrawal = newValue;
         }
-
-        if (command.isChangeInIntegerParameterNamed(recurringDepositTypeIdParamName, this.recurringDepositType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(recurringDepositTypeIdParamName);
-            actualChanges.put(recurringDepositTypeIdParamName, SavingsEnumerations.recurringDepositType(newValue));
-            this.recurringDepositType = newValue;
+        
+        if (command.isChangeInBooleanParameterNamed(adjustAdvanceTowardsFuturePaymentsParamName, this.adjustAdvanceTowardsFuturePayments)) {
+            final boolean newValue = command.booleanObjectValueOfParameterNamed(adjustAdvanceTowardsFuturePaymentsParamName);
+            actualChanges.put(adjustAdvanceTowardsFuturePaymentsParamName, newValue);
+            this.adjustAdvanceTowardsFuturePayments = newValue;
         }
 
         return actualChanges;
     }
-
-    public Integer recurringDepositType() {
-        return this.recurringDepositType;
+    
+    public boolean isMandatoryDeposit() {
+        return this.isMandatoryDeposit;
     }
-
-    public Integer recurringDepositFrequency() {
-        return this.recurringDepositFrequency;
+    
+    public boolean allowWithdrawal() {
+        return this.allowWithdrawal;
     }
-
-    public Integer recurringDepositFrequencyTypeId() {
-        return this.recurringDepositFrequencyType;
-    }
-
-    public SavingsPeriodFrequencyType recurringDepositFrequencyType() {
-        return SavingsPeriodFrequencyType.fromInt(this.recurringDepositFrequencyType);
+    
+    public boolean adjustAdvanceTowardsFuturePayments() {
+        return this.adjustAdvanceTowardsFuturePayments;
     }
 
     public DepositRecurringDetail copy() {
-        final RecurringDepositType recurringDepositType = RecurringDepositType.fromInt(this.recurringDepositType);
-        final Integer recurringDepositFrequency = this.recurringDepositFrequency;
-        final SavingsPeriodFrequencyType recurringDepositFrequencyType = SavingsPeriodFrequencyType
-                .fromInt(this.recurringDepositFrequencyType);
-        return DepositRecurringDetail.createFrom(recurringDepositType, recurringDepositFrequency, recurringDepositFrequencyType);
+        return DepositRecurringDetail.createFrom(this.isMandatoryDeposit, this.allowWithdrawal, this.adjustAdvanceTowardsFuturePayments);
     }
 }
