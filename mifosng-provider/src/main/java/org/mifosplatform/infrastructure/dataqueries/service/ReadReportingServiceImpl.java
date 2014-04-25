@@ -29,8 +29,10 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.data.ReportData;
 import org.mifosplatform.infrastructure.dataqueries.data.ReportParameterData;
@@ -323,7 +325,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
              */
             for (final ParameterDefinitionEntry paramDefEntry : paramsDefinition.getParameterDefinitions()) {
                 final String paramName = paramDefEntry.getName();
-                if (!((paramName.equals("tenantdb")) || (paramName.equals("userhierarchy")))) {
+                if (!((paramName.equals("tenantUrl")) || (paramName.equals("userhierarchy") || (paramName.equals("username")) || (paramName
+                        .equals("password"))))) {
                     logger.info("paramName:" + paramName);
                     final String pValue = queryParams.get(paramName);
                     if (StringUtils.isBlank(pValue)) { throw new PlatformDataIntegrityException("error.msg.reporting.error",
@@ -349,16 +352,21 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             // and
             // data scoping
             final Connection connection = this.dataSource.getConnection();
-            String tenantdb;
+            String tenantUrl;
             try {
-                tenantdb = connection.getCatalog();
+                tenantUrl = connection.getMetaData().getURL();
             } finally {
                 connection.close();
             }
             final String userhierarchy = currentUser.getOffice().getHierarchy();
-            logger.info("db name:" + tenantdb + "      userhierarchy:" + userhierarchy);
-            rptParamValues.put("tenantdb", tenantdb);
+            logger.info("db URL:" + tenantUrl + "      userhierarchy:" + userhierarchy);
             rptParamValues.put("userhierarchy", userhierarchy);
+
+            final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+            
+            rptParamValues.put("tenantUrl", tenantUrl);
+            rptParamValues.put("username", tenant.getSchemaUsername());
+            rptParamValues.put("password", tenant.getSchemaPassword());
         } catch (final Exception e) {
             logger.error("error.msg.reporting.error:" + e.getMessage());
             throw new PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage());
