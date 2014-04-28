@@ -24,6 +24,9 @@ import static org.mifosplatform.portfolio.savings.DepositsApiConstants.preClosur
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositFrequencyTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositTypeIdParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositAmountParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositMinAmountParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositMaxAmountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.descriptionParamName;
@@ -133,8 +136,9 @@ public class DepositProductAssembler {
 
         final DepositPreClosureDetail preClosureDetail = this.assemblePreClosureDetail(command);
         final DepositTermDetail depositTermDetail = this.assembleDepositTermDetail(command);
+        final DepositProductAmountDetails depositProductAmountDetails = this.assembleDepositAmountDetails(command);
         final DepositProductTermAndPreClosure productTermAndPreClosure = DepositProductTermAndPreClosure.createNew(preClosureDetail,
-                depositTermDetail, null);
+                depositTermDetail, depositProductAmountDetails, null);
 
         // Savings product charges
         final Set<Charge> charges = assembleListOfSavingsProductCharges(command, currencyCode);
@@ -167,7 +171,7 @@ public class DepositProductAssembler {
                     .failWithCodeNoParameterAddedToErrorCode("max.term.lessthan.min.term");
         }
         fixedDepositProduct.validateCharts(baseDataValidator);
-
+        fixedDepositProduct.validateInterestPostingAndCompoundingPeriodTypes(baseDataValidator);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -220,8 +224,9 @@ public class DepositProductAssembler {
 
         final DepositPreClosureDetail preClosureDetail = this.assemblePreClosureDetail(command);
         final DepositTermDetail depositTermDetail = this.assembleDepositTermDetail(command);
+        final DepositProductAmountDetails depositProductAmountDetails = this.assembleDepositAmountDetails(command);
         final DepositProductTermAndPreClosure productTermAndPreClosure = DepositProductTermAndPreClosure.createNew(preClosureDetail,
-                depositTermDetail, null);
+                depositTermDetail, depositProductAmountDetails, null);
         final DepositRecurringDetail recurringDetail = this.assembleRecurringDetail(command);
         final DepositProductRecurringDetail productRecurringDetail = DepositProductRecurringDetail.createNew(recurringDetail, null);
 
@@ -260,6 +265,7 @@ public class DepositProductAssembler {
                     .failWithCodeNoParameterAddedToErrorCode("max.term.lessthan.min.term");
         }
         recurringDepositProduct.validateCharts(baseDataValidator);
+        recurringDepositProduct.validateInterestPostingAndCompoundingPeriodTypes(baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -534,5 +540,28 @@ public class DepositProductAssembler {
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    }
+    
+    public DepositProductAmountDetails assembleDepositAmountDetails(final JsonCommand command) {
+        
+        BigDecimal minDepositAmount = null;
+        if(command.parameterExists(depositMinAmountParamName)) {
+                minDepositAmount = command.bigDecimalValueOfParameterNamed(depositMinAmountParamName);
+        }
+        
+        BigDecimal maxDepositAmount = null;
+        if(command.parameterExists(depositMaxAmountParamName)) {
+                maxDepositAmount = command.bigDecimalValueOfParameterNamed(depositMaxAmountParamName);
+        }
+        
+        BigDecimal depositAmount = null;
+        if(command.parameterExists(depositAmountParamName)) {
+                depositAmount = command.bigDecimalValueOfParameterNamed(depositAmountParamName);
+        }
+        
+        final DepositProductAmountDetails depositRecurringDetail = new DepositProductAmountDetails(minDepositAmount, 
+                        depositAmount, maxDepositAmount);
+
+        return depositRecurringDetail;
     }
 }

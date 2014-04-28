@@ -17,6 +17,7 @@ public enum SavingsPostingInterestPeriodType {
     INVALID(0, "savingsPostingInterestPeriodType.invalid"), //
     MONTHLY(4, "savingsPostingInterestPeriodType.monthly"), //
     QUATERLY(5, "savingsPostingInterestPeriodType.quarterly"), //
+    BIANNUAL(6, "savingsPostingInterestPeriodType.biannual"),
     ANNUAL(7, "savingsPostingInterestPeriodType.annual");
 
     private final Integer value;
@@ -55,6 +56,9 @@ public enum SavingsPostingInterestPeriodType {
                 break;
                 case 5:
                     repaymentFrequencyType = SavingsPostingInterestPeriodType.QUATERLY;
+                break;
+                case 6:
+                    repaymentFrequencyType = SavingsPostingInterestPeriodType.BIANNUAL;
                 break;
                 case 7:
                     repaymentFrequencyType = SavingsPostingInterestPeriodType.ANNUAL;

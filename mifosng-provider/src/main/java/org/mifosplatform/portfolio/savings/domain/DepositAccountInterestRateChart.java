@@ -119,10 +119,10 @@ public class DepositAccountInterestRateChart extends AbstractPersistable<Long> {
         this.account = account;
     }
     
-    public BigDecimal getApplicableInterestRate(@SuppressWarnings("unused") final BigDecimal depositAmount, final LocalDate periodStartDate, final LocalDate periodEndDate){
+    public BigDecimal getApplicableInterestRate(final BigDecimal depositAmount, final LocalDate periodStartDate, final LocalDate periodEndDate){
         BigDecimal effectiveInterestRate = BigDecimal.ZERO;
         for (DepositAccountInterestRateChartSlabs slab : setOfChartSlabs()) {
-            if(slab.slabFields().isBetweenPeriod(periodStartDate, periodEndDate)){
+            if(slab.slabFields().isBetweenPeriod(periodStartDate, periodEndDate) && slab.slabFields().isAmountBetween(depositAmount)){
                 effectiveInterestRate = slab.slabFields().annualInterestRate();
             }
         }

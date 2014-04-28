@@ -20,11 +20,11 @@ public enum SavingsCompoundingInterestPeriodType {
     DAILY(1, "savingsCompoundingInterestPeriodType.daily"), //
     // WEEKLY(2, "savingsCompoundingInterestPeriodType.weekly"), //
     // BIWEEKLY(3, "savingsCompoundingInterestPeriodType.biweekly"), //
-    MONTHLY(4, "savingsCompoundingInterestPeriodType.monthly");
+    MONTHLY(4, "savingsCompoundingInterestPeriodType.monthly"),
 
-    // QUATERLY(5, "savingsCompoundingInterestPeriodType.quarterly"), //
-    // BI_ANNUAL(6, "savingsCompoundingInterestPeriodType.biannual"), //
-    // ANNUAL(7, "savingsCompoundingInterestPeriodType.annual"), //
+     QUATERLY(5, "savingsCompoundingInterestPeriodType.quarterly"), //
+     BI_ANNUAL(6, "savingsCompoundingInterestPeriodType.biannual"), //
+     ANNUAL(7, "savingsCompoundingInterestPeriodType.annual"); //
     // NO_COMPOUNDING_SIMPLE_INTEREST(8,
     // "savingsCompoundingInterestPeriodType.nocompounding");
 
@@ -74,16 +74,16 @@ public enum SavingsCompoundingInterestPeriodType {
                     repaymentFrequencyType = SavingsCompoundingInterestPeriodType.MONTHLY;
                 break;
                 case 5:
-                // repaymentFrequencyType =
-                // SavingsCompoundingInterestPeriodType.QUATERLY;
+                 repaymentFrequencyType =
+                 SavingsCompoundingInterestPeriodType.QUATERLY;
                 break;
                 case 6:
-                // repaymentFrequencyType =
-                // SavingsCompoundingInterestPeriodType.BI_ANNUAL;
+                 repaymentFrequencyType =
+                 SavingsCompoundingInterestPeriodType.BI_ANNUAL;
                 break;
                 case 7:
-                // repaymentFrequencyType =
-                // SavingsCompoundingInterestPeriodType.ANNUAL;
+                 repaymentFrequencyType =
+                 SavingsCompoundingInterestPeriodType.ANNUAL;
                 break;
                 case 8:
                 // repaymentFrequencyType =

@@ -69,6 +69,7 @@ public class DepositsApiConstants {
     public static final String approvedOnDateParamName = "approvedOnDate";
     public static final String activatedOnDateParamName = "activatedOnDate";
     public static final String closedOnDateParamName = "closedOnDate";
+    public static final String expectedFirstDepositOnDateParamName = "expectedFirstDepositOnDate";
 
     public static final String activeParamName = "active";
     public static final String nameParamName = "name";
@@ -118,6 +119,8 @@ public class DepositsApiConstants {
     public static final String inMultiplesOfDepositTermType = "inMultiplesOfDepositTermType";
 
     public static final String depositAmountParamName = "depositAmount";
+    public static final String depositMinAmountParamName = "minDepositAmount";
+    public static final String depositMaxAmountParamName = "maxDepositAmount";
     public static final String depositPeriodParamName = "depositPeriod";
     public static final String depositPeriodFrequencyIdParamName = "depositPeriodFrequencyId";
 
@@ -211,11 +214,13 @@ public class DepositsApiConstants {
 
     private static final Set<String> DEPOSIT_TERM_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(minDepositTermParamName,
             maxDepositTermParamName, minDepositTermTypeIdParamName, maxDepositTermTypeIdParamName, inMultiplesOfDepositTermParamName,
-            inMultiplesOfDepositTermTypeIdParamName));
+            inMultiplesOfDepositTermTypeIdParamName, depositAmountParamName,
+            depositMinAmountParamName, depositMaxAmountParamName));
 
     private static final Set<String> DEPOSIT_TERM_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(minDepositTermParamName,
             maxDepositTermParamName, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTermParamName,
-            inMultiplesOfDepositTermType));
+            inMultiplesOfDepositTermType, depositAmountParamName,
+            depositMinAmountParamName, depositMaxAmountParamName));
 
     private static final Set<String> RECURRING_DETAILS_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
             recurringDepositAmountParamName, recurringDepositTypeIdParamName, recurringDepositFrequencyTypeIdParamName,
@@ -277,7 +282,7 @@ public class DepositsApiConstants {
             interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName, interestCalculationTypeParamName,
             interestCalculationDaysInYearTypeParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName,
             chargesParamName, chartsParamName, depositAmountParamName, depositPeriodParamName, depositPeriodFrequencyIdParamName,
-            savingsAccounts));
+            savingsAccounts, expectedFirstDepositOnDateParamName));
 
     public static final Set<String> FIXED_DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS = fixedDepositAccountRequestData();
     public static final Set<String> FIXED_DEPOSIT_ACCOUNT_RESPONSE_DATA_PARAMETERS = fixedDepositAccountResponseData();

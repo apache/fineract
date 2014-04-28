@@ -27,6 +27,9 @@ import static org.mifosplatform.portfolio.savings.DepositsApiConstants.preClosur
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositFrequencyTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositTypeIdParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositAmountParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositMinAmountParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositMaxAmountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.descriptionParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
@@ -48,6 +51,8 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawal
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -109,6 +114,8 @@ public class DepositProductDataValidator {
         validateDepositTermDeatilForCreate(element, baseDataValidator);
 
         validateChartsData(element, baseDataValidator);
+        
+        validateDepositAmountForCreate(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -131,6 +138,8 @@ public class DepositProductDataValidator {
         validateDepositTermDetailForUpdate(element, baseDataValidator);
 
         validateChartsData(element, baseDataValidator);
+        
+        validateDepositAmountForUpdate(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -156,6 +165,8 @@ public class DepositProductDataValidator {
         validateRecurringDetailForCreate(element, baseDataValidator);
 
         validateChartsData(element, baseDataValidator);
+        
+        validateDepositAmountForCreate(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -180,6 +191,8 @@ public class DepositProductDataValidator {
         validateRecurringDepositUpdate(element, baseDataValidator);
 
         validateChartsData(element, baseDataValidator);
+        
+        validateDepositAmountForUpdate(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -731,6 +744,75 @@ public class DepositProductDataValidator {
                     element);
             baseDataValidator.reset().parameter(recurringDepositFrequencyTypeIdParamName).value(rdFrequencyTypeId).notNull()
                     .isOneOfTheseValues(SavingsPeriodFrequencyType.integerValues());
+        }
+    }
+    
+    private void validateDepositAmountForCreate(JsonElement element, DataValidatorBuilder baseDataValidator) {
+    	final BigDecimal depositAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositAmountParamName, element);
+        baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount).notNull().positiveAmount();
+        
+        BigDecimal depositMinAmount = null;
+        if (this.fromApiJsonHelper.parameterExists(depositMinAmountParamName, element)) {
+        	depositMinAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositMinAmountParamName, element);
+            baseDataValidator.reset().parameter(depositMinAmountParamName).value(depositMinAmount).notNull().positiveAmount();
+        }
+
+        BigDecimal depositMaxAmount = null;
+        if (this.fromApiJsonHelper.parameterExists(depositMaxAmountParamName, element)) {
+        	depositMaxAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositMaxAmountParamName, element);
+            baseDataValidator.reset().parameter(depositMaxAmountParamName).value(depositMaxAmount).notNull().positiveAmount();
+        }
+
+        if (depositMaxAmount != null && depositMaxAmount.compareTo(BigDecimal.ZERO) != -1) {
+            if (depositMinAmount != null && depositMinAmount.compareTo(BigDecimal.ZERO) != -1) {
+                baseDataValidator.reset().parameter(depositMaxAmountParamName).value(depositMaxAmount).notLessThanMin(depositMinAmount);
+                if (depositMinAmount.compareTo(depositMaxAmount) <= 0) {
+                    baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount)
+                            .inMinAndMaxAmountRange(depositMinAmount, depositMaxAmount);
+                }
+            } else {
+                baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount).notGreaterThanMax(depositMaxAmount);
+            }
+        } else if (depositMinAmount != null && depositMinAmount.compareTo(BigDecimal.ZERO) != -1) {
+            baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount).notLessThanMin(depositMinAmount);
+        }
+    }
+    
+    private void validateDepositAmountForUpdate(JsonElement element, DataValidatorBuilder baseDataValidator) {
+        BigDecimal depositAmount = null;
+        
+        if (this.fromApiJsonHelper.parameterExists(depositAmountParamName, element)) {
+            depositAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositAmountParamName, element);
+            baseDataValidator.reset().parameter(depositMinAmountParamName).value(depositAmount).notNull().positiveAmount();
+        }
+        baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount).notNull().positiveAmount();
+        
+        BigDecimal depositMinAmount = null;
+        if (this.fromApiJsonHelper.parameterExists(depositMinAmountParamName, element)) {
+                depositMinAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositMinAmountParamName, element);
+            baseDataValidator.reset().parameter(depositMinAmountParamName).value(depositMinAmount).notNull().positiveAmount();
+        }
+
+        BigDecimal depositMaxAmount = null;
+        if (this.fromApiJsonHelper.parameterExists(depositMaxAmountParamName, element)) {
+                depositMaxAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositMaxAmountParamName, element);
+            baseDataValidator.reset().parameter(depositMaxAmountParamName).value(depositMaxAmount).notNull().positiveAmount();
+        }
+
+        if(depositAmount != null) {
+            if (depositMaxAmount != null && depositMaxAmount.compareTo(BigDecimal.ZERO) != -1) {
+                if (depositMinAmount != null && depositMinAmount.compareTo(BigDecimal.ZERO) != -1) {
+                    baseDataValidator.reset().parameter(depositMaxAmountParamName).value(depositMaxAmount).notLessThanMin(depositMinAmount);
+                    if (depositMinAmount.compareTo(depositMaxAmount) <= 0) {
+                        baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount)
+                                .inMinAndMaxAmountRange(depositMinAmount, depositMaxAmount);
+                    }
+                } else {
+                    baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount).notGreaterThanMax(depositMaxAmount);
+                }
+            } else if (depositMinAmount != null && depositMinAmount.compareTo(BigDecimal.ZERO) != -1) {
+                baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount).notLessThanMin(depositMinAmount);
+            }
         }
     }
 }
