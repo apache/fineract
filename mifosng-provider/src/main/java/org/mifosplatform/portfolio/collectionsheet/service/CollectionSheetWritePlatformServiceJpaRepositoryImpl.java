@@ -83,7 +83,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
         final Map<String, Object> changes = new HashMap<String, Object>();
         final CollectionSheetBulkDisbursalCommand bulkDisbursalCommand = this.bulkDisbursalCommandFromApiJsonDeserializer
                 .commandFromApiJson(command.json());
-        changes.putAll(this.loanWritePlatformService.bulkLoanDisbursal(command, bulkDisbursalCommand));
+        changes.putAll(this.loanWritePlatformService.bulkLoanDisbursal(command, bulkDisbursalCommand, false));
         return changes;
     }
 }

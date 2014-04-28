@@ -14,12 +14,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class DisburseLoanCommandHandler implements NewCommandSourceHandler {
+public class DisburseLoanToSavingsCommandHandler implements NewCommandSourceHandler {
 
     private final LoanWritePlatformService writePlatformService;
 
     @Autowired
-    public DisburseLoanCommandHandler(final LoanWritePlatformService writePlatformService) {
+    public DisburseLoanToSavingsCommandHandler(final LoanWritePlatformService writePlatformService) {
         this.writePlatformService = writePlatformService;
     }
 
@@ -27,6 +27,6 @@ public class DisburseLoanCommandHandler implements NewCommandSourceHandler {
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.disburseLoan(command.entityId(), command, false);
+        return this.writePlatformService.disburseLoan(command.entityId(), command, true);
     }
 }
