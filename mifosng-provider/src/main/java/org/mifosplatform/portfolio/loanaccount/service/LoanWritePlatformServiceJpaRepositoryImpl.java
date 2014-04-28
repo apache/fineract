@@ -1790,7 +1790,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
     }
 
-    @SuppressWarnings("null")
     @Transactional
     public void applyChargeToOverdueLoanInstallment(final Long loanId, final Long loanChargeId, final Integer periodNumber,
             final JsonCommand command) {
