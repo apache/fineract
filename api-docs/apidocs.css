@@ -43,16 +43,24 @@
 	padding-right:5px;
 
 	vertical-align:text-top;
-} 
-.matrixHeading tr.alt 
-{ 
-	color:#000; 
-    	background-color: rgb(240, 240, 255);
 }
 
+.matrixHeading tr:not(:first-child):nth-child(even) {
+    color: #000;
+    background-color: rgb(240, 240, 255);
+}
+
+.matrixHeading tr:not(:first-child):nth-child(odd) {
+    color: #000;
+    background-color: rgba(255, 248, 218, 0.13);
+}
+
+.matrixHeading tr:first-child td table tr {
+    background-color: #6eb4db !important;
+}
 
 .matrixHeadingBG {
-	background-color: #6eb4db;
+    background-color: #6eb4db;
 }
 
 .matrixHeadingVerbs {
@@ -62,7 +70,8 @@
 }
 
 .matrixHeadingCommands {
-    	color: rgb(240, 240, 255);
+    color: rgb(240, 240, 255) !important;
+    background-color: #6eb4db !important;
 }
 
 .mifosXHeading2 {
