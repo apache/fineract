@@ -551,6 +551,9 @@ public class LoansApiResource {
         } else if (is(commandParam, "disburse")) {
             final CommandWrapper commandRequest = builder.disburseLoanApplication(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "disburseToSavings")) {
+            final CommandWrapper commandRequest = builder.disburseLoanToSavingsApplication(loanId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (is(commandParam, "undoapproval")) {

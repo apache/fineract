@@ -373,6 +373,10 @@ public class CommandWrapper {
     public boolean isDisbursementOfLoan() {
         return this.actionName.equalsIgnoreCase("DISBURSE") && this.entityName.equalsIgnoreCase("LOAN");
     }
+    
+    public boolean isDisbursementOfLoanToSavings() {
+        return this.actionName.equalsIgnoreCase("DISBURSETOSAVINGS") && this.entityName.equalsIgnoreCase("LOAN");
+    }
 
     public boolean isUndoDisbursementOfLoan() {
         return this.actionName.equalsIgnoreCase("DISBURSALUNDO") && this.entityName.equalsIgnoreCase("LOAN");

@@ -876,6 +876,14 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr>
+								<td></td>
+								<td>loans/{loanId}?command=disburseToSavings</td>
+								<td><a href="#loans_disburse_to_savings">Disburse Loan To Savings Account</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
 							<tr class="alt">
 								<td></td>
 								<td>loans/{loanId}?command=undoDisbursal</td>
@@ -6904,6 +6912,74 @@ Request Body:
     "routingCode": "rou123",
     "receiptNumber": "rec123",
     "bankNumber": "ban123",
+    "status": {
+      "id": 300,
+      "code": "loanStatusType.active",
+      "value": "Active",
+      "pendingApproval": false,
+      "waitingForDisbursal": false,
+      "active": true,
+      "closedObligationsMet": false,
+      "closedWrittenOff": false,
+      "closedRescheduled": false,
+      "closed": false,
+      "overpaid": false
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "actualDisbursementDate": "14 May 2013",
+    "transactionAmount":10000
+  }
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="loans_disburse_to_savings" name="loans_disburse_to_savings" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Disburse Loan To Savings Account</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>actualDisbursementDate</td>
+						</tr>
+					</table>
+					<br/>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>transactionAmount,fixedEmiAmount</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/{loanId}?command=disburseToSavings
+					</code>
+					<code class="method-request">
+POST loans/1?command=disburse
+Content-Type: application/json 
+Request Body:
+{
+  "dateFormat": "dd MMMM yyyy",
+  "locale": "en",
+  "transactionAmount":10000,
+  "fixedEmiAmount""1100,
+  "actualDisbursementDate": "14 May 2013",
+  "note": ""
+</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 1,
+  "resourceId": 1,
+  "changes": {
     "status": {
       "id": 300,
       "code": "loanStatusType.active",
@@ -28901,6 +28977,14 @@ No Request Body:
 					<td></td>
 					<td>loans/{loanId}?command=disburse</td>
 					<td><a href="#loans_disburse">Disburse Loan</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>loans/{loanId}?command=disburseToSavings</td>
+					<td><a href="#loans_disburse_to_savings">Disburse Loan To Savings Account</a></td>
 					<td></td>
 					<td></td>
 					<td></td>

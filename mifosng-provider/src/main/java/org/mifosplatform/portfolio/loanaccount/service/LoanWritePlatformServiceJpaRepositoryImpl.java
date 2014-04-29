@@ -92,6 +92,7 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanChargeRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanDisbursementDetails;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanEvent;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanOverdueInstallmentCharge;
@@ -217,11 +218,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
-    public CommandProcessingResult disburseLoan(final Long loanId, final JsonCommand command) {
+    public CommandProcessingResult disburseLoan(final Long loanId, final JsonCommand command, Boolean isAccountTransfer) {
 
         final AppUser currentUser = this.context.authenticatedUser();
 
-        this.loanEventApiJsonValidator.validateDisbursement(command.json());
+        this.loanEventApiJsonValidator.validateDisbursement(command.json(), isAccountTransfer);
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
@@ -259,11 +260,26 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
         final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
         updateLoanCounters(loan, actualDisbursementDate);
+        Money amountBeforeAdjust = loan.getPrincpal();
+        loan.validateAccountStatus(LoanEvent.LOAN_DISBURSED);
+        boolean canDisburse = loan.canDisburse(actualDisbursementDate);
+        if (canDisburse) {
+            Money disburseAmount = loan.adjustDisburseAmount(command, actualDisbursementDate);
+            boolean recalcualteSchedule = amountBeforeAdjust.isNotEqualTo(loan.getPrincpal());
+            final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
+            if (isAccountTransfer) {
+                disburseLoanToSavings(loan, command, disburseAmount, paymentDetail);
+            } else {
+                LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan.getOffice(), disburseAmount, paymentDetail,
+                        actualDisbursementDate, txnExternalId);
+                disbursementTransaction.updateLoan(loan);
+                loan.getLoanTransactions().add(disbursementTransaction);
+            }
 
-        loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, existingTransactionIds,
-                existingReversedTransactionIds, changes, paymentDetail, calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays,
-                workingDays, allowTransactionsOnHoliday, allowTransactionsOnNonWorkingDay);
-
+            loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, existingTransactionIds,
+                    existingReversedTransactionIds, changes, calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays,
+                    allowTransactionsOnHoliday, allowTransactionsOnNonWorkingDay, recalcualteSchedule);
+        }
         if (!changes.isEmpty()) {
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
@@ -306,7 +322,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(actualDisbursementDate, entrySet.getValue(),
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN, savingAccountData.accountId(), loanId, "Loan Charge Payment",
                     locale, fmt, null, null, LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue(), entrySet.getKey(), null,
-                    AccountTransferType.CHARGE_PAYMENT.getValue(), null);
+                    AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, null, null);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
         }
 
@@ -371,7 +387,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
      *****/
     @Transactional
     @Override
-    public Map<String, Object> bulkLoanDisbursal(final JsonCommand command, final CollectionSheetBulkDisbursalCommand bulkDisbursalCommand) {
+    public Map<String, Object> bulkLoanDisbursal(final JsonCommand command, final CollectionSheetBulkDisbursalCommand bulkDisbursalCommand,
+            Boolean isAccountTransfer) {
         final AppUser currentUser = this.context.authenticatedUser();
 
         final SingleDisbursalCommand[] disbursalCommand = bulkDisbursalCommand.getDisburseTransactions();
@@ -405,12 +422,26 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final WorkingDays workingDays = this.workingDaysRepository.findOne();
             final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
             final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
+            loan.validateAccountStatus(LoanEvent.LOAN_DISBURSED);
             updateLoanCounters(loan, actualDisbursementDate);
-
-            loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, existingTransactionIds,
-                    existingReversedTransactionIds, changes, paymentDetail, firstRepaymentOnDate, isHolidayEnabled, holidays, workingDays,
-                    allowTransactionsOnHoliday, allowTransactionsOnNonWorkingDay);
-
+            boolean canDisburse = loan.canDisburse(actualDisbursementDate);
+            if (canDisburse) {
+                Money amountBeforeAdjust = loan.getPrincpal();
+                Money disburseAmount = loan.adjustDisburseAmount(command, actualDisbursementDate);
+                boolean recalcualteSchedule = amountBeforeAdjust.isNotEqualTo(loan.getPrincpal());
+                final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
+                if (isAccountTransfer) {
+                    disburseLoanToSavings(loan, command, disburseAmount, paymentDetail);
+                } else {
+                    LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan.getOffice(), disburseAmount, paymentDetail,
+                            actualDisbursementDate, txnExternalId);
+                    disbursementTransaction.updateLoan(loan);
+                    loan.getLoanTransactions().add(disbursementTransaction);
+                }
+                loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, existingTransactionIds,
+                        existingReversedTransactionIds, changes, firstRepaymentOnDate, isHolidayEnabled, holidays, workingDays,
+                        allowTransactionsOnHoliday, allowTransactionsOnNonWorkingDay, recalcualteSchedule);
+            }
             if (!changes.isEmpty()) {
                 try {
                     this.loanRepository.save(loan);
@@ -463,7 +494,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(actualDisbursementDate, entrySet.getValue(),
                         PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN, savingAccountData.accountId(), loan.getId(),
                         "Loan Charge Payment", locale, fmt, null, null, LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue(),
-                        entrySet.getKey(), null, AccountTransferType.CHARGE_PAYMENT.getValue(), null);
+                        entrySet.getKey(), null, AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, null, null);
                 this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             }
         }
@@ -1222,7 +1253,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, amount, PortfolioAccountType.SAVINGS,
                 PortfolioAccountType.LOAN, portfolioAccountData.accountId(), loanId, "Loan Charge Payment", locale, fmt, null, null,
                 LoanTransactionType.CHARGE_PAYMENT.getValue(), loanChargeId, loanInstallmentNumber,
-                AccountTransferType.CHARGE_PAYMENT.getValue(), null);
+                AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, null, null);
         this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
 
         return new CommandProcessingResultBuilder() //
@@ -1233,6 +1264,27 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(loanId) //
                 .withSavingsId(portfolioAccountData.accountId()).build();
+    }
+
+    public void disburseLoanToSavings(final Loan loan, final JsonCommand command, final Money amount, final PaymentDetail paymentDetail) {
+
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
+        final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
+
+        final Locale locale = command.extractLocale();
+        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService.retriveLoanAssociation(loan.getId());
+        if (portfolioAccountData == null) {
+            final String errorMessage = "Disburse Loan with id:" + loan.getId() + " requires linked savings account for payment";
+            throw new LinkedAccountRequiredException("loan.disburse.to.savings", errorMessage, loan.getId());
+        }
+
+        final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, amount.getAmount(),
+                PortfolioAccountType.LOAN, PortfolioAccountType.SAVINGS, loan.getId(), portfolioAccountData.accountId(),
+                "Loan Disbursement", locale, fmt, paymentDetail, LoanTransactionType.DISBURSEMENT.getValue(), null, null, null,
+                AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, txnExternalId, loan);
+        this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+
     }
 
     @Override
@@ -1257,7 +1309,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                                     installmentChargeData.getAmountOutstanding(), PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN,
                                     portfolioAccountData.accountId(), chargeData.getLoanId(), "Loan Charge Payment", null, null, null,
                                     null, LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(),
-                                    installmentChargeData.getInstallmentNumber(), AccountTransferType.CHARGE_PAYMENT.getValue(), null);
+                                    installmentChargeData.getInstallmentNumber(), AccountTransferType.CHARGE_PAYMENT.getValue(), null,
+                                    null, null, null);
                             transferFeeCharge(sb, accountTransferDTO);
                         }
                     }
@@ -1268,7 +1321,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                             chargeData.getAmountOutstanding(), PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN,
                             portfolioAccountData.accountId(), chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
                             LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(), null,
-                            AccountTransferType.CHARGE_PAYMENT.getValue(), null);
+                            AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, null, null);
                     transferFeeCharge(sb, accountTransferDTO);
                 }
             }
@@ -1917,6 +1970,73 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withLoanId(loanId) //
                 .with(changes).build();
 
+    }
+
+    public LoanTransaction disburseLoanAmountToSavings(final Long loanId, Long loanChargeId, final JsonCommand command,
+            final boolean isChargeIdIncludedInJson) {
+
+        LoanTransaction transaction = null;
+
+        this.loanEventApiJsonValidator.validateChargePaymentTransaction(command.json(), isChargeIdIncludedInJson);
+        if (isChargeIdIncludedInJson) {
+            loanChargeId = command.longValueOfParameterNamed("chargeId");
+        }
+        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        checkClientOrGroupActive(loan);
+        final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
+
+        // Charges may be waived only when the loan associated with them are
+        // active
+        if (!loan.status().isActive()) { throw new LoanChargeCannotBePayedException(LOAN_CHARGE_CANNOT_BE_PAYED_REASON.LOAN_INACTIVE,
+                loanCharge.getId()); }
+
+        // validate loan charge is not already paid or waived
+        if (loanCharge.isWaived()) {
+            throw new LoanChargeCannotBePayedException(LOAN_CHARGE_CANNOT_BE_PAYED_REASON.ALREADY_WAIVED, loanCharge.getId());
+        } else if (loanCharge.isPaid()) { throw new LoanChargeCannotBePayedException(LOAN_CHARGE_CANNOT_BE_PAYED_REASON.ALREADY_PAID,
+                loanCharge.getId()); }
+
+        if (!loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()) { throw new LoanChargeCannotBePayedException(
+                LOAN_CHARGE_CANNOT_BE_PAYED_REASON.CHARGE_NOT_ACCOUNT_TRANSFER, loanCharge.getId()); }
+
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
+
+        final Locale locale = command.extractLocale();
+        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        Integer loanInstallmentNumber = null;
+        BigDecimal amount = loanCharge.amountOutstanding();
+        if (loanCharge.isInstalmentFee()) {
+            LoanInstallmentCharge chargePerInstallment = null;
+            final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
+            final Integer installmentNumber = command.integerValueOfParameterNamed("installmentNumber");
+            if (dueDate != null) {
+                chargePerInstallment = loanCharge.getInstallmentLoanCharge(dueDate);
+            } else if (installmentNumber != null) {
+                chargePerInstallment = loanCharge.getInstallmentLoanCharge(installmentNumber);
+            }
+            if (chargePerInstallment == null) {
+                chargePerInstallment = loanCharge.getUnpaidInstallmentLoanCharge();
+            }
+            if (chargePerInstallment.isWaived()) {
+                throw new LoanChargeCannotBePayedException(LOAN_CHARGE_CANNOT_BE_PAYED_REASON.ALREADY_WAIVED, loanCharge.getId());
+            } else if (chargePerInstallment.isPaid()) { throw new LoanChargeCannotBePayedException(
+                    LOAN_CHARGE_CANNOT_BE_PAYED_REASON.ALREADY_PAID, loanCharge.getId()); }
+            loanInstallmentNumber = chargePerInstallment.getRepaymentInstallment().getInstallmentNumber();
+            amount = chargePerInstallment.getAmountOutstanding();
+        }
+
+        final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService.retriveLoanAssociation(loanId);
+        if (portfolioAccountData == null) {
+            final String errorMessage = "Charge with id:" + loanChargeId + " requires linked savings account for payment";
+            throw new LinkedAccountRequiredException("loanCharge.pay", errorMessage, loanChargeId);
+        }
+        final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, amount, PortfolioAccountType.SAVINGS,
+                PortfolioAccountType.LOAN, portfolioAccountData.accountId(), loanId, "Loan Charge Payment", locale, fmt, null, null,
+                LoanTransactionType.CHARGE_PAYMENT.getValue(), loanChargeId, loanInstallmentNumber,
+                AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, null, null);
+        this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+
+        return transaction;
     }
 
     private void updateLoanTransaction(final Long loanTransactionId, final LoanTransaction newLoanTransaction) {

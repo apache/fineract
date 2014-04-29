@@ -23,4 +23,7 @@ public interface LoanAccountDomainService {
 
     LoanTransaction makeChargePayment(Loan loan, Long chargeId, LocalDate transactionDate, BigDecimal transactionAmount,
             PaymentDetail paymentDetail, String noteText, String txnExternalId, Integer transactionType, Integer installmentNumber);
+
+    LoanTransaction makeDisburseTransaction(Long loanId, LocalDate transactionDate, BigDecimal transactionAmount,
+            PaymentDetail paymentDetail, String noteText, String txnExternalId);
 }

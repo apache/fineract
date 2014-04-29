@@ -48,13 +48,20 @@ public final class LoanEventApiJsonValidator {
                 "Validation errors exist.", dataValidationErrors); }
     }
 
-    public void validateDisbursement(final String json) {
+    public void validateDisbursement(final String json, boolean isAccountTransfer) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Set<String> disbursementParameters = new HashSet<String>(Arrays.asList("actualDisbursementDate", "externalId", "note",
-                "locale", "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber",
-                LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.emiAmountParameterName));
+        Set<String> disbursementParameters = null;
+
+        if (isAccountTransfer) {
+            disbursementParameters = new HashSet<String>(Arrays.asList("actualDisbursementDate", "externalId", "note", "locale",
+                    "dateFormat", LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.emiAmountParameterName));
+        } else {
+            disbursementParameters = new HashSet<String>(Arrays.asList("actualDisbursementDate", "externalId", "note", "locale",
+                    "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber",
+                    LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.emiAmountParameterName));
+        }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);

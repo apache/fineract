@@ -119,9 +119,17 @@ public class ChargesHelper {
     }
 
     public static String getLoanDisbursementJSON(final Integer chargeCalculationType, final String amount) {
+        return getLoanDisbursementJSON(chargeCalculationType, amount, ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
+    }
+
+    public static String getLoanDisbursementAccountTransferJSON(final Integer chargeCalculationType, final String amount) {
+        return getLoanDisbursementJSON(chargeCalculationType, amount, ChargesHelper.CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER);
+    }
+
+    public static String getLoanDisbursementJSON(final Integer chargeCalculationType, final String amount, final Integer paymentmode) {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("chargeTimeType", CHARGE_DISBURSEMENT_FEE);
-        map.put("chargePaymentMode", ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
+        map.put("chargePaymentMode", paymentmode);
         map.put("amount", amount);
         map.put("chargeCalculationType", chargeCalculationType);
         String chargesCreateJson = new Gson().toJson(map);

@@ -53,6 +53,10 @@ public class LoanProductTestBuilder {
     private String maxPrincipal = "100000.00";
     private Account[] accountList = null;
 
+    private Boolean multiDisburseLoan = false;
+    private String outstandingLoanBalance = "35000";
+    private String maxTrancheCount = "35000";
+
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<String, Object>();
 
@@ -83,6 +87,11 @@ public class LoanProductTestBuilder {
         map.put("minPrincipal", this.minPrincipal);
         map.put("maxPrincipal", this.maxPrincipal);
         map.put("overdueDaysForNPA", this.overdueDaysForNPA);
+        if (multiDisburseLoan) {
+            map.put("multiDisburseLoan", this.multiDisburseLoan);
+            map.put("maxTrancheCount", this.maxTrancheCount);
+            map.put("outstandingLoanBalance", this.outstandingLoanBalance);
+        }
 
         if (this.accountingRule.equals(ACCRUAL_UPFRONT) || this.accountingRule.equals(ACCRUAL_PERIODIC)) {
             map.putAll(getAccountMappingForAccrualBased());
@@ -212,6 +221,11 @@ public class LoanProductTestBuilder {
     public LoanProductTestBuilder withAccountingRulePeriodicAccrual(final Account[] account_list) {
         this.accountingRule = ACCRUAL_PERIODIC;
         this.accountList = account_list;
+        return this;
+    }
+
+    public LoanProductTestBuilder withTranches(boolean multiDisburseLoan) {
+        this.multiDisburseLoan = multiDisburseLoan;
         return this;
     }
 
