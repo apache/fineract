@@ -40,6 +40,9 @@ public class RecurringDepositProductData extends DepositProductData {
     private EnumOptionData recurringDepositType;
     private Integer recurringDepositFrequency;
     private EnumOptionData recurringDepositFrequencyType;
+    private BigDecimal minDepositAmount;
+    private BigDecimal depositAmount;
+    private BigDecimal maxDepositAmount;
 
     private Collection<EnumOptionData> interestFreePeriodTypeOptions;
     private Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions;
@@ -96,7 +99,10 @@ public class RecurringDepositProductData extends DepositProductData {
         final EnumOptionData maxDepositTermType = null;
         final Integer inMultiplesOfDepositTerm = null;
         final EnumOptionData inMultiplesOfDepositTermType = null;
-
+        final BigDecimal minDepositAmount = null;
+        final BigDecimal depositAmount = null;
+        final BigDecimal maxDepositAmount = null;
+   
         return new RecurringDepositProductData(id, name, shortName, description, currency, nominalAnnualInterestRate,
                 interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, accountingRule, accountingMappings, paymentChannelToFundSourceMappings,
@@ -106,9 +112,10 @@ public class RecurringDepositProductData extends DepositProductData {
                 penaltyToIncomeAccountMappings, interestRateCharts, chartTemplate, interestFreePeriodApplicable, interestFreeFromPeriod,
                 interestFreeToPeriod, interestFreePeriodFrequencyType, preClosurePenalApplicable, preClosurePenalInterest,
                 preClosurePenalInterestOnType, interestFreePeriodTypes, preClosurePenalInterestOnTypeOptions, minDepositTerm,
-                maxDepositTerm, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTerm, inMultiplesOfDepositTermType,
-                recurringDepositType, recurringDepositFrequency, recurringDepositFrequencyType, recurringDepositTypeOptions,
-                recurringDepositFrequencyTypeOptions, depositTermTypeOptions, inMultiplesOfDepositTermTypeOptions);
+                maxDepositTerm, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, recurringDepositType,
+                recurringDepositFrequency, recurringDepositFrequencyType, recurringDepositTypeOptions,
+                recurringDepositFrequencyTypeOptions, depositTermTypeOptions, inMultiplesOfDepositTermTypeOptions,
+                minDepositAmount, depositAmount, maxDepositAmount);
     }
 
     public static RecurringDepositProductData withCharges(final RecurringDepositProductData existingProduct,
@@ -134,7 +141,8 @@ public class RecurringDepositProductData extends DepositProductData {
                 existingProduct.recurringDepositType, existingProduct.recurringDepositFrequency,
                 existingProduct.recurringDepositFrequencyType, existingProduct.recurringDepositTypeOptions,
                 existingProduct.recurringDepositFrequencyTypeOptions, existingProduct.depositTermTypeOptions,
-                existingProduct.inMultiplesOfDepositTermTypeOptions);
+                existingProduct.inMultiplesOfDepositTermTypeOptions, existingProduct.minDepositAmount, 
+                existingProduct.depositAmount, existingProduct.maxDepositAmount);
     }
 
     /**
@@ -175,7 +183,8 @@ public class RecurringDepositProductData extends DepositProductData {
                 existingProduct.minDepositTermType, existingProduct.maxDepositTermType, existingProduct.inMultiplesOfDepositTerm,
                 existingProduct.inMultiplesOfDepositTermType, existingProduct.recurringDepositType,
                 existingProduct.recurringDepositFrequency, existingProduct.recurringDepositFrequencyType, recurringDepositTypeOptions,
-                recurringDepositFrequencyTypeOptions, depositTermTypeOptions, inMultiplesOfDepositTermTypeOptions);
+                recurringDepositFrequencyTypeOptions, depositTermTypeOptions, inMultiplesOfDepositTermTypeOptions, existingProduct.minDepositAmount, 
+                existingProduct.depositAmount, existingProduct.maxDepositAmount);
     }
 
     public static RecurringDepositProductData withAccountingDetails(final RecurringDepositProductData existingProduct,
@@ -216,7 +225,8 @@ public class RecurringDepositProductData extends DepositProductData {
                 existingProduct.recurringDepositType, existingProduct.recurringDepositFrequency,
                 existingProduct.recurringDepositFrequencyType, existingProduct.recurringDepositTypeOptions,
                 existingProduct.recurringDepositFrequencyTypeOptions, existingProduct.depositTermTypeOptions,
-                existingProduct.inMultiplesOfDepositTermTypeOptions);
+                existingProduct.inMultiplesOfDepositTermTypeOptions, existingProduct.minDepositAmount, 
+                existingProduct.depositAmount, existingProduct.maxDepositAmount);
     }
 
     public static RecurringDepositProductData instance(final DepositProductData depositProductData,
@@ -226,7 +236,9 @@ public class RecurringDepositProductData extends DepositProductData {
             final Integer maxDepositTerm, final EnumOptionData minDepositTermType, final EnumOptionData maxDepositTermType,
             final Integer inMultiplesOfDepositTerm, final EnumOptionData inMultiplesOfDepositTermType,
             final EnumOptionData recurringDepositType, final Integer recurringDepositFrequency,
-            final EnumOptionData recurringDepositFrequencyType) {
+            final EnumOptionData recurringDepositFrequencyType,
+            final BigDecimal minDepositAmount,final BigDecimal depositAmount,
+            final BigDecimal maxDepositAmount) {
 
         final Map<String, Object> accountingMappings = null;
         final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = null;
@@ -269,7 +281,8 @@ public class RecurringDepositProductData extends DepositProductData {
                 preClosurePenalInterestOnType, interestFreePeriodTypes, preClosurePenalInterestOnTypeOptions, minDepositTerm,
                 maxDepositTerm, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTerm, inMultiplesOfDepositTermType,
                 recurringDepositType, recurringDepositFrequency, recurringDepositFrequencyType, recurringDepositTypeOptions,
-                recurringDepositFrequencyTypeOptions, depositTermTypeOptions, inMultiplesOfDepositTermTypeOptions);
+                recurringDepositFrequencyTypeOptions, depositTermTypeOptions, inMultiplesOfDepositTermTypeOptions,
+                minDepositAmount, depositAmount, maxDepositAmount);
     }
 
     public static RecurringDepositProductData lookup(final Long id, final String name) {
@@ -329,6 +342,9 @@ public class RecurringDepositProductData extends DepositProductData {
         final EnumOptionData inMultiplesOfDepositTermType = null;
         final Collection<EnumOptionData> depositTermTypeOptions = null;
         final Collection<EnumOptionData> inMultiplesOfDepositTermTypeOptions = null;
+        final BigDecimal minDepositAmount = null;
+        final BigDecimal depositAmount = null;
+        final BigDecimal maxDepositAmount = null;
 
         return new RecurringDepositProductData(id, name, shortName, description, currency, nominalAnnualInterestRate,
                 interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
@@ -341,7 +357,8 @@ public class RecurringDepositProductData extends DepositProductData {
                 preClosurePenalInterestOnType, interestFreePeriodTypes, preClosurePenalInterestOnTypeOptions, minDepositTerm,
                 maxDepositTerm, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTerm, inMultiplesOfDepositTermType,
                 recurringDepositType, recurringDepositFrequency, recurringDepositFrequencyType, recurringDepositTypeOptions,
-                recurringDepositFrequencyTypeOptions, depositTermTypeOptions, inMultiplesOfDepositTermTypeOptions);
+                recurringDepositFrequencyTypeOptions, depositTermTypeOptions, inMultiplesOfDepositTermTypeOptions,
+                minDepositAmount, depositAmount, maxDepositAmount);
     }
 
     public static RecurringDepositProductData withInterestChart(final RecurringDepositProductData product,
@@ -362,7 +379,8 @@ public class RecurringDepositProductData extends DepositProductData {
                 product.minDepositTerm, product.maxDepositTerm, product.minDepositTermType, product.maxDepositTermType,
                 product.inMultiplesOfDepositTerm, product.inMultiplesOfDepositTermType, product.recurringDepositType,
                 product.recurringDepositFrequency, product.recurringDepositFrequencyType, product.recurringDepositTypeOptions,
-                product.recurringDepositFrequencyTypeOptions, product.depositTermTypeOptions, product.inMultiplesOfDepositTermTypeOptions);
+                product.recurringDepositFrequencyTypeOptions, product.depositTermTypeOptions, product.inMultiplesOfDepositTermTypeOptions, product.minDepositAmount,
+                product.depositAmount, product.maxDepositAmount);
     }
 
     private RecurringDepositProductData(final Long id, final String name, final String shortName, final String description,
@@ -393,7 +411,8 @@ public class RecurringDepositProductData extends DepositProductData {
             final EnumOptionData recurringDepositType, final Integer recurringDepositFrequency,
             final EnumOptionData recurringDepositFrequencyType, final Collection<EnumOptionData> recurringDepositTypeOptions,
             final Collection<EnumOptionData> recurringDepositFrequencyTypeOptions, final Collection<EnumOptionData> depositTermTypeOptions,
-            final Collection<EnumOptionData> inMultiplesOfDepositTermTypeOptions) {
+            final Collection<EnumOptionData> inMultiplesOfDepositTermTypeOptions,final BigDecimal minDepositAmount, 
+            final BigDecimal depositAmount, final BigDecimal maxDepositAmount) {
 
         super(id, name, shortName, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, lockinPeriodFrequency,
@@ -419,6 +438,9 @@ public class RecurringDepositProductData extends DepositProductData {
         this.recurringDepositFrequencyType = recurringDepositFrequencyType;
         this.recurringDepositFrequency = recurringDepositFrequency;
         this.recurringDepositType = recurringDepositType;
+        this.minDepositAmount = minDepositAmount;
+        this.depositAmount = depositAmount;
+        this.maxDepositAmount = maxDepositAmount;
 
         // template data
         this.interestFreePeriodTypeOptions = interestFreePeriodTypeOptions;

@@ -275,6 +275,9 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             sqlBuilder.append("dprd.recurring_deposit_type_enum as recurringDepositTypeId, ");
             sqlBuilder.append("dprd.recurring_deposit_frequency as recurringDepositFrequency, ");
             sqlBuilder.append("dprd.recurring_deposit_frequency_type_enum as recurringDepositFrequencyTypeId, ");
+            sqlBuilder.append("dptp.min_deposit_amount as minDepositAmount, ");
+            sqlBuilder.append("dptp.deposit_amount as depositAmount, ");
+            sqlBuilder.append("dptp.max_deposit_amount as maxDepositAmount, ");
             sqlBuilder.append("dptp.min_deposit_term as minDepositTerm, ");
             sqlBuilder.append("dptp.max_deposit_term as maxDepositTerm, ");
             sqlBuilder.append("dptp.min_deposit_term_type_enum as minDepositTermTypeId, ");
@@ -315,6 +318,9 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
                     .recurringDepositType(recurringDepositTypeId);
             final Integer recurringDepositFrequency = JdbcSupport.getInteger(rs, "recurringDepositFrequency");
             final Integer recurringDepositFrequencyTypeId = JdbcSupport.getInteger(rs, "recurringDepositFrequencyTypeId");
+            final BigDecimal minDepositAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "minDepositAmount");
+            final BigDecimal depositAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "depositAmount");
+            final BigDecimal maxDepositAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "maxDepositAmount");
             final EnumOptionData recurringDepositFrequencyType = (recurringDepositFrequencyTypeId == null) ? null : SavingsEnumerations
                     .recurringDepositFrequencyType(recurringDepositFrequencyTypeId);
 
@@ -334,7 +340,8 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             return RecurringDepositProductData.instance(depositProductData, interestFreePeriodApplicable, interestFreeFromPeriod,
                     interestFreeToPeriod, interestFreePeriodFrequencyType, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTerm,
-                    inMultiplesOfDepositTermType, recurringDepositType, recurringDepositFrequency, recurringDepositFrequencyType);
+                    inMultiplesOfDepositTermType, recurringDepositType, recurringDepositFrequency, recurringDepositFrequencyType,
+                    minDepositAmount, depositAmount, maxDepositAmount);
         }
     }
 

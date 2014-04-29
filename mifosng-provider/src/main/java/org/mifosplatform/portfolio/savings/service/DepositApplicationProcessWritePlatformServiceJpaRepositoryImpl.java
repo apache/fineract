@@ -151,7 +151,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 ((FixedDepositAccount) account).updateMaturityDateAndAmountBeforeAccountActivation(mc);
                 this.fixedDepositAccountRepository.saveAndFlush((FixedDepositAccount) account);
             } else if (depositAccountType.isRecurringDeposit()) {
-                final LocalDate transactionStartDate = account.accountSubmittedOrActivationDate();
+                final LocalDate transactionStartDate = ((RecurringDepositAccount) account).depositStartDate();
                 ((RecurringDepositAccount) account).updateMaturityDateAndAmount(mc, transactionStartDate);
                 this.recurringDepositAccountRepository.save((RecurringDepositAccount) account);
             }
@@ -254,7 +254,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 if (depositAccountType.isFixedDeposit()) {
                     ((FixedDepositAccount) account).updateMaturityDateAndAmountBeforeAccountActivation(mc);
                 } else if (depositAccountType.isRecurringDeposit()) {
-                    final LocalDate transactionStartDate = account.accountSubmittedOrActivationDate();
+                    final LocalDate transactionStartDate =  ((RecurringDepositAccount) account).depositStartDate();
                     ((RecurringDepositAccount) account).updateMaturityDateAndAmount(mc, transactionStartDate);
                 }
 

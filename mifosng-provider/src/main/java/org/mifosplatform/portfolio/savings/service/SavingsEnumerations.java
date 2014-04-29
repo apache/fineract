@@ -232,6 +232,10 @@ public class SavingsEnumerations {
                 optionData = new EnumOptionData(SavingsPostingInterestPeriodType.QUATERLY.getValue().longValue(), codePrefix
                         + SavingsPostingInterestPeriodType.QUATERLY.getCode(), "Quarterly");
             break;
+            case BIANNUAL:
+                optionData = new EnumOptionData(SavingsPostingInterestPeriodType.BIANNUAL.getValue().longValue(), codePrefix
+                        + SavingsPostingInterestPeriodType.BIANNUAL.getCode(), "BiAnnual");
+            break;
             case ANNUAL:
                 optionData = new EnumOptionData(SavingsPostingInterestPeriodType.ANNUAL.getValue().longValue(), codePrefix
                         + SavingsPostingInterestPeriodType.ANNUAL.getCode(), "Annually");
@@ -276,26 +280,18 @@ public class SavingsEnumerations {
                 optionData = new EnumOptionData(SavingsCompoundingInterestPeriodType.MONTHLY.getValue().longValue(), codePrefix
                         + SavingsCompoundingInterestPeriodType.MONTHLY.getCode(), "Monthly");
             break;
-        // case QUATERLY:
-        // optionData = new
-        // EnumOptionData(SavingsCompoundingInterestPeriodType.QUATERLY.getValue().longValue(),
-        // codePrefix
-        // + SavingsCompoundingInterestPeriodType.QUATERLY.getCode(),
-        // "Quarterly");
-        // break;
-        // case BI_ANNUAL:
-        // optionData = new
-        // EnumOptionData(SavingsCompoundingInterestPeriodType.BI_ANNUAL.getValue().longValue(),
-        // codePrefix
-        // + SavingsCompoundingInterestPeriodType.BI_ANNUAL.getCode(),
-        // "Semi-Annual");
-        // break;
-        // case ANNUAL:
-        // optionData = new
-        // EnumOptionData(SavingsCompoundingInterestPeriodType.ANNUAL.getValue().longValue(),
-        // codePrefix
-        // + SavingsCompoundingInterestPeriodType.ANNUAL.getCode(), "Annually");
-        // break;
+            case QUATERLY:
+                optionData = new EnumOptionData(SavingsCompoundingInterestPeriodType.QUATERLY.getValue().longValue(), codePrefix
+                        + SavingsCompoundingInterestPeriodType.QUATERLY.getCode(), "Quarterly");
+            break;
+            case BI_ANNUAL:
+                optionData = new EnumOptionData(SavingsCompoundingInterestPeriodType.BI_ANNUAL.getValue().longValue(), codePrefix
+                        + SavingsCompoundingInterestPeriodType.BI_ANNUAL.getCode(), "Semi-Annual");
+            break;
+            case ANNUAL:
+                optionData = new EnumOptionData(SavingsCompoundingInterestPeriodType.ANNUAL.getValue().longValue(), codePrefix
+                        + SavingsCompoundingInterestPeriodType.ANNUAL.getCode(), "Annually");
+            break;
         // case NO_COMPOUNDING_SIMPLE_INTEREST:
         // optionData = new
         // EnumOptionData(SavingsCompoundingInterestPeriodType.NO_COMPOUNDING_SIMPLE_INTEREST.getValue().longValue(),

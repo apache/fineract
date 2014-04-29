@@ -210,4 +210,8 @@ public class InterestRateChartSlabFields {
         }
         return actualDepositPeriod;
     }
+    
+    public boolean isAmountBetween(final BigDecimal depositAmount){
+        return depositAmount.compareTo(amountRangeFrom) >= 0 && depositAmount.compareTo(amountRangeTo) <= 0;
+    }
 }

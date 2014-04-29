@@ -783,6 +783,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append("datp.in_multiples_of_deposit_term_type_enum as inMultiplesOfDepositTermTypeId, ");
             sqlBuilder.append("datp.deposit_amount as depositAmount, ");
             sqlBuilder.append("datp.maturity_amount as maturityAmount, ");
+            sqlBuilder.append("datp.expected_firstdepositon_date as expectedFirstDepositOnDate, ");
             sqlBuilder.append("datp.maturity_date as maturityDate, ");
             sqlBuilder.append("datp.deposit_period as depositPeriod, ");
             sqlBuilder.append("datp.deposit_period_frequency_enum as depositPeriodFrequencyTypeId, ");
@@ -847,12 +848,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final Integer onAccountClosureId = JdbcSupport.getInteger(rs, "onAccountClosureId");
             final EnumOptionData onAccountClosureType = (onAccountClosureId == null) ? null : SavingsEnumerations
                     .depositAccountOnClosureType(onAccountClosureId);
+            final LocalDate expectedFirstDepositOnDate = JdbcSupport.getLocalDate(rs, "expectedFirstDepositOnDate");
             return RecurringDepositAccountData.instance(depositAccountData, interestFreePeriodApplicable, interestFreeFromPeriod,
                     interestFreeToPeriod, interestFreePeriodFrequencyType, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
                     depositPeriodFrequencyType, recurringDepositAmount, recurringDepositType, recurringDepositFrequency,
-                    recurringDepositFrequencyType, onAccountClosureType);
+                    recurringDepositFrequencyType, onAccountClosureType, expectedFirstDepositOnDate);
         }
     }
 
@@ -1266,13 +1268,14 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final Integer depositPeriod = null;
             final EnumOptionData depositPeriodFrequencyType = null;
             final BigDecimal recurringDepositAmount = null;
+            final LocalDate expectedFirstDepositOnDate = null;
             final EnumOptionData onAccountClosureType = null;
             return RecurringDepositAccountData.instance(depositAccountData, interestFreePeriodApplicable, interestFreeFromPeriod,
                     interestFreeToPeriod, interestFreePeriodFrequencyType, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
                     depositPeriodFrequencyType, recurringDepositAmount, recurringDepositType, recurringDepositFrequency,
-                    recurringDepositFrequencyType, onAccountClosureType);
+                    recurringDepositFrequencyType, onAccountClosureType, expectedFirstDepositOnDate);
         }
     }
 
