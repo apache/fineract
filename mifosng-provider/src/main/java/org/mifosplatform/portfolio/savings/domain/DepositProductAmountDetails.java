@@ -16,25 +16,23 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 
 /**
- * RecurringDepositProductAmountDetails encapsulates all recurring Deposit Amount of a
- * {@link RecurringDepositProduct}.
+ * RecurringDepositProductAmountDetails encapsulates all recurring Deposit
+ * Amount of a {@link RecurringDepositProduct}.
  */
 @Embeddable
 public class DepositProductAmountDetails {
 
     @Column(name = "min_deposit_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal minDepositAmount;
-   
+
     @Column(name = "max_deposit_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal maxDepositAmount;
-    
+
     @Column(name = "deposit_amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal depositAmount;
-    
 
-  
-    public static DepositProductAmountDetails createFrom(final BigDecimal minDepositAmount,
-    		final BigDecimal depositAmount, final BigDecimal maxDepositAmount) {
+    public static DepositProductAmountDetails createFrom(final BigDecimal minDepositAmount, final BigDecimal depositAmount,
+            final BigDecimal maxDepositAmount) {
 
         return new DepositProductAmountDetails(minDepositAmount, depositAmount, maxDepositAmount);
     }
@@ -70,7 +68,7 @@ public class DepositProductAmountDetails {
             actualChanges.put("locale", localeAsInput);
             this.maxDepositAmount = newValue;
         }
-        
+
         final String depositAmountParamName = "depositAmount";
         if (command.isChangeInBigDecimalParameterNamedWithNullCheck(depositAmountParamName, this.depositAmount)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(depositAmountParamName);
@@ -90,9 +88,8 @@ public class DepositProductAmountDetails {
         return this.maxDepositAmount;
     }
 
-	public BigDecimal getDepositAmount() {
-		return this.depositAmount;
-	}
-    
-    
+    public BigDecimal getDepositAmount() {
+        return this.depositAmount;
+    }
+
 }

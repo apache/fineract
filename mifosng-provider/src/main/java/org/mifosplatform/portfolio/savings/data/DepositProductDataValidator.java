@@ -11,8 +11,9 @@ import static org.mifosplatform.portfolio.savings.DepositsApiConstants.FIXED_DEP
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.RECURRING_DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.chartsParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.minDepositTermTypeIdParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.maxDepositTermTypeIdParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositAmountParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositMaxAmountParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositMinAmountParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.inMultiplesOfDepositTermParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.inMultiplesOfDepositTermTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestFreeFromPeriodParamName;
@@ -20,16 +21,15 @@ import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestF
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestFreePeriodFrequencyTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestFreeToPeriodParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.maxDepositTermParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.maxDepositTermTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.minDepositTermParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.minDepositTermTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.preClosurePenalApplicableParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.preClosurePenalInterestOnTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.preClosurePenalInterestParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositFrequencyTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositTypeIdParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositAmountParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositMinAmountParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositMaxAmountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.descriptionParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
@@ -51,8 +51,6 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawal
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -114,7 +112,7 @@ public class DepositProductDataValidator {
         validateDepositTermDeatilForCreate(element, baseDataValidator);
 
         validateChartsData(element, baseDataValidator);
-        
+
         validateDepositAmountForCreate(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -138,7 +136,7 @@ public class DepositProductDataValidator {
         validateDepositTermDetailForUpdate(element, baseDataValidator);
 
         validateChartsData(element, baseDataValidator);
-        
+
         validateDepositAmountForUpdate(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -165,7 +163,7 @@ public class DepositProductDataValidator {
         validateRecurringDetailForCreate(element, baseDataValidator);
 
         validateChartsData(element, baseDataValidator);
-        
+
         validateDepositAmountForCreate(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -191,7 +189,7 @@ public class DepositProductDataValidator {
         validateRecurringDepositUpdate(element, baseDataValidator);
 
         validateChartsData(element, baseDataValidator);
-        
+
         validateDepositAmountForUpdate(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -387,7 +385,7 @@ public class DepositProductDataValidator {
             baseDataValidator.reset().parameter(maxDepositTermTypeIdParamName).value(maxDepositTermType)
                     .isOneOfTheseValues(SavingsPeriodFrequencyType.integerValues());
         }
-        
+
         if (fromApiJsonHelper.parameterExists(inMultiplesOfDepositTermParamName, element)) {
             final Integer inMultiplesOfDepositTerm = fromApiJsonHelper.extractIntegerSansLocaleNamed(inMultiplesOfDepositTermParamName,
                     element);
@@ -746,20 +744,20 @@ public class DepositProductDataValidator {
                     .isOneOfTheseValues(SavingsPeriodFrequencyType.integerValues());
         }
     }
-    
+
     private void validateDepositAmountForCreate(JsonElement element, DataValidatorBuilder baseDataValidator) {
-    	final BigDecimal depositAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositAmountParamName, element);
+        final BigDecimal depositAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositAmountParamName, element);
         baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount).notNull().positiveAmount();
-        
+
         BigDecimal depositMinAmount = null;
         if (this.fromApiJsonHelper.parameterExists(depositMinAmountParamName, element)) {
-        	depositMinAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositMinAmountParamName, element);
+            depositMinAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositMinAmountParamName, element);
             baseDataValidator.reset().parameter(depositMinAmountParamName).value(depositMinAmount).notNull().positiveAmount();
         }
 
         BigDecimal depositMaxAmount = null;
         if (this.fromApiJsonHelper.parameterExists(depositMaxAmountParamName, element)) {
-        	depositMaxAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositMaxAmountParamName, element);
+            depositMaxAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositMaxAmountParamName, element);
             baseDataValidator.reset().parameter(depositMaxAmountParamName).value(depositMaxAmount).notNull().positiveAmount();
         }
 
@@ -777,29 +775,29 @@ public class DepositProductDataValidator {
             baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount).notLessThanMin(depositMinAmount);
         }
     }
-    
+
     private void validateDepositAmountForUpdate(JsonElement element, DataValidatorBuilder baseDataValidator) {
         BigDecimal depositAmount = null;
-        
+
         if (this.fromApiJsonHelper.parameterExists(depositAmountParamName, element)) {
             depositAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositAmountParamName, element);
             baseDataValidator.reset().parameter(depositMinAmountParamName).value(depositAmount).notNull().positiveAmount();
         }
         baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount).notNull().positiveAmount();
-        
+
         BigDecimal depositMinAmount = null;
         if (this.fromApiJsonHelper.parameterExists(depositMinAmountParamName, element)) {
-                depositMinAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositMinAmountParamName, element);
+            depositMinAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositMinAmountParamName, element);
             baseDataValidator.reset().parameter(depositMinAmountParamName).value(depositMinAmount).notNull().positiveAmount();
         }
 
         BigDecimal depositMaxAmount = null;
         if (this.fromApiJsonHelper.parameterExists(depositMaxAmountParamName, element)) {
-                depositMaxAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositMaxAmountParamName, element);
+            depositMaxAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositMaxAmountParamName, element);
             baseDataValidator.reset().parameter(depositMaxAmountParamName).value(depositMaxAmount).notNull().positiveAmount();
         }
 
-        if(depositAmount != null) {
+        if (depositAmount != null) {
             if (depositMaxAmount != null && depositMaxAmount.compareTo(BigDecimal.ZERO) != -1) {
                 if (depositMinAmount != null && depositMinAmount.compareTo(BigDecimal.ZERO) != -1) {
                     baseDataValidator.reset().parameter(depositMaxAmountParamName).value(depositMaxAmount).notLessThanMin(depositMinAmount);
