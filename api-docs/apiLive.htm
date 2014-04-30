@@ -15675,7 +15675,7 @@ Content-Type: application/json
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
                 <tr class=alt>
                 	<td>name, shortName, description, currencyCode, digitsAfterDecimal,inMultiplesOf, 
-                		interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minDepositTerm, minDepositTermTypeId, recurringDepositFrequency, recurringDepositFrequencyTypeId, accountingRule </td>
+                		interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minDepositTerm, minDepositTermTypeId, recurringDepositFrequency, recurringDepositFrequencyTypeId, accountingRule, depositAmount </td>
                 </tr>
             </table>
             <br/>
@@ -15688,7 +15688,7 @@ Content-Type: application/json
             <br/>
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
-                <tr class=alt><td>lockinPeriodFrequency, lockinPeriodFrequencyType, maxDepositTerm, maxDepositTermTypeId, inMultiplesOfDepositTerm, inMultiplesOfDepositTermTypeId, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, charts</tr>
+                <tr class=alt><td>lockinPeriodFrequency, lockinPeriodFrequencyType, maxDepositTerm, maxDepositTermTypeId, inMultiplesOfDepositTerm, inMultiplesOfDepositTermTypeId, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, charts, minDepositAmount, maxDepositAmount</tr>
             </table>
         </div>
         <div class="method-example">
@@ -15718,6 +15718,9 @@ Request Body:
   "minDepositTermTypeId":1,
   "maxDepositTerm":5,
   "maxDepositTermTypeId":3,
+  depositAmount: "10000",
+  minDepositAmount: "100",
+  maxDepositAmount: "1000000",
   "charts":[
       {
          "fromDate": "01 Jan 2014",
@@ -15860,6 +15863,9 @@ Request Body:
     "code": "recurring.deposit.savingsPeriodFrequencyType.months",
     "value": "Months"
   },
+   "minDepositAmount":100.00,
+   "depositAmount":10000.00,
+   "maxDepositAmount":1000000.00,
   "preClosurePenalApplicable":"true",
   "preClosurePenalInterest":"1.75",
   "preClosurePenalInterestOnType": {
@@ -20000,7 +20006,7 @@ No Request Body:
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-	            <tr class=alt><td>clientId or groupId, productId, submittedOnDate, recurringDepositAmount, depositPeriod, depositPeriodFrequencyId, recurringDepositFrequency, recurringDepositFrequencyTypeId</td></tr>
+	            <tr class=alt><td>clientId or groupId, productId, submittedOnDate, recurringDepositAmount, depositPeriod, depositPeriodFrequencyId, recurringDepositFrequency, recurringDepositFrequencyTypeId, expectedFirstDepositOnDate</td></tr>
 	        </table>
 	        <br/>
 	        <table class=matrixHeading>
@@ -20049,7 +20055,8 @@ Request Body:
   "depositPeriod":"6",
   "depositPeriodFrequencyId":"2",
   "accountNo": "RD000023",
-  "externalId": "RD-23"
+  "externalId": "RD-23",
+  expectedFirstDepositOnDate: "02 April 2014"
 }
 			</code>
 			<p>Full request: accountNo provided (must be unique), remaining details override details from recurring deposit product (except currency).</p>
@@ -20882,6 +20889,11 @@ Request Body:
   },
   "recurringDepositAmount": 100,
   "recurringDepositFrequency": 1,
+  "expectedFirstDepositOnDate": [
+  	2014, 
+  	4,
+   	2
+   ],
   "recurringDepositFrequencyType": {
       "id": 2,
       "code": "recurring.deposit.savingsPeriodFrequencyType.months",

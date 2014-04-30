@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.savings.domain;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositAmountParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositPeriodFrequencyIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositPeriodParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.expectedFirstDepositOnDateParamName;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -32,6 +33,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.savings.DepositAccountOnClosureType;
+import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -121,6 +123,18 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
             final Integer newValue = command.integerValueOfParameterNamed(depositPeriodFrequencyIdParamName);
             actualChanges.put(depositPeriodFrequencyIdParamName, SavingsEnumerations.depositTermFrequencyType(newValue));
             this.depositPeriodFrequency = newValue;
+        }
+        
+        final String localeAsInput = command.locale();
+        final String dateFormat = command.dateFormat();
+        
+        if (command.isChangeInLocalDateParameterNamed(expectedFirstDepositOnDateParamName, getExpectedFirstDepositOnDate())) {
+            final LocalDate newValue = command.localDateValueOfParameterNamed(expectedFirstDepositOnDateParamName);
+            final String newValueAsString = command.stringValueOfParameterNamed(expectedFirstDepositOnDateParamName);
+            actualChanges.put(expectedFirstDepositOnDateParamName, newValueAsString);
+            actualChanges.put(SavingsApiConstants.localeParamName, localeAsInput);
+            actualChanges.put(SavingsApiConstants.dateFormatParamName, dateFormat);
+            this.expectedFirstDepositOnDate = newValue.toDate();
         }
 
         if (this.preClosureDetail != null) {

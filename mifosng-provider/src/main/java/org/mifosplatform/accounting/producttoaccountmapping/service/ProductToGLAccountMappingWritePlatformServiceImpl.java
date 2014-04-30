@@ -20,6 +20,7 @@ import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.accounting.producttoaccountmapping.serialization.ProductToGLAccountMappingFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -145,7 +146,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
 
     @Override
     @Transactional
-    public void createSavingProductToGLAccountMapping(final Long savingProductId, final JsonCommand command) {
+    public void createSavingProductToGLAccountMapping(final Long savingProductId, final JsonCommand command, DepositAccountType accountType) {
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
         final Integer accountingRuleTypeId = this.fromApiJsonHelper.extractIntegerNamed(accountingRuleParamName, element,
                 Locale.getDefault());
@@ -159,9 +160,12 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_REFERENCE.getValue());
-                this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
+                
+                if(!accountType.equals(DepositAccountType.RECURRING_DEPOSIT) && !accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
+                    this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.OVERDRAFT_PORTFOLIO_CONTROL.getValue());
+                }
 
                 // income
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
@@ -171,19 +175,23 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_PENALTIES.getValue());
-
+                
+                if(!accountType.equals(DepositAccountType.RECURRING_DEPOSIT) && !accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_INTEREST.getValue());
+                }
 
                 // expenses
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToExpenseAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.INTEREST_ON_SAVINGS.getValue());
-
+                
+                if(!accountType.equals(DepositAccountType.RECURRING_DEPOSIT) && !accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToExpenseAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), savingProductId,
-                        CASH_ACCOUNTS_FOR_SAVINGS.LOSSES_WRITTEN_OFF.getValue());
+                     CASH_ACCOUNTS_FOR_SAVINGS.LOSSES_WRITTEN_OFF.getValue());
+                }
 
                 // liability
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
@@ -237,7 +245,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
 
     @Override
     public Map<String, Object> updateSavingsProductToGLAccountMapping(final Long savingsProductId, final JsonCommand command,
-            final boolean accountingRuleChanged, final int accountingRuleTypeId) {
+            final boolean accountingRuleChanged, final int accountingRuleTypeId, final DepositAccountType accountType) {
         /***
          * Variable tracks all accounting mapping properties that have been
          * updated
@@ -253,7 +261,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
         if (accountingRuleChanged) {
             this.deserializer.validateForSavingsProductCreate(command.json());
             this.savingsProductToGLAccountMappingHelper.deleteSavingsProductToGLAccountMapping(savingsProductId);
-            createSavingProductToGLAccountMapping(savingsProductId, command);
+            createSavingProductToGLAccountMapping(savingsProductId, command, accountType);
             changes = this.savingsProductToGLAccountMappingHelper.populateChangesForNewSavingsProductToGLAccountMappingCreation(element,
                     accountingRuleType);
         }/*** else examine and update individual changes ***/

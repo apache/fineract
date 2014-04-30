@@ -19,6 +19,7 @@ import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityExce
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.interestratechart.service.InterestRateChartAssembler;
+import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.data.DepositProductDataValidator;
 import org.mifosplatform.portfolio.savings.domain.DepositProductAssembler;
 import org.mifosplatform.portfolio.savings.domain.FixedDepositProduct;
@@ -70,7 +71,7 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
             this.fixedDepositProductRepository.save(product);
 
             // save accounting mappings
-            this.accountMappingWritePlatformService.createSavingProductToGLAccountMapping(product.getId(), command);
+            this.accountMappingWritePlatformService.createSavingProductToGLAccountMapping(product.getId(), command, DepositAccountType.FIXED_DEPOSIT);
 
             return new CommandProcessingResultBuilder() //
                     .withEntityId(product.getId()) //
@@ -107,7 +108,7 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
             // accounting related changes
             final boolean accountingTypeChanged = changes.containsKey(accountingRuleParamName);
             final Map<String, Object> accountingMappingChanges = this.accountMappingWritePlatformService
-                    .updateSavingsProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingType());
+                    .updateSavingsProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingType(), DepositAccountType.FIXED_DEPOSIT);
             changes.putAll(accountingMappingChanges);
 
             if (!changes.isEmpty()) {

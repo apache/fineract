@@ -576,7 +576,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         LocalDate endOfBalanceDate = interestPostingUpToDate;
         for (int i = accountTransactionsSorted.size() - 1; i >= 0; i--) {
             final SavingsAccountTransaction transaction = accountTransactionsSorted.get(i);
-            if (transaction.isNotReversed()) {
+            if (transaction.isNotReversed() && !transaction.isInterestPostingAndNotReversed()) {
                 transaction.updateCumulativeBalanceAndDates(this.currency, endOfBalanceDate);
 
                 // this transactions transaction date is end of balance date for

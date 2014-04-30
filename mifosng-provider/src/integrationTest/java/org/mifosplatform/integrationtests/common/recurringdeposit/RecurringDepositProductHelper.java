@@ -78,6 +78,9 @@ public class RecurringDepositProductHelper {
     private final String recurringDepositTypeId = VOLUNTARY;
     private final String recurringDepositFrequencyTypeId = MONTHS;
     private final String recurringDepositFrequency = "1";
+    private final String depositAmount = "10000";
+    private final String minDepositAmount = "100";
+    private final String maxDepositAmount = "1000000";
     private Account[] accountList = null;
 
     public String build(final String validFrom, final String validTo) {
@@ -157,6 +160,9 @@ public class RecurringDepositProductHelper {
         map.put("recurringDepositTypeId", this.recurringDepositTypeId);
         map.put("recurringDepositFrequencyTypeId", this.recurringDepositFrequencyTypeId);
         map.put("recurringDepositFrequency", this.recurringDepositFrequency);
+        map.put("depositAmount", this.depositAmount);
+        map.put("minDepositAmount", this.minDepositAmount);
+        map.put("maxDepositAmount", this.maxDepositAmount);
 
         if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());

@@ -213,9 +213,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         }
 
         this.savingsAccountRepository.save(account);
-        if (withdrawal != null) {
-            saveTransactionToGenerateTransactionId(withdrawal);
-        }
+       
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
 
         return withdrawal;

@@ -89,6 +89,7 @@ public class RecurringDepositAccountHelper {
     private final String recurringDepositFrequencyTypeId = MONTHS;
     private final String recurringDepositAmount = "2000";
     private String submittedOnDate = "";
+    private String expectedFirstDepositOnDate = "";
 
     public String build(final String clientId, final String productId, final String validFrom, final String validTo) {
         final HashMap<String, Object> map = new HashMap<String, Object>();
@@ -169,6 +170,7 @@ public class RecurringDepositAccountHelper {
         map.put("recurringDepositFrequency", this.recurringDepositFrequency);
         map.put("recurringDepositFrequencyTypeId", this.recurringDepositFrequencyTypeId);
         map.put("recurringDepositAmount", this.recurringDepositAmount);
+        map.put("expectedFirstDepositOnDate", this.expectedFirstDepositOnDate);
 
         String recurringDepositAccountJson = new Gson().toJson(map);
         System.out.println(recurringDepositAccountJson);
@@ -203,8 +205,10 @@ public class RecurringDepositAccountHelper {
         todaysDate.add(Calendar.MONTH, -1);
         todaysDate.add(Calendar.DATE, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String EXPECTED_FIRST_DEPOSIT_ON_ON_DATE = SUBMITTED_ON_DATE;
         final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec) //
                 .withSubmittedOnDate(SUBMITTED_ON_DATE) //
+                .withExpectedFirstDepositOnDate(EXPECTED_FIRST_DEPOSIT_ON_ON_DATE)
                 .build(clientID, productID, validFrom, validTo);
 
         return Utils.performServerPut(this.requestSpec, this.responseSpec, RECURRING_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?"
@@ -409,6 +413,11 @@ public class RecurringDepositAccountHelper {
 
     public RecurringDepositAccountHelper withSubmittedOnDate(final String recurringDepositApplicationSubmittedDate) {
         this.submittedOnDate = recurringDepositApplicationSubmittedDate;
+        return this;
+    }
+    
+    public RecurringDepositAccountHelper withExpectedFirstDepositOnDate(final String recurringDepositApplicationExpectedFirstDepositOnDate) {
+        this.expectedFirstDepositOnDate = recurringDepositApplicationExpectedFirstDepositOnDate;
         return this;
     }
 
