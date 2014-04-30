@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 30 Apr 2014 - 1.22.0.RELEASE
 1. 30 Mar 2014 - 1.21.0.RELEASE
 1. 18 Mar 2014 - 1.20.1.RELEASE
 1. 16 Mar 2014 - 1.20.0.RELEASE
@@ -61,6 +62,62 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+
+1.22.0.RELEASE
+=============
+This feature release contains work around Fixed deposits with interest slabs , recurring deposits, accrual accounting (upfront and periodic accrual) for loan products including the ability to categorize loans as Non Performing Assets, standing instructions, ability to disburse loans to linked savings accounts and upgrading the community app to Bootstrap 3.
+
+
+Note that the FD and RD functionality is likely to undergo a few changes in upcoming releases and is not recommeneded for production use
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-1111] - Add Support for Term Deposits or Fixed Deposits or Time Deposits
+ - [MIFOSX-1112] - Add Support for Recurring Deposits
+ - [MIFOSX-1049] - Ship sample Data with every stable release
+ - [MIFOSX-1065] - In saving product, need quarterly, biannually, yearly option for interest compounding.
+ - [MIFOSX-1081] - Ability to Categorize Loans as Non Performing Assets (NPA)
+ - [MIFOSX-865] - Accrual Accounting support for Loan Products
+ - [MIFOSX-1055] - Add Standing Instructions for account to account transfer
+ - [MIFOSX-1146] - add support for disbursing loan amount to savings account
+ - [MIFOSX-1094] - Passing Tenant Database host, port and credentials to Pentaho reports
+ - [MIFOSX-1008] - No Interest posting on saving account when Interest is set @ 0%
+ - [MIFOSX-1075] - Add overdue penalty batch job in DB and handle exceptions in batch job
+ - [MIFOSX-1035] - JUnit Integration Test Cases for Charges
+ - [MIFOSX-1046] - JUnit test cases for code and code values API's
+ - [MIFOSX-1047] - JUnit test cases for Scheduler Jobs API's
+
+
+Bugs
+ - [MIFOSX-886] - In Modify Loan application adding charge on specified due date/Overdue fees results in Unknown data integrity issue
+ - [MIFOSX-998] - Should not be allowed to activate Group/Center and associate clients under group with out permissions.
+ - [MIFOSX-1021] - Not able to view particular charge details attached for savings account
+ - [MIFOSX-1027] - Potential issues with maker-Checker functionality
+ - [MIFOSX-1036] - Not able to generate Pentaho report added for client's Loan and saving transactions page
+ - [MIFOSX-1056] - Improper error message is displayed after clicking on "Repayment info" button while submitting the tranche loan application for a client with insufficient input
+ - [MIFOSX-1076] - In Modify Loan application if the Loan amount is modified, the % Charge on disbusement is not modifying accordingly.
+ - [MIFOSX-1077] - In Client loan page after submitting the Loan application if the %amount charge is edited then it is not getting calculated properly
+ - [MIFOSX-1053] - Not able to pay overdue savings charges through Schedular Job.
+
+
+Community App
+ - [MIFOSX-962] - Upgrade to Twitter Bootstrap 3
+ - [MIFOSX-1048] - Gmail Like Loading Progress Bar during application load
+ - [MIFOSX-965] - Community app should "respond" to fill entire screen
+ - [MIFOSX-1064] - Remove Gray "frame" around page data so as to match with the background.
+ - [MIFOSX-1072] - Ability to view error log details of individual run in View history page of a particular Schedular Job page
+ - [MIFOSX-1057] - New Collection Sheet UI changes
+ - [MIFOSX-1022] - Improvements In savings account for a client
+ - [MIFOSX-1058] - Not able to create holiday because of issue with the checkbox while selecting the office
+ - [MIFOSX-1073] - Issue with respect to View a particular Charge details in Loan and savings accounts
+ - [MIFOSX-1042] - UI related issues with respect to Datatables
+ - [MIFOSX-1041] - Issue related to Collection sheets
+ - [MIFOSX-1090] - Added overdue penalties is not displaying in loan repayment schedule
+ - [MIFOSX-1095] - Not able to assign Moratorium for Interest in new loan application page for a client
+ - [MIFOSX-1144] - Not able make/edit/read datatable entries even though user have proper permissions
+
 
 
 1.21.0.RELEASE
