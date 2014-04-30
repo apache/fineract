@@ -59,14 +59,15 @@ public class InterestRateChartSlabFields {
         //
     }
 
-    public static InterestRateChartSlabFields createNew(String description, final SavingsPeriodFrequencyType periodFrequencyType, Integer fromPeriod, Integer toPeriod,
-            BigDecimal amountRangeFrom, BigDecimal amountRangeTo, BigDecimal annualInterestRate, String currencyCode) {
+    public static InterestRateChartSlabFields createNew(String description, final SavingsPeriodFrequencyType periodFrequencyType,
+            Integer fromPeriod, Integer toPeriod, BigDecimal amountRangeFrom, BigDecimal amountRangeTo, BigDecimal annualInterestRate,
+            String currencyCode) {
         return new InterestRateChartSlabFields(description, periodFrequencyType, fromPeriod, toPeriod, amountRangeFrom, amountRangeTo,
                 annualInterestRate, currencyCode);
     }
 
-    private InterestRateChartSlabFields(String description, final SavingsPeriodFrequencyType periodFrequencyType, Integer fromPeriod, Integer toPeriod,
-            BigDecimal amountRangeFrom, BigDecimal amountRangeTo, BigDecimal annualInterestRate, String currencyCode) {
+    private InterestRateChartSlabFields(String description, final SavingsPeriodFrequencyType periodFrequencyType, Integer fromPeriod,
+            Integer toPeriod, BigDecimal amountRangeFrom, BigDecimal amountRangeTo, BigDecimal annualInterestRate, String currencyCode) {
         this.description = description;
         this.periodType = (periodFrequencyType == null) ? null : periodFrequencyType.getValue();
         this.fromPeriod = fromPeriod;
@@ -120,10 +121,10 @@ public class InterestRateChartSlabFields {
             actualChanges.put(annualInterestRateParamName, newValue);
             this.annualInterestRate = newValue;
         }
-        
+
         this.validateChartSlabPlatformRules(command, baseDataValidator);
     }
-    
+
     public void validateChartSlabPlatformRules(JsonCommand chartSlabsCommand, DataValidatorBuilder baseDataValidator) {
         if (this.isFromPeriodGreaterThanToPeriod()) {
             final Integer fromPeriod = chartSlabsCommand.integerValueOfParameterNamed(fromPeriodParamName);
@@ -152,7 +153,7 @@ public class InterestRateChartSlabFields {
         }
         return isGreater;
     }
-    
+
     public Integer periodType() {
         return this.periodType;
     }
@@ -166,28 +167,26 @@ public class InterestRateChartSlabFields {
     }
 
     public boolean isPeriodOverlapping(InterestRateChartSlabFields that) {
-        if (that.toPeriod == null){
-            if (this.toPeriod == null){
-                return true;
-            }
+        if (that.toPeriod == null) {
+            if (this.toPeriod == null) { return true; }
             return that.fromPeriod <= this.toPeriod;
         }
         return this.fromPeriod <= that.toPeriod && that.fromPeriod <= this.toPeriod;
     }
-    
-    public boolean isBetweenPeriod(final LocalDate periodStartDate, final LocalDate periodEndDate){
+
+    public boolean isBetweenPeriod(final LocalDate periodStartDate, final LocalDate periodEndDate) {
         final Integer compare = depositPeriod(periodStartDate, periodEndDate);
         return (compare < this.fromPeriod || (this.toPeriod != null && compare > this.toPeriod)) ? false : true;
     }
-    
-    public boolean isAmountRangeProvided(){
+
+    public boolean isAmountRangeProvided() {
         return (this.amountRangeFrom == null) ? false : true;
     }
-    
+
     public BigDecimal annualInterestRate() {
         return this.annualInterestRate;
     }
-    
+
     public Integer depositPeriod(final LocalDate periodStartDate, final LocalDate periodEndDate) {
         Integer actualDepositPeriod = 0;
         final SavingsPeriodFrequencyType periodFrequencyType = SavingsPeriodFrequencyType.fromInt(this.periodType());
@@ -210,8 +209,13 @@ public class InterestRateChartSlabFields {
         }
         return actualDepositPeriod;
     }
-    
-    public boolean isAmountBetween(final BigDecimal depositAmount){
-        return depositAmount.compareTo(amountRangeFrom) >= 0 && depositAmount.compareTo(amountRangeTo) <= 0;
+
+    public boolean isAmountBetween(final BigDecimal depositAmount) {
+        if (amountRangeFrom != null && amountRangeTo != null) {
+            return depositAmount.compareTo(amountRangeFrom) >= 0 && depositAmount.compareTo(amountRangeTo) <= 0;
+        } else if (amountRangeFrom != null) {
+            return depositAmount.compareTo(amountRangeFrom) >= 0;
+        } else if (amountRangeTo != null) { return depositAmount.compareTo(amountRangeTo) <= 0; }
+        return true;
     }
 }
