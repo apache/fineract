@@ -30,6 +30,7 @@ public class RecurringDepositProductHelper {
     }
 
     private static final String RECURRING_DEPOSIT_PRODUCT_URL = "/mifosng-provider/api/v1/recurringdepositproducts";
+    private static final String INTEREST_CHART_URL = "/mifosng-provider/api/v1/interestratecharts";
     private static final String CREATE_RECURRING_DEPOSIT_PRODUCT_URL = RECURRING_DEPOSIT_PRODUCT_URL + "?" + Utils.TENANT_IDENTIFIER;
 
     private static final String LOCALE = "en_GB";
@@ -78,6 +79,7 @@ public class RecurringDepositProductHelper {
     private final String recurringDepositTypeId = VOLUNTARY;
     private final String recurringDepositFrequencyTypeId = MONTHS;
     private final String recurringDepositFrequency = "1";
+    private final String depositAmount = "100000";
     private Account[] accountList = null;
 
     public String build(final String validFrom, final String validTo) {
@@ -156,6 +158,7 @@ public class RecurringDepositProductHelper {
         map.put("preClosurePenalInterestOnTypeId", this.preClosurePenalInterestOnTypeId);
         map.put("recurringDepositTypeId", this.recurringDepositTypeId);
         map.put("recurringDepositFrequencyTypeId", this.recurringDepositFrequencyTypeId);
+        map.put("depositAmount", this.depositAmount);
         map.put("recurringDepositFrequency", this.recurringDepositFrequency);
 
         if (this.accountingRule.equals(CASH_BASED)) {
@@ -225,6 +228,14 @@ public class RecurringDepositProductHelper {
         System.out.println("-------------------- RETRIEVING RECURRING DEPOSIT PRODUCT BY ID --------------------------");
         final String GET_RD_PRODUCT_BY_ID_URL = RECURRING_DEPOSIT_PRODUCT_URL + "/" + productId + "?" + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_RD_PRODUCT_BY_ID_URL, "");
+        return response;
+    }
+
+    public static ArrayList getInterestRateChartSlabsByProductId(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer productId) {
+        System.out.println("-------------------- RETRIEVE INTEREST CHART BY PRODUCT ID ---------------------");
+        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec, INTEREST_CHART_URL + "?productId=" + productId,
+                "chartSlabs");
         return response;
     }
 

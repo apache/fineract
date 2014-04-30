@@ -11,6 +11,9 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.Months;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,10 +41,21 @@ public class FixedDepositTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
-    private FixedDepositProductHelper fixedDepositHelper;
+    private FixedDepositProductHelper fixedDepositProductHelper;
     private FixedDepositAccountHelper fixedDepositAccountHelper;
     private AccountHelper accountHelper;
     private SavingsAccountHelper savingsAccountHelper;
+
+    private static final String WHOLE_TERM = "1";
+    private static final String TILL_PREMATURE_WITHDRAWAL = "2";
+    private static final String DAILY = "1";
+    private static final String MONTHLY = "4";
+    private static final String QUARTERLY = "5";
+    private static final String ANNUALLY = "7";
+    private static final String INTEREST_CALCULATION_USING_DAILY_BALANCE = "1";
+    private static final String INTEREST_CALCULATION_USING_AVERAGE_DAILY_BALANCE = "2";
+    private static final String DAYS_360 = "360";
+    private static final String DAYS_365 = "365";
 
     public static final String MINIMUM_OPENING_BALANCE = "1000.0";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
@@ -60,7 +74,7 @@ public class FixedDepositTest {
 
     @Test
     public void testFixedDepositAccountWithPrematureClosureTypeWithdrawal() {
-        this.fixedDepositHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+        this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
@@ -94,13 +108,8 @@ public class FixedDepositTest {
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO);
         Assert.assertNotNull(fixedDepositProductId);
 
-        ArrayList<HashMap> allFixedDepositProductsData = this.fixedDepositHelper.retrieveAllFixedDepositProducts(this.requestSpec,
-                this.responseSpec);
-        HashMap fixedDepositProductData = this.fixedDepositHelper.retrieveFixedDepositProductById(this.requestSpec, this.responseSpec,
-                fixedDepositProductId.toString());
-
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE);
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
@@ -134,7 +143,7 @@ public class FixedDepositTest {
 
     @Test
     public void testFixedDepositAccountUpdation() {
-        this.fixedDepositHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+        this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
@@ -148,8 +157,8 @@ public class FixedDepositTest {
 
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
-        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
@@ -157,24 +166,26 @@ public class FixedDepositTest {
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO);
         Assert.assertNotNull(fixedDepositProductId);
 
-        ArrayList<HashMap> allFixedDepositProductsData = this.fixedDepositHelper.retrieveAllFixedDepositProducts(this.requestSpec,
+        ArrayList<HashMap> allFixedDepositProductsData = this.fixedDepositProductHelper.retrieveAllFixedDepositProducts(this.requestSpec,
                 this.responseSpec);
-        HashMap fixedDepositProductData = this.fixedDepositHelper.retrieveFixedDepositProductById(this.requestSpec, this.responseSpec,
-                fixedDepositProductId.toString());
+        HashMap fixedDepositProductData = this.fixedDepositProductHelper.retrieveFixedDepositProductById(this.requestSpec,
+                this.responseSpec, fixedDepositProductId.toString());
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE);
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
+        todaysDate.add(Calendar.DATE, -1);
+        SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         HashMap modificationsHashMap = this.fixedDepositAccountHelper.updateFixedDepositAccount(clientId.toString(),
-                fixedDepositProductId.toString(), fixedDepositAccountId.toString(), VALID_FROM, VALID_TO);
+                fixedDepositProductId.toString(), fixedDepositAccountId.toString(), VALID_FROM, VALID_TO, WHOLE_TERM, SUBMITTED_ON_DATE);
         Assert.assertTrue(modificationsHashMap.containsKey("submittedOnDate"));
 
     }
 
     @Test
     public void testFixedDepositAccountWithPrematureClosureTypeTransferToSavings() {
-        this.fixedDepositHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+        this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
@@ -218,13 +229,8 @@ public class FixedDepositTest {
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO);
         Assert.assertNotNull(fixedDepositProductId);
 
-        ArrayList<HashMap> allFixedDepositProductsData = this.fixedDepositHelper.retrieveAllFixedDepositProducts(this.requestSpec,
-                this.responseSpec);
-        HashMap fixedDepositProductData = this.fixedDepositHelper.retrieveFixedDepositProductById(this.requestSpec, this.responseSpec,
-                fixedDepositProductId.toString());
-
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE);
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
@@ -266,13 +272,13 @@ public class FixedDepositTest {
         Float balanceAfter = (Float) savingsSummaryAfter.get("accountBalance");
         Float expectedSavingsBalance = balanceBefore + prematurityAmount;
 
-        Assert.assertEquals("Verifying Savings Account Balance after Premature Closure", expectedSavingsBalance, balanceAfter);
+        Assert.assertEquals("Verifying Savings Account Balance after Premature Closure", balanceAfter, expectedSavingsBalance);
 
     }
 
     @Test
     public void testFixedDepositAccountWithPrematureClosureTypeReinvest() {
-        this.fixedDepositHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+        this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
@@ -304,13 +310,8 @@ public class FixedDepositTest {
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO);
         Assert.assertNotNull(fixedDepositProductId);
 
-        ArrayList<HashMap> allFixedDepositProductsData = this.fixedDepositHelper.retrieveAllFixedDepositProducts(this.requestSpec,
-                this.responseSpec);
-        HashMap fixedDepositProductData = this.fixedDepositHelper.retrieveFixedDepositProductById(this.requestSpec, this.responseSpec,
-                fixedDepositProductId.toString());
-
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE);
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
@@ -342,7 +343,7 @@ public class FixedDepositTest {
 
     @Test
     public void testFixedDepositAccountUndoApproval() {
-        this.fixedDepositHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+        this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
@@ -366,13 +367,8 @@ public class FixedDepositTest {
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO);
         Assert.assertNotNull(fixedDepositProductId);
 
-        ArrayList<HashMap> allFixedDepositProductsData = this.fixedDepositHelper.retrieveAllFixedDepositProducts(this.requestSpec,
-                this.responseSpec);
-        HashMap fixedDepositProductData = this.fixedDepositHelper.retrieveFixedDepositProductById(this.requestSpec, this.responseSpec,
-                fixedDepositProductId.toString());
-
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE);
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
@@ -388,7 +384,7 @@ public class FixedDepositTest {
 
     @Test
     public void testFixedDepositAccountRejectedAndClosed() {
-        this.fixedDepositHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+        this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
 
@@ -413,13 +409,8 @@ public class FixedDepositTest {
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO);
         Assert.assertNotNull(fixedDepositProductId);
 
-        ArrayList<HashMap> allFixedDepositProductsData = this.fixedDepositHelper.retrieveAllFixedDepositProducts(this.requestSpec,
-                this.responseSpec);
-        HashMap fixedDepositProductData = this.fixedDepositHelper.retrieveFixedDepositProductById(this.requestSpec, this.responseSpec,
-                fixedDepositProductId.toString());
-
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE);
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
@@ -433,7 +424,7 @@ public class FixedDepositTest {
 
     @Test
     public void testFixedDepositAccountWithdrawnByClientAndClosed() {
-        this.fixedDepositHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+        this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
 
@@ -458,13 +449,8 @@ public class FixedDepositTest {
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO);
         Assert.assertNotNull(fixedDepositProductId);
 
-        ArrayList<HashMap> allFixedDepositProductsData = this.fixedDepositHelper.retrieveAllFixedDepositProducts(this.requestSpec,
-                this.responseSpec);
-        HashMap fixedDepositProductData = this.fixedDepositHelper.retrieveFixedDepositProductById(this.requestSpec, this.responseSpec,
-                fixedDepositProductId.toString());
-
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE);
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
@@ -478,7 +464,7 @@ public class FixedDepositTest {
 
     @Test
     public void testFixedDepositAccountIsDeleted() {
-        this.fixedDepositHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+        this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
@@ -501,13 +487,8 @@ public class FixedDepositTest {
         Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO);
         Assert.assertNotNull(fixedDepositProductId);
 
-        ArrayList<HashMap> allFixedDepositProductsData = this.fixedDepositHelper.retrieveAllFixedDepositProducts(this.requestSpec,
-                this.responseSpec);
-        HashMap fixedDepositProductData = this.fixedDepositHelper.retrieveFixedDepositProductById(this.requestSpec, this.responseSpec,
-                fixedDepositProductId.toString());
-
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE);
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM);
         Assert.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
@@ -528,10 +509,10 @@ public class FixedDepositTest {
     }
 
     private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String validFrom,
-            final String validTo, final String submittedOnDate) {
+            final String validTo, final String submittedOnDate, final String penalInterestType) {
         System.out.println("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
-                .withSubmittedOnDate(submittedOnDate).build(clientID, productID, validFrom, validTo);
+                .withSubmittedOnDate(submittedOnDate).build(clientID, productID, validFrom, validTo, penalInterestType);
         return this.fixedDepositAccountHelper
                 .applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec, this.responseSpec);
     }
