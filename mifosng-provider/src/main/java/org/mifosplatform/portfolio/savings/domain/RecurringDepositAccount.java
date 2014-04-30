@@ -819,11 +819,14 @@ public class RecurringDepositAccount extends SavingsAccount {
                     "no.applicable.interest.rate.is.found.based.on.amount.and.deposit.period");
         }
 
-        final boolean recurringFrequencyBeforeDepositPeriod = recurringFrequencyBeforeDepositPeriod();
-
-        if (!recurringFrequencyBeforeDepositPeriod) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("recurring.frequency.not.before.deposit.period");
-        }
+        /**
+         * final boolean recurringFrequencyBeforeDepositPeriod =
+         * recurringFrequencyBeforeDepositPeriod();
+         * 
+         * if (!recurringFrequencyBeforeDepositPeriod) {
+         * baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
+         * "recurring.frequency.not.before.deposit.period"); }
+         **/
     }
 
     public boolean isReinvestOnClosure() {
