@@ -1117,6 +1117,70 @@
 								<td></td>
 							</tr>
                             <tr>
+                                <td></td>
+                                <td>groups/{groupId}?command=generateCollectionSheet</td>
+                                <td><a href="#groups_generate_collectionsheet">Generate Collection Sheet</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>groups/{groupId}?command=saveCollectionSheet</td>
+                                <td><a href="#groups_save_collectionsheet">Save Collection Sheet</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>groups/{groupId}?command=unassignStaff</td>
+                                <td><a href="#groups_unassignStaff">Unassign Staff</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>groups/{groupId}?command=assignStaff</td>
+                                <td><a href="#groups_assignStaff">Assign Staff</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>groups/{groupId}?command=close</td>
+                                <td><a href="#groups_close">Close Group</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>groups/{groupId}?command=assignRole</td>
+                                <td><a href="#groups_assignRole">Assign Role</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>groups/{groupId}?command=unassignRole</td>
+                                <td><a href="#groups_unassignRole">Unassign Role</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>groups/{groupId}?command=updateRole</td>
+                                <td><a href="#groups_updateRole">Update Role</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
                                 <td><a href="#centers">Center</a></td>
                                 <td>centers</td>
                                 <td><a href="#centers_create">Create a Center</a></td>
@@ -1144,6 +1208,38 @@
                                 <td></td>
                                 <td>centers/{centerId}?command=activate</td>
                                 <td><a href="#centers_activate">Activate a Center</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>centers/{centerId}?command=close</td>
+                                <td><a href="#centers_close">Close Center</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+															<td></td>
+															<td>centers/{centerId}/accounts</td>
+															<td></td>
+															<td><a href="#centers_accounts">Retrive Center accounts summary</a></td>
+															<td></td>
+															<td></td>
+														</tr>
+                            <tr>
+                                <td></td>
+                                <td>centers/{centerId}?command=generateCollectionSheet</td>
+                                <td><a href="#centers_generate_collectionsheet">Generate Collection Sheet</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>centers/{centerId}?command=saveCollectionSheet</td>
+                                <td><a href="#centers_save_collectionsheet">Save Collection Sheet</a></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
@@ -4168,6 +4264,248 @@ Request Body:
 	    </div>
 	</div>
 
+	<a id="centers_close" name="centers_close" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Close a Center</h2>
+	        <p>Centers can be closed if they don't have any non-closed groups/savings.</p>
+	        <p>If the group have any corresponding active groups/savingsAccount this API will result in an error.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/centers/{centerId}?command=close</code>
+	        <code class="method-request">POST centers/1?command=close
+Content-Type: application/json
+Request Body:
+{
+ "closureReasonId": 32,
+ "closureDate": "05 May 2014",
+ "locale": "en",
+ "dateFormat": "dd MMMM yyyy"
+}
+			</code>
+	        <code class="method-response">
+{
+  "resourceId": 1
+}
+	        </code>
+	    </div>
+	</div>
+
+			<a id="centers_accounts" name="centers_accounts" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Center accounts overview</h4>
+					<p>
+						An example of how a savings summary can be provided. This
+						is requested in a specific use case of the reference application.<br> It is quite reasonable to add resources like this to simplify User Interface development.
+					</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>centers/9/accounts</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/centers/{centerId}/accounts
+					</code>
+					<code class="method-response">
+{
+ "savingsAccounts": [{
+  "id": 16,
+  "accountNo": "000000016",
+  "productId": 1,
+  "productName": "Voluntary savings",
+  "status": {
+   "id": 100,
+   "code": "savingsAccountStatusType.submitted.and.pending.approval",
+   "value": "Submitted and pending approval",
+   "submittedAndPendingApproval": true,
+   "approved": false,
+   "rejected": false,
+   "withdrawnByApplicant": false,
+   "active": false,
+   "closed": false,
+   "prematureClosed": false,
+   "transferInProgress": false,
+   "transferOnHold": false
+  },
+  "currency": {
+   "code": "USD",
+   "name": "US Dollar",
+   "decimalPlaces": 2,
+   "inMultiplesOf": 0,
+   "displaySymbol": "$",
+   "nameCode": "currency.USD",
+   "displayLabel": "US Dollar ($)"
+  },
+  "accountType": {
+   "id": 2,
+   "code": "accountType.group",
+   "value": "Group"
+  },
+  "timeline": {
+   "submittedOnDate": [2014,5,1],
+   "submittedByUsername": "mifos",
+   "submittedByFirstname": "App",
+   "submittedByLastname": "Administrator"
+  },
+  "depositType": {
+   "id": 100,
+   "code": "depositAccountType.savingsDeposit",
+   "value": "Savings"
+  }
+ }]
+}
+					</code>
+				</div>
+			</div>
+
+    <a id="centers_generate_collectionsheet" name="centers_generate_collectionsheet" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+              <h4>Generate Collection Sheet</h4>
+            <p>This api retrieves repayment details of all jlg loans under a center on a specified meeting date.</p>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">POST https://Domain Name/api/v1/centers/{centerId}?command=generateCollectionSheet</code>
+            <code class="method-request">POST centers/10?command=generateCollectionSheet
+Content-Type: application/json
+Request Body:
+{
+ "dateFormat":"dd MMMM yyyy",
+ "locale":"en",
+ "calendarId":6,
+ "transactionDate":"04 May 2014"
+}
+            </code>
+            <code class="method-response">
+{
+ "dueDate": [2014,5,4],
+ "loanProducts": [{
+  "id": 1,
+  "name": "IGL",
+  "includeInBorrowerCycle": false,
+  "useBorrowerCycle": false,
+  "currency": {
+   "code": "USD",
+   "name": "US Dollar",
+   "decimalPlaces": 2,
+   "inMultiplesOf": 0,
+   "displaySymbol": "$",
+   "nameCode": "currency.USD",
+   "displayLabel": "US Dollar ($)"
+  },
+  "principalVariationsForBorrowerCycle": [],
+  "interestRateVariationsForBorrowerCycle": [],
+  "numberOfRepaymentVariationsForBorrowerCycle": []
+ }],
+ "groups": [{
+  "groupId": 1,
+  "groupName": "Group 1",
+  "staffId": 1,
+  "staffName": "A, Aliya",
+  "levelId": 2,
+  "levelName": "Group",
+  "clients": [{
+   "clientId": 10,
+   "clientName": "saving acc",
+   "loans": [{
+    "loanId": 10,
+    "accountId": "000000010",
+    "accountStatusId": 300,
+    "productShortName": "IGL",
+    "productId": 1,
+    "currency": {
+     "code": "USD",
+     "name": "US Dollar",
+     "decimalPlaces": 2,
+     "inMultiplesOf": 0,
+     "displaySymbol": "$",
+     "nameCode": "currency.USD",
+     "displayLabel": "US Dollar ($)"
+    },
+    "principalDue": 1200.000000,
+    "principalPaid": 0.000000,
+    "interestDue": 21.360000,
+    "interestPaid": 0.000000,
+    "totalDue": 1221.360000
+   }],
+   "attendanceType": {
+    "id": 0,
+    "code": "attendanceType.invalid",
+    "value": "Invalid"
+   }
+  }]
+ }],
+ "attendanceTypeOptions": [{
+  "id": 1,
+  "code": "attendanceType.present",
+  "value": "Present"
+ },
+ {
+  "id": 2,
+  "code": "attendanceType.absent",
+  "value": "Absent"
+ },
+ {
+  "id": 3,
+  "code": "attendanceType.approved",
+  "value": "Approved"
+ },
+ {
+  "id": 4,
+  "code": "attendanceType.leave",
+  "value": "Leave"
+ },
+ {
+  "id": 5,
+  "code": "attendanceType.late",
+  "value": "Late"
+ }]
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="centers_save_collectionsheet" name="centers_save_collectionsheet" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Save Collection Sheet</h4>
+                    <p>This api allows the loan officer to perform bulk repayments of JLG loans for a center on its meeting date.</p>      
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">POST https://Domain Name/api/v1/centers/{centerId}?command=saveCollectionSheet</code>
+                    <code class="method-request">POST centers/10?command=saveCollectionSheet
+{
+ "dateFormat": "dd MMMM yyyy",
+ "locale": "en",
+ "calendarId": 6,
+ "transactionDate": "04 May 2014",
+ "actualDisbursementDate": "04 May 2014",
+ "clientsAttendance": [],
+ "bulkDisbursementTransactions": [],
+ "bulkRepaymentTransactions": [{
+  "loanId": 10,
+  "transactionAmount": 1221.36
+ }]
+}
+                    </code>
+                    <code class="method-response">
+{
+ "groupId": 10,
+ "resourceId": 10,
+ "changes": {
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "bulkTransations": {
+   "loanId": 10,
+   "transactionAmount": 1221.36,
+   "transactionDate": [2014,5,4]
+  }
+ }
+}
+                    </code>
+                </div>
+            </div>      
+
 			<a id="centers_update" name="centers_update" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -4843,7 +5181,340 @@ Request Body:
 			  		</code>
 			    </div>
 			</div>
-			<a id="groups_retrieve" name="groups_retrieve" class="old-syle-anchor">&nbsp;</a>
+
+            <a id="groups_generate_collectionsheet" name="groups_generate_collectionsheet" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Generate Collection Sheet</h4>
+                    <p>This api retrieves repayment details of all jlg loans of all members of a group on a specified meeting date.</p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=generateCollectionSheet</code>
+                    <code class="method-request">POST groups/1?command=generateCollectionSheet
+Content-Type: application/json
+Request Body:
+{
+ "dateFormat":"dd MMMM yyyy",
+ "locale":"en",
+ "calendarId":6,
+ "transactionDate":"04 May 2014"
+}
+                    </code>
+                    <code class="method-response">
+{
+ "dueDate": [2014,5,4],
+ "loanProducts": [{
+  "id": 1,
+  "name": "IGL",
+  "includeInBorrowerCycle": false,
+  "useBorrowerCycle": false,
+  "currency": {
+   "code": "USD",
+   "name": "US Dollar",
+   "decimalPlaces": 2,
+   "inMultiplesOf": 0,
+   "displaySymbol": "$",
+   "nameCode": "currency.USD",
+   "displayLabel": "US Dollar ($)"
+  },
+  "principalVariationsForBorrowerCycle": [],
+  "interestRateVariationsForBorrowerCycle": [],
+  "numberOfRepaymentVariationsForBorrowerCycle": []
+ }],
+ "groups": [{
+  "groupId": 1,
+  "groupName": "Group 1",
+  "staffId": 1,
+  "staffName": "A, Aliya",
+  "levelId": 2,
+  "levelName": "Group",
+  "clients": [{
+   "clientId": 10,
+   "clientName": "saving acc",
+   "loans": [{
+    "loanId": 10,
+    "accountId": "000000010",
+    "accountStatusId": 300,
+    "productShortName": "IGL",
+    "productId": 1,
+    "currency": {
+     "code": "USD",
+     "name": "US Dollar",
+     "decimalPlaces": 2,
+     "inMultiplesOf": 0,
+     "displaySymbol": "$",
+     "nameCode": "currency.USD",
+     "displayLabel": "US Dollar ($)"
+    },
+    "principalDue": 1200.000000,
+    "principalPaid": 0.000000,
+    "interestDue": 21.360000,
+    "interestPaid": 0.000000,
+    "totalDue": 1221.360000
+   }],
+   "attendanceType": {
+    "id": 0,
+    "code": "attendanceType.invalid",
+    "value": "Invalid"
+   }
+  }]
+ }],
+ "attendanceTypeOptions": [{
+  "id": 1,
+  "code": "attendanceType.present",
+  "value": "Present"
+ },
+ {
+  "id": 2,
+  "code": "attendanceType.absent",
+  "value": "Absent"
+ },
+ {
+  "id": 3,
+  "code": "attendanceType.approved",
+  "value": "Approved"
+ },
+ {
+  "id": 4,
+  "code": "attendanceType.leave",
+  "value": "Leave"
+ },
+ {
+  "id": 5,
+  "code": "attendanceType.late",
+  "value": "Late"
+ }]
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="groups_save_collectionsheet" name="groups_save_collectionsheet" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Save Collection Sheet</h4>
+                    <p>This api allows the loan officer to perform bulk repayments of JLG loans for a group on its meeting date.</p>
+
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=saveCollectionSheet</code>
+                    <code class="method-request">POST groups/1?command=saveCollectionSheet
+{
+ "dateFormat": "dd MMMM yyyy",
+ "locale": "en",
+ "calendarId": 6,
+ "transactionDate": "04 May 2014",
+ "actualDisbursementDate": "04 May 2014",
+ "clientsAttendance": [],
+ "bulkDisbursementTransactions": [],
+ "bulkRepaymentTransactions": [{
+  "loanId": 10,
+  "transactionAmount": 1221.36
+ }]
+}
+                    </code>
+                    <code class="method-response">
+{
+ "groupId": 1,
+ "resourceId": 1,
+ "changes": {
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "bulkTransations": {
+   "loanId": 10,
+   "transactionAmount": 1221.36,
+   "transactionDate": [2014,5,4]
+  }
+ }
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="groups_unassignStaff" name="groups_unassignStaff" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Unassign a Staff</h4>
+                    <p>Allows you to unassign the <i>Staff</i>.</p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=unassignStaff</code>
+                    <code class="method-request">POST groups/1?command=unassignStaff
+Content-Type: application/json
+Request Body:
+{
+ "staffId":"1"
+}
+                    </code>
+                    <code class="method-response">
+{
+ "officeId": 1,
+ "groupId": 1,
+ "resourceId": 1,
+ "changes": {}
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="groups_assignStaff" name="groups_assignStaff" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Assign a Staff</h4>
+                    <p>Allows you to assign <i>Staff</i> for existed Group.</p>
+                    <p>The selected Staff member should be belongs to the group's office.</p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=assignStaff</code>
+                    <code class="method-request">POST groups/1?command=assignStaff
+Content-Type: application/json
+Request Body:
+{
+ "staffId": "1"
+}
+                    </code>
+                    <code class="method-response">
+{
+ "officeId": 1,
+ "groupId": 1,
+ "resourceId": 1,
+ "changes": {"staffId":1}
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="groups_close" name="groups_close" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Close a Group</h4>
+                    <p>Groups can be closed if they don't have any non-closed clients/loans/savingsAccounts and  This API exists to close a group.</p>
+                    <p>If the group have any corresponding active clients/loans/savingsAccount this API will result in an error.</p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=close</code>
+                    <code class="method-request">POST groups/1?command=close
+Content-Type: application/json
+Request Body:
+{
+ "dateFormat":"dd MMMM yyyy",
+ "locale":"en",
+ "closureDate":"25 June 2013",
+ "closureReasonId":"30"
+}
+                    </code>
+                    <code class="method-response">
+{
+ "groupId": 1,
+ "resourceId": 1
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="groups_assignRole" name="groups_assignRole" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Assign a Role</h4>
+                    <p>Allows you to assign <i>Role</i> for existed member of group.</p>
+                    <p>We can define member roles by adding code values to <b>GROUPROLE</b> code. Example:Group leader etc.</p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=assignRole</code>
+                    <code class="method-request">POST groups/1?command=assignRole
+Content-Type: application/json
+Request Body:
+{
+ "clientId": "1",
+ "role":30
+}
+                    </code>
+                    <code class="method-response">
+{
+ "clientId": 1,
+ "groupId": 1,
+ "resourceId": 1
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="groups_unassignRole" name="groups_unassignRole" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Unassign a Role</h4>
+                    <p>Allows you to unassign the member <i>Role</i>.</p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=unassignRole&roleId=1</code>
+                    <code class="method-request">POST groups/1?command=unassignRole&roleId=1
+Content-Type: application/json
+Request Body:
+{}
+                    </code>
+                    <code class="method-response">
+{
+ "clientId": 1,
+ "groupId": 1,
+ "resourceId": 1
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="groups_updateRole" name="groups_updateRole" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Update a Role</h4>
+                    <p>Allows you to update the member <i>Role</i>.</p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=updateRole&roleId=2</code>
+                    <code class="method-request">POST groups/1?command=updateRole&roleId=2
+Content-Type: application/json
+Request Body:
+{
+ "role":"31"
+}
+                    </code>
+                    <code class="method-response">
+{
+ "groupId": 1,
+ "resourceId": 2,
+ "changes":{"role":31}
+}
+                    </code>
+                </div>
+            </div>
+
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Close a Client</h4>
+                    <p>Clients can be closed if they dont have any non-closed loans/savingsAccount. This API exists to close a client .</p>
+                    <p>If the client have any corresponding active loans/savingsAccount this API will result in an error.</p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=close</code>
+                    <code class="method-request">POST clients/1?command=close
+                        Content-Type: application/json
+                        Request Body:
+                        {
+                        "dateFormat":"dd MMMM yyyy",
+                        "locale":"en",
+                        "closureDate":"25 June 2013",
+                        "closureReasonId":"11"
+                        }
+                    </code>
+                    <code class="method-response">
+                        {
+                        "clientId":15,
+                        "resourceId":15
+                        }
+                    </code>
+                </div>
+            </div>
+
+            <a id="groups_retrieve" name="groups_retrieve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Retrieve a Group</h4>
@@ -29001,38 +29672,142 @@ No Request Body:
 					<td></td>
 					<td></td>
 				</tr>
-                <tr>
-                    <td><a href="#centers">Center</a></td>
-                    <td>centers</td>
-                    <td><a href="#centers_create">Create a Center</a></td>
-                    <td><a href="#centers_list">List Centers</a></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td>centers/template</td>
-                    <td></td>
-                    <td><a href="#centers_template">Retrieve Center Template</a></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td>centers/{centerId}</td>
-                    <td></td>
-                    <td><a href="#centers_retrieve">Retrieve a Center</a></td>
-                    <td><a href="#centers_update">Update a Center</a></td>
-                    <td><a href="#centers_delete">Delete a Center</a></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td>centers/{centerId}?command=activate</td>
-                    <td><a href="#centers_activate">Activate a Center</a></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
+				<tr>
+					<td></td>
+					<td>groups/{groupId}?command=transferClients</td>
+					<td><a href="#groups_transfer_clients">Bulk Transfer Clients across Groups</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+        <tr>
+            <td></td>
+            <td>groups/{groupId}?command=generateCollectionSheet</td>
+            <td><a href="#groups_generate_collectionsheet">Generate Collection Sheet</a></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>groups/{groupId}?command=saveCollectionSheet</td>
+            <td><a href="#groups_save_collectionsheet">Save Collection Sheet</a></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>groups/{groupId}?command=unassignStaff</td>
+            <td><a href="#groups_unassignStaff">Unassign Staff</a></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>groups/{groupId}?command=assignStaff</td>
+            <td><a href="#groups_assignStaff">Assign Staff</a></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>groups/{groupId}?command=close</td>
+            <td><a href="#groups_close">Close Group</a></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>groups/{groupId}?command=assignRole</td>
+            <td><a href="#groups_assignRole">Assign Role</a></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>groups/{groupId}?command=unassignRole</td>
+            <td><a href="#groups_unassignRole">Unassign Role</a></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>groups/{groupId}?command=updateRole</td>
+            <td><a href="#groups_updateRole">Update Role</a></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+          <tr>
+              <td><a href="#centers">Center</a></td>
+              <td>centers</td>
+              <td><a href="#centers_create">Create a Center</a></td>
+              <td><a href="#centers_list">List Centers</a></td>
+              <td></td>
+              <td></td>
+          </tr>
+          <tr>
+              <td></td>
+              <td>centers/template</td>
+              <td></td>
+              <td><a href="#centers_template">Retrieve Center Template</a></td>
+              <td></td>
+              <td></td>
+          </tr>
+          <tr>
+              <td></td>
+              <td>centers/{centerId}</td>
+              <td></td>
+              <td><a href="#centers_retrieve">Retrieve a Center</a></td>
+              <td><a href="#centers_update">Update a Center</a></td>
+              <td><a href="#centers_delete">Delete a Center</a></td>
+          </tr>
+          <tr>
+              <td></td>
+              <td>centers/{centerId}?command=activate</td>
+              <td><a href="#centers_activate">Activate a Center</a></td>
+              <td></td>
+              <td></td>
+              <td></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td>centers/{centerId}?command=close</td>
+            <td><a href="#centers_close">Close Center</a></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+					<td></td>
+					<td>centers/{centerId}/accounts</td>
+					<td></td>
+					<td><a href="#centers_accounts">Retrive Center accounts summary</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+        <tr>
+            <td></td>
+            <td>centers/{centerId}?command=generateCollectionSheet</td>
+            <td><a href="#centers_generate_collectionsheet">Generate Collection Sheet</a></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>centers/{centerId}?command=saveCollectionSheet</td>
+            <td><a href="#centers_save_collectionsheet">Save Collection Sheet</a></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
 				<tr>
 					<td><a href="#loanproducts">Loan Product</a></td>
 					<td>loanproducts</td>
