@@ -49,7 +49,7 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
     @Temporal(TemporalType.DATE)
     @Column(name = "maturity_date", nullable = true)
     private Date maturityDate;
-    
+
     @Temporal(TemporalType.DATE)
     @Column(name = "expected_firstdepositon_date")
     private Date expectedFirstDepositOnDate;
@@ -179,14 +179,14 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
         }
         return maturityLocalDate;
     }
-    
+
     public LocalDate getExpectedFirstDepositOnDate() {
-         LocalDate expectedFirstDepositOnLocalDate = null;
+        LocalDate expectedFirstDepositOnLocalDate = null;
         if (this.expectedFirstDepositOnDate != null) {
-         expectedFirstDepositOnLocalDate = new LocalDate(this.expectedFirstDepositOnDate);
+            expectedFirstDepositOnLocalDate = new LocalDate(this.expectedFirstDepositOnDate);
         }
         return expectedFirstDepositOnLocalDate;
-        }
+    }
 
     public boolean isPreClosurePenalApplicable() {
         if (this.preClosureDetail != null) { return this.preClosureDetail.preClosurePenalApplicable(); }
@@ -195,10 +195,9 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
 
     public Integer getActualDepositPeriod(final LocalDate interestPostingUpToDate, final SavingsPeriodFrequencyType periodFrequencyType) {
         LocalDate depositFromDate = getExpectedFirstDepositOnDate();
-        
-        if(depositFromDate == null)
-                depositFromDate = this.account.accountSubmittedOrActivationDate();
-        
+
+        if (depositFromDate == null) depositFromDate = this.account.accountSubmittedOrActivationDate();
+
         Integer actualDepositPeriod = this.depositPeriod;
         if (depositFromDate == null || getMaturityLocalDate() == null || interestPostingUpToDate.isEqual(getMaturityLocalDate())) { return actualDepositPeriod; }
 
@@ -234,7 +233,7 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
     public boolean isReinvestOnClosure() {
         return DepositAccountOnClosureType.fromInt(this.onAccountClosureType).isReinvest();
     }
-    
+
     public boolean isTransferToSavingsOnClosure() {
         return DepositAccountOnClosureType.fromInt(this.onAccountClosureType).isTransferToSavings();
     }
@@ -249,12 +248,12 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
         final DepositPreClosureDetail preClosureDetail = this.preClosureDetail.copy();
         final DepositTermDetail depositTermDetail = this.depositTermDetail.copy();
         final LocalDate expectedFirstDepositOnDate = null;
-        
+
         final DepositAccountOnClosureType accountOnClosureType = null;
         return DepositAccountTermAndPreClosure.createNew(preClosureDetail, depositTermDetail, account, actualDepositAmount, maturityAmount,
                 maturityDate, depositPeriod, depositPeriodFrequency, expectedFirstDepositOnDate, accountOnClosureType);
     }
-    
+
     public void updateExpectedFirstDepositDate(final LocalDate expectedFirstDepositOnDate) {
         this.expectedFirstDepositOnDate = expectedFirstDepositOnDate.toDate();
     }
