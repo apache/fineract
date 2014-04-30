@@ -45,8 +45,6 @@ public class FixedDepositAccountHelper {
     private static final String CALCULATE_PREMATURE_AMOUNT_COMMAND = "calculatePrematureAmount";
     private static final String PREMATURE_CLOSE_COMMAND = "prematureClose";
 
-    // private static final String CREATED_DATE_PLUS_ONE = "02 April 2014";
-
     private static final String LOCALE = "en_GB";
     private static final String DIGITS_AFTER_DECIMAL = "4";
     private static final String IN_MULTIPLES_OF = "100";
@@ -63,8 +61,6 @@ public class FixedDepositAccountHelper {
     private static final String INTEREST_CALCULATION_USING_AVERAGE_DAILY_BALANCE = "2";
     private static final String DAYS_360 = "360";
     private static final String DAYS_365 = "365";
-    private static final String WHOLE_TERM = "1";
-    private static final String TILL_PREMATURE_WITHDRAWAL = "2";
 
     private String interestCompoundingPeriodType = MONTHLY;
     private String interestPostingPeriodType = MONTHLY;
@@ -78,17 +74,17 @@ public class FixedDepositAccountHelper {
     private String inMultiplesOfDepositTerm = "2";
     private String inMultiplesOfDepositTermTypeId = MONTHS;
     private String preClosurePenalInterest = "2";
-    private String preClosurePenalInterestOnTypeId = WHOLE_TERM;
+    private String interestCalculationDaysInYearType = DAYS_365;
     private final boolean preClosurePenalApplicable = true;
     private final boolean isActiveChart = true;
     private final String currencyCode = USD;
-    private final String interestCalculationDaysInYearType = DAYS_365;
     private final String depositAmount = "100000";
     private final String depositPeriod = "14";
     private final String depositPeriodFrequencyId = MONTHS;
     private String submittedOnDate = "";
 
-    public String build(final String clientId, final String productId, final String validFrom, final String validTo) {
+    public String build(final String clientId, final String productId, final String validFrom, final String validTo,
+            final String penalInterestType) {
         final HashMap<String, Object> map = new HashMap<String, Object>();
 
         List<HashMap<String, String>> chartSlabs = new ArrayList<HashMap<String, String>>();
@@ -159,7 +155,7 @@ public class FixedDepositAccountHelper {
         map.put("inMultiplesOfDepositTerm", this.inMultiplesOfDepositTerm);
         map.put("inMultiplesOfDepositTermTypeId", this.inMultiplesOfDepositTermTypeId);
         map.put("preClosurePenalInterest", this.preClosurePenalInterest);
-        map.put("preClosurePenalInterestOnTypeId", this.preClosurePenalInterestOnTypeId);
+        map.put("preClosurePenalInterestOnTypeId", penalInterestType);
         map.put("depositAmount", this.depositAmount);
         map.put("depositPeriod", this.depositPeriod);
         map.put("depositPeriodFrequencyId", this.depositPeriodFrequencyId);
@@ -183,7 +179,7 @@ public class FixedDepositAccountHelper {
         System.out.println("------------------------ RETRIEVING FIXED DEPOSIT ACCOUNT BY ID -------------------------");
         return Utils.performServerGet(requestSpec, responseSpec, GET_FIXED_DEPOSIT_BY_ID_URL, "");
     }
-    
+
     public HashMap getFixedDepositSummary(final Integer accountID) {
         final String URL = FIXED_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?" + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "summary");
@@ -205,16 +201,27 @@ public class FixedDepositAccountHelper {
     }
 
     public HashMap updateFixedDepositAccount(final String clientID, final String productID, final String accountID, final String validFrom,
-            final String validTo) {
+            final String validTo, final String penalInterestType, final String submittedOnDate) {
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
-        Calendar todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -1);
-        todaysDate.add(Calendar.DATE, -1);
-        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
-                .withSubmittedOnDate(SUBMITTED_ON_DATE) //
-                .build(clientID, productID, validFrom, validTo);
+                .withSubmittedOnDate(submittedOnDate) //
+                .build(clientID, productID, validFrom, validTo, penalInterestType);
+
+        return Utils.performServerPut(this.requestSpec, this.responseSpec, FIXED_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?"
+                + Utils.TENANT_IDENTIFIER, fixedDepositApplicationJSON, CommonConstants.RESPONSE_CHANGES);
+    }
+
+    public HashMap updateInterestCalculationConfigForFixedDeposit(final String clientID, final String productID, final String accountID, final String submittedOnDate,
+            final String validFrom, final String validTo, final String numberOfDaysPerYear, final String penalInterestType,
+            final String interestCalculationType, final String interestCompoundingPeriodType, final String interestPostingPeriodType) {
+
+        final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
+                .withSubmittedOnDate(submittedOnDate) //
+                .withNumberOfDaysPerYear(numberOfDaysPerYear) //
+                .withInterestCalculationPeriodType(interestCalculationType) //
+                .withInterestCompoundingPeriodType(interestCompoundingPeriodType) //
+                .withInterestPostingPeriodType(interestPostingPeriodType) //
+                .build(clientID, productID, validFrom, validTo, penalInterestType);
 
         return Utils.performServerPut(this.requestSpec, this.responseSpec, FIXED_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?"
                 + Utils.TENANT_IDENTIFIER, fixedDepositApplicationJSON, CommonConstants.RESPONSE_CHANGES);
@@ -385,7 +392,7 @@ public class FixedDepositAccountHelper {
     private String createFixedDepositCalculateInterestURL(final String command, final Integer fixedDepositAccountID) {
         return FIXED_DEPOSIT_ACCOUNT_URL + "/" + fixedDepositAccountID + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
     }
-    
+
     public static ArrayList retrieveAllFixedDepositAccounts(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         System.out.println("-------------------- RETRIEVING ALL FIXED DEPOSIT ACCOUNTS ---------------------");
         final ArrayList response = Utils.performServerGet(requestSpec, responseSpec, FIXED_DEPOSIT_ACCOUNT_URL + "?"
@@ -395,6 +402,26 @@ public class FixedDepositAccountHelper {
 
     public FixedDepositAccountHelper withSubmittedOnDate(final String fixedDepositApplicationSubmittedDate) {
         this.submittedOnDate = fixedDepositApplicationSubmittedDate;
+        return this;
+    }
+
+    public FixedDepositAccountHelper withNumberOfDaysPerYear(final String numberOfDaysPerYearTypeId) {
+        this.interestCalculationDaysInYearType = numberOfDaysPerYearTypeId;
+        return this;
+    }
+
+    public FixedDepositAccountHelper withInterestCalculationPeriodType(final String interestCalculationTypeId) {
+        this.interestCalculationType = interestCalculationTypeId;
+        return this;
+    }
+
+    public FixedDepositAccountHelper withInterestCompoundingPeriodType(final String interestCompoundingPeriodTypeId) {
+        this.interestCompoundingPeriodType = interestCompoundingPeriodTypeId;
+        return this;
+    }
+
+    public FixedDepositAccountHelper withInterestPostingPeriodType(final String interestPostingPeriodTypeId) {
+        this.interestPostingPeriodType = interestPostingPeriodTypeId;
         return this;
     }
 

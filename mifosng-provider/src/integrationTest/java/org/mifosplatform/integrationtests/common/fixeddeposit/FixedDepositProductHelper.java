@@ -12,6 +12,7 @@ import org.mifosplatform.integrationtests.common.CommonConstants;
 import org.mifosplatform.integrationtests.common.Utils;
 import org.mifosplatform.integrationtests.common.accounting.Account;
 import org.mifosplatform.integrationtests.common.accounting.Account.AccountType;
+import org.mifosplatform.integrationtests.common.savings.SavingsProductHelper;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -67,6 +68,7 @@ public class FixedDepositProductHelper {
     private String maxDepositTerm = "10";
     private String maxDepositTermTypeId = YEARS;
     private String inMultiplesOfDepositTerm = "2";
+    private final String depositAmount = "100000";
     private String inMultiplesOfDepositTermTypeId = MONTHS;
     private String preClosurePenalInterest = "2";
     private String preClosurePenalInterestOnTypeId = WHOLE_TERM;
@@ -144,6 +146,7 @@ public class FixedDepositProductHelper {
         map.put("minDepositTerm", this.minDepositTerm);
         map.put("maxDepositTermTypeId", this.maxDepositTermTypeId);
         map.put("maxDepositTerm", this.maxDepositTerm);
+        map.put("depositAmount", this.depositAmount);
         map.put("preClosurePenalApplicable", this.preClosurePenalApplicable);
         map.put("inMultiplesOfDepositTerm", this.inMultiplesOfDepositTerm);
         map.put("inMultiplesOfDepositTermTypeId", this.inMultiplesOfDepositTermTypeId);
@@ -158,7 +161,7 @@ public class FixedDepositProductHelper {
         System.out.println(FixedDepositProductCreateJson);
         return FixedDepositProductCreateJson;
     }
-
+    
     public FixedDepositProductHelper withAccountingRuleAsNone() {
         this.accountingRule = NONE;
         return this;
@@ -222,7 +225,8 @@ public class FixedDepositProductHelper {
     public static ArrayList getInterestRateChartSlabsByProductId(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final Integer productId) {
         System.out.println("-------------------- RETRIEVE INTEREST CHART BY PRODUCT ID ---------------------");
-        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec, INTEREST_CHART_URL + "?productId=" + productId, "chartSlabs");
+        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec, INTEREST_CHART_URL + "?productId=" + productId,
+                "chartSlabs");
         return response;
     }
 
