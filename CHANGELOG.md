@@ -68,8 +68,7 @@ Releases
 =============
 This feature release contains work around Fixed deposits with interest slabs , recurring deposits, accrual accounting (upfront and periodic accrual) for loan products including the ability to categorize loans as Non Performing Assets, standing instructions, ability to disburse loans to linked savings accounts and upgrading the community app to Bootstrap 3.
 
-
-Note that the FD and RD functionality is likely to undergo a few changes in upcoming releases and is not recommeneded for production use
+Important: Table `m_savings_account_transfer` has been dropped as a part of the work around Standing instructions. The database changes may be viewed at https://github.com/openMF/mifosx/blob/master/mifosng-db/migrations/core_db/V160__standing_instruction_changes.sql.
 
 Platform & API
 
