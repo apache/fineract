@@ -159,6 +159,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             if (amountForDeposit.isGreaterThanZero()) {
                 this.savingsAccountDomainService.handleDeposit(account, fmt, account.getActivationLocalDate(),
                         amountForDeposit.getAmount(), null);
+                updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
             }
             account.processAccountUponActivation();
             account.validateAccountBalanceDoesNotBecomeNegative(SavingsAccountTransactionType.PAY_CHARGE.name());

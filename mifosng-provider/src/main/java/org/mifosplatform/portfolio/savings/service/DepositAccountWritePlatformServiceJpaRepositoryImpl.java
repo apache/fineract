@@ -177,6 +177,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                             null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, account);
                     this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
                 }
+                updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
             }
             // account.processAccountUponActivation(fmt);
 
