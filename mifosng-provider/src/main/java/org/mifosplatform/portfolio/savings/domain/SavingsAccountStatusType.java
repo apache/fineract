@@ -100,6 +100,10 @@ public enum SavingsAccountStatusType {
     public boolean isActive() {
         return this.value.equals(SavingsAccountStatusType.ACTIVE.getValue());
     }
+    
+    public boolean isActiveOrAwaitingApprovalOrDisbursal() {
+        return isApproved() || isSubmittedAndPendingApproval() || isActive();
+    }
 
     public boolean isClosed() {
         return this.value.equals(SavingsAccountStatusType.CLOSED.getValue()) || isRejected() || isApplicationWithdrawnByApplicant();

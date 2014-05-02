@@ -178,6 +178,8 @@ public class DepositsApiConstants {
 
     public static final String preMatureCloseOnDateParamName = "preMatureCloseOnDate";
 
+    public static final String linkedAccountParamName = "linkAccountId";
+
     // template
     public static final String chartTemplate = "chartTemplate";
 
@@ -295,6 +297,7 @@ public class DepositsApiConstants {
         fixedDepositRequestData.addAll(DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS);
         fixedDepositRequestData.addAll(PRECLOSURE_REQUEST_DATA_PARAMETERS);
         fixedDepositRequestData.addAll(DEPOSIT_TERM_REQUEST_DATA_PARAMETERS);
+        fixedDepositRequestData.add(linkedAccountParamName);
         return fixedDepositRequestData;
     }
 
@@ -303,6 +306,7 @@ public class DepositsApiConstants {
         fixedDepositResponseData.addAll(DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS);
         fixedDepositResponseData.addAll(PRECLOSURE_RESPONSE_DATA_PARAMETERS);
         fixedDepositResponseData.addAll(DEPOSIT_TERM_RESPONSE_DATA_PARAMETERS);
+        fixedDepositResponseData.add(linkedAccountParamName);
         return fixedDepositResponseData;
     }
 

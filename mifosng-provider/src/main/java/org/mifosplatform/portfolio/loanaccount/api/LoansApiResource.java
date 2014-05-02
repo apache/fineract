@@ -85,6 +85,7 @@ import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformSe
 import org.mifosplatform.portfolio.note.data.NoteData;
 import org.mifosplatform.portfolio.note.domain.NoteType;
 import org.mifosplatform.portfolio.note.service.NoteReadPlatformServiceImpl;
+import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountStatusType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -265,7 +266,8 @@ public class LoansApiResource {
                 }
                 final long[] accountStatus = { SavingsAccountStatusType.ACTIVE.getValue() };
                 accountLinkingOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(
-                        PortfolioAccountType.SAVINGS.getValue(), clientId, currencyCode, accountStatus);
+                        PortfolioAccountType.SAVINGS.getValue(), clientId, currencyCode, accountStatus,
+                        DepositAccountType.SAVINGS_DEPOSIT.getValue());
 
             }
 
@@ -428,7 +430,7 @@ public class LoansApiResource {
             }
             final long[] accountStatus = { SavingsAccountStatusType.ACTIVE.getValue() };
             accountLinkingOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(PortfolioAccountType.SAVINGS.getValue(),
-                    loanBasicDetails.clientId(), currencyCode, accountStatus);
+                    loanBasicDetails.clientId(), currencyCode, accountStatus, DepositAccountType.SAVINGS_DEPOSIT.getValue());
 
             if (!associationParameters.contains("linkedAccount")) {
                 mandatoryResponseParameters.add("linkedAccount");

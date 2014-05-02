@@ -78,10 +78,11 @@ public class FixedDepositAccountHelper {
     private final boolean preClosurePenalApplicable = true;
     private final boolean isActiveChart = true;
     private final String currencyCode = USD;
-    private final String depositAmount = "100000";
+    public static final String depositAmount = "100000";
     private final String depositPeriod = "14";
     private final String depositPeriodFrequencyId = MONTHS;
     private String submittedOnDate = "";
+    private String savingsId = null;
 
     public String build(final String clientId, final String productId, final String validFrom, final String validTo,
             final String penalInterestType) {
@@ -156,10 +157,11 @@ public class FixedDepositAccountHelper {
         map.put("inMultiplesOfDepositTermTypeId", this.inMultiplesOfDepositTermTypeId);
         map.put("preClosurePenalInterest", this.preClosurePenalInterest);
         map.put("preClosurePenalInterestOnTypeId", penalInterestType);
-        map.put("depositAmount", this.depositAmount);
+        map.put("depositAmount", depositAmount);
         map.put("depositPeriod", this.depositPeriod);
         map.put("depositPeriodFrequencyId", this.depositPeriodFrequencyId);
         map.put("submittedOnDate", this.submittedOnDate);
+        map.put("linkAccountId", savingsId);
 
         String fixedDepositAccountJson = new Gson().toJson(map);
         System.out.println(fixedDepositAccountJson);
@@ -211,9 +213,10 @@ public class FixedDepositAccountHelper {
                 + Utils.TENANT_IDENTIFIER, fixedDepositApplicationJSON, CommonConstants.RESPONSE_CHANGES);
     }
 
-    public HashMap updateInterestCalculationConfigForFixedDeposit(final String clientID, final String productID, final String accountID, final String submittedOnDate,
-            final String validFrom, final String validTo, final String numberOfDaysPerYear, final String penalInterestType,
-            final String interestCalculationType, final String interestCompoundingPeriodType, final String interestPostingPeriodType) {
+    public HashMap updateInterestCalculationConfigForFixedDeposit(final String clientID, final String productID, final String accountID,
+            final String submittedOnDate, final String validFrom, final String validTo, final String numberOfDaysPerYear,
+            final String penalInterestType, final String interestCalculationType, final String interestCompoundingPeriodType,
+            final String interestPostingPeriodType) {
 
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
                 .withSubmittedOnDate(submittedOnDate) //
@@ -425,4 +428,8 @@ public class FixedDepositAccountHelper {
         return this;
     }
 
+    public FixedDepositAccountHelper withSavings(final String savingsId) {
+        this.savingsId = savingsId;
+        return this;
+    }
 }

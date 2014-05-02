@@ -1541,27 +1541,12 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         // auto enter deposit for minimum required opening balance when
         // activating account.
-        processAccountUponActivation(fmt);
+        processAccountUponActivation();
 
         return actualChanges;
     }
 
-    protected void processAccountUponActivation(final DateTimeFormatter fmt) {
-        final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
-        if (minRequiredOpeningBalance.isGreaterThanZero()) {
-            final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, getActivationLocalDate(),
-                    minRequiredOpeningBalance.getAmount(), null, new Date());
-            deposit(transactionDTO);
-
-            // no openingBalance concept supported yet but probably will to
-            // allow
-            // for migrations.
-            final Money openingAccountBalance = Money.zero(this.currency);
-
-            // update existing transactions so derived balance fields are
-            // correct.
-            recalculateDailyBalances(openingAccountBalance, DateUtils.getLocalDateOfTenant());
-        }
+    public void processAccountUponActivation() {
 
         // update annual fee due date
         for (SavingsAccountCharge charge : this.charges()) {
@@ -1573,7 +1558,11 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         // TODO : AA add activation charges to actual changes list
     }
 
-    public void approveAndActivateApplication(final Date appliedonDate, final AppUser appliedBy, final DateTimeFormatter fmt) {
+    public Money activateWithBalance() {
+        return Money.of(this.currency, this.minRequiredOpeningBalance);
+    }
+
+    public void approveAndActivateApplication(final Date appliedonDate, final AppUser appliedBy) {
         this.status = SavingsAccountStatusType.ACTIVE.getValue();
         this.approvedOnDate = appliedonDate;
         this.approvedBy = appliedBy;
@@ -1586,7 +1575,6 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.activatedOnDate = appliedonDate;
         this.activatedBy = appliedBy;
         this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivationLocalDate());
-        processAccountUponActivation(fmt);
     }
 
     private void payActivationCharges() {

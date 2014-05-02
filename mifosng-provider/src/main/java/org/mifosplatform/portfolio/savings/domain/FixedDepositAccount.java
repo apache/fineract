@@ -52,7 +52,6 @@ import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearT
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
 import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
-import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.mifosplatform.portfolio.savings.domain.interest.PostingPeriod;
 import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -326,7 +325,7 @@ public class FixedDepositAccount extends SavingsAccount {
         final Integer onAccountClosureId = command.integerValueOfParameterNamed(onAccountClosureIdParamName);
         final DepositAccountOnClosureType onClosureType = DepositAccountOnClosureType.fromInt(onAccountClosureId);
         this.accountTermAndPreClosure.updateOnAccountClosureStatus(onClosureType);
-        
+
         postPreMaturityInterest(closedDate);
 
         // withdraw deposit amount before closing the account
@@ -351,18 +350,8 @@ public class FixedDepositAccount extends SavingsAccount {
     }
 
     @Override
-    protected void processAccountUponActivation(final DateTimeFormatter fmt) {
-        final Money depositAmount = Money.of(this.currency, this.accountTermAndPreClosure.depositAmount());
-        if (depositAmount.isGreaterThanZero()) {
-
-            final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, getActivationLocalDate(),
-                    depositAmount.getAmount(), null, new Date());
-            deposit(transactionDTO);
-            final LocalDate interestPostingUpToDate = interestPostingUpToDate(DateUtils.getLocalDateOfTenant());
-            // update existing transactions so derived balance fields are
-            // correct.
-            recalculateDailyBalances(Money.zero(this.currency), interestPostingUpToDate);
-        }
+    public Money activateWithBalance() {
+        return Money.of(this.currency, this.accountTermAndPreClosure.depositAmount());
     }
 
     public SavingsAccountTransaction close(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate,
@@ -576,14 +565,10 @@ public class FixedDepositAccount extends SavingsAccount {
         return interestPostedToDate;
     }
 
-    @Override
-    public Map<String, Object> activate(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate) {
-        final Map<String, Object> actualChanges = super.activate(currentUser, command, tenantsTodayDate);
-        final MathContext mc = MathContext.DECIMAL64;
+    public void updateMaturityDateAndAmountAfterAccountActivation(final MathContext mc) {
         List<SavingsAccountTransaction> allTransactions = new ArrayList<SavingsAccountTransaction>();
         allTransactions.addAll(retreiveOrderedNonInterestPostingTransactions());
         updateMaturityDateAndAmount(mc, allTransactions);
-        return actualChanges;
     }
 
     private LocalDate depositStartDate() {
@@ -640,15 +625,15 @@ public class FixedDepositAccount extends SavingsAccount {
             }
         }
 
-        if(this.chart == null){
+        if (this.chart == null) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.valid.interest.rate.slab.available");
-        }else{
+        } else {
             final LocalDate chartFromDate = this.chart.getFromDateAsLocalDate();
             LocalDate chartEndDate = this.chart.getEndDateAsLocalDate();
             chartEndDate = chartEndDate == null ? DateUtils.getLocalDateOfTenant() : chartEndDate;
-            
+
             final LocalDateInterval chartInterval = LocalDateInterval.create(chartFromDate, chartEndDate);
-            if(!chartInterval.contains(accountSubmittedOrActivationDate())){
+            if (!chartInterval.contains(accountSubmittedOrActivationDate())) {
                 baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.valid.interest.rate.slab.available");
             }
         }
@@ -657,7 +642,7 @@ public class FixedDepositAccount extends SavingsAccount {
     public boolean isReinvestOnClosure() {
         return this.accountTermAndPreClosure.isReinvestOnClosure();
     }
-    
+
     public boolean isTransferToSavingsOnClosure() {
         return this.accountTermAndPreClosure.isTransferToSavingsOnClosure();
     }
@@ -683,14 +668,15 @@ public class FixedDepositAccount extends SavingsAccount {
         final Integer lockinPeriodFrequency = this.lockinPeriodFrequency;
         final boolean withdrawalFeeApplicableForTransfer = false;
         final String accountNumber = null;
-        final FixedDepositAccount reInvestedAccount = FixedDepositAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer, accountNumber, externalId,
-                accountType, getClosedOnDate(), closedBy, interestRate, compoundingPeriodType, postingPeriodType, interestCalculationType,
-                daysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
-                withdrawalFeeApplicableForTransfer, savingsAccountCharges, newAccountTermAndPreClosure, newChart);
-        
+        final FixedDepositAccount reInvestedAccount = FixedDepositAccount
+                .createNewApplicationForSubmittal(client, group, product, fieldOfficer, accountNumber, externalId, accountType,
+                        getClosedOnDate(), closedBy, interestRate, compoundingPeriodType, postingPeriodType, interestCalculationType,
+                        daysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
+                        withdrawalFeeApplicableForTransfer, savingsAccountCharges, newAccountTermAndPreClosure, newChart);
+
         newAccountTermAndPreClosure.updateAccountReference(reInvestedAccount);
-        newChart.updateDepositAccountReference(reInvestedAccount);       
-        
+        newChart.updateDepositAccountReference(reInvestedAccount);
+
         return reInvestedAccount;
 
     }

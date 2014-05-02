@@ -217,7 +217,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
                 AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount, data.fromAccountType(),
                         data.toAccountType(), data.fromAccount().accountId(), data.toAccount().accountId(), data.name()
                                 + " Standing instruction trasfer ", null, null, null, null, data.toTransferType(), null, null, data
-                                .transferType().getValue(), accountTransferDetails, null, null, null);
+                                .transferType().getValue(), accountTransferDetails, null, null, null, null);
                 transferAmount(sb, accountTransferDTO, data.getId());
             }
         }

@@ -6,5 +6,7 @@ public interface AccountAssociationsReadPlatformService {
 
     public PortfolioAccountData retriveLoanAssociation(final Long loanId);
 
-    public boolean isLinkedWithAnyActiveLoan(final Long savingsId);
+    public boolean isLinkedWithAnyActiveAccount(final Long savingsId);
+
+    public PortfolioAccountData retriveSavingsAssociation(final Long savingsId);
 }

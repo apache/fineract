@@ -252,7 +252,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 .integerGreaterThanZero();
 
         final String linkAccountIdParameterName = "linkAccountId";
-        if (this.fromApiJsonHelper.parameterExists(submittedOnNoteParameterName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(linkAccountIdParameterName, element)) {
             final Long linkAccountId = this.fromApiJsonHelper.extractLongNamed(linkAccountIdParameterName, element);
             baseDataValidator.reset().parameter(linkAccountIdParameterName).value(linkAccountId).ignoreIfNull().longGreaterThanZero();
         }

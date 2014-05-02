@@ -9,6 +9,7 @@ import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.portfolio.account.data.AccountAssociationsData;
 import org.mifosplatform.portfolio.account.data.PortfolioAccountData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountStatusType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,22 +44,46 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
         }
         return linkedAccount;
     }
+    
+    @Override
+    public PortfolioAccountData retriveSavingsAssociation(final Long savingsId) {
+        PortfolioAccountData linkedAccount = null;
+        final AccountAssociationsMapper mapper = new AccountAssociationsMapper();
+        final String sql = "select " + mapper.schema() + " where aa.savings_account_id = ? ";
+        try {
+            final AccountAssociationsData accountAssociationsData = this.jdbcTemplate.queryForObject(sql, mapper, savingsId);
+            if (accountAssociationsData != null) {
+                linkedAccount = accountAssociationsData.linkedAccount();
+            }
+        } catch (final EmptyResultDataAccessException e) {
+            logger.debug("Linking account is not configured");
+        }
+        return linkedAccount;
+    }
 
     @Override
-    public boolean isLinkedWithAnyActiveLoan(final Long savingsId) {
-        boolean hasActiveLoan = false;
+    public boolean isLinkedWithAnyActiveAccount(final Long savingsId) {
+        boolean hasActiveAccount = false;
         final String sql = "select loanAccount.loan_status_id as status from m_portfolio_account_associations aa "
                 + "left join m_loan loanAccount on loanAccount.id = aa.loan_account_id " + "where aa.linked_savings_account_id = ?";
 
         final List<Integer> statusList = this.jdbcTemplate.queryForList(sql, Integer.class, savingsId);
         for (final Integer status : statusList) {
             final LoanStatus loanStatus = LoanStatus.fromInt(status);
-            if (loanStatus.isActiveOrAwaitingApprovalOrDisbursal() || loanStatus.isUnderTransfer()) {
-                hasActiveLoan = true;
-                break;
-            }
+            if (loanStatus.isActiveOrAwaitingApprovalOrDisbursal() || loanStatus.isUnderTransfer()) { return true; }
         }
-        return hasActiveLoan;
+
+        final String savsql = "select savingAccount.status_enum as status from m_portfolio_account_associations aa "
+                + "left join m_savings_account savingAccount on savingAccount.id = aa.savings_account_id "
+                + "where aa.linked_savings_account_id = ?";
+
+        final List<Integer> savstatusList = this.jdbcTemplate.queryForList(savsql, Integer.class, savingsId);
+        for (final Integer status : savstatusList) {
+            final SavingsAccountStatusType saveStatus = SavingsAccountStatusType.fromInt(status);
+            if (saveStatus.isActiveOrAwaitingApprovalOrDisbursal() || saveStatus.isUnderTransfer()) { return true; }
+        }
+
+        return hasActiveAccount;
     }
 
     private static final class AccountAssociationsMapper implements RowMapper<AccountAssociationsData> {

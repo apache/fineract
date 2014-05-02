@@ -109,7 +109,7 @@ public class FixedDepositTest {
         Assert.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM);
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, null);
         Assert.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
@@ -172,7 +172,7 @@ public class FixedDepositTest {
                 this.responseSpec, fixedDepositProductId.toString());
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM);
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, null);
         Assert.assertNotNull(fixedDepositAccountId);
 
         todaysDate.add(Calendar.DATE, -1);
@@ -230,7 +230,7 @@ public class FixedDepositTest {
         Assert.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM);
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, null);
         Assert.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
@@ -311,7 +311,7 @@ public class FixedDepositTest {
         Assert.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM);
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, null);
         Assert.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
@@ -368,7 +368,7 @@ public class FixedDepositTest {
         Assert.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM);
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, null);
         Assert.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
@@ -410,7 +410,7 @@ public class FixedDepositTest {
         Assert.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM);
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, null);
         Assert.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
@@ -450,7 +450,7 @@ public class FixedDepositTest {
         Assert.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM);
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, null);
         Assert.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
@@ -488,7 +488,7 @@ public class FixedDepositTest {
         Assert.assertNotNull(fixedDepositProductId);
 
         Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
-                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM);
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, null);
         Assert.assertNotNull(fixedDepositAccountId);
 
         HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
@@ -497,6 +497,64 @@ public class FixedDepositTest {
 
         fixedDepositAccountId = (Integer) this.fixedDepositAccountHelper.deleteFixedDepositApplication(fixedDepositAccountId, "resourceId");
         Assert.assertNotNull(fixedDepositAccountId);
+    }
+
+    @Test
+    public void testFixedDepositAccountWithLinkedAccount() {
+        this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
+
+        FixedDepositAccountHelper fixedDepositAccountHelperValidationError = new FixedDepositAccountHelper(this.requestSpec,
+                new ResponseSpecBuilder().build());
+
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat monthDayFormat = new SimpleDateFormat("dd MMM");
+
+        Calendar todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -3);
+        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
+        todaysDate.add(Calendar.YEAR, 10);
+        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+
+        todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -1);
+        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+        todaysDate.add(Calendar.MONTH, 1);
+        final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
+
+        Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientId);
+        Float balance = new Float(MINIMUM_OPENING_BALANCE) + new Float(FixedDepositAccountHelper.depositAmount);
+        final Integer savingsId = createSavings(clientId, String.valueOf(balance));
+
+        HashMap summary = savingsAccountHelper.getSavingsSummary(savingsId);
+        assertEquals("Verifying opening Balance", balance, summary.get("accountBalance"));
+
+        Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO);
+        Assert.assertNotNull(fixedDepositProductId);
+
+        Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, savingsId.toString());
+        Assert.assertNotNull(fixedDepositAccountId);
+
+        HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
+                this.responseSpec, fixedDepositAccountId.toString());
+        FixedDepositAccountStatusChecker.verifyFixedDepositIsPending(fixedDepositAccountStatusHashMap);
+
+        fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
+        FixedDepositAccountStatusChecker.verifyFixedDepositIsApproved(fixedDepositAccountStatusHashMap);
+
+        fixedDepositAccountStatusHashMap = this.fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, ACTIVATION_DATE);
+        FixedDepositAccountStatusChecker.verifyFixedDepositIsActive(fixedDepositAccountStatusHashMap);
+        summary = savingsAccountHelper.getSavingsSummary(savingsId);
+        balance = new Float(MINIMUM_OPENING_BALANCE);
+        assertEquals("Verifying opening Balance", balance, summary.get("accountBalance"));
+
     }
 
     private Integer createFixedDepositProduct(final String validFrom, final String validTo, Account... accounts) {
@@ -509,10 +567,12 @@ public class FixedDepositTest {
     }
 
     private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String validFrom,
-            final String validTo, final String submittedOnDate, final String penalInterestType) {
+            final String validTo, final String submittedOnDate, final String penalInterestType, String savingsId) {
         System.out.println("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
-        final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
-                .withSubmittedOnDate(submittedOnDate).build(clientID, productID, validFrom, validTo, penalInterestType);
+        final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec)
+                //
+                .withSubmittedOnDate(submittedOnDate).withSavings(savingsId)
+                .build(clientID, productID, validFrom, validTo, penalInterestType);
         return this.fixedDepositAccountHelper
                 .applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec, this.responseSpec);
     }
@@ -527,5 +587,25 @@ public class FixedDepositTest {
                 .withInterestCalculationPeriodTypeAsDailyBalance() //
                 .withMinimumOpenningBalance(minOpenningBalance).build();
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    }
+
+    private Integer createSavings(Integer clientID, String openningBalance) {
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, openningBalance);
+        Assert.assertNotNull(savingsProductID);
+
+        SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        final Integer savingsId = savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertNotNull(savingsProductID);
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        savingsStatusHashMap = savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        return savingsId;
     }
 }

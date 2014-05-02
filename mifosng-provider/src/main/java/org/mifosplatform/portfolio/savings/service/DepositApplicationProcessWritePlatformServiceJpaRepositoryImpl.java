@@ -21,10 +21,13 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
+import org.mifosplatform.portfolio.account.domain.AccountAssociations;
+import org.mifosplatform.portfolio.account.domain.AccountAssociationsRepository;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
@@ -80,6 +83,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final StaffRepositoryWrapper staffRepository;
     private final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator;
     private final SavingsAccountChargeAssembler savingsAccountChargeAssembler;
+    private final AccountAssociationsRepository accountAssociationsRepository;
+    private final FromJsonHelper fromJsonHelper;
 
     @Autowired
     public DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -91,7 +96,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator,
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler,
             final FixedDepositAccountRepository fixedDepositAccountRepository,
-            final RecurringDepositAccountRepository recurringDepositAccountRepository) {
+            final RecurringDepositAccountRepository recurringDepositAccountRepository,
+            final AccountAssociationsRepository accountAssociationsRepository, final FromJsonHelper fromJsonHelper) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.depositAccountAssembler = depositAccountAssembler;
@@ -106,6 +112,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.savingsAccountChargeAssembler = savingsAccountChargeAssembler;
         this.fixedDepositAccountRepository = fixedDepositAccountRepository;
         this.recurringDepositAccountRepository = recurringDepositAccountRepository;
+        this.accountAssociationsRepository = accountAssociationsRepository;
+        this.fromJsonHelper = fromJsonHelper;
     }
 
     /*
@@ -162,6 +170,16 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 account.updateAccountNo(accountNoGenerator.generate());
 
                 this.savingAccountRepository.save(account);
+            }
+
+            // Save linked account information
+            final Long savingsAccountId = command.longValueOfParameterNamed(DepositsApiConstants.linkedAccountParamName);
+            if (savingsAccountId != null) {
+                final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsAccountId,
+                        DepositAccountType.SAVINGS_DEPOSIT);
+                this.depositAccountDataValidator.validatelinkedSavingsAccount(savingsAccount, account);
+                final AccountAssociations accountAssociations = AccountAssociations.associateSavingsAccount(account, savingsAccount);
+                this.accountAssociationsRepository.save(accountAssociations);
             }
 
             final Long savingsId = account.getId();
@@ -259,6 +277,40 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 }
 
                 this.savingAccountRepository.saveAndFlush(account);
+            }
+
+            // Save linked account information
+            final Long savingsAccountId = command.longValueOfParameterNamed(DepositsApiConstants.linkedAccountParamName);
+            AccountAssociations accountAssociations = this.accountAssociationsRepository.findBySavingsId(accountId);
+            if (savingsAccountId == null) {
+                if (accountAssociations != null) {
+                    if (this.fromJsonHelper.parameterExists(DepositsApiConstants.linkedAccountParamName, command.parsedJson())) {
+                        this.accountAssociationsRepository.delete(accountAssociations);
+                        changes.put(DepositsApiConstants.linkedAccountParamName, null);
+                    }
+                }
+            } else {
+                boolean isModified = false;
+                if (accountAssociations == null) {
+                    isModified = true;
+                } else {
+                    final SavingsAccount savingsAccount = accountAssociations.linkedSavingsAccount();
+                    if (savingsAccount == null || savingsAccount.getId() != savingsAccountId) {
+                        isModified = true;
+                    }
+                }
+                if (isModified) {
+                    final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsAccountId,
+                            DepositAccountType.SAVINGS_DEPOSIT);
+                    this.depositAccountDataValidator.validatelinkedSavingsAccount(savingsAccount, account);
+                    if (accountAssociations == null) {
+                        accountAssociations = AccountAssociations.associateSavingsAccount(account, savingsAccount);
+                    } else {
+                        accountAssociations.updateLinkedSavingsAccount(savingsAccount);
+                    }
+                    changes.put(DepositsApiConstants.linkedAccountParamName, savingsAccountId);
+                    this.accountAssociationsRepository.save(accountAssociations);
+                }
             }
 
             return new CommandProcessingResultBuilder() //

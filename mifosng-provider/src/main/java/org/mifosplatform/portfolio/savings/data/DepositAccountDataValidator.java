@@ -5,11 +5,9 @@
  */
 package org.mifosplatform.portfolio.savings.data;
 
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.minDepositTermTypeIdParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.maxDepositTermTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositAmountParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositPeriodParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositPeriodFrequencyIdParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositPeriodParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.inMultiplesOfDepositTermParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.inMultiplesOfDepositTermTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestFreeFromPeriodParamName;
@@ -17,7 +15,9 @@ import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestF
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestFreePeriodFrequencyTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestFreeToPeriodParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.maxDepositTermParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.maxDepositTermTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.minDepositTermParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.minDepositTermTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.preClosurePenalApplicableParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.preClosurePenalInterestOnTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.preClosurePenalInterestParamName;
@@ -44,6 +44,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequire
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.productIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.linkedAccountParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -70,6 +71,7 @@ import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearT
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
 import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -276,6 +278,11 @@ public class DepositAccountDataValidator {
                         .integerZeroOrGreater();
             }
         }
+
+        if (this.fromApiJsonHelper.parameterExists(linkedAccountParamName, element)) {
+            final Long linkAccountId = this.fromApiJsonHelper.extractLongNamed(linkedAccountParamName, element);
+            baseDataValidator.reset().parameter(linkedAccountParamName).value(linkAccountId).ignoreIfNull().longGreaterThanZero();
+        }
     }
 
     private void validateDepositDetailsForUpdate(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
@@ -393,6 +400,11 @@ public class DepositAccountDataValidator {
             baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).inMinMaxRange(0, 3);
         }
 
+        if (this.fromApiJsonHelper.parameterExists(linkedAccountParamName, element)) {
+            final Long linkAccountId = this.fromApiJsonHelper.extractLongNamed(linkedAccountParamName, element);
+            baseDataValidator.reset().parameter(linkedAccountParamName).value(linkAccountId).ignoreIfNull().longGreaterThanZero();
+        }
+
     }
 
     private void validatePreClosureDetailForSubmit(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
@@ -464,7 +476,7 @@ public class DepositAccountDataValidator {
             baseDataValidator.reset().parameter(minDepositTermTypeIdParamName).value(minDepositTermType)
                     .isOneOfTheseValues(SavingsPeriodFrequencyType.integerValues());
         }
-        
+
         if (fromApiJsonHelper.parameterExists(maxDepositTermTypeIdParamName, element)) {
             final Integer maxDepositTermType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(maxDepositTermTypeIdParamName, element);
             baseDataValidator.reset().parameter(maxDepositTermTypeIdParamName).value(maxDepositTermType)
@@ -553,6 +565,24 @@ public class DepositAccountDataValidator {
             // FIXME: AA handle unsupported deposit account type
             // throw unsupported account type exception
         }
+    }
+
+    public void validatelinkedSavingsAccount(final SavingsAccount linkedSavingsAccount, final SavingsAccount savingsAccount) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        if (linkedSavingsAccount.isNotActive()) {
+            final ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.linked.savings.account.is.not.active",
+                    "Linked Savings account with id:" + linkedSavingsAccount.getId() + " is not in active state", "linkAccountId",
+                    linkedSavingsAccount.getId());
+            dataValidationErrors.add(error);
+        } else if (savingsAccount.clientId() != linkedSavingsAccount.clientId()) {
+            final ApiParameterError error = ApiParameterError.parameterError(
+                    "validation.msg.loan.linked.savings.account.not.belongs.to.same.client", "Linked Savings account with id:"
+                            + linkedSavingsAccount.getId() + " is not belongs to the same client", "linkAccountId",
+                    linkedSavingsAccount.getId());
+            dataValidationErrors.add(error);
+        }
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
     }
 
     private void validateSavingsCharges(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
