@@ -651,7 +651,7 @@ public class SchedulerJobsTestResults {
         loanStatusHashMap = this.loanTransactionHelper.approveLoan(AccountTransferTest.LOAN_APPROVAL_DATE, loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(AccountTransferTest.LOAN_DISBURSAL_DATE, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(AccountTransferTest.LOAN_APPROVAL_DATE_PLUS_ONE, loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         ArrayList<HashMap> repaymentScheduleDataBefore = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
@@ -669,6 +669,10 @@ public class SchedulerJobsTestResults {
 
         Assert.assertEquals("Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job",
                 chargeAmount, (Float) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"));
+        
+        loanStatusHashMap = this.loanTransactionHelper.undoDisbursal(loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
     }
 

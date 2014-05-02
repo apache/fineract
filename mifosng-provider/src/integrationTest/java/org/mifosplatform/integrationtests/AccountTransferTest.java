@@ -46,6 +46,7 @@ public class AccountTransferTest {
     public static final String TO_SAVINGS_ACCOUNT_TYPE = "2";
 
     public static final String LOAN_APPROVAL_DATE = "01 March 2013";
+    public static final String LOAN_APPROVAL_DATE_PLUS_ONE = "02 March 2013";
     public static final String LOAN_DISBURSAL_DATE = "01 March 2013";
 
     private ResponseSpecification responseSpec;
