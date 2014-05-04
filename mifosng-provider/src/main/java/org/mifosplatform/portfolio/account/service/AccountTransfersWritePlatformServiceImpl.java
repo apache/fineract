@@ -128,8 +128,10 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             final Long toLoanAccountId = command.longValueOfParameterNamed(toAccountIdParamName);
             final Loan toLoanAccount = this.loanAccountAssembler.assembleFrom(toLoanAccountId);
 
+            final boolean isRecoveryRepayment = false;
             final LoanTransaction loanRepaymentTransaction = this.loanAccountDomainService.makeRepayment(toLoanAccount,
-                    new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, null);
+                    new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, null,
+                    isRecoveryRepayment);
 
             final AccountTransferDetails accountTransferDetails = this.accountTransferAssembler.assembleSavingsToLoanTransfer(command,
                     fromSavingsAccount, toLoanAccount, withdrawal, loanRepaymentTransaction);
@@ -253,9 +255,10 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                         accountTransferDTO.getLoanInstallmentNumber());
 
             } else {
+                final boolean isRecoveryRepayment = false;
                 loanTransaction = this.loanAccountDomainService.makeRepayment(toLoanAccount, new CommandProcessingResultBuilder(),
                         accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
-                        accountTransferDTO.getPaymentDetail(), null, null);
+                        accountTransferDTO.getPaymentDetail(), null, null, isRecoveryRepayment);
             }
 
             accountTransferDetails = this.accountTransferAssembler.assembleSavingsToLoanTransfer(accountTransferDTO, fromSavingsAccount,

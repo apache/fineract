@@ -82,7 +82,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Override
     public LoanTransaction makeRepayment(final Loan loan, final CommandProcessingResultBuilder builderResult,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText,
-            final String txnExternalId) {
+            final String txnExternalId, final boolean isRecoveryRepayment) {
 
         checkClientOrGroupActive(loan);
 
@@ -103,8 +103,15 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
 
         final Money repaymentAmount = Money.of(loan.getCurrency(), transactionAmount);
-        final LoanTransaction newRepaymentTransaction = LoanTransaction.repayment(loan.getOffice(), repaymentAmount, paymentDetail,
-                transactionDate, txnExternalId);
+        LoanTransaction newRepaymentTransaction = null;
+        if (isRecoveryRepayment) {
+            newRepaymentTransaction = LoanTransaction.recoveryRepayment(loan.getOffice(), repaymentAmount, paymentDetail, transactionDate,
+                    txnExternalId);
+        } else {
+            newRepaymentTransaction = LoanTransaction.repayment(loan.getOffice(), repaymentAmount, paymentDetail, transactionDate,
+                    txnExternalId);
+        }
+
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
                 transactionDate.toDate(), HolidayStatusType.ACTIVE.getValue());
@@ -113,7 +120,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         final ChangedTransactionDetail changedTransactionDetail = loan.makeRepayment(newRepaymentTransaction,
                 defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds, allowTransactionsOnHoliday,
-                holidays, workingDays, allowTransactionsOnNonWorkingDay);
+                holidays, workingDays, allowTransactionsOnNonWorkingDay, isRecoveryRepayment);
 
         try {
             this.loanTransactionRepository.save(newRepaymentTransaction);

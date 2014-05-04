@@ -54,7 +54,7 @@ public final class LoanProductDataValidator {
             LOAN_PRODUCT_ACCOUNTING_PARAMS.OVERPAYMENT.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(),
             LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue(),
             LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(),
-            LOAN_PRODUCT_ACCOUNTING_PARAMS.FEE_INCOME_ACCOUNT_MAPPING.getValue(),
+            LOAN_PRODUCT_ACCOUNTING_PARAMS.FEE_INCOME_ACCOUNT_MAPPING.getValue(),LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_RECOVERY.getValue(),
             LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTY_INCOME_ACCOUNT_MAPPING.getValue(), LoanProductConstants.useBorrowerCycleParameterName,
             LoanProductConstants.principalVariationsForBorrowerCycleParameterName,
             LoanProductConstants.interestRateVariationsForBorrowerCycleParameterName,
@@ -297,6 +297,11 @@ public final class LoanProductDataValidator {
             final Long incomeFromPenaltyId = this.fromApiJsonHelper.extractLongNamed(
                     LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), element);
             baseDataValidator.reset().parameter(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue()).value(incomeFromPenaltyId)
+                    .notNull().integerGreaterThanZero();
+
+            final Long incomeFromRecoveryAccountId = this.fromApiJsonHelper.extractLongNamed(
+                    LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_RECOVERY.getValue(), element);
+            baseDataValidator.reset().parameter(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_RECOVERY.getValue()).value(incomeFromRecoveryAccountId)
                     .notNull().integerGreaterThanZero();
 
             final Long writeOffAccountId = this.fromApiJsonHelper.extractLongNamed(
@@ -599,6 +604,11 @@ public final class LoanProductDataValidator {
                 LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), element);
         baseDataValidator.reset().parameter(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue()).value(incomeFromPenaltyId)
                 .ignoreIfNull().integerGreaterThanZero();
+
+        final Long incomeFromRecoveryAccountId = this.fromApiJsonHelper.extractLongNamed(
+                LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_RECOVERY.getValue(), element);
+        baseDataValidator.reset().parameter(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_RECOVERY.getValue()).value(incomeFromRecoveryAccountId)
+                .notNull().integerGreaterThanZero();
 
         final Long writeOffAccountId = this.fromApiJsonHelper.extractLongNamed(
                 LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), element);

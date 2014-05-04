@@ -560,7 +560,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
-    public CommandProcessingResult makeLoanRepayment(final Long loanId, final JsonCommand command) {
+    public CommandProcessingResult makeLoanRepayment(final Long loanId, final JsonCommand command, final boolean isRecoveryRepayment) {
 
         this.context.authenticatedUser();
 
@@ -585,7 +585,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
         this.loanAccountDomainService.makeRepayment(loan, commandProcessingResultBuilder, transactionDate, transactionAmount,
-                paymentDetail, noteText, txnExternalId);
+                paymentDetail, noteText, txnExternalId, isRecoveryRepayment);
 
         return commandProcessingResultBuilder.withCommandId(command.commandId()) //
                 .withLoanId(loanId) //
@@ -600,6 +600,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.context.authenticatedUser();
         final SingleRepaymentCommand[] repaymentCommand = bulkRepaymentCommand.getLoanTransactions();
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+        final boolean isRecoveryRepayment = false;
 
         if (repaymentCommand == null) { return changes; }
 
@@ -612,7 +613,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final PaymentDetail paymentDetail = null;
             final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
             this.loanAccountDomainService.makeRepayment(loan, commandProcessingResultBuilder, bulkRepaymentCommand.getTransactionDate(),
-                    singleLoanRepaymentCommand.getTransactionAmount(), paymentDetail, bulkRepaymentCommand.getNote(), null);
+                    singleLoanRepaymentCommand.getTransactionAmount(), paymentDetail, bulkRepaymentCommand.getNote(), null,
+                    isRecoveryRepayment);
 
             changes.put("bulkTransations", singleLoanRepaymentCommand);
         }
@@ -2046,4 +2048,5 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             this.accountTransferRepository.save(transferTransaction);
         }
     }
+
 }

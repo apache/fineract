@@ -56,6 +56,11 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
                 createJournalEntriesForRepayments(loanDTO, loanTransactionDTO, office);
             }
 
+            /** Logic for handling recovery payments **/
+            else if (loanTransactionDTO.getTransactionType().isRecoveryRepayment()) {
+                createJournalEntriesForRecoveryRepayments(loanDTO, loanTransactionDTO, office);
+            }
+
             /** Logic for Refunds of Overpayments **/
             else if (loanTransactionDTO.getTransactionType().isRefund()) {
                 createJournalEntriesForRefund(loanDTO, loanTransactionDTO, office);
@@ -200,6 +205,33 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         /*** create a single debit entry (or reversal) for the entire amount **/
         this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE, loanProductId,
                 paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount, isReversal);
+    }
+
+    /**
+     * Create a single Debit to fund source and a single credit to
+     * "Income from Recovery"
+     * 
+     * In case the loan transaction is a reversal, all debits are turned into
+     * credits and vice versa
+     */
+    private void createJournalEntriesForRecoveryRepayments(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
+            final Office office) {
+        // loan properties
+        final Long loanProductId = loanDTO.getLoanProductId();
+        final Long loanId = loanDTO.getLoanId();
+        final String currencyCode = loanDTO.getCurrencyCode();
+
+        // transaction properties
+        final String transactionId = loanTransactionDTO.getTransactionId();
+        final Date transactionDate = loanTransactionDTO.getTransactionDate();
+        final BigDecimal amount = loanTransactionDTO.getAmount();
+        final boolean isReversal = loanTransactionDTO.isReversed();
+        final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
+
+        this.helper.createCashBasedJournalEntriesAndReversalsForLoan(office, currencyCode, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE,
+                CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_RECOVERY, loanProductId, paymentTypeId, loanId, transactionId, transactionDate, amount,
+                isReversal);
+
     }
 
     /**

@@ -14,7 +14,8 @@ import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 public interface LoanAccountDomainService {
 
     LoanTransaction makeRepayment(Loan loan, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId);
+            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId,
+            final boolean isRecoveryRepayment);
 
     LoanTransaction makeRefund(Long accountId, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId);

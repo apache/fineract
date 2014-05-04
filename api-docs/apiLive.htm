@@ -925,6 +925,14 @@
                                 <td></td>
                             </tr>
 							<tr>
+                                <td></td>
+                                <td>loans/{loanId}/transactions?command=recoverypayment</td>
+                                <td><a href="#loans_transaction_recovery_payment">Make a Recovery Payment</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+							<tr>
 								<td></td>
 								<td>loans/{loanId}/transactions/{transactionId}</td>
 								<td></td>
@@ -7342,7 +7350,61 @@ Request Body:
                     </code>
                 </div>
             </div>
+        <!------recovery payment -->
+		        <a id="loans_transaction_recovery_payment" name="loans_transaction_recovery_payment" class="old-syle-anchor">&nbsp;</a>
+	    		<div class="method-section">
+				<div class="method-description">
+					<h4>Make Recovery Payment </h4>
+					<p>only applies to written-off loans</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/{loanId}/transactions?command=recoverypayment
+					</code>
+					<code class="method-request">
+POST loans/5/transactions?command=recoverypayment
+Content-Type: application/json
+Request Body:
+{
+  "dateFormat": "dd MMMM yyyy",
+  "locale": "en",
+  "transactionDate": "14 May 2013",
+  "transactionAmount": "500.00",
+  "paymentTypeId": "12",
+  "note": "check payment",
+  "accountNumber": "acc123",
+  "checkNumber": "che123",
+  "routingCode": "rou123",
+  "receiptNumber": "rec123",
+  "bankNumber": "ban123"
+}
+					</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 5,
+  "resourceId": 564,
+  "changes": {
+    "transactionDate": "14 May 2013",
+    "transactionAmount": "500.00",
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "note": "check payment",
+    "accountNumber": "acc123",
+    "checkNumber": "che123",
+    "routingCode": "rou123",
+    "receiptNumber": "rec123",
+    "bankNumber": "ban123"
+  }
+}
+					</code>
+				</div>
+			</div>
 
+        
+		<!--- end of recovery payment -->
+		
             <a id="loans_transaction_undo_write-off_loan" name="loans_transaction_undo_write-off_loan" class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
@@ -29134,6 +29196,14 @@ No Request Body:
 					<td></td>
 					<td>loans/{loanId}/transactions?command=writeoff</td>
 					<td><a href="#loans_transaction_write-off_loan">Write-off Loan</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				</tr><tr>
+					<td></td>
+					<td>loans/{loanId}/transactions?command=recoverypayment</td>
+					<td><a href="#loans_transaction_recovery_payment">Make Recovery Payment</a></td>
 					<td></td>
 					<td></td>
 					<td></td>

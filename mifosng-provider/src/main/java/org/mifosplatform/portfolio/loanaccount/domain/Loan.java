@@ -303,6 +303,9 @@ public class Loan extends AbstractPersistable<Long> {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
     private final Set<LoanTermVariations> loanTermVariations = new HashSet<LoanTermVariations>();
 
+    @Column(name = "total_recovered_derived", scale = 6, precision = 19)
+    private BigDecimal totalRecovered;
+
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy,
@@ -990,6 +993,9 @@ public class Loan extends AbstractPersistable<Long> {
         } else {
             final Money overpaidBy = calculateTotalOverpayment();
             this.totalOverpaid = overpaidBy.getAmountDefaultedToNullIfZero();
+
+            final Money recoveredAmount = calculateTotalRecoveredPayments();
+            this.totalRecovered = recoveredAmount.getAmountDefaultedToNullIfZero();
 
             final Money principal = this.loanRepaymentScheduleDetail.getPrincipal();
             this.summary.updateSummary(loanCurrency(), principal, this.repaymentScheduleInstallments, this.loanSummaryWrapper,
@@ -2148,7 +2154,7 @@ public class Loan extends AbstractPersistable<Long> {
         existingTransactionIds.addAll(findExistingTransactionIds());
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
-        final ChangedTransactionDetail changedTransactionDetail = handleRepaymentOrWaiverTransaction(waiveInterestTransaction,
+        final ChangedTransactionDetail changedTransactionDetail = handleRepaymentOrRecoveryOrWaiverTransaction(waiveInterestTransaction,
                 loanLifecycleStateMachine, null);
 
         return changedTransactionDetail;
@@ -2157,10 +2163,17 @@ public class Loan extends AbstractPersistable<Long> {
     public ChangedTransactionDetail makeRepayment(final LoanTransaction repaymentTransaction,
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds, final boolean allowTransactionsOnHoliday, final List<Holiday> holidays,
-            final WorkingDays workingDays, final boolean allowTransactionsOnNonWorkingDay) {
+            final WorkingDays workingDays, final boolean allowTransactionsOnNonWorkingDay, boolean isRecoveryRepayment) {
 
-        validateAccountStatus(LoanEvent.LOAN_REPAYMENT_OR_WAIVER);
-        validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, repaymentTransaction.getTransactionDate());
+        LoanEvent event = null;
+        if (isRecoveryRepayment) {
+            event = LoanEvent.LOAN_RECOVERY_PAYMENT;
+        } else {
+            event = LoanEvent.LOAN_REPAYMENT_OR_WAIVER;
+        }
+
+        validateAccountStatus(event);
+        validateActivityNotBeforeClientOrGroupTransferDate(event, repaymentTransaction.getTransactionDate());
 
         validateRepaymentDateIsOnHoliday(repaymentTransaction.getTransactionDate(), allowTransactionsOnHoliday, holidays);
         validateRepaymentDateIsOnNonWorkingDay(repaymentTransaction.getTransactionDate(), workingDays, allowTransactionsOnNonWorkingDay);
@@ -2168,7 +2181,7 @@ public class Loan extends AbstractPersistable<Long> {
         existingTransactionIds.addAll(findExistingTransactionIds());
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
-        final ChangedTransactionDetail changedTransactionDetail = handleRepaymentOrWaiverTransaction(repaymentTransaction,
+        final ChangedTransactionDetail changedTransactionDetail = handleRepaymentOrRecoveryOrWaiverTransaction(repaymentTransaction,
                 loanLifecycleStateMachine, null);
 
         return changedTransactionDetail;
@@ -2233,13 +2246,19 @@ public class Loan extends AbstractPersistable<Long> {
         doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
     }
 
-    private ChangedTransactionDetail handleRepaymentOrWaiverTransaction(final LoanTransaction loanTransaction,
+    private ChangedTransactionDetail handleRepaymentOrRecoveryOrWaiverTransaction(final LoanTransaction loanTransaction,
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransaction adjustedTransaction) {
 
         ChangedTransactionDetail changedTransactionDetail = null;
 
-        final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER,
-                LoanStatus.fromInt(this.loanStatus));
+        LoanStatus statusEnum = null;
+
+        if (loanTransaction.isRecoveryRepayment()) {
+            statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_RECOVERY_PAYMENT, LoanStatus.fromInt(this.loanStatus));
+        } else {
+            statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, LoanStatus.fromInt(this.loanStatus));
+        }
+
         this.loanStatus = statusEnum.getValue();
 
         loanTransaction.updateLoan(this);
@@ -2250,9 +2269,10 @@ public class Loan extends AbstractPersistable<Long> {
             this.loanTransactions.add(loanTransaction);
         }
 
-        if (loanTransaction.isNotRepayment() && loanTransaction.isNotWaiver()) {
-            final String errorMessage = "A transaction of type repayment or waiver was expected but not received.";
-            throw new InvalidLoanTransactionTypeException("transaction", "is.not.a.repayment.or.waiver.transaction", errorMessage);
+        if (loanTransaction.isNotRepayment() && loanTransaction.isNotWaiver() && loanTransaction.isNotRecoveryRepayment()) {
+            final String errorMessage = "A transaction of type repayment or recovery repayment or waiver was expected but not received.";
+            throw new InvalidLoanTransactionTypeException("transaction", "is.not.a.repayment.or.waiver.or.recovery.transaction",
+                    errorMessage);
         }
 
         final LocalDate loanTransactionDate = loanTransaction.getTransactionDate();
@@ -2311,7 +2331,13 @@ public class Loan extends AbstractPersistable<Long> {
 
         updateLoanSummaryDerivedFields();
 
-        doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
+        /**
+         * FIXME: Vishwas, skipping post loan transaction checks for Loan
+         * recoveries
+         **/
+        if (loanTransaction.isNotRecoveryRepayment()) {
+            doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
+        }
 
         return changedTransactionDetail;
     }
@@ -2520,7 +2546,7 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         if (newTransactionDetail.isRepayment() || newTransactionDetail.isInterestWaiver()) {
-            changedTransactionDetail = handleRepaymentOrWaiverTransaction(newTransactionDetail, loanLifecycleStateMachine,
+            changedTransactionDetail = handleRepaymentOrRecoveryOrWaiverTransaction(newTransactionDetail, loanLifecycleStateMachine,
                     transactionForAdjustment);
         }
 
@@ -2587,6 +2613,13 @@ public class Loan extends AbstractPersistable<Long> {
         // if total paid in transactions doesnt match repayment schedule then
         // theres an overpayment.
         return totalPaidInRepayments.minus(cumulativeTotalPaidOnInstallments);
+    }
+
+    public Money calculateTotalRecoveredPayments() {
+        Money totalRecoveredPayments = getTotalRecoveredPayments();
+        // in case logic for reversing recovered payment is implemented handle
+        // subtraction from totalRecoveredPayments
+        return totalRecoveredPayments;
     }
 
     private MonetaryCurrency loanCurrency() {
@@ -2930,6 +2963,14 @@ public class Loan extends AbstractPersistable<Long> {
         return disbursementDate;
     }
 
+    public LocalDate getWrittenOffDate() {
+        LocalDate writtenOffDate = null;
+        if (this.writtenOffOnDate != null) {
+            writtenOffDate = new LocalDate(this.writtenOffOnDate);
+        }
+        return writtenOffDate;
+    }
+
     public LocalDate getExpectedDisbursedOnLocalDateForTemplate() {
 
         LocalDate expectedDisbursementDate = null;
@@ -2995,6 +3036,17 @@ public class Loan extends AbstractPersistable<Long> {
             }
         }
 
+        return cumulativePaid;
+    }
+
+    public Money getTotalRecoveredPayments() {
+        Money cumulativePaid = Money.zero(loanCurrency());
+
+        for (final LoanTransaction recoveredPayment : this.loanTransactions) {
+            if (recoveredPayment.isRecoveryRepayment()) {
+                cumulativePaid = cumulativePaid.plus(recoveredPayment.getAmount(loanCurrency()));
+            }
+        }
         return cumulativePaid;
     }
 
@@ -3679,6 +3731,14 @@ public class Loan extends AbstractPersistable<Long> {
                     final String defaultUserMessage = "Edit disbursement is not allowed. Loan Account is not active.";
                     final ApiParameterError error = ApiParameterError.generalError(
                             "error.msg.loan.edit.disbursement.account.is.not.active", defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
+            case LOAN_RECOVERY_PAYMENT:
+                if (!isClosedWrittenOff()) {
+                    final String defaultUserMessage = "Recovery repayments may only be made on loans which are written off";
+                    final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.account.is.not.written.off",
+                            defaultUserMessage);
                     dataValidationErrors.add(error);
                 }
             break;

@@ -112,6 +112,12 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return new LoanTransaction(null, office, LoanTransactionType.REPAYMENT, paymentDetail, amount.getAmount(), paymentDate, externalId);
     }
 
+    public static LoanTransaction recoveryRepayment(final Office office, final Money amount, final PaymentDetail paymentDetail,
+            final LocalDate paymentDate, final String externalId) {
+        return new LoanTransaction(null, office, LoanTransactionType.RECOVERY_REPAYMENT, paymentDetail, amount.getAmount(), paymentDate,
+                externalId);
+    }
+
     public static LoanTransaction loanPayment(final Loan loan, final Office office, final Money amount, final PaymentDetail paymentDetail,
             final LocalDate paymentDate, final String externalId, final LoanTransactionType transactionType) {
         return new LoanTransaction(loan, office, transactionType, paymentDetail, amount.getAmount(), paymentDate, externalId);
@@ -362,6 +368,10 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     public boolean isRepaymentAtDisbursement() {
         return LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isNotRecoveryRepayment() {
+        return !isRecoveryRepayment();
     }
 
     public boolean isRecoveryRepayment() {
