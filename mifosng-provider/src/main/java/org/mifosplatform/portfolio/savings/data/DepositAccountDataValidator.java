@@ -14,6 +14,7 @@ import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestF
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestFreePeriodApplicableParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestFreePeriodFrequencyTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestFreeToPeriodParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.linkedAccountParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.maxDepositTermParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.maxDepositTermTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.minDepositTermParamName;
@@ -44,7 +45,6 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequire
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.productIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.linkedAccountParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -570,13 +570,13 @@ public class DepositAccountDataValidator {
     public void validatelinkedSavingsAccount(final SavingsAccount linkedSavingsAccount, final SavingsAccount savingsAccount) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         if (linkedSavingsAccount.isNotActive()) {
-            final ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.linked.savings.account.is.not.active",
+            final ApiParameterError error = ApiParameterError.parameterError("validation.msg.deposit.linked.savings.account.is.not.active",
                     "Linked Savings account with id:" + linkedSavingsAccount.getId() + " is not in active state", "linkAccountId",
                     linkedSavingsAccount.getId());
             dataValidationErrors.add(error);
         } else if (savingsAccount.clientId() != linkedSavingsAccount.clientId()) {
             final ApiParameterError error = ApiParameterError.parameterError(
-                    "validation.msg.loan.linked.savings.account.not.belongs.to.same.client", "Linked Savings account with id:"
+                    "validation.msg.deposit.linked.savings.account.not.belongs.to.same.client", "Linked Savings account with id:"
                             + linkedSavingsAccount.getId() + " is not belongs to the same client", "linkAccountId",
                     linkedSavingsAccount.getId());
             dataValidationErrors.add(error);
