@@ -459,19 +459,8 @@ public class RecurringDepositAccount extends SavingsAccount {
     }
 
     @Override
-    protected void processAccountUponActivation(final DateTimeFormatter fmt) {
-        final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
-
-        if (minRequiredOpeningBalance.isGreaterThanZero()) {
-            final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, getActivationLocalDate(),
-                    minRequiredOpeningBalance.getAmount(), null, new Date());
-            deposit(transactionDTO);
-
-            // update existing transactions so derived balance fields are
-            // correct.
-            recalculateDailyBalances(Money.zero(this.currency), DateUtils.getLocalDateOfTenant());
-        }
-
+    public Money activateWithBalance() {
+        return Money.of(this.currency, this.minRequiredOpeningBalance);
     }
 
     public SavingsAccountTransaction close(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate,
@@ -902,31 +891,4 @@ public class RecurringDepositAccount extends SavingsAccount {
         this.activatedOnDate = now.toDate();
     }
 
-    private boolean recurringFrequencyBeforeDepositPeriod() {
-        final int recurringFrequency = recurringDetail.recurringDepositFrequency();
-        final SavingsPeriodFrequencyType recurringfrequencyType = recurringDetail.recurringDepositFrequencyType();
-
-        LocalDate depositStartDate = accountTermAndPreClosure.getExpectedFirstDepositOnDate();
-
-        LocalDate endDateWithFirstRecurringFrequency = null;
-
-        switch (recurringfrequencyType) {
-            case DAYS:
-                endDateWithFirstRecurringFrequency = depositStartDate.plusDays(recurringFrequency);
-            break;
-            case MONTHS:
-                endDateWithFirstRecurringFrequency = depositStartDate.plusMonths(recurringFrequency);
-            break;
-            case WEEKS:
-                endDateWithFirstRecurringFrequency = depositStartDate.plusWeeks(recurringFrequency);
-            break;
-            case YEARS:
-                endDateWithFirstRecurringFrequency = depositStartDate.plusYears(recurringFrequency);
-            break;
-            default:
-            break;
-        }
-
-        return endDateWithFirstRecurringFrequency != null && endDateWithFirstRecurringFrequency.isBefore(calculateMaturityDate());
-    }
 }

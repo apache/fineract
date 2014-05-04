@@ -278,9 +278,12 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         Long officeId = loggedInUser.getOffice().getId();
 
         ClientData client = null;
+        Collection<SavingsAccountData> savingsAccountDatas = null;
         if (clientId != null) {
             client = this.clientReadPlatformService.retrieveOne(clientId);
             officeId = client.officeId();
+            savingsAccountDatas = this.savingsAccountReadPlatformService.retrieveActiveForLookup(clientId,
+                    DepositAccountType.SAVINGS_DEPOSIT);
         }
 
         GroupGeneralData group = null;
@@ -381,7 +384,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                         interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
                         withdrawalFeeTypeOptions, transactions, charges, chargeOptions, interestFreePeriodTypeOptions,
                         preClosurePenalInterestOnTypeOptions, depositTermTypeOptions, inMultiplesOfDepositTermTypeOptions,
-                        depositPeriodFrequencyOptions);
+                        depositPeriodFrequencyOptions, savingsAccountDatas);
                 template = FixedDepositAccountData.withInterestChart((FixedDepositAccountData) template, accountChart);
             } else if (depositAccountType.isRecurringDeposit()) {
 
@@ -431,7 +434,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                         interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
                         withdrawalFeeTypeOptions, transactions, charges, chargeOptions, interestFreePeriodTypeOptions,
                         preClosurePenalInterestOnTypeOptions, depositTermTypeOptions, inMultiplesOfDepositTermTypeOptions,
-                        depositPeriodFrequencyOptions);
+                        depositPeriodFrequencyOptions, savingsAccountDatas);
             } else if (depositAccountType.isRecurringDeposit()) {
 
                 template = RecurringDepositAccountData.withClientTemplate(clientId, clientName, groupId, groupName);

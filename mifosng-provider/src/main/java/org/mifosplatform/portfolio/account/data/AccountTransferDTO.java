@@ -9,6 +9,7 @@ import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.mifosplatform.portfolio.account.domain.AccountTransferDetails;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 
 public class AccountTransferDTO {
 
@@ -31,13 +32,14 @@ public class AccountTransferDTO {
     private final String noteText;
     private final String txnExternalId;
     private final Loan loan;
+    private final SavingsAccount savingsAccount;
 
     public AccountTransferDTO(final LocalDate transactionDate, final BigDecimal transactionAmount,
             final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType, final Long fromAccountId,
             final Long toAccountId, final String description, final Locale locale, final DateTimeFormatter fmt,
             final PaymentDetail paymentDetail, final Integer fromTransferType, final Integer toTransferType, final Long chargeId,
-            Integer loanInstallmentNumber, Integer transferType, final AccountTransferDetails accountTransferDetails,final String noteText,
-            final String txnExternalId,final Loan loan) {
+            Integer loanInstallmentNumber, Integer transferType, final AccountTransferDetails accountTransferDetails,
+            final String noteText, final String txnExternalId, final Loan loan, SavingsAccount savingsAccount) {
         this.transactionDate = transactionDate;
         this.transactionAmount = transactionAmount;
         this.fromAccountType = fromAccountType;
@@ -57,6 +59,7 @@ public class AccountTransferDTO {
         this.noteText = noteText;
         this.txnExternalId = txnExternalId;
         this.loan = loan;
+        this.savingsAccount = savingsAccount;
     }
 
     public LocalDate getTransactionDate() {
@@ -131,9 +134,12 @@ public class AccountTransferDTO {
         return this.txnExternalId;
     }
 
-    
     public Loan getLoan() {
         return this.loan;
+    }
+
+    public SavingsAccount getSavingsAccount() {
+        return this.savingsAccount;
     }
 
 }

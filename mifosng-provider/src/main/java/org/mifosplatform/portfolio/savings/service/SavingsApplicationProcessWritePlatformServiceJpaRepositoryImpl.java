@@ -26,6 +26,7 @@ import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidation
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
@@ -47,6 +48,7 @@ import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountAssembler;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountCharge;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountChargeAssembler;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountDomainService;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.mifosplatform.portfolio.savings.domain.SavingsProduct;
 import org.mifosplatform.portfolio.savings.domain.SavingsProductRepository;
@@ -77,6 +79,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator;
     private final SavingsAccountChargeAssembler savingsAccountChargeAssembler;
     private final CommandProcessingService commandProcessingService;
+    private final SavingsAccountDomainService savingsAccountDomainService;
 
     @Autowired
     public SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -86,8 +89,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final GroupRepository groupRepository, final SavingsProductRepository savingsProductRepository,
             final NoteRepository noteRepository, final StaffRepositoryWrapper staffRepository,
             final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator,
-            final SavingsAccountChargeAssembler savingsAccountChargeAssembler,
-            final CommandProcessingService commandProcessingService) {
+            final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final CommandProcessingService commandProcessingService,
+            final SavingsAccountDomainService savingsAccountDomainService) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.savingAccountAssembler = savingAccountAssembler;
@@ -101,6 +104,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.savingsAccountApplicationTransitionApiJsonValidator = savingsAccountApplicationTransitionApiJsonValidator;
         this.savingsAccountChargeAssembler = savingsAccountChargeAssembler;
         this.commandProcessingService = commandProcessingService;
+        this.savingsAccountDomainService = savingsAccountDomainService;
     }
 
     /*
@@ -438,13 +442,20 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
     @Override
     public CommandProcessingResult createActiveApplication(final SavingsAccountDataDTO savingsAccountDataDTO) {
-        
+
         final CommandWrapper commandWrapper = new CommandWrapperBuilder().savingsAccountActivation(null).build();
         boolean rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, savingsAccountDataDTO.getAppliedBy());
-        
-        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsAccountDataDTO.getClient(),savingsAccountDataDTO.getGroup(),
-                savingsAccountDataDTO.getSavingsProduct(),savingsAccountDataDTO.getApplicationDate(),savingsAccountDataDTO.getAppliedBy());
-        account.approveAndActivateApplication(savingsAccountDataDTO.getApplicationDate().toDate(), savingsAccountDataDTO.getAppliedBy(), savingsAccountDataDTO.getFmt());
+
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsAccountDataDTO.getClient(),
+                savingsAccountDataDTO.getGroup(), savingsAccountDataDTO.getSavingsProduct(), savingsAccountDataDTO.getApplicationDate(),
+                savingsAccountDataDTO.getAppliedBy());
+        account.approveAndActivateApplication(savingsAccountDataDTO.getApplicationDate().toDate(), savingsAccountDataDTO.getAppliedBy());
+        Money amountForDeposit = account.activateWithBalance();
+        if (amountForDeposit.isGreaterThanZero()) {
+            this.savingsAccountDomainService.handleDeposit(account, savingsAccountDataDTO.getFmt(), account.getActivationLocalDate(),
+                    amountForDeposit.getAmount(), null);
+        }
+        account.processAccountUponActivation();
         this.savingAccountRepository.save(account);
 
         if (account.isAccountNumberRequiresAutoGeneration()) {
@@ -454,8 +465,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             this.savingAccountRepository.save(account);
         }
         return new CommandProcessingResultBuilder() //
-            .withSavingsId(account.getId()) //
-            .setRollbackTransaction(rollbackTransaction)//
-            .build();
+                .withSavingsId(account.getId()) //
+                .setRollbackTransaction(rollbackTransaction)//
+                .build();
     }
 }

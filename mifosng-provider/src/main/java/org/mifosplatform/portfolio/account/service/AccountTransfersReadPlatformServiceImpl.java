@@ -177,7 +177,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         final String currencyCode = excludeThisAccountFromOptions != null ? excludeThisAccountFromOptions.currencyCode() : null;
 
         Collection<PortfolioAccountData> accountOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(toAccountType,
-                toClientId, currencyCode, null);
+                toClientId, currencyCode, null, null);
         if (!CollectionUtils.isEmpty(accountOptions)) {
             accountOptions.remove(excludeThisAccountFromOptions);
         } else {

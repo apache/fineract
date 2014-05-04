@@ -185,9 +185,13 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                 final LocalDate transactionStartDate = reinvestedDeposit.getActivationLocalDate();
                 final LocalDate nextTransactionStartDate = reinvestedDeposit.nextDepositDate(transactionStartDate);
                 reinvestedDeposit.updateMaturityDateAndAmount(mc, nextTransactionStartDate);
-                reinvestedDeposit.processAccountUponActivation(fmt);
+                this.savingsAccountRepository.save(reinvestedDeposit);
+                Money amountForDeposit = reinvestedDeposit.activateWithBalance();
+                if (amountForDeposit.isGreaterThanZero()) {
+                    handleDeposit(reinvestedDeposit, fmt, reinvestedDeposit.getActivationLocalDate(), amountForDeposit.getAmount(), null);
+                }
                 reinvestedDeposit.updateMaturityDateAndAmount(mc, nextTransactionStartDate);
-                
+
                 this.savingsAccountRepository.save(reinvestedDeposit);
                 autoGenerateAccountNumber(reinvestedDeposit);
             } else if (rdAccount.isTransferToSavingsOnClosure()) {

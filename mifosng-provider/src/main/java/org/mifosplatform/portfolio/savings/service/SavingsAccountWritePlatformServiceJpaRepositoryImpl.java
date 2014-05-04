@@ -41,6 +41,7 @@ import org.mifosplatform.organisation.holiday.service.HolidayWritePlatformServic
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.workingdays.service.WorkingDaysWritePlatformService;
@@ -152,16 +153,15 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final Map<String, Object> changes = account.activate(user, command, DateUtils.getLocalDateOfTenant());
         if (!changes.isEmpty()) {
-
-            final MathContext mc = MathContext.DECIMAL64;
-            if (account.isBeforeLastPostingPeriod(account.getActivationLocalDate())) {
-                final LocalDate today = DateUtils.getLocalDateOfTenant();
-                account.postInterest(mc, today);
-            } else {
-                final LocalDate today = DateUtils.getLocalDateOfTenant();
-                account.calculateInterestUsing(mc, today);
+            final Locale locale = command.extractLocale();
+            final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+            Money amountForDeposit = account.activateWithBalance();
+            if (amountForDeposit.isGreaterThanZero()) {
+                this.savingsAccountDomainService.handleDeposit(account, fmt, account.getActivationLocalDate(),
+                        amountForDeposit.getAmount(), null);
+                updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
             }
-
+            account.processAccountUponActivation();
             account.validateAccountBalanceDoesNotBecomeNegative(SavingsAccountTransactionType.PAY_CHARGE.name());
 
             this.savingAccountRepository.save(account);
@@ -499,11 +499,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         this.savingsAccountTransactionDataValidator.validateClosing(command);
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
-        final boolean isLinkedWithAnyActiveLoan = this.accountAssociationsReadPlatformService.isLinkedWithAnyActiveLoan(savingsId);
+        final boolean isLinkedWithAnyActiveLoan = this.accountAssociationsReadPlatformService.isLinkedWithAnyActiveAccount(savingsId);
 
         if (isLinkedWithAnyActiveLoan) {
             final String defaultUserMessage = "Closing savings account with id:" + savingsId
-                    + " is not allowed, since it is linked with one of the active loans";
+                    + " is not allowed, since it is linked with one of the active accounts";
             throw new SavingsAccountClosingNotAllowedException("linked", defaultUserMessage, savingsId);
         }
 

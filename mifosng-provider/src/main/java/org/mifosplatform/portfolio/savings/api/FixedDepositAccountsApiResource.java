@@ -39,6 +39,8 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.account.data.PortfolioAccountData;
+import org.mifosplatform.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.DepositsApiConstants;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
@@ -69,6 +71,7 @@ public class FixedDepositAccountsApiResource {
     private final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService;
     private final FromJsonHelper fromJsonHelper;
     private final DepositAccountPreMatureCalculationPlatformService accountPreMatureCalculationPlatformService;
+    private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
 
     @Autowired
     public FixedDepositAccountsApiResource(final DepositAccountReadPlatformService depositAccountReadPlatformService,
@@ -76,7 +79,8 @@ public class FixedDepositAccountsApiResource {
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService, final FromJsonHelper fromJsonHelper,
-            final DepositAccountPreMatureCalculationPlatformService accountPreMatureCalculationPlatformService) {
+            final DepositAccountPreMatureCalculationPlatformService accountPreMatureCalculationPlatformService,
+            final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService) {
         this.depositAccountReadPlatformService = depositAccountReadPlatformService;
         this.context = context;
         this.toApiJsonSerializer = toApiJsonSerializer;
@@ -85,6 +89,7 @@ public class FixedDepositAccountsApiResource {
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
         this.fromJsonHelper = fromJsonHelper;
         this.accountPreMatureCalculationPlatformService = accountPreMatureCalculationPlatformService;
+        this.accountAssociationsReadPlatformService = accountAssociationsReadPlatformService;
     }
 
     @GET
@@ -170,12 +175,14 @@ public class FixedDepositAccountsApiResource {
 
         Collection<SavingsAccountTransactionData> transactions = null;
         Collection<SavingsAccountChargeData> charges = null;
+        PortfolioAccountData linkedAccount = null;
 
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
 
             if (associationParameters.contains("all")) {
-                associationParameters.addAll(Arrays.asList(SavingsApiConstants.transactions, SavingsApiConstants.charges));
+                associationParameters.addAll(Arrays.asList(SavingsApiConstants.transactions, SavingsApiConstants.charges,
+                        SavingsApiConstants.linkedAccount));
             }
 
             if (associationParameters.contains(SavingsApiConstants.transactions)) {
@@ -195,6 +202,11 @@ public class FixedDepositAccountsApiResource {
                     charges = currentCharges;
                 }
             }
+
+            if (associationParameters.contains(SavingsApiConstants.linkedAccount)) {
+                mandatoryResponseParameters.add(SavingsApiConstants.linkedAccount);
+                linkedAccount = this.accountAssociationsReadPlatformService.retriveSavingsAssociation(accountId);
+            }
         }
 
         FixedDepositAccountData templateData = null;
@@ -206,7 +218,7 @@ public class FixedDepositAccountsApiResource {
                     staffInSelectedOfficeOnly);
         }
 
-        return FixedDepositAccountData.withTemplateOptions(savingsAccount, templateData, transactions, charges);
+        return FixedDepositAccountData.associationsAndTemplate(savingsAccount, templateData, transactions, charges, linkedAccount);
     }
 
     @PUT

@@ -268,7 +268,11 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             SavingsAccount toSavingsAccount = null;
             if (accountTransferDetails == null) {
                 fromSavingsAccount = this.savingsAccountAssembler.assembleFrom(accountTransferDTO.getFromAccountId());
-                toSavingsAccount = this.savingsAccountAssembler.assembleFrom(accountTransferDTO.getToAccountId());
+                if (accountTransferDTO.getSavingsAccount() == null) {
+                    toSavingsAccount = this.savingsAccountAssembler.assembleFrom(accountTransferDTO.getToAccountId());
+                } else {
+                    toSavingsAccount = accountTransferDTO.getSavingsAccount();
+                }
             } else {
                 fromSavingsAccount = accountTransferDetails.fromSavingsAccount();
                 this.savingsAccountAssembler.setHelpers(fromSavingsAccount);

@@ -11,4 +11,6 @@ public interface AccountAssociationsRepository extends JpaRepository<AccountAsso
     @Query("from AccountAssociations aa where aa.loanAccount.id= :loanId")
     AccountAssociations findByLoanId(@Param("loanId") Long loanId);
 
+    @Query("from AccountAssociations aa where aa.savingsAccount.id= :savingsId")
+    AccountAssociations findBySavingsId(@Param("savingsId") Long savingsId);
 }

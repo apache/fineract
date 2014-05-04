@@ -8,7 +8,9 @@ package org.mifosplatform.portfolio.account.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
@@ -86,14 +88,15 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
     @Override
     public Collection<PortfolioAccountData> retrieveAllForLookup(final Integer accountTypeId, final Long clientId,
             final long[] accountStatus) {
-        return retrieveAllForLookup(accountTypeId, clientId, null, accountStatus);
+        return retrieveAllForLookup(accountTypeId, clientId, null, accountStatus, null);
     }
 
     @Override
     public Collection<PortfolioAccountData> retrieveAllForLookup(final Integer accountTypeId, final Long clientId,
-            final String currencyCode, final long[] accountStatus) {
+            final String currencyCode, final long[] accountStatus,final Integer depositType) {
 
-        Object[] sqlParams = new Object[] { clientId };
+        List<Object> sqlParams = new ArrayList<Object>();
+        sqlParams.add(clientId);
         Collection<PortfolioAccountData> accounts = null;
         String sql = null;
         String defaultAccountStatus = "300";
@@ -112,20 +115,25 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                         + defaultAccountStatus.toString() + ")";
                 if (currencyCode != null) {
                     sql += " and la.currency_code = ?";
-                    sqlParams = new Object[] { clientId, currencyCode };
+                    sqlParams.add(currencyCode);
                 }
 
-                accounts = this.jdbcTemplate.query(sql, this.loanAccountMapper, sqlParams);
+                accounts = this.jdbcTemplate.query(sql, this.loanAccountMapper, sqlParams.toArray());
             break;
             case SAVINGS:
                 sql = "select " + this.savingsAccountMapper.schema() + " where sa.client_id = ? and sa.status_enum in ("
                         + defaultAccountStatus.toString() + ")";
                 if (currencyCode != null) {
                     sql += " and sa.currency_code = ?";
-                    sqlParams = new Object[] { clientId, currencyCode };
+                    sqlParams.add(currencyCode);
+                }
+                
+                if(depositType != null){
+                    sql += " and sa.deposit_type_enum = ?";
+                    sqlParams.add(depositType);
                 }
 
-                accounts = this.jdbcTemplate.query(sql, this.savingsAccountMapper, sqlParams);
+                accounts = this.jdbcTemplate.query(sql, this.savingsAccountMapper, sqlParams.toArray());
             break;
             default:
             break;
