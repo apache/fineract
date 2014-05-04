@@ -2118,7 +2118,11 @@ public class Loan extends AbstractPersistable<Long> {
         this.actualDisbursementDate = null;
 
         for (final LoanCharge charge : charges()) {
-            charge.resetToOriginal(loanCurrency());
+            if (charge.isOverdueInstallmentCharge()) {
+                charge.setActive(false);
+            } else {
+                charge.resetToOriginal(loanCurrency());
+            }
         }
 
         for (final LoanRepaymentScheduleInstallment currentInstallment : this.repaymentScheduleInstallments) {
