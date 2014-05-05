@@ -396,7 +396,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         if (this.savingsAccountRepository.doNonClosedSavingAccountsExistForClient(client.getId())) {
             // get each individual saving account for the client
             for (final SavingsAccount savingsAccount : this.savingsAccountRepository.findSavingAccountByClientId(client.getId())) {
-                if (!savingsAccount.isClosed()) {
+                if (savingsAccount.isActivated() && !savingsAccount.isClosed()) {
                     switch (transferEventType) {
                         case ACCEPTANCE:
                             this.savingsAccountWritePlatformService.acceptSavingsTransfer(savingsAccount.getId(),

@@ -358,6 +358,14 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return SavingsAccountStatusType.fromInt(this.status).isApproved();
     }
 
+    public boolean isActivated() {
+        boolean isActive = false;
+        if (this.activatedOnDate != null) {
+            isActive = true;
+        }
+        return isActive;
+    }
+
     public boolean isClosed() {
         return SavingsAccountStatusType.fromInt(this.status).isClosed();
     }
