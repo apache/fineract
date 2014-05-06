@@ -767,6 +767,10 @@ public class Loan extends AbstractPersistable<Long> {
         }
         return amount.getAmount();
     }
+    
+    public BigDecimal getTotalWrittenOff() {
+        return this.summary.getTotalWrittenOff();
+    }
 
     /**
      * @param calculationType
