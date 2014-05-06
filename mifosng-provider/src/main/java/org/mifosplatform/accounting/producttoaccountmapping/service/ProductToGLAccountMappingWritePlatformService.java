@@ -8,17 +8,18 @@ package org.mifosplatform.accounting.producttoaccountmapping.service;
 import java.util.Map;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.portfolio.savings.DepositAccountType;
 
 public interface ProductToGLAccountMappingWritePlatformService {
 
     void createLoanProductToGLAccountMapping(Long loanProductId, JsonCommand command);
 
-    void createSavingProductToGLAccountMapping(Long savingProductId, JsonCommand command);
+    void createSavingProductToGLAccountMapping(Long savingProductId, JsonCommand command, DepositAccountType accountType);
 
     Map<String, Object> updateLoanProductToGLAccountMapping(Long loanProductId, JsonCommand command, boolean accountingRuleChanged,
             int accountingRuleTypeId);
 
     Map<String, Object> updateSavingsProductToGLAccountMapping(Long savingsProductId, JsonCommand command, boolean accountingRuleChanged,
-            int accountingRuleTypeId);
+            int accountingRuleTypeId, DepositAccountType accountType);
 
 }

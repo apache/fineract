@@ -1,21 +1,14 @@
 package org.mifosplatform.integrationtests.common.recurringdeposit;
 
-import static org.junit.Assert.assertEquals;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.mifosplatform.integrationtests.common.CommonConstants;
 import org.mifosplatform.integrationtests.common.Utils;
-import org.mifosplatform.integrationtests.common.accounting.Account;
-import org.mifosplatform.integrationtests.common.accounting.Account.AccountType;
-import org.mifosplatform.integrationtests.common.savings.SavingsApplicationTestBuilder;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -63,18 +56,18 @@ public class RecurringDepositAccountHelper {
     private static final String DAYS_360 = "360";
     private static final String DAYS_365 = "365";
 
-    private String interestCompoundingPeriodType = MONTHLY;
-    private String interestPostingPeriodType = MONTHLY;
-    private String interestCalculationType = INTEREST_CALCULATION_USING_DAILY_BALANCE;
-    private String lockinPeriodFrequency = "6";
-    private String lockingPeriodFrequencyType = MONTHS;
-    private String minDepositTerm = "6";
-    private String minDepositTermTypeId = MONTHS;
-    private String maxDepositTerm = "10";
-    private String maxDepositTermTypeId = YEARS;
-    private String inMultiplesOfDepositTerm = "2";
-    private String inMultiplesOfDepositTermTypeId = MONTHS;
-    private String preClosurePenalInterest = "2";
+    private final String interestCompoundingPeriodType = MONTHLY;
+    private final String interestPostingPeriodType = MONTHLY;
+    private final String interestCalculationType = INTEREST_CALCULATION_USING_DAILY_BALANCE;
+    private final String lockinPeriodFrequency = "6";
+    private final String lockingPeriodFrequencyType = MONTHS;
+    private final String minDepositTerm = "6";
+    private final String minDepositTermTypeId = MONTHS;
+    private final String maxDepositTerm = "10";
+    private final String maxDepositTermTypeId = YEARS;
+    private final String inMultiplesOfDepositTerm = "2";
+    private final String inMultiplesOfDepositTermTypeId = MONTHS;
+    private final String preClosurePenalInterest = "2";
     private final boolean preClosurePenalApplicable = true;
     private final boolean isActiveChart = true;
     private final String currencyCode = USD;
@@ -86,6 +79,7 @@ public class RecurringDepositAccountHelper {
     private final String recurringDepositFrequencyTypeId = MONTHS;
     private final String recurringDepositAmount = "2000";
     private String submittedOnDate = "";
+    private String expectedFirstDepositOnDate = "";
 
     public String build(final String clientId, final String productId, final String validFrom, final String validTo,
             final String penalInterestType) {
@@ -167,6 +161,7 @@ public class RecurringDepositAccountHelper {
         map.put("recurringDepositFrequency", this.recurringDepositFrequency);
         map.put("recurringDepositFrequencyTypeId", this.recurringDepositFrequencyTypeId);
         map.put("recurringDepositAmount", this.recurringDepositAmount);
+        map.put("expectedFirstDepositOnDate", this.expectedFirstDepositOnDate);
 
         String recurringDepositAccountJson = new Gson().toJson(map);
         System.out.println(recurringDepositAccountJson);
@@ -215,8 +210,9 @@ public class RecurringDepositAccountHelper {
         todaysDate.add(Calendar.MONTH, -1);
         todaysDate.add(Calendar.DATE, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec) //
-                .withSubmittedOnDate(submittedOnDate) //
+        final String EXPECTED_FIRST_DEPOSIT_ON_ON_DATE = SUBMITTED_ON_DATE;
+        final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec)
+                .withSubmittedOnDate(SUBMITTED_ON_DATE).withExpectedFirstDepositOnDate(EXPECTED_FIRST_DEPOSIT_ON_ON_DATE)
                 .build(clientID, productID, validFrom, validTo, penalInterestType);
 
         return Utils.performServerPut(this.requestSpec, this.responseSpec, RECURRING_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?"
@@ -422,6 +418,11 @@ public class RecurringDepositAccountHelper {
 
     public RecurringDepositAccountHelper withSubmittedOnDate(final String recurringDepositApplicationSubmittedDate) {
         this.submittedOnDate = recurringDepositApplicationSubmittedDate;
+        return this;
+    }
+
+    public RecurringDepositAccountHelper withExpectedFirstDepositOnDate(final String recurringDepositApplicationExpectedFirstDepositOnDate) {
+        this.expectedFirstDepositOnDate = recurringDepositApplicationExpectedFirstDepositOnDate;
         return this;
     }
 

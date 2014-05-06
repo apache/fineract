@@ -211,11 +211,13 @@ public class InterestRateChartSlabFields {
     }
 
     public boolean isAmountBetween(final BigDecimal depositAmount) {
+        boolean returnValue = true;
         if (amountRangeFrom != null && amountRangeTo != null) {
-            return depositAmount.compareTo(amountRangeFrom) >= 0 && depositAmount.compareTo(amountRangeTo) <= 0;
+            returnValue = depositAmount.compareTo(amountRangeFrom) >= 0 && depositAmount.compareTo(amountRangeTo) <= 0;
         } else if (amountRangeFrom != null) {
-            return depositAmount.compareTo(amountRangeFrom) >= 0;
+            returnValue = depositAmount.compareTo(amountRangeFrom) >= 0;
         } else if (amountRangeTo != null) { return depositAmount.compareTo(amountRangeTo) <= 0; }
-        return true;
+        return returnValue;
     }
+
 }

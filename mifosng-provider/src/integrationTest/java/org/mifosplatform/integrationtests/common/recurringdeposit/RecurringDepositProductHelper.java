@@ -1,18 +1,12 @@
 package org.mifosplatform.integrationtests.common.recurringdeposit;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.mifosplatform.integrationtests.common.CommonConstants;
 import org.mifosplatform.integrationtests.common.Utils;
 import org.mifosplatform.integrationtests.common.accounting.Account;
-import org.mifosplatform.integrationtests.common.accounting.Account.AccountType;
-import org.mifosplatform.integrationtests.common.savings.SavingsProductHelper;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -56,23 +50,23 @@ public class RecurringDepositProductHelper {
     private static final String VOLUNTARY = "1";
     private static final String MANDATORY = "2";
 
-    private String name = Utils.randomNameGenerator("RECURRING_DEPOSIT_PRODUCT_", 6);
-    private String shortName = Utils.randomNameGenerator("", 4);
-    private String description = Utils.randomNameGenerator("", 20);
-    private String interestCompoundingPeriodType = MONTHLY;
-    private String interestPostingPeriodType = MONTHLY;
-    private String interestCalculationType = INTEREST_CALCULATION_USING_DAILY_BALANCE;
+    private final String name = Utils.randomNameGenerator("RECURRING_DEPOSIT_PRODUCT_", 6);
+    private final String shortName = Utils.randomNameGenerator("", 4);
+    private final String description = Utils.randomNameGenerator("", 20);
+    private final String interestCompoundingPeriodType = MONTHLY;
+    private final String interestPostingPeriodType = MONTHLY;
+    private final String interestCalculationType = INTEREST_CALCULATION_USING_DAILY_BALANCE;
     private String accountingRule = NONE;
-    private String lockinPeriodFrequency = "6";
-    private String lockingPeriodFrequencyType = MONTHS;
-    private String minDepositTerm = "6";
-    private String minDepositTermTypeId = MONTHS;
-    private String maxDepositTerm = "10";
-    private String maxDepositTermTypeId = YEARS;
-    private String inMultiplesOfDepositTerm = "2";
-    private String inMultiplesOfDepositTermTypeId = MONTHS;
-    private String preClosurePenalInterest = "2";
-    private String preClosurePenalInterestOnTypeId = WHOLE_TERM;
+    private final String lockinPeriodFrequency = "6";
+    private final String lockingPeriodFrequencyType = MONTHS;
+    private final String minDepositTerm = "6";
+    private final String minDepositTermTypeId = MONTHS;
+    private final String maxDepositTerm = "10";
+    private final String maxDepositTermTypeId = YEARS;
+    private final String inMultiplesOfDepositTerm = "2";
+    private final String inMultiplesOfDepositTermTypeId = MONTHS;
+    private final String preClosurePenalInterest = "2";
+    private final String preClosurePenalInterestOnTypeId = WHOLE_TERM;
     private final boolean preClosurePenalApplicable = true;
     private final String currencyCode = USD;
     private final String interestCalculationDaysInYearType = DAYS_365;
@@ -80,6 +74,8 @@ public class RecurringDepositProductHelper {
     private final String recurringDepositFrequencyTypeId = MONTHS;
     private final String recurringDepositFrequency = "1";
     private final String depositAmount = "100000";
+    private final String minDepositAmount = "100";
+    private final String maxDepositAmount = "1000000";
     private Account[] accountList = null;
 
     public String build(final String validFrom, final String validTo) {
@@ -160,6 +156,9 @@ public class RecurringDepositProductHelper {
         map.put("recurringDepositFrequencyTypeId", this.recurringDepositFrequencyTypeId);
         map.put("depositAmount", this.depositAmount);
         map.put("recurringDepositFrequency", this.recurringDepositFrequency);
+        map.put("depositAmount", this.depositAmount);
+        map.put("minDepositAmount", this.minDepositAmount);
+        map.put("maxDepositAmount", this.maxDepositAmount);
 
         if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());
