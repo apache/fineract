@@ -13006,17 +13006,17 @@ Content-Type: application/json
 					<code class="method-response">{ "auditId": 1 } </code>
 				</div>
 			</div>
-			<a id="makercheckers_reject" name="makercheckers_approve" class="old-syle-anchor">&nbsp;</a>
+			<a id="makercheckers_reject" name="makercheckers_reject" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Reject Maker Checker Entry</h4>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-PUT https://DomainName/api/v1/makercheckers/{auditId}
+POST https://DomainName/api/v1/makercheckers/{auditId}?command=reject
 					</code>
 					<code class="method-request">
-PUT makercheckers/1
+POST makercheckers/1?command=reject
 Content-Type: application/json
 					</code>
 					<code class="method-response">{ "auditId": 1 } </code>
@@ -30552,10 +30552,10 @@ No Request Body:
                 </tr>
     			<tr>
                     <td></td>
-                    <td>makercheckers/{auditId}</td>
-                    <td></td>
-                    <td></td>
+                    <td>makercheckers/{auditId}?command=reject</td>
                     <td><a href="#makercheckers_reject">Reject Maker Checker Entry</a></td>
+                    <td></td>
+                    <td></td>
                     <td></td>
                 </tr>
             <tr>
