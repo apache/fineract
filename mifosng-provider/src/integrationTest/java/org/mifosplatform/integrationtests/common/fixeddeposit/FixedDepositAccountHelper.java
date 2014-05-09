@@ -53,6 +53,7 @@ public class FixedDepositAccountHelper {
     private static final String INTEREST_CALCULATION_USING_AVERAGE_DAILY_BALANCE = "2";
     private static final String DAYS_360 = "360";
     private static final String DAYS_365 = "365";
+    public final static String depositAmount = "100000";
 
     private String interestCompoundingPeriodType = MONTHLY;
     private String interestPostingPeriodType = MONTHLY;
@@ -70,7 +71,7 @@ public class FixedDepositAccountHelper {
     private final boolean preClosurePenalApplicable = true;
     private final boolean isActiveChart = true;
     private final String currencyCode = USD;
-    private final String depositAmount = "100000";
+
     private final String depositPeriod = "14";
     private final String depositPeriodFrequencyId = MONTHS;
     private String submittedOnDate = "";
@@ -150,7 +151,7 @@ public class FixedDepositAccountHelper {
         map.put("inMultiplesOfDepositTermTypeId", this.inMultiplesOfDepositTermTypeId);
         map.put("preClosurePenalInterest", this.preClosurePenalInterest);
         map.put("preClosurePenalInterestOnTypeId", penalInterestType);
-        map.put("depositAmount", this.depositAmount);
+        map.put("depositAmount", depositAmount);
         map.put("depositPeriod", this.depositPeriod);
         map.put("depositPeriodFrequencyId", this.depositPeriodFrequencyId);
         map.put("submittedOnDate", this.submittedOnDate);
