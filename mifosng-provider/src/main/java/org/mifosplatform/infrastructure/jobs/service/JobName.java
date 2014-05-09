@@ -15,7 +15,8 @@ public enum JobName {
     EXECUTE_STANDING_INSTRUCTIONS("Execute Standing Instruction"),
     ADD_ACCRUAL_ENTRIES("Add Accrual Transactions"),
     UPDATE_NPA("Update Non Performing Assets"),
-    UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS("Update Deposit Accounts Maturity details");
+    UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS("Update Deposit Accounts Maturity details"),
+    TRANSFER_INTEREST_TO_SAVINGS("Transfer Interest To Savings");
 
     private final String name;
 

@@ -45,6 +45,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequire
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.productIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -279,8 +280,15 @@ public class DepositAccountDataValidator {
             }
         }
 
-        if (this.fromApiJsonHelper.parameterExists(linkedAccountParamName, element)) {
-            final Long linkAccountId = this.fromApiJsonHelper.extractLongNamed(linkedAccountParamName, element);
+        boolean isLinkedAccRequired = false;
+        if (fromApiJsonHelper.parameterExists(transferInterestToSavingsParamName, element)) {
+            isLinkedAccRequired = fromApiJsonHelper.extractBooleanNamed(transferInterestToSavingsParamName, element);
+        }
+
+        final Long linkAccountId = this.fromApiJsonHelper.extractLongNamed(linkedAccountParamName, element);
+        if (isLinkedAccRequired) {
+            baseDataValidator.reset().parameter(linkedAccountParamName).value(linkAccountId).notNull().longGreaterThanZero();
+        } else {
             baseDataValidator.reset().parameter(linkedAccountParamName).value(linkAccountId).ignoreIfNull().longGreaterThanZero();
         }
     }
@@ -400,9 +408,18 @@ public class DepositAccountDataValidator {
             baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).inMinMaxRange(0, 3);
         }
 
+        boolean isLinkedAccRequired = false;
+        if (fromApiJsonHelper.parameterExists(transferInterestToSavingsParamName, element)) {
+            isLinkedAccRequired = fromApiJsonHelper.extractBooleanNamed(transferInterestToSavingsParamName, element);
+        }
+
         if (this.fromApiJsonHelper.parameterExists(linkedAccountParamName, element)) {
             final Long linkAccountId = this.fromApiJsonHelper.extractLongNamed(linkedAccountParamName, element);
-            baseDataValidator.reset().parameter(linkedAccountParamName).value(linkAccountId).ignoreIfNull().longGreaterThanZero();
+            if (isLinkedAccRequired) {
+                baseDataValidator.reset().parameter(linkedAccountParamName).value(linkAccountId).notNull().longGreaterThanZero();
+            } else {
+                baseDataValidator.reset().parameter(linkedAccountParamName).value(linkAccountId).ignoreIfNull().longGreaterThanZero();
+            }
         }
 
     }
@@ -583,6 +600,15 @@ public class DepositAccountDataValidator {
         }
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
+    }
+
+    public void throwLinkedAccountRequiredError() {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final ApiParameterError error = ApiParameterError.parameterError(
+                "validation.msg.fixeddepositaccount.linkAccountId.cannot.be.blank", "Linked Savings account required", "linkAccountId");
+        dataValidationErrors.add(error);
+        throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                dataValidationErrors);
     }
 
     private void validateSavingsCharges(final JsonElement element, final DataValidatorBuilder baseDataValidator) {

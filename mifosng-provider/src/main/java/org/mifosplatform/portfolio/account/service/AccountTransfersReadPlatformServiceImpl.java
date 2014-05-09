@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -25,6 +26,7 @@ import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.mifosplatform.portfolio.account.data.AccountTransferData;
 import org.mifosplatform.portfolio.account.data.PortfolioAccountData;
+import org.mifosplatform.portfolio.account.domain.AccountTransferType;
 import org.mifosplatform.portfolio.account.exception.AccountTransferNotFoundException;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
@@ -188,15 +190,15 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     }
 
     @Override
-    public Page<AccountTransferData> retrieveAll(final SearchParameters searchParameters,final  Long accountDetailId) {
+    public Page<AccountTransferData> retrieveAll(final SearchParameters searchParameters, final Long accountDetailId) {
 
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(this.accountTransfersMapper.schema());
         Object[] finalObjectArray = {};
-        if(accountDetailId != null){
+        if (accountDetailId != null) {
             sqlBuilder.append(" where att.account_transfer_details_id=?");
-            finalObjectArray = new Object[]{ accountDetailId };
+            finalObjectArray = new Object[] { accountDetailId };
         }
 
         if (searchParameters.isOrderByRequested()) {
@@ -229,6 +231,16 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         } catch (final EmptyResultDataAccessException e) {
             throw new AccountTransferNotFoundException(transferId);
         }
+    }
+
+    @Override
+    public Collection<Long> fetchPostInterestTransactionIds(final Long accountId) {
+        final String sql = "select att.from_savings_transaction_id from m_account_transfer_transaction att inner join m_account_transfer_details atd on atd.id = att.account_transfer_details_id where atd.from_savings_account_id=? and att.is_reversed =0 and atd.transfer_type = ?";
+
+        final List<Long> transactionId = this.jdbcTemplate.queryForList(sql, Long.class, accountId,
+                AccountTransferType.INTEREST_TRANSFER.getValue());
+
+        return transactionId;
     }
 
     private static final class AccountTransfersMapper implements RowMapper<AccountTransferData> {

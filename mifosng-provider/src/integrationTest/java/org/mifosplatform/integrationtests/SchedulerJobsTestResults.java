@@ -1,6 +1,9 @@
 package org.mifosplatform.integrationtests;
 
+import static org.junit.Assert.assertEquals;
+
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -22,6 +25,9 @@ import org.mifosplatform.integrationtests.common.accounting.GLAccountBuilder;
 import org.mifosplatform.integrationtests.common.accounting.JournalEntry;
 import org.mifosplatform.integrationtests.common.accounting.JournalEntryHelper;
 import org.mifosplatform.integrationtests.common.charges.ChargesHelper;
+import org.mifosplatform.integrationtests.common.fixeddeposit.FixedDepositAccountHelper;
+import org.mifosplatform.integrationtests.common.fixeddeposit.FixedDepositAccountStatusChecker;
+import org.mifosplatform.integrationtests.common.fixeddeposit.FixedDepositProductHelper;
 import org.mifosplatform.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.mifosplatform.integrationtests.common.loans.LoanProductTestBuilder;
 import org.mifosplatform.integrationtests.common.loans.LoanStatusChecker;
@@ -669,7 +675,7 @@ public class SchedulerJobsTestResults {
 
         Assert.assertEquals("Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job",
                 chargeAmount, (Float) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"));
-        
+
         loanStatusHashMap = this.loanTransactionHelper.undoDisbursal(loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
@@ -706,6 +712,88 @@ public class SchedulerJobsTestResults {
         excuteJob(JobName);
         final Boolean isNPAAfter = (Boolean) this.loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, loanID, "isNPA");
         Assert.assertTrue(isNPAAfter);
+    }
+
+    @Test
+    public void testInterestTransferForSavings() throws InterruptedException {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
+        FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+        AccountHelper accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        FixedDepositAccountHelper fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
+
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat monthDayFormat = new SimpleDateFormat("dd MMM");
+
+        Calendar todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -3);
+        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
+        todaysDate.add(Calendar.YEAR, 10);
+        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+
+        todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -2);
+        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        todaysDate.add(Calendar.MONTH, 1);
+        final String WHOLE_TERM = "1";
+
+        Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientId);
+        Float balance = new Float(MINIMUM_OPENING_BALANCE) + new Float(FixedDepositAccountHelper.depositAmount);
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, String.valueOf(balance));
+        Assert.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductID,
+                ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertNotNull(savingsId);
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        HashMap summary = savingsAccountHelper.getSavingsSummary(savingsId);
+        assertEquals("Verifying opening Balance", balance, summary.get("accountBalance"));
+
+        Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO);
+        Assert.assertNotNull(fixedDepositProductId);
+
+        Integer fixedDepositAccountId = applyForFixedDepositApplication(clientId.toString(), fixedDepositProductId.toString(), VALID_FROM,
+                VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, savingsId.toString(), true, fixedDepositAccountHelper);
+        Assert.assertNotNull(fixedDepositAccountId);
+
+        HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
+                this.responseSpec, fixedDepositAccountId.toString());
+        FixedDepositAccountStatusChecker.verifyFixedDepositIsPending(fixedDepositAccountStatusHashMap);
+
+        fixedDepositAccountStatusHashMap = fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
+        FixedDepositAccountStatusChecker.verifyFixedDepositIsApproved(fixedDepositAccountStatusHashMap);
+
+        fixedDepositAccountStatusHashMap = fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, ACTIVATION_DATE);
+        FixedDepositAccountStatusChecker.verifyFixedDepositIsActive(fixedDepositAccountStatusHashMap);
+        summary = savingsAccountHelper.getSavingsSummary(savingsId);
+        balance = new Float(MINIMUM_OPENING_BALANCE);
+        assertEquals("Verifying Balance", balance, summary.get("accountBalance"));
+
+        fixedDepositAccountHelper.postInterestForFixedDeposit(fixedDepositAccountId);
+
+        HashMap fixedDepositSummary = savingsAccountHelper.getSavingsSummary(fixedDepositAccountId);
+        Float interestPosted = (Float) fixedDepositSummary.get("accountBalance") - new Float(FixedDepositAccountHelper.depositAmount);
+
+        String JobName = "Transfer Interest To Savings";
+        excuteJob(JobName);
+        fixedDepositSummary = savingsAccountHelper.getSavingsSummary(fixedDepositAccountId);
+        assertEquals("Verifying opening Balance", new Float(FixedDepositAccountHelper.depositAmount),
+                fixedDepositSummary.get("accountBalance"));
+
+        summary = savingsAccountHelper.getSavingsSummary(savingsId);
+        balance = new Float(MINIMUM_OPENING_BALANCE) + interestPosted;
+        validateNumberForEqualExcludePrecission(String.valueOf(balance), String.valueOf(summary.get("accountBalance")));
     }
 
     private void excuteJob(String JobName) throws InterruptedException {
@@ -796,5 +884,31 @@ public class SchedulerJobsTestResults {
                 .withSubmittedOnDate("10 January 2013") //
                 .build(clientID, loanProductID, savingsID);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+    }
+
+    private Integer createFixedDepositProduct(final String validFrom, final String validTo, Account... accounts) {
+        System.out.println("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
+        FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+        final String fixedDepositProductJSON = fixedDepositProductHelper //
+                // .withAccountingRuleAsCashBased(accounts)
+                .build(validFrom, validTo);
+        return FixedDepositProductHelper.createFixedDepositProduct(fixedDepositProductJSON, requestSpec, responseSpec);
+    }
+
+    private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String validFrom,
+            final String validTo, final String submittedOnDate, final String penalInterestType, String savingsId,
+            final boolean transferInterest, final FixedDepositAccountHelper fixedDepositAccountHelper) {
+        System.out.println("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
+        final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec)
+                //
+                .withSubmittedOnDate(submittedOnDate).withSavings(savingsId).transferInterest(true)
+                .withLockinPeriodFrequency("1", FixedDepositAccountHelper.DAYS)
+                .build(clientID, productID, validFrom, validTo, penalInterestType);
+        return fixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec, this.responseSpec);
+    }
+
+    public void validateNumberForEqualExcludePrecission(String val, String val2) {
+        DecimalFormat twoDForm = new DecimalFormat("#");
+        Assert.assertTrue(new Float(twoDForm.format(new Float(val))).compareTo(new Float(twoDForm.format(new Float(val2)))) == 0);
     }
 }

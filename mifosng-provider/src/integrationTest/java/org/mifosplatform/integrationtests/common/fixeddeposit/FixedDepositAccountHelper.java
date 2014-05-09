@@ -49,7 +49,7 @@ public class FixedDepositAccountHelper {
     private static final String DIGITS_AFTER_DECIMAL = "4";
     private static final String IN_MULTIPLES_OF = "100";
     private static final String USD = "USD";
-    private static final String DAYS = "0";
+    public static final String DAYS = "0";
     private static final String WEEKS = "1";
     private static final String MONTHS = "2";
     private static final String YEARS = "3";
@@ -83,6 +83,7 @@ public class FixedDepositAccountHelper {
     private final String depositPeriodFrequencyId = MONTHS;
     private String submittedOnDate = "";
     private String savingsId = null;
+    private boolean transferInterest = false;
 
     public String build(final String clientId, final String productId, final String validFrom, final String validTo,
             final String penalInterestType) {
@@ -162,6 +163,7 @@ public class FixedDepositAccountHelper {
         map.put("depositPeriodFrequencyId", this.depositPeriodFrequencyId);
         map.put("submittedOnDate", this.submittedOnDate);
         map.put("linkAccountId", savingsId);
+        map.put("transferInterestToSavings", transferInterest);
 
         String fixedDepositAccountJson = new Gson().toJson(map);
         System.out.println(fixedDepositAccountJson);
@@ -430,6 +432,17 @@ public class FixedDepositAccountHelper {
 
     public FixedDepositAccountHelper withSavings(final String savingsId) {
         this.savingsId = savingsId;
+        return this;
+    }
+
+    public FixedDepositAccountHelper transferInterest(final boolean transferInterest) {
+        this.transferInterest = transferInterest;
+        return this;
+    }
+
+    public FixedDepositAccountHelper withLockinPeriodFrequency(final String lockingPeriodFrequencyType, final String lockinPeriodFrequency) {
+        this.lockingPeriodFrequencyType = lockingPeriodFrequencyType;
+        this.lockinPeriodFrequency = lockinPeriodFrequency;
         return this;
     }
 }

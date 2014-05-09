@@ -3,12 +3,26 @@ package org.mifosplatform.portfolio.savings.domain.interest;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 
 public class CompoundInterestHelper {
 
-    public Money calculateInterestForAllPostingPeriods(final MonetaryCurrency currency, final List<PostingPeriod> allPeriods) {
+    /**
+     * @param currency
+     * @param allPeriods
+     * @param lockUntil
+     *            - account locked date used with the combination of
+     *            immediateWithdrawalOfInterest to avoid exclusion of
+     *            interestEarned
+     * @param interestTransferEnabled
+     *            - boolean flag used to avoid addition of interest to next
+     *            posting period as income while calculating interest
+     * @return
+     */
+    public Money calculateInterestForAllPostingPeriods(final MonetaryCurrency currency, final List<PostingPeriod> allPeriods,
+            LocalDate lockUntil, Boolean interestTransferEnabled) {
 
         // sum up the 'rounded' values that are posted each posting period
         Money interestEarned = Money.zero(currency);
@@ -22,8 +36,14 @@ public class CompoundInterestHelper {
             final Money moneyToBePostedForPeriod = Money.of(currency, interestEarnedThisPeriod);
 
             interestEarned = interestEarned.plus(moneyToBePostedForPeriod);
-
-            interestEarnedButNotPosted = interestEarnedButNotPosted.add(moneyToBePostedForPeriod.getAmount());
+            // these checks are for fixed deposit account for not include
+            // interest for accounts which has post interest to linked savings
+            // account and if already transfered then it includes in interest
+            // calculation.
+            if (postingPeriod.isInterestTransfered() || !interestTransferEnabled
+                    || (lockUntil != null && !postingPeriod.dateOfPostingTransaction().isAfter(lockUntil))) {
+                interestEarnedButNotPosted = interestEarnedButNotPosted.add(moneyToBePostedForPeriod.getAmount());
+            }
         }
 
         return interestEarned;
