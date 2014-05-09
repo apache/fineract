@@ -81,11 +81,11 @@ public final class UserDataValidator {
         final Long officeId = this.fromApiJsonHelper.extractLongNamed("officeId", element);
         baseDataValidator.reset().parameter("officeId").value(officeId).notNull().integerGreaterThanZero();
 
-        if(this.fromApiJsonHelper.parameterExists("staffId", element)) {
-                final Long staffId = this.fromApiJsonHelper.extractLongNamed("staffId", element);
-                baseDataValidator.reset().parameter("staffId").value(staffId).notNull().integerGreaterThanZero();            
+        if (this.fromApiJsonHelper.parameterExists("staffId", element)) {
+            final Long staffId = this.fromApiJsonHelper.extractLongNamed("staffId", element);
+            baseDataValidator.reset().parameter("staffId").value(staffId).notNull().integerGreaterThanZero();
         }
-        
+
         final String[] roles = this.fromApiJsonHelper.extractArrayNamed("roles", element);
         baseDataValidator.reset().parameter("roles").value(roles).arrayNotEmpty();
 
@@ -111,10 +111,10 @@ public final class UserDataValidator {
             final Long officeId = this.fromApiJsonHelper.extractLongNamed("officeId", element);
             baseDataValidator.reset().parameter("officeId").value(officeId).notNull().integerGreaterThanZero();
         }
-        
-        if(this.fromApiJsonHelper.parameterExists("staffId", element)) {
+
+        if (this.fromApiJsonHelper.parameterExists("staffId", element)) {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed("staffId", element);
-            baseDataValidator.reset().parameter("staffId").value(staffId).integerGreaterThanZero();            
+            baseDataValidator.reset().parameter("staffId").value(staffId).ignoreIfNull().integerGreaterThanZero();
         }
 
         if (this.fromApiJsonHelper.parameterExists("username", element)) {

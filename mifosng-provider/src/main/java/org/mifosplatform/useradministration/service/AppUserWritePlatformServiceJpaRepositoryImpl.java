@@ -26,7 +26,6 @@ import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
-import org.mifosplatform.organisation.staff.exception.StaffNotFoundException;
 import org.mifosplatform.useradministration.api.AppUserApiConstant;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.useradministration.domain.AppUserPreviousPassword;
@@ -64,7 +63,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     private final UserDataValidator fromApiJsonDeserializer;
     private final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository;
     private final StaffRepositoryWrapper staffRepositoryWrapper;
-    
+
     @Autowired
     public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository,
             final UserDomainService userDomainService, final OfficeRepository officeRepository, final RoleRepository roleRepository,
@@ -100,19 +99,18 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             final String[] roles = command.arrayValueOfParameterNamed("roles");
             final Set<Role> allRoles = assembleSetOfRoles(roles);
 
-            AppUser appUser;               
+            AppUser appUser;
 
             final String staffIdParamName = "staffId";
             final Long staffId = command.longValueOfParameterNamed(staffIdParamName);
-            
-            if(staffId != null) {
-                final Staff linkedStaff = this.staffRepositoryWrapper.findOneWithNotFoundDetection(staffId);
-                if(linkedStaff.officeId() != userOffice.getId()) { throw new StaffNotFoundException(staffId); }
-                appUser = AppUser.fromJson(userOffice,linkedStaff, allRoles, command);                
 
-            } else {                
-                appUser  = AppUser.fromJson(userOffice, null, allRoles, command);
+            Staff linkedStaff = null;
+            if (staffId != null) {
+                linkedStaff = this.staffRepositoryWrapper.findByOfficeWithNotFoundDetection(staffId, userOffice.getId());
             }
+
+            appUser = AppUser.fromJson(userOffice, linkedStaff, allRoles, command);
+
             final Boolean sendPasswordToEmail = command.booleanObjectValueOfParameterNamed("sendPasswordToEmail");
             this.userDomainService.create(appUser, sendPasswordToEmail);
 
@@ -163,14 +161,12 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
                 userToUpdate.changeOffice(office);
             }
-            
+
             if (changes.containsKey("staffId")) {
                 final Long staffId = (Long) changes.get("staffId");
-                final Staff linkedStaff;
-                if(staffId!=null) { 
-                    linkedStaff = this.staffRepositoryWrapper.findOneWithNotFoundDetection(staffId); 
-                } else { 
-                    linkedStaff = null;
+                Staff linkedStaff = null;
+                if (staffId != null) {
+                    linkedStaff = this.staffRepositoryWrapper.findByOfficeWithNotFoundDetection(staffId, userToUpdate.getOffice().getId());
                 }
                 userToUpdate.changeStaff(linkedStaff);
             }
