@@ -1,21 +1,12 @@
 package org.mifosplatform.integrationtests.common.fixeddeposit;
 
-import static org.junit.Assert.assertEquals;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.mifosplatform.integrationtests.common.CommonConstants;
 import org.mifosplatform.integrationtests.common.Utils;
-import org.mifosplatform.integrationtests.common.accounting.Account;
-import org.mifosplatform.integrationtests.common.accounting.Account.AccountType;
-import org.mifosplatform.integrationtests.common.savings.SavingsApplicationTestBuilder;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -49,7 +40,7 @@ public class FixedDepositAccountHelper {
     private static final String DIGITS_AFTER_DECIMAL = "4";
     private static final String IN_MULTIPLES_OF = "100";
     private static final String USD = "USD";
-    private static final String DAYS = "0";
+    public static final String DAYS = "0";
     private static final String WEEKS = "1";
     private static final String MONTHS = "2";
     private static final String YEARS = "3";
@@ -68,13 +59,13 @@ public class FixedDepositAccountHelper {
     private String interestCalculationType = INTEREST_CALCULATION_USING_DAILY_BALANCE;
     private String lockinPeriodFrequency = "6";
     private String lockingPeriodFrequencyType = MONTHS;
-    private String minDepositTerm = "6";
-    private String minDepositTermTypeId = MONTHS;
-    private String maxDepositTerm = "10";
-    private String maxDepositTermTypeId = YEARS;
-    private String inMultiplesOfDepositTerm = "2";
-    private String inMultiplesOfDepositTermTypeId = MONTHS;
-    private String preClosurePenalInterest = "2";
+    private final String minDepositTerm = "6";
+    private final String minDepositTermTypeId = MONTHS;
+    private final String maxDepositTerm = "10";
+    private final String maxDepositTermTypeId = YEARS;
+    private final String inMultiplesOfDepositTerm = "2";
+    private final String inMultiplesOfDepositTermTypeId = MONTHS;
+    private final String preClosurePenalInterest = "2";
     private String interestCalculationDaysInYearType = DAYS_365;
     private final boolean preClosurePenalApplicable = true;
     private final boolean isActiveChart = true;
@@ -83,6 +74,8 @@ public class FixedDepositAccountHelper {
     private final String depositPeriod = "14";
     private final String depositPeriodFrequencyId = MONTHS;
     private String submittedOnDate = "";
+    private String savingsId = null;
+    private boolean transferInterest = false;
 
     public String build(final String clientId, final String productId, final String validFrom, final String validTo,
             final String penalInterestType) {
@@ -161,6 +154,8 @@ public class FixedDepositAccountHelper {
         map.put("depositPeriod", this.depositPeriod);
         map.put("depositPeriodFrequencyId", this.depositPeriodFrequencyId);
         map.put("submittedOnDate", this.submittedOnDate);
+        map.put("linkAccountId", savingsId);
+        map.put("transferInterestToSavings", transferInterest);
 
         String fixedDepositAccountJson = new Gson().toJson(map);
         System.out.println(fixedDepositAccountJson);
@@ -201,9 +196,10 @@ public class FixedDepositAccountHelper {
 
         return annualInterestRate;
     }
-    
-    public static Float getPrincipalAfterCompoundingInterest(Calendar currentDate, Float principal, Integer depositPeriod, double interestPerDay, Integer compoundingInterval, Integer postingInterval) {
-        
+
+    public static Float getPrincipalAfterCompoundingInterest(Calendar currentDate, Float principal, Integer depositPeriod,
+            double interestPerDay, Integer compoundingInterval, Integer postingInterval) {
+
         Float totalInterest = 0.0f;
         Float interestEarned = 0.0f;
 
@@ -242,9 +238,10 @@ public class FixedDepositAccountHelper {
                 + Utils.TENANT_IDENTIFIER, fixedDepositApplicationJSON, CommonConstants.RESPONSE_CHANGES);
     }
 
-    public HashMap updateInterestCalculationConfigForFixedDeposit(final String clientID, final String productID, final String accountID, final String submittedOnDate,
-            final String validFrom, final String validTo, final String numberOfDaysPerYear, final String penalInterestType,
-            final String interestCalculationType, final String interestCompoundingPeriodType, final String interestPostingPeriodType) {
+    public HashMap updateInterestCalculationConfigForFixedDeposit(final String clientID, final String productID, final String accountID,
+            final String submittedOnDate, final String validFrom, final String validTo, final String numberOfDaysPerYear,
+            final String penalInterestType, final String interestCalculationType, final String interestCompoundingPeriodType,
+            final String interestPostingPeriodType) {
 
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
                 .withSubmittedOnDate(submittedOnDate) //
@@ -456,4 +453,19 @@ public class FixedDepositAccountHelper {
         return this;
     }
 
+    public FixedDepositAccountHelper withSavings(final String savingsId) {
+        this.savingsId = savingsId;
+        return this;
+    }
+
+    public FixedDepositAccountHelper transferInterest(final boolean transferInterest) {
+        this.transferInterest = transferInterest;
+        return this;
+    }
+
+    public FixedDepositAccountHelper withLockinPeriodFrequency(final String lockingPeriodFrequencyType, final String lockinPeriodFrequency) {
+        this.lockingPeriodFrequencyType = lockingPeriodFrequencyType;
+        this.lockinPeriodFrequency = lockinPeriodFrequency;
+        return this;
+    }
 }

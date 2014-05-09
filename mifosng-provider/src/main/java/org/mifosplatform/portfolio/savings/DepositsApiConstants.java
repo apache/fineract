@@ -179,6 +179,7 @@ public class DepositsApiConstants {
     public static final String preMatureCloseOnDateParamName = "preMatureCloseOnDate";
 
     public static final String linkedAccountParamName = "linkAccountId";
+    public static final String transferInterestToSavingsParamName = "transferInterestToSavings";
 
     // template
     public static final String chartTemplate = "chartTemplate";
@@ -216,13 +217,11 @@ public class DepositsApiConstants {
 
     private static final Set<String> DEPOSIT_TERM_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(minDepositTermParamName,
             maxDepositTermParamName, minDepositTermTypeIdParamName, maxDepositTermTypeIdParamName, inMultiplesOfDepositTermParamName,
-            inMultiplesOfDepositTermTypeIdParamName, depositAmountParamName,
-            depositMinAmountParamName, depositMaxAmountParamName));
+            inMultiplesOfDepositTermTypeIdParamName, depositAmountParamName, depositMinAmountParamName, depositMaxAmountParamName));
 
     private static final Set<String> DEPOSIT_TERM_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(minDepositTermParamName,
             maxDepositTermParamName, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTermParamName,
-            inMultiplesOfDepositTermType, depositAmountParamName,
-            depositMinAmountParamName, depositMaxAmountParamName));
+            inMultiplesOfDepositTermType, depositAmountParamName, depositMinAmountParamName, depositMaxAmountParamName));
 
     private static final Set<String> RECURRING_DETAILS_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
             recurringDepositAmountParamName, recurringDepositTypeIdParamName, recurringDepositFrequencyTypeIdParamName,
@@ -298,6 +297,7 @@ public class DepositsApiConstants {
         fixedDepositRequestData.addAll(PRECLOSURE_REQUEST_DATA_PARAMETERS);
         fixedDepositRequestData.addAll(DEPOSIT_TERM_REQUEST_DATA_PARAMETERS);
         fixedDepositRequestData.add(linkedAccountParamName);
+        fixedDepositRequestData.add(transferInterestToSavingsParamName);
         return fixedDepositRequestData;
     }
 
@@ -307,6 +307,7 @@ public class DepositsApiConstants {
         fixedDepositResponseData.addAll(PRECLOSURE_RESPONSE_DATA_PARAMETERS);
         fixedDepositResponseData.addAll(DEPOSIT_TERM_RESPONSE_DATA_PARAMETERS);
         fixedDepositResponseData.add(linkedAccountParamName);
+        fixedDepositResponseData.add(transferInterestToSavingsParamName);
         return fixedDepositResponseData;
     }
 

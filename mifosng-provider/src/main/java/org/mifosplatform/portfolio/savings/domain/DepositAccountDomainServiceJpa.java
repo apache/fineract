@@ -82,14 +82,14 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
                 paymentDetail, new Date());
         final SavingsAccountTransaction withdrawal = account.withdraw(transactionDTO, applyWithdrawFee);
-
+        boolean isInterestTransfer = false;
         final MathContext mc = MathContext.DECIMAL64;
         if (account.isBeforeLastPostingPeriod(transactionDate)) {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.postInterest(mc, today);
+            account.postInterest(mc, today, isInterestTransfer);
         } else {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.calculateInterestUsing(mc, today);
+            account.calculateInterestUsing(mc, today, isInterestTransfer);
         }
         account.validateAccountBalanceDoesNotBecomeNegative(transactionAmount);
         saveTransactionToGenerateTransactionId(withdrawal);
@@ -111,14 +111,14 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
                 paymentDetail, new Date());
         final SavingsAccountTransaction deposit = account.deposit(transactionDTO);
-
+        boolean isInterestTransfer = false;
         final MathContext mc = MathContext.DECIMAL64;
         if (account.isBeforeLastPostingPeriod(transactionDate)) {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.postInterest(mc, today);
+            account.postInterest(mc, today, isInterestTransfer);
         } else {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.calculateInterestUsing(mc, today);
+            account.calculateInterestUsing(mc, today, isInterestTransfer);
         }
 
         saveTransactionToGenerateTransactionId(deposit);
@@ -217,7 +217,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         }
 
         this.savingsAccountRepository.save(account);
-       
+
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
 
         return withdrawal;

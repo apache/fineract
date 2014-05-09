@@ -445,13 +445,15 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
             if (isDeposit()) {
                 // endOfDayBalance = openingBalance.plus(getAmount(currency));
                 // if (endOfDayBalance.isLessThanZero()) {
-                endOfDayBalance = Money.of(currency, this.runningBalance);
+                endOfDayBalance = endOfDayBalance.plus(getAmount(currency));
                 // }
             } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
                 // endOfDayBalance = openingBalance.minus(getAmount(currency));
-                // if (endOfDayBalance.isLessThanZero()) {
-                endOfDayBalance = Money.of(currency, this.runningBalance);
-                // }
+                if (endOfDayBalance.isGreaterThanZero()) {
+                    endOfDayBalance = endOfDayBalance.minus(getAmount(currency));
+                } else {
+                    endOfDayBalance = Money.of(currency, this.runningBalance);
+                }
             }
         }
 

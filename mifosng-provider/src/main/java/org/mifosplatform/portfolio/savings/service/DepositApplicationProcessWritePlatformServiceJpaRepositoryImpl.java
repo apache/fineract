@@ -5,6 +5,9 @@
  */
 package org.mifosplatform.portfolio.savings.service;
 
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.linkedAccountParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
+
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -272,12 +275,14 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 if (depositAccountType.isFixedDeposit()) {
                     ((FixedDepositAccount) account).updateMaturityDateAndAmountBeforeAccountActivation(mc);
                 } else if (depositAccountType.isRecurringDeposit()) {
-                    final LocalDate transactionStartDate =  ((RecurringDepositAccount) account).depositStartDate();
+                    final LocalDate transactionStartDate = ((RecurringDepositAccount) account).depositStartDate();
                     ((RecurringDepositAccount) account).updateMaturityDateAndAmount(mc, transactionStartDate);
                 }
 
                 this.savingAccountRepository.saveAndFlush(account);
             }
+
+            boolean isLinkedAccRequired = command.booleanPrimitiveValueOfParameterNamed(transferInterestToSavingsParamName);
 
             // Save linked account information
             final Long savingsAccountId = command.longValueOfParameterNamed(DepositsApiConstants.linkedAccountParamName);
@@ -287,7 +292,12 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     if (this.fromJsonHelper.parameterExists(DepositsApiConstants.linkedAccountParamName, command.parsedJson())) {
                         this.accountAssociationsRepository.delete(accountAssociations);
                         changes.put(DepositsApiConstants.linkedAccountParamName, null);
+                        if (isLinkedAccRequired) {
+                            this.depositAccountDataValidator.throwLinkedAccountRequiredError();
+                        }
                     }
+                } else if (isLinkedAccRequired) {
+                    this.depositAccountDataValidator.throwLinkedAccountRequiredError();
                 }
             } else {
                 boolean isModified = false;

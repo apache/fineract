@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.portfolio.account.service;
 
+import java.util.Collection;
+
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.mifosplatform.portfolio.account.data.AccountTransferData;
@@ -22,4 +24,6 @@ public interface AccountTransfersReadPlatformService {
     boolean isAccountTransfer(Long transactionId, PortfolioAccountType accountType);
 
     Page<AccountTransferData> retrieveByStandingInstruction(Long id, SearchParameters searchParameters);
+
+    Collection<Long> fetchPostInterestTransactionIds(Long accountId);
 }
