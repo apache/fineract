@@ -44,6 +44,7 @@ public class FixedDepositProductHelper {
     private static final String DAILY = "1";
     private static final String MONTHLY = "4";
     private static final String QUARTERLY = "5";
+    private static final String BI_ANNUALLY = "6";
     private static final String ANNUALLY = "7";
     private static final String INTEREST_CALCULATION_USING_DAILY_BALANCE = "1";
     private static final String INTEREST_CALCULATION_USING_AVERAGE_DAILY_BALANCE = "2";
@@ -51,6 +52,8 @@ public class FixedDepositProductHelper {
     private static final String DAYS_365 = "365";
     private static final String NONE = "1";
     private static final String CASH_BASED = "2";
+    private static final String ACCRUAL_PERIODIC = "3";
+    private static final String ACCRUAL_UPFRONT = "4";
     private static final String WHOLE_TERM = "1";
     private static final String TILL_PREMATURE_WITHDRAWAL = "2";
 
@@ -161,7 +164,7 @@ public class FixedDepositProductHelper {
         System.out.println(FixedDepositProductCreateJson);
         return FixedDepositProductCreateJson;
     }
-    
+
     public FixedDepositProductHelper withAccountingRuleAsNone() {
         this.accountingRule = NONE;
         return this;

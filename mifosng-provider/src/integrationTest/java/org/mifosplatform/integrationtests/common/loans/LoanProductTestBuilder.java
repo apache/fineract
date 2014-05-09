@@ -243,6 +243,7 @@ public class LoanProductTestBuilder {
                 map.put("interestOnLoanAccountId", ID);
                 map.put("incomeFromFeeAccountId", ID);
                 map.put("incomeFromPenaltyAccountId", ID);
+                map.put("incomeFromRecoveryAccountId", ID);
             }
             if (this.accountList[i].getAccountType().equals(Account.AccountType.EXPENSE)) {
                 final String ID = this.accountList[i].getAccountID().toString();
@@ -274,6 +275,7 @@ public class LoanProductTestBuilder {
                 map.put("interestOnLoanAccountId", ID);
                 map.put("incomeFromFeeAccountId", ID);
                 map.put("incomeFromPenaltyAccountId", ID);
+                map.put("incomeFromRecoveryAccountId", ID);
             }
             if (this.accountList[i].getAccountType().equals(Account.AccountType.EXPENSE)) {
                 final String ID = this.accountList[i].getAccountID().toString();

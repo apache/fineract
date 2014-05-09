@@ -38,6 +38,8 @@ public class RecurringDepositAccountHelper {
     private static final String CALCULATE_PREMATURE_AMOUNT_COMMAND = "calculatePrematureAmount";
     private static final String PREMATURE_CLOSE_COMMAND = "prematureClose";
     private static final String DEPOSIT_INTO_RECURRING_DEPOSIT_COMMAND = "deposit";
+    private static final String MODIFY_TRANSACTION_COMMAND = "modify";
+    private static final String UNDO_TRANSACTION_COMMAND = "undo";
 
     private static final String LOCALE = "en_GB";
     private static final String DIGITS_AFTER_DECIMAL = "4";
@@ -50,15 +52,20 @@ public class RecurringDepositAccountHelper {
     private static final String DAILY = "1";
     private static final String MONTHLY = "4";
     private static final String QUARTERLY = "5";
+    private static final String BI_ANNUALLY = "6";
     private static final String ANNUALLY = "7";
     private static final String INTEREST_CALCULATION_USING_DAILY_BALANCE = "1";
     private static final String INTEREST_CALCULATION_USING_AVERAGE_DAILY_BALANCE = "2";
     private static final String DAYS_360 = "360";
     private static final String DAYS_365 = "365";
+    private static final String NONE = "1";
+    private static final String CASH_BASED = "2";
+    private static final String ACCRUAL_PERIODIC = "3";
+    private static final String ACCRUAL_UPFRONT = "4";
 
-    private final String interestCompoundingPeriodType = MONTHLY;
-    private final String interestPostingPeriodType = MONTHLY;
-    private final String interestCalculationType = INTEREST_CALCULATION_USING_DAILY_BALANCE;
+    private String interestCompoundingPeriodType = MONTHLY;
+    private String interestPostingPeriodType = MONTHLY;
+    private String interestCalculationType = INTEREST_CALCULATION_USING_DAILY_BALANCE;
     private final String lockinPeriodFrequency = "6";
     private final String lockingPeriodFrequencyType = MONTHS;
     private final String minDepositTerm = "6";
@@ -71,7 +78,7 @@ public class RecurringDepositAccountHelper {
     private final boolean preClosurePenalApplicable = true;
     private final boolean isActiveChart = true;
     private final String currencyCode = USD;
-    private final String interestCalculationDaysInYearType = DAYS_365;
+    private String interestCalculationDaysInYearType = DAYS_365;
     private final String depositAmount = "2000";
     private final String depositPeriod = "14";
     private final String depositPeriodFrequencyId = MONTHS;
@@ -188,8 +195,9 @@ public class RecurringDepositAccountHelper {
         return response;
     }
 
-    public static Float getInterestRate(ArrayList<ArrayList<HashMap>> interestSlabData, Integer depositPeriod, Float annualInterestRate) {
+    public static Float getInterestRate(ArrayList<ArrayList<HashMap>> interestSlabData, Integer depositPeriod) {
 
+        Float annualInterestRate = 0.0f;
         for (Integer slabIndex = 0; slabIndex < interestSlabData.get(0).size(); slabIndex++) {
             Integer fromPeriod = (Integer) interestSlabData.get(0).get(slabIndex).get("fromPeriod");
             Integer toPeriod = (Integer) interestSlabData.get(0).get(slabIndex).get("toPeriod");
@@ -200,6 +208,38 @@ public class RecurringDepositAccountHelper {
         }
 
         return annualInterestRate;
+    }
+
+    public static Float getPrincipalAfterCompoundingInterest(Calendar currentDate, Float principal, Float depositAmount, Integer depositPeriod,
+            double interestPerDay, Integer compoundingInterval, Integer postingInterval) {
+
+        Float totalInterest = 0.0f;
+        Float interestEarned = 0.0f;
+
+        for (int i = 1; i <= depositPeriod; i++) {
+            Integer daysInMonth = currentDate.getActualMaximum(Calendar.DATE);
+            principal += depositAmount;
+            for (int j = 0; j < daysInMonth; j++) {
+
+                interestEarned = (float) (principal * interestPerDay);
+                totalInterest += interestEarned;
+                if (compoundingInterval == 0) {
+                    principal += interestEarned;
+                }
+
+            }
+            if ((i % postingInterval) == 0 || i == depositPeriod) {
+                if (compoundingInterval != 0) {
+                    principal += totalInterest;
+                }
+                totalInterest = 0.0f;
+                System.out.println(principal);
+
+            }
+            currentDate.add(Calendar.MONTH, 1);
+            interestEarned = 0.0f;
+        }
+        return principal;
     }
 
     public HashMap updateRecurringDepositAccount(final String clientID, final String productID, final String accountID,
@@ -217,6 +257,40 @@ public class RecurringDepositAccountHelper {
 
         return Utils.performServerPut(this.requestSpec, this.responseSpec, RECURRING_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?"
                 + Utils.TENANT_IDENTIFIER, recurringDepositApplicationJSON, CommonConstants.RESPONSE_CHANGES);
+    }
+
+    public HashMap updateInterestCalculationConfigForRecurringDeposit(final String clientID, final String productID,
+            final String accountID, final String submittedOnDate, final String validFrom, final String validTo,
+            final String numberOfDaysPerYear, final String penalInterestType, final String interestCalculationType,
+            final String interestCompoundingPeriodType, final String interestPostingPeriodType, final String expectedFirstDepositOnDate) {
+
+        final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec) //
+                .withSubmittedOnDate(submittedOnDate) //
+                .withNumberOfDaysPerYear(numberOfDaysPerYear) //
+                .withInterestCalculationPeriodType(interestCalculationType) //
+                .withInterestCompoundingPeriodType(interestCompoundingPeriodType) //
+                .withInterestPostingPeriodType(interestPostingPeriodType) //
+                .withExpectedFirstDepositOnDate(expectedFirstDepositOnDate) //
+                .build(clientID, productID, validFrom, validTo, penalInterestType);
+
+        return Utils.performServerPut(this.requestSpec, this.responseSpec, RECURRING_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?"
+                + Utils.TENANT_IDENTIFIER, recurringDepositApplicationJSON, CommonConstants.RESPONSE_CHANGES);
+    }
+
+    public Integer updateTransactionForRecurringDeposit(final Integer accountID, final Integer transactionId, final String transactionDate,
+            final Float transactionAmount) {
+        System.out.println("--------------------------------- UPDATE RECURRING DEPOSIT TRANSACTION ------------------------------------");
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, RECURRING_DEPOSIT_ACCOUNT_URL + "/" + accountID
+                + "/transactions/" + transactionId + "?command=" + MODIFY_TRANSACTION_COMMAND,
+                getUpdateTransactionAsJSON(transactionDate, transactionAmount), CommonConstants.RESPONSE_RESOURCE_ID);
+    }
+
+    public Integer undoTransactionForRecurringDeposit(final Integer accountID, final Integer transactionId, final String transactionDate,
+            final Float transactionAmount) {
+        System.out.println("--------------------------------- UNDO RECURRING DEPOSIT TRANSACTION ------------------------------------");
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, RECURRING_DEPOSIT_ACCOUNT_URL + "/" + accountID
+                + "/transactions/" + transactionId + "?command=" + UNDO_TRANSACTION_COMMAND,
+                getUpdateTransactionAsJSON(transactionDate, transactionAmount), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public HashMap approveRecurringDeposit(final Integer recurringDepositAccountID, final String approvedOnDate) {
@@ -278,11 +352,12 @@ public class RecurringDepositAccountHelper {
                 getCalculatedInterestForRecurringDepositApplicationAsJSON(), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
-    public Integer depositToRecurringDepositAccount(final Integer recurringDepositAccountId, final String depositedOnDate) {
+    public Integer depositToRecurringDepositAccount(final Integer recurringDepositAccountId, final Float depositAmount,
+            final String depositedOnDate) {
         System.out.println("--------------------------------- DEPOSIT TO RECURRING DEPOSIT ACCOUNT --------------------------------");
         return (Integer) performRecurringDepositActions(
                 createDepositToRecurringDepositURL(DEPOSIT_INTO_RECURRING_DEPOSIT_COMMAND, recurringDepositAccountId),
-                getDepositToRecurringDepositAccountAsJSON(depositedOnDate), CommonConstants.RESPONSE_RESOURCE_ID);
+                getDepositToRecurringDepositAccountAsJSON(depositAmount, depositedOnDate), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public HashMap calculatePrematureAmountForRecurringDeposit(final Integer recurringDepositAccountId, final String closedOnDate) {
@@ -309,6 +384,17 @@ public class RecurringDepositAccountHelper {
         String recurringDepositAccountApproveJson = new Gson().toJson(map);
         System.out.println(recurringDepositAccountApproveJson);
         return recurringDepositAccountApproveJson;
+    }
+
+    private String getUpdateTransactionAsJSON(final String transactionDate, final Float transactionAmount) {
+        final HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("locale", CommonConstants.locale);
+        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("transactionDate", transactionDate);
+        map.put("transactionAmount", transactionAmount);
+        String updateTransactionJson = new Gson().toJson(map);
+        System.out.println(updateTransactionJson);
+        return updateTransactionJson;
     }
 
     private String getRejectedRecurringDepositAsJSON(final String rejectedOnDate) {
@@ -360,11 +446,11 @@ public class RecurringDepositAccountHelper {
         return recurringDepositAccountPrematureClosureJson;
     }
 
-    private String getDepositToRecurringDepositAccountAsJSON(final String depositedOnDate) {
+    private String getDepositToRecurringDepositAccountAsJSON(final Float depositAmount, final String depositedOnDate) {
         final HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
-        map.put("transactionAmount", this.recurringDepositAmount);
+        map.put("transactionAmount", depositAmount);
         map.put("transactionDate", depositedOnDate);
         String recurringDepositAccountPrematureClosureJson = new Gson().toJson(map);
         System.out.println(recurringDepositAccountPrematureClosureJson);
@@ -423,6 +509,26 @@ public class RecurringDepositAccountHelper {
 
     public RecurringDepositAccountHelper withExpectedFirstDepositOnDate(final String recurringDepositApplicationExpectedFirstDepositOnDate) {
         this.expectedFirstDepositOnDate = recurringDepositApplicationExpectedFirstDepositOnDate;
+        return this;
+    }
+
+    public RecurringDepositAccountHelper withNumberOfDaysPerYear(final String numberOfDaysPerYearTypeId) {
+        this.interestCalculationDaysInYearType = numberOfDaysPerYearTypeId;
+        return this;
+    }
+
+    public RecurringDepositAccountHelper withInterestCalculationPeriodType(final String interestCalculationTypeId) {
+        this.interestCalculationType = interestCalculationTypeId;
+        return this;
+    }
+
+    public RecurringDepositAccountHelper withInterestCompoundingPeriodType(final String interestCompoundingPeriodTypeId) {
+        this.interestCompoundingPeriodType = interestCompoundingPeriodTypeId;
+        return this;
+    }
+
+    public RecurringDepositAccountHelper withInterestPostingPeriodType(final String interestPostingPeriodTypeId) {
+        this.interestPostingPeriodType = interestPostingPeriodTypeId;
         return this;
     }
 

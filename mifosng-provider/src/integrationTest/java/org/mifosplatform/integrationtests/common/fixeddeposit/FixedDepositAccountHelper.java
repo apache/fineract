@@ -56,6 +56,7 @@ public class FixedDepositAccountHelper {
     private static final String DAILY = "1";
     private static final String MONTHLY = "4";
     private static final String QUARTERLY = "5";
+    private static final String BI_ANNUALLY = "6";
     private static final String ANNUALLY = "7";
     private static final String INTEREST_CALCULATION_USING_DAILY_BALANCE = "1";
     private static final String INTEREST_CALCULATION_USING_AVERAGE_DAILY_BALANCE = "2";
@@ -78,11 +79,10 @@ public class FixedDepositAccountHelper {
     private final boolean preClosurePenalApplicable = true;
     private final boolean isActiveChart = true;
     private final String currencyCode = USD;
-    public static final String depositAmount = "100000";
+    private final String depositAmount = "100000";
     private final String depositPeriod = "14";
     private final String depositPeriodFrequencyId = MONTHS;
     private String submittedOnDate = "";
-    private String savingsId = null;
 
     public String build(final String clientId, final String productId, final String validFrom, final String validTo,
             final String penalInterestType) {
@@ -157,11 +157,10 @@ public class FixedDepositAccountHelper {
         map.put("inMultiplesOfDepositTermTypeId", this.inMultiplesOfDepositTermTypeId);
         map.put("preClosurePenalInterest", this.preClosurePenalInterest);
         map.put("preClosurePenalInterestOnTypeId", penalInterestType);
-        map.put("depositAmount", depositAmount);
+        map.put("depositAmount", this.depositAmount);
         map.put("depositPeriod", this.depositPeriod);
         map.put("depositPeriodFrequencyId", this.depositPeriodFrequencyId);
         map.put("submittedOnDate", this.submittedOnDate);
-        map.put("linkAccountId", savingsId);
 
         String fixedDepositAccountJson = new Gson().toJson(map);
         System.out.println(fixedDepositAccountJson);
@@ -188,8 +187,9 @@ public class FixedDepositAccountHelper {
         return response;
     }
 
-    public static Float getInterestRate(ArrayList<ArrayList<HashMap>> interestSlabData, Integer depositPeriod, Float annualInterestRate) {
+    public static Float getInterestRate(ArrayList<ArrayList<HashMap>> interestSlabData, Integer depositPeriod) {
 
+        Float annualInterestRate = 0.0f;
         for (Integer slabIndex = 0; slabIndex < interestSlabData.get(0).size(); slabIndex++) {
             Integer fromPeriod = (Integer) interestSlabData.get(0).get(slabIndex).get("fromPeriod");
             Integer toPeriod = (Integer) interestSlabData.get(0).get(slabIndex).get("toPeriod");
@@ -200,6 +200,35 @@ public class FixedDepositAccountHelper {
         }
 
         return annualInterestRate;
+    }
+    
+    public static Float getPrincipalAfterCompoundingInterest(Calendar currentDate, Float principal, Integer depositPeriod, double interestPerDay, Integer compoundingInterval, Integer postingInterval) {
+        
+        Float totalInterest = 0.0f;
+        Float interestEarned = 0.0f;
+
+        for (int i = 1; i <= depositPeriod; i++) {
+            Integer daysInMonth = currentDate.getActualMaximum(Calendar.DATE);
+            for (int j = 0; j < daysInMonth; j++) {
+
+                interestEarned = (float) (principal * interestPerDay);
+                totalInterest += interestEarned;
+                if (compoundingInterval == 0) {
+                    principal += interestEarned;
+                }
+            }
+            if ((i % postingInterval) == 0 || i == depositPeriod) {
+                if (compoundingInterval != 0) {
+                    principal += totalInterest;
+                }
+                totalInterest = 0.0f;
+                System.out.println(principal);
+
+            }
+            currentDate.add(Calendar.MONTH, 1);
+            interestEarned = 0.0f;
+        }
+        return principal;
     }
 
     public HashMap updateFixedDepositAccount(final String clientID, final String productID, final String accountID, final String validFrom,
@@ -213,10 +242,9 @@ public class FixedDepositAccountHelper {
                 + Utils.TENANT_IDENTIFIER, fixedDepositApplicationJSON, CommonConstants.RESPONSE_CHANGES);
     }
 
-    public HashMap updateInterestCalculationConfigForFixedDeposit(final String clientID, final String productID, final String accountID,
-            final String submittedOnDate, final String validFrom, final String validTo, final String numberOfDaysPerYear,
-            final String penalInterestType, final String interestCalculationType, final String interestCompoundingPeriodType,
-            final String interestPostingPeriodType) {
+    public HashMap updateInterestCalculationConfigForFixedDeposit(final String clientID, final String productID, final String accountID, final String submittedOnDate,
+            final String validFrom, final String validTo, final String numberOfDaysPerYear, final String penalInterestType,
+            final String interestCalculationType, final String interestCompoundingPeriodType, final String interestPostingPeriodType) {
 
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
                 .withSubmittedOnDate(submittedOnDate) //
@@ -428,8 +456,4 @@ public class FixedDepositAccountHelper {
         return this;
     }
 
-    public FixedDepositAccountHelper withSavings(final String savingsId) {
-        this.savingsId = savingsId;
-        return this;
-    }
 }
