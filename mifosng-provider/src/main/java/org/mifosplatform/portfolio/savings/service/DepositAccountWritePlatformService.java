@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.savings.service;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.jobs.exception.JobExecutionException;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
@@ -54,4 +55,6 @@ public interface DepositAccountWritePlatformService {
     void applyChargeDue(final Long savingsAccountChargeId, final Long accountId, final DepositAccountType depositAccountType);
     
     void updateMaturityDetails(final Long depositAccountId, final DepositAccountType depositAccountType);
+
+    void transferInterestToSavings() throws JobExecutionException;
 }

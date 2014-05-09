@@ -9,6 +9,7 @@ import java.util.Collection;
 
 import org.mifosplatform.infrastructure.core.data.PaginationParameters;
 import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.portfolio.account.data.AccountTransferDTO;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.data.DepositAccountData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionData;
@@ -34,4 +35,6 @@ public interface DepositAccountReadPlatformService {
     Collection<DepositAccountData> retrieveForMaturityUpdate();
     
     SavingsAccountTransactionData retrieveRecurringAccountDepositTransactionTemplate(final Long accountId);
+
+    Collection<AccountTransferDTO> retrieveDataForInterestTransfer();
 }

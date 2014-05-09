@@ -506,9 +506,6 @@ public class FixedDepositTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
 
-        FixedDepositAccountHelper fixedDepositAccountHelperValidationError = new FixedDepositAccountHelper(this.requestSpec,
-                new ResponseSpecBuilder().build());
-
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
         DateFormat monthDayFormat = new SimpleDateFormat("dd MMM");
 

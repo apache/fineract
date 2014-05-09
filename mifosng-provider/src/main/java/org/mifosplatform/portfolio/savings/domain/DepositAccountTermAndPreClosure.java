@@ -9,6 +9,7 @@ import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositAm
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositPeriodFrequencyIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositPeriodParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.expectedFirstDepositOnDateParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -75,6 +76,9 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
     @JoinColumn(name = "savings_account_id", nullable = false)
     private SavingsAccount account;
 
+    @Column(name = "transfer_interest_to_linked_account", nullable = false)
+    private boolean transferInterestToLinkedAccount;
+
     protected DepositAccountTermAndPreClosure() {
         super();
     }
@@ -82,16 +86,16 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
     public static DepositAccountTermAndPreClosure createNew(DepositPreClosureDetail preClosureDetail, DepositTermDetail depositTermDetail,
             SavingsAccount account, BigDecimal depositAmount, BigDecimal maturityAmount, final LocalDate maturityDate,
             Integer depositPeriod, final SavingsPeriodFrequencyType depositPeriodFrequency, final LocalDate expectedFirstDepositOnDate,
-            final DepositAccountOnClosureType accountOnClosureType) {
+            final DepositAccountOnClosureType accountOnClosureType, Boolean trasferInterest) {
 
         return new DepositAccountTermAndPreClosure(preClosureDetail, depositTermDetail, account, depositAmount, maturityAmount,
-                maturityDate, depositPeriod, depositPeriodFrequency, expectedFirstDepositOnDate, accountOnClosureType);
+                maturityDate, depositPeriod, depositPeriodFrequency, expectedFirstDepositOnDate, accountOnClosureType, trasferInterest);
     }
 
     private DepositAccountTermAndPreClosure(DepositPreClosureDetail preClosureDetail, DepositTermDetail depositTermDetail,
             SavingsAccount account, BigDecimal depositAmount, BigDecimal maturityAmount, final LocalDate maturityDate,
             Integer depositPeriod, final SavingsPeriodFrequencyType depositPeriodFrequency, final LocalDate expectedFirstDepositOnDate,
-            final DepositAccountOnClosureType accountOnClosureType) {
+            final DepositAccountOnClosureType accountOnClosureType, Boolean transferInterest) {
         this.depositAmount = depositAmount;
         this.maturityAmount = maturityAmount;
         this.maturityDate = (maturityDate == null) ? null : maturityDate.toDate();
@@ -102,6 +106,7 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
         this.account = account;
         this.expectedFirstDepositOnDate = expectedFirstDepositOnDate == null ? null : expectedFirstDepositOnDate.toDate();
         this.onAccountClosureType = (accountOnClosureType == null) ? null : accountOnClosureType.getValue();
+        this.transferInterestToLinkedAccount = transferInterest;
     }
 
     public Map<String, Object> update(final JsonCommand command, final DataValidatorBuilder baseDataValidator) {
@@ -124,10 +129,10 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
             actualChanges.put(depositPeriodFrequencyIdParamName, SavingsEnumerations.depositTermFrequencyType(newValue));
             this.depositPeriodFrequency = newValue;
         }
-        
+
         final String localeAsInput = command.locale();
         final String dateFormat = command.dateFormat();
-        
+
         if (command.isChangeInLocalDateParameterNamed(expectedFirstDepositOnDateParamName, getExpectedFirstDepositOnDate())) {
             final LocalDate newValue = command.localDateValueOfParameterNamed(expectedFirstDepositOnDateParamName);
             final String newValueAsString = command.stringValueOfParameterNamed(expectedFirstDepositOnDateParamName);
@@ -135,6 +140,12 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
             actualChanges.put(SavingsApiConstants.localeParamName, localeAsInput);
             actualChanges.put(SavingsApiConstants.dateFormatParamName, dateFormat);
             this.expectedFirstDepositOnDate = newValue.toDate();
+        }
+
+        if (command.isChangeInBooleanParameterNamed(transferInterestToSavingsParamName, this.transferInterestToLinkedAccount)) {
+            final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed(transferInterestToSavingsParamName);
+            actualChanges.put(transferInterestToSavingsParamName, newValue);
+            this.transferInterestToLinkedAccount = newValue;
         }
 
         if (this.preClosureDetail != null) {
@@ -262,13 +273,20 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
         final DepositPreClosureDetail preClosureDetail = this.preClosureDetail.copy();
         final DepositTermDetail depositTermDetail = this.depositTermDetail.copy();
         final LocalDate expectedFirstDepositOnDate = null;
+        final Boolean transferInterestToLinkedAccount = null;
 
         final DepositAccountOnClosureType accountOnClosureType = null;
         return DepositAccountTermAndPreClosure.createNew(preClosureDetail, depositTermDetail, account, actualDepositAmount, maturityAmount,
-                maturityDate, depositPeriod, depositPeriodFrequency, expectedFirstDepositOnDate, accountOnClosureType);
+                maturityDate, depositPeriod, depositPeriodFrequency, expectedFirstDepositOnDate, accountOnClosureType,
+                transferInterestToLinkedAccount);
     }
 
     public void updateExpectedFirstDepositDate(final LocalDate expectedFirstDepositOnDate) {
         this.expectedFirstDepositOnDate = expectedFirstDepositOnDate.toDate();
+    }
+
+    
+    public boolean isTransferInterestToLinkedAccount() {
+        return this.transferInterestToLinkedAccount;
     }
 }

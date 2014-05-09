@@ -1,6 +1,7 @@
 package org.mifosplatform.portfolio.savings.domain;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -8,11 +9,18 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.domain.LocalDateInterval;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.domain.interest.CompoundInterestHelper;
 import org.mifosplatform.portfolio.savings.domain.interest.PostingPeriod;
 
 public final class SavingsHelper {
+
+    AccountTransfersReadPlatformService accountTransfersReadPlatformService = null;
+
+    public SavingsHelper(AccountTransfersReadPlatformService accountTransfersReadPlatformService) {
+        this.accountTransfersReadPlatformService = accountTransfersReadPlatformService;
+    }
 
     private final CompoundInterestHelper compoundInterestHelper = new CompoundInterestHelper();
 
@@ -26,7 +34,8 @@ public final class SavingsHelper {
 
         while (!periodStartDate.isAfter(interestPostingUpToDate) && !periodEndDate.isAfter(interestPostingUpToDate)) {
 
-            final LocalDate interestPostingLocalDate = determineInterestPostingPeriodEndDateFrom(periodStartDate, postingPeriodType, interestPostingUpToDate);
+            final LocalDate interestPostingLocalDate = determineInterestPostingPeriodEndDateFrom(periodStartDate, postingPeriodType,
+                    interestPostingUpToDate);
             periodEndDate = interestPostingLocalDate.minusDays(1);
 
             if (!interestPostingLocalDate.isAfter(interestPostingUpToDate)) {
@@ -61,7 +70,7 @@ public final class SavingsHelper {
                 final int monthofYear = periodStartDate.getMonthOfYear();
                 if (monthofYear <= 3) {
                     periodEndDate = new DateTime().withDate(year, 3, 31).toLocalDate();
-            } else if (monthofYear <= 6) {
+                } else if (monthofYear <= 6) {
                     periodEndDate = new DateTime().withDate(year, 6, 30).toLocalDate();
                 } else if (monthofYear <= 9) {
                     periodEndDate = new DateTime().withDate(year, 9, 30).toLocalDate();
@@ -70,14 +79,14 @@ public final class SavingsHelper {
                 }
             break;
             case BIANNUAL:
-            		final int byear = periodStartDate.getYearOfEra();
-            		final int bmonthofYear = periodStartDate.getMonthOfYear();
+                final int byear = periodStartDate.getYearOfEra();
+                final int bmonthofYear = periodStartDate.getMonthOfYear();
                 if (bmonthofYear <= 6) {
                     periodEndDate = new DateTime().withDate(byear, 6, 30).toLocalDate();
                 } else if (bmonthofYear <= 12) {
                     periodEndDate = new DateTime().withDate(byear, 12, 31).toLocalDate();
                 }
-            	break;
+            break;
             case ANNUAL:
                 periodEndDate = periodStartDate.monthOfYear().withMaximumValue();
                 periodEndDate = periodEndDate.dayOfMonth().withMaximumValue();
@@ -90,7 +99,13 @@ public final class SavingsHelper {
         return periodEndDate;
     }
 
-    public Money calculateInterestForAllPostingPeriods(final MonetaryCurrency currency, final List<PostingPeriod> allPeriods) {
-        return this.compoundInterestHelper.calculateInterestForAllPostingPeriods(currency, allPeriods);
+    public Money calculateInterestForAllPostingPeriods(final MonetaryCurrency currency, final List<PostingPeriod> allPeriods,
+            LocalDate accountLockedUntil, Boolean immediateWithdrawalOfInterest) {
+        return this.compoundInterestHelper.calculateInterestForAllPostingPeriods(currency, allPeriods, accountLockedUntil,
+                immediateWithdrawalOfInterest);
+    }
+
+    public Collection<Long> fetchPostInterestTransactionIds(Long accountId) {
+        return this.accountTransfersReadPlatformService.fetchPostInterestTransactionIds(accountId);
     }
 }

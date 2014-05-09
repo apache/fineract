@@ -370,9 +370,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return SavingsAccountStatusType.fromInt(this.status).isClosed();
     }
 
-    public void postInterest(final MathContext mc, final LocalDate interestPostingUpToDate) {
+    public void postInterest(final MathContext mc, final LocalDate interestPostingUpToDate, final boolean isInterestTransfer) {
 
-        final List<PostingPeriod> postingPeriods = calculateInterestUsing(mc, interestPostingUpToDate);
+        final List<PostingPeriod> postingPeriods = calculateInterestUsing(mc, interestPostingUpToDate, isInterestTransfer);
 
         Money interestPostedToDate = Money.zero(this.currency);
 
@@ -447,8 +447,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
      * calculate the amount of interest due at the end of each 'crediting'
      * period check if an existing 'interest posting' transaction exists for
      * date and matches the amount posted
+     * @param isInterestTransfer TODO
      */
-    public List<PostingPeriod> calculateInterestUsing(final MathContext mc, final LocalDate upToInterestCalculationDate) {
+    public List<PostingPeriod> calculateInterestUsing(final MathContext mc, final LocalDate upToInterestCalculationDate, boolean isInterestTransfer) {
 
         // no openingBalance concept supported yet but probably will to allow
         // for migrations.
@@ -480,18 +481,20 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType.fromInt(this.interestCalculationType);
         final BigDecimal interestRateAsFraction = getEffectiveInterestRateAsFraction(mc, upToInterestCalculationDate);
+        final Collection<Long> interestPostTransactions = this.savingsHelper.fetchPostInterestTransactionIds(getId());
         for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
 
             final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance,
                     retreiveOrderedNonInterestPostingTransactions(), this.currency, compoundingPeriodType, interestCalculationType,
-                    interestRateAsFraction, daysInYearType.getValue(), upToInterestCalculationDate);
+                    interestRateAsFraction, daysInYearType.getValue(), upToInterestCalculationDate, interestPostTransactions, isInterestTransfer);
 
             periodStartingBalance = postingPeriod.closingBalance();
 
             allPostingPeriods.add(postingPeriod);
         }
 
-        this.savingsHelper.calculateInterestForAllPostingPeriods(this.currency, allPostingPeriods);
+        this.savingsHelper.calculateInterestForAllPostingPeriods(this.currency, allPostingPeriods, getLockedInUntilLocalDate(),
+                isTransferInterestToOtherAccount());
 
         this.summary.updateFromInterestPeriodSummaries(this.currency, allPostingPeriods);
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
@@ -809,7 +812,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return isLocked;
     }
 
-    private LocalDate getLockedInUntilLocalDate() {
+    protected LocalDate getLockedInUntilLocalDate() {
         LocalDate lockedInUntilLocalDate = null;
         if (this.lockedInUntilDate != null) {
             lockedInUntilLocalDate = new LocalDate(this.lockedInUntilDate);
@@ -2035,5 +2038,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     public DepositAccountType depositAccountType() {
         return DepositAccountType.fromInt(depositType);
+    }
+
+    protected boolean isTransferInterestToOtherAccount() {
+        return false;
     }
 }

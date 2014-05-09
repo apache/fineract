@@ -13,6 +13,7 @@ import static org.mifosplatform.portfolio.savings.DepositsApiConstants.onAccount
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -281,18 +282,20 @@ public class RecurringDepositAccount extends SavingsAccount {
 
         final SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType.fromInt(this.interestCalculationType);
         final BigDecimal interestRateAsFraction = getEffectiveInterestRateAsFraction(mc, maturityDate);
-
+        final Collection<Long> interestPostTransactions = this.savingsHelper.fetchPostInterestTransactionIds(getId());
+        boolean isInterestTransfer = false;
         for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
             final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance, transactions,
                     this.currency, compoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYearType.getValue(),
-                    maturityDate);
+                    maturityDate, interestPostTransactions, isInterestTransfer);
 
             periodStartingBalance = postingPeriod.closingBalance();
 
             allPostingPeriods.add(postingPeriod);
         }
 
-        this.savingsHelper.calculateInterestForAllPostingPeriods(this.currency, allPostingPeriods);
+        this.savingsHelper.calculateInterestForAllPostingPeriods(this.currency, allPostingPeriods, this.getLockedInUntilLocalDate(),
+                isTransferInterestToOtherAccount());
         // this.summary.updateFromInterestPeriodSummaries(this.currency,
         // allPostingPeriods);
         return allPostingPeriods;
@@ -538,8 +541,8 @@ public class RecurringDepositAccount extends SavingsAccount {
     public void postMaturityInterest(final LocalDate interestPostingUpToDate) {
 
         final MathContext mc = MathContext.DECIMAL64;
-
-        final List<PostingPeriod> postingPeriods = calculateInterestUsing(mc, interestPostingUpToDate);
+        boolean isInterestTransfer = false;
+        final List<PostingPeriod> postingPeriods = calculateInterestUsing(mc, interestPostingUpToDate,isInterestTransfer);
 
         Money interestPostedToDate = Money.zero(this.currency);
 
@@ -634,15 +637,15 @@ public class RecurringDepositAccount extends SavingsAccount {
     }
 
     @Override
-    public void postInterest(final MathContext mc, final LocalDate postingDate) {
+    public void postInterest(final MathContext mc, final LocalDate postingDate,final boolean isInterestTransfer) {
         final LocalDate interestPostingUpToDate = interestPostingUpToDate(postingDate);
-        super.postInterest(mc, interestPostingUpToDate);
+        super.postInterest(mc, interestPostingUpToDate, isInterestTransfer);
     }
 
     @Override
-    public List<PostingPeriod> calculateInterestUsing(final MathContext mc, final LocalDate postingDate) {
+    public List<PostingPeriod> calculateInterestUsing(final MathContext mc, final LocalDate postingDate, boolean isInterestTransfer) {
         final LocalDate interestPostingUpToDate = interestPostingUpToDate(postingDate);
-        return super.calculateInterestUsing(mc, interestPostingUpToDate);
+        return super.calculateInterestUsing(mc, interestPostingUpToDate, isInterestTransfer);
     }
 
     private LocalDate interestPostingUpToDate(final LocalDate interestPostingDate) {
@@ -891,4 +894,8 @@ public class RecurringDepositAccount extends SavingsAccount {
         this.activatedOnDate = now.toDate();
     }
 
+    @Override
+    protected boolean isTransferInterestToOtherAccount() {
+        return this.accountTermAndPreClosure.isTransferInterestToLinkedAccount();
+    }
 }

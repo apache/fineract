@@ -9,11 +9,12 @@ import static org.mifosplatform.portfolio.savings.DepositsApiConstants.chartIdPa
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositAmountParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositPeriodFrequencyIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositPeriodParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.expectedFirstDepositOnDateParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositAmountParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositFrequencyTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositTypeIdParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.expectedFirstDepositOnDateParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountNoParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.clientIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.externalIdParamName;
@@ -40,6 +41,7 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
+import org.mifosplatform.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
@@ -71,7 +73,7 @@ import com.google.gson.JsonElement;
 public class DepositAccountAssembler {
 
     private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
-    private final SavingsHelper savingsHelper = new SavingsHelper();
+    private final SavingsHelper savingsHelper;
     private final ClientRepositoryWrapper clientRepository;
     private final GroupRepositoryWrapper groupRepository;
     private final StaffRepositoryWrapper staffRepository;
@@ -88,7 +90,9 @@ public class DepositAccountAssembler {
             final StaffRepositoryWrapper staffRepository, final FixedDepositProductRepository fixedDepositProductRepository,
             final SavingsAccountRepositoryWrapper savingsAccountRepository,
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper,
-            final DepositProductAssembler depositProductAssembler, final RecurringDepositProductRepository recurringDepositProductRepository) {
+            final DepositProductAssembler depositProductAssembler,
+            final RecurringDepositProductRepository recurringDepositProductRepository,
+            final AccountTransfersReadPlatformService accountTransfersReadPlatformService) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
@@ -99,6 +103,7 @@ public class DepositAccountAssembler {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.depositProductAssembler = depositProductAssembler;
         this.recurringDepositProductRepository = recurringDepositProductRepository;
+        this.savingsHelper = new SavingsHelper(accountTransfersReadPlatformService);
     }
 
     /**
@@ -314,6 +319,7 @@ public class DepositAccountAssembler {
         final SavingsPeriodFrequencyType depositPeriodFrequency = SavingsPeriodFrequencyType.fromInt(depositPeriodFrequencyId);
         final SavingsAccount account = null;
         final LocalDate expectedFirstDepositOnDate = command.localDateValueOfParameterNamed(expectedFirstDepositOnDateParamName);
+        final Boolean trasferInterest = command.booleanPrimitiveValueOfParameterNamed(transferInterestToSavingsParamName);
 
         // calculate maturity amount
         final BigDecimal maturityAmount = null;// calculated and updated in
@@ -321,7 +327,8 @@ public class DepositAccountAssembler {
         final LocalDate maturityDate = null;// calculated and updated in account
         final DepositAccountOnClosureType accountOnClosureType = null;
         return DepositAccountTermAndPreClosure.createNew(updatedProductPreClosure, updatedProductTerm, account, depositAmount,
-                maturityAmount, maturityDate, depositPeriod, depositPeriodFrequency, expectedFirstDepositOnDate, accountOnClosureType);
+                maturityAmount, maturityDate, depositPeriod, depositPeriodFrequency, expectedFirstDepositOnDate, accountOnClosureType,
+                trasferInterest);
     }
 
     public DepositAccountRecurringDetail assembleAccountRecurringDetail(final JsonCommand command,

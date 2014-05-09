@@ -26,7 +26,10 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
+import org.mifosplatform.portfolio.account.PortfolioAccountType;
+import org.mifosplatform.portfolio.account.data.AccountTransferDTO;
 import org.mifosplatform.portfolio.account.data.AccountTransferData;
+import org.mifosplatform.portfolio.account.domain.AccountTransferType;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientData;
@@ -464,6 +467,22 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         }
     }
 
+    @Override
+    public Collection<AccountTransferDTO> retrieveDataForInterestTransfer() {
+        final StringBuilder sqlBuilder = new StringBuilder(300);
+        AccountTransferMapper mapper = new AccountTransferMapper();
+        sqlBuilder.append("SELECT ");
+        sqlBuilder.append(mapper.schema());
+        sqlBuilder.append(" where da.transfer_interest_to_linked_account = 1 and ");
+        sqlBuilder
+                .append("st.transaction_date > (select IFNULL(max(sat.transaction_date),sa.activatedon_date) from m_savings_account_transaction sat where sat.transaction_type_enum = ? and sat.savings_account_id = sa.id and sat.is_reversed=0) ");
+        sqlBuilder
+                .append("and st.transaction_type_enum = ? and sa.status_enum = ? and st.is_reversed=0 and st.transaction_date > IFNULL(sa.lockedin_until_date_derived,sa.activatedon_date)");
+
+        return this.jdbcTemplate.query(sqlBuilder.toString(), mapper, new Object[] { SavingsAccountTransactionType.WITHDRAWAL.getValue(),
+                SavingsAccountTransactionType.INTEREST_POSTING.getValue(), SavingsAccountStatusType.ACTIVE.getValue() });
+    }
+
     private static abstract class DepositAccountMapper implements RowMapper<DepositAccountData> {
 
         private final String selectFieldsSql;
@@ -697,7 +716,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append("datp.maturity_date as maturityDate, ");
             sqlBuilder.append("datp.deposit_period as depositPeriod, ");
             sqlBuilder.append("datp.deposit_period_frequency_enum as depositPeriodFrequencyTypeId, ");
-            sqlBuilder.append("datp.on_account_closure_enum as onAccountClosureId ");
+            sqlBuilder.append("datp.on_account_closure_enum as onAccountClosureId, ");
+            sqlBuilder.append("datp.transfer_interest_to_linked_account as transferInterestToSavings ");
 
             sqlBuilder.append(super.selectTablesSql());
 
@@ -750,12 +770,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final Integer onAccountClosureId = JdbcSupport.getInteger(rs, "onAccountClosureId");
             final EnumOptionData onAccountClosureType = (onAccountClosureId == null) ? null : SavingsEnumerations
                     .depositAccountOnClosureType(onAccountClosureId);
+            final Boolean transferInterestToSavings = rs.getBoolean("transferInterestToSavings");
 
             return FixedDepositAccountData.instance(depositAccountData, interestFreePeriodApplicable, interestFreeFromPeriod,
                     interestFreeToPeriod, interestFreePeriodFrequencyType, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
-                    depositPeriodFrequencyType, onAccountClosureType);
+                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings);
         }
     }
 
@@ -1182,12 +1203,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final Integer depositPeriod = null;
             final EnumOptionData depositPeriodFrequencyType = null;
             final EnumOptionData onAccountClosureType = null;
+            final Boolean transferInterestToSavings = false;
 
             return FixedDepositAccountData.instance(depositAccountData, interestFreePeriodApplicable, interestFreeFromPeriod,
                     interestFreeToPeriod, interestFreePeriodFrequencyType, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
-                    depositPeriodFrequencyType, onAccountClosureType);
+                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings);
         }
     }
 
@@ -1374,5 +1396,37 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             return SavingsAccountTransactionData.create(savingsId, transactionType, paymentDetailData, savingsId, accountNo,
                     DateUtils.getLocalDateOfTenant(), currency, recurringDepositAmount, runningBalance, false, transfer);
         }
+    }
+
+    private class AccountTransferMapper implements RowMapper<AccountTransferDTO> {
+
+        private final String schemaSql;
+
+        public AccountTransferMapper() {
+            final StringBuilder sqlBuilder = new StringBuilder(400);
+            sqlBuilder
+                    .append("sa.id as fromAcc ,aa.linked_savings_account_id as toAcc,st.amount as amount, st.transaction_date as transactionDate ")
+                    .append(" from m_deposit_account_term_and_preclosure da ")
+                    .append(" inner join m_savings_account sa on da.savings_account_id = sa.id")
+                    .append(" inner join m_savings_account_transaction st on st.savings_account_id = sa.id")
+                    .append(" inner join m_portfolio_account_associations aa on aa.savings_account_id=sa.id");
+            schemaSql = sqlBuilder.toString();
+        }
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        @Override
+        public AccountTransferDTO mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+            final Long fromAccountId = rs.getLong("fromAcc");
+            final Long toAccountId = rs.getLong("toAcc");
+            final BigDecimal transactionAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "amount");
+            final LocalDate transactionDate = JdbcSupport.getLocalDate(rs, "transactionDate");
+            return new AccountTransferDTO(transactionDate, transactionAmount, PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS,
+                    fromAccountId, toAccountId, "trasfer interest to savings", null, null, null, null, null, null, null,
+                    AccountTransferType.INTEREST_TRANSFER.getValue(), null, null, null, null, null);
+        }
+
     }
 }
