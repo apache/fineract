@@ -45,6 +45,8 @@ public class RecurringDepositProductHelper {
     private static final String DAYS_365 = "365";
     private static final String NONE = "1";
     private static final String CASH_BASED = "2";
+    private static final String ACCRUAL_PERIODIC = "3";
+    private static final String ACCRUAL_UPFRONT = "4";
     private static final String WHOLE_TERM = "1";
     private static final String TILL_PREMATURE_WITHDRAWAL = "2";
     private static final String VOLUNTARY = "1";
