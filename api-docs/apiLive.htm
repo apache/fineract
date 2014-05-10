@@ -26154,6 +26154,17 @@ GET https://DomainName/api/v1/users
         "firstname": "App",
         "lastname": "Administrator",
         "email": "demomfi@mifos.org",
+        "staff": {
+		   "id": 1,
+		   "firstname": "Test",
+		   "lastname": "123",
+		   "displayName": "123, Test",
+		   "mobileNo": "12312312",
+		   "officeId": 1,
+		   "officeName": "Head Office",
+		   "isLoanOfficer": true,
+		   "isActive": true
+		}
 	"selectedRoles": [
             {
                 "id": 1,
@@ -26234,6 +26245,17 @@ GET https://DomainName/api/v1/users/{userId}
     "firstname": "App",
     "lastname": "Administrator",
     "email": "demomfi@mifos.org",
+    "staff": {
+	 "id": 1,
+	 "firstname": "Test",
+	 "lastname": "123",
+	 "displayName": "123, Test",
+	 "mobileNo": "12312312",
+	 "officeId": 1,
+	 "officeName": "Head Office",
+	 "isLoanOfficer": true,
+	 "isActive": true
+	}
     "availableRoles": [],
     "selectedRoles": [
         {
@@ -26262,8 +26284,17 @@ GET https://DomainName/api/v1/users/{userId}
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
 						</tr>
-						<tr class=alt>
+						<tr>
 							<td>username, firstname, lastname, email, officeId, roles, sendPasswordToEmail</td>
+						</tr>
+					</table>
+					<br>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr>
+							<td>staffId</td>
 						</tr>
 					</table>
 				</div>
@@ -26281,6 +26312,7 @@ Request body:
     "lastname": "User",
     "email": "whatever@mifos.org",
     "officeId": 1,
+    "staffId": 1,
     "roles": [2,3],
     "sendPasswordToEmail": true
 }
@@ -26301,6 +26333,7 @@ Request body:
     "lastname": "User",
     "email": "whatever@mifos.org",
     "officeId": 1,
+    "staffId": 1,
     "roles": [2,3],
     "sendPasswordToEmail": false,
     "password": "123",
