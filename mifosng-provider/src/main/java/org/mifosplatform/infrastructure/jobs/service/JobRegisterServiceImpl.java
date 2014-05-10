@@ -108,12 +108,9 @@ public class JobRegisterServiceImpl implements JobRegisterService {
             }
 
         } catch (final Exception e) {
-			final String msg = "Job execution failed for job with id:"
-					+ scheduledJobDetail.getId();
-			logger.error(msg, e);
-			throw new PlatformInternalServerException(
-					"error.msg.sheduler.job.execution.failed", msg,
-					scheduledJobDetail.getId());
+            final String msg = "Job execution failed for job with id:" + scheduledJobDetail.getId();
+            logger.error(msg, e);
+            throw new PlatformInternalServerException("error.msg.sheduler.job.execution.failed", msg, scheduledJobDetail.getId());
         }
 
     }
@@ -218,9 +215,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
             scheduledJobDetails.updateNextRunTime(null);
             final String stackTrace = getStackTraceAsString(throwable);
             scheduledJobDetails.updateErrorLog(stackTrace);
-			logger.error(
-					"Could not schedule job: "
-							+ scheduledJobDetails.getJobName(), throwable);
+            logger.error("Could not schedule job: " + scheduledJobDetails.getJobName(), throwable);
         }
         scheduledJobDetails.updateCurrentlyRunningStatus(false);
     }
