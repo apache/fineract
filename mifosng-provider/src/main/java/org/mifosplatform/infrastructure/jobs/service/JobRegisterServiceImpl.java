@@ -13,6 +13,7 @@ import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.core.exception.PlatformInternalServerException;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.jobs.annotation.CronMethodParser;
+import org.mifosplatform.infrastructure.jobs.annotation.CronMethodParser.ClassMethodNamesPair;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.mifosplatform.infrastructure.jobs.domain.SchedulerDetail;
 import org.mifosplatform.infrastructure.jobs.exception.JobNotFoundException;
@@ -295,12 +296,12 @@ public class JobRegisterServiceImpl implements JobRegisterService {
 
     private JobDetail createJobDetail(final ScheduledJobDetail scheduledJobDetail) throws Exception {
         final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
-        final String[] jobDetails = CronMethodParser.findTargetMethodDetails(scheduledJobDetail.getJobName());
-        final Object targetObject = getBeanObject(Class.forName(jobDetails[CronMethodParser.CLASS_INDEX]));
+        final ClassMethodNamesPair jobDetails = CronMethodParser.findTargetMethodDetails(scheduledJobDetail.getJobName());
+        final Object targetObject = getBeanObject(Class.forName(jobDetails.className));
         final MethodInvokingJobDetailFactoryBean jobDetailFactoryBean = new MethodInvokingJobDetailFactoryBean();
         jobDetailFactoryBean.setName(scheduledJobDetail.getJobName() + "JobDetail" + tenant.getId());
         jobDetailFactoryBean.setTargetObject(targetObject);
-        jobDetailFactoryBean.setTargetMethod(jobDetails[CronMethodParser.METHOD_INDEX]);
+        jobDetailFactoryBean.setTargetMethod(jobDetails.methodName);
         jobDetailFactoryBean.setGroup(scheduledJobDetail.getGroupName());
         jobDetailFactoryBean.setConcurrent(false);
         jobDetailFactoryBean.afterPropertiesSet();

@@ -19,9 +19,13 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Parser to find method which is marked with CronTargetMethod annotation
- * 
  */
 public class CronMethodParser {
+
+    public static class ClassMethodNamesPair {
+        public String className;
+        public String methodName;
+    }
 
     private static final String SEARCH_PACKAGE = "org.mifosplatform.";
 
@@ -29,17 +33,13 @@ public class CronMethodParser {
 
     private static final String RESOURCE_PATTERN = "**/*.class";
 
-    private static final Map<String, String[]> targetMethosMap = new HashMap<String, String[]>();
+    private static final Map<String, ClassMethodNamesPair> targetMethosMap = new HashMap<String, ClassMethodNamesPair>();
 
     private static final ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
     private static final MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(resourcePatternResolver);
 
-    public static final int CLASS_INDEX = 0;
-
-    public static final int METHOD_INDEX = 1;
-
-    public static String[] findTargetMethodDetails(final String attributeValue) throws IOException {
+    public static ClassMethodNamesPair findTargetMethodDetails(final String attributeValue) throws IOException {
         if (!targetMethosMap.containsKey(attributeValue)) {
             findAnnotationMethods(CronTarget.class, CRON_ANNOTATION_ATTRIBUTE_NAME);
         }
@@ -66,8 +66,10 @@ public class CronMethodParser {
                         final Map<String, Object> attributes = metadata.getAnnotationAttributes(annotationClass.getName());
                         final JobName attributeValue = (JobName) attributes.get(attributeName);
                         final String className = metadata.getDeclaringClassName();
-                        final String[] mapVal = { className, metadata.getMethodName() };
-                        targetMethosMap.put(attributeValue.toString(), mapVal);
+                        final ClassMethodNamesPair pair = new ClassMethodNamesPair();
+                        pair.className = className;
+                        pair.methodName = metadata.getMethodName();
+                        targetMethosMap.put(attributeValue.toString(), pair);
                     }
                 }
             }
