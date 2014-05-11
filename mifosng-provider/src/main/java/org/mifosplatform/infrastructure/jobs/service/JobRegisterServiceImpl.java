@@ -54,6 +54,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
     private TenantDetailsService tenantDetailsService;
     private SchedulerJobListener schedulerJobListener;
     private SchedulerStopListener schedulerStopListener;
+    private SchedulerTriggerListener globalSchedulerTriggerListener;
 
     private final HashMap<String, Scheduler> schedulers = new HashMap<String, Scheduler>(4);
 
@@ -80,6 +81,11 @@ public class JobRegisterServiceImpl implements JobRegisterService {
     @Autowired
     public void setSchedulerStopListener(SchedulerStopListener schedulerStopListener) {
         this.schedulerStopListener = schedulerStopListener;
+    }
+
+    @Autowired
+    public void setGlobalTriggerListener(SchedulerTriggerListener globalTriggerListener) {
+        this.globalSchedulerTriggerListener = globalTriggerListener;
     }
 
     @PostConstruct
@@ -277,8 +283,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
         final SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
         schedulerFactoryBean.setSchedulerName(name);
         schedulerFactoryBean.setGlobalJobListeners(jobListeners);
-        final TriggerListener globalTriggerListener = this.applicationContext.getBean("schedulerTriggerListener", TriggerListener.class);
-        final TriggerListener[] globalTriggerListeners = { globalTriggerListener };
+        final TriggerListener[] globalTriggerListeners = { globalSchedulerTriggerListener };
         schedulerFactoryBean.setGlobalTriggerListeners(globalTriggerListeners);
         final Properties quartzProperties = new Properties();
         quartzProperties.put(SchedulerFactoryBean.PROP_THREAD_COUNT, Integer.toString(noOfThreads));
