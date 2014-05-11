@@ -28,8 +28,8 @@ sourceCompatibility = JavaVersion.VERSION_1_6
 /* define binary compatiblity version */
 targetCompatibility = JavaVersion.VERSION_1_6
 
-project.ext.springVersion = '3.2.5.RELEASE'
-project.ext.springSecurityVersion = '3.1.4.RELEASE'
+project.ext.springVersion = '4.0.4.RELEASE'
+project.ext.springSecurityVersion = '3.2.3.RELEASE'
 project.ext.hibernateCoreVersion = '4.1.9.Final'
 project.ext.jerseyVersion = '1.17'
 project.ext.springDataJpaVersion = '1.4.1.RELEASE'
@@ -69,6 +69,7 @@ dependencies {
 
 	compile(
 	   			[group: 'org.springframework', name: 'spring-core', version: springVersion],
+                [group: 'org.springframework', name: 'spring-context-support', version: springVersion],
 	   			[group: 'org.springframework', name: 'spring-aspects', version: springVersion],
 	   			[group: 'org.springframework', name: 'spring-web', version: springVersion],
 	   			[group: 'org.springframework', name: 'spring-test', version: springVersion],
@@ -139,8 +140,8 @@ dependencies {
                 [group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.8.12']
  	        )
 
- 	 testCompile 'junit:junit:4.10',
- 	 			 'junit:junit-dep:4.10',
+ 	 testCompile 'junit:junit:4.11',
+ 	 			 'junit:junit-dep:4.11',
                  'org.mockito:mockito-all:1.9.5',
                  'com.jayway.restassured:rest-assured:1.7.2'
 
