@@ -2,6 +2,7 @@ package org.mifosplatform.integrationtests.common.accounting;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,6 +39,12 @@ public class JournalEntryHelper {
         checkJournalEntry(liabilityAccount, date, accountEntries);
     }
 
+    public void ensureNoAccountingTransactionsWithTransactionId(final String transactionId) {
+        ArrayList<HashMap> transactions = getJournalEntriesByTransactionId(transactionId);
+        assertTrue("Tranasactions are is not empty", transactions.isEmpty());
+        
+    }
+
     private String getEntryValueFromJournalEntry(final ArrayList<HashMap> entryResponse, final int entryNumber) {
         final HashMap map = (HashMap) entryResponse.get(entryNumber).get("entryType");
         return (String) map.get("value");
@@ -59,6 +66,17 @@ public class JournalEntryHelper {
     private String createURLForGettingAccountEntries(final Account account, final String date) {
         return new String("/mifosng-provider/api/v1/journalentries?glAccountId=" + account.getAccountID() + "&type="
                 + account.getAccountType() + "&fromDate=" + date + "&toDate=" + date + "&tenantIdentifier=default"
+                + "&orderBy=id&sortOrder=desc&locale=en&dateFormat=dd MMMM yyyy");
+    }
+
+    private ArrayList<HashMap> getJournalEntriesByTransactionId(final String transactionId) {
+        final String url = createURLForGettingAccountEntriesByTransactionId(transactionId);
+        final ArrayList<HashMap> response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, "pageItems");
+        return response;
+    }
+
+    private String createURLForGettingAccountEntriesByTransactionId(final String transactionId) {
+        return new String("/mifosng-provider/api/v1/journalentries?transactionId=" + transactionId + "&tenantIdentifier=default"
                 + "&orderBy=id&sortOrder=desc&locale=en&dateFormat=dd MMMM yyyy");
     }
 

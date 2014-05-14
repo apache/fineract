@@ -79,7 +79,7 @@ public class SchedulerJobsTest {
             Assert.assertEquals("Verifying Scheduler Job Updation", active, changes.get("active"));
 
             // Executing Scheduler Job
-            this.schedulerJobHelper.runSchedulerJob(this.requestSpec, this.responseSpecForSchedulerJob, jobId.toString());
+            this.schedulerJobHelper.runSchedulerJob(this.requestSpec, jobId.toString());
 
             // Retrieving Scheduler Job by ID
             schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
