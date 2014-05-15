@@ -426,7 +426,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     ClientApiConstants.CLIENT_CLOSURE_REASON, closureReasonId);
 
             if (ClientStatus.fromInt(client.getStatus()).isClosed()) {
-                final String errorMessage = "Client is alread closed.";
+                final String errorMessage = "Client is already closed.";
                 throw new InvalidClientStateTransitionException("close", "is.already.closed", errorMessage);
             } else if (ClientStatus.fromInt(client.getStatus()).isUnderTransfer()) {
                 final String errorMessage = "Cannot Close a Client under Transfer";
@@ -455,6 +455,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     throw new InvalidClientStateTransitionException("close", "loan.non-closed", errorMessage);
                 } else if (loanStatus.isAwaitingDisbursal()) {
                     final String errorMessage = "Client cannot be closed because of non-closed loans.";
+                    throw new InvalidClientStateTransitionException("close", "loan.non-closed", errorMessage);
+                } else if (loanStatus.isOverpaid()) {
+                    final String errorMessage = "Client cannot be closed because of overpaid loans.";
                     throw new InvalidClientStateTransitionException("close", "loan.non-closed", errorMessage);
                 }
             }
