@@ -417,25 +417,25 @@ public class DepositProductAssembler {
 
         if (command.parameterExists(minDepositTermParamName)) {
             minDepositTerm = command.integerValueOfParameterNamed(minDepositTermParamName);
-        } else {
+        } else if(prodDepositTermDetail != null){
             minDepositTerm = prodDepositTermDetail.minDepositTerm();
         }
 
         if (command.parameterExists(maxDepositTermParamName)) {
             maxDepositTerm = command.integerValueOfParameterNamed(maxDepositTermParamName);
-        } else {
+        } else if(prodDepositTermDetail != null){
             maxDepositTerm = prodDepositTermDetail.maxDepositTerm();
         }
 
         if (command.parameterExists(minDepositTermTypeIdParamName)) {
             minDepositTermTypeId = command.integerValueOfParameterNamed(minDepositTermTypeIdParamName);
-        } else {
+        } else if(prodDepositTermDetail != null){
             minDepositTermTypeId = prodDepositTermDetail.minDepositTermType();
         }
 
         if (command.parameterExists(maxDepositTermTypeIdParamName)) {
             maxDepositTermTypeId = command.integerValueOfParameterNamed(maxDepositTermTypeIdParamName);
-        } else {
+        } else if(prodDepositTermDetail != null){
             maxDepositTermTypeId = prodDepositTermDetail.maxDepositTermType();
         }
 
@@ -447,13 +447,13 @@ public class DepositProductAssembler {
 
         if (command.parameterExists(inMultiplesOfDepositTermParamName)) {
             inMultiplesOfDepositTerm = command.integerValueOfParameterNamed(inMultiplesOfDepositTermParamName);
-        } else {
+        } else if(prodDepositTermDetail != null){
             inMultiplesOfDepositTerm = prodDepositTermDetail.inMultiplesOfDepositTerm();
         }
 
         if (command.parameterExists(preClosurePenalApplicableParamName)) {
             inMultiplesOfDepositTermTypeId = command.integerValueOfParameterNamed(inMultiplesOfDepositTermTypeIdParamName);
-        } else {
+        } else if(prodDepositTermDetail != null){
             inMultiplesOfDepositTermTypeId = prodDepositTermDetail.inMultiplesOfDepositTermType();
         }
 

@@ -175,13 +175,13 @@ public class DepositTermDetail {
     private boolean isEqualOrGreaterThanMin(LocalDate depositStartDate, LocalDate depositEndDate) {
         final SavingsPeriodFrequencyType periodFrequencyType = SavingsPeriodFrequencyType.fromInt(this.minDepositTermType());
         final Integer depositPeriod = depositPeriod(depositStartDate, depositEndDate, periodFrequencyType);
-        return depositPeriod.compareTo(minDepositTerm()) >= 0;
+        return minDepositTerm() == null || depositPeriod.compareTo(minDepositTerm()) >= 0;
     }
 
     private boolean isEqualOrLessThanMax(LocalDate depositStartDate, LocalDate depositEndDate) {
         final SavingsPeriodFrequencyType periodFrequencyType = SavingsPeriodFrequencyType.fromInt(this.maxDepositTermType());
         final Integer depositPeriod = depositPeriod(depositStartDate, depositEndDate, periodFrequencyType);
-        return depositPeriod.compareTo(maxDepositTerm()) <= 0;
+        return maxDepositTerm() == null || depositPeriod.compareTo(maxDepositTerm()) <= 0;
     }
 
     public Integer depositPeriod(final LocalDate periodStartDate, final LocalDate periodEndDate,
