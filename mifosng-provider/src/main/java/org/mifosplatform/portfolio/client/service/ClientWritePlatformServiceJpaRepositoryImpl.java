@@ -186,8 +186,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             CodeValue gender = null;
             final Long genderId = command.longValueOfParameterNamed(ClientApiConstants.genderIdParamName);
             if (genderId != null) {
-                gender = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.GENDER,
-                        genderId);
+                gender = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.GENDER, genderId);
             }
 
             SavingsProduct savingsProduct = null;
@@ -443,34 +442,22 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             for (final Loan loan : clientLoans) {
                 final LoanStatusMapper loanStatus = new LoanStatusMapper(loan.status().getValue());
-                if (loanStatus.isOpen()) {
+                if (loanStatus.isOpen() || loanStatus.isPendingApproval() || loanStatus.isAwaitingDisbursal()) {
                     final String errorMessage = "Client cannot be closed because of non-closed loans.";
                     throw new InvalidClientStateTransitionException("close", "loan.non-closed", errorMessage);
                 } else if (loanStatus.isClosed() && loan.getClosedOnDate().after(closureDate.toDate())) {
                     final String errorMessage = "The client closureDate cannot be before the loan closedOnDate.";
                     throw new InvalidClientStateTransitionException("close", "date.cannot.before.loan.closed.date", errorMessage,
                             closureDate, loan.getClosedOnDate());
-                } else if (loanStatus.isPendingApproval()) {
-                    final String errorMessage = "Client cannot be closed because of non-closed loans.";
-                    throw new InvalidClientStateTransitionException("close", "loan.non-closed", errorMessage);
-                } else if (loanStatus.isAwaitingDisbursal()) {
-                    final String errorMessage = "Client cannot be closed because of non-closed loans.";
-                    throw new InvalidClientStateTransitionException("close", "loan.non-closed", errorMessage);
                 } else if (loanStatus.isOverpaid()) {
                     final String errorMessage = "Client cannot be closed because of overpaid loans.";
-                    throw new InvalidClientStateTransitionException("close", "loan.non-closed", errorMessage);
+                    throw new InvalidClientStateTransitionException("close", "loan.overpaid", errorMessage);
                 }
             }
             final List<SavingsAccount> clientSavingAccounts = this.savingsRepository.findSavingAccountByClientId(clientId);
 
             for (final SavingsAccount saving : clientSavingAccounts) {
-                if (saving.isActive()) {
-                    final String errorMessage = "Client cannot be closed because of non-closed savings account.";
-                    throw new InvalidClientStateTransitionException("close", "non-closed.savings.account", errorMessage);
-                } else if (saving.isSubmittedAndPendingApproval()) {
-                    final String errorMessage = "Client cannot be closed because of non-closed savings account.";
-                    throw new InvalidClientStateTransitionException("close", "non-closed.savings.account", errorMessage);
-                } else if (saving.isApproved()) {
+                if (saving.isActive() || saving.isSubmittedAndPendingApproval() || saving.isApproved()) {
                     final String errorMessage = "Client cannot be closed because of non-closed savings account.";
                     throw new InvalidClientStateTransitionException("close", "non-closed.savings.account", errorMessage);
                 }
