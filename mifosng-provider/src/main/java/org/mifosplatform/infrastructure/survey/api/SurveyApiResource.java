@@ -126,19 +126,6 @@ public class SurveyApiResource {
         return this.toApiJsonClientScoreOverviewSerializer.serialize(scores);
     }
 
-//    @GET
-//    @Path("{clientId}")
-//    @Consumes({ MediaType.APPLICATION_JSON })
-//    @Produces({ MediaType.APPLICATION_JSON })
-//    public String getAllClientSurveyOverview( @PathParam("clientId") final Long clientId) {
-//
-//
-//        this.context.authenticatedUser().validateHasReadPermission(SurveyApiConstants.SURVEY_RESOURCE_NAME);
-//
-//        List<ClientScoresOverview> scores = this.readSurveyService.retrieveClientSurveyScoreOverview(clientId);
-//
-//        return this.toApiJsonClientScoreOverviewSerializer.serialize(scores);
-//    }
 
     @GET
     @Path("{surveyName}/{clientId}/{entryId}")

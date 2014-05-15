@@ -65,4 +65,9 @@ public final class Likelihood extends AbstractPersistable<Long> {
     public Long getId() {
         return super.getId();
     }
+
+    public void disable()
+    {
+        this.enabled = LikelihoodStatus.DISABLED;
+    }
 }

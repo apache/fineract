@@ -20,6 +20,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
+import java.util.List;
 
 /**
  * Created by Cieyou on 3/12/14.
@@ -60,21 +61,18 @@ public class WriteLikelihoodServiceImpl implements WriteLikelihoodService{
             final Likelihood likelihood = this.repository.findOne(likelihoodId);
 
 
-
-            String disableLikelihoodSql = "update ppi_likelihoods_ppi set enabled = "+ LikelihoodStatus.DISABLED
-                        + " WHERE ppi_likelihoods_ppi.id IN "
-                        + " ( SELECT t.id FROM ( SELECT * FROM ppi_likelihoods_ppi ) as t " +
-                                     " WHERE t.ppi_name = '" + likelihood.getPpiName()
-                                   + "' AND t.id !=" +likelihood.getId()+ " ) ";
-
-
             if (!likelihood.update(command).isEmpty()) {
                 this.repository.save(likelihood);
 
                 if(likelihood.isActivateCommand(command))
                 {
-                    // disable the other likelihood
-                    jdbcTemplate.execute(disableLikelihoodSql);
+                    List<Likelihood> likelihoods = this.repository.findByPpiNameAndLikeliHoodId(likelihood.getPpiName(),likelihood.getId());
+
+                    for(Likelihood aLikelihood:likelihoods)
+                    {
+                        aLikelihood.disable();
+                    }
+                    this.repository.save(likelihoods);
                 }
 
             }

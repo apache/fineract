@@ -75,7 +75,7 @@ public class LikelihoodApiResource {
     }
 
     @PUT
-    @Path("{likelihoodId}")
+    @Path("{ppiName}/{likelihoodId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String update(@PathParam("likelihoodId") final Long likelihoodId, final String apiRequestBodyAsJson){

@@ -11,6 +11,5 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 public interface GlobalConfigurationWritePlatformService {
 
     CommandProcessingResult update(Long configId, JsonCommand command);
-    CommandProcessingResult update(String name, JsonCommand command);
     void addSurveyConfig(String name);
 }

@@ -66,29 +66,6 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
 
     }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult update(final String name, final JsonCommand command) {
-
-        this.context.authenticatedUser();
-
-        try {
-            this.globalConfigurationDataValidator.validateForUpdate(command);
-
-            final GlobalConfigurationProperty configItemForUpdate = this.repository.findOneByNameWithNotFoundDetection(name);
-
-            if (configItemForUpdate.updateTo(true)) {
-                this.repository.save(configItemForUpdate);
-            }
-
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(configItemForUpdate.getId()).build();
-
-        } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(dve);
-            return CommandProcessingResult.empty();
-        }
-
-    }
 
     @Transactional
     @Override
