@@ -781,9 +781,8 @@ public class DepositProductDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(depositAmountParamName, element)) {
             depositAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(depositAmountParamName, element);
-            baseDataValidator.reset().parameter(depositMinAmountParamName).value(depositAmount).notNull().positiveAmount();
+            baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount).notNull().positiveAmount();
         }
-        baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount).notNull().positiveAmount();
 
         BigDecimal depositMinAmount = null;
         if (this.fromApiJsonHelper.parameterExists(depositMinAmountParamName, element)) {
