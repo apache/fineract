@@ -256,7 +256,7 @@ public class FixedDepositAccount extends SavingsAccount {
 
         final List<PostingPeriod> allPostingPeriods = new ArrayList<PostingPeriod>();
 
-        Money periodStartingBalance = Money.of(getCurrency(), this.accountTermAndPreClosure.depositAmount());
+        Money periodStartingBalance = Money.zero(currency);
 
         final SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType.fromInt(this.interestCalculationType);
         final BigDecimal interestRateAsFraction = getEffectiveInterestRateAsFraction(mc, maturityDate);
