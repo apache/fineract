@@ -354,6 +354,7 @@ public class SchedulerJobsTestResults {
     @Test
     public void testUpdateAccountingRunningBalancesJobOutcome() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
 
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
