@@ -377,7 +377,7 @@ public class DepositProductDataValidator {
         }
 
         final Integer minDepositTermType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(minDepositTermTypeIdParamName, element);
-        baseDataValidator.reset().parameter(minDepositTermTypeIdParamName).value(minDepositTermType)
+        baseDataValidator.reset().parameter(minDepositTermTypeIdParamName).value(minDepositTermType).ignoreIfNull()
                 .isOneOfTheseValues(SavingsPeriodFrequencyType.integerValues());
 
         if (fromApiJsonHelper.parameterExists(maxDepositTermTypeIdParamName, element)) {
