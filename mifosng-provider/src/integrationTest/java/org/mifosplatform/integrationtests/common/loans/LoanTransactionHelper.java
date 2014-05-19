@@ -1,17 +1,22 @@
 package org.mifosplatform.integrationtests.common.loans;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.integrationtests.common.Utils;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({ "rawtypes", "unchecked", "cast" })
 public class LoanTransactionHelper {
 
     private final RequestSpecification requestSpec;
@@ -102,6 +107,12 @@ public class LoanTransactionHelper {
 
     public HashMap waiveInterest(final String date, final String amountToBeWaived, final Integer loanID) {
         return performLoanTransaction(createLoanTransactionURL(WAIVE_INTEREST_COMMAND, loanID), getWaiveBodyAsJSON(date, amountToBeWaived));
+    }
+    
+    public Integer waiveInterestAndReturnTransactionId(final String date, final String amountToBeWaived, final Integer loanID) {
+       Integer resourceId = Utils.performServerPost(this.requestSpec, this.responseSpec, createLoanTransactionURL(WAIVE_INTEREST_COMMAND, loanID),
+                getWaiveBodyAsJSON(date, amountToBeWaived), "resourceId");
+       return resourceId;
     }
 
     public HashMap makeRepayment(final String date, final Float amountToBePaid, final Integer loanID) {
@@ -320,11 +331,39 @@ public class LoanTransactionHelper {
         return (HashMap) response.get("status");
     }
 
-    @SuppressWarnings("unchecked")
     public void verifyRepaymentScheduleEntryFor(final int repaymentNumber, final float expectedPrincipalOutstanding, final Integer loanID) {
         System.out.println("---------------------------GETTING LOAN REPAYMENT SCHEDULE--------------------------------");
         final ArrayList<HashMap> repaymentPeriods = getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         assertEquals("Mismatch in Principal Loan Balance Outstanding ", expectedPrincipalOutstanding, repaymentPeriods.get(repaymentNumber)
                 .get("principalLoanBalanceOutstanding"));
+    }
+
+    public void checkAccrualTransactionForRepayment(final String transactionDate, final Float interestAmount, final Integer loanID) {
+
+        ArrayList<HashMap> transactions = (ArrayList<HashMap>) getLoanDetail(this.requestSpec, this.responseSpec, loanID, "transactions");
+        boolean isTransactionFound = false;
+        for (int i = 0; i < transactions.size(); i++) {
+            HashMap transactionType = (HashMap) transactions.get(i).get("type");
+            boolean isAccrualTransaction = (Boolean) transactionType.get("accrual");
+
+            if (isAccrualTransaction) {
+                ArrayList<Integer> accrualEntryDateAsArray =  (ArrayList<Integer>)transactions.get(i).get("date");
+                LocalDate accrualEntryDate = new LocalDate(accrualEntryDateAsArray.get(0),accrualEntryDateAsArray.get(1),accrualEntryDateAsArray.get(2));
+
+                try {
+                    DateFormat df = new SimpleDateFormat("dd MMMM yyyy");
+                    LocalDate expectedTransactionDate = new LocalDate(df.parse(transactionDate));
+                    if (expectedTransactionDate.equals(accrualEntryDate)) {
+                        isTransactionFound = true;
+                        assertEquals("Mismatch in transaction amounts", interestAmount, (Float) transactions.get(i).get("amount"));
+                        break;
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        assertTrue("No Accrual entries are posted", isTransactionFound);
+
     }
 }

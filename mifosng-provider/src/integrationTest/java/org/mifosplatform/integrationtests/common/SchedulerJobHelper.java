@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+import org.junit.Assert;
+
 import com.google.gson.Gson;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
-@SuppressWarnings({ "unused", "rawtypes" })
+@SuppressWarnings({ "unused", "rawtypes", "unchecked" })
 public class SchedulerJobHelper {
 
     private final RequestSpecification requestSpec;
@@ -42,7 +45,7 @@ public class SchedulerJobHelper {
     }
     
     public static void updateSchedulerStatus(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String command) {
-        final String UPDATE_SCHEDULER_STATUS_URL = "/mifosng-provider/api/v1/scheduler?command=" + command;
+        final String UPDATE_SCHEDULER_STATUS_URL = "/mifosng-provider/api/v1/scheduler?command=" + command +"&tenantIdentifier=default";
         System.out.println("------------------------ UPDATING SCHEDULER STATUS -------------------------");
         Utils.performServerPost(requestSpec, responseSpec, UPDATE_SCHEDULER_STATUS_URL, runSchedulerJobAsJSON(), null);
     }
@@ -70,10 +73,10 @@ public class SchedulerJobHelper {
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_SCHEDULER_STATUS_URL, "");
         return (ArrayList) response.get("pageItems");
     }
-    
-    public static void runSchedulerJob(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String jobId) {
-        final String RUN_SCHEDULER_JOB_URL = "/mifosng-provider/api/v1/jobs/" + jobId + "?command=executeJob";
+
+    public static void runSchedulerJob(final RequestSpecification requestSpec, final String jobId) {
+        final ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(202).build(); 
+        final String RUN_SCHEDULER_JOB_URL = "/mifosng-provider/api/v1/jobs/" + jobId + "?command=executeJob&tenantIdentifier=default";
         System.out.println("------------------------ RUN SCHEDULER JOB -------------------------");
         Utils.performServerPost(requestSpec, responseSpec, RUN_SCHEDULER_JOB_URL, runSchedulerJobAsJSON(), null);
     }
@@ -85,4 +88,37 @@ public class SchedulerJobHelper {
         return runSchedulerJob;
     }
 
+    public void excuteJob(String JobName) throws InterruptedException {
+        ArrayList<HashMap> allSchedulerJobsData = getAllSchedulerJobs(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(allSchedulerJobsData);
+
+        for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
+            if (allSchedulerJobsData.get(jobIndex).get("displayName").equals(JobName)) {
+                Integer jobId = (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
+
+                // Executing Scheduler Job
+                runSchedulerJob(this.requestSpec, jobId.toString());
+
+                // Retrieving Scheduler Job by ID
+                HashMap schedulerJob = getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+                Assert.assertNotNull(schedulerJob);
+
+                // Waiting for Job to complete
+                while ((Boolean) schedulerJob.get("currentlyRunning") == true) {
+                    Thread.sleep(15000);
+                    schedulerJob = getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
+                    Assert.assertNotNull(schedulerJob);
+                    System.out.println("Job is Still Running");
+                }
+
+                ArrayList<HashMap> jobHistoryData = getSchedulerJobHistory(this.requestSpec, this.responseSpec, jobId.toString());
+
+                // Verifying the Status of the Recently executed Scheduler Job
+                Assert.assertEquals("Verifying Last Scheduler Job Status", "success",
+                        jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
+
+                break;
+            }
+        }
+    }
 }
