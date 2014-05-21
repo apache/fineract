@@ -1079,7 +1079,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                     + " where g.id = " + appTableId;
         }
         if (appTable.equalsIgnoreCase("m_office")) {
-            scopedSQL = "select o.id as officeId, null as groupId, null as clientId, null as savingsId, null as loanId from, null as entityId m_office o "
+            scopedSQL = "select o.id as officeId, null as groupId, null as clientId, null as savingsId, null as loanId, null as entityId from m_office o "
                     + " where o.hierarchy like '" + currentUser.getOffice().getHierarchy() + "%'" + " and o.id = " + appTableId;
         }
 
