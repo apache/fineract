@@ -544,4 +544,8 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
 
         return passwordEncodedValue;
     }
+
+    public boolean isNotEnabled() {
+        return !isEnabled();
+    }
 }
