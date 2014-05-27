@@ -63,7 +63,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         CommandSource commandSourceResult = null;
         if (command.commandId() != null) {
             commandSourceResult = this.commandSourceRepository.findOne(command.commandId());
-                commandSourceResult.markAsChecked(maker, DateTime.now());
+            commandSourceResult.markAsChecked(maker, DateTime.now());
         } else {
             commandSourceResult = CommandSource.fullEntryFrom(wrapper, command, maker);
         }
@@ -341,9 +341,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = this.applicationContext.getBean("undoDisbursalLoanCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isLoanRepayment()) {
                 handler = this.applicationContext.getBean("loanRepaymentCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isLoanRecoveryPayment()){
+            } else if (wrapper.isLoanRecoveryPayment()) {
                 handler = this.applicationContext.getBean("loanRecoveryPaymentCommandHandler", NewCommandSourceHandler.class);
-            }else if (wrapper.isLoanRepaymentAdjustment()) {
+            } else if (wrapper.isLoanRepaymentAdjustment()) {
                 handler = this.applicationContext.getBean("loanRepaymentAdjustmentCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isWaiveInterestPortionOnLoan()) {
                 handler = this.applicationContext.getBean("waiveInterestPortionOnLoanCommandHandler", NewCommandSourceHandler.class);
@@ -733,6 +733,16 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
 
+        } else if (wrapper.isOfficeToGLAccountMapping()) {
+            if (wrapper.isCreate()) {
+                handler = this.applicationContext.getBean("createOfficeToGLAccountMappingHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdate()) {
+                handler = this.applicationContext.getBean("updateOfficeToGLAccountMappingCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDelete()) {
+                handler = this.applicationContext.getBean("deleteOfficeToGLAccountMappingCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
         } else {
 
             throw new UnsupportedCommandException(wrapper.commandName());

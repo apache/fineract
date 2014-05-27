@@ -799,4 +799,8 @@ public class CommandWrapper {
     public DepositAccountType depositAccountType(){
         return this.depositAccountType;
     }
+    
+    public boolean isOfficeToGLAccountMapping() {
+        return this.entityName.equalsIgnoreCase("OFFICEGLACCOUNT");
+    }
 }

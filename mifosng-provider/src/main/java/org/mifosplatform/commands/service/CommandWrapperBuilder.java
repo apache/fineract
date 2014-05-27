@@ -576,7 +576,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder loanRecoveryPaymentTransaction(final Long loanId){
+    public CommandWrapperBuilder loanRecoveryPaymentTransaction(final Long loanId) {
         this.actionName = "RECOVERYPAYMENT";
         this.entityName = "LOAN";
         this.entityId = null;
@@ -710,7 +710,7 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId;
         return this;
     }
-    
+
     public CommandWrapperBuilder disburseLoanToSavingsApplication(final Long loanId) {
         this.actionName = "DISBURSETOSAVINGS";
         this.entityName = "LOAN";
@@ -1810,7 +1810,7 @@ public class CommandWrapperBuilder {
         this.href = "/fixeddepositaccounts/" + accountId + "?command=postInterest";
         return this;
     }
-    
+
     public CommandWrapperBuilder fixedDepositAccountDeposit(final Long accountId) {
         this.actionName = "DEPOSIT";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -1820,7 +1820,7 @@ public class CommandWrapperBuilder {
         this.href = "/fixeddepositaccounts/" + accountId + "/transactions?command=deposit";
         return this;
     }
-    
+
     public CommandWrapperBuilder fixedDepositAccountWithdrawal(final Long accountId) {
         this.actionName = "WITHDRAWAL";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -1858,7 +1858,7 @@ public class CommandWrapperBuilder {
         this.href = "/recurringdepositaccounts/" + accountId + "/transactions?command=deposit";
         return this;
     }
-    
+
     public CommandWrapperBuilder recurringAccountWithdrawal(final Long accountId) {
         this.actionName = "WITHDRAWAL";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -1880,7 +1880,7 @@ public class CommandWrapperBuilder {
         this.href = "/recurringdepositaccounts/" + accountId + "/transactions/" + transactionId + "?command=modify";
         return this;
     }
-    
+
     public CommandWrapperBuilder undoRecurringAccountTransaction(final Long accountId, final Long transactionId) {
         this.actionName = "UNDOTRANSACTION";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -1892,7 +1892,7 @@ public class CommandWrapperBuilder {
         this.href = "/recurringdepositaccounts/" + accountId + "/transactions/" + transactionId + "?command=undo";
         return this;
     }
-    
+
     public CommandWrapperBuilder deleteRecurringDepositAccount(final Long accountId) {
         this.actionName = "DELETE";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -1991,4 +1991,29 @@ public class CommandWrapperBuilder {
         this.href = "/recurringdepositaccounts/" + accountId + "?command=postInterest";
         return this;
     }
+
+    public CommandWrapperBuilder createOfficeToGLAccountMapping() {
+        this.actionName = "CREATE";
+        this.entityName = "OFFICEGLACCOUNT";
+        this.entityId = null;
+        this.href = "/organizationglaccounts/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateOfficeToGLAccountMapping(final Long mappingId) {
+        this.actionName = "UPDATE";
+        this.entityName = "OFFICEGLACCOUNT";
+        this.entityId = mappingId;
+        this.href = "/organizationglaccounts/" + mappingId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteOfficeToGLAccountMapping(final Long mappingId) {
+        this.actionName = "DELETE";
+        this.entityName = "OFFICEGLACCOUNT";
+        this.entityId = mappingId;
+        this.href = "/organizationglaccounts/" + mappingId;
+        return this;
+    }
+
 }
