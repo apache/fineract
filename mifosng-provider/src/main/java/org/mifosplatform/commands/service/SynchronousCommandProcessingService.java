@@ -503,43 +503,87 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
-        } else if (wrapper.isDepositAccountResource()) {
+        } else if (wrapper.isFixedDepositAccountResource()) {
             if (wrapper.isCreate()) {
-                handler = this.applicationContext
-                        .getBean("depositAccountApplicationSubmittalCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isUpdate()) {
-                handler = this.applicationContext.getBean("depositAccountApplicationModificationCommandHandler",
+                handler = this.applicationContext.getBean("fixedDepositAccountApplicationSubmittalCommandHandler",
+                        NewCommandSourceHandler.class);
+            }else if (wrapper.isUpdate()) {
+                handler = this.applicationContext.getBean("fixedDepositAccountApplicationModificationCommandHandler",
                         NewCommandSourceHandler.class);
             } else if (wrapper.isDelete()) {
-                handler = this.applicationContext.getBean("depositAccountApplicationDeletionCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isRejectionOfDepositAccountApplication()) {
-                handler = this.applicationContext.getBean("depositAccountApplicationRejectedCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isWithdrawFromDepositAccountApplicationByApplicant()) {
-                handler = this.applicationContext.getBean("depositAccountApplicationWithdrawnByApplicantCommandHandler",
+                handler = this.applicationContext.getBean("fixedDepositAccountApplicationDeletionCommandHandler",
                         NewCommandSourceHandler.class);
-            } else if (wrapper.isApprovalOfDepositAccountApplication()) {
-                handler = this.applicationContext.getBean("depositAccountApplicationApprovalCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isUndoApprovalOfDepositAccountApplication()) {
-                handler = this.applicationContext.getBean("depositAccountApplicationApprovalUndoCommandHandler",
+            } else if (wrapper.isRejectionOfFixedDepositAccountApplication()) {
+                handler = this.applicationContext.getBean("fixedDepositAccountApplicationRejectedCommandHandler",
                         NewCommandSourceHandler.class);
-            } else if (wrapper.isDepositAccountDeposit()) {
-                handler = this.applicationContext.getBean("depositAccountDepositCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isDepositAccountWithdrawal()) {
-                handler = this.applicationContext.getBean("withdrawDepositAccountCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isDepositAccountActivation()) {
-                handler = this.applicationContext.getBean("activateDepositAccountCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isDepositAccountInterestCalculation()) {
-                handler = this.applicationContext.getBean("calculateInterestDepositAccountCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isDepositAccountInterestPosting()) {
-                handler = this.applicationContext.getBean("postInterestDepositAccountCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isDepositAccountUndoTransaction()) {
-                handler = this.applicationContext.getBean("undoTransactionDepositAccountCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isAdjustDeopsitAccountTransaction()) {
-                handler = this.applicationContext.getBean("depositTransactionAdjustmentCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isWithdrawFixedDepositAccountApplicationByApplicant()) {
+                handler = this.applicationContext.getBean("fixedDepositAccountApplicationWithdrawnByApplicantCommandHandler",
+                        NewCommandSourceHandler.class);
+            }  else if (wrapper.isApprovalOfFixedDepositAccountApplication()) {
+                handler = this.applicationContext.getBean("fixedDepositAccountApplicationApprovalCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUndoApprovalOfFixedDepositAccountApplication()) {
+                handler = this.applicationContext.getBean("fixedDepositAccountApplicationApprovalUndoCommandHandler",
+                        NewCommandSourceHandler.class);
+            } else if (wrapper.isDeposit()) {
+                handler = this.applicationContext.getBean("fixedDepositAccountDepositCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isWithdrawal()) {
+                handler = this.applicationContext.getBean("withdrawalFixedDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isActivation()) {
+                handler = this.applicationContext.getBean("activateFixedDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isInterestCalculation()) {
+                handler = this.applicationContext.getBean("calculateInterestFixedDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isInterestPosting()) {
+                handler = this.applicationContext.getBean("postInterestFixedDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUndoTransaction()) {
+                handler = this.applicationContext.getBean("undoTransactionFixedDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isAdjustTransaction()) {
+                handler = this.applicationContext.getBean("fixedDepositTransactionAdjustmentCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isDepositAccountClose()) {
-                handler = this.applicationContext.getBean("closeDepositAccountCommandHandler", NewCommandSourceHandler.class);
+                handler = this.applicationContext.getBean("closeFixedDepositAccountCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isDepositAccountPrematureClose()) {
-                handler = this.applicationContext.getBean("prematureCloseDepositAccountCommandHandler", NewCommandSourceHandler.class);
+                handler = this.applicationContext.getBean("prematureCloseFixedDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
+        } else if (wrapper.isRecurringDepositAccountResource()) {
+            if (wrapper.isCreate()) {
+                handler = this.applicationContext.getBean("recurringDepositAccountApplicationSubmittalCommandHandler",
+                        NewCommandSourceHandler.class);
+            }else if (wrapper.isUpdate()) {
+                handler = this.applicationContext.getBean("recurringDepositAccountApplicationModificationCommandHandler",
+                        NewCommandSourceHandler.class);
+            } else if (wrapper.isDelete()) {
+                handler = this.applicationContext.getBean("recurringDepositAccountApplicationDeletionCommandHandler",
+                        NewCommandSourceHandler.class);
+            } else if (wrapper.isRejectionOfRecurringDepositAccountApplication()) {
+                handler = this.applicationContext.getBean("recurringDepositAccountApplicationRejectedCommandHandler",
+                        NewCommandSourceHandler.class);
+            } else if (wrapper.isWithdrawRecurringDepositAccountApplicationByApplicant()) {
+                handler = this.applicationContext.getBean("recurringDepositAccountApplicationWithdrawnByApplicantCommandHandler",
+                        NewCommandSourceHandler.class);
+            } else if (wrapper.isApprovalOfRecurringDepositAccountApplication()) {
+                handler = this.applicationContext.getBean("recurringDepositAccountApplicationApprovalCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUndoApprovalOfRecurringDepositAccountApplication()) {
+                handler = this.applicationContext.getBean("recurringDepositAccountApplicationApprovalUndoCommandHandler",
+                        NewCommandSourceHandler.class);
+            } else if (wrapper.isDeposit()) {
+                handler = this.applicationContext.getBean("recurringDepositAccountDepositCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isWithdrawal()) {
+                handler = this.applicationContext.getBean("withdrawalRecurringDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isActivation()) {
+                handler = this.applicationContext.getBean("activateRecurringDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isInterestCalculation()) {
+                handler = this.applicationContext.getBean("calculateInterestRecurringDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isInterestPosting()) {
+                handler = this.applicationContext.getBean("postInterestRecurringDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUndoTransaction()) {
+                handler = this.applicationContext.getBean("undoTransactionRecurringDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isAdjustTransaction()) {
+                handler = this.applicationContext.getBean("recurringDepositTransactionAdjustmentCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDepositAccountClose()) {
+                handler = this.applicationContext.getBean("closeRecurringDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDepositAccountPrematureClose()) {
+                handler = this.applicationContext.getBean("prematureCloseRecurringDepositAccountCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }

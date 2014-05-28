@@ -5,14 +5,17 @@
  */
 package org.mifosplatform.portfolio.interestratechart.service;
 
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.amountRangeFromParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.amountRangeToParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.annualInterestRateParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.amountRangeFromParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.amountRangeToParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.annualInterestRateParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.interestRateForFemaleParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.interestRateForChildrenParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.interestRateForSeniorCitizenParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.chartSlabs;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.descriptionParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.fromPeriodParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.periodTypeParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.toPeriodParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.fromPeriodParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.periodTypeParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.toPeriodParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.INTERESTRATE_CHART_SLAB_RESOURCE_NAME;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.currencyCodeParamName;
 
@@ -32,6 +35,7 @@ import org.mifosplatform.portfolio.interestratechart.data.InterestRateChartRepos
 import org.mifosplatform.portfolio.interestratechart.domain.InterestRateChart;
 import org.mifosplatform.portfolio.interestratechart.domain.InterestRateChartSlab;
 import org.mifosplatform.portfolio.interestratechart.domain.InterestRateChartSlabFields;
+import org.mifosplatform.portfolio.interestratechart.exception.InterestRateChartSlabNotFoundException;
 import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,7 +68,7 @@ public class InterestRateChartSlabAssembler {
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(elementObject);
         final String currencyCode = command.stringValueOfParameterNamed(currencyCodeParamName);
 
-        final Long chartId = command.interestRateChartId();
+        final Long chartId = command.subentityId();// returns chart id
 
         final InterestRateChart chart = this.interestRateChartRepositoryWrapper.findOneWithNotFoundDetection(chartId);
 
@@ -91,8 +95,12 @@ public class InterestRateChartSlabAssembler {
         final BigDecimal amountRangeFrom = this.fromApiJsonHelper.extractBigDecimalNamed(amountRangeFromParamName, element, locale);
         final BigDecimal amountRangeTo = this.fromApiJsonHelper.extractBigDecimalNamed(amountRangeToParamName, element, locale);
         final BigDecimal annualInterestRate = this.fromApiJsonHelper.extractBigDecimalNamed(annualInterestRateParamName, element, locale);
+        final BigDecimal interestRateForFemale = this.fromApiJsonHelper.extractBigDecimalNamed(interestRateForFemaleParamName, element, locale);
+        final BigDecimal interestRateForChildren = this.fromApiJsonHelper.extractBigDecimalNamed(interestRateForChildrenParamName, element, locale);
+        final BigDecimal interestRateForSeniorCitizen = this.fromApiJsonHelper.extractBigDecimalNamed(interestRateForSeniorCitizenParamName, element, locale);
+        
         final InterestRateChartSlabFields slabFields = InterestRateChartSlabFields.createNew(description, periodType, fromPeriod, toPeriod,
-                amountRangeFrom, amountRangeTo, annualInterestRate, currencyCode);
+                amountRangeFrom, amountRangeTo, annualInterestRate, interestRateForFemale, interestRateForChildren, interestRateForSeniorCitizen, currencyCode);
         return InterestRateChartSlab.createNew(slabFields, interestRateChart);
 
     }
@@ -100,6 +108,9 @@ public class InterestRateChartSlabAssembler {
     public InterestRateChartSlab assembleFrom(final Long chartSlabId, final Long chartId) {
         final InterestRateChart chart = this.interestRateChartRepositoryWrapper.findOneWithNotFoundDetection(chartId);
         final InterestRateChartSlab interestRateChartSlab = chart.findChartSlab(chartSlabId);
+
+        if (interestRateChartSlab == null) throw new InterestRateChartSlabNotFoundException(chartSlabId, chartId);
+
         return interestRateChartSlab;
     }
 

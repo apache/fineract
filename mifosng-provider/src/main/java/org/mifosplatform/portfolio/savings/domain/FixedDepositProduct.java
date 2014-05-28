@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.savings.domain;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.deleteParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.idParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.maxDepositTermParamName;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -72,16 +73,15 @@ public class FixedDepositProduct extends SavingsProduct {
             final MonetaryCurrency currency, final BigDecimal interestRate,
             final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
-            final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, 
-            final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final AccountingRuleType accountingRuleType, final Set<Charge> charges,
-            final DepositProductTermAndPreClosure productTermAndPreClosure, final Set<InterestRateChart> charts) {
+            final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final Integer lockinPeriodFrequency,
+            final SavingsPeriodFrequencyType lockinPeriodFrequencyType, final AccountingRuleType accountingRuleType,
+            final Set<Charge> charges, final DepositProductTermAndPreClosure productTermAndPreClosure, final Set<InterestRateChart> charts) {
 
         final BigDecimal minRequiredOpeningBalance = null;
         final boolean withdrawalFeeApplicableForTransfer = false;
         final boolean allowOverdraft = false;
         final BigDecimal overdraftLimit = null;
-        
+
         return new FixedDepositProduct(name, shortName, description, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, accountingRuleType, charges,
@@ -134,6 +134,8 @@ public class FixedDepositProduct extends SavingsProduct {
                 .resource(FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME);
 
         actualChanges.putAll(this.update(command, baseDataValidator));
+
+        validateDomainRules(baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
@@ -188,7 +190,7 @@ public class FixedDepositProduct extends SavingsProduct {
             }
         }
 
-        this.validateCharts(baseDataValidator);
+        // this.validateCharts(baseDataValidator);
 
         // add chart changes to actual changes list.
         if (!chartsChanges.isEmpty()) {
@@ -249,7 +251,7 @@ public class FixedDepositProduct extends SavingsProduct {
         InterestRateChart applicableChart = null;
         if (this.charts != null) {
             for (InterestRateChart chart : this.charts) {
-                if(chart.isApplicableChartFor(target)){
+                if (chart.isApplicableChartFor(target)) {
                     applicableChart = chart;
                     break;
                 }
@@ -261,37 +263,70 @@ public class FixedDepositProduct extends SavingsProduct {
     public DepositProductTermAndPreClosure depositProductTermAndPreClosure() {
         return this.productTermAndPreClosure;
     }
-    
-    @SuppressWarnings("unchecked")
-        public void validateInterestPostingAndCompoundingPeriodTypes(final DataValidatorBuilder baseDataValidator) {
-        Map<SavingsPostingInterestPeriodType, List<SavingsCompoundingInterestPeriodType>> postingtoCompoundMap = 
-                        new HashMap<SavingsPostingInterestPeriodType, List<SavingsCompoundingInterestPeriodType>>();
-        postingtoCompoundMap.put(SavingsPostingInterestPeriodType.MONTHLY, 
-                        Arrays.asList(new SavingsCompoundingInterestPeriodType[]{SavingsCompoundingInterestPeriodType.DAILY,SavingsCompoundingInterestPeriodType.MONTHLY}));
-        
-        postingtoCompoundMap.put(SavingsPostingInterestPeriodType.QUATERLY, 
-                        Arrays.asList(new SavingsCompoundingInterestPeriodType[]{SavingsCompoundingInterestPeriodType.DAILY
-                                        ,SavingsCompoundingInterestPeriodType.MONTHLY,SavingsCompoundingInterestPeriodType.QUATERLY}));
-        
-        postingtoCompoundMap.put(SavingsPostingInterestPeriodType.BIANNUAL, 
-                        Arrays.asList(new SavingsCompoundingInterestPeriodType[]{SavingsCompoundingInterestPeriodType.DAILY,
-                                        SavingsCompoundingInterestPeriodType.MONTHLY,SavingsCompoundingInterestPeriodType.QUATERLY,SavingsCompoundingInterestPeriodType.BI_ANNUAL}));
-        
-        postingtoCompoundMap.put(SavingsPostingInterestPeriodType.ANNUAL, 
-                        Arrays.asList(new SavingsCompoundingInterestPeriodType[]{SavingsCompoundingInterestPeriodType.DAILY,
-                                        SavingsCompoundingInterestPeriodType.MONTHLY,SavingsCompoundingInterestPeriodType.QUATERLY
-                                        ,SavingsCompoundingInterestPeriodType.BI_ANNUAL,SavingsCompoundingInterestPeriodType.ANNUAL}));
-        
-                SavingsPostingInterestPeriodType savingsPostingInterestPeriodType = SavingsPostingInterestPeriodType.fromInt(interestPostingPeriodType);
-                SavingsCompoundingInterestPeriodType savingsCompoundingInterestPeriodType = SavingsCompoundingInterestPeriodType.fromInt(interestCompoundingPeriodType);
-                
-                if(postingtoCompoundMap.get(savingsPostingInterestPeriodType) == null || 
-                                !postingtoCompoundMap.get(savingsPostingInterestPeriodType).contains(savingsCompoundingInterestPeriodType)) {
-                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode("posting.period.type.is.less.than.compound.period.type",
-                                        savingsPostingInterestPeriodType.name(),savingsCompoundingInterestPeriodType.name());
-                
+
+    public void validateInterestPostingAndCompoundingPeriodTypes(final DataValidatorBuilder baseDataValidator) {
+        Map<SavingsPostingInterestPeriodType, List<SavingsCompoundingInterestPeriodType>> postingtoCompoundMap = new HashMap<SavingsPostingInterestPeriodType, List<SavingsCompoundingInterestPeriodType>>();
+        postingtoCompoundMap.put(
+                SavingsPostingInterestPeriodType.MONTHLY,
+                Arrays.asList(new SavingsCompoundingInterestPeriodType[] { SavingsCompoundingInterestPeriodType.DAILY,
+                        SavingsCompoundingInterestPeriodType.MONTHLY }));
+
+        postingtoCompoundMap.put(
+                SavingsPostingInterestPeriodType.QUATERLY,
+                Arrays.asList(new SavingsCompoundingInterestPeriodType[] { SavingsCompoundingInterestPeriodType.DAILY,
+                        SavingsCompoundingInterestPeriodType.MONTHLY, SavingsCompoundingInterestPeriodType.QUATERLY }));
+
+        postingtoCompoundMap.put(
+                SavingsPostingInterestPeriodType.BIANNUAL,
+                Arrays.asList(new SavingsCompoundingInterestPeriodType[] { SavingsCompoundingInterestPeriodType.DAILY,
+                        SavingsCompoundingInterestPeriodType.MONTHLY, SavingsCompoundingInterestPeriodType.QUATERLY,
+                        SavingsCompoundingInterestPeriodType.BI_ANNUAL }));
+
+        postingtoCompoundMap.put(
+                SavingsPostingInterestPeriodType.ANNUAL,
+                Arrays.asList(new SavingsCompoundingInterestPeriodType[] { SavingsCompoundingInterestPeriodType.DAILY,
+                        SavingsCompoundingInterestPeriodType.MONTHLY, SavingsCompoundingInterestPeriodType.QUATERLY,
+                        SavingsCompoundingInterestPeriodType.BI_ANNUAL, SavingsCompoundingInterestPeriodType.ANNUAL }));
+
+        SavingsPostingInterestPeriodType savingsPostingInterestPeriodType = SavingsPostingInterestPeriodType
+                .fromInt(interestPostingPeriodType);
+        SavingsCompoundingInterestPeriodType savingsCompoundingInterestPeriodType = SavingsCompoundingInterestPeriodType
+                .fromInt(interestCompoundingPeriodType);
+
+        if (postingtoCompoundMap.get(savingsPostingInterestPeriodType) == null
+                || !postingtoCompoundMap.get(savingsPostingInterestPeriodType).contains(savingsCompoundingInterestPeriodType)) {
+            baseDataValidator.failWithCodeNoParameterAddedToErrorCode("posting.period.type.is.less.than.compound.period.type",
+                    savingsPostingInterestPeriodType.name(), savingsCompoundingInterestPeriodType.name());
+
         }
     }
-   
+
+    public void validateDomainRules() {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME);
+        validateDomainRules(baseDataValidator);
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validateDomainRules(final DataValidatorBuilder baseDataValidator) {
+        
+        final DepositTermDetail termDetails = this.depositProductTermAndPreClosure().depositTermDetail();
+        final boolean isMinTermGreaterThanMax = termDetails.isMinDepositTermGreaterThanMaxDepositTerm();
+        if (isMinTermGreaterThanMax) {
+            final Integer maxTerm = termDetails.maxDepositTerm();
+            baseDataValidator.reset().parameter(maxDepositTermParamName).value(maxTerm)
+                    .failWithCodeNoParameterAddedToErrorCode("max.term.lessthan.min.term");
+        }
+
+        if (this.charts != null) {
+            validateCharts(baseDataValidator);
+        } else if (this.nominalAnnualInterestRate == null || this.nominalAnnualInterestRate.compareTo(BigDecimal.ZERO) == 0) {
+            baseDataValidator.reset().parameter(DepositsApiConstants.nominalAnnualInterestRateParamName).value(nominalAnnualInterestRate)
+                    .failWithCodeNoParameterAddedToErrorCode("interest.chart.or.nominal.interest.rate.required");
+        }
+        
+        this.validateInterestPostingAndCompoundingPeriodTypes(baseDataValidator);
+    }
 
 }

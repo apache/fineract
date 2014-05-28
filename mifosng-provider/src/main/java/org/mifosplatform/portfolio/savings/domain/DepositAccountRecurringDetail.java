@@ -5,7 +5,7 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositAmountParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.mandatoryRecommendedDepositAmountParamName;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
@@ -19,48 +19,76 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
-import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
+import org.mifosplatform.organisation.monetary.domain.Money;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_deposit_account_recurring_detail")
 public class DepositAccountRecurringDetail extends AbstractPersistable<Long> {
 
-    @Column(name = "recurring_deposit_amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal recurringDepositAmount;
+    @Column(name = "mandatory_recommended_deposit_amount", scale = 6, precision = 19, nullable = true)
+    private BigDecimal mandatoryRecommendedDepositAmount;
+
+    @Column(name = "total_overdue_amount", scale = 6, precision = 19, nullable = true)
+    private BigDecimal totalOverdueAmount;
+
+    @Column(name = "is_calendar_inherited", nullable = false)
+    private boolean isCalendarInherited;
     
+    @Column(name = "no_of_overdue_installments", nullable = false)
+    private Integer noOfOverdueInstallments;
+
     @Embedded
     private DepositRecurringDetail recurringDetail;
 
     @OneToOne
     @JoinColumn(name = "savings_account_id", nullable = false)
     private SavingsAccount account;
-
-    protected DepositAccountRecurringDetail() {
-        super();
+    
+    /**
+     * 
+     */
+    public DepositAccountRecurringDetail() {
+        this.noOfOverdueInstallments = 0;
+        this.isCalendarInherited = false;
     }
 
-    public static DepositAccountRecurringDetail createNew(final BigDecimal recurringDepositAmount, DepositRecurringDetail recurringDetail, SavingsAccount account) {
+    
 
-        return new DepositAccountRecurringDetail(recurringDepositAmount, recurringDetail, account);
+    public static DepositAccountRecurringDetail createNew(final BigDecimal mandatoryRecommendedDepositAmount,
+            final DepositRecurringDetail recurringDetail, final SavingsAccount account, final boolean isCalendarInherited) {
+        final BigDecimal totalOverdueAmount = null;
+        final Integer noOfOverdueInstallments = null;
+        return new DepositAccountRecurringDetail(mandatoryRecommendedDepositAmount, totalOverdueAmount, noOfOverdueInstallments,
+                recurringDetail, account, isCalendarInherited);
     }
 
-    private DepositAccountRecurringDetail(final BigDecimal recurringDepositAmount, DepositRecurringDetail recurringDetail, SavingsAccount account) {
-        this.recurringDepositAmount = recurringDepositAmount;
+    /**
+     * @param mandatoryRecommendedDepositAmount
+     * @param totalOverdueAmount
+     * @param noOfOverdueInstallments
+     * @param recurringDetail
+     * @param account
+     */
+    protected DepositAccountRecurringDetail(final BigDecimal mandatoryRecommendedDepositAmount, final BigDecimal totalOverdueAmount,
+            final Integer noOfOverdueInstallments, final DepositRecurringDetail recurringDetail, final SavingsAccount account, final boolean isCalendarInherited) {
+        this.mandatoryRecommendedDepositAmount = mandatoryRecommendedDepositAmount;
+        this.totalOverdueAmount = totalOverdueAmount;
+        this.noOfOverdueInstallments = noOfOverdueInstallments;
         this.recurringDetail = recurringDetail;
         this.account = account;
+        this.isCalendarInherited = isCalendarInherited;
     }
 
-    public Map<String, Object> update(final JsonCommand command, final DataValidatorBuilder baseDataValidator) {
+    public Map<String, Object> update(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(10);
-        if (command.isChangeInBigDecimalParameterNamed(recurringDepositAmountParamName, this.recurringDepositAmount)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(recurringDepositAmountParamName);
-            actualChanges.put(recurringDepositAmountParamName, newValue);
-            this.recurringDepositAmount = newValue;
+        if (command.isChangeInBigDecimalParameterNamed(mandatoryRecommendedDepositAmountParamName, this.mandatoryRecommendedDepositAmount)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(mandatoryRecommendedDepositAmountParamName);
+            actualChanges.put(mandatoryRecommendedDepositAmountParamName, newValue);
+            this.mandatoryRecommendedDepositAmount = newValue;
         }
         if (this.recurringDetail != null) {
-            actualChanges.putAll(this.recurringDetail.update(command, baseDataValidator));
+            actualChanges.putAll(this.recurringDetail.update(command));
         }
         return actualChanges;
     }
@@ -72,30 +100,36 @@ public class DepositAccountRecurringDetail extends AbstractPersistable<Long> {
     public void updateAccountReference(final SavingsAccount account) {
         this.account = account;
     }
-    
-    public Integer recurringDepositType() {
-        return this.recurringDetail().recurringDepositType();
+
+    public boolean isMandatoryDeposit() {
+        return this.recurringDetail.isMandatoryDeposit();
     }
 
-    public Integer recurringDepositFrequency() {
-        return this.recurringDetail().recurringDepositFrequency();
+    public boolean allowWithdrawal() {
+        return this.recurringDetail.allowWithdrawal();
     }
 
-    public Integer recurringDepositFrequencyTypeId() {
-        return this.recurringDetail().recurringDepositFrequencyTypeId();
+    public boolean adjustAdvanceTowardsFuturePayments() {
+        return this.recurringDetail.adjustAdvanceTowardsFuturePayments();
+    }
+
+    public BigDecimal mandatoryRecommendedDepositAmount() {
+        return this.mandatoryRecommendedDepositAmount;
+    }
+
+    public boolean isCalendarInherited(){
+        return this.isCalendarInherited;
     }
     
-    public SavingsPeriodFrequencyType recurringDepositFrequencyType() {
-        return SavingsPeriodFrequencyType.fromInt(this.recurringDepositFrequencyTypeId());
-    }
-    
-    public BigDecimal recurringDepositAmount(){
-        return this.recurringDepositAmount;
-    }
-    
-    public DepositAccountRecurringDetail copy(){
-        final BigDecimal recurringDepositAmount = this.recurringDepositAmount;
+    public DepositAccountRecurringDetail copy() {
+        final BigDecimal mandatoryRecommendedDepositAmount = this.mandatoryRecommendedDepositAmount;
         final DepositRecurringDetail recurringDetail = this.recurringDetail.copy();
-        return DepositAccountRecurringDetail.createNew(recurringDepositAmount, recurringDetail, account);
+        final boolean isCalendarInherited = this.isCalendarInherited;
+        return DepositAccountRecurringDetail.createNew(mandatoryRecommendedDepositAmount, recurringDetail, null, isCalendarInherited);
+    }
+    
+    public void updateOverdueDetails(final int noOfOverdueInstallments, final Money totalOverdueAmount){
+        this.noOfOverdueInstallments = noOfOverdueInstallments;
+        this.totalOverdueAmount = totalOverdueAmount.getAmount();
     }
 }

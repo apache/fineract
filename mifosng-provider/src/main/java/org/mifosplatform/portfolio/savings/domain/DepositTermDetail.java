@@ -164,21 +164,27 @@ public class DepositTermDetail {
 
     public boolean isValidInMultiplesOfPeriod(final Integer depositPeriod, final SavingsPeriodFrequencyType depositPeriodFrequencyType) {
 
+        boolean isValidInMultiplesOfPeriod = true;
         final Integer depositPeriodInDays = this.convertToSafeDays(depositPeriod, depositPeriodFrequencyType);
-        final Integer inMultiplesOfInDays = this.convertToSafeDays(this.inMultiplesOfDepositTerm(),
-                SavingsPeriodFrequencyType.fromInt(this.inMultiplesOfDepositTermType()));
-        final Integer minDepositInDays = this.convertToSafeDays(minDepositTerm, SavingsPeriodFrequencyType.fromInt(minDepositTermType));
+        if (this.inMultiplesOfDepositTerm() != null) {
+            final Integer inMultiplesOfInDays = this.convertToSafeDays(this.inMultiplesOfDepositTerm(),
+                    SavingsPeriodFrequencyType.fromInt(this.inMultiplesOfDepositTermType()));
+            final Integer minDepositInDays = this.convertToSafeDays(minDepositTerm, SavingsPeriodFrequencyType.fromInt(minDepositTermType));
+            isValidInMultiplesOfPeriod = ((depositPeriodInDays - minDepositInDays) % inMultiplesOfInDays == 0);
+        }
 
-        return ((depositPeriodInDays - minDepositInDays) % inMultiplesOfInDays == 0);
+        return isValidInMultiplesOfPeriod;
     }
 
     private boolean isEqualOrGreaterThanMin(LocalDate depositStartDate, LocalDate depositEndDate) {
+        if (minDepositTerm() == null) return true;
         final SavingsPeriodFrequencyType periodFrequencyType = SavingsPeriodFrequencyType.fromInt(this.minDepositTermType());
         final Integer depositPeriod = depositPeriod(depositStartDate, depositEndDate, periodFrequencyType);
         return minDepositTerm() == null || depositPeriod.compareTo(minDepositTerm()) >= 0;
     }
 
     private boolean isEqualOrLessThanMax(LocalDate depositStartDate, LocalDate depositEndDate) {
+        if (maxDepositTerm() == null) return true;
         final SavingsPeriodFrequencyType periodFrequencyType = SavingsPeriodFrequencyType.fromInt(this.maxDepositTermType());
         final Integer depositPeriod = depositPeriod(depositStartDate, depositEndDate, periodFrequencyType);
         return maxDepositTerm() == null || depositPeriod.compareTo(maxDepositTerm()) <= 0;

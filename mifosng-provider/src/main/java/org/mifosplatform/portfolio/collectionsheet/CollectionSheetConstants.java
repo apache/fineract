@@ -20,6 +20,7 @@ public class CollectionSheetConstants {
     public static final String actualDisbursementDateParamName = "actualDisbursementDate";
     public static final String bulkRepaymentTransactionsParamName = "bulkRepaymentTransactions";
     public static final String bulkDisbursementTransactionsParamName = "bulkDisbursementTransactions";
+    public static final String bulkSavingsDueTransactionsParamName = "bulkSavingsDueTransactions";
     public static final String noteParamName = "note";
     public static final String calendarIdParamName = "calendarId";
 
@@ -29,9 +30,10 @@ public class CollectionSheetConstants {
     public static final String attendanceTypeParamName = "attendanceType";
 
     public static final String loanIdParamName = "loanId";
+    public static final String savingsIdParamName = "savingsId";
     public static final String transactionAmountParamName = "transactionAmount";
 
     public static final Set<String> COLLECTIONSHEET_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, transactionDateParamName, actualDisbursementDateParamName, bulkRepaymentTransactionsParamName,
-            bulkDisbursementTransactionsParamName, noteParamName, calendarIdParamName, clientsAttendanceParamName));
+            bulkDisbursementTransactionsParamName, noteParamName, calendarIdParamName, clientsAttendanceParamName, bulkSavingsDueTransactionsParamName));
 }

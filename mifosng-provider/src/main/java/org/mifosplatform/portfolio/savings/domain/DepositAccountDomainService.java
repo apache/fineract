@@ -19,12 +19,21 @@ public interface DepositAccountDomainService {
     SavingsAccountTransaction handleWithdrawal(SavingsAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail, boolean applyWithdrawFee);
 
-    SavingsAccountTransaction handleDeposit(SavingsAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
+    SavingsAccountTransaction handleFDDeposit(FixedDepositAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
+            BigDecimal transactionAmount, PaymentDetail paymentDetail);
+    
+    SavingsAccountTransaction handleRDDeposit(RecurringDepositAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail);
 
-    SavingsAccountTransaction handleAccountClosure(SavingsAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
+    Long handleFDAccountClosure(FixedDepositAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
             LocalDate tenantsTodayDate, Map<String, Object> changes);
     
-    SavingsAccountTransaction handleAccountPreMatureClosure(SavingsAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
+    Long handleRDAccountClosure(RecurringDepositAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
+            LocalDate tenantsTodayDate, Map<String, Object> changes);
+    
+    Long handleFDAccountPreMatureClosure(FixedDepositAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
+            LocalDate tenantsTodayDate, Map<String, Object> changes);
+    
+    Long handleRDAccountPreMatureClosure(RecurringDepositAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
             LocalDate tenantsTodayDate, Map<String, Object> changes);
 }

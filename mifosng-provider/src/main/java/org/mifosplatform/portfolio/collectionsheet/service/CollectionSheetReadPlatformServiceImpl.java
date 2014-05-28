@@ -35,6 +35,7 @@ import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetData;
 import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetFlatData;
 import org.mifosplatform.portfolio.collectionsheet.data.JLGGroupData;
 import org.mifosplatform.portfolio.collectionsheet.data.LoanDueData;
+import org.mifosplatform.portfolio.collectionsheet.data.SavingsDueData;
 import org.mifosplatform.portfolio.collectionsheet.serialization.CollectionSheetGenerateCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.group.data.CenterData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
@@ -43,8 +44,11 @@ import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.meeting.attendance.service.AttendanceDropdownReadPlatformService;
 import org.mifosplatform.portfolio.meeting.attendance.service.AttendanceEnumerations;
+import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -61,6 +65,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     private final CollectionSheetGenerateCommandFromApiJsonDeserializer collectionSheetGenerateCommandFromApiJsonDeserializer;
     private final CalendarRepositoryWrapper calendarRepositoryWrapper;
     private final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService;
+    final MandatorySavingsCollectionsheetExtractor mandatorySavingsExtractor = new MandatorySavingsCollectionsheetExtractor();
 
     @Autowired
     public CollectionSheetReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -162,7 +167,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                 jlgGroupsData.add(jlgGroupData);
             }
 
-            jlgCollectionSheetData = new JLGCollectionSheetData(dueDate, loanProducts, jlgGroupsData,
+            jlgCollectionSheetData = JLGCollectionSheetData.instance(dueDate, loanProducts, jlgGroupsData,
                     this.attendanceDropdownReadPlatformService.retrieveAttendanceTypeOptions());
         }
 
@@ -296,8 +301,6 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper();
 
-        final StringBuilder sql = new StringBuilder(mapper.collectionSheetSchema(false));
-
         // entityType should be center if it's within a center
         final CalendarEntityType entityType = (group.isChildGroup()) ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
 
@@ -305,10 +308,81 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                 .addValue("groupId", group.getId()).addValue("officeHierarchy", officeHierarchy)
                 .addValue("entityTypeId", entityType.getValue());
 
-        final Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.namedParameterjdbcTemplate.query(sql.toString(),
-                namedParameters, mapper);
+        final Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.namedParameterjdbcTemplate.query(
+                mapper.collectionSheetSchema(false), namedParameters, mapper);
 
-        return buildJLGCollectionSheet(transactionDate, collectionSheetFlatDatas);
+        // loan data for collection sheet
+        JLGCollectionSheetData collectionSheetData = buildJLGCollectionSheet(transactionDate, collectionSheetFlatDatas);
+
+        // mandatory savings data for collection sheet
+        Collection<JLGGroupData> groupsWithSavingsData = this.namedParameterjdbcTemplate.query(
+                mandatorySavingsExtractor.collectionSheetSchema(false), namedParameters, mandatorySavingsExtractor);
+
+        // merge savings data into loan data
+        mergeSavingsGroupDataIntoCollectionsheetData(groupsWithSavingsData, collectionSheetData);
+
+        collectionSheetData = JLGCollectionSheetData.withSavingsProducts(collectionSheetData,
+                retrieveSavingsProducts(groupsWithSavingsData));
+
+        return collectionSheetData;
+    }
+
+    private void mergeSavingsGroupDataIntoCollectionsheetData(final Collection<JLGGroupData> groupsWithSavingsData,
+            final JLGCollectionSheetData collectionSheetData) {
+        final List<JLGGroupData> groupsWithLoanData = (List<JLGGroupData>) collectionSheetData.getGroups();
+        for (JLGGroupData groupSavingsData : groupsWithSavingsData) {
+            if (groupsWithLoanData.contains(groupSavingsData)) {
+                mergeGroup(groupSavingsData, groupsWithLoanData);
+            } else {
+                groupsWithLoanData.add(groupSavingsData);
+            }
+        }
+
+    }
+
+    private void mergeGroup(final JLGGroupData groupSavingsData, final List<JLGGroupData> groupsWithLoanData) {
+        final int index = groupsWithLoanData.indexOf(groupSavingsData);
+
+        if (index < 0) return;
+
+        JLGGroupData groupLoanData = groupsWithLoanData.get(index);
+        List<JLGClientData> clientsLoanData = (List<JLGClientData>) groupLoanData.getClients();
+        List<JLGClientData> clientsSavingsData = (List<JLGClientData>) groupSavingsData.getClients();
+
+        for (JLGClientData clientSavingsData : clientsSavingsData) {
+            if (clientsLoanData.contains(clientSavingsData)) {
+                mergeClient(clientSavingsData, clientsLoanData);
+            } else {
+                clientsLoanData.add(clientSavingsData);
+            }
+        }
+    }
+
+    private void mergeClient(final JLGClientData clientSavingsData, List<JLGClientData> clientsLoanData) {
+        final int index = clientsLoanData.indexOf(clientSavingsData);
+
+        if (index < 0) return;
+
+        JLGClientData clientLoanData = clientsLoanData.get(index);
+        clientLoanData.setSavings(clientSavingsData.getSavings());
+    }
+
+    private Collection<SavingsProductData> retrieveSavingsProducts(Collection<JLGGroupData> groupsWithSavingsData) {
+        List<SavingsProductData> savingsProducts = new ArrayList<SavingsProductData>();
+        for (JLGGroupData groupSavingsData : groupsWithSavingsData) {
+            Collection<JLGClientData> clientsSavingsData = groupSavingsData.getClients();
+            for (JLGClientData clientSavingsData : clientsSavingsData) {
+                Collection<SavingsDueData> savingsDatas = clientSavingsData.getSavings();
+                for (SavingsDueData savingsDueData : savingsDatas) {
+                    final SavingsProductData savingsProduct = SavingsProductData.lookup(savingsDueData.productId(),
+                            savingsDueData.productName());
+                    if (!savingsProducts.contains(savingsProduct)) {
+                        savingsProducts.add(savingsProduct);
+                    }
+                }
+            }
+        }
+        return savingsProducts;
     }
 
     @Override
@@ -337,6 +411,204 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         final Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.namedParameterjdbcTemplate.query(sql.toString(),
                 namedParameters, mapper);
 
-        return buildJLGCollectionSheet(transactionDate, collectionSheetFlatDatas);
+        // loan data for collection sheet
+        JLGCollectionSheetData collectionSheetData = buildJLGCollectionSheet(transactionDate, collectionSheetFlatDatas);
+
+        // mandatory savings data for collection sheet
+        Collection<JLGGroupData> groupsWithSavingsData = this.namedParameterjdbcTemplate.query(
+                mandatorySavingsExtractor.collectionSheetSchema(true), namedParameters, mandatorySavingsExtractor);
+
+        // merge savings data into loan data
+        mergeSavingsGroupDataIntoCollectionsheetData(groupsWithSavingsData, collectionSheetData);
+
+        collectionSheetData = JLGCollectionSheetData.withSavingsProducts(collectionSheetData,
+                retrieveSavingsProducts(groupsWithSavingsData));
+
+        return collectionSheetData;
+    }
+
+    private static final class MandatorySavingsCollectionsheetExtractor implements ResultSetExtractor<Collection<JLGGroupData>> {
+
+        private GroupSavingsDataMapper groupSavingsDataMapper = new GroupSavingsDataMapper();
+
+        public String collectionSheetSchema(final boolean isCenterCollection) {
+
+            final StringBuffer sql = new StringBuffer(400);
+            sql.append("SELECT gp.display_name As groupName, ")
+                    .append("gp.id As groupId, ")
+                    .append("cl.display_name As clientName, ")
+                    .append("cl.id As clientId, ")
+                    .append("sf.id As staffId, ")
+                    .append("sf.display_name As staffName, ")
+                    .append("gl.id As levelId, ")
+                    .append("gl.level_name As levelName, ")
+                    .append("sa.id As savingsId, ")
+                    .append("sa.account_no As accountId, ")
+                    .append("sa.status_enum As accountStatusId, ")
+                    .append("sp.short_name As productShortName, ")
+                    .append("sp.id As productId, ")
+                    .append("sa.currency_code as currencyCode, ")
+                    .append("sa.currency_digits as currencyDigits, ")
+                    .append("sa.currency_multiplesof as inMultiplesOf, ")
+                    .append("rc.`name` as currencyName, ")
+                    .append("rc.display_symbol as currencyDisplaySymbol, ")
+                    .append("rc.internationalized_name_code as currencyNameCode, ")
+                    .append("sum(ifnull(mss.deposit_amount,0) - ifnull(mss.deposit_amount_completed_derived,0)) as dueAmount ")
+
+                    .append("FROM m_group gp ")
+                    .append("LEFT JOIN m_office of ON of.id = gp.office_id AND of.hierarchy like :officeHierarchy ")
+                    .append("JOIN m_group_level gl ON gl.id = gp.level_Id ")
+                    .append("LEFT JOIN m_staff sf ON sf.id = gp.staff_id ")
+                    .append("JOIN m_group_client gc ON gc.group_id = gp.id ")
+                    .append("JOIN m_client cl ON cl.id = gc.client_id ")
+                    .append("JOIN m_savings_account sa ON sa.client_id=cl.id and sa.status_enum=300 ")
+                    .append("JOIN m_savings_product sp ON sa.product_id=sp.id ")
+                    .append("JOIN m_deposit_account_recurring_detail dard ON sa.id = dard.savings_account_id AND dard.is_mandatory = true AND dard.is_calendar_inherited = true ")
+                    .append("JOIN m_mandatory_savings_schedule mss ON mss.savings_account_id=sa.id AND mss.duedate <= :dueDate ")
+                    .append("LEFT JOIN m_currency rc on rc.`code` = sa.currency_code ");
+
+            if (isCenterCollection) {
+                sql.append("WHERE gp.parent_id = :centerId ");
+            } else {
+                sql.append("WHERE gp.id = :groupId ");
+            }
+
+            sql.append("and (gp.status_enum = 300 or (gp.status_enum = 600 and gp.closedon_date >= :dueDate)) ")
+                    .append("and (cl.status_enum = 300 or (cl.status_enum = 600 and cl.closedon_date >= :dueDate)) ")
+                    .append("GROUP BY gp.id ,cl.id , sa.id ORDER BY gp.id , cl.id , sa.id ");
+
+            return sql.toString();
+        }
+
+        @Override
+        public Collection<JLGGroupData> extractData(ResultSet rs) throws SQLException, DataAccessException {
+            List<JLGGroupData> groups = new ArrayList<JLGGroupData>();
+
+            JLGGroupData group = null;
+            int groupIndex = 0;
+            boolean isEndOfRecords = false;
+            // move cursor to first row.
+            rs.next();
+
+            while (!isEndOfRecords) {
+                group = groupSavingsDataMapper.mapRowData(rs, groupIndex++);
+                groups.add(group);
+                isEndOfRecords = rs.isAfterLast();
+            }
+
+            return groups;
+        }
+    }
+
+    private static final class GroupSavingsDataMapper implements RowMapper<JLGGroupData> {
+
+        private ClientSavingsDataMapper clientSavingsDataMapper = new ClientSavingsDataMapper();
+
+        private GroupSavingsDataMapper() {}
+
+        public JLGGroupData mapRowData(ResultSet rs, int rowNum) throws SQLException {
+            final List<JLGClientData> clients = new ArrayList<JLGClientData>();
+            final JLGGroupData group = this.mapRow(rs, rowNum);
+            final Long previousGroupId = group.getGroupId();
+            
+            // first client row of new group
+            JLGClientData client = clientSavingsDataMapper.mapRowData(rs, rowNum);
+            clients.add(client);
+            
+          //if its not after last row loop
+            while (!rs.isAfterLast()) {
+                final Long groupId = JdbcSupport.getLong(rs, "groupId");
+                if (previousGroupId != null && groupId.compareTo(previousGroupId) != 0) {
+                    // return for next group details
+                    return JLGGroupData.withClients(group, clients);
+                }
+                client = clientSavingsDataMapper.mapRowData(rs, rowNum);
+                clients.add(client);
+            }
+
+            return JLGGroupData.withClients(group, clients);
+        }
+
+        @Override
+        public JLGGroupData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+
+            final String groupName = rs.getString("groupName");
+            final Long groupId = JdbcSupport.getLong(rs, "groupId");
+            final Long staffId = JdbcSupport.getLong(rs, "staffId");
+            final String staffName = rs.getString("staffName");
+            final Long levelId = JdbcSupport.getLong(rs, "levelId");
+            final String levelName = rs.getString("levelName");
+            return JLGGroupData.instance(groupId, groupName, staffId, staffName, levelId, levelName);
+        }
+    }
+
+    private static final class ClientSavingsDataMapper implements RowMapper<JLGClientData> {
+
+        private SavingsDueDataMapper savingsDueDataMapper = new SavingsDueDataMapper();
+
+        private ClientSavingsDataMapper() {}
+
+        public JLGClientData mapRowData(ResultSet rs, int rowNum) throws SQLException {
+
+            List<SavingsDueData> savings = new ArrayList<SavingsDueData>();
+
+            JLGClientData client = this.mapRow(rs, rowNum);
+            final Long previousClientId = client.getClientId();
+            
+            // first savings row of new client record
+            SavingsDueData saving = savingsDueDataMapper.mapRow(rs, rowNum);
+            savings.add(saving);
+
+            while (rs.next()) {
+                final Long clientId = JdbcSupport.getLong(rs, "clientId");
+                if (previousClientId != null && clientId.compareTo(previousClientId) != 0) {
+                    // client id changes then return for next client data
+                    return JLGClientData.withSavings(client, savings);
+                }
+                saving = savingsDueDataMapper.mapRow(rs, rowNum);
+                savings.add(saving);
+            }
+            return JLGClientData.withSavings(client, savings);
+        }
+
+        @Override
+        public JLGClientData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+
+            final String clientName = rs.getString("clientName");
+            final Long clientId = JdbcSupport.getLong(rs, "clientId");
+            // final Integer attendanceTypeId = rs.getInt("attendanceTypeId");
+            // final EnumOptionData attendanceType =
+            // AttendanceEnumerations.attendanceType(attendanceTypeId);
+            final EnumOptionData attendanceType = null;
+
+            return JLGClientData.instance(clientId, clientName, attendanceType);
+        }
+    }
+
+    private static final class SavingsDueDataMapper implements RowMapper<SavingsDueData> {
+
+        private SavingsDueDataMapper() {}
+
+        @Override
+        public SavingsDueData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+            final Long savingsId = rs.getLong("savingsId");
+            final String accountId = rs.getString("accountId");
+            final Integer accountStatusId = JdbcSupport.getInteger(rs, "accountStatusId");
+            final String productName = rs.getString("productShortName");
+            final Long productId = rs.getLong("productId");
+            final BigDecimal dueAmount = rs.getBigDecimal("dueAmount");
+
+            final String currencyCode = rs.getString("currencyCode");
+            final String currencyName = rs.getString("currencyName");
+            final String currencyNameCode = rs.getString("currencyNameCode");
+            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
+            // currency
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
+                    currencyDisplaySymbol, currencyNameCode);
+
+            return SavingsDueData.instance(savingsId, accountId, accountStatusId, productName, productId, currency, dueAmount);
+        }
     }
 }

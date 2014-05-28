@@ -153,12 +153,12 @@ public class JLGCollectionSheetFlatData {
     }
 
     public JLGClientData getClientData() {
-        return new JLGClientData(this.clientId, this.clientName, this.attendanceType);
+        return JLGClientData.withAttendance(this.clientId, this.clientName, this.attendanceType);
     }
 
     public JLGGroupData getJLGGroupData() {
 
-        return new JLGGroupData(this.groupId, this.groupName, this.staffId, this.staffName, this.levelId, this.levelName);
+        return JLGGroupData.instance(this.groupId, this.groupName, this.staffId, this.staffName, this.levelId, this.levelName);
     }
 
 }

@@ -24,6 +24,7 @@ public class UpdateInterestRateChartSlabCommandHandler implements NewCommandSour
 
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.update(command.entityId(), command.interestRateChartId(), command);
+        //command.subentityId();//returns chart id
+        return this.writePlatformService.update(command.entityId(), command.subentityId(), command);
     }
 }

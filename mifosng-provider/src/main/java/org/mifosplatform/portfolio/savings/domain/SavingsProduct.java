@@ -215,7 +215,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     }
 
     public BigDecimal nominalAnnualInterestRate() {
-        return Money.of(this.currency, this.nominalAnnualInterestRate).getAmount();
+        return this.nominalAnnualInterestRate;
     }
 
     public SavingsCompoundingInterestPeriodType interestCompoundingPeriodType() {

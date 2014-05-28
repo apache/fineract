@@ -5,15 +5,15 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.adjustAdvanceTowardsFuturePaymentsParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.allowWithdrawalParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.chartsParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositAmountParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositMaxAmountParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositMinAmountParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.inMultiplesOfDepositTermParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.inMultiplesOfDepositTermTypeIdParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestFreeFromPeriodParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestFreePeriodApplicableParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestFreePeriodFrequencyTypeIdParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.interestFreeToPeriodParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.isMandatoryDepositParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.maxDepositTermParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.maxDepositTermTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.minDepositTermParamName;
@@ -21,12 +21,6 @@ import static org.mifosplatform.portfolio.savings.DepositsApiConstants.minDeposi
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.preClosurePenalApplicableParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.preClosurePenalInterestOnTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.preClosurePenalInterestParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositFrequencyParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositFrequencyTypeIdParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringDepositTypeIdParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositAmountParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositMinAmountParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.depositMaxAmountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.descriptionParamName;
@@ -44,38 +38,31 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnn
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.shortNameParamName;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.ApiParameterError;
-import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
-import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.mifosplatform.portfolio.charge.exception.ChargeCannotBeAppliedToException;
-import org.mifosplatform.portfolio.interestratechart.InterestRateChartPeriodType;
 import org.mifosplatform.portfolio.interestratechart.domain.InterestRateChart;
 import org.mifosplatform.portfolio.interestratechart.service.InterestRateChartAssembler;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.mifosplatform.portfolio.savings.PreClosurePenalInterestOnType;
-import org.mifosplatform.portfolio.savings.RecurringDepositType;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
 import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-@Component
+@Service
 public class DepositProductAssembler {
 
     private final ChargeRepositoryWrapper chargeRepository;
@@ -131,7 +118,7 @@ public class DepositProductAssembler {
         if (lockinPeriodFrequencyTypeValue != null) {
             lockinPeriodFrequencyType = SavingsPeriodFrequencyType.fromInt(lockinPeriodFrequencyTypeValue);
         }
-        
+
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
 
         final DepositPreClosureDetail preClosureDetail = this.assemblePreClosureDetail(command);
@@ -154,25 +141,9 @@ public class DepositProductAssembler {
         // update product reference
         productTermAndPreClosure.updateProductReference(fixedDepositProduct);
 
-        validateFixedDepositProductDomainRules(fixedDepositProduct);
+        fixedDepositProduct.validateDomainRules();
 
         return fixedDepositProduct;
-    }
-
-    private void validateFixedDepositProductDomainRules(FixedDepositProduct fixedDepositProduct) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME);
-        final DepositTermDetail termDetails = fixedDepositProduct.depositProductTermAndPreClosure().depositTermDetail();
-        final boolean isMinTermGreaterThanMax = termDetails.isMinDepositTermGreaterThanMaxDepositTerm();
-        if (isMinTermGreaterThanMax) {
-            final Integer maxTerm = termDetails.maxDepositTerm();
-            baseDataValidator.reset().parameter(maxDepositTermParamName).value(maxTerm)
-                    .failWithCodeNoParameterAddedToErrorCode("max.term.lessthan.min.term");
-        }
-        fixedDepositProduct.validateCharts(baseDataValidator);
-        fixedDepositProduct.validateInterestPostingAndCompoundingPeriodTypes(baseDataValidator);
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     public RecurringDepositProduct assembleRecurringDepositProduct(final JsonCommand command) {
@@ -212,14 +183,14 @@ public class DepositProductAssembler {
         if (interestCalculationDaysInYearTypeValue != null) {
             interestCalculationDaysInYearType = SavingsInterestCalculationDaysInYearType.fromInt(interestCalculationDaysInYearTypeValue);
         }
-        
+
         final Integer lockinPeriodFrequency = command.integerValueOfParameterNamedDefaultToNullIfZero(lockinPeriodFrequencyParamName);
         SavingsPeriodFrequencyType lockinPeriodFrequencyType = null;
         final Integer lockinPeriodFrequencyTypeValue = command.integerValueOfParameterNamed(lockinPeriodFrequencyTypeParamName);
         if (lockinPeriodFrequencyTypeValue != null) {
             lockinPeriodFrequencyType = SavingsPeriodFrequencyType.fromInt(lockinPeriodFrequencyTypeValue);
         }
-        
+
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
 
         final DepositPreClosureDetail preClosureDetail = this.assemblePreClosureDetail(command);
@@ -248,45 +219,12 @@ public class DepositProductAssembler {
         productTermAndPreClosure.updateProductReference(recurringDepositProduct);
         productRecurringDetail.updateProductReference(recurringDepositProduct);
 
-        validateRecurringDepositProductDomainRules(recurringDepositProduct);
-        
+        recurringDepositProduct.validateDomainRules();
+
         return recurringDepositProduct;
     }
 
-    private void validateRecurringDepositProductDomainRules(RecurringDepositProduct recurringDepositProduct) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME);
-        final DepositTermDetail termDetails = recurringDepositProduct.depositProductTermAndPreClosure().depositTermDetail();
-        final boolean isMinTermGreaterThanMax = termDetails.isMinDepositTermGreaterThanMaxDepositTerm();
-        if (isMinTermGreaterThanMax) {
-            final Integer maxTerm = termDetails.maxDepositTerm();
-            baseDataValidator.reset().parameter(maxDepositTermParamName).value(maxTerm)
-                    .failWithCodeNoParameterAddedToErrorCode("max.term.lessthan.min.term");
-        }
-        recurringDepositProduct.validateCharts(baseDataValidator);
-        recurringDepositProduct.validateInterestPostingAndCompoundingPeriodTypes(baseDataValidator);
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
-    }
-    
     public DepositPreClosureDetail assemblePreClosureDetail(final JsonCommand command) {
-
-        boolean interestFreePeriodApplicable = false;
-        Integer interestFreeFromPeriod = null;
-        Integer interestFreeToPeriod = null;
-        InterestRateChartPeriodType interestFreePeriodFrequencyType = null;
-
-        if (command.parameterExists(interestFreePeriodApplicableParamName)) {
-            interestFreePeriodApplicable = command.booleanObjectValueOfParameterNamed(interestFreePeriodApplicableParamName);
-            if (interestFreePeriodApplicable) {
-                interestFreeFromPeriod = command.integerValueOfParameterNamed(interestFreeFromPeriodParamName);
-                interestFreeToPeriod = command.integerValueOfParameterNamed(interestFreeToPeriodParamName);
-                final Integer interestFreePreriodTypeId = command.integerValueOfParameterNamed(interestFreePeriodFrequencyTypeIdParamName);
-                interestFreePeriodFrequencyType = (interestFreePreriodTypeId == null) ? null : InterestRateChartPeriodType
-                        .fromInt(interestFreePreriodTypeId);
-            }
-        }
 
         boolean preClosurePenalApplicable = false;
         BigDecimal preClosurePenalInterest = null;
@@ -303,53 +241,13 @@ public class DepositProductAssembler {
             }
         }
 
-        DepositPreClosureDetail preClosureDetail = DepositPreClosureDetail.createFrom(interestFreePeriodApplicable, interestFreeFromPeriod,
-                interestFreeToPeriod, interestFreePeriodFrequencyType, preClosurePenalApplicable, preClosurePenalInterest,
+        DepositPreClosureDetail preClosureDetail = DepositPreClosureDetail.createFrom(preClosurePenalApplicable, preClosurePenalInterest,
                 preClosurePenalInterestType);
 
         return preClosureDetail;
     }
 
     public DepositPreClosureDetail assemblePreClosureDetail(final JsonCommand command, DepositPreClosureDetail produPreClosureDetail) {
-
-        boolean interestFreePeriodApplicable = false;
-        Integer interestFreeFromPeriod = null;
-        Integer interestFreeToPeriod = null;
-        InterestRateChartPeriodType interestFreePeriodFrequencyType = null;
-        Integer interestFreePreriodTypeId = null;
-
-        if (command.parameterExists(interestFreePeriodApplicableParamName)) {
-            interestFreePeriodApplicable = command.booleanObjectValueOfParameterNamed(interestFreePeriodApplicableParamName);
-            if (interestFreePeriodApplicable) {
-                if (command.parameterExists(interestFreeFromPeriodParamName)) {
-                    interestFreeFromPeriod = command.integerValueOfParameterNamed(interestFreeFromPeriodParamName);
-                } else {
-                    interestFreeFromPeriod = produPreClosureDetail.interestFreeFromPeriod();
-                }
-
-                if (command.parameterExists(interestFreeToPeriodParamName)) {
-                    interestFreeToPeriod = command.integerValueOfParameterNamed(interestFreeToPeriodParamName);
-                } else {
-                    interestFreeToPeriod = produPreClosureDetail.interestFreeToPeriod();
-                }
-
-                if (command.parameterExists(interestFreePeriodFrequencyTypeIdParamName)) {
-                    interestFreePreriodTypeId = command.integerValueOfParameterNamed(interestFreePeriodFrequencyTypeIdParamName);
-                } else {
-                    interestFreePreriodTypeId = produPreClosureDetail.interestFreePeriodFrequencyType();
-                }
-                interestFreePeriodFrequencyType = (interestFreePreriodTypeId == null) ? null : InterestRateChartPeriodType
-                        .fromInt(interestFreePreriodTypeId);
-            }
-        } else {
-            interestFreePeriodApplicable = produPreClosureDetail.interestFreePeriodApplicable();
-            interestFreeFromPeriod = produPreClosureDetail.interestFreeFromPeriod();
-            interestFreeToPeriod = produPreClosureDetail.interestFreeToPeriod();
-            interestFreePreriodTypeId = produPreClosureDetail.interestFreePeriodFrequencyType();
-            interestFreePeriodFrequencyType = (interestFreePreriodTypeId == null) ? null : InterestRateChartPeriodType
-                    .fromInt(interestFreePreriodTypeId);
-        }
-
         boolean preClosurePenalApplicable = false;
         BigDecimal preClosurePenalInterest = null;
         PreClosurePenalInterestOnType preClosurePenalInterestType = null;
@@ -378,9 +276,8 @@ public class DepositProductAssembler {
         preClosurePenalInterestType = preClosurePenalInterestOnTypeId == null ? null : PreClosurePenalInterestOnType
                 .fromInt(preClosurePenalInterestOnTypeId);
 
-        DepositPreClosureDetail preClosureDetail1 = DepositPreClosureDetail.createFrom(interestFreePeriodApplicable,
-                interestFreeFromPeriod, interestFreeToPeriod, interestFreePeriodFrequencyType, preClosurePenalApplicable,
-                preClosurePenalInterest, preClosurePenalInterestType);
+        DepositPreClosureDetail preClosureDetail1 = DepositPreClosureDetail.createFrom(preClosurePenalApplicable, preClosurePenalInterest,
+                preClosurePenalInterestType);
 
         return preClosureDetail1;
     }
@@ -468,22 +365,17 @@ public class DepositProductAssembler {
 
     public DepositRecurringDetail assembleRecurringDetail(final JsonCommand command) {
 
-        RecurringDepositType recurringDepositType = null;
-        final Integer recurringDepositTypeValue = command.integerValueOfParameterNamed(recurringDepositTypeIdParamName);
-        if (recurringDepositTypeValue != null) {
-            recurringDepositType = RecurringDepositType.fromInt(recurringDepositTypeValue);
-        }
+        Boolean isMandatoryDeposit = command.booleanObjectValueOfParameterNamed(isMandatoryDepositParamName);
+        Boolean allowWithdrawal = command.booleanObjectValueOfParameterNamed(allowWithdrawalParamName);
+        Boolean adjustAdvanceTowardsFuturePayments = command
+                .booleanObjectValueOfParameterNamed(adjustAdvanceTowardsFuturePaymentsParamName);
 
-        SavingsPeriodFrequencyType recurringDepositFrequencyType = null;
-        final Integer recurringDepositFrequencyTypeValue = command.integerValueOfParameterNamed(recurringDepositFrequencyTypeIdParamName);
-        if (recurringDepositFrequencyTypeValue != null) {
-            recurringDepositFrequencyType = SavingsPeriodFrequencyType.fromInt(recurringDepositFrequencyTypeValue);
-        }
+        if (isMandatoryDeposit == null) isMandatoryDeposit = false;
+        if (allowWithdrawal == null) allowWithdrawal = false;
+        if (adjustAdvanceTowardsFuturePayments == null) adjustAdvanceTowardsFuturePayments = false;
 
-        final Integer recurringDepositFrequency = command.integerValueOfParameterNamed(recurringDepositFrequencyParamName);
-
-        final DepositRecurringDetail depositRecurringDetail = DepositRecurringDetail.createFrom(recurringDepositType,
-                recurringDepositFrequency, recurringDepositFrequencyType);
+        final DepositRecurringDetail depositRecurringDetail = DepositRecurringDetail.createFrom(isMandatoryDeposit, allowWithdrawal,
+                adjustAdvanceTowardsFuturePayments);
 
         return depositRecurringDetail;
     }
@@ -538,29 +430,25 @@ public class DepositProductAssembler {
         return charts;
     }
 
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-    }
-    
     public DepositProductAmountDetails assembleDepositAmountDetails(final JsonCommand command) {
-        
+
         BigDecimal minDepositAmount = null;
-        if(command.parameterExists(depositMinAmountParamName)) {
-                minDepositAmount = command.bigDecimalValueOfParameterNamed(depositMinAmountParamName);
+        if (command.parameterExists(depositMinAmountParamName)) {
+            minDepositAmount = command.bigDecimalValueOfParameterNamed(depositMinAmountParamName);
         }
-        
+
         BigDecimal maxDepositAmount = null;
-        if(command.parameterExists(depositMaxAmountParamName)) {
-                maxDepositAmount = command.bigDecimalValueOfParameterNamed(depositMaxAmountParamName);
+        if (command.parameterExists(depositMaxAmountParamName)) {
+            maxDepositAmount = command.bigDecimalValueOfParameterNamed(depositMaxAmountParamName);
         }
-        
+
         BigDecimal depositAmount = null;
-        if(command.parameterExists(depositAmountParamName)) {
-                depositAmount = command.bigDecimalValueOfParameterNamed(depositAmountParamName);
+        if (command.parameterExists(depositAmountParamName)) {
+            depositAmount = command.bigDecimalValueOfParameterNamed(depositAmountParamName);
         }
-        
-        final DepositProductAmountDetails depositRecurringDetail = new DepositProductAmountDetails(minDepositAmount, 
-                        depositAmount, maxDepositAmount);
+
+        final DepositProductAmountDetails depositRecurringDetail = new DepositProductAmountDetails(minDepositAmount, depositAmount,
+                maxDepositAmount);
 
         return depositRecurringDetail;
     }

@@ -6,15 +6,18 @@
 package org.mifosplatform.portfolio.interestratechart.domain;
 
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.INTERESTRATE_CHART_RESOURCE_NAME;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.amountRangeFromParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.amountRangeToParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.annualInterestRateParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.amountRangeFromParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.amountRangeToParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.annualInterestRateParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.deleteParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.descriptionParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.fromPeriodParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.fromPeriodParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.idParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.periodTypeParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.toPeriodParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.interestRateForChildrenParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.interestRateForFemaleParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.interestRateForSeniorCitizenParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.periodTypeParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.toPeriodParamName;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -202,8 +205,12 @@ public class InterestRateChart extends AbstractPersistable<Long> {
                         final BigDecimal amountRangeTo = chartSlabsCommand.bigDecimalValueOfParameterNamed(amountRangeToParamName);
                         final BigDecimal annualInterestRate = chartSlabsCommand
                                 .bigDecimalValueOfParameterNamed(annualInterestRateParamName);
+                        final BigDecimal interestRateForFemale = chartSlabsCommand.bigDecimalValueOfParameterNamed(interestRateForFemaleParamName);
+                        final BigDecimal interestRateForChildren = chartSlabsCommand.bigDecimalValueOfParameterNamed(interestRateForChildrenParamName);
+                        final BigDecimal interestRateForSeniorCitizen = chartSlabsCommand.bigDecimalValueOfParameterNamed(interestRateForSeniorCitizenParamName);
+                        
                         final InterestRateChartSlabFields slabFields = InterestRateChartSlabFields.createNew(description, periodFrequencyType,
-                                fromPeriod, toPeriod, amountRangeFrom, amountRangeTo, annualInterestRate, currencyCode);
+                                fromPeriod, toPeriod, amountRangeFrom, amountRangeTo, annualInterestRate, interestRateForFemale, interestRateForChildren, interestRateForSeniorCitizen, currencyCode);
                         final InterestRateChartSlab chartSlab = InterestRateChartSlab.createNew(slabFields, this);
                         chartSlab.slabFields().validateChartSlabPlatformRules(chartSlabsCommand, baseDataValidator);
                         this.addChartSlab(chartSlab);

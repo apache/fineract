@@ -6,7 +6,6 @@ import java.math.RoundingMode;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.domain.LocalDateInterval;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.monetary.domain.Money;
 
 public class EndOfDayBalance {

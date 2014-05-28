@@ -8,7 +8,7 @@ package org.mifosplatform.portfolio.interestratechart.service;
 import java.util.Collection;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
-import org.mifosplatform.portfolio.interestratechart.InterestRateChartPeriodType;
+import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,7 +16,7 @@ public class InterestRateChartDropdownReadPlatformServiceImpl implements Interes
 
     @Override
     public Collection<EnumOptionData> retrievePeriodTypeOptions() {
-        return InterestRateChartEnumerations.periodType(InterestRateChartPeriodType.values());
+        return InterestRateChartEnumerations.periodType(PeriodFrequencyType.values());
     }
 
 }

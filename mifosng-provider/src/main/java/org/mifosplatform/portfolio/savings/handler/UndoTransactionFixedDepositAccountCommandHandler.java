@@ -14,18 +14,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class CloseDepositAccountCommandHandler implements NewCommandSourceHandler {
+public class UndoTransactionFixedDepositAccountCommandHandler implements NewCommandSourceHandler {
 
     private final DepositAccountWritePlatformService depositAccountWritePlatformService;
 
     @Autowired
-    public CloseDepositAccountCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
+    public UndoTransactionFixedDepositAccountCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
         this.depositAccountWritePlatformService = depositAccountWritePlatformService;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.close(command.entityId(), command, command.depositAccounttype());
+        final Long transactionId = Long.valueOf(command.getTransactionId());
+        return this.depositAccountWritePlatformService.undoFDTransaction(command.entityId(), transactionId, false);
     }
 }

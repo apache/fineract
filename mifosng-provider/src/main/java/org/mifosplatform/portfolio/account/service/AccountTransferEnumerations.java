@@ -86,6 +86,10 @@ public class AccountTransferEnumerations {
                     optionData = new EnumOptionData(AccountTransferType.CHARGE_PAYMENT.getValue().longValue(),
                             AccountTransferType.CHARGE_PAYMENT.getCode(), "Charge Payment");
                 break;
+                case INTEREST_TRANSFER:
+                    optionData = new EnumOptionData(AccountTransferType.INTEREST_TRANSFER.getValue().longValue(),
+                            AccountTransferType.INTEREST_TRANSFER.getCode(), "Interest Transfer");
+                break;
             }
         }
         return optionData;

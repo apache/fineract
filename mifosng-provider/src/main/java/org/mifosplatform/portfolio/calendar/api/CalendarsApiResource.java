@@ -236,6 +236,9 @@ public class CalendarsApiResource {
             case LOANS:
                 resourceDetails.withLoanId(entityId);
             break;
+            case SAVINGS:
+                resourceDetails.withSavingsId(entityId);
+            break;
             case INVALID:
             break;
         }

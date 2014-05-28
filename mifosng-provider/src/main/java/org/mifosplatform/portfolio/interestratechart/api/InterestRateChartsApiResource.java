@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.interestratechart.api;
 
 import java.util.Collection;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -23,6 +24,7 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -94,8 +96,15 @@ public class InterestRateChartsApiResource {
     public String retrieveOne(@PathParam("chartId") final Long chartId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(InterestRateChartApiConstants.INTERESTRATE_CHART_RESOURCE_NAME);
-
-        InterestRateChartData chartData = this.chartReadPlatformService.retrieveOneWithSlabs(chartId);
+        
+        InterestRateChartData chartData = null;
+        final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
+        if (!associationParameters.isEmpty() && associationParameters.contains(InterestRateChartApiConstants.chartSlabs)) {
+            chartData = this.chartReadPlatformService.retrieveOneWithSlabs(chartId);
+        }else {
+            chartData = this.chartReadPlatformService.retrieveOne(chartId);
+        }
+        
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
             chartData = this.chartReadPlatformService.retrieveWithTemplate(chartData);

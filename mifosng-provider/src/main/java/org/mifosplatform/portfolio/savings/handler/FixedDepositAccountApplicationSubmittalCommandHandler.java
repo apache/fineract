@@ -8,24 +8,25 @@ package org.mifosplatform.portfolio.savings.handler;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.portfolio.savings.service.DepositAccountWritePlatformService;
+import org.mifosplatform.portfolio.savings.service.DepositApplicationProcessWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class WithdrawDepositAccountCommandHandler implements NewCommandSourceHandler {
+public class FixedDepositAccountApplicationSubmittalCommandHandler implements NewCommandSourceHandler {
 
-    private final DepositAccountWritePlatformService depositAccountWritePlatformService;
+    private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
 
     @Autowired
-    public WithdrawDepositAccountCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
+    public FixedDepositAccountApplicationSubmittalCommandHandler(
+            final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
         this.depositAccountWritePlatformService = depositAccountWritePlatformService;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.withdrawal(command.entityId(), command, command.depositAccounttype());
+        return this.depositAccountWritePlatformService.submitFDApplication(command);
     }
 }

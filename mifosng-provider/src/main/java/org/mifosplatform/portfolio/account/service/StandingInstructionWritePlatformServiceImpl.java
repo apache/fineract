@@ -42,6 +42,7 @@ import org.mifosplatform.portfolio.account.exception.StandingInstructionNotFound
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.ScheduledDateGenerator;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -213,11 +214,12 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
 
             if (isDueForTransfer && transactionAmount != null && transactionAmount.compareTo(BigDecimal.ZERO) > 0) {
                 final AccountTransferDetails accountTransferDetails = this.accountTransferDetailRepository.findOne(data.accountDetailId());
+                final SavingsAccount fromSavingsAccount = null;
                 accountTransferDetails.accountTransferStandingInstruction().updateLatsRunDate(transactionDate.toDate());
                 AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount, data.fromAccountType(),
                         data.toAccountType(), data.fromAccount().accountId(), data.toAccount().accountId(), data.name()
                                 + " Standing instruction trasfer ", null, null, null, null, data.toTransferType(), null, null, data
-                                .transferType().getValue(), accountTransferDetails, null, null, null, null);
+                                .transferType().getValue(), accountTransferDetails, null, null, null, null, fromSavingsAccount);
                 transferAmount(sb, accountTransferDTO, data.getId());
             }
         }

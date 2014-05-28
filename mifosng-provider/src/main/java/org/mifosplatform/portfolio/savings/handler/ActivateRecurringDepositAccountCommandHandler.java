@@ -8,25 +8,24 @@ package org.mifosplatform.portfolio.savings.handler;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.portfolio.savings.service.DepositApplicationProcessWritePlatformService;
+import org.mifosplatform.portfolio.savings.service.DepositAccountWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class DepositAccountApplicationDeletionCommandHandler implements NewCommandSourceHandler {
+public class ActivateRecurringDepositAccountCommandHandler implements NewCommandSourceHandler {
 
-    private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
+    private final DepositAccountWritePlatformService depositAccountWritePlatformService;
 
     @Autowired
-    public DepositAccountApplicationDeletionCommandHandler(
-            final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
+    public ActivateRecurringDepositAccountCommandHandler(final DepositAccountWritePlatformService depositAccountWritePlatformService) {
         this.depositAccountWritePlatformService = depositAccountWritePlatformService;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.deleteApplication(command.entityId(), command.depositAccounttype());
+        return this.depositAccountWritePlatformService.activateRDAccount(command.entityId(), command);
     }
 }

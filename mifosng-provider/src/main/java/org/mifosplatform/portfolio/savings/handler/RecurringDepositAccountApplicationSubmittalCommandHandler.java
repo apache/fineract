@@ -14,12 +14,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class DepositAccountApplicationRejectedCommandHandler implements NewCommandSourceHandler {
+public class RecurringDepositAccountApplicationSubmittalCommandHandler implements NewCommandSourceHandler {
 
     private final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService;
 
     @Autowired
-    public DepositAccountApplicationRejectedCommandHandler(
+    public RecurringDepositAccountApplicationSubmittalCommandHandler(
             final DepositApplicationProcessWritePlatformService depositAccountWritePlatformService) {
         this.depositAccountWritePlatformService = depositAccountWritePlatformService;
     }
@@ -27,6 +27,6 @@ public class DepositAccountApplicationRejectedCommandHandler implements NewComma
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.rejectApplication(command.entityId(), command, command.depositAccounttype());
+        return this.depositAccountWritePlatformService.submitRDApplication(command);
     }
 }

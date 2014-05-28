@@ -159,7 +159,7 @@ public class DepositAccountTransactionDataValidator {
             if (accountOnClosureType.isTransferToSavings()) {
                 final Long toSavingsAccountId = this.fromApiJsonHelper.extractLongNamed(toSavingsAccountIdParamName, element);
                 baseDataValidator.reset().parameter(toSavingsAccountIdParamName).value(toSavingsAccountId)
-                        .cantBeBlankWhenParameterProvidedIs(onAccountClosureIdParamName, onAccountClosureId);
+                        .cantBeBlankWhenParameterProvidedIs(onAccountClosureIdParamName, DepositAccountOnClosureType.fromInt(onAccountClosureId).getCode());
             } else if (accountOnClosureType.isReinvest() && isPreMatureClose) {
                 baseDataValidator.reset().parameter(onAccountClosureIdParamName).value(onAccountClosureId)
                         .failWithCode("reinvest.not.allowed", "Re-Invest is not supported for account pre mature close");

@@ -68,8 +68,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
             final JsonCommand command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(),
                     wrapper.getEntityId(), wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(),
-                    wrapper.getSavingsId(), wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId(),
-                    wrapper.interestRatechartId(), wrapper.depositAccountType());
+                    wrapper.getSavingsId(), wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId());
 
             result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
         } catch (final RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {

@@ -44,6 +44,7 @@ import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
+import org.mifosplatform.portfolio.common.service.DropdownReadPlatformService;
 import org.mifosplatform.portfolio.interestratechart.data.InterestRateChartData;
 import org.mifosplatform.portfolio.interestratechart.service.InterestRateChartReadPlatformService;
 import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
@@ -69,7 +70,7 @@ import org.springframework.util.CollectionUtils;
 public class RecurringDepositProductsApiResource {
 
     private final DepositProductReadPlatformService depositProductReadPlatformService;
-    private final SavingsDropdownReadPlatformService dropdownReadPlatformService;
+    private final SavingsDropdownReadPlatformService savingsDropdownReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final PlatformSecurityContext context;
     private final DefaultToApiJsonSerializer<RecurringDepositProductData> toApiJsonSerializer;
@@ -82,10 +83,11 @@ public class RecurringDepositProductsApiResource {
     private final InterestRateChartReadPlatformService chartReadPlatformService;
     private final InterestRateChartReadPlatformService interestRateChartReadPlatformService;
     private final DepositsDropdownReadPlatformService depositsDropdownReadPlatformService;
+    private final DropdownReadPlatformService dropdownReadPlatformService;
 
     @Autowired
     public RecurringDepositProductsApiResource(final DepositProductReadPlatformService depositProductReadPlatformService,
-            final SavingsDropdownReadPlatformService dropdownReadPlatformService,
+            final SavingsDropdownReadPlatformService savingsDropdownReadPlatformService,
             final CurrencyReadPlatformService currencyReadPlatformService, final PlatformSecurityContext context,
             final DefaultToApiJsonSerializer<RecurringDepositProductData> toApiJsonSerializer,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
@@ -94,9 +96,10 @@ public class RecurringDepositProductsApiResource {
             final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService,
             final ChargeReadPlatformService chargeReadPlatformService, final InterestRateChartReadPlatformService chartReadPlatformService,
             final InterestRateChartReadPlatformService interestRateChartReadPlatformService,
-            final DepositsDropdownReadPlatformService depositsDropdownReadPlatformService) {
+            final DepositsDropdownReadPlatformService depositsDropdownReadPlatformService,
+            final DropdownReadPlatformService dropdownReadPlatformService) {
         this.depositProductReadPlatformService = depositProductReadPlatformService;
-        this.dropdownReadPlatformService = dropdownReadPlatformService;
+        this.savingsDropdownReadPlatformService = savingsDropdownReadPlatformService;
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.context = context;
         this.toApiJsonSerializer = toApiJsonSerializer;
@@ -109,6 +112,7 @@ public class RecurringDepositProductsApiResource {
         this.chartReadPlatformService = chartReadPlatformService;
         this.interestRateChartReadPlatformService = interestRateChartReadPlatformService;
         this.depositsDropdownReadPlatformService = depositsDropdownReadPlatformService;
+        this.dropdownReadPlatformService = dropdownReadPlatformService;
     }
 
     @POST
@@ -232,22 +236,23 @@ public class RecurringDepositProductsApiResource {
             currency = new ArrayList<CurrencyData>(currencyOptions).get(0);
         }
 
-        final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = this.dropdownReadPlatformService
+        final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = this.savingsDropdownReadPlatformService
                 .retrieveCompoundingInterestPeriodTypeOptions();
 
-        final Collection<EnumOptionData> interestPostingPeriodTypeOptions = this.dropdownReadPlatformService
+        final Collection<EnumOptionData> interestPostingPeriodTypeOptions = this.savingsDropdownReadPlatformService
                 .retrieveInterestPostingPeriodTypeOptions();
 
-        final Collection<EnumOptionData> interestCalculationTypeOptions = this.dropdownReadPlatformService
+        final Collection<EnumOptionData> interestCalculationTypeOptions = this.savingsDropdownReadPlatformService
                 .retrieveInterestCalculationTypeOptions();
 
-        final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = this.dropdownReadPlatformService
+        final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = this.savingsDropdownReadPlatformService
                 .retrieveInterestCalculationDaysInYearTypeOptions();
 
-        final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = this.dropdownReadPlatformService
+        final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = this.savingsDropdownReadPlatformService
                 .retrieveLockinPeriodFrequencyTypeOptions();
 
-        final Collection<EnumOptionData> withdrawalFeeTypeOptions = this.dropdownReadPlatformService.retrievewithdrawalFeeTypeOptions();
+        final Collection<EnumOptionData> withdrawalFeeTypeOptions = this.savingsDropdownReadPlatformService
+                .retrievewithdrawalFeeTypeOptions();
 
         final Collection<CodeValueData> paymentTypeOptions = this.codeValueReadPlatformService
                 .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
@@ -257,8 +262,6 @@ public class RecurringDepositProductsApiResource {
                 .retrieveAccountMappingOptionsForSavingsProducts();
         final Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions = this.depositsDropdownReadPlatformService
                 .retrievePreClosurePenalInterestOnTypeOptions();
-        final Collection<EnumOptionData> interestFreePeriodTypeOptions = this.depositsDropdownReadPlatformService
-                .retrieveInterestFreePeriodFrequencyTypeOptions();
 
         // charges
         final boolean feeChargesOnly = true;
@@ -268,15 +271,7 @@ public class RecurringDepositProductsApiResource {
         Collection<ChargeData> penaltyOptions = this.chargeReadPlatformService.retrieveSavingsAccountApplicablePenalties();
         penaltyOptions = CollectionUtils.isEmpty(penaltyOptions) ? null : penaltyOptions;
 
-        Collection<EnumOptionData> recurringDepositTypeOptions = this.depositsDropdownReadPlatformService
-                .retrieveRecurringDepositTypeOptions();
-        Collection<EnumOptionData> recurringDepositFrequencyTypeOptions = this.depositsDropdownReadPlatformService
-                .retrieveRecurringDepositFrequencyTypeOptions();
-
-        final Collection<EnumOptionData> depositTermTypeOptions = this.depositsDropdownReadPlatformService.retrieveDepositTermTypeOptions();
-
-        final Collection<EnumOptionData> inMultiplesOfDepositTermTypeOptions = this.depositsDropdownReadPlatformService
-                .retrieveInMultiplesOfDepositTermTypeOptions();
+        final Collection<EnumOptionData> periodFrequencyTypeOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();
 
         // interest rate chart template
         final InterestRateChartData chartTemplate = this.interestRateChartReadPlatformService.template();
@@ -287,16 +282,14 @@ public class RecurringDepositProductsApiResource {
                     interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
                     interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions,
                     paymentTypeOptions, accountingRuleOptions, accountingMappingOptions, chargeOptions, penaltyOptions, chartTemplate,
-                    interestFreePeriodTypeOptions, preClosurePenalInterestOnTypeOptions, recurringDepositTypeOptions,
-                    recurringDepositFrequencyTypeOptions, depositTermTypeOptions, inMultiplesOfDepositTermTypeOptions);
+                    preClosurePenalInterestOnTypeOptions, periodFrequencyTypeOptions);
         } else {
             recurringDepositProductToReturn = RecurringDepositProductData.template(currency, interestCompoundingPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, accountingRule, currencyOptions,
                     interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
                     interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions,
                     paymentTypeOptions, accountingRuleOptions, accountingMappingOptions, chargeOptions, penaltyOptions, chartTemplate,
-                    interestFreePeriodTypeOptions, preClosurePenalInterestOnTypeOptions, recurringDepositTypeOptions,
-                    recurringDepositFrequencyTypeOptions, depositTermTypeOptions, inMultiplesOfDepositTermTypeOptions);
+                    preClosurePenalInterestOnTypeOptions, periodFrequencyTypeOptions);
         }
 
         return recurringDepositProductToReturn;

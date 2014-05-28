@@ -97,10 +97,6 @@ public class DepositsApiConstants {
     public static final String bankNumberParamName = "bankNumber";
 
     // Preclosure parameters
-    public static final String interestFreePeriodApplicableParamName = "interestFreePeriodApplicable";
-    public static final String interestFreeFromPeriodParamName = "interestFreeFromPeriod";
-    public static final String interestFreeToPeriodParamName = "interestFreeToPeriod";
-    public static final String interestFreePeriodFrequencyTypeIdParamName = "interestFreePeriodFrequencyTypeId";
     public static final String preClosurePenalApplicableParamName = "preClosurePenalApplicable";
     public static final String preClosurePenalInterestParamName = "preClosurePenalInterest";
     public static final String preClosurePenalInterestOnTypeIdParamName = "preClosurePenalInterestOnTypeId";
@@ -125,12 +121,14 @@ public class DepositsApiConstants {
     public static final String depositPeriodFrequencyIdParamName = "depositPeriodFrequencyId";
 
     // recurring parameters
-    public static final String recurringDepositAmountParamName = "recurringDepositAmount";
-    public static final String recurringDepositType = "recurringDepositType";
-    public static final String recurringDepositFrequencyType = "recurringDepositFrequencyType";
-    public static final String recurringDepositFrequencyParamName = "recurringDepositFrequency";
-    public static final String recurringDepositTypeIdParamName = "recurringDepositTypeId";
-    public static final String recurringDepositFrequencyTypeIdParamName = "recurringDepositFrequencyTypeId";
+    public static final String mandatoryRecommendedDepositAmountParamName = "mandatoryRecommendedDepositAmount";
+    public static final String isMandatoryDepositParamName = "isMandatoryDeposit";
+    public static final String allowWithdrawalParamName = "allowWithdrawal";
+    public static final String adjustAdvanceTowardsFuturePaymentsParamName = "adjustAdvanceTowardsFuturePayments";
+
+    public static final String recurringFrequencyTypeParamName = "recurringFrequencyType";
+    public static final String recurringFrequencyParamName = "recurringFrequency";
+    public static final String isCalendarInheritedParamName = "isCalendarInherited";
 
     // transaction parameters
     public static final String transactionDateParamName = "transactionDate";
@@ -206,14 +204,10 @@ public class DepositsApiConstants {
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PENALTY_INCOME_ACCOUNT_MAPPING.getValue(), chartsParamName));
 
     private static final Set<String> PRECLOSURE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
-            interestFreePeriodApplicableParamName, interestFreeFromPeriodParamName, interestFreeToPeriodParamName,
-            interestFreePeriodFrequencyTypeIdParamName, preClosurePenalApplicableParamName, preClosurePenalInterestParamName,
-            preClosurePenalInterestOnTypeIdParamName));
+            preClosurePenalApplicableParamName, preClosurePenalInterestParamName, preClosurePenalInterestOnTypeIdParamName));
 
     private static final Set<String> PRECLOSURE_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
-            interestFreePeriodApplicableParamName, interestFreeFromPeriodParamName, interestFreeToPeriodParamName,
-            interestFreePeriodFrequencyType, preClosurePenalApplicableParamName, preClosurePenalInterestParamName,
-            preClosurePenalInterestOnType));
+            preClosurePenalApplicableParamName, preClosurePenalInterestParamName, preClosurePenalInterestOnType));
 
     private static final Set<String> DEPOSIT_TERM_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(minDepositTermParamName,
             maxDepositTermParamName, minDepositTermTypeIdParamName, maxDepositTermTypeIdParamName, inMultiplesOfDepositTermParamName,
@@ -224,11 +218,14 @@ public class DepositsApiConstants {
             inMultiplesOfDepositTermType, depositAmountParamName, depositMinAmountParamName, depositMaxAmountParamName));
 
     private static final Set<String> RECURRING_DETAILS_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
-            recurringDepositAmountParamName, recurringDepositTypeIdParamName, recurringDepositFrequencyTypeIdParamName,
-            recurringDepositFrequencyParamName));
+            mandatoryRecommendedDepositAmountParamName, isMandatoryDepositParamName, allowWithdrawalParamName,
+            adjustAdvanceTowardsFuturePaymentsParamName, recurringFrequencyTypeParamName, recurringFrequencyParamName,
+            isCalendarInheritedParamName));
 
     private static final Set<String> RECURRING_DETAILS_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
-            recurringDepositAmountParamName, recurringDepositType, recurringDepositFrequencyParamName, recurringDepositFrequencyType));
+            mandatoryRecommendedDepositAmountParamName, isMandatoryDepositParamName, allowWithdrawalParamName,
+            adjustAdvanceTowardsFuturePaymentsParamName, recurringFrequencyTypeParamName, recurringFrequencyParamName,
+            isCalendarInheritedParamName));
 
     public static final Set<String> DEPOSIT_PRECLOSURE_CALCULATION_REQUEST_DATA_PARAMETERS = new HashSet<String>(
             Arrays.asList(preMatureCloseOnDateParamName));

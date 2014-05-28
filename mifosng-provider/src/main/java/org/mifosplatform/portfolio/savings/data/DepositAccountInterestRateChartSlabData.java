@@ -25,34 +25,47 @@ public class DepositAccountInterestRateChartSlabData {
     private final BigDecimal amountRangeFrom;
     private final BigDecimal amountRangeTo;
     private final BigDecimal annualInterestRate;
+    private final BigDecimal interestRateForFemale;
+    private final BigDecimal interestRateForChildren;
+    private final BigDecimal interestRateForSeniorCitizen;
     private final CurrencyData currency;
 
     // associations
 
     // template
     @SuppressWarnings("unused")
-    private Collection<EnumOptionData> periodTypes;
+    private final Collection<EnumOptionData> periodTypes;
 
-    public static DepositAccountInterestRateChartSlabData instance(Long id, String description, EnumOptionData periodType, Integer fromPeriod,
-            Integer toPeriod, BigDecimal amountRangeFrom, BigDecimal amountRangeTo, BigDecimal annualInterestRate, CurrencyData currency) {
-        Collection<EnumOptionData> periodTypes = null;
-        return new DepositAccountInterestRateChartSlabData(id, description, periodType, fromPeriod, toPeriod, amountRangeFrom, amountRangeTo,
-                annualInterestRate, currency, periodTypes);
-    }
-    
-    public static DepositAccountInterestRateChartSlabData from(InterestRateChartSlabData chartSlabData) {
-        final Long id = null;        
-        return new DepositAccountInterestRateChartSlabData(id, chartSlabData.description(), chartSlabData.periodType(), chartSlabData.fromPeriod(), chartSlabData.toPeriod(), chartSlabData.amountRangeFrom(), chartSlabData.amountRangeTo(),
-                chartSlabData.annualInterestRate(), chartSlabData.currency(), chartSlabData.periodTypes());
-    }
-    
-    public static DepositAccountInterestRateChartSlabData withTemplate(DepositAccountInterestRateChartSlabData chartSlab, Collection<EnumOptionData> periodTypes) {
-        return new DepositAccountInterestRateChartSlabData(chartSlab.id, chartSlab.description, chartSlab.periodType, chartSlab.fromPeriod, chartSlab.toPeriod, chartSlab.amountRangeFrom, chartSlab.amountRangeTo,
-                chartSlab.annualInterestRate, chartSlab.currency, periodTypes);
+    public static DepositAccountInterestRateChartSlabData instance(final Long id, final String description,
+            final EnumOptionData periodType, final Integer fromPeriod, final Integer toPeriod, final BigDecimal amountRangeFrom,
+            final BigDecimal amountRangeTo, final BigDecimal annualInterestRate, final BigDecimal interestRateForFemale,
+            final BigDecimal interestRateForChildren, final BigDecimal interestRateForSeniorCitizen, final CurrencyData currency) {
+        final Collection<EnumOptionData> periodTypes = null;
+        return new DepositAccountInterestRateChartSlabData(id, description, periodType, fromPeriod, toPeriod, amountRangeFrom,
+                amountRangeTo, annualInterestRate, interestRateForFemale, interestRateForChildren, interestRateForSeniorCitizen, currency,
+                periodTypes);
     }
 
-    private DepositAccountInterestRateChartSlabData(Long id, String description, EnumOptionData periodType, Integer fromPeriod, Integer toPeriod,
-            BigDecimal amountRangeFrom, BigDecimal amountRangeTo, BigDecimal annualInterestRate, CurrencyData currency, Collection<EnumOptionData> periodTypes) {
+    public static DepositAccountInterestRateChartSlabData from(final InterestRateChartSlabData chartSlabData) {
+        final Long id = null;
+        return new DepositAccountInterestRateChartSlabData(id, chartSlabData.description(), chartSlabData.periodType(),
+                chartSlabData.fromPeriod(), chartSlabData.toPeriod(), chartSlabData.amountRangeFrom(), chartSlabData.amountRangeTo(),
+                chartSlabData.annualInterestRate(), chartSlabData.interestRateForFemale(), chartSlabData.interestRateForChildren(),
+                chartSlabData.interestRateForSeniorCitizen(), chartSlabData.currency(), chartSlabData.periodTypes());
+    }
+
+    public static DepositAccountInterestRateChartSlabData withTemplate(final DepositAccountInterestRateChartSlabData chartSlab,
+            final Collection<EnumOptionData> periodTypes) {
+        return new DepositAccountInterestRateChartSlabData(chartSlab.id, chartSlab.description, chartSlab.periodType, chartSlab.fromPeriod,
+                chartSlab.toPeriod, chartSlab.amountRangeFrom, chartSlab.amountRangeTo, chartSlab.annualInterestRate,
+                chartSlab.interestRateForFemale, chartSlab.interestRateForChildren, chartSlab.interestRateForSeniorCitizen,
+                chartSlab.currency, periodTypes);
+    }
+
+    private DepositAccountInterestRateChartSlabData(final Long id, final String description, final EnumOptionData periodType,
+            final Integer fromPeriod, final Integer toPeriod, final BigDecimal amountRangeFrom, final BigDecimal amountRangeTo,
+            final BigDecimal annualInterestRate, final BigDecimal interestRateForFemale, final BigDecimal interestRateForChildren,
+            final BigDecimal interestRateForSeniorCitizen, final CurrencyData currency, final Collection<EnumOptionData> periodTypes) {
         this.id = id;
         this.description = description;
         this.periodType = periodType;
@@ -61,6 +74,9 @@ public class DepositAccountInterestRateChartSlabData {
         this.amountRangeFrom = amountRangeFrom;
         this.amountRangeTo = amountRangeTo;
         this.annualInterestRate = annualInterestRate;
+        this.interestRateForFemale = interestRateForFemale;
+        this.interestRateForChildren = interestRateForChildren;
+        this.interestRateForSeniorCitizen = interestRateForSeniorCitizen;
         this.currency = currency;
         this.periodTypes = periodTypes;
     }

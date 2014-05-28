@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.savings.domain;
 
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.maxDepositTermParamName;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidation
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.interestratechart.domain.InterestRateChart;
+import org.mifosplatform.portfolio.savings.DepositsApiConstants;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
@@ -91,6 +93,8 @@ public class RecurringDepositProduct extends FixedDepositProduct {
 
         actualChanges.putAll(this.update(command, baseDataValidator));
 
+        validateDomainRules(baseDataValidator);
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
         return actualChanges;
@@ -103,7 +107,7 @@ public class RecurringDepositProduct extends FixedDepositProduct {
         actualChanges.putAll(super.update(command, baseDataValidator));
 
         if (this.recurringDetail != null) {
-            actualChanges.putAll(this.recurringDetail.update(command, baseDataValidator));
+            actualChanges.putAll(this.recurringDetail.update(command));
         }
 
         return actualChanges;
@@ -117,4 +121,33 @@ public class RecurringDepositProduct extends FixedDepositProduct {
         return this.recurringDetail;
     }
 
+    @Override
+    public void validateDomainRules() {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME);
+
+        validateDomainRules(baseDataValidator);
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validateDomainRules(final DataValidatorBuilder baseDataValidator) {
+        final DepositTermDetail termDetails = this.depositProductTermAndPreClosure().depositTermDetail();
+        final boolean isMinTermGreaterThanMax = termDetails.isMinDepositTermGreaterThanMaxDepositTerm();
+        if (isMinTermGreaterThanMax) {
+            final Integer maxTerm = termDetails.maxDepositTerm();
+            baseDataValidator.reset().parameter(maxDepositTermParamName).value(maxTerm)
+                    .failWithCodeNoParameterAddedToErrorCode("max.term.lessthan.min.term");
+        }
+
+        if (this.charts != null) {
+            validateCharts(baseDataValidator);
+        } else if (this.nominalAnnualInterestRate == null || this.nominalAnnualInterestRate.compareTo(BigDecimal.ZERO) == 0) {
+            baseDataValidator.reset().parameter(DepositsApiConstants.nominalAnnualInterestRateParamName).value(nominalAnnualInterestRate)
+                    .failWithCodeNoParameterAddedToErrorCode("interest.chart.or.nominal.interest.rate.required");
+        }
+        
+        this.validateInterestPostingAndCompoundingPeriodTypes(baseDataValidator);
+    }
 }
