@@ -16,7 +16,6 @@ public final class AuditData {
     private final Long id;
     @SuppressWarnings("unused")
     private final String actionName;
-    @SuppressWarnings("unused")
     private final String entityName;
     @SuppressWarnings("unused")
     private final Long resourceId;
@@ -83,5 +82,9 @@ public final class AuditData {
 
     public String getCommandAsJson() {
         return this.commandAsJson;
+    }
+
+    public String getEntityName() {
+        return this.entityName;
     }
 }

@@ -260,6 +260,16 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 }
                 clientForUpdate.updateStaff(newStaff);
             }
+            
+            if (changes.containsKey(ClientApiConstants.genderIdParamName)) {
+
+                final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.genderIdParamName);
+                CodeValue gender = null;
+                if (newValue != null) {
+                    gender = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.GENDER, newValue);
+                }
+                clientForUpdate.updateGender(gender);
+            }
 
             if (changes.containsKey(ClientApiConstants.savingsProductIdParamName)) {
                 if (clientForUpdate.isActive()) { throw new ClientActiveForUpdateException(clientId,
