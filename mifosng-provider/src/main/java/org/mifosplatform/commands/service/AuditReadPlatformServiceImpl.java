@@ -38,6 +38,12 @@ import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
+import org.mifosplatform.portfolio.savings.DepositAccountType;
+import org.mifosplatform.portfolio.savings.data.DepositProductData;
+import org.mifosplatform.portfolio.savings.data.SavingsProductData;
+import org.mifosplatform.portfolio.savings.service.DepositProductReadPlatformService;
+import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
+import org.mifosplatform.portfolio.savings.service.SavingsProductReadPlatformService;
 import org.mifosplatform.useradministration.data.AppUserData;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.useradministration.service.AppUserReadPlatformService;
@@ -70,13 +76,17 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     private final StaffReadPlatformService staffReadPlatformService;
     private final PaginationHelper<AuditData> paginationHelper = new PaginationHelper<AuditData>();
     private final PaginationParametersDataValidator paginationParametersDataValidator;
+    private final SavingsProductReadPlatformService savingsProductReadPlatformService;
+    private final DepositProductReadPlatformService depositProductReadPlatformService;
 
     @Autowired
     public AuditReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final FromJsonHelper fromApiJsonHelper, final AppUserReadPlatformService appUserReadPlatformService,
             final OfficeReadPlatformService officeReadPlatformService, final ClientReadPlatformService clientReadPlatformService,
             final LoanProductReadPlatformService loanProductReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
-            final PaginationParametersDataValidator paginationParametersDataValidator) {
+            final PaginationParametersDataValidator paginationParametersDataValidator,
+            final SavingsProductReadPlatformService savingsProductReadPlatformService,
+            final DepositProductReadPlatformService depositProductReadPlatformService) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.fromApiJsonHelper = fromApiJsonHelper;
@@ -86,6 +96,8 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         this.loanProductReadPlatformService = loanProductReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
         this.paginationParametersDataValidator = paginationParametersDataValidator;
+        this.savingsProductReadPlatformService = savingsProductReadPlatformService;
+        this.depositProductReadPlatformService = depositProductReadPlatformService;
     }
 
     private static final class AuditMapper implements RowMapper<AuditData> {
@@ -308,48 +320,115 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final String productIdStr = auditObject.get("productId").getAsString();
             if (StringUtils.isNotBlank(productIdStr)) {
                 productId = Long.valueOf(productIdStr);
-                final LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
-                commandAsJsonMap.put("productName", loanProduct.getName());
+                if (auditResult.getEntityName().equalsIgnoreCase("LOAN")) {
+                    final LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
+                    commandAsJsonMap.put("productName", loanProduct.getName());
+                } else if (auditResult.getEntityName().equalsIgnoreCase("SAVINGSACCOUNT")) {
+                    final SavingsProductData savingProduct = this.savingsProductReadPlatformService.retrieveOne(productId);
+                    commandAsJsonMap.put("productName", savingProduct.getName());
+                } else if (auditResult.getEntityName().equalsIgnoreCase("RECURRINGDEPOSITACCOUNT")) {
+                    final DepositProductData depositProduct = this.depositProductReadPlatformService.retrieveOne(
+                            DepositAccountType.RECURRING_DEPOSIT, productId);
+                    commandAsJsonMap.put("productName", depositProduct.getName());
+                } else if (auditResult.getEntityName().equalsIgnoreCase("FIXEDDEPOSITACCOUNT")) {
+                    final DepositProductData depositProduct = this.depositProductReadPlatformService.retrieveOne(
+                            DepositAccountType.FIXED_DEPOSIT, productId);
+                    commandAsJsonMap.put("productName", depositProduct.getName());
+                } else {
+                    commandAsJsonMap.put("productName", "");
+                }
             } else {
                 commandAsJsonMap.put("productName", "");
             }
         }
 
-        if (commandAsJsonMap.containsKey("loanOfficerId")) {
-            commandAsJsonMap.remove("loanOfficerId");
+        if (commandAsJsonMap.containsKey("loanOfficerId") || commandAsJsonMap.containsKey("fieldOfficerId")
+                || commandAsJsonMap.containsKey("staffId")) {
+            String staffIdStr = "";
+            String staffNameParamName = "";
 
-            Long loanOfficerId = null;
-            final String loanOfficerIdStr = auditObject.get("loanOfficerId").getAsString();
-            if (StringUtils.isNotBlank(loanOfficerIdStr)) {
-                loanOfficerId = Long.valueOf(loanOfficerIdStr);
-                final StaffData officer = this.staffReadPlatformService.retrieveStaff(loanOfficerId);
-                commandAsJsonMap.put("loanOfficerName", officer.getDisplayName());
-            } else {
-                commandAsJsonMap.put("loanOfficerName", "");
+            if (commandAsJsonMap.containsKey("loanOfficerId")) {
+                commandAsJsonMap.remove("loanOfficerId");
+                staffIdStr = auditObject.get("loanOfficerId").getAsString();
+                staffNameParamName = "loanOfficerName";
+            } else if (commandAsJsonMap.containsKey("fieldOfficerId")) {
+                commandAsJsonMap.remove("fieldOfficerId");
+                staffIdStr = auditObject.get("fieldOfficerId").getAsString();
+                staffNameParamName = "fieldOfficerName";
+            } else if (commandAsJsonMap.containsKey("staffId")) {
+                commandAsJsonMap.remove("staffId");
+                staffIdStr = auditObject.get("staffId").getAsString();
+                staffNameParamName = "staffName";
             }
+
+            replaceStaffIdWithStaffName(staffIdStr, staffNameParamName, commandAsJsonMap);
+
         }
 
-        final String[] enumTypes = { "loanTermFrequencyType", "repaymentFrequencyType", "amortizationType", "interestType",
-                "interestCalculationPeriodType", "interestRateFrequencyType" };
-
-        for (final String typeName : enumTypes) {
-            if (commandAsJsonMap.containsKey(typeName)) {
-                commandAsJsonMap.remove(typeName);
-
-                final Integer enumTypeId = auditObject.get(typeName).getAsInt();
-                if (enumTypeId != null) {
-                    final String code = LoanEnumerations.loanEnumueration(typeName, enumTypeId).getCode();
-                    if (code != null) {
-                        commandAsJsonMap.put(typeName, code);
-                    }
-                }
-            }
-        }
+        updateEnumerations(commandAsJsonMap, auditObject, auditResult.getEntityName());
 
         final String newAuditAsJson = this.fromApiJsonHelper.toJson(commandAsJsonMap);
         auditResult.setCommandAsJson(newAuditAsJson);
 
         return auditResult;
+    }
+
+    private void updateEnumerations(Map<String, Object> commandAsJsonMap, JsonObject auditObject, String entityName) {
+
+        if (entityName.equalsIgnoreCase("LOAN") || entityName.equalsIgnoreCase("LOANPRODUCT")) {
+            
+            final String[] enumTypes = { "loanTermFrequencyType", "termFrequencyType", "repaymentFrequencyType", "amortizationType",
+                    "interestType", "interestCalculationPeriodType", "interestRateFrequencyType", "loanType", "accountingRule" };
+
+            for (final String typeName : enumTypes) {
+                if (commandAsJsonMap.containsKey(typeName)) {
+                    commandAsJsonMap.remove(typeName);
+
+                    final Integer enumTypeId = auditObject.get(typeName).getAsInt();
+                    if (enumTypeId != null) {
+                        final String code = LoanEnumerations.loanEnumueration(typeName, enumTypeId).getValue();
+                        if (code != null) {
+                            commandAsJsonMap.put(typeName, code);
+                        }
+                    }
+                }
+            }
+            
+        } else if (entityName.equalsIgnoreCase("SAVINGSPRODUCT") || entityName.equalsIgnoreCase("SAVINGSACCOUNT")
+                || entityName.equalsIgnoreCase("RECURRINGDEPOSITPRODUCT") || entityName.equalsIgnoreCase("RECURRINGDEPOSITACCOUNT")
+                || entityName.equalsIgnoreCase("FIXEDDEPOSITPRODUCT") || entityName.equalsIgnoreCase("FIXEDDEPOSITACCOUNT")) {
+
+            final String[] enumTypes = { "interestCompoundingPeriodType", "interestPostingPeriodType", "interestCalculationType",
+                    "lockinPeriodFrequencyType", "minDepositTermTypeId", "maxDepositTermTypeId", "inMultiplesOfDepositTermTypeId",
+                    "depositPeriodFrequencyId", "accountingRule", "interestCalculationDaysInYearType", "preClosurePenalInterestOnTypeId",
+                    "recurringFrequencyType" };
+
+            for (final String typeName : enumTypes) {
+                if (commandAsJsonMap.containsKey(typeName)) {
+                    commandAsJsonMap.remove(typeName);
+
+                    final Integer enumTypeId = auditObject.get(typeName).getAsInt();
+                    if (enumTypeId != null) {
+                        final String code = SavingsEnumerations.savingEnumueration(typeName, enumTypeId).getValue();
+                        if (code != null) {
+                            commandAsJsonMap.put(typeName, code);
+                        }
+                    }
+                }
+            }            
+        }
+    }
+
+    private void replaceStaffIdWithStaffName(final String staffIdStr, final String staffNameParamName, Map<String, Object> commandAsJsonMap) {
+
+        Long staffId = null;
+        if (StringUtils.isNotBlank(staffIdStr)) {
+            staffId = Long.valueOf(staffIdStr);
+            final StaffData officer = this.staffReadPlatformService.retrieveStaff(staffId);
+            commandAsJsonMap.put(staffNameParamName, officer.getDisplayName());
+        } else {
+            commandAsJsonMap.put(staffNameParamName, "");
+        }
     }
 
     @Override

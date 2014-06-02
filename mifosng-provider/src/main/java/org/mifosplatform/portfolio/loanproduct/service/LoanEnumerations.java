@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.loanproduct.service;
 
+import org.mifosplatform.accounting.common.AccountingEnumerations;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.accountdetails.service.AccountEnumerations;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
@@ -29,7 +30,7 @@ public class LoanEnumerations {
     public static final String INTEREST_TYPE = "interestType";
     public static final String INTEREST_CALCULATION_PERIOD_TYPE = "interestCalculationPeriodType";
     public static final String PAYMENT_TYPE = "paymentType";
-    public static final String ACCOUNTING_RULE_TYPE = "accountingRuleType";
+    public static final String ACCOUNTING_RULE_TYPE = "accountingRule";
     public static final String LOAN_TYPE = "loanType";
 
     public static EnumOptionData loanEnumueration(final String typeName, final int id) {
@@ -47,7 +48,11 @@ public class LoanEnumerations {
             return interestType(id);
         } else if (typeName.equals(INTEREST_CALCULATION_PERIOD_TYPE)) {
             return interestCalculationPeriodType(id);
-        } else if (typeName.equals(LOAN_TYPE)) { return AccountEnumerations.loanType(id); }
+        } else if (typeName.equals(ACCOUNTING_RULE_TYPE)) { 
+            return AccountingEnumerations.accountingRuleType(id);
+        }  else if (typeName.equals(LOAN_TYPE)) { 
+            return AccountEnumerations.loanType(id); 
+        }
         return null;
     }
 
