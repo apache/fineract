@@ -7,6 +7,6 @@ package org.mifosplatform.infrastructure.security.domain;
 
 public interface PlatformUserRepository {
 
-    PlatformUser findByUsername(String username);
+    PlatformUser findByUsernameAndDeletedAndEnabled(String username, boolean deleted, boolean enabled);
 
 }

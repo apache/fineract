@@ -37,6 +37,10 @@ public class LoanStatusChecker {
         assertFalse(getStatus(loanStatusHashMap, "active"));
     }
 
+    public static void verifyLoanAccountIsOverPaid(final HashMap loanStatusHashMap) {
+        assertTrue(getStatus(loanStatusHashMap, "overpaid"));
+    }
+
     public static HashMap getStatusOfLoan(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer loanID) {
         final String url = "/mifosng-provider/api/v1/loans/" + loanID + "?tenantIdentifier=default";

@@ -22,7 +22,6 @@ import org.mifosplatform.infrastructure.security.service.SpringSecurityPlatformS
 import org.mifosplatform.useradministration.data.RoleData;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.useradministration.domain.Role;
-import org.mifosplatform.useradministration.exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
@@ -59,10 +58,6 @@ public class AuthenticationApiResource {
 
         final Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
         final Authentication authenticationCheck = this.customAuthenticationProvider.authenticate(authentication);
-        final AppUser principal = (AppUser) authenticationCheck.getPrincipal();
-        if (principal.isDeleted() || principal.isNotEnabled() ) {
-            throw new UserNotFoundException(principal.getId());
-        }
 
         final Collection<String> permissions = new ArrayList<String>();
         AuthenticatedUserData authenticatedUserData = new AuthenticatedUserData(username, permissions);
@@ -75,6 +70,7 @@ public class AuthenticationApiResource {
 
             final byte[] base64EncodedAuthenticationKey = Base64.encode(username + ":" + password);
 
+            final AppUser principal = (AppUser) authenticationCheck.getPrincipal();
             final Collection<RoleData> roles = new ArrayList<RoleData>();
             final Set<Role> userRoles = principal.getRoles();
             for (final Role role : userRoles) {

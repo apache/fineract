@@ -3,9 +3,6 @@ package org.mifosplatform.integrationtests.common.loans;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -16,7 +13,7 @@ import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
-@SuppressWarnings({ "rawtypes", "unchecked", "cast" })
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class LoanTransactionHelper {
 
     private final RequestSpecification requestSpec;
@@ -338,7 +335,8 @@ public class LoanTransactionHelper {
                 .get("principalLoanBalanceOutstanding"));
     }
 
-    public void checkAccrualTransactionForRepayment(final String transactionDate, final Float interestAmount, final Integer loanID) {
+    public void checkAccrualTransactionForRepayment(final LocalDate transactionDate, final Float interestPortion, final Float feePortion,
+            final Float penaltyPortion, final Integer loanID) {
 
         ArrayList<HashMap> transactions = (ArrayList<HashMap>) getLoanDetail(this.requestSpec, this.responseSpec, loanID, "transactions");
         boolean isTransactionFound = false;
@@ -347,19 +345,19 @@ public class LoanTransactionHelper {
             boolean isAccrualTransaction = (Boolean) transactionType.get("accrual");
 
             if (isAccrualTransaction) {
-                ArrayList<Integer> accrualEntryDateAsArray =  (ArrayList<Integer>)transactions.get(i).get("date");
-                LocalDate accrualEntryDate = new LocalDate(accrualEntryDateAsArray.get(0),accrualEntryDateAsArray.get(1),accrualEntryDateAsArray.get(2));
+                ArrayList<Integer> accrualEntryDateAsArray = (ArrayList<Integer>) transactions.get(i).get("date");
+                LocalDate accrualEntryDate = new LocalDate(accrualEntryDateAsArray.get(0), accrualEntryDateAsArray.get(1),
+                        accrualEntryDateAsArray.get(2));
 
-                try {
-                    DateFormat df = new SimpleDateFormat("dd MMMM yyyy");
-                    LocalDate expectedTransactionDate = new LocalDate(df.parse(transactionDate));
-                    if (expectedTransactionDate.equals(accrualEntryDate)) {
-                        isTransactionFound = true;
-                        assertEquals("Mismatch in transaction amounts", interestAmount, (Float) transactions.get(i).get("amount"));
-                        break;
-                    }
-                } catch (ParseException e) {
-                    e.printStackTrace();
+                if (transactionDate.equals(accrualEntryDate)) {
+                    isTransactionFound = true;
+                    assertEquals("Mismatch in transaction amounts", interestPortion,
+                            Float.valueOf(String.valueOf(transactions.get(i).get("interestPortion"))));
+                    assertEquals("Mismatch in transaction amounts", feePortion,
+                            Float.valueOf(String.valueOf(transactions.get(i).get("feeChargesPortion"))));
+                    assertEquals("Mismatch in transaction amounts", penaltyPortion,
+                            Float.valueOf(String.valueOf(transactions.get(i).get("penaltyChargesPortion"))));
+                    break;
                 }
             }
         }
