@@ -379,7 +379,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         if (entityName.equalsIgnoreCase("LOAN") || entityName.equalsIgnoreCase("LOANPRODUCT")) {
             
             final String[] enumTypes = { "loanTermFrequencyType", "termFrequencyType", "repaymentFrequencyType", "amortizationType",
-                    "interestType", "interestCalculationPeriodType", "interestRateFrequencyType", "loanType", "accountingRule" };
+                    "interestType", "interestCalculationPeriodType", "interestRateFrequencyType", "accountingRule" };
 
             for (final String typeName : enumTypes) {
                 if (commandAsJsonMap.containsKey(typeName)) {
