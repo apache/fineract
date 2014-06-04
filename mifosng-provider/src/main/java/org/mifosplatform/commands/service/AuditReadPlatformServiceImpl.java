@@ -111,7 +111,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
             String partSql = " aud.id as id, aud.action_name as actionName, aud.entity_name as entityName,"
                     + " aud.resource_id as resourceId, aud.subresource_id as subresourceId,aud.client_id as clientId, aud.loan_id as loanId,"
-                    + " mk.username as maker, aud.made_on_date as madeOnDate, "
+                    + " mk.username as maker, aud.made_on_date as madeOnDate, " + " aud.api_get_url as resourceGetUrl, "
                     + "ck.username as checker, aud.checked_on_date as checkedOnDate, ev.enum_message_property as processingResult "
                     + commandAsJsonString + ", "
                     + " o.name as officeName, gl.level_name as groupLevelName, g.display_name as groupName, c.display_name as clientName, "
@@ -146,6 +146,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final String checker = rs.getString("checker");
             final DateTime checkedOnDate = JdbcSupport.getDateTime(rs, "checkedOnDate");
             final String processingResult = rs.getString("processingResult");
+            final String resourceGetUrl = rs.getString("resourceGetUrl");
             String commandAsJson;
             // commandAsJson might not be on the select list of columns
             try {
@@ -163,7 +164,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
             return new AuditData(id, actionName, entityName, resourceId, subresourceId, maker, madeOnDate, checker, checkedOnDate,
                     processingResult, commandAsJson, officeName, groupLevelName, groupName, clientName, loanAccountNo, savingsAccountNo,
-                    clientId, loanId);
+                    clientId, loanId, resourceGetUrl);
         }
     }
 
