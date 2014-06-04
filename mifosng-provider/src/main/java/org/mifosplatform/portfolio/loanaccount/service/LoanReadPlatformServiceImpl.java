@@ -1389,4 +1389,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     }
 
+    @Override
+    public LoanTransactionData retrieveLoanWriteoffTemplate(final Long loanId) {
+
+        final LoanAccountData loan = this.retrieveOne(loanId);
+
+        final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WRITEOFF);
+        return new LoanTransactionData(null, null, null, transactionType, null, loan.currency(), DateUtils.getLocalDateOfTenant(),
+                loan.getTotalOutstandingAmount(), null, null, null, null, null, null, null, null);
+    }
+
 }

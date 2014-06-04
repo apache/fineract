@@ -82,4 +82,6 @@ public interface LoanReadPlatformService {
     Collection<LoanScheduleAccrualData> retriveScheduleAccrualData();
 
     LoanTransactionData retrieveRecoveryPaymentTemplate(Long loanId);
+
+    LoanTransactionData retrieveLoanWriteoffTemplate(Long loanId);
 }
