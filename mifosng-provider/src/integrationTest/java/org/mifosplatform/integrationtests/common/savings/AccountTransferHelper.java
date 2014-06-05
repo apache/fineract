@@ -14,7 +14,7 @@ public class AccountTransferHelper {
     private static final String LOCALE = "en_GB";
     private static final String OFFICE_ID = "1";
     private static final String TRANSFER_DESCRIPTION = "Transfer";
-    private static final String ACCOUNT_TRANSFER_DATE = "01 March 2013";
+    public static final String ACCOUNT_TRANSFER_DATE = "01 March 2013";
 
     private String transferDate = "";
     private String officeId = OFFICE_ID;

@@ -451,9 +451,10 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 savingsAccountDataDTO.getAppliedBy());
         account.approveAndActivateApplication(savingsAccountDataDTO.getApplicationDate().toDate(), savingsAccountDataDTO.getAppliedBy());
         Money amountForDeposit = account.activateWithBalance();
+        boolean isAccountTransfer = false;
         if (amountForDeposit.isGreaterThanZero()) {
             this.savingsAccountDomainService.handleDeposit(account, savingsAccountDataDTO.getFmt(), account.getActivationLocalDate(),
-                    amountForDeposit.getAmount(), null);
+                    amountForDeposit.getAmount(), null, isAccountTransfer);
         }
         account.processAccountUponActivation();
         this.savingAccountRepository.save(account);

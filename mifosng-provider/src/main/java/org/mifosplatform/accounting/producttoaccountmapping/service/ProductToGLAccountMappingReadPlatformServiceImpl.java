@@ -125,9 +125,9 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
                     accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_DATA_PARAMS.LOSSES_WRITTEN_OFF.getValue(), gLAccountData);
                 } else if (glAccountForLoan.equals(CASH_ACCOUNTS_FOR_LOAN.OVERPAYMENT)) {
                     accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_DATA_PARAMS.OVERPAYMENT.getValue(), gLAccountData);
-                } else if(glAccountForLoan.equals(CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_RECOVERY)) {
+                } else if (glAccountForLoan.equals(CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_RECOVERY)) {
                     accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_DATA_PARAMS.INCOME_FROM_RECOVERY.getValue(), gLAccountData);
-                }
+                } 
             }
         } else if (AccountingRuleType.ACCRUAL_UPFRONT.getValue().equals(accountingType)
                 || AccountingRuleType.ACCRUAL_PERIODIC.getValue().equals(accountingType)) {
@@ -163,7 +163,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
                     accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_DATA_PARAMS.FEES_RECEIVABLE.getValue(), gLAccountData);
                 } else if (glAccountForLoan.equals(ACCRUAL_ACCOUNTS_FOR_LOAN.PENALTIES_RECEIVABLE)) {
                     accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_DATA_PARAMS.PENALTIES_RECEIVABLE.getValue(), gLAccountData);
-                } else if((glAccountForLoan.equals(ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_RECOVERY))){
+                } else if ((glAccountForLoan.equals(ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_RECOVERY))) {
                     accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_DATA_PARAMS.INCOME_FROM_RECOVERY.getValue(), gLAccountData);
                 }
             }

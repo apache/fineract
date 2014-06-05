@@ -50,6 +50,16 @@ public class AccountingDropdownReadPlatformServiceImpl implements AccountingDrop
 
     @Override
     public Map<String, List<GLAccountData>> retrieveAccountMappingOptionsForLoanProducts() {
+        return retrieveAccountMappingOptions();
+    }
+
+    @Override
+    public Map<String, List<GLAccountData>> retrieveAccountMappingOptionsForSavingsProducts() {
+        return retrieveAccountMappingOptions();
+    }
+
+    @Override
+    public Map<String, List<GLAccountData>> retrieveAccountMappingOptions() {
         final Map<String, List<GLAccountData>> accountOptions = new HashMap<String, List<GLAccountData>>();
         List<GLAccountData> assetAccountOptions = this.accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.ASSET);
         if (assetAccountOptions.isEmpty()) {
@@ -70,18 +80,6 @@ public class AccountingDropdownReadPlatformServiceImpl implements AccountingDrop
         }
         accountOptions.put("expenseAccountOptions", expenseAccountOptions);
 
-        List<GLAccountData> liabilityAccountOptions = this.accountReadPlatformService
-                .retrieveAllEnabledDetailGLAccounts(GLAccountType.LIABILITY);
-        if (liabilityAccountOptions.isEmpty()) {
-            liabilityAccountOptions = null;
-        }
-        accountOptions.put("liabilityAccountOptions", liabilityAccountOptions);
-        return accountOptions;
-    }
-
-    @Override
-    public Map<String, List<GLAccountData>> retrieveAccountMappingOptionsForSavingsProducts() {
-        final Map<String, List<GLAccountData>> accountOptions = retrieveAccountMappingOptionsForLoanProducts();
         List<GLAccountData> liabilityAccountOptions = this.accountReadPlatformService
                 .retrieveAllEnabledDetailGLAccounts(GLAccountType.LIABILITY);
         if (liabilityAccountOptions.isEmpty()) {

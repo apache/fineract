@@ -767,7 +767,7 @@ public class Loan extends AbstractPersistable<Long> {
         }
         return amount.getAmount();
     }
-    
+
     public BigDecimal getTotalWrittenOff() {
         return this.summary.getTotalWrittenOff();
     }
@@ -3304,7 +3304,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public Map<String, Object> deriveAccountingBridgeData(final CurrencyData currencyData, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds) {
+            final List<Long> existingReversedTransactionIds, boolean isAccountTransfer) {
 
         final Map<String, Object> accountingBridgeData = new LinkedHashMap<String, Object>();
         accountingBridgeData.put("loanId", getId());
@@ -3315,6 +3315,7 @@ public class Loan extends AbstractPersistable<Long> {
         accountingBridgeData.put("cashBasedAccountingEnabled", isCashBasedAccountingEnabledOnLoanProduct());
         accountingBridgeData.put("upfrontAccrualBasedAccountingEnabled", isUpfrontAccrualAccountingEnabledOnLoanProduct());
         accountingBridgeData.put("periodicAccrualBasedAccountingEnabled", isPeriodicAccrualAccountingEnabledOnLoanProduct());
+        accountingBridgeData.put("isAccountTransfer", isAccountTransfer);
 
         final List<Map<String, Object>> newLoanTransactions = new ArrayList<Map<String, Object>>();
         for (final LoanTransaction transaction : this.loanTransactions) {

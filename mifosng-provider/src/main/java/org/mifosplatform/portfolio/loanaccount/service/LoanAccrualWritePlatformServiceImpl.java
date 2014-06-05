@@ -147,6 +147,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         accountingBridgeData.put("cashBasedAccountingEnabled", false);
         accountingBridgeData.put("upfrontAccrualBasedAccountingEnabled", false);
         accountingBridgeData.put("periodicAccrualBasedAccountingEnabled", true);
+        accountingBridgeData.put("isAccountTransfer", false);
 
         final List<Map<String, Object>> newLoanTransactions = new ArrayList<Map<String, Object>>();
         newLoanTransactions.add(transactionMap);
