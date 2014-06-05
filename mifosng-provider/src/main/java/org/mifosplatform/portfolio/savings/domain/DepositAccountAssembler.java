@@ -231,7 +231,6 @@ public class DepositAccountAssembler {
             minRequiredOpeningBalance = product.minRequiredOpeningBalance();
         }
 
-        @SuppressWarnings("unused")
         Integer lockinPeriodFrequency = null;
         if (command.parameterExists(lockinPeriodFrequencyParamName)) {
             lockinPeriodFrequency = command.integerValueOfParameterNamed(lockinPeriodFrequencyParamName);
@@ -280,7 +279,7 @@ public class DepositAccountAssembler {
             FixedDepositAccount fdAccount = FixedDepositAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer,
                     accountNo, externalId, accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequencyTypeValue, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, charges,
+                    lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, charges,
                     accountTermAndPreClosure, accountChart);
             accountTermAndPreClosure.updateAccountReference(fdAccount);
             fdAccount.validateDomainRules();
@@ -298,7 +297,7 @@ public class DepositAccountAssembler {
             RecurringDepositAccount rdAccount = RecurringDepositAccount.createNewApplicationForSubmittal(client, group, product,
                     fieldOfficer, accountNo, externalId, accountType, submittedOnDate, submittedBy, interestRate,
                     interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
-                    minRequiredOpeningBalance, lockinPeriodFrequencyTypeValue, lockinPeriodFrequencyType,
+                    minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
                     iswithdrawalFeeApplicableForTransfer, charges, accountTermAndPreClosure, accountRecurringDetail, accountChart);
 
             accountTermAndPreClosure.updateAccountReference(rdAccount);

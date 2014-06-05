@@ -33,7 +33,9 @@ import org.mifosplatform.portfolio.account.service.AccountTransfersWritePlatform
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
+import org.mifosplatform.portfolio.savings.DepositAccountOnClosureType;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
+import org.mifosplatform.portfolio.savings.DepositsApiConstants;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -272,7 +274,10 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         // post interest
         account.postPreMaturityInterest(closedDate);
 
-        if (account.isTransferToSavingsOnClosure()) {
+        final Integer closureTypeValue = command.integerValueOfParameterNamed(DepositsApiConstants.onAccountClosureIdParamName);
+        DepositAccountOnClosureType closureType = DepositAccountOnClosureType.fromInt(closureTypeValue);
+
+        if (closureType.isTransferToSavings()) {
 
             final Long toSavingsId = command.longValueOfParameterNamed(toSavingsAccountIdParamName);
             final String transferDescription = command.stringValueOfParameterNamed(transferDescriptionParamName);
@@ -312,7 +317,10 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         // post interest
         account.postPreMaturityInterest(closedDate);
 
-        if (account.isTransferToSavingsOnClosure()) {
+        final Integer closureTypeValue = command.integerValueOfParameterNamed(DepositsApiConstants.onAccountClosureIdParamName);
+        DepositAccountOnClosureType closureType = DepositAccountOnClosureType.fromInt(closureTypeValue);
+
+        if (closureType.isTransferToSavings()) {
             final Long toSavingsId = command.longValueOfParameterNamed(toSavingsAccountIdParamName);
             final String transferDescription = command.stringValueOfParameterNamed(transferDescriptionParamName);
             final SavingsAccount toSavingsAccount = this.depositAccountAssembler.assembleFrom(toSavingsId,
