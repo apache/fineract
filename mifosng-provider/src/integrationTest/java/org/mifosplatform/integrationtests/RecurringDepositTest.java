@@ -681,7 +681,7 @@ public class RecurringDepositTest {
 
         HashMap recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        Float depositAmount = (Float) recurringDepositAccountData.get("recurringDepositAmount");
+        Float depositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
         Float maturityAmount = (Float) recurringDepositAccountData.get("maturityAmount");
         Integer depositPeriod = (Integer) recurringDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) recurringDepositAccountData.get("interestCalculationDaysInYearType");
@@ -761,7 +761,7 @@ public class RecurringDepositTest {
 
         HashMap recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        Float depositAmount = (Float) recurringDepositAccountData.get("recurringDepositAmount");
+        Float depositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
         Float maturityAmount = (Float) recurringDepositAccountData.get("maturityAmount");
         Integer depositPeriod = (Integer) recurringDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) recurringDepositAccountData.get("interestCalculationDaysInYearType");
@@ -938,7 +938,7 @@ public class RecurringDepositTest {
 
         HashMap recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        Float depositAmount = (Float) recurringDepositAccountData.get("recurringDepositAmount");
+        Float depositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
         Integer depositPeriod = (Integer) recurringDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) recurringDepositAccountData.get("interestCalculationDaysInYearType");
         Float preClosurePenalInterestRate = (Float) recurringDepositAccountData.get("preClosurePenalInterest");
@@ -1064,7 +1064,7 @@ public class RecurringDepositTest {
 
         HashMap recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        Float depositAmount = (Float) recurringDepositAccountData.get("recurringDepositAmount");
+        Float depositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
         Integer depositPeriod = (Integer) recurringDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) recurringDepositAccountData.get("interestCalculationDaysInYearType");
         Float preClosurePenalInterestRate = (Float) recurringDepositAccountData.get("preClosurePenalInterest");
@@ -1185,7 +1185,7 @@ public class RecurringDepositTest {
 
         HashMap recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        Float depositAmount = (Float) recurringDepositAccountData.get("recurringDepositAmount");
+        Float depositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
         HashMap daysInYearMap = (HashMap) recurringDepositAccountData.get("interestCalculationDaysInYearType");
         Float preClosurePenalInterestRate = (Float) recurringDepositAccountData.get("preClosurePenalInterest");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
@@ -1319,7 +1319,7 @@ public class RecurringDepositTest {
 
         HashMap recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId);
-        Float depositAmount = (Float) recurringDepositAccountData.get("recurringDepositAmount");
+        Float depositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
         HashMap daysInYearMap = (HashMap) recurringDepositAccountData.get("interestCalculationDaysInYearType");
         Float preClosurePenalInterestRate = (Float) recurringDepositAccountData.get("preClosurePenalInterest");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
@@ -1444,7 +1444,7 @@ public class RecurringDepositTest {
                 this.responseSpec, recurringDepositAccountId);
         HashMap recurringDepositSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
         Float principal = (Float) recurringDepositSummary.get("accountBalance");
-        Float recurringDepositAmount = (Float) recurringDepositAccountData.get("recurringDepositAmount");
+        Float recurringDepositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
         Float maturityAmount = (Float) recurringDepositAccountData.get("maturityAmount");
         Integer depositPeriod = (Integer) recurringDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) recurringDepositAccountData.get("interestCalculationDaysInYearType");
@@ -1524,7 +1524,7 @@ public class RecurringDepositTest {
                 this.responseSpec, recurringDepositAccountId);
         HashMap recurringDepositSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
         Float principal = (Float) recurringDepositSummary.get("accountBalance");
-        Float recurringDepositAmount = (Float) recurringDepositAccountData.get("recurringDepositAmount");
+        Float recurringDepositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
         Float maturityAmount = (Float) recurringDepositAccountData.get("maturityAmount");
         Integer depositPeriod = (Integer) recurringDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) recurringDepositAccountData.get("interestCalculationDaysInYearType");
@@ -1611,7 +1611,7 @@ public class RecurringDepositTest {
                 this.responseSpec, recurringDepositAccountId);
         HashMap recurringDepositSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
         Float principal = (Float) recurringDepositSummary.get("accountBalance");
-        Float recurringDepositAmount = (Float) recurringDepositAccountData.get("recurringDepositAmount");
+        Float recurringDepositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
         Integer depositPeriod = (Integer) recurringDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) recurringDepositAccountData.get("interestCalculationDaysInYearType");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
@@ -1697,7 +1697,7 @@ public class RecurringDepositTest {
                 this.responseSpec, recurringDepositAccountId);
         HashMap recurringDepositSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
         Float principal = (Float) recurringDepositSummary.get("accountBalance");
-        Float recurringDepositAmount = (Float) recurringDepositAccountData.get("recurringDepositAmount");
+        Float recurringDepositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
         Integer depositPeriod = (Integer) recurringDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) recurringDepositAccountData.get("interestCalculationDaysInYearType");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
@@ -1783,7 +1783,7 @@ public class RecurringDepositTest {
         HashMap recurringDepositSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
 
         Float principal = (Float) recurringDepositSummary.get("accountBalance");
-        Float recurringDepositAmount = (Float) recurringDepositAccountData.get("recurringDepositAmount");
+        Float recurringDepositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
         Integer depositPeriod = (Integer) recurringDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) recurringDepositAccountData.get("interestCalculationDaysInYearType");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
@@ -1869,7 +1869,7 @@ public class RecurringDepositTest {
         HashMap recurringDepositSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
 
         Float principal = (Float) recurringDepositSummary.get("accountBalance");
-        Float recurringDepositAmount = (Float) recurringDepositAccountData.get("recurringDepositAmount");
+        Float recurringDepositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
         Integer depositPeriod = (Integer) recurringDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) recurringDepositAccountData.get("interestCalculationDaysInYearType");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
@@ -1955,7 +1955,7 @@ public class RecurringDepositTest {
                 this.responseSpec, recurringDepositAccountId);
         HashMap recurringDepositSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
         Float principal = (Float) recurringDepositSummary.get("accountBalance");
-        Float recurringDepositAmount = (Float) recurringDepositAccountData.get("recurringDepositAmount");
+        Float recurringDepositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
         Integer depositPeriod = (Integer) recurringDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) recurringDepositAccountData.get("interestCalculationDaysInYearType");
         Integer daysInYear = (Integer) daysInYearMap.get("id");
@@ -2041,7 +2041,7 @@ public class RecurringDepositTest {
                 this.responseSpec, recurringDepositAccountId);
         HashMap recurringDepositSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
         Float principal = (Float) recurringDepositSummary.get("accountBalance");
-        Float recurringDepositAmount = (Float) recurringDepositAccountData.get("recurringDepositAmount");
+        Float recurringDepositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
         Integer depositPeriod = (Integer) recurringDepositAccountData.get("depositPeriod");
         HashMap daysInYearMap = (HashMap) recurringDepositAccountData.get("interestCalculationDaysInYearType");
         Integer daysInYear = (Integer) daysInYearMap.get("id");

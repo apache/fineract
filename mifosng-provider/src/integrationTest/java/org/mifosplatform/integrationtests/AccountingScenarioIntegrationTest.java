@@ -452,7 +452,7 @@ public class AccountingScenarioIntegrationTest {
         RecurringDepositAccountStatusChecker.verifyRecurringDepositIsActive(recurringDepositAccountStatusHashMap);
         
         HashMap recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec, this.responseSpec, recurringDepositAccountId);
-        Float depositAmount = (Float) recurringDepositAccountData.get("recurringDepositAmount");
+        Float depositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
         
         Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId, depositAmount, EXPECTED_FIRST_DEPOSIT_ON_DATE);
         Assert.assertNotNull(depositTransactionId);

@@ -49,8 +49,6 @@ public class RecurringDepositProductHelper {
     private static final String ACCRUAL_UPFRONT = "4";
     private static final String WHOLE_TERM = "1";
     private static final String TILL_PREMATURE_WITHDRAWAL = "2";
-    private static final String VOLUNTARY = "1";
-    private static final String MANDATORY = "2";
 
     private final String name = Utils.randomNameGenerator("RECURRING_DEPOSIT_PRODUCT_", 6);
     private final String shortName = Utils.randomNameGenerator("", 4);
@@ -59,7 +57,7 @@ public class RecurringDepositProductHelper {
     private final String interestPostingPeriodType = MONTHLY;
     private final String interestCalculationType = INTEREST_CALCULATION_USING_DAILY_BALANCE;
     private String accountingRule = NONE;
-    private final String lockinPeriodFrequency = "6";
+    private final String lockinPeriodFrequency = "1";
     private final String lockingPeriodFrequencyType = MONTHS;
     private final String minDepositTerm = "6";
     private final String minDepositTermTypeId = MONTHS;
@@ -72,9 +70,9 @@ public class RecurringDepositProductHelper {
     private final boolean preClosurePenalApplicable = true;
     private final String currencyCode = USD;
     private final String interestCalculationDaysInYearType = DAYS_365;
-    private final String recurringDepositTypeId = VOLUNTARY;
-    private final String recurringDepositFrequencyTypeId = MONTHS;
-    private final String recurringDepositFrequency = "1";
+    private final boolean isMandatoryDeposit = false;
+    private final String recurringFrequencyType = MONTHS;
+    private final String recurringFrequency = "1";
     private final String depositAmount = "100000";
     private final String minDepositAmount = "100";
     private final String maxDepositAmount = "1000000";
@@ -154,10 +152,10 @@ public class RecurringDepositProductHelper {
         map.put("inMultiplesOfDepositTermTypeId", this.inMultiplesOfDepositTermTypeId);
         map.put("preClosurePenalInterest", this.preClosurePenalInterest);
         map.put("preClosurePenalInterestOnTypeId", this.preClosurePenalInterestOnTypeId);
-        map.put("recurringDepositTypeId", this.recurringDepositTypeId);
-        map.put("recurringDepositFrequencyTypeId", this.recurringDepositFrequencyTypeId);
+        map.put("isMandatoryDeposit", this.isMandatoryDeposit);
+        map.put("recurringFrequencyType", this.recurringFrequencyType);
         map.put("depositAmount", this.depositAmount);
-        map.put("recurringDepositFrequency", this.recurringDepositFrequency);
+        map.put("recurringFrequency", this.recurringFrequency);
         map.put("depositAmount", this.depositAmount);
         map.put("minDepositAmount", this.minDepositAmount);
         map.put("maxDepositAmount", this.maxDepositAmount);

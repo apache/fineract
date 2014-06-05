@@ -66,7 +66,7 @@ public class RecurringDepositAccountHelper {
     private String interestCompoundingPeriodType = MONTHLY;
     private String interestPostingPeriodType = MONTHLY;
     private String interestCalculationType = INTEREST_CALCULATION_USING_DAILY_BALANCE;
-    private final String lockinPeriodFrequency = "6";
+    private final String lockinPeriodFrequency = "1";
     private final String lockingPeriodFrequencyType = MONTHS;
     private final String minDepositTerm = "6";
     private final String minDepositTermTypeId = MONTHS;
@@ -82,11 +82,12 @@ public class RecurringDepositAccountHelper {
     private final String depositAmount = "2000";
     private final String depositPeriod = "14";
     private final String depositPeriodFrequencyId = MONTHS;
-    private final String recurringDepositFrequency = "1";
-    private final String recurringDepositFrequencyTypeId = MONTHS;
-    private final String recurringDepositAmount = "2000";
+    private final String recurringFrequency = "1";
+    private final String recurringFrequencyType = MONTHS;
+    private final String mandatoryRecommendedDepositAmount = "2000";
     private String submittedOnDate = "";
     private String expectedFirstDepositOnDate = "";
+    private boolean isCalendarInherited = false;
 
     public String build(final String clientId, final String productId, final String validFrom, final String validTo,
             final String penalInterestType) {
@@ -165,10 +166,11 @@ public class RecurringDepositAccountHelper {
         map.put("depositPeriod", this.depositPeriod);
         map.put("depositPeriodFrequencyId", this.depositPeriodFrequencyId);
         map.put("submittedOnDate", this.submittedOnDate);
-        map.put("recurringDepositFrequency", this.recurringDepositFrequency);
-        map.put("recurringDepositFrequencyTypeId", this.recurringDepositFrequencyTypeId);
-        map.put("recurringDepositAmount", this.recurringDepositAmount);
+        map.put("recurringFrequency", this.recurringFrequency);
+        map.put("recurringFrequencyType", this.recurringFrequencyType);
+        map.put("mandatoryRecommendedDepositAmount", this.mandatoryRecommendedDepositAmount);
         map.put("expectedFirstDepositOnDate", this.expectedFirstDepositOnDate);
+        map.put("isCalendarInherited", this.isCalendarInherited);
 
         String recurringDepositAccountJson = new Gson().toJson(map);
         System.out.println(recurringDepositAccountJson);

@@ -58,7 +58,7 @@ public class FixedDepositAccountHelper {
     private String interestCompoundingPeriodType = MONTHLY;
     private String interestPostingPeriodType = MONTHLY;
     private String interestCalculationType = INTEREST_CALCULATION_USING_DAILY_BALANCE;
-    private String lockinPeriodFrequency = "6";
+    private String lockinPeriodFrequency = "1";
     private String lockingPeriodFrequencyType = MONTHS;
     private final String minDepositTerm = "6";
     private final String minDepositTermTypeId = MONTHS;
