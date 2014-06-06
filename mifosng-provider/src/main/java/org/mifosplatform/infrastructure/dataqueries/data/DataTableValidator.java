@@ -1,23 +1,25 @@
 package org.mifosplatform.infrastructure.dataqueries.data;
 
-import com.google.gson.JsonElement;
-import com.google.gson.reflect.TypeToken;
-import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.ApiParameterError;
-import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
-import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
-import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import static org.mifosplatform.infrastructure.dataqueries.api.DataTableApiConstant.CATEGORY_DEFAULT;
+import static org.mifosplatform.infrastructure.dataqueries.api.DataTableApiConstant.CATEGORY_PPI;
+import static org.mifosplatform.infrastructure.dataqueries.api.DataTableApiConstant.DATATABLE_RESOURCE_NAME;
+import static org.mifosplatform.infrastructure.dataqueries.api.DataTableApiConstant.REGISTER_PARAMS;
+import static org.mifosplatform.infrastructure.dataqueries.api.DataTableApiConstant.categoryParamName;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.mifosplatform.infrastructure.dataqueries.api.DataTableApiConstant.*;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 
 @Component
 public class DataTableValidator {
@@ -31,7 +33,6 @@ public class DataTableValidator {
 
     public void validateDataTableRegistration(final String json) {
 
-
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, REGISTER_PARAMS);
 
@@ -41,8 +42,9 @@ public class DataTableValidator {
 
         if (this.fromApiJsonHelper.parameterExists(categoryParamName, element)) {
 
-            final Integer category = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(categoryParamName,element);
-            baseDataValidator.reset().parameter(categoryParamName).value(category).isOneOfTheseValues(new Integer[]{CATEGORY_PPI,CATEGORY_DEFAULT});
+            final Integer category = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(categoryParamName, element);
+            Object[] objectArray = new Integer[] { CATEGORY_PPI, CATEGORY_DEFAULT };
+            baseDataValidator.reset().parameter(categoryParamName).value(category).isOneOfTheseValues(objectArray);
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }

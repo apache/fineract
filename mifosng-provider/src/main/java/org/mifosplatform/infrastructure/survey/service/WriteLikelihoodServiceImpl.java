@@ -1,47 +1,35 @@
 package org.mifosplatform.infrastructure.survey.service;
 
-import com.google.gson.JsonElement;
-import org.mifosplatform.infrastructure.configuration.domain.GlobalConfigurationProperty;
+import java.util.List;
+
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.survey.data.LikelihoodDataValidator;
-import org.mifosplatform.infrastructure.survey.data.LikelihoodStatus;
 import org.mifosplatform.infrastructure.survey.domain.Likelihood;
 import org.mifosplatform.infrastructure.survey.domain.LikelihoodRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-
-import javax.sql.DataSource;
-import java.util.List;
 
 /**
  * Created by Cieyou on 3/12/14.
  */
 @Service
-public class WriteLikelihoodServiceImpl implements WriteLikelihoodService{
+public class WriteLikelihoodServiceImpl implements WriteLikelihoodService {
 
     private final static Logger logger = LoggerFactory.getLogger(PovertyLineService.class);
-    private final JdbcTemplate jdbcTemplate;
-    private final DataSource dataSource;
     private final PlatformSecurityContext context;
     private final LikelihoodDataValidator likelihoodDataValidator;
     private final LikelihoodRepository repository;
 
     @Autowired
-    WriteLikelihoodServiceImpl (final RoutingDataSource dataSource,
-                                final PlatformSecurityContext context,
-                                final LikelihoodDataValidator likelihoodDataValidator,
-                                final LikelihoodRepository repository){
-        this.dataSource = dataSource;
-        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+    WriteLikelihoodServiceImpl(final PlatformSecurityContext context, final LikelihoodDataValidator likelihoodDataValidator,
+            final LikelihoodRepository repository) {
         this.context = context;
         this.likelihoodDataValidator = likelihoodDataValidator;
         this.repository = repository;
@@ -49,8 +37,7 @@ public class WriteLikelihoodServiceImpl implements WriteLikelihoodService{
     }
 
     @Override
-    public CommandProcessingResult update(Long likelihoodId, JsonCommand command)
-    {
+    public CommandProcessingResult update(Long likelihoodId, JsonCommand command) {
 
         this.context.authenticatedUser();
 
@@ -60,16 +47,14 @@ public class WriteLikelihoodServiceImpl implements WriteLikelihoodService{
 
             final Likelihood likelihood = this.repository.findOne(likelihoodId);
 
-
             if (!likelihood.update(command).isEmpty()) {
                 this.repository.save(likelihood);
 
-                if(likelihood.isActivateCommand(command))
-                {
-                    List<Likelihood> likelihoods = this.repository.findByPpiNameAndLikeliHoodId(likelihood.getPpiName(),likelihood.getId());
+                if (likelihood.isActivateCommand(command)) {
+                    List<Likelihood> likelihoods = this.repository
+                            .findByPpiNameAndLikeliHoodId(likelihood.getPpiName(), likelihood.getId());
 
-                    for(Likelihood aLikelihood:likelihoods)
-                    {
+                    for (Likelihood aLikelihood : likelihoods) {
                         aLikelihood.disable();
                     }
                     this.repository.save(likelihoods);
@@ -85,7 +70,6 @@ public class WriteLikelihoodServiceImpl implements WriteLikelihoodService{
         }
 
     }
-
 
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue

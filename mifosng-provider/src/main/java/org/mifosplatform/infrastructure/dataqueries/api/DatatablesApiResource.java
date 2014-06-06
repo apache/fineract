@@ -6,7 +6,6 @@
 package org.mifosplatform.infrastructure.dataqueries.api;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -33,13 +32,12 @@ import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.service.GenericDataService;
 import org.mifosplatform.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 //import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Path("/datatables")
 @Component
@@ -52,8 +50,6 @@ public class DatatablesApiResource {
     private final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final static org.slf4j.Logger logger = LoggerFactory.getLogger(DatatablesApiResource.class);
-
-
 
     @Autowired
     public DatatablesApiResource(final PlatformSecurityContext context, final GenericDataService genericDataService,
@@ -117,9 +113,11 @@ public class DatatablesApiResource {
     @Path("register/{datatable}/{apptable}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String registerDatatable(@PathParam("datatable") final String datatable, @PathParam("apptable") final String apptable,final String apiRequestBodyAsJson) {
+    public String registerDatatable(@PathParam("datatable") final String datatable, @PathParam("apptable") final String apptable,
+            final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().registerDBDatatable(datatable,apptable).withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().registerDBDatatable(datatable, apptable)
+                .withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

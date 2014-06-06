@@ -20,11 +20,9 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.exception.SQLGrammarException;
-import org.hibernate.service.config.internal.ConfigurationServiceImpl;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.service.CodeReadPlatformService;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
-
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -38,7 +36,11 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.serialization.JsonParserHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.dataqueries.api.DataTableApiConstant;
-import org.mifosplatform.infrastructure.dataqueries.data.*;
+import org.mifosplatform.infrastructure.dataqueries.data.DataTableValidator;
+import org.mifosplatform.infrastructure.dataqueries.data.DatatableData;
+import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
+import org.mifosplatform.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
+import org.mifosplatform.infrastructure.dataqueries.data.ResultsetRowData;
 import org.mifosplatform.infrastructure.dataqueries.exception.DatatableNotFoundException;
 import org.mifosplatform.infrastructure.dataqueries.exception.DatatableSystemErrorException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -46,7 +48,6 @@ import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.mifosplatform.infrastructure.configuration.service.GlobalConfigurationWritePlatformServiceJpaRepositoryImpl;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -92,7 +93,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private final CodeReadPlatformService codeReadPlatformService;
     private final DataTableValidator dataTableValidator;
 
-    //private final GlobalConfigurationWritePlatformServiceJpaRepositoryImpl configurationWriteService;
+    // private final GlobalConfigurationWritePlatformServiceJpaRepositoryImpl
+    // configurationWriteService;
 
     @Autowired(required = true)
     public ReadWriteNonCoreDataServiceImpl(final RoutingDataSource dataSource, final PlatformSecurityContext context,
@@ -109,7 +111,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         this.codeReadPlatformService = codeReadPlatformService;
         this.configurationDomainService = configurationDomainService;
         this.dataTableValidator = dataTableValidator;
-        //this.configurationWriteService = configurationWriteService;
+        // this.configurationWriteService = configurationWriteService;
     }
 
     @Override
@@ -177,8 +179,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     @Transactional
     @Override
-    public void registerDatatable(final String dataTableName, final String applicationTableName)
-    {
+    public void registerDatatable(final String dataTableName, final String applicationTableName) {
 
         Integer category = DataTableApiConstant.CATEGORY_DEFAULT;
 
@@ -204,8 +205,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     @Transactional
     @Override
-    public void registerDatatable(final JsonCommand command,final String permissionSql)
-    {
+    public void registerDatatable(final JsonCommand command, final String permissionSql) {
         final String applicationTableName = this.getTableName(command.getUrl());
         final String dataTableName = this.getDataTableName(command.getUrl());
 
@@ -213,16 +213,13 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         this.dataTableValidator.validateDataTableRegistration(command.json());
 
-        this._registerDataTable(applicationTableName,dataTableName,category,permissionSql);
+        this._registerDataTable(applicationTableName, dataTableName, category, permissionSql);
 
     }
 
     @Transactional
-    private void _registerDataTable(final String applicationTableName,
-                                    final String dataTableName,
-                                    final Integer category,
-                                    final String permissionsSql)
-    {
+    private void _registerDataTable(final String applicationTableName, final String dataTableName, final Integer category,
+            final String permissionsSql) {
 
         validateAppTable(applicationTableName);
         assertDataTableExists(dataTableName);
@@ -230,17 +227,14 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         final String registerDatatableSql = "insert into x_registered_table (registered_table_name, application_table_name,category) values ('"
                 + dataTableName + "', '" + applicationTableName + "', '" + category + "')";
 
-
         try {
-
 
             final String[] sqlArray = { registerDatatableSql, permissionsSql };
             this.jdbcTemplate.batchUpdate(sqlArray);
 
             // add the registered table to the config if it is a ppi
-            if(this.isSurveyCategory(category))
-            {
-                this.jdbcTemplate.execute("insert into c_configuration (name, value, enabled ) values('"+dataTableName+"', '0','0')");
+            if (this.isSurveyCategory(category)) {
+                this.jdbcTemplate.execute("insert into c_configuration (name, value, enabled ) values('" + dataTableName + "', '0','0')");
             }
 
         }
@@ -253,24 +247,22 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             // show duplicate datatable error msg
             if (realCause.getMessage().contains("Duplicate entry")) { throw new PlatformDataIntegrityException(
                     "error.msg.datatable.registered", "Datatable `" + dataTableName
-                    + "` is already registered against an application table.", "dataTableName", dataTableName); }
+                            + "` is already registered against an application table.", "dataTableName", dataTableName); }
         } catch (final DataIntegrityViolationException dve) {
             final Throwable realCause = dve.getMostSpecificCause();
             // even if duplicate is only due to permission duplicate, okay to
             // show duplicate datatable error msg
             if (realCause.getMessage().contains("Duplicate entry")) { throw new PlatformDataIntegrityException(
                     "error.msg.datatable.registered", "Datatable `" + dataTableName
-                    + "` is already registered against an application table.", "dataTableName", dataTableName); }
+                            + "` is already registered against an application table.", "dataTableName", dataTableName); }
             logAsErrorUnexpectedDataIntegrityException(dve);
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
         }
 
-
     }
 
-    private String _getPermissionSql(final String dataTableName)
-    {
+    private String _getPermissionSql(final String dataTableName) {
         final String createPermission = "'CREATE_" + dataTableName + "'";
         final String createPermissionChecker = "'CREATE_" + dataTableName + "_CHECKER'";
         final String readPermission = "'READ_" + dataTableName + "'";
@@ -279,67 +271,38 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         final String deletePermission = "'DELETE_" + dataTableName + "'";
         final String deletePermissionChecker = "'DELETE_" + dataTableName + "_CHECKER'";
 
-        return "insert into m_permission (grouping, code, action_name, entity_name, can_maker_checker) values "
-                + "('datatable', "
-                + createPermission
-                + ", 'CREATE', '"
-                + dataTableName
-                + "', true),"
-                + "('datatable', "
-                + createPermissionChecker
-                + ", 'CREATE', '"
-                + dataTableName
-                + "', false),"
-                + "('datatable', "
-                + readPermission
-                + ", 'READ', '"
-                + dataTableName
-                + "', false),"
-                + "('datatable', "
-                + updatePermission
-                + ", 'UPDATE', '"
-                + dataTableName
-                + "', true),"
-                + "('datatable', "
-                + updatePermissionChecker
-                + ", 'UPDATE', '"
-                + dataTableName
-                + "', false),"
-                + "('datatable', "
-                + deletePermission
-                + ", 'DELETE', '"
-                + dataTableName
-                + "', true),"
-                + "('datatable', "
-                + deletePermissionChecker
-                + ", 'DELETE', '"
+        return "insert into m_permission (grouping, code, action_name, entity_name, can_maker_checker) values " + "('datatable', "
+                + createPermission + ", 'CREATE', '" + dataTableName + "', true)," + "('datatable', " + createPermissionChecker
+                + ", 'CREATE', '" + dataTableName + "', false)," + "('datatable', " + readPermission + ", 'READ', '" + dataTableName
+                + "', false)," + "('datatable', " + updatePermission + ", 'UPDATE', '" + dataTableName + "', true)," + "('datatable', "
+                + updatePermissionChecker + ", 'UPDATE', '" + dataTableName + "', false)," + "('datatable', " + deletePermission
+                + ", 'DELETE', '" + dataTableName + "', true)," + "('datatable', " + deletePermissionChecker + ", 'DELETE', '"
                 + dataTableName + "', false)";
 
     }
 
-    private Integer getCategory(final JsonCommand command)
-    {
+    private Integer getCategory(final JsonCommand command) {
         Integer category = command.integerValueOfParameterNamedDefaultToNullIfZero(DataTableApiConstant.categoryParamName);
-        if(category ==null) category = DataTableApiConstant.CATEGORY_DEFAULT;
+        if (category == null) category = DataTableApiConstant.CATEGORY_DEFAULT;
         return category;
     }
 
-    private boolean isSurveyCategory(final Integer category)
-    {
+    private boolean isSurveyCategory(final Integer category) {
         return category.equals(DataTableApiConstant.CATEGORY_PPI);
     }
 
-    public String getDataTableName(String url){
+    @Override
+    public String getDataTableName(String url) {
 
-        String [] urlParts = url.split("/");
+        String[] urlParts = url.split("/");
 
         return urlParts[3];
 
     }
 
-    public String getTableName(String url)
-    {
-        String [] urlParts = url.split("/");
+    @Override
+    public String getTableName(String url) {
+        String[] urlParts = url.split("/");
         return urlParts[4];
     }
 
@@ -356,13 +319,13 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         final String deleteRegisteredDatatableSql = "delete from x_registered_table where registered_table_name = '" + datatable + "'";
 
-        final String deleteFromConfigurationSql = "delete from c_configuration where name ='"+datatable+"'";
+        final String deleteFromConfigurationSql = "delete from c_configuration where name ='" + datatable + "'";
 
         String[] sqlArray = new String[4];
         sqlArray[0] = deleteRolePermissionsSql;
         sqlArray[1] = deletePermissionsSql;
         sqlArray[2] = deleteRegisteredDatatableSql;
-        sqlArray[3] = deleteFromConfigurationSql ;
+        sqlArray[3] = deleteFromConfigurationSql;
 
         this.jdbcTemplate.batchUpdate(sqlArray);
     }
@@ -410,6 +373,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
     }
 
+    @Override
     public CommandProcessingResult createPPIEntry(final String dataTableName, final Long appTableId, final JsonCommand command) {
 
         try {
@@ -434,7 +398,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final Throwable realCause = dve.getCause();
             if (realCause.getMessage().contains("Duplicate entry")) { throw new PlatformDataIntegrityException(
                     "error.msg.datatable.entry.duplicate", "An entry already exists for datatable `" + dataTableName
-                    + "` and application table with identifier `" + appTableId + "`.", "dataTableName", dataTableName, appTableId); }
+                            + "` and application table with identifier `" + appTableId + "`.", "dataTableName", dataTableName, appTableId); }
 
             logAsErrorUnexpectedDataIntegrityException(dve);
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
@@ -443,7 +407,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final Throwable realCause = dve.getMostSpecificCause();
             if (realCause.getMessage().contains("Duplicate entry")) { throw new PlatformDataIntegrityException(
                     "error.msg.datatable.entry.duplicate", "An entry already exists for datatable `" + dataTableName
-                    + "` and application table with identifier `" + appTableId + "`.", "dataTableName", dataTableName, appTableId); }
+                            + "` and application table with identifier `" + appTableId + "`.", "dataTableName", dataTableName, appTableId); }
 
             logAsErrorUnexpectedDataIntegrityException(dve);
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
@@ -1075,7 +1039,6 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     public GenericResultsetData retrieveDataTableGenericResultSet(final String dataTableName, final Long appTableId, final String order,
             final Long id) {
 
-
         final String appTable = queryForApplicationTableName(dataTableName);
 
         checkMainResourceExistsWithinScope(appTable, appTableId);
@@ -1315,7 +1278,6 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             } else {
                 pValueWrite = singleQuote + this.genericDataService.replace(pValue, singleQuote, singleQuote + singleQuote) + singleQuote;
 
-
             }
             columnName = "`" + key + "`";
             insertColumns += ", " + columnName;
@@ -1331,8 +1293,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     /**
-     * This method is used special for ppi cases
-     * Where the score need to be computed
+     * This method is used special for ppi cases Where the score need to be
+     * computed
+     * 
      * @param columnHeaders
      * @param datatable
      * @param fkName
@@ -1341,12 +1304,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
      * @return
      */
     public String getAddSqlWithScore(final List<ResultsetColumnHeaderData> columnHeaders, final String datatable, final String fkName,
-                             final Long appTableId, final Map<String, String> queryParams) {
+            final Long appTableId, final Map<String, String> queryParams) {
 
         final Map<String, String> affectedColumns = getAffectedColumns(columnHeaders, queryParams, fkName);
 
         String pValueWrite = "";
-        String addSql = "";
         String scoresId = " ";
         final String singleQuote = "'";
 
@@ -1362,8 +1324,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             } else {
                 pValueWrite = singleQuote + this.genericDataService.replace(pValue, singleQuote, singleQuote + singleQuote) + singleQuote;
 
-                scoresId +=pValueWrite +" ,";
-
+                scoresId += pValueWrite + " ,";
 
             }
             columnName = "`" + key + "`";
@@ -1371,16 +1332,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             selectColumns += "," + pValueWrite + " as " + columnName;
         }
 
-
         scoresId = scoresId.replaceAll(" ,$", "");
 
-        addSql = "insert into `" + datatable + "` (`" + fkName + "` " + insertColumns + ")" + " select " + appTableId + " as id"
-                + selectColumns;
-
-        String vaddSql = "insert into `" + datatable + "` (`" + fkName + "` " + insertColumns + ", `score` )" + " select " + appTableId + " as id"
-                + selectColumns + " , ( SELECT SUM( code_score ) FROM m_code_value WHERE m_code_value.id IN (" + scoresId + " ) ) as score";
-
-
+        String vaddSql = "insert into `" + datatable + "` (`" + fkName + "` " + insertColumns + ", `score` )" + " select " + appTableId
+                + " as id" + selectColumns + " , ( SELECT SUM( code_score ) FROM m_code_value WHERE m_code_value.id IN (" + scoresId
+                + " ) ) as score";
 
         logger.info(vaddSql);
 
