@@ -579,6 +579,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
+        changes.put("paymentTypeId",command.stringValueOfParameterNamed("paymentTypeId"));
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
@@ -655,6 +656,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
+        changes.put("paymentTypeId",command.stringValueOfParameterNamed("paymentTypeId"));
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
