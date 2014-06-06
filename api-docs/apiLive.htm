@@ -2149,6 +2149,30 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr>
+                                 <td><a href="#survey_retrieve">Survey</a></td>
+                                 <td>survey/</td>
+                                 <td></td>
+                                 <td><a href="#survey_retrieve">List surveys</a></td>
+                                 <td></td>
+                                 <td></td>
+                             </tr>
+                             <tr>
+                                 <td></td>
+                                 <td>survey/{surveyName}</td>
+                                 <td></td>
+                                 <td><a href="#survey_details">Retrieve Survey details</a></td>
+                                 <td></td>
+                                 <td></td>
+                             </tr>
+                             <tr>
+                                 <td></td>
+                                 <td>survey/{surveyName}/{clientId}</td>
+                                 <td><a href="#survey_create">Create Entry in the survey table</a></td>
+                                 <td></td>
+                                 <td></td>
+                                 <td></td>
+                             </tr>
 						</table>
 					</div>
 				</div>
@@ -11904,6 +11928,39 @@ GET https://DomainName/api/v1/configurations/1
 					</code>
 				</div>
 			</div>
+
+			<a id="configs_globalconfig_retrieve_survey" name="configs_globalconfig_retrieve_survey" class="old-syle-anchor">&nbsp;</a>
+             <div class="method-section">
+                 <div class="method-description">
+                     <h4>Retrieve Global Configuration for surveys</h4>
+                     <p>Returns the list global enable/disable survey configurations.</p>
+                     <p>Example Requests:</p>
+                     <div class=apiClick>configurations/survey</div>
+                 </div>
+                 <div class="method-example">
+                     <code class="method-declaration">
+                         GET https://DomainName/api/v1/configurations/survey
+                     </code>
+                     <code class="method-response">
+                         {
+                         "ppi_kenya_2005": [
+                         {
+                         "name": "maker-checker",
+                         "enabled": true,
+                         "value": 0,
+                         "id": 1
+                         },
+                         {
+                         "name": "ppi_tanzania_20012",
+                         "enabled": false,
+                         "value": 0,
+                         "id": 2
+                         },
+                         ]
+                         }
+                     </code>
+                 </div>
+             </div>
 
 			<a id="configs_globalconfig_update" name="configs_globalconfig_update" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -24619,7 +24676,10 @@ No Request Body
 					<h4>Register Data Table</h4>
 					<p>Registers a data table with the Mifos X Core application
 						table. This allows the data table to be maintained through the
-						API.</p>
+						API.
+						In case the datatable is a PPI (survey table), a parameter category should be pass along with the request.
+                        The API currently support one category (200)
+                    </p>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -24984,6 +25044,261 @@ Request Body:
 				</div>
 			</div>
 			<!-- end of datatables api docs -->
+
+			<!-- start of survey api docs -->
+ 
+             <a id="survey_retrieve" name="survey_retrieve"
+                class="old-syle-anchor">&nbsp;</a>
+             <div class="method-section">
+                 <div class="method-description">
+                     <h4>Retreive surveys</h4>
+                     <p>Retrieve surveys. This allows to retrieve the list of survey tables registered .
+                     </p>
+                 </div>
+                 <div class="method-example">
+                     <code class="method-declaration">
+                         GET https://DomainName/api/v1/survey/
+                     </code>
+                     <code class="method-request">
+                         GET survey/
+ 
+                         Content-Type: application/json
+                         Request Body:
+                         {}
+                     </code>
+                     <code class="method-response">
+                     [
+                         {
+                         "datatableData": {
+                         "applicationTableName": "m_client",
+                         "registeredTableName": "ppi_kenya_2005",
+                         "columnHeaderData": [
+                             {
+                             "columnName": "id",
+                             "columnType": "bigint",
+                             "columnLength": 0,
+                             "columnDisplayType": "INTEGER",
+                             "isColumnNullable": false,
+                             "isColumnPrimaryKey": true,
+                             "columnValues": []
+                             },
+                             {
+                             "columnName": "client_id",
+                             "columnType": "int",
+                             "columnLength": 0,
+                             "columnDisplayType": "INTEGER",
+                             "isColumnNullable": false,
+                             "isColumnPrimaryKey": false,
+                             "columnValues": []
+                             },
+                             {
+                             "columnName": "ppi_household_members_cd_q1_householdmembers",
+                             "columnType": "int",
+                             "columnLength": 0,
+                             "columnDisplayType": "CODELOOKUP",
+                             "isColumnNullable": false,
+                             "isColumnPrimaryKey": false,
+                             "columnValues": [
+                             {
+                             "id": 167,
+                             "value": "Nine or More",
+                             "score": 0
+                             },
+                             {
+                             "id": 168,
+                             "value": "Seven or eight",
+                             "score": 5
+                             },
+                             {
+                             "id": 169,
+                             "value": "Six",
+                             "score": 8
+                             },
+ 
+                         ],
+                     "columnCode": "ppi_household_members"
+                     },
+                    {
+                     "columnName": "date",
+                     "columnType": "datetime",
+                     "columnLength": 0,
+                     "columnDisplayType": "DATETIME",
+                     "isColumnNullable": false,
+                     "isColumnPrimaryKey": false,
+                     "columnValues": []
+                     }
+                     ]
+                     },
+                     "enabled": false
+                     },
+                     {
+                     "datatableData": {
+                     "applicationTableName": "m_client",
+                     "registeredTableName": "ppi_tanzania_20012",
+                     "columnHeaderData": [
+                     {
+                     "columnName": "id",
+                     "columnType": "bigint",
+                     "columnLength": 0,
+                     "columnDisplayType": "INTEGER",
+                     "isColumnNullable": false,
+                     "isColumnPrimaryKey": true,
+                     "columnValues": []
+                     },
+                     {
+                     "columnName": "client_id",
+                     "columnType": "int",
+                     "columnLength": 0,
+                     "columnDisplayType": "INTEGER",
+                     "isColumnNullable": false,
+                     "isColumnPrimaryKey": false,
+                     "columnValues": []
+                     },
+                     {
+                     "columnName": "ppi_youngerthan17_cd_q1_youngerthan17",
+                     "columnType": "int",
+                     "columnLength": 0,
+                     "columnDisplayType": "CODELOOKUP",
+                     "isColumnNullable": false,
+                     "isColumnPrimaryKey": false,
+                     "columnValues": [
+                     {
+                     "id": 204,
+                     "value": "four or More",
+                     "score": 0
+                     },
+ 
+                     ],
+                     "columnCode": "ppi_youngerthan17"
+                     },
+                     ],
+                     "columnCode": "ppi_how_many_tables"
+                     },
+                      ]
+                     },
+                     "enabled": true
+                     }
+                     ]
+                     </code>
+                 </div>
+             </div>
+ 
+ 
+             <a id="survey_details" name="survey_details"
+                class="old-syle-anchor">&nbsp;</a>
+             <div class="method-section">
+                 <div class="method-description">
+                     <h4>Retreive survey</h4>
+                     <p>Lists a registered survey table details and the Mifos X Core application table they are registered to.
+                     </p>
+                 </div>
+                 <div class="method-example">
+                     <code class="method-declaration">
+                         GET https://DomainName/api/v1/survey/ppi_kenya_2005
+                     </code>
+                     <code class="method-request">
+                         GET survey/{surveyName}
+ 
+                         Content-Type: application/json
+                         Request Body:
+                         {}
+                     </code>
+                     <code class="method-response">
+                         {
+                         "applicationTableName": "m_client",
+                         "registeredTableName": "extra_client_details",
+                         "columnHeaderData": [
+                         {
+                         "columnName": "client_id",
+                         "columnType": "bigint",
+                         "columnLength": 0,
+                         "columnDisplayType": "INTEGER",
+                         "isColumnNullable": false,
+                         "isColumnPrimaryKey": true,
+                         "columnValues": []
+                         },
+                         {
+                         "columnName": "Gender_cd_Question",
+                         "columnType": "int",
+                         "columnLength": 0,
+                         "columnDisplayType": "INTEGER",
+                         "isColumnNullable": true,
+                         "isColumnPrimaryKey": false,
+                         "columnValues": []
+                         },
+                         {
+                         "columnName": "Some Decimal",
+                         "columnType": "decimal",
+                         "columnLength": 0,
+                         "columnDisplayType": "DECIMAL",
+                         "isColumnNullable": true,
+                         "isColumnPrimaryKey": false,
+                         "columnValues": []
+                         },
+                         {
+                         "columnName": "Birth Date",
+                         "columnType": "date",
+                         "columnLength": 0,
+                         "columnDisplayType": "DATE",
+                         "isColumnNullable": true,
+                         "isColumnPrimaryKey": false,
+                         "columnValues": []
+                         }
+                         enabled:false
+                         ]
+                         }
+                     </code>
+                 </div>
+             </div>
+ 
+             <a id="survey_create" name="survey_create"
+                class="old-syle-anchor">&nbsp;</a>
+             <div class="method-section">
+                 <div class="method-description">
+                     <h4>Create an entry in the survey table</h4>
+                     <p>Insert and entry in a survey table (full fill the survey).
+ 
+                     </p>
+                 </div>
+                 <div class="method-example">
+                     <code class="method-declaration">
+                         POST https://DomainName/api/v1/survey/ppi_kenya_2005/87
+                     </code>
+                     <code class="method-request">
+                         POST survey/{surveyName}/{clientId}
+ 
+                         Content-Type: application/json
+                         Request Body:
+                         {
+ 
+                                 ppi_household_members_cd_q1_householdmembers : 167,
+                                 ppi_highestschool_cd_q2_highestschool : 174 ,
+                                 ppi_businessoccupation_cd_q3_businessoccupation : 180,
+                                 ppi_habitablerooms_cd_q4_habitablerooms :184,
+                                 ppi_floortype_cd_q5_floortype : 188,
+                                 ppi_lightingsource_cd_q6_lightingsource :190,
+                                 ppi_irons_cd_q7_irons:193,
+                                 ppi_mosquitonets_cd_q8_mosquitonets:195,
+                                 ppi_towels_cd_q9_towels:198,
+                                 ppi_fryingpans_cd_q10_fryingpans:201,
+                                 date:"2014-12-02 20:30:00",
+                                 dateFormat:"Y-m-d H:i:s",
+                                 locale:"en_GB"
+ 
+                         }
+                     </code>
+                     <code class="method-response">
+                         {
+                         "officeId": 2,
+                         "clientId": 87,
+                         "resourceId": 87
+                         }
+                     </code>
+                 </div>
+             </div>
+ 
+ 
+             <!-- end of Survey api docs -->
 			
 			<!-- start of Notes api docs -->
 			<a id="notes" name="notes" class="old-syle-anchor">&nbsp;</a>
@@ -30739,6 +31054,14 @@ No Request Body:
 					<td><a href="#configs_globalconfig_update">Update Global Configuration</a></td>
 					<td></td>
 				</tr>
+				<tr class="alt">
+                     <td></td>
+                     <td></td>
+                     <td></td>
+                     <td><a href="#configs_globalconfig_retrieve_survey">Retrieve Surveys Global Configuration</a></td>
+                     <td></td>
+                     <td></td>
+                </tr>
 				<tr>
 					<td><a href="#configs_codes">Codes</a></td>
 					<td>codes</td>

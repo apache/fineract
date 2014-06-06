@@ -26,8 +26,7 @@ public class CommandWrapperBuilder {
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
-                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId,
-                this.templateId);
+                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId);
     }
 
     public CommandWrapperBuilder withLoanId(final Long withLoanId) {
@@ -1182,7 +1181,7 @@ public class CommandWrapperBuilder {
         this.actionName = "CREATE";
         this.entityName = "CHARTSLAB";
         this.entityId = null;
-        this.subentityId = chartId; //refer to chart id 
+        this.subentityId = chartId; // refer to chart id
         this.href = "/interestratechart/" + chartId + "/chartdetails/template";
         return this;
     }
@@ -1191,7 +1190,7 @@ public class CommandWrapperBuilder {
         this.actionName = "UPDATE";
         this.entityName = "CHARTSLAB";
         this.entityId = chartSlabId;
-        this.subentityId = chartId;//refers parent chart
+        this.subentityId = chartId;// refers parent chart
         this.href = "/interestratechart/" + chartId + "/chartdetails/" + chartSlabId;
         return this;
     }
@@ -1200,7 +1199,7 @@ public class CommandWrapperBuilder {
         this.actionName = "DELETE";
         this.entityName = "CHARTSLAB";
         this.entityId = chartSlabId;
-        this.subentityId = chartId;//refers parent chart
+        this.subentityId = chartId;// refers parent chart
         this.href = "/interestratechart/" + chartId + "/chartdetails/" + chartSlabId;
         return this;
     }
@@ -1980,6 +1979,38 @@ public class CommandWrapperBuilder {
         this.entityName = "OFFICEGLACCOUNT";
         this.entityId = mappingId;
         this.href = "/organizationglaccounts/" + mappingId;
+        return this;
+    }
+
+    public CommandWrapperBuilder registerDBDatatable(final String datatable, final String apptable) {
+        this.actionName = "REGISTER";
+        this.entityName = "DATATABLE";
+        this.entityId = null;
+        this.href = "/datatables/register/" + datatable + "/" + apptable;
+        return this;
+    }
+
+    public CommandWrapperBuilder registerSurvey(final String datatable, final String apptable) {
+        this.actionName = "REGISTER";
+        this.entityName = "SURVEY";
+        this.entityId = null;
+        this.href = "/survey/register/" + datatable + "/" + apptable;
+        return this;
+    }
+
+    public CommandWrapperBuilder fullFilSurvey(final String datatable, final Long apptableId) {
+        this.entityName = datatable;
+        this.entityId = apptableId;
+        this.actionName = "CREATE";
+        this.href = "/survey/" + datatable + "/" + apptableId;
+        return this;
+    }
+
+    public CommandWrapperBuilder updateLikelihood(final Long entityId) {
+        this.actionName = "UPDATE";
+        this.entityName = "LIKELIHOOD";
+        this.href = "/likelihood/" + entityId;
+        this.entityId = entityId;
         return this;
     }
 

@@ -10,8 +10,8 @@ import org.mifosplatform.infrastructure.configuration.data.GlobalConfigurationPr
 
 public interface ConfigurationReadPlatformService {
 
-    GlobalConfigurationData retrieveGlobalConfiguration();
-    
     GlobalConfigurationPropertyData retrieveGlobalConfiguration(Long configId);
+
+    GlobalConfigurationData retrieveGlobalConfiguration(boolean survey);
 
 }
