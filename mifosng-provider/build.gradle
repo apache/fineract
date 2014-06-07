@@ -54,8 +54,6 @@ configurations {
 	all*.exclude group: 'commons-logging'
 }
 
-sourceSets.test.compileClasspath += sourceSets.main.compileClasspath
-
 dependencies {
         def tomcatVersion = '7.0.47'
 	    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
