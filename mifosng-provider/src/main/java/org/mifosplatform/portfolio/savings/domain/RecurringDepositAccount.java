@@ -166,6 +166,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         recurringDetail.update(command);
 
         validateDomainRules(baseDataValidator);
+        super.validateInterestPostingAndCompoundingPeriodTypes(baseDataValidator);
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
@@ -866,6 +867,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME);
         validateDomainRules(baseDataValidator);
+        super.validateInterestPostingAndCompoundingPeriodTypes(baseDataValidator);
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 

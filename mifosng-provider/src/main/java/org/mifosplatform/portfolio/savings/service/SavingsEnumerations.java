@@ -699,7 +699,7 @@ public class SavingsEnumerations {
             case INVALID:
             break;
             case WITHDRAW_DEPOSIT:
-                optionData = new EnumOptionData(DepositAccountOnClosureType.WITHDRAW_DEPOSIT.getValue().longValue(), DepositAccountOnClosureType.WITHDRAW_DEPOSIT.getCode(), "Withdra Deposit");
+                optionData = new EnumOptionData(DepositAccountOnClosureType.WITHDRAW_DEPOSIT.getValue().longValue(), DepositAccountOnClosureType.WITHDRAW_DEPOSIT.getCode(), "Withdraw Deposit");
             break;
             case TRANSFER_TO_SAVINGS:
                 optionData = new EnumOptionData(DepositAccountOnClosureType.TRANSFER_TO_SAVINGS.getValue().longValue(), DepositAccountOnClosureType.TRANSFER_TO_SAVINGS.getCode(), "Transfer to Savings");
