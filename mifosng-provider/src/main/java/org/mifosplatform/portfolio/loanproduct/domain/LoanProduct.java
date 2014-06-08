@@ -623,6 +623,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
+    public boolean isAccountingDisabled() {
+        return AccountingRuleType.NONE.getValue().equals(this.accountingRule);
+    }
+
     public boolean isCashBasedAccountingEnabled() {
         return AccountingRuleType.CASH_BASED.getValue().equals(this.accountingRule);
     }

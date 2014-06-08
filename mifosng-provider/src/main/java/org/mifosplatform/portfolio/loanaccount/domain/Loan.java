@@ -1744,10 +1744,11 @@ public class Loan extends AbstractPersistable<Long> {
 
         /**
          * Add an interest applied transaction of the interest is accrued
-         * upfront (Up front accrual)
+         * upfront (Up front accrual), no accounting or cash based accounting is
+         * selected
          **/
 
-        if (isUpfrontAccrualAccountingEnabledOnLoanProduct()) {
+        if (isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
             final LoanTransaction interestAppliedTransaction = LoanTransaction.accrueInterest(getOffice(), this, interestApplied,
                     actualDisbursementDate);
             this.loanTransactions.add(interestAppliedTransaction);
@@ -2007,10 +2008,10 @@ public class Loan extends AbstractPersistable<Long> {
                     }
                 } else {
                     /**
-                     * create a Charge applied transaction if Upfront Accrual is
-                     * enabled
+                     * create a Charge applied transaction if Upfront Accrual,
+                     * None or Cash based accounting is enabled
                      **/
-                    if (isUpfrontAccrualAccountingEnabledOnLoanProduct()) {
+                    if (isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
                         handleChargeAppliedTransaction(charge, disbursedOn);
                     }
                 }
@@ -3281,6 +3282,15 @@ public class Loan extends AbstractPersistable<Long> {
 
     public Boolean isUpfrontAccrualAccountingEnabledOnLoanProduct() {
         return this.loanProduct.isUpfrontAccrualAccountingEnabled();
+    }
+
+    public Boolean isAccountingDisabledOnLoanProduct() {
+        return this.loanProduct.isAccountingDisabled();
+    }
+
+    public Boolean isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct() {
+        return isCashBasedAccountingEnabledOnLoanProduct() || isUpfrontAccrualAccountingEnabledOnLoanProduct()
+                || isAccountingDisabledOnLoanProduct();
     }
 
     private Boolean isPeriodicAccrualAccountingEnabledOnLoanProduct() {
