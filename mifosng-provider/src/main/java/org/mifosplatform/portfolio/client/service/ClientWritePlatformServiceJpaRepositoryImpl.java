@@ -189,6 +189,20 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 gender = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.GENDER, genderId);
             }
 
+            CodeValue clientType = null;
+            final Long clientTypeId = command.longValueOfParameterNamed(ClientApiConstants.clientTypeIdParamName);
+            if (clientTypeId != null) {
+                clientType = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.CLIENT_TYPE,
+                        clientTypeId);
+            }
+
+            CodeValue clientClassification = null;
+            final Long clientClassificationId = command.longValueOfParameterNamed(ClientApiConstants.clientClassificationIdParamName);
+            if (clientClassificationId != null) {
+                clientClassification = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
+                        ClientApiConstants.CLIENT_CLASSIFICATION, clientClassificationId);
+            }
+
             SavingsProduct savingsProduct = null;
             final Long savingsProductId = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
             if (savingsProductId != null) {
@@ -197,7 +211,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             }
 
-            final Client newClient = Client.createNew(currentUser, clientOffice, clientParentGroup, staff, savingsProduct, gender, command);
+            final Client newClient = Client.createNew(currentUser, clientOffice, clientParentGroup, staff, savingsProduct, gender,
+                    clientType, clientClassification, command);
             boolean rollbackTransaction = false;
             if (newClient.isActive()) {
                 final CommandWrapper commandWrapper = new CommandWrapperBuilder().activateClient(null).build();
@@ -281,6 +296,35 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     if (savingsProduct == null) { throw new SavingsProductNotFoundException(savingsProductId); }
                 }
                 clientForUpdate.updateSavingsProduct(savingsProduct);
+            }
+
+            if (changes.containsKey(ClientApiConstants.genderIdParamName)) {
+                final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.genderIdParamName);
+                CodeValue newCodeVal = null;
+                if (newValue != null) {
+                    newCodeVal = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.GENDER, newValue);
+                }
+                clientForUpdate.updateGender(newCodeVal);
+            }
+
+            if (changes.containsKey(ClientApiConstants.clientTypeIdParamName)) {
+                final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.clientTypeIdParamName);
+                CodeValue newCodeVal = null;
+                if (newValue != null) {
+                    newCodeVal = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.CLIENT_TYPE,
+                            newValue);
+                }
+                clientForUpdate.updateClientType(newCodeVal);
+            }
+
+            if (changes.containsKey(ClientApiConstants.clientClassificationIdParamName)) {
+                final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.clientClassificationIdParamName);
+                CodeValue newCodeVal = null;
+                if (newValue != null) {
+                    newCodeVal = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
+                            ClientApiConstants.CLIENT_CLASSIFICATION, newValue);
+                }
+                clientForUpdate.updateClientClassification(newCodeVal);
             }
 
             if (!changes.isEmpty()) {

@@ -14,8 +14,9 @@ public interface InterestRateChartSlabReadPlatformService {
     Collection<InterestRateChartSlabData> retrieveAll(Long chartId);
 
     InterestRateChartSlabData retrieveOne(Long chartId, Long chartSlabId);
-    
+
     InterestRateChartSlabData retrieveWithTemplate(InterestRateChartSlabData chartSlab);
-    
+
     InterestRateChartSlabData retrieveTemplate();
+
 }

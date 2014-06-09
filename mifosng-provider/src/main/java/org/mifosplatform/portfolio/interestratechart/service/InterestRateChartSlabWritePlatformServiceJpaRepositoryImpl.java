@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.interestratechart.service;
 
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -80,8 +81,8 @@ public class InterestRateChartSlabWritePlatformServiceJpaRepositoryImpl implemen
         final Map<String, Object> changes = new LinkedHashMap<String, Object>(20);
         final InterestRateChartSlab updateChartSlabs = this.interestRateChartSlabAssembler.assembleFrom(chartSlabId,
                 interestRateChartId);
-
-        updateChartSlabs.update(command, changes);
+        final Locale locale = command.extractLocale();
+        updateChartSlabs.update(command, changes,locale);
 
         this.chartSlabRepository.saveAndFlush(updateChartSlabs);
 

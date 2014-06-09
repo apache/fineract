@@ -98,7 +98,14 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final List<CodeValueData> genderOptions = new ArrayList<CodeValueData>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.GENDER));
 
-        return ClientData.template(defaultOfficeId, new LocalDate(), offices, staffOptions, null, genderOptions, savingsProductDatas);
+        final List<CodeValueData> clientTypeOptions = new ArrayList<CodeValueData>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_TYPE));
+
+        final List<CodeValueData> clientClassificationOptions = new ArrayList<CodeValueData>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_CLASSIFICATION));
+
+        return ClientData.template(defaultOfficeId, new LocalDate(), offices, staffOptions, null, genderOptions, savingsProductDatas,
+                clientTypeOptions, clientClassificationOptions);
     }
 
     @Override
@@ -276,6 +283,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlBuilder.append("c.date_of_birth as dateOfBirth, ");
             sqlBuilder.append("c.gender_cv_id as genderId, ");
             sqlBuilder.append("cv.code_value as genderValue, ");
+            sqlBuilder.append("c.client_type_cv_id as clienttypeId, ");
+            sqlBuilder.append("cvclienttype.code_value as clienttypeValue, ");
+            sqlBuilder.append("c.client_classification_cv_id as classificationId, ");
+            sqlBuilder.append("cvclassification.code_value as classificationValue, ");
             sqlBuilder.append("c.activation_date as activationDate, c.image_id as imageId, ");
             sqlBuilder.append("c.staff_id as staffId, s.display_name as staffName,");
             sqlBuilder.append("c.default_savings_product as savingsProductId, sp.name as savingsProductName, ");
@@ -306,6 +317,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlBuilder.append("left join m_appuser acu on acu.id = c.activatedon_userid ");
             sqlBuilder.append("left join m_appuser clu on clu.id = c.closedon_userid ");
             sqlBuilder.append("left join m_code_value cv on cv.id = c.gender_cv_id ");
+            sqlBuilder.append("left join m_code_value cvclienttype on cvclienttype.id = c.client_type_cv_id ");
+            sqlBuilder.append("left join m_code_value cvclassification on cvclassification.id = c.client_classification_cv_id ");
 
             this.schema = sqlBuilder.toString();
         }
@@ -341,6 +354,14 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String genderValue = rs.getString("genderValue");
             final CodeValueData gender = CodeValueData.instance(genderId, genderValue);
 
+            final Long clienttypeId = JdbcSupport.getLong(rs, "clienttypeId");
+            final String clienttypeValue = rs.getString("clienttypeValue");
+            final CodeValueData clienttype = CodeValueData.instance(clienttypeId, clienttypeValue);
+
+            final Long classificationId = JdbcSupport.getLong(rs, "classificationId");
+            final String classificationValue = rs.getString("classificationValue");
+            final CodeValueData classification = CodeValueData.instance(classificationId, classificationValue);
+
             final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
             final Long imageId = JdbcSupport.getLong(rs, "imageId");
             final Long staffId = JdbcSupport.getLong(rs, "staffId");
@@ -371,7 +392,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             return ClientData.instance(accountNo, status, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
                     middlename, lastname, fullname, displayName, externalId, mobileNo, dateOfBirth, gender, activationDate, imageId,
-                    staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId);
+                    staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId, clienttype, classification);
 
         }
     }
@@ -407,6 +428,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("c.date_of_birth as dateOfBirth, ");
             builder.append("c.gender_cv_id as genderId, ");
             builder.append("cv.code_value as genderValue, ");
+            builder.append("c.client_type_cv_id as clienttypeId, ");
+            builder.append("cvclienttype.code_value as clienttypeValue, ");
+            builder.append("c.client_classification_cv_id as classificationId, ");
+            builder.append("cvclassification.code_value as classificationValue, ");
 
             builder.append("c.submittedon_date as submittedOnDate, ");
             builder.append("sbu.username as submittedByUsername, ");
@@ -436,6 +461,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("left join m_appuser acu on acu.id = c.activatedon_userid ");
             builder.append("left join m_appuser clu on clu.id = c.closedon_userid ");
             builder.append("left join m_code_value cv on cv.id = c.gender_cv_id ");
+            builder.append("left join m_code_value cvclienttype on cvclienttype.id = c.client_type_cv_id ");
+            builder.append("left join m_code_value cvclassification on cvclassification.id = c.client_classification_cv_id ");
 
             this.schema = builder.toString();
         }
@@ -470,6 +497,15 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final Long genderId = JdbcSupport.getLong(rs, "genderId");
             final String genderValue = rs.getString("genderValue");
             final CodeValueData gender = CodeValueData.instance(genderId, genderValue);
+
+            final Long clienttypeId = JdbcSupport.getLong(rs, "clienttypeId");
+            final String clienttypeValue = rs.getString("clienttypeValue");
+            final CodeValueData clienttype = CodeValueData.instance(clienttypeId, clienttypeValue);
+
+            final Long classificationId = JdbcSupport.getLong(rs, "classificationId");
+            final String classificationValue = rs.getString("classificationValue");
+            final CodeValueData classification = CodeValueData.instance(classificationId, classificationValue);
+
             final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
             final Long imageId = JdbcSupport.getLong(rs, "imageId");
             final Long staffId = JdbcSupport.getLong(rs, "staffId");
@@ -499,7 +535,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             return ClientData.instance(accountNo, status, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
                     middlename, lastname, fullname, displayName, externalId, mobileNo, dateOfBirth, gender, activationDate, imageId,
-                    staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId);
+                    staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId, clienttype, classification);
 
         }
     }
@@ -611,8 +647,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     public ClientData retrieveAllClosureReasons(final String clientClosureReason) {
         final List<CodeValueData> closureReasons = new ArrayList<CodeValueData>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(clientClosureReason));
-
-        return ClientData.template(null, null, null, null, closureReasons, null, null);
+        final Collection<CodeValueData> clientTypeOptions = null;
+        final Collection<CodeValueData> clientClassificationOptions = null;
+        return ClientData.template(null, null, null, null, closureReasons, null, null, clientTypeOptions, clientClassificationOptions);
     }
 
 }

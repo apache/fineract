@@ -8,15 +8,13 @@ package org.mifosplatform.portfolio.interestratechart.domain;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.amountRangeFromParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.amountRangeToParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.annualInterestRateParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.interestRateForFemaleParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.interestRateForChildrenParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.interestRateForSeniorCitizenParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.descriptionParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.fromPeriodParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.periodTypeParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.toPeriodParamName;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.persistence.Column;
@@ -55,15 +53,7 @@ public class InterestRateChartSlabFields {
     @Column(name = "annual_interest_rate", scale = 6, precision = 19, nullable = false)
     private BigDecimal annualInterestRate;
 
-    @Column(name = "interest_rate_for_female", scale = 6, precision = 19, nullable = true)
-    private BigDecimal interestRateForFemale;
-
-    @Column(name = "interest_rate_for_children", scale = 6, precision = 19, nullable = true)
-    private BigDecimal interestRateForChildren;
-
-    @Column(name = "interest_rate_for_senior_citizen", scale = 6, precision = 19, nullable = true)
-    private BigDecimal interestRateForSeniorCitizen;
-
+    @SuppressWarnings("unused")
     @Column(name = "currency_code", nullable = false)
     private String currencyCode;
 
@@ -73,16 +63,14 @@ public class InterestRateChartSlabFields {
 
     public static InterestRateChartSlabFields createNew(final String description, final SavingsPeriodFrequencyType periodFrequencyType,
             final Integer fromPeriod, final Integer toPeriod, final BigDecimal amountRangeFrom, final BigDecimal amountRangeTo,
-            final BigDecimal annualInterestRate, final BigDecimal interestRateForFemale, final BigDecimal interestRateForChildren,
-            final BigDecimal interestRateForSeniorCitizen, final String currencyCode) {
+            final BigDecimal annualInterestRate, final String currencyCode) {
         return new InterestRateChartSlabFields(description, periodFrequencyType, fromPeriod, toPeriod, amountRangeFrom, amountRangeTo,
-                annualInterestRate, interestRateForFemale, interestRateForChildren, interestRateForSeniorCitizen, currencyCode);
+                annualInterestRate, currencyCode);
     }
 
     private InterestRateChartSlabFields(final String description, final SavingsPeriodFrequencyType periodFrequencyType,
             final Integer fromPeriod, final Integer toPeriod, final BigDecimal amountRangeFrom, final BigDecimal amountRangeTo,
-            final BigDecimal annualInterestRate, final BigDecimal interestRateForFemale, final BigDecimal interestRateForChildren,
-            final BigDecimal interestRateForSeniorCitizen, final String currencyCode) {
+            final BigDecimal annualInterestRate, final String currencyCode) {
         this.description = description;
         this.periodType = (periodFrequencyType == null) ? null : periodFrequencyType.getValue();
         this.fromPeriod = fromPeriod;
@@ -90,13 +78,11 @@ public class InterestRateChartSlabFields {
         this.amountRangeFrom = amountRangeFrom;
         this.amountRangeTo = amountRangeTo;
         this.annualInterestRate = annualInterestRate;
-        this.interestRateForFemale = interestRateForFemale;
-        this.interestRateForChildren = interestRateForChildren;
-        this.interestRateForSeniorCitizen = interestRateForSeniorCitizen;
         this.currencyCode = currencyCode;
     }
 
-    public void update(final JsonCommand command, final Map<String, Object> actualChanges, final DataValidatorBuilder baseDataValidator) {
+    public void update(final JsonCommand command, final Map<String, Object> actualChanges, final DataValidatorBuilder baseDataValidator,
+            final Locale locale) {
 
         if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
             final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
@@ -104,71 +90,54 @@ public class InterestRateChartSlabFields {
             this.description = newValue;
         }
 
-        if (command.isChangeInIntegerParameterNamed(periodTypeParamName, this.periodType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(periodTypeParamName);
+        if (command.isChangeInIntegerParameterNamed(periodTypeParamName, this.periodType, locale)) {
+            final Integer newValue = command.integerValueOfParameterNamed(periodTypeParamName, locale);
             actualChanges.put(periodTypeParamName, newValue);
             this.periodType = newValue;
         }
 
-        if (command.isChangeInIntegerParameterNamed(fromPeriodParamName, this.fromPeriod)) {
-            final Integer newValue = command.integerValueOfParameterNamed(fromPeriodParamName);
+        if (command.isChangeInIntegerParameterNamed(fromPeriodParamName, this.fromPeriod, locale)) {
+            final Integer newValue = command.integerValueOfParameterNamed(fromPeriodParamName, locale);
             actualChanges.put(fromPeriodParamName, newValue);
             this.fromPeriod = newValue;
         }
 
-        if (command.isChangeInIntegerParameterNamed(toPeriodParamName, this.toPeriod)) {
-            final Integer newValue = command.integerValueOfParameterNamed(toPeriodParamName);
+        if (command.isChangeInIntegerParameterNamed(toPeriodParamName, this.toPeriod, locale)) {
+            final Integer newValue = command.integerValueOfParameterNamed(toPeriodParamName, locale);
             actualChanges.put(toPeriodParamName, newValue);
             this.toPeriod = newValue;
         }
 
-        if (command.isChangeInBigDecimalParameterNamed(amountRangeFromParamName, this.amountRangeFrom)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountRangeFromParamName);
+        if (command.isChangeInBigDecimalParameterNamed(amountRangeFromParamName, this.amountRangeFrom, locale)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountRangeFromParamName, locale);
             actualChanges.put(amountRangeFromParamName, newValue);
             this.amountRangeFrom = newValue;
         }
 
-        if (command.isChangeInBigDecimalParameterNamed(amountRangeToParamName, this.amountRangeTo)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountRangeToParamName);
+        if (command.isChangeInBigDecimalParameterNamed(amountRangeToParamName, this.amountRangeTo, locale)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountRangeToParamName, locale);
             actualChanges.put(amountRangeToParamName, newValue);
             this.amountRangeTo = newValue;
         }
 
-        if (command.isChangeInBigDecimalParameterNamed(annualInterestRateParamName, this.annualInterestRate)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(annualInterestRateParamName);
+        if (command.isChangeInBigDecimalParameterNamed(annualInterestRateParamName, this.annualInterestRate, locale)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(annualInterestRateParamName, locale);
             actualChanges.put(annualInterestRateParamName, newValue);
             this.annualInterestRate = newValue;
         }
 
-        if (command.isChangeInBigDecimalParameterNamed(interestRateForFemaleParamName, this.interestRateForFemale)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(interestRateForFemaleParamName);
-            actualChanges.put(interestRateForFemaleParamName, newValue);
-            this.interestRateForFemale = newValue;
-        }
-
-        if (command.isChangeInBigDecimalParameterNamed(interestRateForChildrenParamName, this.interestRateForChildren)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(interestRateForChildrenParamName);
-            actualChanges.put(interestRateForChildrenParamName, newValue);
-            this.interestRateForChildren = newValue;
-        }
-
-        if (command.isChangeInBigDecimalParameterNamed(interestRateForSeniorCitizenParamName, this.interestRateForSeniorCitizen)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(interestRateForSeniorCitizenParamName);
-            actualChanges.put(interestRateForSeniorCitizenParamName, newValue);
-            this.interestRateForSeniorCitizen = newValue;
-        }
-
-        validateChartSlabPlatformRules(command, baseDataValidator);
+        validateChartSlabPlatformRules(command, baseDataValidator, locale);
     }
 
-    public void validateChartSlabPlatformRules(final JsonCommand chartSlabsCommand, final DataValidatorBuilder baseDataValidator) {
+    public void validateChartSlabPlatformRules(final JsonCommand chartSlabsCommand, final DataValidatorBuilder baseDataValidator,
+            Locale locale) {
         if (isFromPeriodGreaterThanToPeriod()) {
-            final Integer fromPeriod = chartSlabsCommand.integerValueOfParameterNamed(fromPeriodParamName);
+            final Integer fromPeriod = chartSlabsCommand.integerValueOfParameterNamed(fromPeriodParamName, locale);
             baseDataValidator.parameter(fromPeriodParamName).value(fromPeriod).failWithCode("from.period.is.greater.than.to.period");
         }
 
         if (isAmountRangeFromGreaterThanTo()) {
-            final BigDecimal amountRangeFrom = chartSlabsCommand.bigDecimalValueOfParameterNamed(amountRangeFromParamName);
+            final BigDecimal amountRangeFrom = chartSlabsCommand.bigDecimalValueOfParameterNamed(amountRangeFromParamName, locale);
             baseDataValidator.parameter(amountRangeFromParamName).value(amountRangeFrom)
                     .failWithCode("amount.range.from.is.greater.than.amount.range.to");
         }
@@ -221,18 +190,6 @@ public class InterestRateChartSlabFields {
 
     public BigDecimal annualInterestRate() {
         return this.annualInterestRate;
-    }
-
-    public BigDecimal interestRateForFemale() {
-        return this.interestRateForFemale;
-    }
-
-    public BigDecimal interestRateForChildren() {
-        return this.interestRateForChildren;
-    }
-
-    public BigDecimal interestRateForSeniorCitizen() {
-        return this.interestRateForSeniorCitizen;
     }
 
     public Integer depositPeriod(final LocalDate periodStartDate, final LocalDate periodEndDate) {
