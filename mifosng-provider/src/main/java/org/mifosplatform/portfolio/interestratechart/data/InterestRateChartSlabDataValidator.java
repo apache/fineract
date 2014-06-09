@@ -148,7 +148,7 @@ public class InterestRateChartSlabDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(descriptionParamName, element)) {
             final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParamName, element);
-            baseDataValidator.reset().parameter(descriptionParamName).value(description).notNull();
+            baseDataValidator.reset().parameter(descriptionParamName).value(description).ignoreIfNull();
         }
 
         if (this.fromApiJsonHelper.parameterExists(periodTypeParamName, element)) {

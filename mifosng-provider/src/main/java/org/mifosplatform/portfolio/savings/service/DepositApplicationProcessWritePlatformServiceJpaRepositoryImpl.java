@@ -172,8 +172,9 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     DepositAccountType.FIXED_DEPOSIT);
 
             final MathContext mc = MathContext.DECIMAL64;
+            final boolean isPreMatureClosure = false;
 
-            account.updateMaturityDateAndAmountBeforeAccountActivation(mc);
+            account.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure);
             this.fixedDepositAccountRepository.save(account);
 
             if (account.isAccountNumberRequiresAutoGeneration()) {
@@ -240,7 +241,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             Integer frequency = CalendarUtils.getInterval(calendar.getRecurrence());
             frequency = frequency == -1 ? 1 : frequency;
             account.generateSchedule(frequencyType, frequency);
-            account.updateMaturityDateAndAmount(mc);
+            final boolean isPreMatureClosure = false;
+            account.updateMaturityDateAndAmount(mc, isPreMatureClosure);
             account.validateApplicableInterestRate();
             this.savingAccountRepository.save(account);
 
@@ -328,7 +330,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             if (!changes.isEmpty()) {
                 updateFDAndRDCommonChanges(changes, command, account);
                 final MathContext mc = MathContext.DECIMAL64;
-                account.updateMaturityDateAndAmountBeforeAccountActivation(mc);
+                final boolean isPreMatureClosure = false;
+                account.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure);
                 this.savingAccountRepository.save(account);
             }
 
@@ -371,7 +374,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 Integer frequency = CalendarUtils.getInterval(calendar.getRecurrence());
                 frequency = frequency == -1 ? 1 : frequency;
                 account.generateSchedule(frequencyType, frequency);
-                account.updateMaturityDateAndAmount(mc);
+                final boolean isPreMatureClosure = false;
+                account.updateMaturityDateAndAmount(mc, isPreMatureClosure);
                 account.validateApplicableInterestRate();
                 this.savingAccountRepository.save(account);
 

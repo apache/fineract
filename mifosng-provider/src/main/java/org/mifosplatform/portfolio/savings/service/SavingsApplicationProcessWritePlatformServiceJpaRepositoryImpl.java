@@ -453,6 +453,9 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         Money amountForDeposit = account.activateWithBalance();
         boolean isAccountTransfer = false;
         if (amountForDeposit.isGreaterThanZero()) {
+            // save account entity before performing deposit transaction, as
+            // accountId is required for persist transaction entity.
+            this.savingAccountRepository.save(account);
             this.savingsAccountDomainService.handleDeposit(account, savingsAccountDataDTO.getFmt(), account.getActivationLocalDate(),
                     amountForDeposit.getAmount(), null, isAccountTransfer);
         }
