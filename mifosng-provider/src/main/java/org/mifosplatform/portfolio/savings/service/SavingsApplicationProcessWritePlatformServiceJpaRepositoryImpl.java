@@ -41,6 +41,7 @@ import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
+import org.mifosplatform.portfolio.savings.SavingsAccountTransactionType;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountDataDTO;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountDataValidator;
@@ -460,6 +461,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     amountForDeposit.getAmount(), null, isAccountTransfer);
         }
         account.processAccountUponActivation();
+        account.validateAccountBalanceDoesNotBecomeNegative(SavingsAccountTransactionType.PAY_CHARGE.name());
         this.savingAccountRepository.save(account);
 
         if (account.isAccountNumberRequiresAutoGeneration()) {
