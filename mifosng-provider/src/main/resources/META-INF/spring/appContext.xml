@@ -34,11 +34,14 @@
 										  org.mifosplatform.mix.*,
 										  org.mifosplatform.template.*,
 										  org.mifosplatform.template.service.*,
-										  org.mifosplatform.useradministration.*">
+										  org.mifosplatform.useradministration.*,
+										  org.mifosplatform.batch.*">
 		<context:exclude-filter expression="org.springframework.stereotype.Controller"
 			type="annotation" />
 	</context:component-scan>
 
+	<bean id="CreateClientCommandStrategy"
+		class="org.mifosplatform.batch.command.internal.CreateClientCommandStrategy"/>
 	<bean id="auditorAware"
 		class="org.mifosplatform.infrastructure.core.domain.AuditorAwareImpl" />
 	<jpa:auditing auditor-aware-ref="auditorAware" />
@@ -52,6 +55,7 @@
 	<jpa:repositories base-package="org.mifosplatform.mix.domain" />
 	<jpa:repositories base-package="org.mifosplatform.scheduledjobs.domain" />
 	<jpa:repositories base-package="org.mifosplatform.template.domain" />
+	<jpa:repositories base-package="org.mifosplatform.batch.domain"/>
 
 	<import resource="infrastructure.xml" />
 
