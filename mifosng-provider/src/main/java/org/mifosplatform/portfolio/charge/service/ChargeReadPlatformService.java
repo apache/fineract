@@ -7,11 +7,14 @@ package org.mifosplatform.portfolio.charge.service;
 
 import java.util.Collection;
 
+import org.mifosplatform.organisation.office.domain.OrganisationCurrency;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 
 public interface ChargeReadPlatformService {
 
     Collection<ChargeData> retrieveAllCharges();
+
+    Collection<ChargeData> retrieveAllChargesForCurrency(OrganisationCurrency currency);
 
     ChargeData retrieveCharge(Long chargeId);
 

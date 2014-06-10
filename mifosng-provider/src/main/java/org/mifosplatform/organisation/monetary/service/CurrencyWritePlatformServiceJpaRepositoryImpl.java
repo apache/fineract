@@ -18,9 +18,13 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
+import org.mifosplatform.organisation.monetary.exception.CurrencyInUseException;
 import org.mifosplatform.organisation.monetary.serialization.CurrencyCommandFromApiJsonDeserializer;
 import org.mifosplatform.organisation.office.domain.OrganisationCurrency;
 import org.mifosplatform.organisation.office.domain.OrganisationCurrencyRepository;
+import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
+import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
+import org.mifosplatform.portfolio.savings.service.SavingsProductReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,16 +36,25 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
     private final OrganisationCurrencyRepository organisationCurrencyRepository;
     private final CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final LoanProductReadPlatformService loanProductService;
+    private final SavingsProductReadPlatformService savingsProductService;
+    private final ChargeReadPlatformService chargeService;
 
     @Autowired
     public CurrencyWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
-            final OrganisationCurrencyRepository organisationCurrencyRepository) {
+            final OrganisationCurrencyRepository organisationCurrencyRepository,
+            final LoanProductReadPlatformService loanProductService,
+            final SavingsProductReadPlatformService savingsProductService,
+            final ChargeReadPlatformService chargeService) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
         this.organisationCurrencyRepository = organisationCurrencyRepository;
+        this.loanProductService = loanProductService;
+        this.savingsProductService = savingsProductService;
+        this.chargeService = chargeService;
     }
 
     @Transactional
@@ -67,6 +80,17 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
             allowedCurrencies.add(allowedCurrency);
         }
 
+        for (OrganisationCurrency priorCurrency : this.organisationCurrencyRepository.findAll()) {
+        	if (!allowedCurrencyCodes.contains(priorCurrency.getCode())) {
+        		// Check if it's safe to remove this currency.
+        		if (!loanProductService.retrieveAllLoanProductsForCurrency(priorCurrency).isEmpty() ||
+        				!savingsProductService.retrieveAllForCurrency(priorCurrency).isEmpty() ||
+        				!chargeService.retrieveAllChargesForCurrency(priorCurrency).isEmpty()) {
+        			throw new CurrencyInUseException(priorCurrency.getCode());
+        		}
+        	}
+        }
+        
         changes.put("currencies", allowedCurrencyCodes.toArray(new String[allowedCurrencyCodes.size()]));
 
         this.organisationCurrencyRepository.deleteAll();

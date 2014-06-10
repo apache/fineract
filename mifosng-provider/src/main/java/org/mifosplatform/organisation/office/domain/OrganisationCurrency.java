@@ -54,4 +54,8 @@ public class OrganisationCurrency extends AbstractPersistable<Long> {
         this.nameCode = nameCode;
         this.displaySymbol = displaySymbol;
     }
+    
+    public final String getCode() {
+    	return code;
+    }
 }
