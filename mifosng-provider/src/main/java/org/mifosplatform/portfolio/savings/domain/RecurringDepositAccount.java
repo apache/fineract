@@ -27,7 +27,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.Transient;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -46,9 +45,7 @@ import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.group.domain.Group;
-import org.mifosplatform.portfolio.interestratechart.data.ClientIncentiveAttributes;
 import org.mifosplatform.portfolio.interestratechart.domain.InterestRateChart;
-import org.mifosplatform.portfolio.interestratechart.service.InterestRateChartAssembler;
 import org.mifosplatform.portfolio.savings.DepositAccountOnClosureType;
 import org.mifosplatform.portfolio.savings.DepositsApiConstants;
 import org.mifosplatform.portfolio.savings.PreClosurePenalInterestOnType;
@@ -79,9 +76,6 @@ public class RecurringDepositAccount extends SavingsAccount {
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "account", orphanRemoval = true)
     private List<RecurringDepositScheduleInstallment> depositScheduleInstallments = new ArrayList<RecurringDepositScheduleInstallment>();
-
-    @Transient
-    private InterestRateChartAssembler chartAssembler;
 
     protected RecurringDepositAccount() {
         //
@@ -192,9 +186,8 @@ public class RecurringDepositAccount extends SavingsAccount {
         }
 
         final BigDecimal depositAmount = accountTermAndPreClosure.depositAmount();
-        final ClientIncentiveAttributes incentiveAttributes = (this.client == null) ? null : this.client.incentiveAttributes();
         BigDecimal applicableInterestRate = this.chart.getApplicableInterestRate(depositAmount, depositStartDate(), depositCloseDate,
-                incentiveAttributes);
+                this.client);
 
         if (applyPreMaturePenalty) {
             applicableInterestRate = applicableInterestRate.subtract(penalInterest);
@@ -941,9 +934,8 @@ public class RecurringDepositAccount extends SavingsAccount {
             }
 
             final BigDecimal maturityAmount = this.accountTermAndPreClosure.maturityAmount();
-            final ClientIncentiveAttributes incentiveAttributes = (this.client == null) ? null : this.client.incentiveAttributes();
             BigDecimal applicableInterestRate = this.chart.getApplicableInterestRate(maturityAmount, depositStartDate(),
-                    calculateMaturityDate(), incentiveAttributes);
+                    calculateMaturityDate(), this.client);
 
             if (applicableInterestRate.equals(BigDecimal.ZERO)) {
                 baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(

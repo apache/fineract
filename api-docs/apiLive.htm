@@ -2854,7 +2854,7 @@ GET https://DomainName/api/v1/clients/template
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>groupId, externalId, accountNo, staffId, mobileNo, savingsProductId</td>
+							<td>groupId, externalId, accountNo, staffId, mobileNo, savingsProductId, genderId, clientTypeId, clientClassificationId</td>
 						</tr>
 					</table>
 				</div>
@@ -29483,6 +29483,14 @@ GET https://DomainName/api/v1/interestratecharts/template
 							provide a description about the slab.
 						</td>
 					</tr>
+					<tr class=alt>
+						<td>incentives</td>
+					</tr>
+					<tr>
+						<td class=fielddesc>
+							Represents incentives on interest for a perticular period.
+						</td>
+					</tr>
 				</table>
 			</div>
 		</div>
@@ -29526,7 +29534,15 @@ Request Body:
   "toPeriod": "180",
   "annualInterestRate": "5",
   "description": "5% interest from 1 day till 180 days of deposit",
-  "locale":"en"
+  "locale":"en",
+  "incentives":[{
+		"entityType":"2",
+		"attributeName":2,
+		"conditionType":2,
+		"attributeValue":11,
+		"incentiveType":3,
+		"amount":"-1"
+	}]
 }
 					</code>
 					<code class="method-response">
@@ -29572,7 +29588,15 @@ GET https://DomainName/api/v1/interestratecharts/{chartId}/chartslabs
       "displaySymbol": "$",
       "nameCode": "currency.USD",
       "displayLabel": "US Dollar ($)"
-    }
+    },
+	"incentives":[{
+	 "id":1, 
+	 "entityType":{"id":2,"code":"InterestIncentiveEntityType.customer","value":"Customer"}, 
+	 "attributeName":{"id":2,"code":"InterestIncentiveAttributeName.gender","value":"Gender"}, "conditionType":{"id":2,"code":"incentiveConditionType.equal","value":"equal"},
+	 "attributeValue":"11","attributeValueDesc":"FEMALE", 
+	 "incentiveType":{"id":3,"code":"InterestIncentiveType.incentive","value":"Incentive"},
+	 "amount":-1.000000
+	 }]
   }
 ]
 					</code>
@@ -29612,7 +29636,15 @@ GET https://DomainName/api/v1/interestratecharts/{chartId}/chartslabs/{slabId}
     "displaySymbol": "$",
     "nameCode": "currency.USD",
     "displayLabel": "US Dollar ($)"
-  }
+  },
+  "incentives":[{
+	 "id":1, 
+	 "entityType":{"id":2,"code":"InterestIncentiveEntityType.customer","value":"Customer"}, 
+	 "attributeName":{"id":2,"code":"InterestIncentiveAttributeName.gender","value":"Gender"}, "conditionType":{"id":2,"code":"incentiveConditionType.equal","value":"equal"},
+	 "attributeValue":"11","attributeValueDesc":"FEMALE", 
+	 "incentiveType":{"id":3,"code":"InterestIncentiveType.incentive","value":"Incentive"},
+	 "amount":-1.000000
+	 }]
 }
 					</code>
 				</div>

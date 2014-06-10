@@ -6,16 +6,13 @@
 package org.mifosplatform.portfolio.interestratechart.domain;
 
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.INTERESTRATE_CHART_RESOURCE_NAME;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.deleteParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.descriptionParamName;
+import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.idParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.amountRangeFromParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.amountRangeToParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.annualInterestRateParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.deleteParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.descriptionParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.fromPeriodParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.idParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.interestRateForChildrenParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.interestRateForFemaleParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.interestRateForSeniorCitizenParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.periodTypeParamName;
 import static org.mifosplatform.portfolio.interestratechart.InterestRateChartSlabApiConstants.toPeriodParamName;
 
@@ -25,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,19 +54,17 @@ public class InterestRateChart extends AbstractPersistable<Long> {
 
     @OneToMany(mappedBy = "interestRateChart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<InterestRateChartSlab> chartSlabs = new HashSet<InterestRateChartSlab>();
-   
+
     protected InterestRateChart() {
         //
     }
 
-    public static InterestRateChart createNew(InterestRateChartFields chartFields, 
-            Collection<InterestRateChartSlab> interestRateChartSlabs) {
+    public static InterestRateChart createNew(InterestRateChartFields chartFields, Collection<InterestRateChartSlab> interestRateChartSlabs) {
 
         return new InterestRateChart(chartFields, new HashSet<InterestRateChartSlab>(interestRateChartSlabs));
     }
 
-    private InterestRateChart(InterestRateChartFields chartFields, 
-            Set<InterestRateChartSlab> interestRateChartSlabs) {
+    private InterestRateChart(InterestRateChartFields chartFields, Set<InterestRateChartSlab> interestRateChartSlabs) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -100,9 +96,9 @@ public class InterestRateChart extends AbstractPersistable<Long> {
             for (int j = i + 1; j < chartSlabsList.size(); j++) {
                 InterestRateChartSlab jSlabs = chartSlabsList.get(j);
                 if (iSlabs.slabFields().isPeriodOverlapping(jSlabs.slabFields())) {
-                    baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.period.overlapping", iSlabs.slabFields()
-                            .fromPeriod(), iSlabs.slabFields().toPeriod(), jSlabs.slabFields().fromPeriod(), jSlabs
-                            .slabFields().toPeriod());
+                    baseDataValidator
+                            .failWithCodeNoParameterAddedToErrorCode("chart.slabs.period.overlapping", iSlabs.slabFields().fromPeriod(),
+                                    iSlabs.slabFields().toPeriod(), jSlabs.slabFields().fromPeriod(), jSlabs.slabFields().toPeriod());
                 }
             }
         }
@@ -170,7 +166,7 @@ public class InterestRateChart extends AbstractPersistable<Long> {
 
         final Map<String, Object> deleteChartSlabs = new HashMap<String, Object>();
         final Map<String, Object> chartSlabsChanges = new HashMap<String, Object>();
-
+        final Locale locale = command.extractLocale();
         if (command.hasParameter(InterestRateChartApiConstants.chartSlabs)) {
             final JsonArray array = command.arrayOfParameterNamed(InterestRateChartApiConstants.chartSlabs);
             if (array != null) {
@@ -181,14 +177,13 @@ public class InterestRateChart extends AbstractPersistable<Long> {
                         final Long chartSlabId = chartSlabsCommand.longValueOfParameterNamed(idParamName);
                         final InterestRateChartSlab chartSlab = this.findChartSlab(chartSlabId);
                         if (chartSlab == null) {
-                            baseDataValidator.parameter(idParamName).value(chartSlabId)
-                                    .failWithCode("no.chart.slab.associated.with.id");
+                            baseDataValidator.parameter(idParamName).value(chartSlabId).failWithCode("no.chart.slab.associated.with.id");
                         } else if (chartSlabsCommand.parameterExists(deleteParamName)) {
                             if (this.removeChartSlab(chartSlab)) {
                                 deleteChartSlabs.put(idParamName, chartSlabId);
                             }
                         } else {
-                            chartSlab.update(chartSlabsCommand, chartSlabsChanges, baseDataValidator);
+                            chartSlab.update(chartSlabsCommand, chartSlabsChanges, baseDataValidator, locale);
                         }
                     } else {
 
@@ -197,22 +192,22 @@ public class InterestRateChart extends AbstractPersistable<Long> {
                          * InterestRateChartSlabAssembler
                          */
                         final String description = chartSlabsCommand.stringValueOfParameterNamed(descriptionParamName);
-                        final Integer periodTypeId = chartSlabsCommand.integerValueOfParameterNamed(periodTypeParamName);
+                        final Integer periodTypeId = chartSlabsCommand.integerValueOfParameterNamed(periodTypeParamName, locale);
                         final SavingsPeriodFrequencyType periodFrequencyType = SavingsPeriodFrequencyType.fromInt(periodTypeId);
-                        final Integer fromPeriod = chartSlabsCommand.integerValueOfParameterNamed(fromPeriodParamName);
-                        final Integer toPeriod = chartSlabsCommand.integerValueOfParameterNamed(toPeriodParamName);
-                        final BigDecimal amountRangeFrom = chartSlabsCommand.bigDecimalValueOfParameterNamed(amountRangeFromParamName);
-                        final BigDecimal amountRangeTo = chartSlabsCommand.bigDecimalValueOfParameterNamed(amountRangeToParamName);
-                        final BigDecimal annualInterestRate = chartSlabsCommand
-                                .bigDecimalValueOfParameterNamed(annualInterestRateParamName);
-                        final BigDecimal interestRateForFemale = chartSlabsCommand.bigDecimalValueOfParameterNamed(interestRateForFemaleParamName);
-                        final BigDecimal interestRateForChildren = chartSlabsCommand.bigDecimalValueOfParameterNamed(interestRateForChildrenParamName);
-                        final BigDecimal interestRateForSeniorCitizen = chartSlabsCommand.bigDecimalValueOfParameterNamed(interestRateForSeniorCitizenParamName);
-                        
-                        final InterestRateChartSlabFields slabFields = InterestRateChartSlabFields.createNew(description, periodFrequencyType,
-                                fromPeriod, toPeriod, amountRangeFrom, amountRangeTo, annualInterestRate, interestRateForFemale, interestRateForChildren, interestRateForSeniorCitizen, currencyCode);
+                        final Integer fromPeriod = chartSlabsCommand.integerValueOfParameterNamed(fromPeriodParamName, locale);
+                        final Integer toPeriod = chartSlabsCommand.integerValueOfParameterNamed(toPeriodParamName, locale);
+                        final BigDecimal amountRangeFrom = chartSlabsCommand.bigDecimalValueOfParameterNamed(amountRangeFromParamName,
+                                locale);
+                        final BigDecimal amountRangeTo = chartSlabsCommand.bigDecimalValueOfParameterNamed(amountRangeToParamName, locale);
+                        final BigDecimal annualInterestRate = chartSlabsCommand.bigDecimalValueOfParameterNamed(
+                                annualInterestRateParamName, locale);
+
+                        final InterestRateChartSlabFields slabFields = InterestRateChartSlabFields
+                                .createNew(description, periodFrequencyType, fromPeriod, toPeriod, amountRangeFrom, amountRangeTo,
+                                        annualInterestRate, currencyCode);
                         final InterestRateChartSlab chartSlab = InterestRateChartSlab.createNew(slabFields, this);
-                        chartSlab.slabFields().validateChartSlabPlatformRules(chartSlabsCommand, baseDataValidator);
+                        chartSlab.slabFields().validateChartSlabPlatformRules(chartSlabsCommand, baseDataValidator, locale);
+                        chartSlab.updateIncentives(chartSlabsCommand, actualChanges, baseDataValidator, chartSlab, locale);
                         this.addChartSlab(chartSlab);
                     }
                 }
@@ -261,8 +256,8 @@ public class InterestRateChart extends AbstractPersistable<Long> {
     public InterestRateChartFields chartFields() {
         return this.chartFields;
     }
-    
-    public boolean isApplicableChartFor(final LocalDate target){
+
+    public boolean isApplicableChartFor(final LocalDate target) {
         return this.chartFields.isApplicableChartFor(target);
     }
 }

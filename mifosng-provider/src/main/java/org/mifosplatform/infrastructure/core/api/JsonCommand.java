@@ -338,6 +338,15 @@ public final class JsonCommand {
         return isChanged;
     }
 
+    public boolean isChangeInBigDecimalParameterNamed(final String parameterName, final BigDecimal existingValue, final Locale locale) {
+        boolean isChanged = false;
+        if (parameterExists(parameterName)) {
+            final BigDecimal workingValue = bigDecimalValueOfParameterNamed(parameterName, locale);
+            isChanged = differenceExists(existingValue, workingValue);
+        }
+        return isChanged;
+    }
+
     public boolean isChangeInBigDecimalParameterNamedWithNullCheck(final String parameterName, final BigDecimal existingValue) {
         boolean isChanged = false;
         if (parameterExists(parameterName)) {
@@ -371,6 +380,10 @@ public final class JsonCommand {
         return this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(parameterName, this.parsedCommand);
     }
 
+    public BigDecimal bigDecimalValueOfParameterNamed(final String parameterName, final Locale locale) {
+        return this.fromApiJsonHelper.extractBigDecimalNamed(parameterName, this.parsedCommand, locale);
+    }
+
     public BigDecimal bigDecimalValueOfParameterNamedDefaultToNullIfZero(final String parameterName) {
         return defaultToNullIfZero(bigDecimalValueOfParameterNamed(parameterName));
     }
@@ -393,6 +406,15 @@ public final class JsonCommand {
         return isChanged;
     }
 
+    public boolean isChangeInIntegerParameterNamed(final String parameterName, final Integer existingValue, final Locale locale) {
+        boolean isChanged = false;
+        if (parameterExists(parameterName)) {
+            final Integer workingValue = integerValueOfParameterNamed(parameterName, locale);
+            isChanged = differenceExists(existingValue, workingValue);
+        }
+        return isChanged;
+    }
+
     public boolean isChangeInIntegerParameterNamedWithNullCheck(final String parameterName, final Integer existingValue) {
         boolean isChanged = false;
         if (parameterExists(parameterName)) {
@@ -408,6 +430,10 @@ public final class JsonCommand {
 
     public Integer integerValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractIntegerWithLocaleNamed(parameterName, this.parsedCommand);
+    }
+
+    public Integer integerValueOfParameterNamed(final String parameterName, final Locale locale) {
+        return this.fromApiJsonHelper.extractIntegerNamed(parameterName, this.parsedCommand, locale);
     }
 
     public Integer integerValueOfParameterNamedDefaultToNullIfZero(final String parameterName) {
@@ -493,5 +519,5 @@ public final class JsonCommand {
     public void checkForUnsupportedParameters(final Type typeOfMap, final String json, final Set<String> requestDataParameters) {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, requestDataParameters);
     }
-   
+
 }

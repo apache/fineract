@@ -46,7 +46,6 @@ import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.mifosplatform.portfolio.group.domain.Group;
-import org.mifosplatform.portfolio.interestratechart.data.ClientIncentiveAttributes;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsProduct;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -159,11 +158,17 @@ public final class Client extends AbstractPersistable<Long> {
     @JoinColumn(name = "default_savings_account", nullable = true)
     private SavingsAccount savingsAccount;
 
-    @Transient
-    private ClientIncentiveAttributes incentiveAttributes;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_type_cv_id", nullable = true)
+    private CodeValue clientType;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_classification_cv_id", nullable = true)
+    private CodeValue clientClassification;
 
     public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
-            final SavingsProduct savingsProduct, final CodeValue gender, final JsonCommand command) {
+            final SavingsProduct savingsProduct, final CodeValue gender, final CodeValue clientType, final CodeValue clientClassification,
+            final JsonCommand command) {
 
         final String accountNo = command.stringValueOfParameterNamed(ClientApiConstants.accountNoParamName);
         final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
@@ -200,7 +205,7 @@ public final class Client extends AbstractPersistable<Long> {
         final SavingsAccount account = null;
         return new Client(currentUser, status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname,
                 activationDate, officeJoiningDate, externalId, mobileNo, staff, submittedOnDate, savingsProduct, account, dataOfBirth,
-                gender);
+                gender, clientType, clientClassification);
     }
 
     protected Client() {
@@ -211,7 +216,7 @@ public final class Client extends AbstractPersistable<Long> {
             final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
             final LocalDate activationDate, final LocalDate officeJoiningDate, final String externalId, final String mobileNo,
             final Staff staff, final LocalDate submittedOnDate, final SavingsProduct savingsProduct, final SavingsAccount savingsAccount,
-            final LocalDate dateOfBirth, final CodeValue gender) {
+            final LocalDate dateOfBirth, final CodeValue gender, final CodeValue clientType, final CodeValue clientClassification) {
 
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
@@ -283,6 +288,8 @@ public final class Client extends AbstractPersistable<Long> {
         if (dateOfBirth != null) {
             this.dateOfBirth = dateOfBirth.toDateTimeAtStartOfDay().toDate();
         }
+        this.clientType = clientType;
+        this.clientClassification = clientClassification;
 
         deriveDisplayName();
         validate();
@@ -429,7 +436,7 @@ public final class Client extends AbstractPersistable<Long> {
             final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.staffIdParamName);
             actualChanges.put(ClientApiConstants.staffIdParamName, newValue);
         }
-        
+
         if (command.isChangeInLongParameterNamed(ClientApiConstants.genderIdParamName, genderId())) {
             final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.genderIdParamName);
             actualChanges.put(ClientApiConstants.genderIdParamName, newValue);
@@ -438,6 +445,21 @@ public final class Client extends AbstractPersistable<Long> {
         if (command.isChangeInLongParameterNamed(ClientApiConstants.savingsProductIdParamName, savingsProductId())) {
             final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
             actualChanges.put(ClientApiConstants.savingsProductIdParamName, newValue);
+        }
+
+        if (command.isChangeInLongParameterNamed(ClientApiConstants.genderIdParamName, genderId())) {
+            final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.genderIdParamName);
+            actualChanges.put(ClientApiConstants.genderIdParamName, newValue);
+        }
+
+        if (command.isChangeInLongParameterNamed(ClientApiConstants.clientTypeIdParamName, clientTypeId())) {
+            final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.clientTypeIdParamName);
+            actualChanges.put(ClientApiConstants.clientTypeIdParamName, newValue);
+        }
+
+        if (command.isChangeInLongParameterNamed(ClientApiConstants.clientClassificationIdParamName, clientClassificationId())) {
+            final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.clientClassificationIdParamName);
+            actualChanges.put(ClientApiConstants.clientClassificationIdParamName, newValue);
         }
 
         final String dateFormatAsInput = command.dateFormat();
@@ -703,10 +725,6 @@ public final class Client extends AbstractPersistable<Long> {
         this.savingsAccount = savingsAccount;
     }
 
-    public ClientIncentiveAttributes incentiveAttributes() {
-        return this.incentiveAttributes;
-    }
-
     public void updateIncentiveAttributes(final Long ageLimitForChildren, final Long ageLimitForSeniorCitizen, final LocalDate compareOnDate) {
         boolean isFemale = false;
         boolean isChild = false;
@@ -722,7 +740,7 @@ public final class Client extends AbstractPersistable<Long> {
         if (this.dateOfBirth != null) {
             final LocalDate dobLacalDate = LocalDate.fromDateFields(this.dateOfBirth);
             final int age = Years.yearsBetween(dobLacalDate, compareOnDate).getYears();
-            
+
             if (age >= ageLimitForSeniorCitizen.intValue()) {
                 isSeniorCitizen = true;
             }
@@ -732,15 +750,9 @@ public final class Client extends AbstractPersistable<Long> {
             }
         }
 
-        this.incentiveAttributes = ClientIncentiveAttributes.instance(isFemale, isChild, isSeniorCitizen);
-
     }
 
-    public CodeValue gender() {
-        return this.gender;
-    }
-    
-    private Long genderId() {
+    public Long genderId() {
         Long genderId = null;
         if (this.gender != null) {
             genderId = this.gender.getId();
@@ -748,7 +760,47 @@ public final class Client extends AbstractPersistable<Long> {
         return genderId;
     }
 
-    public void updateGender(final CodeValue gender) {
+    public Long clientTypeId() {
+        Long clientTypeId = null;
+        if (this.clientType != null) {
+            clientTypeId = this.clientType.getId();
+        }
+        return clientTypeId;
+    }
+
+    public Long clientClassificationId() {
+        Long clientClassificationId = null;
+        if (this.clientClassification != null) {
+            clientClassificationId = this.clientClassification.getId();
+        }
+        return clientClassificationId;
+    }
+
+    public CodeValue gender() {
+        return this.gender;
+    }
+
+    public CodeValue clientType() {
+        return this.clientType;
+    }
+
+    public void updateClientType(CodeValue clientType) {
+        this.clientType = clientType;
+    }
+
+    public CodeValue clientClassification() {
+        return this.clientClassification;
+    }
+
+    public void updateClientClassification(CodeValue clientClassification) {
+        this.clientClassification = clientClassification;
+    }
+
+    public void updateGender(CodeValue gender) {
         this.gender = gender;
+    }
+
+    public Date dateOfBirth() {
+        return this.dateOfBirth;
     }
 }

@@ -1,6 +1,10 @@
 package org.mifosplatform.portfolio.common.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.portfolio.common.domain.ConditionType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 
 public class CommonEnumerations {
@@ -34,6 +38,46 @@ public class CommonEnumerations {
             break;
         }
         return optionData;
+    }
+
+    public static EnumOptionData conditionType(final int id, final String codePrefix) {
+        return conditionType(ConditionType.fromInt(id), codePrefix);
+    }
+
+    public static EnumOptionData conditionType(final ConditionType type, final String codePrefix) {
+        EnumOptionData optionData = null;
+        switch (type) {
+            case EQUAL:
+                optionData = new EnumOptionData(ConditionType.EQUAL.getValue().longValue(), codePrefix + ConditionType.EQUAL.getCode(),
+                        "equal");
+            break;
+            case NOT_EQUAL:
+                optionData = new EnumOptionData(ConditionType.NOT_EQUAL.getValue().longValue(), codePrefix
+                        + ConditionType.NOT_EQUAL.getCode(), "notEqual");
+            break;
+            case GRETERTHAN:
+                optionData = new EnumOptionData(ConditionType.GRETERTHAN.getValue().longValue(), codePrefix
+                        + ConditionType.GRETERTHAN.getCode(), "greterthan");
+            break;
+            case LESSTHAN:
+                optionData = new EnumOptionData(ConditionType.LESSTHAN.getValue().longValue(), codePrefix
+                        + ConditionType.LESSTHAN.getCode(), "lessthan");
+            break;
+            default:
+                optionData = new EnumOptionData(ConditionType.INVALID.getValue().longValue(), ConditionType.INVALID.getCode(), "Invalid");
+            break;
+        }
+        return optionData;
+    }
+
+    public static List<EnumOptionData> conditionType(final ConditionType[] conditionTypes, final String codePrefix) {
+        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        for (final ConditionType conditionType : conditionTypes) {
+            if (!conditionType.isInvalid()) {
+                optionDatas.add(conditionType(conditionType, codePrefix));
+            }
+        }
+        return optionDatas;
     }
 
 }

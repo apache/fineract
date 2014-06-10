@@ -20,10 +20,13 @@ import javax.persistence.Table;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
-import org.mifosplatform.portfolio.interestratechart.data.ClientIncentiveAttributes;
+import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.interestratechart.domain.InterestRateChart;
 import org.mifosplatform.portfolio.interestratechart.domain.InterestRateChartFields;
 import org.mifosplatform.portfolio.interestratechart.domain.InterestRateChartSlab;
+import org.mifosplatform.portfolio.interestratechart.incentive.AttributeIncentiveCalculation;
+import org.mifosplatform.portfolio.interestratechart.incentive.AttributeIncentiveCalculationFactory;
+import org.mifosplatform.portfolio.interestratechart.incentive.IncentiveDTO;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -49,7 +52,7 @@ public class DepositAccountInterestRateChart extends AbstractPersistable<Long> {
         final Set<InterestRateChartSlab> chartSlabs = productChart.setOfChartSlabs();
         final Set<DepositAccountInterestRateChartSlabs> depostiChartSlabs = new HashSet<DepositAccountInterestRateChartSlabs>();
         for (InterestRateChartSlab interestRateChartSlab : chartSlabs) {
-            depostiChartSlabs.add(DepositAccountInterestRateChartSlabs.from(interestRateChartSlab.slabFields(), null));
+            depostiChartSlabs.add(DepositAccountInterestRateChartSlabs.from(interestRateChartSlab, null));
         }
         final DepositAccountInterestRateChart depositChart = new DepositAccountInterestRateChart(productChart.chartFields(), null,
                 depostiChartSlabs);
@@ -112,25 +115,19 @@ public class DepositAccountInterestRateChart extends AbstractPersistable<Long> {
         this.account = account;
     }
 
-    public BigDecimal getApplicableInterestRate(final BigDecimal depositAmount,
-            final LocalDate periodStartDate, final LocalDate periodEndDate, final ClientIncentiveAttributes incentiveAttributes) {
+    public BigDecimal getApplicableInterestRate(final BigDecimal depositAmount, final LocalDate periodStartDate,
+            final LocalDate periodEndDate, final Client client) {
         BigDecimal effectiveInterestRate = BigDecimal.ZERO;
         for (DepositAccountInterestRateChartSlabs slab : setOfChartSlabs()) {
             if (slab.slabFields().isBetweenPeriod(periodStartDate, periodEndDate) && slab.slabFields().isAmountBetween(depositAmount)) {
 
-                if (incentiveAttributes == null) {
-                    effectiveInterestRate = slab.slabFields().annualInterestRate();
-                } else {
-                    if (incentiveAttributes.isSeniorCitizen()) {
-                        effectiveInterestRate = slab.slabFields().interestRateForSeniorCitizen();
-                    }
-                    if (incentiveAttributes.isFemale()) {
-
-                        effectiveInterestRate = slab.slabFields().interestRateForFemale();
-                    }
-                    if (incentiveAttributes.isChild()) {
-                        effectiveInterestRate = slab.slabFields().interestRateForChildren();
-                    }
+                effectiveInterestRate = slab.slabFields().annualInterestRate();
+                Set<DepositAccountInterestIncentives> depositInterestIncentives = slab.setOfIncentives();
+                for (DepositAccountInterestIncentives incentives : depositInterestIncentives) {
+                    AttributeIncentiveCalculation attributeIncentiveCalculation = AttributeIncentiveCalculationFactory
+                            .findAttributeIncentiveCalculation(incentives.interestIncentivesFields().entiryType());
+                    IncentiveDTO incentiveDTO = new IncentiveDTO(client, effectiveInterestRate, incentives.interestIncentivesFields());
+                    effectiveInterestRate = attributeIncentiveCalculation.calculateIncentive(incentiveDTO);
                 }
 
                 // effectiveInterestRate is zero or null then reset to default

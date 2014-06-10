@@ -153,9 +153,21 @@ public final class ClientDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.genderIdParamName, element)) {
             final Integer genderId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.genderIdParamName, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.genderIdParamName).value(genderId).notNull();
+            baseDataValidator.reset().parameter(ClientApiConstants.genderIdParamName).value(genderId).integerGreaterThanZero();
         }
 
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.clientTypeIdParamName, element)) {
+            final Integer clientType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.clientTypeIdParamName,
+                    element);
+            baseDataValidator.reset().parameter(ClientApiConstants.clientTypeIdParamName).value(clientType).integerGreaterThanZero();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.clientClassificationIdParamName, element)) {
+            final Integer clientClassification = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+                    ClientApiConstants.clientClassificationIdParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.clientClassificationIdParamName).value(clientClassification)
+                    .integerGreaterThanZero();
+        }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -338,7 +350,20 @@ public final class ClientDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.genderIdParamName, element)) {
             final Integer genderId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.genderIdParamName, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.genderIdParamName).value(genderId).notNull();
+            baseDataValidator.reset().parameter(ClientApiConstants.genderIdParamName).value(genderId).integerGreaterThanZero();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.clientTypeIdParamName, element)) {
+            final Integer clientType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.clientTypeIdParamName,
+                    element);
+            baseDataValidator.reset().parameter(ClientApiConstants.clientTypeIdParamName).value(clientType).integerGreaterThanZero();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.clientClassificationIdParamName, element)) {
+            final Integer clientClassification = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+                    ClientApiConstants.clientClassificationIdParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.clientClassificationIdParamName).value(clientClassification)
+                    .integerGreaterThanZero();
         }
 
         if (!atLeastOneParameterPassedForUpdate) {

@@ -30,25 +30,20 @@ public class InterestRateChartSlabApiConstants {
     public static final String amountRangeFromParamName = "amountRangeFrom";
     public static final String amountRangeToParamName = "amountRangeTo";
     public static final String annualInterestRateParamName = "annualInterestRate";
-    public static final String interestRateForFemaleParamName = "interestRateForFemale";
-    public static final String interestRateForChildrenParamName = "interestRateForChildren";
-    public static final String interestRateForSeniorCitizenParamName = "interestRateForSeniorCitizen";
     public static final String currencyCodeParamName = "currencyCode";
+    public static final String incentivesParamName = "incentives";
 
     // associations
 
     public static final Set<String> INTERESTRATE_CHART_SLAB_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
             localeParamName, idParamName, descriptionParamName, periodTypeParamName, fromPeriodParamName, toPeriodParamName,
-            amountRangeFromParamName, amountRangeToParamName, annualInterestRateParamName, interestRateForFemaleParamName,
-            interestRateForChildrenParamName, interestRateForSeniorCitizenParamName, currencyCodeParamName));
+            amountRangeFromParamName, amountRangeToParamName, annualInterestRateParamName, currencyCodeParamName, incentivesParamName));
 
     public static final Set<String> INTERESTRATE_CHART_SLAB_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
             localeParamName, idParamName, descriptionParamName, periodTypeParamName, fromPeriodParamName, toPeriodParamName,
-            amountRangeFromParamName, amountRangeToParamName, annualInterestRateParamName, interestRateForFemaleParamName,
-            interestRateForChildrenParamName, interestRateForSeniorCitizenParamName, currencyCodeParamName));
+            amountRangeFromParamName, amountRangeToParamName, annualInterestRateParamName, currencyCodeParamName, incentivesParamName));
 
     public static final Set<String> INTERESTRATE_CHART_SLAB_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             idParamName, descriptionParamName, periodTypeParamName, fromPeriodParamName, toPeriodParamName, amountRangeFromParamName,
-            amountRangeToParamName, annualInterestRateParamName, interestRateForFemaleParamName, interestRateForChildrenParamName,
-            interestRateForSeniorCitizenParamName, currencyCodeParamName));
+            amountRangeToParamName, annualInterestRateParamName, currencyCodeParamName, incentivesParamName));
 }
