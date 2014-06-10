@@ -77,7 +77,7 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                     this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
                             ORGANIZATION_ACCOUNTS.LIABILITY_TRANSFER_SUSPENSE.getValue(),
                             CASH_ACCOUNTS_FOR_SAVINGS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), savingsProductId, paymentTypeId, savingsId,
-                            transactionId, transactionDate, amount, isReversal);
+                            transactionId, transactionDate, overdraftAmount, isReversal);
                     if (amount.subtract(overdraftAmount).compareTo(BigDecimal.ZERO) == 1) {
                         this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
                                 ORGANIZATION_ACCOUNTS.LIABILITY_TRANSFER_SUSPENSE.getValue(),
@@ -88,7 +88,7 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                     this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
                             CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_REFERENCE.getValue(),
                             CASH_ACCOUNTS_FOR_SAVINGS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), savingsProductId, paymentTypeId, savingsId,
-                            transactionId, transactionDate, amount, isReversal);
+                            transactionId, transactionDate, overdraftAmount, isReversal);
                     if (amount.subtract(overdraftAmount).compareTo(BigDecimal.ZERO) == 1) {
                         this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
                                 CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_REFERENCE.getValue(),
@@ -130,6 +130,23 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
              * Handle Interest Applications and reversals of Interest
              * Applications
              **/
+            else if (savingsTransactionDTO.getTransactionType().isInterestPosting() && savingsTransactionDTO.isOverdraftTransaction()) {
+                // Post journal entry if earned interest amount is greater than
+                // zero
+                if (savingsTransactionDTO.getAmount().compareTo(BigDecimal.ZERO) == 1) {
+                    this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
+                            CASH_ACCOUNTS_FOR_SAVINGS.INTEREST_ON_SAVINGS.getValue(),
+                            CASH_ACCOUNTS_FOR_SAVINGS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), savingsProductId, paymentTypeId, savingsId,
+                            transactionId, transactionDate, overdraftAmount, isReversal);
+                    if (amount.subtract(overdraftAmount).compareTo(BigDecimal.ZERO) == 1) {
+                        this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
+                                CASH_ACCOUNTS_FOR_SAVINGS.INTEREST_ON_SAVINGS.getValue(),
+                                CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL.getValue(), savingsProductId, paymentTypeId, savingsId,
+                                transactionId, transactionDate, amount.subtract(overdraftAmount), isReversal);
+                    }
+                }
+            }
+
             else if (savingsTransactionDTO.getTransactionType().isInterestPosting()) {
                 // Post journal entry if earned interest amount is greater than
                 // zero
@@ -141,6 +158,33 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
             }
 
             /** Handle Fees Deductions and reversals of Fees Deductions **/
+            else if (savingsTransactionDTO.getTransactionType().isFeeDeduction() && savingsTransactionDTO.isOverdraftTransaction()) {
+                // Is the Charge a penalty?
+                if (penaltyPayments.size() > 0) {
+                    this.helper.createCashBasedJournalEntriesAndReversalsForSavingsCharges(office, currencyCode,
+                            CASH_ACCOUNTS_FOR_SAVINGS.OVERDRAFT_PORTFOLIO_CONTROL, CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_PENALTIES,
+                            savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, overdraftAmount, isReversal,
+                            penaltyPayments);
+                    if (amount.subtract(overdraftAmount).compareTo(BigDecimal.ZERO) == 1) {
+                        this.helper.createCashBasedJournalEntriesAndReversalsForSavingsCharges(office, currencyCode,
+                                CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL, CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_PENALTIES,
+                                savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate,
+                                amount.subtract(overdraftAmount), isReversal, penaltyPayments);
+                    }
+                } else {
+                    this.helper.createCashBasedJournalEntriesAndReversalsForSavingsCharges(office, currencyCode,
+                            CASH_ACCOUNTS_FOR_SAVINGS.OVERDRAFT_PORTFOLIO_CONTROL, CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_FEES,
+                            savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, overdraftAmount, isReversal,
+                            feePayments);
+                    if (amount.subtract(overdraftAmount).compareTo(BigDecimal.ZERO) == 1) {
+                        this.helper.createCashBasedJournalEntriesAndReversalsForSavingsCharges(office, currencyCode,
+                                CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL, CASH_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_FEES, savingsProductId,
+                                paymentTypeId, savingsId, transactionId, transactionDate, amount.subtract(overdraftAmount), isReversal,
+                                feePayments);
+                    }
+                }
+            }
+
             else if (savingsTransactionDTO.getTransactionType().isFeeDeduction()) {
                 // Is the Charge a penalty?
                 if (penaltyPayments.size() > 0) {
