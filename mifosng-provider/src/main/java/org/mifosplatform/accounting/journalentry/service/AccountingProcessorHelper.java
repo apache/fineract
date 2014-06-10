@@ -42,6 +42,8 @@ import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityExce
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
+import org.mifosplatform.portfolio.account.PortfolioAccountType;
+import org.mifosplatform.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
@@ -64,13 +66,15 @@ public class AccountingProcessorHelper {
     private final OfficeRepository officeRepository;
     private final LoanTransactionRepository loanTransactionRepository;
     private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
+    private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
 
     @Autowired
     public AccountingProcessorHelper(final JournalEntryRepository glJournalEntryRepository,
             final ProductToGLAccountMappingRepository accountMappingRepository, final GLClosureRepository closureRepository,
             final OfficeRepository officeRepository, final LoanTransactionRepository loanTransactionRepository,
             final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
-            final OfficeToGLAccountMappingRepository officeToGLAccountMappingRepository) {
+            final OfficeToGLAccountMappingRepository officeToGLAccountMappingRepository,
+            final AccountTransfersReadPlatformService accountTransfersReadPlatformService) {
         this.glJournalEntryRepository = glJournalEntryRepository;
         this.accountMappingRepository = accountMappingRepository;
         this.closureRepository = closureRepository;
@@ -78,6 +82,7 @@ public class AccountingProcessorHelper {
         this.loanTransactionRepository = loanTransactionRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
         this.officeToGLAccountMappingRepository = officeToGLAccountMappingRepository;
+        this.accountTransfersReadPlatformService = accountTransfersReadPlatformService;
     }
 
     public LoanDTO populateLoanDtoFromMap(final Map<String, Object> accountingBridgeData, final boolean cashBasedAccountingEnabled,
@@ -86,9 +91,8 @@ public class AccountingProcessorHelper {
         final Long loanProductId = (Long) accountingBridgeData.get("loanProductId");
         final Long officeId = (Long) accountingBridgeData.get("officeId");
         final CurrencyData currencyData = (CurrencyData) accountingBridgeData.get("currency");
-        final boolean isAccountTransfer = (Boolean) accountingBridgeData.get("isAccountTransfer");
-
         final List<LoanTransactionDTO> newLoanTransactions = new ArrayList<LoanTransactionDTO>();
+        boolean isAccountTransfer = (Boolean) accountingBridgeData.get("isAccountTransfer");
 
         @SuppressWarnings("unchecked")
         final List<Map<String, Object>> newTransactionsMap = (List<Map<String, Object>>) accountingBridgeData.get("newLoanTransactions");
@@ -127,6 +131,10 @@ public class AccountingProcessorHelper {
                 }
             }
 
+            if (!isAccountTransfer) {
+                isAccountTransfer = this.accountTransfersReadPlatformService.isAccountTransfer(Long.parseLong(transactionId),
+                        PortfolioAccountType.LOAN);
+            }
             final LoanTransactionDTO transaction = new LoanTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
                     transactionDate, transactionType, amount, principal, interest, fees, penalties, overPayments, reversed,
                     feePaymentDetails, penaltyPaymentDetails, isAccountTransfer);
@@ -145,8 +153,8 @@ public class AccountingProcessorHelper {
         final Long loanProductId = (Long) accountingBridgeData.get("savingsProductId");
         final Long officeId = (Long) accountingBridgeData.get("officeId");
         final CurrencyData currencyData = (CurrencyData) accountingBridgeData.get("currency");
-        final boolean isAccountTransfer = (Boolean) accountingBridgeData.get("isAccountTransfer");
         final List<SavingsTransactionDTO> newSavingsTransactions = new ArrayList<SavingsTransactionDTO>();
+        boolean isAccountTransfer = (Boolean) accountingBridgeData.get("isAccountTransfer");
 
         @SuppressWarnings("unchecked")
         final List<Map<String, Object>> newTransactionsMap = (List<Map<String, Object>>) accountingBridgeData.get("newSavingsTransactions");
@@ -180,7 +188,10 @@ public class AccountingProcessorHelper {
                     }
                 }
             }
-
+            if (!isAccountTransfer) {
+                isAccountTransfer = this.accountTransfersReadPlatformService.isAccountTransfer(Long.parseLong(transactionId),
+                        PortfolioAccountType.SAVINGS);
+            }
             final SavingsTransactionDTO transaction = new SavingsTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
                     transactionDate, transactionType, amount, reversed, feePayments, penaltyPayments, overdraftAmount, isAccountTransfer);
 
@@ -213,9 +224,9 @@ public class AccountingProcessorHelper {
      * @param isReversal
      */
     public void createAccrualBasedJournalEntriesAndReversalsForLoan(final Office office, final String currencyCode,
-            final Integer accountTypeToBeDebited, final Integer accountTypeToBeCredited,
-            final Long loanProductId, final Long paymentTypeId, final Long loanId, final String transactionId, final Date transactionDate,
-            final BigDecimal amount, final Boolean isReversal) {
+            final Integer accountTypeToBeDebited, final Integer accountTypeToBeCredited, final Long loanProductId,
+            final Long paymentTypeId, final Long loanId, final String transactionId, final Date transactionDate, final BigDecimal amount,
+            final Boolean isReversal) {
         int accountTypeToDebitId = accountTypeToBeDebited;
         int accountTypeToCreditId = accountTypeToBeCredited;
         // reverse debits and credits for reversals
