@@ -215,7 +215,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
             }
 
-            account.updateMaturityDateAndAmount(mc);
+            final boolean isPreMatureClosure = false;
+            account.updateMaturityDateAndAmount(mc, isPreMatureClosure);
             account.validateAccountBalanceDoesNotBecomeNegative(SavingsAccountTransactionType.PAY_CHARGE.name());
             this.savingAccountRepository.save(account);
         }
@@ -276,6 +277,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             // submitted and activation date are different then recalculate
             // maturity date and schedule
             if (!account.accountSubmittedAndActivationOnSameDate()) {
+                final boolean isPreMatureClosure = false;
                 final CalendarInstance calendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
                         savingsId, CalendarEntityType.SAVINGS.getValue(), CalendarType.COLLECTION.getValue());
 
@@ -284,7 +286,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 Integer frequency = CalendarUtils.getInterval(calendar.getRecurrence());
                 frequency = frequency == -1 ? 1 : frequency;
                 account.generateSchedule(frequencyType, frequency);
-                account.updateMaturityDateAndAmount(mc);
+                account.updateMaturityDateAndAmount(mc, isPreMatureClosure);
             }
 
             final LocalDate overdueUptoDate = account.maturityDate().isAfter(DateUtils.getLocalDateOfTenant()) ? DateUtils
@@ -517,7 +519,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         }
         account.validateAccountBalanceDoesNotBecomeNegative(SavingsApiConstants.undoTransactionAction);
         // account.activateAccountBasedOnBalance();
-        account.updateMaturityDateAndAmount(mc);
+        final boolean isPreMatureClosure = false;
+        account.updateMaturityDateAndAmount(mc, isPreMatureClosure);
 
         final LocalDate overdueUptoDate = account.maturityDate().isAfter(DateUtils.getLocalDateOfTenant()) ? DateUtils
                 .getLocalDateOfTenant() : account.maturityDate();
