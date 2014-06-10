@@ -19,6 +19,7 @@ import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
+import org.mifosplatform.organisation.office.domain.OrganisationCurrency;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductBorrowerCycleVariationData;
@@ -290,6 +291,19 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         }
 
     }
+    
+	@Override
+	public Collection<LoanProductData> retrieveAllLoanProductsForCurrency(
+			OrganisationCurrency currency) {
+		this.context.authenticatedUser();
+
+		final LoanProductMapper rm = new LoanProductMapper(null, null);
+
+		final String sql = "select " + rm.loanProductSchema()
+				+ " where lp.currency_code='" + currency.getCode() + "'";
+
+		return this.jdbcTemplate.query(sql, rm, new Object[] {});
+	}
 
     @Override
     public Collection<LoanProductData> retrieveAvailableLoanProductsForMix() {

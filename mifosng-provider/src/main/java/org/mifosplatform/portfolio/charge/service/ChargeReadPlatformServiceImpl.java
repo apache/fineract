@@ -18,6 +18,7 @@ import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
+import org.mifosplatform.organisation.office.domain.OrganisationCurrency;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.domain.ChargeAppliesTo;
 import org.mifosplatform.portfolio.charge.exception.ChargeNotFoundException;
@@ -62,6 +63,21 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
+
+	@Override
+	@Cacheable(value = "charges", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('ch')")
+	public Collection<ChargeData> retrieveAllChargesForCurrency(
+			OrganisationCurrency currency) {
+		this.context.authenticatedUser();
+
+		final ChargeMapper rm = new ChargeMapper();
+
+		final String sql = "select " + rm.chargeSchema()
+				+ " where c.is_deleted=0 and c.currency_code='" + currency.getCode()
+				+ "' order by c.name ";
+
+		return this.jdbcTemplate.query(sql, rm, new Object[] {});
+	}
 
     @Override
     public ChargeData retrieveCharge(final Long chargeId) {
