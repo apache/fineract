@@ -181,7 +181,7 @@ public class ProductToGLAccountMappingHelper {
          * Accounts in the system
          **/
         final Set<Long> existingCharges = new HashSet<Long>();
-        if (chargeToIncomeAccountMappingArray != null) {
+        if (chargeToIncomeAccountMappingArray != null && chargeToIncomeAccountMappingArray.size() > 0) {
             if (changes != null) {
                 changes.put(arrayFragmentName, command.jsonFragment(arrayFragmentName));
             }
@@ -259,7 +259,7 @@ public class ProductToGLAccountMappingHelper {
          * Fund Sources in the system
          **/
         final Set<Long> existingPaymentTypes = new HashSet<Long>();
-        if (paymentChannelMappingArray != null) {
+        if (paymentChannelMappingArray != null && paymentChannelMappingArray.size() > 0) {
             if (changes != null) {
                 changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(),
                         command.jsonFragment(LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue()));
