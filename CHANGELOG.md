@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 11 Jun 2014 - 1.23.0.RELEASE
 1. 30 Apr 2014 - 1.22.0.RELEASE
 1. 30 Mar 2014 - 1.21.0.RELEASE
 1. 18 Mar 2014 - 1.20.1.RELEASE
@@ -62,6 +63,89 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.23.0.RELEASE
+=============
+This feature release contains works around Adding support for opening fixed deposits from existing savings accounts, transferring interest from fixed deposits to savings Account, cccounting improvements for account Transfers, ability to collect "recover payments" for written off Loans and a number of bug fixes
+
+Platform & API
+
+New Features & Improvements
+
+ - [MIFOSX-1163] - Add support for opening fixed deposits from existing savings account
+ - [MIFOSX-1182] - Add support to transfer interest from fixed deposit to linked savings account
+ - [MIFOSX-695] - Clean up Account Transfers functionality implementation
+ - [MIFOSX-281] - Add ability to enter a 'recovery repayment' on written off loan
+ - [MIFOSX-1227] - Option to set staff as active/inactive
+ - [MIFOSX-1024] - Add support to decline maker checker
+ - [MIFOSX-709] - Ability of Not allow to Close Client with the Loan status "Overpaid"
+ - [MIFOSX-982] - Add ability to associate a staff to user
+ - [MIFOSX-1203] - Add batch job to update status from Active to Matured in Fixed deposits
+
+Bugs
+
+ - [MIFOSX-1019] - transferring a client with a savings account not approved yet crashes
+ - [MIFOSX-1099] - Added validation that compound period falls within posting period
+ - [MIFOSX-1107] - Transaction balance end day calculated wrongly after interest posting in recurring deposit account
+ - [MIFOSX-1115] - Withdrawal posted twice when closing matured recurring deposit account
+ - [MIFOSX-1150] - Issue where null pointer exception was thrown after enabling cash based accounting for recurring deposit account
+ - [MIFOSX-1151] - Issue where expected first deposit date was not updated when recurring deposit account was edited
+ - [MIFOSX-1162] - Undo disbursal failing for loans which have overdue charges
+ - [MIFOSX-1187] - Not able to submit Fixed deposit application if the Maximum deposit term is not defined in Product level
+ - [MIFOSX-1183] - replaced fields in loans api transactions part (loanTransactionType.invalid)
+ - [MIFOSX-960] - Lefthand navigation menu shouldn't collapse automatically
+ - [MIFOSX-1300] - Should not allowed to transfer fund from Savings account to an active Fixed deposit account
+ - [MIFOSX-1200] - In Fixed deposit on premature closure withdrawal amount is calculating incorrectly
+ - [MIFOSX-1288] - For FD and RD transfer to savings account on premature closure is not working as expected
+ - [MIFOSX-1242] - For update fixed deposit product - "View Audit entry" page displays other improper details along with the output
+ - [MIFOSX-1243] - Not able to create Fixed deposit account for a client if Maker checker task is enabled.
+ - [MIFOSX-1244] - Details displayed in "Waiting For Checker Approval" page after creating Recurring Deposit is not proper
+ - [MIFOSX-1245] - Not able to create Recurring deposit account for a client if Maker checker task is enabled.
+ - [MIFOSX-1260] - Not able to create a client with the savings account attached
+ - [MIFOSX-1268] - In demo version Transactions created by activation of savings account while creating client is not proper
+ - [MIFOSX-1270] - In Savings account Journal entries are not mapping properly because of the charges attached on activation.
+ - [MIFOSX-1274] - Standing Instructions fail if the savings account had gone to negative balance during account creation
+ - [MIFOSX-1318] - Not able to Generate collection sheet for the defined meeting date
+ - [MIFOSX-1238] - Error while running Pentaho reports in MySQL 5.6+ with strict mode enabled
+ - [MIFOSX-1208] - Issue on Retrieving Datatable entries for Office.
+ - [MIFOSX-1215] - Not able to approve/delete maker checker tasks with checker user role
+ - [MIFOSX-1237] - Able to login with Deleted user
+
+Community App
+
+ - [MIFOSX-1233] - When assigning staff to Centers, Groups, Client, Loan, Savings a/c: Only loan officers who belong to the branch should be displayed in dropdown
+ - [MIFOSX-1154] - Usability issues while editing data tables
+ - [MIFOSX-1164] - Clean up login page transition
+ - [MIFOSX-1320] - Force logout on the community app on tab/window close
+ - [MIFOSX-1263] - Client/Loan Account info table takes up too much space
+ - [MIFOSX-1039] - Provide option for External ID to Loans
+ - [MIFOSX-1069] - Implementation of sorting options for transaction preview tables for savings or loans.
+ - [MIFOSX-1207] - Journal Entries - should have debits before credits
+ - [MIFOSX-1209] - In Loan repayment schedule page "Waive" column should be introduced
+ - [MIFOSX-1226] - UI improvements in Fixed deposits
+ - [MIFOSX-1254] - The UI for defining/managing charges, refers to loan products only. Charges may be set up for other products.
+ - [MIFOSX-1255] - Overdue charges do not appear in UI in loan product edit mode
+ - [MIFOSX-1256] - Filter charge and overdue charges drop-down lists to display only valid charges (matching currency)
+ - [MIFOSX-1257] - When creating charges, charges may be associated with either Loan or Saving, but Saving apply to Fixed and Recurring Deposits as well.
+ - [MIFOSX-1259] - Need space between icons and text
+ - [MIFOSX-1267] - Loan writeoff screen should display Writeoff amount
+ - [MIFOSX-1294] - Ability to hide " Add Fee Frequency " field for Loan charges except for Overdue fees
+ - [MIFOSX-1297] - In Saving product creation page settings is not working as expected
+ - [MIFOSX-1299] - Not able to add cash based accounting in Edit Fixed deposit product
+ - [MIFOSX-1196] - In fixed deposit product not able to "Edit Interest Rate Chart" displays improper error message
+ - [MIFOSX-1198] - Mobile Number field in Community App should be Text instead of Numeric field
+ - [MIFOSX-1282] - UI related issues in FD, RD, Loan and Savings products
+ - [MIFOSX-1276] - Not able to save Edit loan product page with Accounting "None"
+ - [MIFOSX-1279] - Deposit frequency is missed in Create and edit Recurring deposit product
+ - [MIFOSX-1280] - "Locking period frequency" is displaying improper values after submitting the Fixed deposit application and Recurring deposit application for a client
+ - [MIFOSX-1281] - In cash based accounting for loan products "Over payment liability" GL accounts are not displaying in dropdown
+ - [MIFOSX-1314] - Transfer of overpaid Loan amount to Savings account navigates to a page displays without entries
+ - [MIFOSX-1327] - Date format modified in settings is displaying "invalid date format" error while adding charge to savings account
+ - [MIFOSX-1328] - UI related issues
+ - [MIFOSX-1217] - Overdue charges added while creating the loan product is not displaying in Edit loan product page.
+ - [MIFOSX-1219] - Unable to make datatable entries for manually registered datatables
+ - [MIFOSX-1221] - External ID added while creating the center is not displaying in center general page
+ - [MIFOSX-1240] - Gender drop down menu does not display when editing client information
 
 
 1.22.0.RELEASE
