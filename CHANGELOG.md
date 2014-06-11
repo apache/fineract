@@ -66,7 +66,7 @@ Releases
 
 1.23.0.RELEASE
 =============
-This feature release contains works around Adding support for opening fixed deposits from existing savings accounts, transferring interest from fixed deposits to savings Account, cccounting improvements for account Transfers, ability to collect "recover payments" for written off Loans and a number of bug fixes
+This feature release contains works around Adding support for opening fixed deposits from existing savings accounts, transferring interest from fixed deposits to savings Account, acccounting improvements for account Transfers, ability to collect "recover payments" for written off Loans, flexible interest rate charts with the ability to provide incentives based on customer attributes and a number of bug fixes
 
 Platform & API
 
@@ -81,6 +81,7 @@ New Features & Improvements
  - [MIFOSX-709] - Ability of Not allow to Close Client with the Loan status "Overpaid"
  - [MIFOSX-982] - Add ability to associate a staff to user
  - [MIFOSX-1203] - Add batch job to update status from Active to Matured in Fixed deposits
+ - [MIFOSX-1313] - Add support to use incentives for interest rate chart
 
 Bugs
 
