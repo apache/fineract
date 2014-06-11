@@ -475,6 +475,16 @@ public final class Client extends AbstractPersistable<Long> {
             this.activationDate = newValue.toDate();
             this.officeJoiningDate = this.activationDate;
         }
+        
+        if (command.isChangeInLocalDateParameterNamed(ClientApiConstants.dateOfBirthParamName, dateOfBirthLocalDate())) {
+            final String valueAsInput = command.stringValueOfParameterNamed(ClientApiConstants.dateOfBirthParamName);
+            actualChanges.put(ClientApiConstants.dateOfBirthParamName, valueAsInput);
+            actualChanges.put(ClientApiConstants.dateFormatParamName, dateFormatAsInput);
+            actualChanges.put(ClientApiConstants.localeParamName, localeAsInput);
+
+            final LocalDate newValue = command.localDateValueOfParameterNamed(ClientApiConstants.dateOfBirthParamName);
+            this.dateOfBirth = newValue.toDate();
+        }
 
         validate();
 
@@ -802,5 +812,13 @@ public final class Client extends AbstractPersistable<Long> {
 
     public Date dateOfBirth() {
         return this.dateOfBirth;
+    }
+    
+    public LocalDate dateOfBirthLocalDate(){
+        LocalDate dateOfBirth = null;
+        if (this.dateOfBirth != null) {
+            dateOfBirth = LocalDate.fromDateFields(this.dateOfBirth);
+        }
+        return dateOfBirth;
     }
 }

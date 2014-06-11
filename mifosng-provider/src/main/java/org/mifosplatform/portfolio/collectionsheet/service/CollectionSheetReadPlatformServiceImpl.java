@@ -488,12 +488,14 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             int groupIndex = 0;
             boolean isEndOfRecords = false;
             // move cursor to first row.
-            rs.next();
+            final boolean isNotEmtyResultSet = rs.next();
 
-            while (!isEndOfRecords) {
-                group = groupSavingsDataMapper.mapRowData(rs, groupIndex++);
-                groups.add(group);
-                isEndOfRecords = rs.isAfterLast();
+            if (isNotEmtyResultSet) {
+                while (!isEndOfRecords) {
+                    group = groupSavingsDataMapper.mapRowData(rs, groupIndex++);
+                    groups.add(group);
+                    isEndOfRecords = rs.isAfterLast();
+                }
             }
 
             return groups;
