@@ -3,11 +3,10 @@ package org.mifosplatform.accounting.accountmapping.service;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mifosplatform.accounting.accountmapping.domain.OfficeToGLAccountMapping;
-import org.mifosplatform.accounting.accountmapping.domain.OfficeToGLAccountMappingRepositoryWrapper;
-import org.mifosplatform.accounting.accountmapping.exception.DuplicateOfficeToGLAccountMappingFoundException;
-import org.mifosplatform.accounting.accountmapping.exception.MappingUpdateNotSupportedException;
-import org.mifosplatform.accounting.accountmapping.serialization.OfficeToGLAccountMappingDataValidator;
+import org.mifosplatform.accounting.accountmapping.domain.FinancialActivityAccount;
+import org.mifosplatform.accounting.accountmapping.domain.FinancialActivityAccountRepositoryWrapper;
+import org.mifosplatform.accounting.accountmapping.exception.DuplicateFinancialActivityAccountFoundException;
+import org.mifosplatform.accounting.accountmapping.serialization.FinancialActivityAccountDataValidator;
 import org.mifosplatform.accounting.common.AccountingConstants.ORGANIZATION_ACCOUNTING_PARAMS;
 import org.mifosplatform.accounting.common.AccountingConstants.ORGANIZATION_ACCOUNTS;
 import org.mifosplatform.accounting.glaccount.domain.GLAccount;
@@ -18,72 +17,64 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.organisation.office.domain.Office;
-import org.mifosplatform.organisation.office.domain.OfficeRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.JsonElement;
 
 @Service
-public class OfficeToGLAccountMappingWritePlatformServiceImpl implements OfficeToGLAccountMappingWritePlatformService {
+public class FinancialActivityAccountWritePlatformServiceImpl implements FinancialActivityAccountWritePlatformService {
 
-    private final OfficeToGLAccountMappingRepositoryWrapper accountMappingRepository;
-    private final OfficeToGLAccountMappingDataValidator fromApiJsonDeserializer;
+    private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository;
+    private final FinancialActivityAccountDataValidator fromApiJsonDeserializer;
     private final FromJsonHelper fromApiJsonHelper;
     private final GLAccountRepositoryWrapper glAccountRepositoryWrapper;
-    private final OfficeRepositoryWrapper officeRepositoryWrapper;
 
     @Autowired
-    public OfficeToGLAccountMappingWritePlatformServiceImpl(final OfficeToGLAccountMappingRepositoryWrapper accountMappingRepository,
-            final OfficeToGLAccountMappingDataValidator fromApiJsonDeserializer, final FromJsonHelper fromApiJsonHelper,
-            final GLAccountRepositoryWrapper glAccountRepositoryWrapper, final OfficeRepositoryWrapper officeRepositoryWrapper) {
-        this.accountMappingRepository = accountMappingRepository;
+    public FinancialActivityAccountWritePlatformServiceImpl(
+            final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository,
+            final FinancialActivityAccountDataValidator fromApiJsonDeserializer, final FromJsonHelper fromApiJsonHelper,
+            final GLAccountRepositoryWrapper glAccountRepositoryWrapper) {
+        this.financialActivityAccountRepository = financialActivityAccountRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.glAccountRepositoryWrapper = glAccountRepositoryWrapper;
-        this.officeRepositoryWrapper = officeRepositoryWrapper;
     }
 
     @Override
-    public CommandProcessingResult createGLAccountMapping(JsonCommand command) {
+    public CommandProcessingResult createGLAccountActivityMapping(JsonCommand command) {
 
         this.fromApiJsonDeserializer.validateForCreate(command.json());
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
-        final Long officeId = this.fromApiJsonHelper.extractLongNamed("officeId", element);
-        final Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
-        OfficeToGLAccountMapping accountMapping = createLiabilityTrasferSuspenceMapping(office, element);
-        checkForExistingMapping(accountMapping);
-        this.accountMappingRepository.save(accountMapping);
+        FinancialActivityAccount financialActivityAccount = createLiabilityTrasferSuspenceMapping(element);
+        checkForExistingMapping(financialActivityAccount);
+        this.financialActivityAccountRepository.save(financialActivityAccount);
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
-                .withEntityId(accountMapping.getId()) //
+                .withEntityId(financialActivityAccount.getId()) //
                 .build();
     }
 
-    private void checkForExistingMapping(final OfficeToGLAccountMapping accountMapping) {
-        OfficeToGLAccountMapping existingMapping = this.accountMappingRepository.findByOfficeAndFinancialAccountType(accountMapping
-                .office().getId(), accountMapping.getFinancialAccountType());
-        if (existingMapping != null && !existingMapping.getId().equals(accountMapping.getId())) { throw new DuplicateOfficeToGLAccountMappingFoundException(
-                accountMapping.office().getId(), accountMapping.getFinancialAccountType()); }
+    private void checkForExistingMapping(final FinancialActivityAccount financialActivityAccount) {
+        FinancialActivityAccount existingMapping = this.financialActivityAccountRepository
+                .findByFinancialActivityType(financialActivityAccount.getFinancialActivityType());
+        if (existingMapping != null) { throw new DuplicateFinancialActivityAccountFoundException(
+                financialActivityAccount.getFinancialActivityType()); }
     }
 
     @Override
-    public CommandProcessingResult updateGLAccountMapping(Long mappingId, JsonCommand command) {
+    public CommandProcessingResult updateGLAccountActivityMapping(Long mappingId, JsonCommand command) {
         this.fromApiJsonDeserializer.validateForUpdate(command.json());
-        final OfficeToGLAccountMapping officeToGLAccountMapping = this.accountMappingRepository.findOneWithNotFoundDetection(mappingId);
-        Map<String, Object> changes = findChanges(command, officeToGLAccountMapping);
+        final FinancialActivityAccount financialActivityAccount = this.financialActivityAccountRepository
+                .findOneWithNotFoundDetection(mappingId);
+        Map<String, Object> changes = findChanges(command, financialActivityAccount);
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
 
         if (changes.containsKey(ORGANIZATION_ACCOUNTING_PARAMS.LIABILITY_TRANSFER_SUSPENSE.getValue())) {
             final GLAccount glAccount = fetchGLAccount(element, ORGANIZATION_ACCOUNTING_PARAMS.LIABILITY_TRANSFER_SUSPENSE.getValue(),
                     GLAccountType.LIABILITY);
-            officeToGLAccountMapping.updateGlAccount(glAccount);
-        }
-
-        if (!changes.isEmpty()) {
-            checkForExistingMapping(officeToGLAccountMapping);
-            this.accountMappingRepository.save(officeToGLAccountMapping);
+            financialActivityAccount.updateGlAccount(glAccount);
+            this.financialActivityAccountRepository.save(financialActivityAccount);
         }
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -93,20 +84,21 @@ public class OfficeToGLAccountMappingWritePlatformServiceImpl implements OfficeT
     }
 
     @Override
-    public CommandProcessingResult deleteGLAccountMapping(Long mappingId, JsonCommand command) {
-        final OfficeToGLAccountMapping officeToGLAccountMapping = this.accountMappingRepository.findOneWithNotFoundDetection(mappingId);
-        this.accountMappingRepository.delete(officeToGLAccountMapping);
+    public CommandProcessingResult deleteGLAccountActivityMapping(Long mappingId, JsonCommand command) {
+        final FinancialActivityAccount officeToGLAccountMapping = this.financialActivityAccountRepository
+                .findOneWithNotFoundDetection(mappingId);
+        this.financialActivityAccountRepository.delete(officeToGLAccountMapping);
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(mappingId) //
                 .build();
     }
 
-    private OfficeToGLAccountMapping createLiabilityTrasferSuspenceMapping(final Office office, final JsonElement element) {
+    private FinancialActivityAccount createLiabilityTrasferSuspenceMapping(final JsonElement element) {
         final GLAccount glAccount = fetchGLAccount(element, ORGANIZATION_ACCOUNTING_PARAMS.LIABILITY_TRANSFER_SUSPENSE.getValue(),
                 GLAccountType.LIABILITY);
         final Integer financialAccountType = ORGANIZATION_ACCOUNTS.LIABILITY_TRANSFER_SUSPENSE.getValue();
-        return OfficeToGLAccountMapping.createNew(glAccount, office, financialAccountType);
+        return FinancialActivityAccount.createNew(glAccount, financialAccountType);
     }
 
     private GLAccount fetchGLAccount(final JsonElement element, final String paramName, final GLAccountType expectedAccountType) {
@@ -133,19 +125,11 @@ public class OfficeToGLAccountMappingWritePlatformServiceImpl implements OfficeT
         return glAccount;
     }
 
-    public Map<String, Object> findChanges(JsonCommand command, OfficeToGLAccountMapping accountMapping) {
+    public Map<String, Object> findChanges(JsonCommand command, FinancialActivityAccount financialActivityAccount) {
 
         Map<String, Object> changes = new HashMap<String, Object>();
 
-        final String officeParamName = "officeId";
-        Long existingOfficeId = accountMapping.office().getId();
-        if (command.isChangeInLongParameterNamed(officeParamName, existingOfficeId)) {
-            final Long newValue = command.longValueOfParameterNamed(officeParamName);
-            String defaultMsg = "Office updating not allowed ";
-            throw new MappingUpdateNotSupportedException("officeId", defaultMsg, newValue,existingOfficeId,accountMapping.getId());
-        }
-
-        Long existingGLAccountId = accountMapping.glAccount().getId();
+        Long existingGLAccountId = financialActivityAccount.glAccount().getId();
         if (command
                 .isChangeInLongParameterNamed(ORGANIZATION_ACCOUNTING_PARAMS.LIABILITY_TRANSFER_SUSPENSE.getValue(), existingGLAccountId)) {
             final Long newValue = command.longValueOfParameterNamed(ORGANIZATION_ACCOUNTING_PARAMS.LIABILITY_TRANSFER_SUSPENSE.getValue());

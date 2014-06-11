@@ -11,14 +11,14 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
  * A {@link RuntimeException} thrown when product to GL account mapping are not
  * found.
  */
-public class OfficeToGLAccountMappingNotFoundException extends AbstractPlatformResourceNotFoundException {
+public class FinancialActivityAccountNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public OfficeToGLAccountMappingNotFoundException(final Long officeId, final String accountType) {
+    public FinancialActivityAccountNotFoundException(final Long officeId, final String accountType) {
         super("error.msg.officeToAccountMapping.not.found", "Mapping for office with Id " + officeId
                 + " does not exist for an account of type " + accountType, officeId, accountType);
     }
 
-    public OfficeToGLAccountMappingNotFoundException(final Long id) {
+    public FinancialActivityAccountNotFoundException(final Long id) {
         super("error.msg.officeToAccountMapping.not.found", "Mapping for GL Account with Id " + id + " does not exist", id);
     }
 }

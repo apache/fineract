@@ -27,18 +27,18 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 @Component
-public final class OfficeToGLAccountMappingDataValidator {
+public final class FinancialActivityAccountDataValidator {
 
     /**
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("locale",
-            ORGANIZATION_ACCOUNTING_PARAMS.LIABILITY_TRANSFER_SUSPENSE.getValue(), "officeId"));
+            ORGANIZATION_ACCOUNTING_PARAMS.LIABILITY_TRANSFER_SUSPENSE.getValue()));
 
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
-    public OfficeToGLAccountMappingDataValidator(final FromJsonHelper fromApiJsonHelper) {
+    public FinancialActivityAccountDataValidator(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
@@ -57,9 +57,6 @@ public final class OfficeToGLAccountMappingDataValidator {
                 ORGANIZATION_ACCOUNTING_PARAMS.LIABILITY_TRANSFER_SUSPENSE.getValue(), element);
         baseDataValidator.reset().parameter(ORGANIZATION_ACCOUNTING_PARAMS.LIABILITY_TRANSFER_SUSPENSE.getValue())
                 .value(liabilityTransferInSuspenseAccountId).notNull().integerGreaterThanZero();
-
-        final Long officeID = this.fromApiJsonHelper.extractLongNamed("officeId", element);
-        baseDataValidator.reset().parameter("officeId").value(officeID).notNull().integerGreaterThanZero();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -80,11 +77,6 @@ public final class OfficeToGLAccountMappingDataValidator {
                     ORGANIZATION_ACCOUNTING_PARAMS.LIABILITY_TRANSFER_SUSPENSE.getValue(), element);
             baseDataValidator.reset().parameter(ORGANIZATION_ACCOUNTING_PARAMS.LIABILITY_TRANSFER_SUSPENSE.getValue())
                     .value(liabilityTransferInSuspenseAccountId).notNull().integerGreaterThanZero();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists("officeId", element)) {
-            final Long officeID = this.fromApiJsonHelper.extractLongNamed("officeId", element);
-            baseDataValidator.reset().parameter("officeId").value(officeID).notNull().integerGreaterThanZero();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

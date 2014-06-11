@@ -11,11 +11,11 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
  * A {@link RuntimeException} thrown when product to GL account mapping are not
  * found.
  */
-public class DuplicateOfficeToGLAccountMappingFoundException extends AbstractPlatformDomainRuleException {
+public class DuplicateFinancialActivityAccountFoundException extends AbstractPlatformDomainRuleException {
 
-    public DuplicateOfficeToGLAccountMappingFoundException(final Long officeId, final Integer accountType) {
-        super("error.msg.officeToAccountMapping.exists.for.office", "Mapping for office with Id " + officeId
-                + " exist for an account of type " + accountType, officeId, accountType);
+    public DuplicateFinancialActivityAccountFoundException(final Integer financialActivityType) {
+        super("error.msg.officeToAccountMapping.exists.for.office", "Mapping for activity already exists " + financialActivityType,
+                financialActivityType);
     }
 
 }

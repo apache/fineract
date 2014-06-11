@@ -1371,19 +1371,19 @@
 							</tr>
 							<tr>
 								<td><a href="#officeglaccount">Office GL Account Mappings</a></td>
-								<td>officeglaccounts</td>
-								<td><a href="#officeglaccounts_create">Create Office GL Account Mapping</a><br> </td>
-								<td><a href="#officeglaccounts_list">List Journal Entries</a></td>
+								<td>financialactivityaccounts</td>
+								<td><a href="#financialactivityaccounts_create">Create Office GL Account Mapping</a><br> </td>
+								<td><a href="#financialactivityaccounts_list">List Journal Entries</a></td>
 								<td></td>
 								<td></td>
 							</tr>
 							<tr>
 								<td></td>
-								<td>officeglaccounts/{entryId}</td>
+								<td>financialactivityaccounts/{entryId}</td>
 								<td></td>
-								<td><a href="#officeglaccounts_retrieve">Retrieve a single Entry</a></td>
-								<td><a href="#officeglaccounts_update">Update Office GL Account Mapping</a></td>
-								<td><a href="#officeglaccounts_delete">Delete Office GL Account Mapping</a></td>
+								<td><a href="#financialactivityaccounts_retrieve">Retrieve a single Entry</a></td>
+								<td><a href="#financialactivityaccounts_update">Update Office GL Account Mapping</a></td>
+								<td><a href="#financialactivityaccounts_delete">Delete Office GL Account Mapping</a></td>
 
 							</tr>
 							
@@ -28608,7 +28608,7 @@ Content-Type: application/json
                 </div>
             </div>
 
-            <a id="officeglaccounts_list" name="officeglaccounts_list" class="old-syle-anchor">&nbsp;</a>
+            <a id="financialactivityaccounts_list" name="financialactivityaccounts_list" class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
                     <h4>List Office Level GL Account Mappings</h4>
@@ -28648,13 +28648,13 @@ Content-Type: application/json
 						
 					</dl>
 					<p>Example Requests:</p>
-					<div class=apiClick>officeglaccounts</div>
+					<div class=apiClick>financialactivityaccounts</div>
 					<br>
-					<div class=apiClick>officeglaccounts?orderBy=id&sortOrder=DESC</div>
+					<div class=apiClick>financialactivityaccounts?orderBy=id&sortOrder=DESC</div>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
-GET https://DomainName/api/v1/officeglaccounts
+GET https://DomainName/api/v1/financialactivityaccounts
                     </code>
                     <code class="method-response">
 
@@ -28677,7 +28677,7 @@ GET https://DomainName/api/v1/officeglaccounts
                 </div>
             </div>
 
-            <a id="officeglaccounts_create" name="officeglaccounts_create" class="old-syle-anchor">&nbsp;</a>
+            <a id="financialactivityaccounts_create" name="financialactivityaccounts_create" class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
                     <h4>Create Office GL Account</h4>
@@ -28696,10 +28696,10 @@ GET https://DomainName/api/v1/officeglaccounts
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
-POST https://DomainName/api/v1/officeglaccounts
+POST https://DomainName/api/v1/financialactivityaccounts
                     </code>
                     <code class="method-request">
-POST officeglaccounts
+POST financialactivityaccounts
 Content-Type: application/json 
 Request Body:
 {
@@ -28715,7 +28715,7 @@ Request Body:
                 </div>
             </div>
 
-            <a id="officeglaccounts_update" name="officeglaccounts_update" class="old-syle-anchor">&nbsp;</a>
+            <a id="financialactivityaccounts_update" name="financialactivityaccounts_update" class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
                     <h4>Update Office GL Account Mappings</h4>
@@ -28727,10 +28727,10 @@ Request Body:
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
-POST https://DomainName/api/v1/officeglaccounts/1
+POST https://DomainName/api/v1/financialactivityaccounts/1
                     </code>
                     <code class="method-request">
-POST officeglaccounts
+POST financialactivityaccounts
 Content-Type: application/json 
 Request Body:
 {
@@ -28747,18 +28747,18 @@ Request Body:
             </div>
 
 			
-            <a id="officeglaccounts_retrieve" name="officeglaccounts_retrieve"
+            <a id="financialactivityaccounts_retrieve" name="financialactivityaccounts_retrieve"
                 class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
                     <h4>Retrieve a single Entry</h4>
                     <p>Example Requests:</p>
-                    <div class=apiClick>officeglaccounts/1</div>
+                    <div class=apiClick>financialactivityaccounts/1</div>
                     <br>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
-GET https://DomainName/api/v1/officeglaccounts/{entryId}
+GET https://DomainName/api/v1/financialactivityaccounts/{entryId}
                     </code>
                     <code class="method-response">
 {
@@ -28777,7 +28777,7 @@ GET https://DomainName/api/v1/officeglaccounts/{entryId}
                 </div>
             </div>
 
-            <a id="officeglaccounts_delete" name="officeglaccounts_delete"
+            <a id="financialactivityaccounts_delete" name="financialactivityaccounts_delete"
                 class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
@@ -28785,10 +28785,10 @@ GET https://DomainName/api/v1/officeglaccounts/{entryId}
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
-GET https://DomainName/api/v1/officeglaccounts/{mappingId}
+GET https://DomainName/api/v1/financialactivityaccounts/{mappingId}
                     </code>
                     <code class="method-request">
-POST officeglaccounts/C1MAE935K0IAEYA?command=reverse
+POST financialactivityaccounts/C1MAE935K0IAEYA?command=reverse
 Content-Type: application/json 
 </code>
                     <code class="method-response">

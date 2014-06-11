@@ -8,12 +8,12 @@ package org.mifosplatform.accounting.accountmapping.service;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
-public interface OfficeToGLAccountMappingWritePlatformService {
+public interface FinancialActivityAccountWritePlatformService {
 
-    CommandProcessingResult createGLAccountMapping(JsonCommand command);
+    CommandProcessingResult createGLAccountActivityMapping(JsonCommand command);
 
-    CommandProcessingResult updateGLAccountMapping(Long mappingId, JsonCommand command);
+    CommandProcessingResult updateGLAccountActivityMapping(Long mappingId, JsonCommand command);
 
-    CommandProcessingResult deleteGLAccountMapping(Long mappingId, JsonCommand command);
+    CommandProcessingResult deleteGLAccountActivityMapping(Long mappingId, JsonCommand command);
 
 }

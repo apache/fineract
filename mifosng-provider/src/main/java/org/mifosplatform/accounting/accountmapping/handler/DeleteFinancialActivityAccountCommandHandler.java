@@ -5,7 +5,7 @@
  */
 package org.mifosplatform.accounting.accountmapping.handler;
 
-import org.mifosplatform.accounting.accountmapping.service.OfficeToGLAccountMappingWritePlatformService;
+import org.mifosplatform.accounting.accountmapping.service.FinancialActivityAccountWritePlatformService;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -14,18 +14,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class DeleteOfficeToGLAccountMappingCommandHandler implements NewCommandSourceHandler {
+public class DeleteFinancialActivityAccountCommandHandler implements NewCommandSourceHandler {
 
-    private final OfficeToGLAccountMappingWritePlatformService writePlatformService;
+    private final FinancialActivityAccountWritePlatformService writePlatformService;
 
     @Autowired
-    public DeleteOfficeToGLAccountMappingCommandHandler(final OfficeToGLAccountMappingWritePlatformService writePlatformService) {
+    public DeleteFinancialActivityAccountCommandHandler(final FinancialActivityAccountWritePlatformService writePlatformService) {
         this.writePlatformService = writePlatformService;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.deleteGLAccountMapping(command.entityId(), command);
+        return this.writePlatformService.deleteGLAccountActivityMapping(command.entityId(), command);
     }
 }

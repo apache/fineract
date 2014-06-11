@@ -14,9 +14,9 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosplatform.accounting.accountmapping.domain.OfficeToGLAccountMapping;
-import org.mifosplatform.accounting.accountmapping.domain.OfficeToGLAccountMappingRepository;
-import org.mifosplatform.accounting.accountmapping.exception.OfficeToGLAccountMappingNotFoundException;
+import org.mifosplatform.accounting.accountmapping.domain.FinancialActivityAccount;
+import org.mifosplatform.accounting.accountmapping.domain.FinancialActivityAccountRepository;
+import org.mifosplatform.accounting.accountmapping.exception.FinancialActivityAccountNotFoundException;
 import org.mifosplatform.accounting.closure.domain.GLClosure;
 import org.mifosplatform.accounting.closure.domain.GLClosureRepository;
 import org.mifosplatform.accounting.common.AccountingConstants.ACCRUAL_ACCOUNTS_FOR_LOAN;
@@ -61,7 +61,7 @@ public class AccountingProcessorHelper {
     public static final String SAVINGS_TRANSACTION_IDENTIFIER = "S";
     private final JournalEntryRepository glJournalEntryRepository;
     private final ProductToGLAccountMappingRepository accountMappingRepository;
-    private final OfficeToGLAccountMappingRepository officeToGLAccountMappingRepository;
+    private final FinancialActivityAccountRepository officeToGLAccountMappingRepository;
     private final GLClosureRepository closureRepository;
     private final OfficeRepository officeRepository;
     private final LoanTransactionRepository loanTransactionRepository;
@@ -73,7 +73,7 @@ public class AccountingProcessorHelper {
             final ProductToGLAccountMappingRepository accountMappingRepository, final GLClosureRepository closureRepository,
             final OfficeRepository officeRepository, final LoanTransactionRepository loanTransactionRepository,
             final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
-            final OfficeToGLAccountMappingRepository officeToGLAccountMappingRepository,
+            final FinancialActivityAccountRepository officeToGLAccountMappingRepository,
             final AccountTransfersReadPlatformService accountTransfersReadPlatformService) {
         this.glJournalEntryRepository = glJournalEntryRepository;
         this.accountMappingRepository = accountMappingRepository;
@@ -572,11 +572,11 @@ public class AccountingProcessorHelper {
             Long officeId) {
         GLAccount glAccount = null;
         if (isOrganizationAccount(accountMappingTypeId)) {
-            OfficeToGLAccountMapping accountMapping = this.officeToGLAccountMappingRepository.findByOfficeAndFinancialAccountType(officeId,
-                    accountMappingTypeId);
-            if (accountMapping == null) { throw new OfficeToGLAccountMappingNotFoundException(officeId,
+            FinancialActivityAccount financialActivityAccount = this.officeToGLAccountMappingRepository
+                    .findByFinancialActivityType(accountMappingTypeId);
+            if (financialActivityAccount == null) { throw new FinancialActivityAccountNotFoundException(officeId,
                     String.valueOf(accountMappingTypeId)); }
-            glAccount = accountMapping.glAccount();
+            glAccount = financialActivityAccount.glAccount();
         } else {
             ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(loanProductId,
                     PortfolioProductType.LOAN.getValue(), accountMappingTypeId);
@@ -652,11 +652,11 @@ public class AccountingProcessorHelper {
             final Long paymentTypeId, Long officeId) {
         GLAccount glAccount = null;
         if (isOrganizationAccount(accountMappingTypeId)) {
-            OfficeToGLAccountMapping accountMapping = this.officeToGLAccountMappingRepository.findByOfficeAndFinancialAccountType(officeId,
-                    accountMappingTypeId);
-            if (accountMapping == null) { throw new OfficeToGLAccountMappingNotFoundException(officeId,
+            FinancialActivityAccount financialActivityAccount = this.officeToGLAccountMappingRepository
+                    .findByFinancialActivityType(accountMappingTypeId);
+            if (financialActivityAccount == null) { throw new FinancialActivityAccountNotFoundException(officeId,
                     String.valueOf(accountMappingTypeId)); }
-            glAccount = accountMapping.glAccount();
+            glAccount = financialActivityAccount.glAccount();
         } else {
             ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(savingsProductId,
                     PortfolioProductType.SAVING.getValue(), accountMappingTypeId);
