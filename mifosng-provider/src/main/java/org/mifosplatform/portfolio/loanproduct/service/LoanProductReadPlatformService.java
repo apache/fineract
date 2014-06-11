@@ -7,7 +7,6 @@ package org.mifosplatform.portfolio.loanproduct.service;
 
 import java.util.Collection;
 
-import org.mifosplatform.organisation.office.domain.OrganisationCurrency;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductBorrowerCycleVariationData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 
@@ -20,8 +19,8 @@ public interface LoanProductReadPlatformService {
     LoanProductData retrieveLoanProduct(Long productId);
 
     LoanProductData retrieveNewLoanProductDetails();
-    
-    Collection<LoanProductData> retrieveAllLoanProductsForCurrency(OrganisationCurrency currency);
+
+    Collection<LoanProductData> retrieveAllLoanProductsForCurrency(String currencyCode);
 
     Collection<LoanProductData> retrieveAvailableLoanProductsForMix();
 

@@ -16,7 +16,6 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
-import org.mifosplatform.organisation.office.domain.OrganisationCurrency;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 import org.mifosplatform.portfolio.savings.exception.SavingsProductNotFoundException;
@@ -179,25 +178,23 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
     @Override
     public Collection<SavingsProductData> retrieveAllForLookupByType(Boolean isOverdraftType) {
-        String sql = "select " + this.savingsProductLookupsRowMapper.schema(); 
-         if(isOverdraftType != null){       
-               sql += " where sp.allow_overdraft=?";
-               return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, isOverdraftType);
-         }
+        String sql = "select " + this.savingsProductLookupsRowMapper.schema();
+        if (isOverdraftType != null) {
+            sql += " where sp.allow_overdraft=?";
+            return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, isOverdraftType);
+        }
 
         return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper);
 
     }
-    
-	@Override
-	public Collection<SavingsProductData> retrieveAllForCurrency(
-			OrganisationCurrency currency) {
-		
-		this.context.authenticatedUser();
 
-		final String sql = "select " + this.savingsProductRowMapper.schema()
-				+ " where sp.currency_code='" + currency.getCode() + "'";
+    @Override
+    public Collection<SavingsProductData> retrieveAllForCurrency(String currencyCode) {
+
+        this.context.authenticatedUser();
+
+        final String sql = "select " + this.savingsProductRowMapper.schema() + " where sp.currency_code='" + currencyCode + "'";
 
         return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
-	}
+    }
 }

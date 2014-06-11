@@ -44,10 +44,8 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
     public CurrencyWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
-            final OrganisationCurrencyRepository organisationCurrencyRepository,
-            final LoanProductReadPlatformService loanProductService,
-            final SavingsProductReadPlatformService savingsProductService,
-            final ChargeReadPlatformService chargeService) {
+            final OrganisationCurrencyRepository organisationCurrencyRepository, final LoanProductReadPlatformService loanProductService,
+            final SavingsProductReadPlatformService savingsProductService, final ChargeReadPlatformService chargeService) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
@@ -81,16 +79,15 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
         }
 
         for (OrganisationCurrency priorCurrency : this.organisationCurrencyRepository.findAll()) {
-        	if (!allowedCurrencyCodes.contains(priorCurrency.getCode())) {
-        		// Check if it's safe to remove this currency.
-        		if (!loanProductService.retrieveAllLoanProductsForCurrency(priorCurrency).isEmpty() ||
-        				!savingsProductService.retrieveAllForCurrency(priorCurrency).isEmpty() ||
-        				!chargeService.retrieveAllChargesForCurrency(priorCurrency).isEmpty()) {
-        			throw new CurrencyInUseException(priorCurrency.getCode());
-        		}
-        	}
+            if (!allowedCurrencyCodes.contains(priorCurrency.getCode())) {
+                // Check if it's safe to remove this currency.
+                if (!loanProductService.retrieveAllLoanProductsForCurrency(priorCurrency.getCode()).isEmpty()
+                        || !savingsProductService.retrieveAllForCurrency(priorCurrency.getCode()).isEmpty()
+                        || !chargeService.retrieveAllChargesForCurrency(priorCurrency.getCode()).isEmpty()) { throw new CurrencyInUseException(
+                        priorCurrency.getCode()); }
+            }
         }
-        
+
         changes.put("currencies", allowedCurrencyCodes.toArray(new String[allowedCurrencyCodes.size()]));
 
         this.organisationCurrencyRepository.deleteAll();

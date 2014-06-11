@@ -7,7 +7,6 @@ package org.mifosplatform.portfolio.savings.service;
 
 import java.util.Collection;
 
-import org.mifosplatform.organisation.office.domain.OrganisationCurrency;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 
 public interface SavingsProductReadPlatformService {
@@ -18,7 +17,7 @@ public interface SavingsProductReadPlatformService {
 
     Collection<SavingsProductData> retrieveAllForLookupByType(Boolean isOverdraftType);
 
-    Collection<SavingsProductData> retrieveAllForCurrency(OrganisationCurrency currency);
+    Collection<SavingsProductData> retrieveAllForCurrency(String currencyCode);
 
     SavingsProductData retrieveOne(Long productId);
 
