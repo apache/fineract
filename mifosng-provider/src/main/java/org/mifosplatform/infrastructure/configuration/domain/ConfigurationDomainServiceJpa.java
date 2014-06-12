@@ -136,18 +136,4 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         return property.getValue();
     }
 
-    @Override
-    public Long ageLimitForSeniorCitizen() {
-        final String propertyName = "age_limit_for_senior_citizen";
-        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
-        return property.getValue();
-    }
-
-    @Override
-    public Long ageLimitForChildren() {
-        final String propertyName = "age_limit_for_children";
-        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
-        return property.getValue();
-    }
-    
 }

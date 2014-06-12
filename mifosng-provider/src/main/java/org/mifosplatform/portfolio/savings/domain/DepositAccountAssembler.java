@@ -48,7 +48,6 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
@@ -100,7 +99,6 @@ public class DepositAccountAssembler {
     private final SavingsAccountChargeAssembler savingsAccountChargeAssembler;
     private final FromJsonHelper fromApiJsonHelper;
     private final DepositProductAssembler depositProductAssembler;
-    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public DepositAccountAssembler(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
@@ -110,8 +108,7 @@ public class DepositAccountAssembler {
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper,
             final DepositProductAssembler depositProductAssembler,
             final RecurringDepositProductRepository recurringDepositProductRepository,
-            final AccountTransfersReadPlatformService accountTransfersReadPlatformService,
-            final ConfigurationDomainService configurationDomainService) {
+            final AccountTransfersReadPlatformService accountTransfersReadPlatformService) {
 
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
@@ -124,7 +121,6 @@ public class DepositAccountAssembler {
         this.depositProductAssembler = depositProductAssembler;
         this.recurringDepositProductRepository = recurringDepositProductRepository;
         this.savingsHelper = new SavingsHelper(accountTransfersReadPlatformService);
-        this.configurationDomainService = configurationDomainService;
     }
 
     /**
@@ -310,7 +306,6 @@ public class DepositAccountAssembler {
         if (account != null) {
             account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
             account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), depositAccountType.resourceName());
-            updateIncentiveAttributes(account.getClient(), account.accountSubmittedOrActivationDate());
         }
 
         return account;
@@ -319,15 +314,7 @@ public class DepositAccountAssembler {
     public SavingsAccount assembleFrom(final Long savingsId, DepositAccountType depositAccountType) {
         final SavingsAccount account = this.savingsAccountRepository.findOneWithNotFoundDetection(savingsId, depositAccountType);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
-        updateIncentiveAttributes(account.getClient(), account.accountSubmittedOrActivationDate());
         return account;
-    }
-
-    private void updateIncentiveAttributes(final Client client, final LocalDate compareOnDate) {
-        if (client == null) return;
-        final Long ageLimitForSeniorCitizen = this.configurationDomainService.ageLimitForSeniorCitizen();
-        final Long ageLimitForChildren = this.configurationDomainService.ageLimitForChildren();
-        client.updateIncentiveAttributes(ageLimitForChildren, ageLimitForSeniorCitizen, compareOnDate);
     }
 
     public void assignSavingAccountHelpers(final SavingsAccount savingsAccount) {

@@ -735,33 +735,6 @@ public final class Client extends AbstractPersistable<Long> {
         this.savingsAccount = savingsAccount;
     }
 
-    public void updateIncentiveAttributes(final Long ageLimitForChildren, final Long ageLimitForSeniorCitizen, final LocalDate compareOnDate) {
-        boolean isFemale = false;
-        boolean isChild = false;
-        boolean isSeniorCitizen = false;
-
-        if (this.gender != null) {
-            // FIXME: this needs to be handled in better way
-            if (this.gender.label().equalsIgnoreCase("FEMALE")) {
-                isFemale = true;
-            }
-        }
-
-        if (this.dateOfBirth != null) {
-            final LocalDate dobLacalDate = LocalDate.fromDateFields(this.dateOfBirth);
-            final int age = Years.yearsBetween(dobLacalDate, compareOnDate).getYears();
-
-            if (age >= ageLimitForSeniorCitizen.intValue()) {
-                isSeniorCitizen = true;
-            }
-
-            if (age <= ageLimitForChildren.intValue()) {
-                isChild = true;
-            }
-        }
-
-    }
-
     public Long genderId() {
         Long genderId = null;
         if (this.gender != null) {

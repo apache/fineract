@@ -35,7 +35,4 @@ public interface ConfigurationDomainService {
 
     Long retrieveGraceOnPenaltyPostingPeriod();
     
-    Long ageLimitForSeniorCitizen();
-    
-    Long ageLimitForChildren();
 }
