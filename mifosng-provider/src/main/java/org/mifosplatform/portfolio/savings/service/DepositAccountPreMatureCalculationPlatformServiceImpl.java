@@ -71,17 +71,19 @@ public class DepositAccountPreMatureCalculationPlatformServiceImpl implements De
                 account.clientId(), DepositAccountType.SAVINGS_DEPOSIT);
         final JsonElement element = this.fromJsonHelper.parse(query.json());
         final LocalDate preMaturityDate = this.fromJsonHelper.extractLocalDateNamed(closedOnDateParamName, element);
+        // calculate interest before one day of closure date
+        final LocalDate interestCalculatedToDate = preMaturityDate.minusDays(1);
         final boolean isPreMatureClosure = true;
 
         if (depositAccountType.isFixedDeposit()) {
             final FixedDepositAccount fd = (FixedDepositAccount) account;
             accountData = FixedDepositAccountData.preClosureDetails(account.getId(),
-                    fd.calculatePreMatureAmount(preMaturityDate, isPreMatureClosure), onAccountClosureOptions, paymentTypeOptions,
+                    fd.calculatePreMatureAmount(interestCalculatedToDate, isPreMatureClosure), onAccountClosureOptions, paymentTypeOptions,
                     savingsAccountDatas);
         } else if (depositAccountType.isRecurringDeposit()) {
             final RecurringDepositAccount rd = (RecurringDepositAccount) account;
             accountData = RecurringDepositAccountData.preClosureDetails(account.getId(),
-                    rd.calculatePreMatureAmount(preMaturityDate, isPreMatureClosure), onAccountClosureOptions, paymentTypeOptions,
+                    rd.calculatePreMatureAmount(interestCalculatedToDate, isPreMatureClosure), onAccountClosureOptions, paymentTypeOptions,
                     savingsAccountDatas);
         }
 
