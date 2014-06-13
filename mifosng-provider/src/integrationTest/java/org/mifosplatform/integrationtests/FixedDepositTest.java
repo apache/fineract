@@ -661,11 +661,13 @@ public class FixedDepositTest {
 
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
+        todaysDate.add(Calendar.DAY_OF_MONTH, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.MONTH, 1);
+        todaysDate.add(Calendar.DAY_OF_MONTH, 1);
         final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -706,6 +708,7 @@ public class FixedDepositTest {
         double interestPerDay = interestRateInFraction * perDay;
 
         todaysDate.add(Calendar.MONTH, -1);
+        todaysDate.add(Calendar.DAY_OF_MONTH, -1);
         Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         daysInMonth = (daysInMonth - currentDate) + 1;
@@ -761,11 +764,13 @@ public class FixedDepositTest {
 
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
+        todaysDate.add(Calendar.DAY_OF_MONTH, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.MONTH, 1);
+        todaysDate.add(Calendar.DAY_OF_MONTH, 1);
         final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -810,6 +815,7 @@ public class FixedDepositTest {
         double interestPerDay = interestRateInFraction * perDay;
 
         todaysDate.add(Calendar.MONTH, -1);
+        todaysDate.add(Calendar.DAY_OF_MONTH, -1);
         Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         daysInMonth = (daysInMonth - currentDate) + 1;
@@ -865,11 +871,13 @@ public class FixedDepositTest {
 
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
+        todaysDate.add(Calendar.DAY_OF_MONTH, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.MONTH, 1);
+        todaysDate.add(Calendar.DAY_OF_MONTH, 1);
         final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -903,6 +911,7 @@ public class FixedDepositTest {
 
         Calendar activationDate = Calendar.getInstance();
         activationDate.add(Calendar.MONTH, -1);
+        activationDate.add(Calendar.DAY_OF_MONTH, -1);
         DateTime startDate = new DateTime(activationDate.getTime());
 
         Calendar prematureClosureDate = Calendar.getInstance();
@@ -918,6 +927,7 @@ public class FixedDepositTest {
         double interestPerDay = interestRateInFraction * perDay;
 
         todaysDate.add(Calendar.MONTH, -1);
+        todaysDate.add(Calendar.DAY_OF_MONTH, -1);
         Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         daysInMonth = (daysInMonth - currentDate) + 1;
@@ -972,11 +982,13 @@ public class FixedDepositTest {
 
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
+        todaysDate.add(Calendar.DAY_OF_MONTH, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.MONTH, 1);
+        todaysDate.add(Calendar.DAY_OF_MONTH, 1);
         final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -1014,6 +1026,7 @@ public class FixedDepositTest {
 
         Calendar activationDate = Calendar.getInstance();
         activationDate.add(Calendar.MONTH, -1);
+        activationDate.add(Calendar.DAY_OF_MONTH, -1);
         DateTime startDate = new DateTime(activationDate.getTime());
 
         Calendar prematureClosureDate = Calendar.getInstance();
@@ -1029,6 +1042,7 @@ public class FixedDepositTest {
         double interestPerDay = interestRateInFraction * perDay;
 
         todaysDate.add(Calendar.MONTH, -1);
+        todaysDate.add(Calendar.DAY_OF_MONTH, -1);
         Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
         Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
         daysInMonth = (daysInMonth - currentDate) + 1;

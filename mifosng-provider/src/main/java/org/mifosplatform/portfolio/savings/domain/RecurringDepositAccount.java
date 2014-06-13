@@ -600,7 +600,9 @@ public class RecurringDepositAccount extends SavingsAccount {
     public void postPreMaturityInterest(final LocalDate accountCloseDate, final boolean isPreMatureClosure) {
 
         final Money interestPostedToDate = totalInterestPosted();
-        final Money interestOnMaturity = calculatePreMatureInterest(accountCloseDate, retreiveOrderedNonInterestPostingTransactions(), isPreMatureClosure);
+        // calculate interest before one day of closure date
+        final LocalDate interestCalculatedToDate = accountCloseDate.minusDays(1);
+        final Money interestOnMaturity = calculatePreMatureInterest(interestCalculatedToDate, retreiveOrderedNonInterestPostingTransactions(), isPreMatureClosure);
 
         boolean recalucateDailyBalance = false;
 

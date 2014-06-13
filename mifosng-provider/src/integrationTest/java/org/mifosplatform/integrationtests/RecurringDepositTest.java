@@ -975,7 +975,6 @@ public class RecurringDepositTest {
                 DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
         Assert.assertNotNull(transactionIdForDeposit);
 
-        currentDate = currentDate - 1;
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
         System.out.println("IPM = " + interestPerMonth);
         principal += interestPerMonth;
@@ -1102,7 +1101,6 @@ public class RecurringDepositTest {
                 DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
         Assert.assertNotNull(transactionIdForDeposit);
 
-        currentDate = currentDate - 1;
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
         System.out.println("IPM = " + interestPerMonth);
         principal += interestPerMonth;
@@ -1150,12 +1148,14 @@ public class RecurringDepositTest {
 
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
+        todaysDate.add(Calendar.DAY_OF_MONTH, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
         String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.MONTH, 1);
+        todaysDate.add(Calendar.DAY_OF_MONTH, 1);
         final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
 
         final Account assetAccount = this.accountHelper.createAssetAccount();
@@ -1196,6 +1196,7 @@ public class RecurringDepositTest {
 
         Calendar activationDate = Calendar.getInstance();
         activationDate.add(Calendar.MONTH, -1);
+        activationDate.add(Calendar.DAY_OF_MONTH, -1);
         DateTime start = new DateTime(activationDate.getTime());
 
         Calendar prematureClosureDate = Calendar.getInstance();
@@ -1219,6 +1220,7 @@ public class RecurringDepositTest {
 
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MONTH, -1);
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
         Integer currentDate = new Integer(currentDateFormat.format(calendar.getTime()));
         Integer daysInMonth = calendar.getActualMaximum(Calendar.DATE);
         daysInMonth = (daysInMonth - currentDate) + 1;
@@ -1232,7 +1234,6 @@ public class RecurringDepositTest {
                 DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
         Assert.assertNotNull(transactionIdForDeposit);
 
-        currentDate = currentDate - 1;
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
         System.out.println("IPM = " + interestPerMonth);
         principal += interestPerMonth;
@@ -1280,12 +1281,14 @@ public class RecurringDepositTest {
 
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
+        todaysDate.add(Calendar.DAY_OF_MONTH, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
         String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
         todaysDate.add(Calendar.MONTH, 1);
+        todaysDate.add(Calendar.DAY_OF_MONTH, 1);
         final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
 
         final Account assetAccount = this.accountHelper.createAssetAccount();
@@ -1331,6 +1334,7 @@ public class RecurringDepositTest {
 
         Calendar activationDate = Calendar.getInstance();
         activationDate.add(Calendar.MONTH, -1);
+        activationDate.add(Calendar.DAY_OF_MONTH, -1);
         DateTime start = new DateTime(activationDate.getTime());
 
         Calendar prematureClosureDate = Calendar.getInstance();
@@ -1354,6 +1358,7 @@ public class RecurringDepositTest {
 
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MONTH, -1);
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
         Integer currentDate = new Integer(currentDateFormat.format(calendar.getTime()));
         Integer daysInMonth = calendar.getActualMaximum(Calendar.DATE);
         daysInMonth = (daysInMonth - currentDate) + 1;
@@ -1367,7 +1372,6 @@ public class RecurringDepositTest {
                 DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
         Assert.assertNotNull(newTransactionIdForDeposit);
 
-        currentDate = currentDate - 1;
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
         System.out.println("IPM = " + interestPerMonth);
         principal += interestPerMonth;
