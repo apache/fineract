@@ -600,7 +600,8 @@ public class RecurringDepositAccount extends SavingsAccount {
     public void postPreMaturityInterest(final LocalDate accountCloseDate, final boolean isPreMatureClosure) {
 
         final Money interestPostedToDate = totalInterestPosted();
-        final Money interestOnMaturity = calculatePreMatureInterest(accountCloseDate, retreiveOrderedNonInterestPostingTransactions(), isPreMatureClosure);
+        final Money interestOnMaturity = calculatePreMatureInterest(accountCloseDate, retreiveOrderedNonInterestPostingTransactions(),
+                isPreMatureClosure);
 
         boolean recalucateDailyBalance = false;
 
@@ -1078,11 +1079,17 @@ public class RecurringDepositAccount extends SavingsAccount {
         this.recurringDetail.updateOverdueDetails(noOfOverdueInstallments, totalOverdueAmount);
     }
 
+    @Override
     public boolean allowWithdrawal() {
         return this.recurringDetail.allowWithdrawal();
     }
 
     public boolean adjustAdvanceTowardsFuturePayments() {
         return this.recurringDetail.adjustAdvanceTowardsFuturePayments();
+    }
+
+    @Override
+    public boolean isTransactionsAllowed() {
+        return isActive() || isAccountMatured();
     }
 }

@@ -668,7 +668,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     public SavingsAccountTransaction withdraw(final SavingsAccountTransactionDTO transactionDTO, final boolean applyWithdrawFee) {
 
-        if (isNotActive()) {
+        if (!isTransactionsAllowed()) {
 
             final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.account.is.not.active",
@@ -2106,5 +2106,21 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                     savingsPostingInterestPeriodType.name(), savingsCompoundingInterestPeriodType.name());
 
         }
+    }
+
+    public boolean allowDeposit() {
+        return true;
+    }
+
+    public boolean allowWithdrawal() {
+        return true;
+    }
+
+    public boolean allowModify() {
+        return true;
+    }
+
+    public boolean isTransactionsAllowed() {
+        return isActive();
     }
 }

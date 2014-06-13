@@ -14,8 +14,9 @@ import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 public interface SavingsAccountDomainService {
 
     SavingsAccountTransaction handleWithdrawal(SavingsAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, boolean applyWithdrawFee, boolean isInterestTransfer, boolean isAccountTransfer);
+            BigDecimal transactionAmount, PaymentDetail paymentDetail, boolean applyWithdrawFee, boolean isInterestTransfer,
+            boolean isAccountTransfer, boolean isRegularTransaction);
 
     SavingsAccountTransaction handleDeposit(SavingsAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, boolean isAccountTransfer);
+            BigDecimal transactionAmount, PaymentDetail paymentDetail, boolean isAccountTransfer, boolean isRegularTransaction);
 }

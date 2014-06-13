@@ -21,6 +21,7 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyReposit
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDTO;
+import org.mifosplatform.portfolio.savings.exception.DepositAccountTransactionNotAllowedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,8 +49,10 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     @Override
     public SavingsAccountTransaction handleWithdrawal(final SavingsAccount account, final DateTimeFormatter fmt,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
-            final boolean applyWithdrawFee, boolean isInterestTransfer, final boolean isAccountTransfer) {
+            final boolean applyWithdrawFee, boolean isInterestTransfer, final boolean isAccountTransfer, final boolean isRegularTransaction) {
 
+        if (isRegularTransaction && !account.allowWithdrawal()) { throw new DepositAccountTransactionNotAllowedException(account.getId(),
+                "withdraw", account.depositAccountType()); }
         final Set<Long> existingTransactionIds = new HashSet<Long>();
         final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
@@ -78,7 +81,10 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     @Override
     public SavingsAccountTransaction handleDeposit(final SavingsAccount account, final DateTimeFormatter fmt,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
-            final boolean isAccountTransfer) {
+            final boolean isAccountTransfer, final boolean isRegularTransaction) {
+
+        if (isRegularTransaction && !account.allowDeposit()) { throw new DepositAccountTransactionNotAllowedException(account.getId(),
+                "deposit", account.depositAccountType()); }
 
         boolean isInterestTransfer = false;
         final Set<Long> existingTransactionIds = new HashSet<Long>();

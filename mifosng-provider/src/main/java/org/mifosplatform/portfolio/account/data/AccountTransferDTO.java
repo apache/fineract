@@ -34,13 +34,15 @@ public class AccountTransferDTO {
     private final Loan loan;
     private final SavingsAccount toSavingsAccount;
     private final SavingsAccount fromSavingsAccount;
-    
+    private final Boolean isRegularTransaction;
+
     public AccountTransferDTO(final LocalDate transactionDate, final BigDecimal transactionAmount,
             final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType, final Long fromAccountId,
             final Long toAccountId, final String description, final Locale locale, final DateTimeFormatter fmt,
             final PaymentDetail paymentDetail, final Integer fromTransferType, final Integer toTransferType, final Long chargeId,
             Integer loanInstallmentNumber, Integer transferType, final AccountTransferDetails accountTransferDetails,
-            final String noteText, final String txnExternalId, final Loan loan, SavingsAccount toSavingsAccount, final SavingsAccount fromSavingsAccount) {
+            final String noteText, final String txnExternalId, final Loan loan, SavingsAccount toSavingsAccount,
+            final SavingsAccount fromSavingsAccount,final Boolean isRegularTransaction) {
         this.transactionDate = transactionDate;
         this.transactionAmount = transactionAmount;
         this.fromAccountType = fromAccountType;
@@ -62,6 +64,7 @@ public class AccountTransferDTO {
         this.loan = loan;
         this.toSavingsAccount = toSavingsAccount;
         this.fromSavingsAccount = fromSavingsAccount;
+        this.isRegularTransaction = isRegularTransaction;
     }
 
     public LocalDate getTransactionDate() {
@@ -143,9 +146,14 @@ public class AccountTransferDTO {
     public SavingsAccount getToSavingsAccount() {
         return this.toSavingsAccount;
     }
-    
+
     public SavingsAccount getFromSavingsAccount() {
         return this.fromSavingsAccount;
+    }
+
+    
+    public Boolean isRegularTransaction() {
+        return this.isRegularTransaction;
     }
 
 }

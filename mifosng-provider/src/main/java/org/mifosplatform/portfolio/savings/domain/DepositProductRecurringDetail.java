@@ -24,6 +24,7 @@ public class DepositProductRecurringDetail extends AbstractPersistable<Long> {
     @Embedded
     private DepositRecurringDetail recurringDetail;
 
+    @SuppressWarnings("unused")
     @OneToOne
     @JoinColumn(name = "savings_product_id", nullable = false)
     private RecurringDepositProduct product;

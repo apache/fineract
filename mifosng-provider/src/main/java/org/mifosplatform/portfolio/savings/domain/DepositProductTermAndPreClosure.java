@@ -28,6 +28,7 @@ public class DepositProductTermAndPreClosure extends AbstractPersistable<Long> {
     @Embedded
     protected DepositTermDetail depositTermDetail;
 
+    @SuppressWarnings("unused")
     @OneToOne
     @JoinColumn(name = "savings_product_id", nullable = false)
     private FixedDepositProduct product;

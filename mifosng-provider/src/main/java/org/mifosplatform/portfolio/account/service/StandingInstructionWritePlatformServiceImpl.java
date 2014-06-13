@@ -215,11 +215,13 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
             if (isDueForTransfer && transactionAmount != null && transactionAmount.compareTo(BigDecimal.ZERO) > 0) {
                 final AccountTransferDetails accountTransferDetails = this.accountTransferDetailRepository.findOne(data.accountDetailId());
                 final SavingsAccount fromSavingsAccount = null;
+                final boolean isRegularTransaction = true;
                 accountTransferDetails.accountTransferStandingInstruction().updateLatsRunDate(transactionDate.toDate());
                 AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount, data.fromAccountType(),
                         data.toAccountType(), data.fromAccount().accountId(), data.toAccount().accountId(), data.name()
                                 + " Standing instruction trasfer ", null, null, null, null, data.toTransferType(), null, null, data
-                                .transferType().getValue(), accountTransferDetails, null, null, null, null, fromSavingsAccount);
+                                .transferType().getValue(), accountTransferDetails, null, null, null, null, fromSavingsAccount,
+                        isRegularTransaction);
                 transferAmount(sb, accountTransferDTO, data.getId());
             }
         }

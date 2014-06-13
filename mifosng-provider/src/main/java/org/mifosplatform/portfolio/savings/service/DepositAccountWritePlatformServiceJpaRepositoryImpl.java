@@ -197,10 +197,12 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                             amountForDeposit.getAmount(), paymentDetail);
                 } else {
                     final SavingsAccount fromSavingsAccount = null;
+                    boolean isRegularTransaction = false;
                     final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(account.getActivationLocalDate(),
                             amountForDeposit.getAmount(), PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS,
                             portfolioAccountData.accountId(), account.getId(), "Account Transfer", locale, fmt, null, null, null, null,
-                            null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, account, fromSavingsAccount);
+                            null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, account, fromSavingsAccount,
+                            isRegularTransaction);
                     this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
                 }
                 final boolean isInterestTransfer = false;
@@ -236,6 +238,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     @Transactional
     @Override
     public CommandProcessingResult activateRDAccount(final Long savingsId, final JsonCommand command) {
+        boolean isRegularTransaction = false;
 
         final AppUser user = this.context.authenticatedUser();
 
@@ -260,13 +263,14 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                         .retriveSavingsAssociation(savingsId);
                 if (portfolioAccountData == null) {
                     this.depositAccountDomainService.handleRDDeposit(account, fmt, account.getActivationLocalDate(),
-                            amountForDeposit.getAmount(), null);
+                            amountForDeposit.getAmount(), null, isRegularTransaction);
                 } else {
                     final SavingsAccount fromSavingsAccount = null;
                     final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(account.getActivationLocalDate(),
                             amountForDeposit.getAmount(), PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS,
                             portfolioAccountData.accountId(), account.getId(), "Account Transfer", locale, fmt, null, null, null, null,
-                            null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, account, fromSavingsAccount);
+                            null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, account, fromSavingsAccount,
+                            isRegularTransaction);
                     this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
                 }
                 updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
@@ -329,6 +333,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     @Transactional
     @Override
     public CommandProcessingResult depositToRDAccount(final Long savingsId, final JsonCommand command) {
+        boolean isRegularTransaction = true;
 
         this.context.authenticatedUser();
 
@@ -347,7 +352,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         final SavingsAccountTransaction deposit = this.depositAccountDomainService.handleRDDeposit(account, fmt, transactionDate,
-                transactionAmount, paymentDetail);
+                transactionAmount, paymentDetail, isRegularTransaction);
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(deposit.getId()) //
@@ -368,10 +373,9 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     @Override
     public CommandProcessingResult withdrawal(final Long savingsId, final JsonCommand command, final DepositAccountType depositAccountType) {
 
-        this.depositAccountTransactionDataValidator.validate(command, depositAccountType);
+        boolean isRegularTransaction = true;
 
-        if (depositAccountType.isFixedDeposit()) { throw new DepositAccountTransactionNotAllowedException(savingsId, "withdrawal",
-                depositAccountType); }
+        this.depositAccountTransactionDataValidator.validate(command, depositAccountType);
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
@@ -382,15 +386,12 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
-        final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
-                depositAccountType);
+        final SavingsAccount account = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
 
-        if (!account.allowWithdrawal()) { throw new DepositAccountTransactionNotAllowedException(savingsId, "withdrawal",
-                depositAccountType); }
         checkClientOrGroupActive(account);
 
         final SavingsAccountTransaction withdrawal = this.depositAccountDomainService.handleWithdrawal(account, fmt, transactionDate,
-                transactionAmount, paymentDetail, true);
+                transactionAmount, paymentDetail, true, isRegularTransaction);
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(withdrawal.getId()) //
@@ -1169,11 +1170,12 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     @Transactional
     @Override
     public SavingsAccountTransaction mandatorySavingsAccountDeposit(final SavingsAccountTransactionDTO accountTransactionDTO) {
+        boolean isRegularTransaction = false;
         final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(
                 accountTransactionDTO.getSavingsAccountId(), DepositAccountType.RECURRING_DEPOSIT);
         return this.depositAccountDomainService.handleRDDeposit(account, accountTransactionDTO.getFormatter(),
                 accountTransactionDTO.getTransactionDate(), accountTransactionDTO.getTransactionAmount(),
-                accountTransactionDTO.getPaymentDetail());
+                accountTransactionDTO.getPaymentDetail(), isRegularTransaction);
     }
 
 }
