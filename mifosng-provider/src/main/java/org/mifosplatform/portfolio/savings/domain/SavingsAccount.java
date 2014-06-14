@@ -789,9 +789,16 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 runningBalance = runningBalance.minus(transaction.getAmount(this.currency));
             }
 
+            final BigDecimal withdrawalFee = null;
+            // deal with potential minRequiredBalance and allowOverdraftMinBalance
+            if (this.minRequiredBalance != null && !this.allowOverdraftMinBalance) {
+                if (runningBalance.minus(this.minRequiredBalance).isLessThanZero()) {
+                    throw new InsufficientAccountBalanceException("transactionAmount",
+                            getAccountBalance(), withdrawalFee, transactionAmount);
+                }
+            }
+
             if (runningBalance.isLessThanZero()) {
-                //
-                final BigDecimal withdrawalFee = null;
                 Money limit = runningBalance.zero();
                 if (this.allowOverdraft) {
                     if (this.overdraftLimit != null) {
