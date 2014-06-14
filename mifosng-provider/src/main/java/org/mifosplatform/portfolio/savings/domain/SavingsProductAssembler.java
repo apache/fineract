@@ -24,6 +24,8 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawal
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.shortNameParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredBalanceParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftMinBalanceParamName;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -122,10 +124,17 @@ public class SavingsProductAssembler {
 
         final BigDecimal overdraftLimit = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(overdraftLimitParamName);
 
+        boolean allowOverdraftMinBalance = false;
+        if (command.parameterExists(allowOverdraftMinBalanceParamName)) {
+            allowOverdraftMinBalance = command.booleanPrimitiveValueOfParameterNamed(allowOverdraftMinBalanceParamName);
+        }
+
+        final BigDecimal minRequiredBalance = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(minRequiredBalanceParamName);
+
         return SavingsProduct.createNew(name, shortName, description, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, accountingRuleType, charges,
-                allowOverdraft, overdraftLimit);
+                allowOverdraft, overdraftLimit, allowOverdraftMinBalance, minRequiredBalance);
     }
 
     public Set<Charge> assembleListOfSavingsProductCharges(final JsonCommand command, final String savingsProductCurrencyCode) {

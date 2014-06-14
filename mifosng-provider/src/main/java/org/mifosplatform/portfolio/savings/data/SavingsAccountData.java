@@ -46,6 +46,8 @@ public class SavingsAccountData {
     private final boolean withdrawalFeeForTransfers;
     private final boolean allowOverdraft;
     private final BigDecimal overdraftLimit;
+    private final BigDecimal minRequiredBalance;
+    private final boolean allowOverdraftMinBalance;
 
     // associations
     private final SavingsAccountSummaryData summary;
@@ -78,7 +80,8 @@ public class SavingsAccountData {
             final EnumOptionData interestCalculationType, final EnumOptionData interestCalculationDaysInYearType,
             final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency,
             final EnumOptionData lockinPeriodFrequencyType, final boolean withdrawalFeeForTransfers,
-            final SavingsAccountSummaryData summary, final boolean allowOverdraft, final BigDecimal overdraftLimit) {
+            final SavingsAccountSummaryData summary, final boolean allowOverdraft, final BigDecimal overdraftLimit,
+            final BigDecimal minRequiredBalance, final boolean allowOverdraftMinBalance) {
 
         final Collection<SavingsProductData> productOptions = null;
         final Collection<StaffData> fieldOfficerOptions = null;
@@ -99,7 +102,8 @@ public class SavingsAccountData {
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, transactions, productOptions,
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
-                withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit);
+                withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit, minRequiredBalance,
+                allowOverdraftMinBalance);
     }
 
     public static SavingsAccountData lookup(final Long accountId, final String accountNo) {
@@ -132,6 +136,8 @@ public class SavingsAccountData {
         // final LocalDate annualFeeNextDueDate = null;
         final boolean allowOverdraft = false;
         final BigDecimal overdraftLimit = null;
+        final BigDecimal minRequiredBalance = null;
+        final boolean allowOverdraftMinBalance = false;
 
         final SavingsAccountSummaryData summary = null;
         final Collection<SavingsAccountTransactionData> transactions = null;
@@ -154,7 +160,7 @@ public class SavingsAccountData {
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, transactions, productOptions,
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
-                withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit);
+                withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit, minRequiredBalance, allowOverdraftMinBalance);
     }
 
     public static SavingsAccountData lookupWithProductDetails(final Long accountId, final String accountNo, final Long productId,
@@ -185,6 +191,8 @@ public class SavingsAccountData {
         // final LocalDate annualFeeNextDueDate = null;
         final boolean allowOverdraft = false;
         final BigDecimal overdraftLimit = null;
+        final BigDecimal minRequiredBalance = null;
+        final boolean allowOverdraftMinBalance = false;
 
         final SavingsAccountSummaryData summary = null;
         final Collection<SavingsAccountTransactionData> transactions = null;
@@ -207,7 +215,8 @@ public class SavingsAccountData {
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, transactions, productOptions,
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
-                withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit);
+                withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit, minRequiredBalance,
+                allowOverdraftMinBalance);
     }
 
     public static SavingsAccountData withTemplateOptions(final SavingsAccountData account, final SavingsAccountData template,
@@ -238,7 +247,8 @@ public class SavingsAccountData {
                 template.productOptions, template.fieldOfficerOptions, template.interestCompoundingPeriodTypeOptions,
                 template.interestPostingPeriodTypeOptions, template.interestCalculationTypeOptions,
                 template.interestCalculationDaysInYearTypeOptions, template.lockinPeriodFrequencyTypeOptions,
-                template.withdrawalFeeTypeOptions, charges, template.chargeOptions, account.allowOverdraft, account.overdraftLimit);
+                template.withdrawalFeeTypeOptions, charges, template.chargeOptions, account.allowOverdraft, account.overdraftLimit,
+                account.minRequiredBalance, account.allowOverdraftMinBalance);
     }
 
     public static SavingsAccountData withTemplateOptions(final SavingsAccountData account,
@@ -259,7 +269,8 @@ public class SavingsAccountData {
                 account.lockinPeriodFrequencyType, account.withdrawalFeeForTransfers, account.summary, transactions, productOptions,
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
-                withdrawalFeeTypeOptions, charges, chargeOptions, account.allowOverdraft, account.overdraftLimit);
+                withdrawalFeeTypeOptions, charges, chargeOptions, account.allowOverdraft, account.overdraftLimit,
+                account.minRequiredBalance, account.allowOverdraftMinBalance);
     }
 
     public static SavingsAccountData withClientTemplate(final Long clientId, final String clientName, final Long groupId,
@@ -291,6 +302,8 @@ public class SavingsAccountData {
         // final LocalDate annualFeeNextDueDate = null;
         final boolean allowOverdraft = false;
         final BigDecimal overdraftLimit = null;
+        final BigDecimal minRequiredBalance = null;
+        final boolean allowOverdraftMinBalance = false;
 
         final SavingsAccountSummaryData summary = null;
         final Collection<SavingsAccountTransactionData> transactions = null;
@@ -313,7 +326,8 @@ public class SavingsAccountData {
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, transactions, productOptions,
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
-                withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit);
+                withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit, minRequiredBalance,
+                allowOverdraftMinBalance);
     }
 
     private SavingsAccountData(final Long id, final String accountNo, final String externalId, final Long groupId, final String groupName,
@@ -331,7 +345,7 @@ public class SavingsAccountData {
             final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
             final Collection<SavingsAccountChargeData> charges, final Collection<ChargeData> chargeOptions, final boolean allowOverdraft,
-            final BigDecimal overdraftLimit) {
+            final BigDecimal overdraftLimit, final BigDecimal minRequiredBalance, final boolean allowOverdraftMinBalance) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -382,6 +396,8 @@ public class SavingsAccountData {
         this.annualFee = getAnnualFee();
         this.allowOverdraft = allowOverdraft;
         this.overdraftLimit = overdraftLimit;
+        this.minRequiredBalance = minRequiredBalance;
+        this.allowOverdraftMinBalance = allowOverdraftMinBalance;
     }
 
     private SavingsAccountChargeData getWithdrawalFee() {
