@@ -10,11 +10,10 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mifosplatform.integrationtests.common.CommonConstants;
-import org.mifosplatform.integrationtests.common.OfficeHelper;
 import org.mifosplatform.integrationtests.common.Utils;
 import org.mifosplatform.integrationtests.common.accounting.Account;
 import org.mifosplatform.integrationtests.common.accounting.AccountHelper;
-import org.mifosplatform.integrationtests.common.accounting.OfficeAccountMappingHelper;
+import org.mifosplatform.integrationtests.common.accounting.FinancialActivityAccountsHelper;
 
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
@@ -36,22 +35,16 @@ public class OfficeAccountingMappingsTest {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
+    /**
     @SuppressWarnings("unchecked")
     @Test
-    public void testOfficeAccountingMappings() {
-
-        OfficeHelper officeHelper = new OfficeHelper(this.requestSpec, this.responseSpec);
-        Integer officeId = officeHelper.createOffice("01 January 2014");
-        Assert.assertNotNull(officeId);
-
-        Integer officeId2 = officeHelper.createOffice("01 January 2014");
-        Assert.assertNotNull(officeId2);
+    public void testFinancialActivityAccounts() {
 
         AccountHelper accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         Account transferAccount = accountHelper.createLiabilityAccount();
         Assert.assertNotNull(transferAccount);
 
-        OfficeAccountMappingHelper accountMappingHelper = new OfficeAccountMappingHelper(this.requestSpec,
+        FinancialActivityAccountsHelper accountMappingHelper = new FinancialActivityAccountsHelper(this.requestSpec,
                 new ResponseSpecBuilder().build());
         Integer transferAccountMappingId = (Integer) accountMappingHelper.createOfficeAccountMapping(officeId,
                 transferAccount.getAccountID(), CommonConstants.RESPONSE_RESOURCE_ID);
@@ -86,8 +79,9 @@ public class OfficeAccountingMappingsTest {
 
         List<HashMap> error3 = (List<HashMap>) accountMappingHelper.createOfficeAccountMapping(officeId2, fundAccount.getAccountID(),
                 CommonConstants.RESPONSE_ERROR);
-        assertEquals("error.msg.liabilityTransferInSuspenseAccountId.invalid.account.type", error3.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        assertEquals("error.msg.liabilityTransferInSuspenseAccountId.invalid.account.type",
+                error3.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-    }
+    }**/
 
 }

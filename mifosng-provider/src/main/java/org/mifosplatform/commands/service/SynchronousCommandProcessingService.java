@@ -788,7 +788,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
 
-        } else if (wrapper.isOfficeToGLAccountMapping()) {
+        } else if (wrapper.isFinancialActivityAccountMapping()) {
             if (wrapper.isCreate()) {
                 handler = this.applicationContext.getBean("createFinancialActivityAccountHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdate()) {

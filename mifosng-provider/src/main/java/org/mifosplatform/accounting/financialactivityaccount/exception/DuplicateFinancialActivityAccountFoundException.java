@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.accounting.accountmapping.exception;
+package org.mifosplatform.accounting.financialactivityaccount.exception;
 
 import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
@@ -14,7 +14,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
 public class DuplicateFinancialActivityAccountFoundException extends AbstractPlatformDomainRuleException {
 
     public DuplicateFinancialActivityAccountFoundException(final Integer financialActivityType) {
-        super("error.msg.officeToAccountMapping.exists.for.office", "Mapping for activity already exists " + financialActivityType,
+        super("error.msg.financialActivityAccount.exists.for.office", "Mapping for activity already exists " + financialActivityType,
                 financialActivityType);
     }
 

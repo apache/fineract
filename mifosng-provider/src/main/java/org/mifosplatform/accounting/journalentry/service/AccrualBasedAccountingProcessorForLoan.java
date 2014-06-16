@@ -11,7 +11,7 @@ import java.util.Date;
 import org.mifosplatform.accounting.closure.domain.GLClosure;
 import org.mifosplatform.accounting.common.AccountingConstants.ACCRUAL_ACCOUNTS_FOR_LOAN;
 import org.mifosplatform.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR_LOAN;
-import org.mifosplatform.accounting.common.AccountingConstants.ORGANIZATION_ACCOUNTS;
+import org.mifosplatform.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
 import org.mifosplatform.accounting.journalentry.data.LoanDTO;
 import org.mifosplatform.accounting.journalentry.data.LoanTransactionDTO;
 import org.mifosplatform.organisation.office.domain.Office;
@@ -101,8 +101,8 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         // reversal)
         if (loanTransactionDTO.isAccountTransfer()) {
             this.helper.createAccrualBasedJournalEntriesAndReversalsForLoan(office, currencyCode,
-                    ACCRUAL_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue(), ORGANIZATION_ACCOUNTS.LIABILITY_TRANSFER_SUSPENSE.getValue(),
-                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, disbursalAmount, isReversed);
+                    ACCRUAL_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue(), FINANCIAL_ACTIVITY.LIABILITY_TRANSFER.getValue(), loanProductId,
+                    paymentTypeId, loanId, transactionId, transactionDate, disbursalAmount, isReversed);
         } else {
             this.helper.createAccrualBasedJournalEntriesAndReversalsForLoan(office, currencyCode,
                     ACCRUAL_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue(), ACCRUAL_ACCOUNTS_FOR_LOAN.FUND_SOURCE.getValue(), loanProductId,
@@ -217,7 +217,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         } else {
             if (loanTransactionDTO.isAccountTransfer()) {
                 this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode,
-                        ORGANIZATION_ACCOUNTS.LIABILITY_TRANSFER_SUSPENSE.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
+                        FINANCIAL_ACTIVITY.LIABILITY_TRANSFER.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
                         transactionDate, totalDebitAmount, isReversal);
             } else {
                 this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode,
@@ -321,8 +321,8 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         if (loanTransactionDTO.isAccountTransfer()) {
             this.helper.createCashBasedJournalEntriesAndReversalsForLoan(office, currencyCode,
-                    CASH_ACCOUNTS_FOR_LOAN.OVERPAYMENT.getValue(), ORGANIZATION_ACCOUNTS.LIABILITY_TRANSFER_SUSPENSE.getValue(),
-                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, refundAmount, isReversal);
+                    CASH_ACCOUNTS_FOR_LOAN.OVERPAYMENT.getValue(), FINANCIAL_ACTIVITY.LIABILITY_TRANSFER.getValue(), loanProductId,
+                    paymentTypeId, loanId, transactionId, transactionDate, refundAmount, isReversal);
         } else {
             this.helper.createCashBasedJournalEntriesAndReversalsForLoan(office, currencyCode,
                     CASH_ACCOUNTS_FOR_LOAN.OVERPAYMENT.getValue(), CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE.getValue(), loanProductId,

@@ -3,11 +3,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.accounting.accountmapping.domain;
+package org.mifosplatform.accounting.financialactivityaccount.domain;
 
 import java.util.List;
 
-import org.mifosplatform.accounting.accountmapping.exception.FinancialActivityAccountNotFoundException;
+import org.mifosplatform.accounting.financialactivityaccount.exception.FinancialActivityAccountNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,8 +33,10 @@ public class FinancialActivityAccountRepositoryWrapper {
         return financialActivityAccount;
     }
 
-    public FinancialActivityAccount findByFinancialActivityType(final int financialActivityType) {
-        return this.repository.findByFinancialActivityType(financialActivityType);
+    public FinancialActivityAccount findByFinancialActivityTypeWithNotFoundDetection(final int financialActivityType) {
+        FinancialActivityAccount financialActivityAccount = this.repository.findByFinancialActivityType(financialActivityType);
+        if (financialActivityAccount == null) { throw new FinancialActivityAccountNotFoundException(financialActivityType); }
+        return financialActivityAccount;
     }
 
     public List<FinancialActivityAccount> findAll() {

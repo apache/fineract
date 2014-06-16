@@ -32,7 +32,6 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
-import org.joda.time.Years;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -475,7 +474,7 @@ public final class Client extends AbstractPersistable<Long> {
             this.activationDate = newValue.toDate();
             this.officeJoiningDate = this.activationDate;
         }
-        
+
         if (command.isChangeInLocalDateParameterNamed(ClientApiConstants.dateOfBirthParamName, dateOfBirthLocalDate())) {
             final String valueAsInput = command.stringValueOfParameterNamed(ClientApiConstants.dateOfBirthParamName);
             actualChanges.put(ClientApiConstants.dateOfBirthParamName, valueAsInput);
@@ -786,8 +785,8 @@ public final class Client extends AbstractPersistable<Long> {
     public Date dateOfBirth() {
         return this.dateOfBirth;
     }
-    
-    public LocalDate dateOfBirthLocalDate(){
+
+    public LocalDate dateOfBirthLocalDate() {
         LocalDate dateOfBirth = null;
         if (this.dateOfBirth != null) {
             dateOfBirth = LocalDate.fromDateFields(this.dateOfBirth);
