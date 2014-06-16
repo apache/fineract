@@ -195,6 +195,6 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
         final String sql = "select " + this.savingsProductRowMapper.schema() + " where sp.currency_code='" + currencyCode + "'";
 
-        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
+        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper);
     }
 }
