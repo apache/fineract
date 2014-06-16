@@ -53,7 +53,6 @@ public class InterestRateChartSlabFields {
     @Column(name = "annual_interest_rate", scale = 6, precision = 19, nullable = false)
     private BigDecimal annualInterestRate;
 
-    @SuppressWarnings("unused")
     @Column(name = "currency_code", nullable = false)
     private String currencyCode;
 

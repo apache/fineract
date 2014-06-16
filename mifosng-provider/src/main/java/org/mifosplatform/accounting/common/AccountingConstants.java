@@ -5,8 +5,13 @@
  */
 package org.mifosplatform.accounting.common;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import org.mifosplatform.accounting.financialactivityaccount.data.FinancialActivityData;
+import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
 
 public class AccountingConstants {
 
@@ -215,13 +220,18 @@ public class AccountingConstants {
         }
     }
 
-    public static enum ORGANIZATION_ACCOUNTS {
-        LIABILITY_TRANSFER_SUSPENSE(100);
+    public static enum FINANCIAL_ACTIVITY {
+        ASSET_TRANSFER(100, "assetTransfer", GLAccountType.ASSET), LIABILITY_TRANSFER(200, "liabilityTransfer", GLAccountType.LIABILITY);
 
         private final Integer value;
+        private final String code;
+        private final GLAccountType mappedGLAccountType;
+        private static List<FinancialActivityData> financialActivities;
 
-        private ORGANIZATION_ACCOUNTS(final Integer value) {
+        private FINANCIAL_ACTIVITY(final Integer value, final String code, final GLAccountType mappedGLAccountType) {
             this.value = value;
+            this.code = code;
+            this.mappedGLAccountType = mappedGLAccountType;
         }
 
         @Override
@@ -233,62 +243,49 @@ public class AccountingConstants {
             return this.value;
         }
 
-        private static final Map<Integer, ORGANIZATION_ACCOUNTS> intToEnumMap = new HashMap<Integer, ORGANIZATION_ACCOUNTS>();
+        public String getCode() {
+            return this.code;
+        }
+
+        public GLAccountType getMappedGLAccountType() {
+            return mappedGLAccountType;
+        }
+
+        public String getValueAsString() {
+            return this.value.toString();
+        }
+
+        private static final Map<Integer, FINANCIAL_ACTIVITY> intToEnumMap = new HashMap<Integer, FINANCIAL_ACTIVITY>();
         static {
-            for (final ORGANIZATION_ACCOUNTS type : ORGANIZATION_ACCOUNTS.values()) {
+            for (final FINANCIAL_ACTIVITY type : FINANCIAL_ACTIVITY.values()) {
                 intToEnumMap.put(type.value, type);
             }
         }
 
-        public static ORGANIZATION_ACCOUNTS fromInt(final int i) {
-            final ORGANIZATION_ACCOUNTS type = intToEnumMap.get(Integer.valueOf(i));
+        public static FINANCIAL_ACTIVITY fromInt(final int financialActivityId) {
+            final FINANCIAL_ACTIVITY type = intToEnumMap.get(Integer.valueOf(financialActivityId));
             return type;
         }
-    }
 
-    /***
-     * Enum of all accounting related input parameter names used while
-     * creating/updating a loan product
-     ***/
-    public static enum ORGANIZATION_ACCOUNTING_PARAMS {
-        LIABILITY_TRANSFER_SUSPENSE("liabilityTransferInSuspenseAccountId");
-
-        private final String value;
-
-        private ORGANIZATION_ACCOUNTING_PARAMS(final String value) {
-            this.value = value;
+        public static FinancialActivityData toFinancialActivityData(final int financialActivityId) {
+            final FINANCIAL_ACTIVITY type = fromInt(financialActivityId);
+            return convertToFinancialActivityData(type);
         }
 
-        @Override
-        public String toString() {
-            return name().toString().replaceAll("_", " ");
+        public static List<FinancialActivityData> getAllFinancialActivities() {
+            if (financialActivities == null) {
+                financialActivities = new ArrayList<FinancialActivityData>();
+                for (final FINANCIAL_ACTIVITY type : FINANCIAL_ACTIVITY.values()) {
+                    FinancialActivityData financialActivityData = convertToFinancialActivityData(type);
+                    financialActivities.add(financialActivityData);
+                }
+            }
+            return financialActivities;
         }
 
-        public String getValue() {
-            return this.value;
-        }
-    }
-
-    /***
-     * Enum of all accounting related input parameter names used while
-     * creating/updating a loan product
-     ***/
-    public static enum ORGANIZATION_ACCOUNTING_DATA_PARAMS {
-        LIABILITY_TRANSFER_SUSPENSE("liabilityTransferInSuspenseAccount");
-
-        private final String value;
-
-        private ORGANIZATION_ACCOUNTING_DATA_PARAMS(final String value) {
-            this.value = value;
-        }
-
-        @Override
-        public String toString() {
-            return name().toString().replaceAll("_", " ");
-        }
-
-        public String getValue() {
-            return this.value;
+        private static FinancialActivityData convertToFinancialActivityData(final FINANCIAL_ACTIVITY type) {
+            FinancialActivityData financialActivityData = new FinancialActivityData(type.value, type.code, type.getMappedGLAccountType());
+            return financialActivityData;
         }
     }
 

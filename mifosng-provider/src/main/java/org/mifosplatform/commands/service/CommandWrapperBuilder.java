@@ -1960,7 +1960,7 @@ public class CommandWrapperBuilder {
 
     public CommandWrapperBuilder createOfficeToGLAccountMapping() {
         this.actionName = "CREATE";
-        this.entityName = "OFFICEGLACCOUNT";
+        this.entityName = "FINANCIALACTIVITYACCOUNT";
         this.entityId = null;
         this.href = "/organizationglaccounts/template";
         return this;
@@ -1968,7 +1968,7 @@ public class CommandWrapperBuilder {
 
     public CommandWrapperBuilder updateOfficeToGLAccountMapping(final Long mappingId) {
         this.actionName = "UPDATE";
-        this.entityName = "OFFICEGLACCOUNT";
+        this.entityName = "FINANCIALACTIVITYACCOUNT";
         this.entityId = mappingId;
         this.href = "/organizationglaccounts/" + mappingId;
         return this;
@@ -1976,7 +1976,7 @@ public class CommandWrapperBuilder {
 
     public CommandWrapperBuilder deleteOfficeToGLAccountMapping(final Long mappingId) {
         this.actionName = "DELETE";
-        this.entityName = "OFFICEGLACCOUNT";
+        this.entityName = "FINANCIALACTIVITYACCOUNT";
         this.entityId = mappingId;
         this.href = "/organizationglaccounts/" + mappingId;
         return this;

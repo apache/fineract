@@ -3,12 +3,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.accounting.accountmapping.api;
+package org.mifosplatform.accounting.financialactivityaccount.api;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -22,8 +19,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosplatform.accounting.accountmapping.data.FinancialActivityAccountData;
-import org.mifosplatform.accounting.accountmapping.service.FinancialActivityAccountReadPlatformService;
+import org.mifosplatform.accounting.financialactivityaccount.data.FinancialActivityAccountData;
+import org.mifosplatform.accounting.financialactivityaccount.service.FinancialActivityAccountReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -40,11 +37,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class FinancialActivityAccountsApiResource {
-
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "glAccountData",
-            "accountingMappingOptions"));
-
-    private final String resourceNameForPermission = "OFFICEGLACCOUNT";
 
     private final FinancialActivityAccountReadPlatformService financialActivityAccountReadPlatformService;
     private final DefaultToApiJsonSerializer<FinancialActivityAccountData> apiJsonSerializerService;
@@ -71,12 +63,14 @@ public class FinancialActivityAccountsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveTemplate(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(FinancialActivityAccountsConstants.resourceNameForPermission);
 
-        FinancialActivityAccountData officeToGLAccountMappingData = this.financialActivityAccountReadPlatformService.retrieveTemplate();
+        FinancialActivityAccountData financialActivityAccountData = this.financialActivityAccountReadPlatformService
+                .getFinancialActivityAccountTemplate();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.apiJsonSerializerService.serialize(settings, officeToGLAccountMappingData, RESPONSE_DATA_PARAMETERS);
+        return this.apiJsonSerializerService.serialize(settings, financialActivityAccountData,
+                FinancialActivityAccountsConstants.RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -84,29 +78,31 @@ public class FinancialActivityAccountsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(FinancialActivityAccountsConstants.resourceNameForPermission);
         final List<FinancialActivityAccountData> financialActivityAccounts = this.financialActivityAccountReadPlatformService.retrieveAll();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.apiJsonSerializerService.serialize(settings, financialActivityAccounts, RESPONSE_DATA_PARAMETERS);
+        return this.apiJsonSerializerService.serialize(settings, financialActivityAccounts,
+                FinancialActivityAccountsConstants.RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
     @Path("{mappingId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retreiveAccountMapping(@PathParam("mappingId") final Long mappingId, @Context final UriInfo uriInfo) {
+    public String retreive(@PathParam("mappingId") final Long mappingId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(FinancialActivityAccountsConstants.resourceNameForPermission);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        FinancialActivityAccountData officeToGLAccountMappingData = this.financialActivityAccountReadPlatformService.retrieve(mappingId);
+        FinancialActivityAccountData financialActivityAccountData = this.financialActivityAccountReadPlatformService.retrieve(mappingId);
         if (settings.isTemplate()) {
-            FinancialActivityAccountData templateData = this.financialActivityAccountReadPlatformService.retrieveTemplate();
-            officeToGLAccountMappingData = FinancialActivityAccountData.associateTemplateData(templateData, officeToGLAccountMappingData);
+            financialActivityAccountData = this.financialActivityAccountReadPlatformService
+                    .addTemplateDetails(financialActivityAccountData);
         }
 
-        return this.apiJsonSerializerService.serialize(settings, officeToGLAccountMappingData, RESPONSE_DATA_PARAMETERS);
+        return this.apiJsonSerializerService.serialize(settings, financialActivityAccountData,
+                FinancialActivityAccountsConstants.RESPONSE_DATA_PARAMETERS);
     }
 
     @POST

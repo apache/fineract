@@ -834,8 +834,8 @@ public class CommandWrapper {
 
     // End - Deposit accounts
 
-    public boolean isOfficeToGLAccountMapping() {
-        return this.entityName.equalsIgnoreCase("OFFICEGLACCOUNT");
+    public boolean isFinancialActivityAccountMapping() {
+        return this.entityName.equalsIgnoreCase("FINANCIALACTIVITYACCOUNT");
     }
 
     public boolean isRegisterDatatable() {
