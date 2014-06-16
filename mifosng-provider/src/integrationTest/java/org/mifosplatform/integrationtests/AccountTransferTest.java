@@ -4,15 +4,17 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mifosplatform.integrationtests.common.ClientHelper;
+import org.mifosplatform.integrationtests.common.CommonConstants;
 import org.mifosplatform.integrationtests.common.OfficeHelper;
 import org.mifosplatform.integrationtests.common.Utils;
 import org.mifosplatform.integrationtests.common.accounting.Account;
 import org.mifosplatform.integrationtests.common.accounting.AccountHelper;
-import org.mifosplatform.integrationtests.common.accounting.FinancialActivityAccountsHelper;
+import org.mifosplatform.integrationtests.common.accounting.FinancialActivityAccountHelper;
 import org.mifosplatform.integrationtests.common.accounting.JournalEntry;
 import org.mifosplatform.integrationtests.common.accounting.JournalEntryHelper;
 import org.mifosplatform.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -60,6 +62,9 @@ public class AccountTransferTest {
     Float TRANSFER_AMOUNT = new Float(ACCOUNT_TRANSFER_AMOUNT);
     Float TRANSFER_AMOUNT_ADJUST = new Float(ACCOUNT_TRANSFER_AMOUNT_ADJUST);
 
+    private FinancialActivityAccountHelper financialActivityAccountHelper;
+    private Integer financialActivityAccountId;
+
     @Before
     public void setup() {
         Utils.initializeRESTAssured();
@@ -68,6 +73,29 @@ public class AccountTransferTest {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
+        this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec, this.responseSpec);
+
+        /** Setup liability transfer account **/
+        /** Create a Liability and an Asset Transfer Account **/
+        Account liabilityTransferAccount = accountHelper.createLiabilityAccount();
+        Assert.assertNotNull(liabilityTransferAccount);
+
+        /*** Create A Financial Activity to Account Mapping **/
+        financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
+                FinancialActivityAccountsTest.liabilityTransferFinancialActivityId, liabilityTransferAccount.getAccountID(),
+                CommonConstants.RESPONSE_RESOURCE_ID);
+        Assert.assertNotNull(financialActivityAccountId);
+    }
+
+    /**
+     * Delete the Liability transfer account
+     */
+    @After
+    public void tearDown() {
+        Integer deletedFinancialActivityAccountId = financialActivityAccountHelper.deleteFinancialActivityAccount(
+                financialActivityAccountId, CommonConstants.RESPONSE_RESOURCE_ID);
+        Assert.assertNotNull(deletedFinancialActivityAccountId);
+        Assert.assertEquals(financialActivityAccountId, deletedFinancialActivityAccountId);
     }
 
     @Test
@@ -92,7 +120,7 @@ public class AccountTransferTest {
         Account toTransferAccount = accountHelper.createLiabilityAccount();
         Assert.assertNotNull(toTransferAccount);
 
-        FinancialActivityAccountsHelper accountMappingHelper = new FinancialActivityAccountsHelper(this.requestSpec,
+        FinancialActivityAccountHelper accountMappingHelper = new FinancialActivityAccountHelper(this.requestSpec,
                 new ResponseSpecBuilder().build());
 
         final Integer toSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, assetAccount,
@@ -200,7 +228,7 @@ public class AccountTransferTest {
         Account toTransferAccount = accountHelper.createLiabilityAccount();
         Assert.assertNotNull(toTransferAccount);
 
-        FinancialActivityAccountsHelper accountMappingHelper = new FinancialActivityAccountsHelper(this.requestSpec,
+        FinancialActivityAccountHelper accountMappingHelper = new FinancialActivityAccountHelper(this.requestSpec,
                 new ResponseSpecBuilder().build());
 
         final Integer toLoanProductID = createLoanProduct(loanAssetAccount, loanIncomeAccount, loanExpenseAccount, overpaymentAccount);
@@ -302,7 +330,7 @@ public class AccountTransferTest {
         Account toTransferAccount = accountHelper.createLiabilityAccount();
         Assert.assertNotNull(toTransferAccount);
 
-        FinancialActivityAccountsHelper accountMappingHelper = new FinancialActivityAccountsHelper(this.requestSpec,
+        FinancialActivityAccountHelper accountMappingHelper = new FinancialActivityAccountHelper(this.requestSpec,
                 new ResponseSpecBuilder().build());
 
         final Integer toSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, assetAccount,
