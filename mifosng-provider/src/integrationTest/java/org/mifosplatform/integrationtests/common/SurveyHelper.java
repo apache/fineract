@@ -8,7 +8,7 @@ import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 
-public class surveyHelper {
+public class SurveyHelper {
 
     private static final String FULFIL_SURVEY_URL = "/mifosng-provider/api/v1/survey/ppi_kenya_2009/clientId?tenantIdentifier=default";
 

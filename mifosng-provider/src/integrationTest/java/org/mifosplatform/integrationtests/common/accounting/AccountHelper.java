@@ -44,9 +44,9 @@ public class AccountHelper {
     }
 
     public Account createLiabilityAccount() {
-        final String assetAccountJSON = new GLAccountBuilder().withAccountTypeAsLiability().build();
+        final String liabilityAccountJSON = new GLAccountBuilder().withAccountTypeAsLiability().build();
         final Integer accountID = Utils.performServerPost(this.requestSpec, this.responseSpec, this.CREATE_GL_ACCOUNT_URL,
-                assetAccountJSON, this.GL_ACCOUNT_ID_RESPONSE);
+                liabilityAccountJSON, this.GL_ACCOUNT_ID_RESPONSE);
         return new Account(accountID, Account.AccountType.LIABILITY);
     }
     

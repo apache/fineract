@@ -13,9 +13,14 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
  */
 public class DuplicateFinancialActivityAccountFoundException extends AbstractPlatformDomainRuleException {
 
+    private final static String errorCode = "error.msg.financialActivityAccount.exists";
+
     public DuplicateFinancialActivityAccountFoundException(final Integer financialActivityType) {
-        super("error.msg.financialActivityAccount.exists.for.office", "Mapping for activity already exists " + financialActivityType,
-                financialActivityType);
+        super(errorCode, "Mapping for activity already exists " + financialActivityType, financialActivityType);
+    }
+
+    public static String getErrorcode() {
+        return errorCode;
     }
 
 }
