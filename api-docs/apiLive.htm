@@ -304,47 +304,31 @@
 								<td><a href="#standinginstruction">Standing Instructions</a></td>
 								<td>standinginstructions</td>
 								<td><a href="#standinginstruction_create">Create Standing Instruction</a></td>
+                                <td><a href="#standinginstructions_list">List Standing Instructions</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>standinginstructions/{standingInstructionId}</td>
+                                <td></td>
 								<td><a href="#standinginstructions_retrieve">Retrive a Standing Instruction</a></td>
-								<td><a href="#standinginstruction_update">Update Standing Instruction</a></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td></td>
-								<td></td>
-								<td><a href="#standinginstructions_list">List Standing Instructions</a></td>
+                                <td><a href="#standinginstruction_update">Update Standing Instruction</a></td>
 								<td><a href="#standinginstruction_delete">Delete Standing Instruction(status change)</a></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td></td>
-								<td></td>
-								<td><a href="#standinginstruction_template">Retrive Standing Instruction Template</a></td>
-								<td></td>
-								<td></td>
 							</tr>
 							<tr>
 								<td><a href="#accounttransfers">Account Transfer</a></td>
 								<td>accounttransfers</td>
 								<td><a href="#accounttransfers_create">Create Account Transfer</a></td>
-								<td><a href="#accounttransfers_retrieve">Retrive a Account Transfer</a></td>
+                                <td><a href="#accounttransfers_list">List Account Transfer</a></td>
 								<td></td>
 								<td></td>
 							</tr>
 							<tr>
 								<td></td>
+								<td>accounttransfers/{accountTransferId}</td>
 								<td></td>
-								<td></td>
-								<td><a href="#accounttransfers_list">List Account Transfer</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td></td>
-								<td></td>
-								<td><a href="#accounttransfers_template">Retrive Account Transfer Template</a></td>
+                                <td><a href="#accounttransfers_retrieve">Retrive a Account Transfer</a></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -2338,6 +2322,14 @@
 								<td>savingsaccounts/{accountId}/transactions/template</td>
 								<td><a href="#savingsaccounts_transactions_template">Retrieve savings account transaction template</a></td>
 							</tr>
+                            <tr>
+                                <td>standinginstructions/template</td>
+                                <td><a href="#standinginstruction_template">Retrive Standing Instruction Template</a></td>
+                            </tr>
+                            <tr>
+                                <td>accounttransfers/template</td>
+                                <td><a href="#accounttransfers_template">Retrive Account Transfer Template</a></td>
+                            </tr>
 						</table>
 					</div>
 				</div>
@@ -30224,21 +30216,21 @@ No Request Body:
                     <td><a href="#standinginstruction">Standing Instructions</a></td>
                     <td>standinginstructions</td>
                     <td><a href="#standinginstruction_create">Create Standing Instruction</a></td>
+                    <td><a href="#standinginstructions_list">List Standing Instructions</a></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>standinginstructions/{standingInstructionId}</td>
+                    <td></td>
                     <td><a href="#standinginstructions_retrieve">Retrive a Standing Instruction</a></td>
                     <td><a href="#standinginstruction_update">Update Standing Instruction</a></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td><a href="#standinginstructions_list">List Standing Instructions</a></td>
                     <td><a href="#standinginstruction_delete">Delete Standing Instruction(status change)</a></td>
-                    <td></td>
                 </tr>
                 <tr>
                     <td></td>
-                    <td></td>
+                    <td>standinginstructions/template</td>
                     <td></td>
                     <td><a href="#standinginstruction_template">Retrive Standing Instruction Template</a></td>
                     <td></td>
