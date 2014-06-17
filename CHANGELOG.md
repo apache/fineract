@@ -111,6 +111,7 @@ Bugs
  - [MIFOSX-1208] - Issue on Retrieving Datatable entries for Office.
  - [MIFOSX-1215] - Not able to approve/delete maker checker tasks with checker user role
  - [MIFOSX-1237] - Able to login with Deleted user
+ - [MIFOSX-1335] - Not able to close FD and RD accounts, displays "account is not active" error message
 
 Community App
 
