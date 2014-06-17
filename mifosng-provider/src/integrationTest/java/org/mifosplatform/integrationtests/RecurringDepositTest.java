@@ -975,6 +975,7 @@ public class RecurringDepositTest {
                 DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
         Assert.assertNotNull(transactionIdForDeposit);
 
+        currentDate = currentDate - 1;
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
         System.out.println("IPM = " + interestPerMonth);
         principal += interestPerMonth;
@@ -1101,6 +1102,7 @@ public class RecurringDepositTest {
                 DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
         Assert.assertNotNull(transactionIdForDeposit);
 
+        currentDate = currentDate - 1;
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
         System.out.println("IPM = " + interestPerMonth);
         principal += interestPerMonth;
@@ -1234,6 +1236,7 @@ public class RecurringDepositTest {
                 DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
         Assert.assertNotNull(transactionIdForDeposit);
 
+        currentDate = currentDate - 1;
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
         System.out.println("IPM = " + interestPerMonth);
         principal += interestPerMonth;
@@ -1372,6 +1375,7 @@ public class RecurringDepositTest {
                 DEPOSIT_AMOUNT, EXPECTED_FIRST_DEPOSIT_ON_DATE);
         Assert.assertNotNull(newTransactionIdForDeposit);
 
+        currentDate = currentDate - 1;
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
         System.out.println("IPM = " + interestPerMonth);
         principal += interestPerMonth;
