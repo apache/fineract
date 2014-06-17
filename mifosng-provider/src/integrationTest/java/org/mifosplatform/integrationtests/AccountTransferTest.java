@@ -185,10 +185,10 @@ public class AccountTransferTest {
         final JournalEntry[] office2LiabilityEntries = { new JournalEntry(new Float(ACCOUNT_TRANSFER_AMOUNT),
                 JournalEntry.TransactionType.DEBIT) };
 
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
-                office1LiabilityEntries);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
-                office2LiabilityEntries);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,
+                AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office1LiabilityEntries);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(toOfficeId, liabilityTransferAccount,
+                AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office2LiabilityEntries);
 
     }
 
@@ -282,10 +282,10 @@ public class AccountTransferTest {
         final JournalEntry[] office2LiabilityEntries = { new JournalEntry(new Float(ACCOUNT_TRANSFER_AMOUNT_ADJUST),
                 JournalEntry.TransactionType.DEBIT) };
 
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
-                office1LiabilityEntries);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
-                office2LiabilityEntries);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,
+                AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office1LiabilityEntries);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(toOfficeId, liabilityTransferAccount,
+                AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office2LiabilityEntries);
     }
 
     @Test
@@ -403,10 +403,10 @@ public class AccountTransferTest {
         final JournalEntry[] office2LiabilityEntries = { new JournalEntry(new Float(ACCOUNT_TRANSFER_AMOUNT_ADJUST),
                 JournalEntry.TransactionType.DEBIT) };
 
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
-                office1LiabilityEntries);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
-                office2LiabilityEntries);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,
+                AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office1LiabilityEntries);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(toOfficeId, liabilityTransferAccount,
+                AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office2LiabilityEntries);
 
     }
 
