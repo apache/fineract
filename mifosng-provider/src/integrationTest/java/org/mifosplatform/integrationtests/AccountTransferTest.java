@@ -145,9 +145,6 @@ public class AccountTransferTest {
                 String.valueOf(fromOfficeId));
         Assert.assertNotNull(fromClientID);
 
-        Account fromTransferAccount = accountHelper.createLiabilityAccount();
-        Assert.assertNotNull(fromTransferAccount);
-
         final Integer fromSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 assetAccount, incomeAccount, expenseAccount, liabilityAccount);
         Assert.assertNotNull(fromSavingsProductID);
@@ -188,9 +185,9 @@ public class AccountTransferTest {
         final JournalEntry[] office2LiabilityEntries = { new JournalEntry(new Float(ACCOUNT_TRANSFER_AMOUNT),
                 JournalEntry.TransactionType.DEBIT) };
 
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(fromTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
                 office1LiabilityEntries);
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(liabilityTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
                 office2LiabilityEntries);
 
     }
@@ -246,9 +243,6 @@ public class AccountTransferTest {
                 String.valueOf(fromOfficeId));
         Assert.assertNotNull(fromClientID);
 
-        Account fromTransferAccount = accountHelper.createLiabilityAccount();
-        Assert.assertNotNull(fromTransferAccount);
-
         final Integer fromSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 assetAccount, incomeAccount, expenseAccount, liabilityAccount);
         Assert.assertNotNull(fromSavingsProductID);
@@ -288,9 +282,9 @@ public class AccountTransferTest {
         final JournalEntry[] office2LiabilityEntries = { new JournalEntry(new Float(ACCOUNT_TRANSFER_AMOUNT_ADJUST),
                 JournalEntry.TransactionType.DEBIT) };
 
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(fromTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
                 office1LiabilityEntries);
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(toTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
                 office2LiabilityEntries);
     }
 
@@ -343,9 +337,6 @@ public class AccountTransferTest {
         final Integer fromClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
                 String.valueOf(fromOfficeId));
         Assert.assertNotNull(fromClientID);
-
-        Account fromTransferAccount = accountHelper.createLiabilityAccount();
-        Assert.assertNotNull(fromTransferAccount);
 
         final Integer loanProductID = createLoanProduct(loanAssetAccount, loanIncomeAccount, loanExpenseAccount, overpaymentAccount);
         Assert.assertNotNull(loanProductID);
@@ -412,9 +403,9 @@ public class AccountTransferTest {
         final JournalEntry[] office2LiabilityEntries = { new JournalEntry(new Float(ACCOUNT_TRANSFER_AMOUNT_ADJUST),
                 JournalEntry.TransactionType.DEBIT) };
 
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(fromTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
                 office1LiabilityEntries);
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(liabilityTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
                 office2LiabilityEntries);
 
     }
