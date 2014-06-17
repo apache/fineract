@@ -28,6 +28,8 @@ import com.jayway.restassured.specification.ResponseSpecification;
 public class FinancialActivityAccountsTest {
 
     private ResponseSpecification responseSpec;
+    private ResponseSpecification responseSpecForValidationError;
+    private ResponseSpecification responseSpecForResourceNotFoundError;
     private RequestSpecification requestSpec;
     private AccountHelper accountHelper;
     private FinancialActivityAccountHelper financialActivityAccountHelper;
@@ -41,8 +43,10 @@ public class FinancialActivityAccountsTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.responseSpecForValidationError = new ResponseSpecBuilder().expectStatusCode(400).build();
+        this.responseSpecForResourceNotFoundError = new ResponseSpecBuilder().expectStatusCode(404).build();
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec, this.responseSpec);
+        this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec);
     }
 
     @SuppressWarnings("unchecked")
@@ -57,7 +61,8 @@ public class FinancialActivityAccountsTest {
 
         /*** Create A Financial Activity to Account Mapping **/
         Integer financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
-                liabilityTransferFinancialActivityId, liabilityTransferAccount.getAccountID(), CommonConstants.RESPONSE_RESOURCE_ID);
+                liabilityTransferFinancialActivityId, liabilityTransferAccount.getAccountID(), responseSpec,
+                CommonConstants.RESPONSE_RESOURCE_ID);
         Assert.assertNotNull(financialActivityAccountId);
 
         /***
@@ -74,7 +79,8 @@ public class FinancialActivityAccountsTest {
         Assert.assertNotNull(newLiabilityTransferAccount);
 
         HashMap changes = (HashMap) financialActivityAccountHelper.updateFinancialActivityAccount(financialActivityAccountId,
-                liabilityTransferFinancialActivityId, newLiabilityTransferAccount.getAccountID(), CommonConstants.RESPONSE_CHANGES);
+                liabilityTransferFinancialActivityId, newLiabilityTransferAccount.getAccountID(), responseSpec,
+                CommonConstants.RESPONSE_CHANGES);
         Assert.assertEquals(newLiabilityTransferAccount.getAccountID(), changes.get("glAccountId"));
 
         /** Validate update works correctly **/
@@ -83,13 +89,14 @@ public class FinancialActivityAccountsTest {
 
         /** Update with Invalid Financial Activity should fail **/
         List<HashMap> invalidFinancialActivityUpdateError = (List<HashMap>) financialActivityAccountHelper.updateFinancialActivityAccount(
-                financialActivityAccountId, 232, newLiabilityTransferAccount.getAccountID(), CommonConstants.RESPONSE_ERROR);
-        assertEquals("error.msg.officeToAccountMapping.update.of.officeId.is.not.supported", invalidFinancialActivityUpdateError.get(0)
-                .get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+                financialActivityAccountId, 232, newLiabilityTransferAccount.getAccountID(), responseSpecForValidationError,
+                CommonConstants.RESPONSE_ERROR);
+        assertEquals("validation.msg.financialactivityaccount.financialActivityId.is.not.one.of.expected.enumerations",
+                invalidFinancialActivityUpdateError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         /** Creating Duplicate Financial Activity should fail **/
         List<HashMap> duplicateFinancialActivityAccountError = (List<HashMap>) financialActivityAccountHelper
-                .createFinancialActivityAccount(financialActivityAccountId, liabilityTransferAccount.getAccountID(),
+                .createFinancialActivityAccount(financialActivityAccountId, liabilityTransferAccount.getAccountID(), responseSpec,
                         CommonConstants.RESPONSE_ERROR);
         assertEquals(DuplicateFinancialActivityAccountFoundException.getErrorcode(),
                 duplicateFinancialActivityAccountError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
@@ -99,23 +106,23 @@ public class FinancialActivityAccountsTest {
          * should fail
          **/
         List<HashMap> invalidFinancialActivityAccountError = (List<HashMap>) financialActivityAccountHelper.updateFinancialActivityAccount(
-                financialActivityAccountId, liabilityTransferFinancialActivityId, newLiabilityTransferAccount.getAccountID(),
+                financialActivityAccountId, liabilityTransferFinancialActivityId, newLiabilityTransferAccount.getAccountID(), responseSpec,
                 CommonConstants.RESPONSE_ERROR);
         assertEquals(FinancialActivityAccountInvalidException.getErrorcode(),
                 invalidFinancialActivityAccountError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         /** Should be able to delete a Financial Activity to Account Mapping **/
         Integer deletedFinancialActivityAccountId = financialActivityAccountHelper.deleteFinancialActivityAccount(
-                financialActivityAccountId, CommonConstants.RESPONSE_RESOURCE_ID);
+                financialActivityAccountId, responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
         Assert.assertNotNull(deletedFinancialActivityAccountId);
         Assert.assertEquals(financialActivityAccountId, deletedFinancialActivityAccountId);
 
         /*** Trying to fetch a Deleted Account Mapping should give me a 404 **/
-        financialActivityAccountHelper.getFinancialActivityAccountAndValidateResouceNotFound(financialActivityAccountId);
+        financialActivityAccountHelper.getFinancialActivityAccount(deletedFinancialActivityAccountId, responseSpecForResourceNotFoundError);
     }
 
     private void assertFinancialActivityAccountCreation(Integer financialActivityAccountId, Integer financialActivityId, Account glAccount) {
-        HashMap mappingDetails = financialActivityAccountHelper.getFinancialActivityAccount(financialActivityAccountId);
+        HashMap mappingDetails = financialActivityAccountHelper.getFinancialActivityAccount(financialActivityAccountId, responseSpec);
         Assert.assertEquals(financialActivityId, ((HashMap) mappingDetails.get("financialActivityData")).get("id"));
         Assert.assertEquals(glAccount.getAccountID(), ((HashMap) mappingDetails.get("glAccountData")).get("id"));
     }
