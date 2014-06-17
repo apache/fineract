@@ -75,7 +75,7 @@ public class FinancialActivityAccountsTest {
 
         HashMap changes = (HashMap) financialActivityAccountHelper.updateFinancialActivityAccount(financialActivityAccountId,
                 liabilityTransferFinancialActivityId, newLiabilityTransferAccount.getAccountID(), CommonConstants.RESPONSE_CHANGES);
-        Assert.assertEquals(newLiabilityTransferAccount.getAccountID(), changes.get("liabilityTransferInSuspenseAccountId"));
+        Assert.assertEquals(newLiabilityTransferAccount.getAccountID(), changes.get("glAccountId"));
 
         /** Validate update works correctly **/
         assertFinancialActivityAccountCreation(financialActivityAccountId, liabilityTransferFinancialActivityId,

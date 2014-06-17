@@ -1354,20 +1354,20 @@
 								<td><a href="#accountingrules_delete">Delete a Accounting Rule</a></td>
 							</tr>
 							<tr>
-								<td><a href="#officeglaccount">Office GL Account Mappings</a></td>
+								<td><a href="#officeglaccount">Mapping Financial Activities to Accounts</a></td>
 								<td>financialactivityaccounts</td>
-								<td><a href="#financialactivityaccounts_create">Create Office GL Account Mapping</a><br> </td>
-								<td><a href="#financialactivityaccounts_list">List Journal Entries</a></td>
+								<td><a href="#financialactivityaccounts_create">Create Financial Activity to Account Mapping</a><br> </td>
+								<td><a href="#financialactivityaccounts_list">List Financial Activities to Accounts Mappings</a></td>
 								<td></td>
 								<td></td>
 							</tr>
 							<tr>
 								<td></td>
-								<td>financialactivityaccounts/{entryId}</td>
+								<td>financialactivityaccounts/{financialActivityAccountId}</td>
 								<td></td>
-								<td><a href="#financialactivityaccounts_retrieve">Retrieve a single Entry</a></td>
-								<td><a href="#financialactivityaccounts_update">Update Office GL Account Mapping</a></td>
-								<td><a href="#financialactivityaccounts_delete">Delete Office GL Account Mapping</a></td>
+								<td><a href="#financialactivityaccounts_retrieve">Retrieve a Financial Activity to Account Mapping</a></td>
+								<td><a href="#financialactivityaccounts_update">Update a Financial Activity to Account Mapping</a></td>
+								<td><a href="#financialactivityaccounts_delete">Delete a Financial Activity to Account Mapping</a></td>
 
 							</tr>
 							
@@ -28571,29 +28571,27 @@ Content-Type: application/json
 <a id="officeglaccount" name="officeglaccount" class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
-                    <h3>Office GL Accounting Mappings</h3>
+                    <h3>Mapping Financial Activities to Accounts</h3>
                     <p>
-                    	These are the Branch level intermediate accounts to move funds between banches
+                    	Organization Level Financial Activities like Asset and Liability Transfer can be mapped to GL Account. Integrated accounting takes these accounts into consideration when an Account transfer is made between a savings to loan/savings account and vice-versa
                     </p>
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG">
                             <td><div class="mifosXHeading2">Field Descriptions</div></td>
                         </tr>
                         <tr class=alt>
-                            <td>officeId</td>
+                            <td>financialActivityId</td>
                         </tr>
                         <tr>
-                            <td class=fielddesc>The identifier of the office (
-                            	cost center) at which the financial activity
-                            	occurs</td>
+                            <td class=fielddesc>The identifier of the Financial Activity
+                            	</td>
                         </tr>
                         <tr class=alt>
-                            <td>liabilityTransferInSuspenseAccountId</td>
+                            <td>glAccountId</td>
                         </tr>
                         <tr>
-                            <td class=fielddesc>The identifier of the liability account (
-                            	Ledger Account) against which transfer journal entry
-                            	should made
+                            <td class=fielddesc>The identifier of a GL Account (
+                            	Ledger Account) which shall be used as the default account for the selected Financial Activity
                             </td>
                         </tr>
                     </table>
@@ -28603,68 +28601,44 @@ Content-Type: application/json
             <a id="financialactivityaccounts_list" name="financialactivityaccounts_list" class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
-                    <h4>List Office Level GL Account Mappings</h4>
-                    <p>The <i>list</i> of Account Mapping entries through <b>pagination</b> and <b>sorting</b>.</p>
-					<h5>Optional Arguments</h5>
-					<dl class="argument-list">
-						<dt>offset</dt>
-						<dd>
-							Integer <span>optional</span>, defaults to 0
-						</dd>
-						<dd>Indicates from what result to start from.</dd>
-						
-						<dt>limit</dt>
-						<dd>
-							Integer <span>optional</span>, defaults to 200
-						</dd>
-						<dd>Restricts the size of results returned. To override the default and return all entries you must explicitly pass a non-positive integer value for limit e.g. limit=0, or limit=-1</dd>
-
-						<dt>orderBy</dt>
-						<dd>
-							String <span>optional</span>, one of <span>displayName, accountNo, officeId, officeName</span>
-						</dd>
-						<dd>Orders the results by the field indicated.</dd>
-
-						<dt>sortBy</dt>
-						<dd>
-							String <span>optional</span>, one of <span>ASC, DESC</span>
-						</dd>
-						<dd>Indicates what way to order results if <i>orderBy</i> is used.</dd>
-
-						<dt>officeId</dt>
-						<dd>
-							Integer <span>optional</span> 
-						</dd>
-						<dd>Provides ability to restrict list of centers returned based on the office there associated with.</dd>
-						
-						
-					</dl>
-					<p>Example Requests:</p>
+                    <h4>List Financial Activities to Accounts Mappings</h4>
+                   	<p>Example Requests:</p>
 					<div class=apiClick>financialactivityaccounts</div>
-					<br>
-					<div class=apiClick>financialactivityaccounts?orderBy=id&sortOrder=DESC</div>
-                </div>
+				</div>
                 <div class="method-example">
                     <code class="method-declaration">
 GET https://DomainName/api/v1/financialactivityaccounts
                     </code>
                     <code class="method-response">
 
-{
-  "totalFilteredRecords": 1,
-  "pageItems": [
-    {
-      "id": 1,
-      "officeData": {
-        "id": 2,
-        "name": "Office_BX38"
-      },
-      "glAccountData": {
-        "id": 29,
-        "name": "ACCOUNT_NAME_P9UWO",
-        "glCode": "LIABILITY_7E1401198314394"
-      }
-    }]}
+[
+  {
+    "id": 1,
+    "financialActivityData": {
+      "id": 200,
+      "name": "liabilityTransfer",
+      "mappedGLAccountType": "LIABILITY"
+    },
+    "glAccountData": {
+      "id": 55,
+      "name": "Liability Transfer (Temp)",
+      "glCode": "220004-Temp"
+    }
+  },
+  {
+    "id": 2,
+    "financialActivityData": {
+      "id": 100,
+      "name": "assetTransfer",
+      "mappedGLAccountType": "ASSET"
+    },
+    "glAccountData": {
+      "id": 33,
+      "name": "Petty Cash",
+      "glCode": "20302"
+    }
+  }
+]
                     </code>
                 </div>
             </div>
@@ -28672,13 +28646,13 @@ GET https://DomainName/api/v1/financialactivityaccounts
             <a id="financialactivityaccounts_create" name="financialactivityaccounts_create" class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
-                    <h4>Create Office GL Account</h4>
+                    <h4>Create a new Financial Activity to Accounts Mapping</h4>
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG">
                             <td><div class="mifosXHeading2">Mandatory Fields</div></td>
                         </tr>
                         <tr class=alt>
-                            <td>officeId, liabilityTransferInSuspenseAccountId 
+                            <td>financialActivityId, glAccountId 
                             </td>
                         </tr>
                        
@@ -28695,8 +28669,8 @@ POST financialactivityaccounts
 Content-Type: application/json 
 Request Body:
 {
-"officeId": 1,
-"liabilityTransferInSuspenseAccountId" : 2
+"financialActivityId": 200,
+"glAccountId":2
 }
                     </code>
                     <code class="method-response">
@@ -28710,28 +28684,32 @@ Request Body:
             <a id="financialactivityaccounts_update" name="financialactivityaccounts_update" class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
-                    <h4>Update Office GL Account Mappings</h4>
+                    <h4>Update a Financial Activity to Account Mapping</h4>
                     <p>
-                        the API Updates the mapping GL Accoiunt for office.
+                        the API updates the Ledger account linked to a Financial Activity
                         <br>
                     </p>
                    
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
-POST https://DomainName/api/v1/financialactivityaccounts/1
+PUT https://DomainName/api/v1/financialactivityaccounts/{financialactivityaccountId}
                     </code>
                     <code class="method-request">
-POST financialactivityaccounts
+PUT financialactivityaccounts
 Content-Type: application/json 
 Request Body:
 {
-"liabilityTransferInSuspenseAccountId": 2
+"financialActivityId": 200,
+"glAccountId":3
 }
                     </code>
                     <code class="method-response">
 {
-    "liabilityTransferInSuspenseAccountId": 2
+  "resourceId": 2,
+  "changes": {
+    "glAccountId": 3
+  }
 }
                     </code>
                    
@@ -28743,26 +28721,27 @@ Request Body:
                 class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
-                    <h4>Retrieve a single Entry</h4>
+                    <h4>Retrieve a Financial Activity to Account Mapping</h4>
                     <p>Example Requests:</p>
                     <div class=apiClick>financialactivityaccounts/1</div>
                     <br>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
-GET https://DomainName/api/v1/financialactivityaccounts/{entryId}
+GET https://DomainName/api/v1/financialactivityaccounts/{financialactivityaccountId}
                     </code>
                     <code class="method-response">
 {
   "id": 1,
-  "officeData": {
-    "id": 2,
-    "name": "Office_BX38"
+  "financialActivityData": {
+    "id": 200,
+    "name": "liabilityTransfer",
+    "mappedGLAccountType": "LIABILITY"
   },
   "glAccountData": {
-    "id": 29,
-    "name": "ACCOUNT_NAME_P9UWO",
-    "glCode": "LIABILITY_7E1401198314394"
+    "id": 55,
+    "name": "Liability Transfer (Temp)",
+    "glCode": "220004-Temp"
   }
 }
                     </code>
@@ -28773,14 +28752,14 @@ GET https://DomainName/api/v1/financialactivityaccounts/{entryId}
                 class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
-                    <h4>Delete Office GL Mapping</h4>
+                    <h4>Delete a Financial Activity to Account Mapping</h4>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
-GET https://DomainName/api/v1/financialactivityaccounts/{mappingId}
+DELETE https://DomainName/api/v1/financialactivityaccounts/{financialactivityaccountId}
                     </code>
                     <code class="method-request">
-POST financialactivityaccounts/C1MAE935K0IAEYA?command=reverse
+DELETE financialactivityaccounts/1?
 Content-Type: application/json 
 </code>
                     <code class="method-response">
