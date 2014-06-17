@@ -24,25 +24,31 @@ public class JournalEntryHelper {
     }
 
     public void checkJournalEntryForExpenseAccount(final Account expenseAccount, final String date, final JournalEntry... accountEntries) {
-        checkJournalEntry(expenseAccount, date, accountEntries);
+        checkJournalEntry(null, expenseAccount, date, accountEntries);
     }
 
     public void checkJournalEntryForAssetAccount(final Account assetAccount, final String date, final JournalEntry... accountEntries) {
-        checkJournalEntry(assetAccount, date, accountEntries);
+        checkJournalEntry(null, assetAccount, date, accountEntries);
     }
 
     public void checkJournalEntryForIncomeAccount(final Account incomeAccount, final String date, final JournalEntry... accountEntries) {
-        checkJournalEntry(incomeAccount, date, accountEntries);
+        checkJournalEntry(null, incomeAccount, date, accountEntries);
     }
-    
-    public void checkJournalEntryForLiabilityAccount(final Account liabilityAccount, final String date, final JournalEntry... accountEntries) {
-        checkJournalEntry(liabilityAccount, date, accountEntries);
+
+    public void checkJournalEntryForLiabilityAccount(final Account liabilityAccount, final String date,
+            final JournalEntry... accountEntries) {
+        checkJournalEntry(null, liabilityAccount, date, accountEntries);
+    }
+
+    public void checkJournalEntryForLiabilityAccount(final Integer officeId, final Account liabilityAccount, final String date,
+            final JournalEntry... accountEntries) {
+        checkJournalEntry(officeId, liabilityAccount, date, accountEntries);
     }
 
     public void ensureNoAccountingTransactionsWithTransactionId(final String transactionId) {
         ArrayList<HashMap> transactions = getJournalEntriesByTransactionId(transactionId);
         assertTrue("Tranasactions are is not empty", transactions.isEmpty());
-        
+
     }
 
     private String getEntryValueFromJournalEntry(final ArrayList<HashMap> entryResponse, final int entryNumber) {
@@ -54,8 +60,8 @@ public class JournalEntryHelper {
         return (Float) entryResponse.get(entryNumber).get("amount");
     }
 
-    private void checkJournalEntry(final Account account, final String date, final JournalEntry... accountEntries) {
-        final String url = createURLForGettingAccountEntries(account, date);
+    private void checkJournalEntry(final Integer officeId, final Account account, final String date, final JournalEntry... accountEntries) {
+        final String url = createURLForGettingAccountEntries(account, date, officeId);
         final ArrayList<HashMap> response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, "pageItems");
         for (int i = 0; i < accountEntries.length; i++) {
             assertThat(getEntryValueFromJournalEntry(response, i), equalTo(accountEntries[i].getTransactionType()));
@@ -63,10 +69,14 @@ public class JournalEntryHelper {
         }
     }
 
-    private String createURLForGettingAccountEntries(final Account account, final String date) {
-        return new String("/mifosng-provider/api/v1/journalentries?glAccountId=" + account.getAccountID() + "&type="
+    private String createURLForGettingAccountEntries(final Account account, final String date, final Integer officeId) {
+        String url = new String("/mifosng-provider/api/v1/journalentries?glAccountId=" + account.getAccountID() + "&type="
                 + account.getAccountType() + "&fromDate=" + date + "&toDate=" + date + "&tenantIdentifier=default"
                 + "&orderBy=id&sortOrder=desc&locale=en&dateFormat=dd MMMM yyyy");
+        if (officeId != null) {
+            url = url + "&officeId=" + officeId;
+        }
+        return url;
     }
 
     private ArrayList<HashMap> getJournalEntriesByTransactionId(final String transactionId) {

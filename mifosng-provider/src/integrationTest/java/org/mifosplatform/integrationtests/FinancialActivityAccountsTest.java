@@ -34,8 +34,7 @@ public class FinancialActivityAccountsTest {
     private RequestSpecification requestSpec;
     private AccountHelper accountHelper;
     private FinancialActivityAccountHelper financialActivityAccountHelper;
-    // private final Integer assetTransferFinancialActivityId =
-    // FINANCIAL_ACTIVITY.ASSET_TRANSFER.getValue();
+    private final Integer assetTransferFinancialActivityId = FINANCIAL_ACTIVITY.ASSET_TRANSFER.getValue();
     public static final Integer liabilityTransferFinancialActivityId = FINANCIAL_ACTIVITY.LIABILITY_TRANSFER.getValue();
 
     @Before
@@ -108,7 +107,7 @@ public class FinancialActivityAccountsTest {
          * should fail
          **/
         List<HashMap> invalidFinancialActivityAccountError = (List<HashMap>) financialActivityAccountHelper.updateFinancialActivityAccount(
-                financialActivityAccountId, liabilityTransferFinancialActivityId, newLiabilityTransferAccount.getAccountID(),
+                financialActivityAccountId, assetTransferFinancialActivityId, newLiabilityTransferAccount.getAccountID(),
                 responseSpecForDomainRuleViolation, CommonConstants.RESPONSE_ERROR);
         assertEquals(FinancialActivityAccountInvalidException.getErrorcode(),
                 invalidFinancialActivityAccountError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
