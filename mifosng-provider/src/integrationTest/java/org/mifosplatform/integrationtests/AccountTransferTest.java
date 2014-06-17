@@ -64,6 +64,7 @@ public class AccountTransferTest {
 
     private FinancialActivityAccountHelper financialActivityAccountHelper;
     private Integer financialActivityAccountId;
+    private Account liabilityTransferAccount;
 
     @Before
     public void setup() {
@@ -73,16 +74,16 @@ public class AccountTransferTest {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
-        this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec, this.responseSpec);
+        this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec);
 
         /** Setup liability transfer account **/
         /** Create a Liability and an Asset Transfer Account **/
-        Account liabilityTransferAccount = accountHelper.createLiabilityAccount();
+        liabilityTransferAccount = accountHelper.createLiabilityAccount();
         Assert.assertNotNull(liabilityTransferAccount);
 
         /*** Create A Financial Activity to Account Mapping **/
         financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
-                FinancialActivityAccountsTest.liabilityTransferFinancialActivityId, liabilityTransferAccount.getAccountID(),
+                FinancialActivityAccountsTest.liabilityTransferFinancialActivityId, liabilityTransferAccount.getAccountID(), responseSpec,
                 CommonConstants.RESPONSE_RESOURCE_ID);
         Assert.assertNotNull(financialActivityAccountId);
     }
@@ -93,7 +94,7 @@ public class AccountTransferTest {
     @After
     public void tearDown() {
         Integer deletedFinancialActivityAccountId = financialActivityAccountHelper.deleteFinancialActivityAccount(
-                financialActivityAccountId, CommonConstants.RESPONSE_RESOURCE_ID);
+                financialActivityAccountId, responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
         Assert.assertNotNull(deletedFinancialActivityAccountId);
         Assert.assertEquals(financialActivityAccountId, deletedFinancialActivityAccountId);
     }
@@ -116,12 +117,6 @@ public class AccountTransferTest {
         final Integer toClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
                 String.valueOf(toOfficeId));
         Assert.assertNotNull(toClientID);
-
-        Account toTransferAccount = accountHelper.createLiabilityAccount();
-        Assert.assertNotNull(toTransferAccount);
-
-        FinancialActivityAccountHelper accountMappingHelper = new FinancialActivityAccountHelper(this.requestSpec,
-                new ResponseSpecBuilder().build());
 
         final Integer toSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, assetAccount,
                 incomeAccount, expenseAccount, liabilityAccount);
@@ -195,7 +190,7 @@ public class AccountTransferTest {
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(fromTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
                 office1LiabilityEntries);
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(toTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(liabilityTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
                 office2LiabilityEntries);
 
     }
@@ -227,9 +222,6 @@ public class AccountTransferTest {
 
         Account toTransferAccount = accountHelper.createLiabilityAccount();
         Assert.assertNotNull(toTransferAccount);
-
-        FinancialActivityAccountHelper accountMappingHelper = new FinancialActivityAccountHelper(this.requestSpec,
-                new ResponseSpecBuilder().build());
 
         final Integer toLoanProductID = createLoanProduct(loanAssetAccount, loanIncomeAccount, loanExpenseAccount, overpaymentAccount);
         Assert.assertNotNull(toLoanProductID);
@@ -327,12 +319,6 @@ public class AccountTransferTest {
                 String.valueOf(toOfficeId));
         Assert.assertNotNull(toClientID);
 
-        Account toTransferAccount = accountHelper.createLiabilityAccount();
-        Assert.assertNotNull(toTransferAccount);
-
-        FinancialActivityAccountHelper accountMappingHelper = new FinancialActivityAccountHelper(this.requestSpec,
-                new ResponseSpecBuilder().build());
-
         final Integer toSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, assetAccount,
                 incomeAccount, expenseAccount, liabilityAccount);
         Assert.assertNotNull(toSavingsProductID);
@@ -428,7 +414,7 @@ public class AccountTransferTest {
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(fromTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
                 office1LiabilityEntries);
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(toTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(liabilityTransferAccount, AccountTransferHelper.ACCOUNT_TRANSFER_DATE,
                 office2LiabilityEntries);
 
     }

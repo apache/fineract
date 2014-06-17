@@ -1,6 +1,5 @@
 package org.mifosplatform.integrationtests.common;
 
-import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.path.json.JsonPath.from;
 import static org.hamcrest.Matchers.is;
@@ -52,10 +51,6 @@ public class Utils {
             final String getURL, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
         return (T) from(json).get(jsonAttributeToGetBack);
-    }
-
-    public static void performServerGetAndValidateResourceNotFound(final String getURL) {
-        expect().statusCode(404).when().get(getURL);
     }
 
     public static <T> T performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
