@@ -29,6 +29,7 @@ public class FinancialActivityAccountsTest {
 
     private ResponseSpecification responseSpec;
     private ResponseSpecification responseSpecForValidationError;
+    private ResponseSpecification responseSpecForDomainRuleViolation;
     private ResponseSpecification responseSpecForResourceNotFoundError;
     private RequestSpecification requestSpec;
     private AccountHelper accountHelper;
@@ -44,6 +45,7 @@ public class FinancialActivityAccountsTest {
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.responseSpecForValidationError = new ResponseSpecBuilder().expectStatusCode(400).build();
+        this.responseSpecForDomainRuleViolation = new ResponseSpecBuilder().expectStatusCode(403).build();
         this.responseSpecForResourceNotFoundError = new ResponseSpecBuilder().expectStatusCode(404).build();
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec);
@@ -96,8 +98,8 @@ public class FinancialActivityAccountsTest {
 
         /** Creating Duplicate Financial Activity should fail **/
         List<HashMap> duplicateFinancialActivityAccountError = (List<HashMap>) financialActivityAccountHelper
-                .createFinancialActivityAccount(financialActivityAccountId, liabilityTransferAccount.getAccountID(), responseSpec,
-                        CommonConstants.RESPONSE_ERROR);
+                .createFinancialActivityAccount(liabilityTransferFinancialActivityId, liabilityTransferAccount.getAccountID(),
+                        responseSpecForDomainRuleViolation, CommonConstants.RESPONSE_ERROR);
         assertEquals(DuplicateFinancialActivityAccountFoundException.getErrorcode(),
                 duplicateFinancialActivityAccountError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
@@ -106,8 +108,8 @@ public class FinancialActivityAccountsTest {
          * should fail
          **/
         List<HashMap> invalidFinancialActivityAccountError = (List<HashMap>) financialActivityAccountHelper.updateFinancialActivityAccount(
-                financialActivityAccountId, liabilityTransferFinancialActivityId, newLiabilityTransferAccount.getAccountID(), responseSpec,
-                CommonConstants.RESPONSE_ERROR);
+                financialActivityAccountId, liabilityTransferFinancialActivityId, newLiabilityTransferAccount.getAccountID(),
+                responseSpecForDomainRuleViolation, CommonConstants.RESPONSE_ERROR);
         assertEquals(FinancialActivityAccountInvalidException.getErrorcode(),
                 invalidFinancialActivityAccountError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
