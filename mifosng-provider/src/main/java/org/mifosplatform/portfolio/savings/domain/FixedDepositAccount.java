@@ -156,8 +156,7 @@ public class FixedDepositAccount extends SavingsAccount {
             }
 
             final BigDecimal depositAmount = accountTermAndPreClosure.depositAmount();
-            applicableInterestRate = this.chart.getApplicableInterestRate(depositAmount, depositStartDate(), depositCloseDate,
-                    this.client);
+            applicableInterestRate = this.chart.getApplicableInterestRate(depositAmount, depositStartDate(), depositCloseDate, this.client);
 
             if (applyPreMaturePenalty) {
                 applicableInterestRate = applicableInterestRate.subtract(penalInterest);
@@ -291,8 +290,8 @@ public class FixedDepositAccount extends SavingsAccount {
         return allPostingPeriods;
     }
 
-    public void prematureClosure(final AppUser currentUser, final JsonCommand command,
-            final LocalDate tenantsTodayDate, final Map<String, Object> actualChanges) {
+    public void prematureClosure(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate,
+            final Map<String, Object> actualChanges) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -347,14 +346,15 @@ public class FixedDepositAccount extends SavingsAccount {
         final Integer onAccountClosureId = command.integerValueOfParameterNamed(onAccountClosureIdParamName);
         final DepositAccountOnClosureType onClosureType = DepositAccountOnClosureType.fromInt(onAccountClosureId);
         this.accountTermAndPreClosure.updateOnAccountClosureStatus(onClosureType);
-        
 
-/*        // withdraw deposit amount before closing the account
-        final Money transactionAmountMoney = Money.of(this.currency, this.getAccountBalance());
-        final SavingsAccountTransaction withdraw = SavingsAccountTransaction.withdrawal(this, office(), paymentDetail, closedDate,
-                transactionAmountMoney, new Date());
-        this.transactions.add(withdraw);
-*/
+        /*
+         * // withdraw deposit amount before closing the account final Money
+         * transactionAmountMoney = Money.of(this.currency,
+         * this.getAccountBalance()); final SavingsAccountTransaction withdraw =
+         * SavingsAccountTransaction.withdrawal(this, office(), paymentDetail,
+         * closedDate, transactionAmountMoney, new Date());
+         * this.transactions.add(withdraw);
+         */
         actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
         actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
@@ -501,7 +501,8 @@ public class FixedDepositAccount extends SavingsAccount {
         Money interestPostedToDate = totalInterestPosted();
         // calculate interest before one day of closure date
         final LocalDate interestCalculatedToDate = accountCloseDate.minusDays(1);
-        final Money interestOnMaturity = calculatePreMatureInterest(interestCalculatedToDate, retreiveOrderedNonInterestPostingTransactions(), isPreMatureClosure);
+        final Money interestOnMaturity = calculatePreMatureInterest(interestCalculatedToDate,
+                retreiveOrderedNonInterestPostingTransactions(), isPreMatureClosure);
         boolean recalucateDailyBalance = false;
 
         // post remaining interest
@@ -735,5 +736,29 @@ public class FixedDepositAccount extends SavingsAccount {
     @Override
     protected boolean isTransferInterestToOtherAccount() {
         return this.accountTermAndPreClosure.isTransferInterestToLinkedAccount();
+    }
+
+    @Override
+    public boolean allowDeposit() {
+        return false;
+    }
+
+    @Override
+    public boolean allowWithdrawal() {
+        return false;
+    }
+
+    @Override
+    public boolean allowModify() {
+        return false;
+    }
+
+    @Override
+    public boolean isTransactionsAllowed() {
+        return isActive() || isAccountMatured();
+    }
+
+    private boolean isAccountMatured() {
+        return SavingsAccountStatusType.fromInt(status).isMatured();
     }
 }

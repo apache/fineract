@@ -156,9 +156,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final Locale locale = command.extractLocale();
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
             Money amountForDeposit = account.activateWithBalance();
+            boolean isRegularTransaction = false;
             if (amountForDeposit.isGreaterThanZero()) {
                 this.savingsAccountDomainService.handleDeposit(account, fmt, account.getActivationLocalDate(),
-                        amountForDeposit.getAmount(), null, isAccountTransfer);
+                        amountForDeposit.getAmount(), null, isAccountTransfer, isRegularTransaction);
                 updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
             }
             account.processAccountUponActivation();
@@ -199,8 +200,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         boolean isAccountTransfer = false;
+        boolean isRegularTransaction = true;
         final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(account, fmt, transactionDate,
-                transactionAmount, paymentDetail, isAccountTransfer);
+                transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction);
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(deposit.getId()) //
@@ -236,8 +238,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         checkClientOrGroupActive(account);
         boolean isInterestTransfer = false;
         boolean isAccountTransfer = false;
+        boolean isRegularTransaction = true;
         final SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(account, fmt, transactionDate,
-                transactionAmount, paymentDetail, true, isInterestTransfer, isAccountTransfer);
+                transactionAmount, paymentDetail, true, isInterestTransfer, isAccountTransfer, isRegularTransaction);
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(withdrawal.getId()) //
@@ -362,6 +365,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 "error.msg.saving.account.transfer.transaction.update.not.allowed", "Savings account transaction:" + transactionId
                         + " update not allowed as it involves in account transfer", transactionId); }
 
+        if (!account.allowModify()) { throw new PlatformServiceUnavailableException(
+                "error.msg.saving.account.transaction.update.not.allowed", "Savings account transaction:" + transactionId
+                        + " update not allowed for this savings type", transactionId); }
+
         final LocalDate today = DateUtils.getLocalDateOfTenant();
         final MathContext mc = new MathContext(15, RoundingMode.HALF_EVEN);
 
@@ -422,6 +429,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         if (account.isNotActive()) {
             throwValidationForActiveStatus(SavingsApiConstants.adjustTransactionAction);
         }
+        if (!account.allowModify()) { throw new PlatformServiceUnavailableException(
+                "error.msg.saving.account.transaction.update.not.allowed", "Savings account transaction:" + transactionId
+                        + " update not allowed for this savings type", transactionId); }
         final Set<Long> existingTransactionIds = new HashSet<Long>();
         final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);

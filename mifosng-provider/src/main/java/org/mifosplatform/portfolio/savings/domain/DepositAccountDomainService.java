@@ -17,23 +17,23 @@ import org.mifosplatform.useradministration.domain.AppUser;
 public interface DepositAccountDomainService {
 
     SavingsAccountTransaction handleWithdrawal(SavingsAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, boolean applyWithdrawFee);
+            BigDecimal transactionAmount, PaymentDetail paymentDetail, boolean applyWithdrawFee, boolean isRegularTransaction);
 
     SavingsAccountTransaction handleFDDeposit(FixedDepositAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail);
-    
+
     SavingsAccountTransaction handleRDDeposit(RecurringDepositAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail);
+            BigDecimal transactionAmount, PaymentDetail paymentDetail, boolean isRegularTransaction);
 
     Long handleFDAccountClosure(FixedDepositAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
             LocalDate tenantsTodayDate, Map<String, Object> changes);
-    
+
     Long handleRDAccountClosure(RecurringDepositAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
             LocalDate tenantsTodayDate, Map<String, Object> changes);
-    
+
     Long handleFDAccountPreMatureClosure(FixedDepositAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
             LocalDate tenantsTodayDate, Map<String, Object> changes);
-    
+
     Long handleRDAccountPreMatureClosure(RecurringDepositAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
             LocalDate tenantsTodayDate, Map<String, Object> changes);
 }

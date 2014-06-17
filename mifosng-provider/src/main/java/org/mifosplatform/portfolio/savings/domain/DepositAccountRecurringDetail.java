@@ -29,18 +29,21 @@ public class DepositAccountRecurringDetail extends AbstractPersistable<Long> {
     @Column(name = "mandatory_recommended_deposit_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal mandatoryRecommendedDepositAmount;
 
+    @SuppressWarnings("unused")
     @Column(name = "total_overdue_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal totalOverdueAmount;
 
     @Column(name = "is_calendar_inherited", nullable = false)
     private boolean isCalendarInherited;
     
+    @SuppressWarnings("unused")
     @Column(name = "no_of_overdue_installments", nullable = false)
     private Integer noOfOverdueInstallments;
 
     @Embedded
     private DepositRecurringDetail recurringDetail;
 
+    @SuppressWarnings("unused")
     @OneToOne
     @JoinColumn(name = "savings_account_id", nullable = false)
     private SavingsAccount account;
