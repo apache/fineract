@@ -66,7 +66,7 @@ Releases
 
 1.23.0.RELEASE
 =============
-This feature release contains works around Adding support for opening fixed deposits from existing savings accounts, transferring interest from fixed deposits to savings Account, acccounting improvements for account Transfers, ability to collect "recovery payments" for written off Loans, flexible interest rate charts with the ability to provide incentives based on customer attributes along with a number of bug fixes
+This feature release contains works around adding support for opening fixed deposits from existing savings accounts, transferring interest from fixed deposits to savings Account, accounting improvements for account Transfers, ability to collect "recovery payments" for written off Loans, flexible interest rate charts with the ability to provide incentives based on customer attributes along with a number of bug fixes
 
 Platform & API
 
