@@ -6,7 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
-1. 11 Jun 2014 - 1.23.0.RELEASE
+1. 15 Jun 2014 - 1.23.0.RELEASE
 1. 30 Apr 2014 - 1.22.0.RELEASE
 1. 30 Mar 2014 - 1.21.0.RELEASE
 1. 18 Mar 2014 - 1.20.1.RELEASE
@@ -66,7 +66,7 @@ Releases
 
 1.23.0.RELEASE
 =============
-This feature release contains works around Adding support for opening fixed deposits from existing savings accounts, transferring interest from fixed deposits to savings Account, acccounting improvements for account Transfers, ability to collect "recover payments" for written off Loans, flexible interest rate charts with the ability to provide incentives based on customer attributes and a number of bug fixes
+This feature release contains works around Adding support for opening fixed deposits from existing savings accounts, transferring interest from fixed deposits to savings Account, acccounting improvements for account Transfers, ability to collect "recovery payments" for written off Loans, flexible interest rate charts with the ability to provide incentives based on customer attributes along with a number of bug fixes
 
 Platform & API
 
@@ -147,6 +147,7 @@ Community App
  - [MIFOSX-1219] - Unable to make datatable entries for manually registered datatables
  - [MIFOSX-1221] - External ID added while creating the center is not displaying in center general page
  - [MIFOSX-1240] - Gender drop down menu does not display when editing client information
+ - [MIFOSX-1331] - For saving charges in Edit charge page Dropdown of "Charge calculation" is displaying Loan charge related inputs
 
 
 1.22.0.RELEASE
