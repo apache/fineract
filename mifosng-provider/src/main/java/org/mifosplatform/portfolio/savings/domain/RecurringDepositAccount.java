@@ -164,6 +164,12 @@ public class RecurringDepositAccount extends SavingsAccount {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
+    @Override
+    protected BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate interestPostingUpToDate) {
+        boolean isPreMatureClosure = false;
+        return getEffectiveInterestRateAsFraction(mc, interestPostingUpToDate, isPreMatureClosure);
+    }
+
     protected BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate interestPostingUpToDate,
             final boolean isPreMatureClosure) {
 
