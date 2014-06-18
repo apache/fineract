@@ -781,6 +781,10 @@ public class ClientLoanIntegrationTest {
         Assert.assertTrue(new Float(val).compareTo(new Float(val2)) == 0);
     }
 
+    public void validateNumberForEqualWithMsg(String msg, String val, String val2) {
+        Assert.assertTrue(msg, new Float(val).compareTo(new Float(val2)) == 0);
+    }
+
     public void validateNumberForEqualExcludePrecission(String val, String val2) {
         DecimalFormat twoDForm = new DecimalFormat("#");
         Assert.assertTrue(new Float(twoDForm.format(new Float(val))).compareTo(new Float(twoDForm.format(new Float(val2)))) == 0);
@@ -800,6 +804,40 @@ public class ClientLoanIntegrationTest {
                 .withTranches(multiDisburseLoan) //
                 .withAccounting(accountingRule, accounts).build(null);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+    }
+
+    private Integer createLoanProduct(final String inMultiplesOf, final String digitsAfterDecimal) {
+        System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+        final String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("10000000.00") //
+                .withNumberOfRepayments("24") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("2") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualPrincipalPayment() //
+                .withInterestTypeAsDecliningBalance() //
+                .currencyDetails(digitsAfterDecimal, inMultiplesOf).build(null);
+        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+    }
+
+    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String graceOnPrincipalPayment) {
+        System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
+                .withPrincipal("10000000.00") //
+                .withLoanTermFrequency("24") //
+                .withLoanTermFrequencyAsMonths() //
+                .withNumberOfRepayments("24") //
+                .withRepaymentEveryAfter("1") //
+                .withRepaymentFrequencyTypeAsMonths() //
+                .withInterestRatePerPeriod("2") //
+                .withAmortizationTypeAsEqualPrincipalPayments() //
+                .withInterestTypeAsDecliningBalance() //
+                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
+                .withPrincipalGrace(graceOnPrincipalPayment).withExpectedDisbursementDate("2 June 2014") //
+                .withSubmittedOnDate("2 June 2014") //
+                .build(clientID.toString(), loanProductID.toString(), null);
+        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
@@ -885,6 +923,113 @@ public class ClientLoanIntegrationTest {
                 loanSchedule.get(4).get("dueDate"));
         assertEquals("Checking for Principal Due for 4th Month", new Float("3089.7"), loanSchedule.get(4).get("principalDue"));
         assertEquals("Checking for Interest Due for 4th Month", new Float("61.79"), loanSchedule.get(4).get("interestOriginalDue"));
+    }
+
+    private void verifyLoanRepaymentScheduleForEqualPrincipal(final ArrayList<HashMap> loanSchedule) {
+        System.out.println("--------------------VERIFYING THE PRINCIPAL DUES,INTEREST DUE AND DUE DATE--------------------------");
+
+        assertEquals("Checking for Due Date for 1st Month", new ArrayList<Integer>(Arrays.asList(2014, 7, 2)),
+                loanSchedule.get(1).get("dueDate"));
+        assertEquals("Checking for Principal Due for 1st Month", new Float("416700"), loanSchedule.get(1).get("principalOriginalDue"));
+        assertEquals("Checking for Interest Due for 1st Month", new Float("200000"), loanSchedule.get(1).get("interestOriginalDue"));
+
+        assertEquals("Checking for Due Date for 2nd Month", new ArrayList<Integer>(Arrays.asList(2014, 8, 2)),
+                loanSchedule.get(2).get("dueDate"));
+        assertEquals("Checking for Principal Due for 2nd Month", new Float("416700"), loanSchedule.get(2).get("principalDue"));
+        assertEquals("Checking for Interest Due for 2nd Month", new Float("191700"), loanSchedule.get(2).get("interestOriginalDue"));
+
+        assertEquals("Checking for Due Date for 3rd Month", new ArrayList<Integer>(Arrays.asList(2014, 9, 2)),
+                loanSchedule.get(3).get("dueDate"));
+        assertEquals("Checking for Principal Due for 3rd Month", new Float("416700"), loanSchedule.get(3).get("principalDue"));
+        assertEquals("Checking for Interest Due for 3rd Month", new Float("183300"), loanSchedule.get(3).get("interestOriginalDue"));
+
+        assertEquals("Checking for Due Date for 4th Month", new ArrayList<Integer>(Arrays.asList(2014, 10, 2)),
+                loanSchedule.get(4).get("dueDate"));
+        assertEquals("Checking for Principal Due for 4th Month", new Float("416700"), loanSchedule.get(4).get("principalDue"));
+        assertEquals("Checking for Interest Due for 4th Month", new Float("175000"), loanSchedule.get(4).get("interestOriginalDue"));
+
+        assertEquals("Checking for Due Date for 5th Month", new ArrayList<Integer>(Arrays.asList(2014, 11, 2)),
+                loanSchedule.get(5).get("dueDate"));
+        assertEquals("Checking for Principal Due for 5th Month", new Float("416700"), loanSchedule.get(5).get("principalDue"));
+        assertEquals("Checking for Interest Due for 5th Month", new Float("166700"), loanSchedule.get(5).get("interestOriginalDue"));
+
+        assertEquals("Checking for Due Date for 6th Month", new ArrayList<Integer>(Arrays.asList(2014, 12, 2)),
+                loanSchedule.get(6).get("dueDate"));
+        assertEquals("Checking for Principal Due for 6th Month", new Float("416700"), loanSchedule.get(6).get("principalDue"));
+        assertEquals("Checking for Interest Due for 6th Month", new Float("158300"), loanSchedule.get(6).get("interestOriginalDue"));
+
+        assertEquals("Checking for Due Date for 10th Month", new ArrayList<Integer>(Arrays.asList(2015, 4, 2)),
+                loanSchedule.get(10).get("dueDate"));
+        assertEquals("Checking for Principal Due for 10th Month", new Float("416700"), loanSchedule.get(10).get("principalDue"));
+        assertEquals("Checking for Interest Due for 10th Month", new Float("125000"), loanSchedule.get(10).get("interestOriginalDue"));
+
+        assertEquals("Checking for Due Date for 20th Month", new ArrayList<Integer>(Arrays.asList(2016, 2, 2)),
+                loanSchedule.get(20).get("dueDate"));
+        assertEquals("Checking for Principal Due for 20th Month", new Float("416700"), loanSchedule.get(20).get("principalDue"));
+        assertEquals("Checking for Interest Due for 20th Month", new Float("41700"), loanSchedule.get(20).get("interestOriginalDue"));
+
+        assertEquals("Checking for Due Date for 24th Month", new ArrayList<Integer>(Arrays.asList(2016, 6, 2)),
+                loanSchedule.get(24).get("dueDate"));
+        assertEquals("Checking for Principal Due for 24th Month", new Float("415900"), loanSchedule.get(24).get("principalDue"));
+        assertEquals("Checking for Interest Due for 24th Month", new Float("8300"), loanSchedule.get(24).get("interestOriginalDue"));
+
+    }
+
+    private void verifyLoanRepaymentScheduleForEqualPrincipalWithGrace(final ArrayList<HashMap> loanSchedule) {
+        System.out.println("--------------------VERIFYING THE PRINCIPAL DUES,INTEREST DUE AND DUE DATE--------------------------");
+
+        assertEquals("Checking for Due Date for 1st Month", new ArrayList<Integer>(Arrays.asList(2014, 7, 2)),
+                loanSchedule.get(1).get("dueDate"));
+        validateNumberForEqualWithMsg("Checking for Principal Due for 1st Month", "0.0",
+                String.valueOf(loanSchedule.get(1).get("principalOriginalDue")));
+        assertEquals("Checking for Interest Due for 1st Month", new Float("200000"), loanSchedule.get(1).get("interestOriginalDue"));
+
+        assertEquals("Checking for Due Date for 2nd Month", new ArrayList<Integer>(Arrays.asList(2014, 8, 2)),
+                loanSchedule.get(2).get("dueDate"));
+        validateNumberForEqualWithMsg("Checking for Principal Due for 2nd Month", "0.0",
+                String.valueOf(loanSchedule.get(2).get("principalOriginalDue")));
+        assertEquals("Checking for Interest Due for 2nd Month", new Float("200000"), loanSchedule.get(2).get("interestOriginalDue"));
+
+        assertEquals("Checking for Due Date for 3rd Month", new ArrayList<Integer>(Arrays.asList(2014, 9, 2)),
+                loanSchedule.get(3).get("dueDate"));
+        validateNumberForEqualWithMsg("Checking for Principal Due for 3rd Month", "0.0", String.valueOf(loanSchedule.get(3).get("principalDue")));
+        assertEquals("Checking for Interest Due for 3rd Month", new Float("200000"), loanSchedule.get(3).get("interestOriginalDue"));
+
+        assertEquals("Checking for Due Date for 4th Month", new ArrayList<Integer>(Arrays.asList(2014, 10, 2)),
+                loanSchedule.get(4).get("dueDate"));
+        validateNumberForEqualWithMsg("Checking for Principal Due for 4th Month", "0", String.valueOf(loanSchedule.get(4).get("principalDue")));
+        assertEquals("Checking for Interest Due for 4th Month", new Float("200000"), loanSchedule.get(4).get("interestOriginalDue"));
+
+        assertEquals("Checking for Due Date for 5th Month", new ArrayList<Integer>(Arrays.asList(2014, 11, 2)),
+                loanSchedule.get(5).get("dueDate"));
+        validateNumberForEqualWithMsg("Checking for Principal Due for 5th Month", "0", String.valueOf(loanSchedule.get(5).get("principalDue")));
+        assertEquals("Checking for Interest Due for 5th Month", new Float("200000"), loanSchedule.get(5).get("interestOriginalDue"));
+
+        assertEquals("Checking for Due Date for 6th Month", new ArrayList<Integer>(Arrays.asList(2014, 12, 2)),
+                loanSchedule.get(6).get("dueDate"));
+        assertEquals("Checking for Principal Due for 6th Month", new Float("526300"), loanSchedule.get(6).get("principalDue"));
+        assertEquals("Checking for Interest Due for 6th Month", new Float("200000"), loanSchedule.get(6).get("interestOriginalDue"));
+
+        assertEquals("Checking for Due Date for 7th Month", new ArrayList<Integer>(Arrays.asList(2015, 1, 2)),
+                loanSchedule.get(7).get("dueDate"));
+        assertEquals("Checking for Principal Due for 7th Month", new Float("526300"), loanSchedule.get(7).get("principalDue"));
+        assertEquals("Checking for Interest Due for 7th Month", new Float("189500"), loanSchedule.get(7).get("interestOriginalDue"));
+
+        assertEquals("Checking for Due Date for 10th Month", new ArrayList<Integer>(Arrays.asList(2015, 4, 2)),
+                loanSchedule.get(10).get("dueDate"));
+        assertEquals("Checking for Principal Due for 10th Month", new Float("526300"), loanSchedule.get(10).get("principalDue"));
+        assertEquals("Checking for Interest Due for 10th Month", new Float("157900"), loanSchedule.get(10).get("interestOriginalDue"));
+
+        assertEquals("Checking for Due Date for 20th Month", new ArrayList<Integer>(Arrays.asList(2016, 2, 2)),
+                loanSchedule.get(20).get("dueDate"));
+        assertEquals("Checking for Principal Due for 20th Month", new Float("526300"), loanSchedule.get(20).get("principalDue"));
+        assertEquals("Checking for Interest Due for 20th Month", new Float("52600"), loanSchedule.get(20).get("interestOriginalDue"));
+
+        assertEquals("Checking for Due Date for 24th Month", new ArrayList<Integer>(Arrays.asList(2016, 6, 2)),
+                loanSchedule.get(24).get("dueDate"));
+        assertEquals("Checking for Principal Due for 24th Month", new Float("526600"), loanSchedule.get(24).get("principalDue"));
+        assertEquals("Checking for Interest Due for 24th Month", new Float("10500"), loanSchedule.get(24).get("interestOriginalDue"));
+
     }
 
     private void addCharges(List<HashMap> charges, Integer chargeId, String amount, String duedate) {
@@ -1151,7 +1296,7 @@ public class ClientLoanIntegrationTest {
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 January 2012", new JournalEntry(
                 Float.valueOf("50.00"), JournalEntry.TransactionType.CREDIT));
     }
-    
+
     /***
      * Test case for checking CashBasedAccounting functionality adding charges
      * with calculation type percentage of amount
@@ -1910,7 +2055,6 @@ public class ClientLoanIntegrationTest {
         LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
     }
 
-    
     /***
      * Test case for checking AccuralUpfrontAccounting functionality adding
      * charges with calculation type percentage of amount plus interest
@@ -1984,19 +2128,19 @@ public class ClientLoanIntegrationTest {
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", assetAccountInitialEntry);
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "20 September 2011",
                 new JournalEntry(Float.valueOf("605.94"), JournalEntry.TransactionType.CREDIT), new JournalEntry(Float.valueOf("126.06"),
-                        JournalEntry.TransactionType.CREDIT), new JournalEntry(Float.valueOf("126.04"),
-                        JournalEntry.TransactionType.CREDIT));
-        
+                        JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(Float.valueOf("126.04"), JournalEntry.TransactionType.CREDIT));
+
         this.loanTransactionHelper.addChargesForLoan(
                 loanID,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
                         String.valueOf(amountPlusInterestPercentageSpecifiedDueDateCharge), "29 September 2011", "1"));
-        
+
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(amountPlusInterestPercentageDisbursementCharge, loanCharges, "1", "0.0", "126.06", "0.0");
         validateCharge(amountPlusInterestPercentageSpecifiedDueDateCharge, loanCharges, "1", "126.06", "0.0", "0.0");
-        
+
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "29 September 2011",
                 new JournalEntry(Float.valueOf("126.06"), JournalEntry.TransactionType.DEBIT));
         this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, "29 September 2011",
@@ -2025,14 +2169,15 @@ public class ClientLoanIntegrationTest {
         secondInstallment = loanSchedule.get(2);
         validateNumberForEqual("157.57", String.valueOf(secondInstallment.get("feeChargesDue")));
         System.out.println("----------- Waive installment charge for 2nd installment ---------");
-        this.loanTransactionHelper.waiveChargesForLoan(loanID, (Integer) getloanCharge(amountPlusInterestPercentageInstallmentFee, loanCharges).get("id"),
+        this.loanTransactionHelper.waiveChargesForLoan(loanID,
+                (Integer) getloanCharge(amountPlusInterestPercentageInstallmentFee, loanCharges).get("id"),
                 LoanTransactionHelper.getWaiveChargeJSON(String.valueOf(2)));
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(amountPlusInterestPercentageInstallmentFee, loanCharges, "1", "63.02", "31.51", "31.51");
 
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", new JournalEntry(Float.valueOf("31.51"),
-                JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", new JournalEntry(
+                Float.valueOf("31.51"), JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "20 September 2011",
                 new JournalEntry(Float.valueOf("31.51"), JournalEntry.TransactionType.DEBIT));
 
@@ -2119,6 +2264,7 @@ public class ClientLoanIntegrationTest {
         loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "status");
         LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
     }
+
     /***
      * Test case for checking AccuralPeriodicAccounting functionality adding
      * charges with calculation type flat
@@ -2220,8 +2366,8 @@ public class ClientLoanIntegrationTest {
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(flatInstallmentFee, loanCharges, "50", "100.00", "50.0", "50.0");
 
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", new JournalEntry(
-                Float.valueOf("50.0"), JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", new JournalEntry(Float.valueOf("50.0"),
+                JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "20 September 2011",
                 new JournalEntry(Float.valueOf("50.0"), JournalEntry.TransactionType.DEBIT));
 
@@ -2316,7 +2462,7 @@ public class ClientLoanIntegrationTest {
         loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "status");
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
     }
-    
+
     /**
      * Test case for checking AccuralPeriodicAccounting functionality adding
      * charges with calculation type percentage of amount
@@ -2415,15 +2561,14 @@ public class ClientLoanIntegrationTest {
         secondInstallment = loanSchedule.get(2);
         validateNumberForEqual("149.70", String.valueOf(secondInstallment.get("feeChargesDue")));
         System.out.println("----------- Waive installment charge for 2nd installment ---------");
-        this.loanTransactionHelper.waiveChargesForLoan(loanID,
-                (Integer) getloanCharge(percentageInstallmentFee, loanCharges).get("id"),
+        this.loanTransactionHelper.waiveChargesForLoan(loanID, (Integer) getloanCharge(percentageInstallmentFee, loanCharges).get("id"),
                 LoanTransactionHelper.getWaiveChargeJSON(String.valueOf(2)));
         loanCharges.clear();
         loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
         validateCharge(percentageInstallmentFee, loanCharges, "1", "61.19", "29.11", "29.70");
 
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", new JournalEntry(
-                Float.valueOf("29.7"), JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 September 2011", new JournalEntry(Float.valueOf("29.7"),
+                JournalEntry.TransactionType.CREDIT));
         this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, "20 September 2011",
                 new JournalEntry(Float.valueOf("29.7"), JournalEntry.TransactionType.DEBIT));
 
@@ -2518,6 +2663,7 @@ public class ClientLoanIntegrationTest {
         loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "status");
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
     }
+
     /***
      * Test case for checking AccuralPeriodicAccounting functionality adding
      * charges with calculation type percentage of amount and interest
@@ -2725,6 +2871,34 @@ public class ClientLoanIntegrationTest {
                 JournalEntry.TransactionType.CREDIT), new JournalEntry(Float.valueOf("3089.70"), JournalEntry.TransactionType.CREDIT));
         loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "status");
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
+    }
+
+    @Test
+    public void testClientLoanScheduleWithCurrencyDetails() {
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer loanProductID = createLoanProduct("100", "0");
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID, null);
+        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
+                loanID);
+        verifyLoanRepaymentScheduleForEqualPrincipal(loanSchedule);
+
+    }
+
+    @Test
+    public void testClientLoanScheduleWithCurrencyDetails_with_grace() {
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer loanProductID = createLoanProduct("100", "0");
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID, "5");
+        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
+                loanID);
+        verifyLoanRepaymentScheduleForEqualPrincipalWithGrace(loanSchedule);
+
     }
 
     private void checkAccrualTransactions(final ArrayList<HashMap> loanSchedule, final Integer loanID) {

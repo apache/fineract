@@ -13,7 +13,6 @@ import com.google.gson.Gson;
 public class LoanProductTestBuilder {
 
     private static final String LOCALE = "en_GB";
-    private static final String DIGITS_AFTER_DECIMAL = "2";
     private static final String USD = "USD";
     private static final String DAYS = "0";
     private static final String WEEK = "1";
@@ -33,6 +32,9 @@ public class LoanProductTestBuilder {
     private static final String ACCRUAL_PERIODIC = "3";
     private static final String ACCRUAL_UPFRONT = "4";
 
+    private String digitsAfterDecimal = "2";
+    private String inMultiplesOf = "0";
+
     private String nameOfLoanProduct = Utils.randomNameGenerator("LOAN_PRODUCT_", 6);
     private String shortName = Utils.randomNameGenerator("", 4);
     private String principal = "10000.00";
@@ -50,7 +52,7 @@ public class LoanProductTestBuilder {
     private final String currencyCode = USD;
     private String amortizationType = EQUAL_INSTALLMENTS;
     private String minPrincipal = "1000.00";
-    private String maxPrincipal = "100000.00";
+    private String maxPrincipal = "10000000.00";
     private Account[] accountList = null;
 
     private Boolean multiDisburseLoan = false;
@@ -71,7 +73,8 @@ public class LoanProductTestBuilder {
         map.put("shortName", this.shortName);
         map.put("currencyCode", this.currencyCode);
         map.put("locale", LOCALE);
-        map.put("digitsAfterDecimal", DIGITS_AFTER_DECIMAL);
+        map.put("digitsAfterDecimal", digitsAfterDecimal);
+        map.put("inMultiplesOf", inMultiplesOf);
         map.put("principal", this.principal);
         map.put("numberOfRepayments", this.numberOfRepayments);
         map.put("repaymentEvery", this.repaymentPeriod);
@@ -293,6 +296,12 @@ public class LoanProductTestBuilder {
     public LoanProductTestBuilder withAccounting(final String accountingRule, final Account[] account_list) {
         this.accountingRule = accountingRule;
         this.accountList = account_list;
+        return this;
+    }
+
+    public LoanProductTestBuilder currencyDetails(final String digitsAfterDecimal, final String inMultiplesOf) {
+        this.digitsAfterDecimal = digitsAfterDecimal;
+        this.inMultiplesOf = inMultiplesOf;
         return this;
     }
 
