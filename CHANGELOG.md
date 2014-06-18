@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 16 Jun 2014 - 1.23.1.RELEASE
 1. 15 Jun 2014 - 1.23.0.RELEASE
 1. 30 Apr 2014 - 1.22.0.RELEASE
 1. 30 Mar 2014 - 1.21.0.RELEASE
@@ -63,6 +64,14 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.23.1.RELEASE
+=============
+Bug Release
+
+Bugs
+ - [MIFOSX-1336] - Mifos X Generates Incorrect Repayment Schedules for Loans
+
 
 1.23.0.RELEASE
 =============
