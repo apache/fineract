@@ -188,6 +188,65 @@ public class ClientLoanIntegrationTest {
         validateNumberForEqual("0.0", String.valueOf(disbursementDetail.get("feeChargesDue")));
 
     }
+    
+    @Test
+    public void testLoanCharges_DISBURSEMENT_FEE_WITH_AMOUNT_CHANGE() {
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer loanProductID = createLoanProduct(false, NONE);
+
+        List<HashMap> charges = new ArrayList<HashMap>();
+        Integer amountPercentage = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT, "1"));
+        addCharges(charges, amountPercentage, "1", null);
+        Integer amountPlusInterestPercentage = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST, "1"));
+        addCharges(charges, amountPlusInterestPercentage, "1", null);
+        Integer interestPercentage = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_INTEREST, "1"));
+        addCharges(charges, interestPercentage, "1", null);
+
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID, charges, null, "12,000.00");
+        Assert.assertNotNull(loanID);
+
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        HashMap disbursementDetail = loanSchedule.get(0);
+
+        List<HashMap> loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
+
+        validateCharge(amountPercentage, loanCharges, "1.0", "120.0", "0.0", "0.0");
+        validateCharge(interestPercentage, loanCharges, "1.0", "6.06", "0.0", "0.0");
+        validateCharge(amountPlusInterestPercentage, loanCharges, "1.0", "126.06", "0.0", "0.0");
+        validateNumberForEqual("252.12", String.valueOf(disbursementDetail.get("feeChargesDue")));
+        
+        System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------");
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+        
+        // DISBURSE
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID,"10000");
+        System.out.println("DISBURSE " + loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+        loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
+        loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        disbursementDetail = loanSchedule.get(0);
+
+        validateCharge(amountPercentage, loanCharges, "1.0", "0.0", "100.0", "0.0");
+        validateCharge(interestPercentage, loanCharges, "1.0", "0.0", "5.05", "0.0");
+        validateCharge(amountPlusInterestPercentage, loanCharges, "1.0", "0.0", "105.05", "0.0");
+        validateNumberForEqual("210.1", String.valueOf(disbursementDetail.get("feeChargesDue")));
+
+        
+    }
+
+
 
     @Test
     public void testLoanCharges_SPECIFIED_DUE_DATE_FEE() {
