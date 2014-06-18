@@ -288,14 +288,16 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
     }
 
     public Money waive(final MonetaryCurrency currency) {
-        this.amountWaived = this.amountOutstanding;
+        Money amountWaivedToDate = Money.of(currency, this.amountWaived);
+        Money amountOutstanding = Money.of(currency, this.amountOutstanding);
+        this.amountWaived = amountWaivedToDate.plus(amountOutstanding).getAmount();
         this.amountOutstanding = BigDecimal.ZERO;
         this.waived = true;
 
         recalculateAmountOutstanding();
         updateToNextDueDate();
 
-        return getAmountWaived(currency);
+        return amountOutstanding;
     }
 
     public void undoWaiver(final MonetaryCurrency currency, final Money transactionAmount) {

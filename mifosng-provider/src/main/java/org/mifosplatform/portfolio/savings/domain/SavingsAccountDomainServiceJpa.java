@@ -133,4 +133,13 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
                 existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
         this.journalEntryWritePlatformService.createJournalEntriesForSavings(accountingBridgeData);
     }
+
+    @Transactional
+    @Override
+    public void postJournalEntries(final SavingsAccount account, final Set<Long> existingTransactionIds,
+            final Set<Long> existingReversedTransactionIds) {
+
+        final boolean isAccountTransfer = false;
+        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
+    }
 }

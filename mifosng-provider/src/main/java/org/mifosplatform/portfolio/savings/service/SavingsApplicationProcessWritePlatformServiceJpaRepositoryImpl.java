@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.savings.service;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -452,7 +453,11 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 savingsAccountDataDTO.getAppliedBy());
         account.approveAndActivateApplication(savingsAccountDataDTO.getApplicationDate().toDate(), savingsAccountDataDTO.getAppliedBy());
         Money amountForDeposit = account.activateWithBalance();
-        boolean isAccountTransfer = false;
+        
+        final Set<Long> existingTransactionIds = new HashSet<Long>();
+        final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
+        final boolean isAccountTransfer = false;
+        
         if (amountForDeposit.isGreaterThanZero()) {
             // save account entity before performing deposit transaction, as
             // accountId is required for persist transaction entity.
@@ -460,6 +465,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             boolean isRegularTransaction = false;
             this.savingsAccountDomainService.handleDeposit(account, savingsAccountDataDTO.getFmt(), account.getActivationLocalDate(),
                     amountForDeposit.getAmount(), null, isAccountTransfer, isRegularTransaction);
+            updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         }
         account.processAccountUponActivation();
         account.validateAccountBalanceDoesNotBecomeNegative(SavingsAccountTransactionType.PAY_CHARGE.name());
@@ -471,9 +477,18 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             account.updateAccountNo(accountNoGenerator.generate());
             this.savingAccountRepository.save(account);
         }
+        //post journal entries for activation charges
+        this.savingsAccountDomainService.postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
+        
         return new CommandProcessingResultBuilder() //
                 .withSavingsId(account.getId()) //
                 .setRollbackTransaction(rollbackTransaction)//
                 .build();
+    }
+
+    private void updateExistingTransactionsDetails(SavingsAccount account, Set<Long> existingTransactionIds,
+            Set<Long> existingReversedTransactionIds) {
+        existingTransactionIds.addAll(account.findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(account.findExistingReversedTransactionIds());
     }
 }
