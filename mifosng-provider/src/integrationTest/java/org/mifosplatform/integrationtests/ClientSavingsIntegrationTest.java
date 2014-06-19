@@ -2,6 +2,7 @@ package org.mifosplatform.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -392,6 +393,12 @@ public class ClientSavingsIntegrationTest {
         this.savingsAccountHelper.waiveCharge((Integer) savingsChargeForWaive.get("id"), savingsId);
         HashMap waiveCharge = this.savingsAccountHelper.getSavingsCharge(savingsId, (Integer) savingsChargeForWaive.get("id"));
         assertEquals(savingsChargeForWaive.get("amount"), waiveCharge.get("amountWaived"));
+
+        this.savingsAccountHelper.waiveCharge((Integer) savingsChargeForWaive.get("id"), savingsId);
+        waiveCharge = this.savingsAccountHelper.getSavingsCharge(savingsId, (Integer) savingsChargeForWaive.get("id"));
+        BigDecimal totalWaiveAmount = BigDecimal.valueOf(Double.valueOf((Float) savingsChargeForWaive.get("amount")));
+        totalWaiveAmount = totalWaiveAmount.add(totalWaiveAmount);
+        assertEquals(totalWaiveAmount.floatValue(), waiveCharge.get("amountWaived"));
     }
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
