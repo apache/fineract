@@ -32,7 +32,7 @@ The two ways to get up and running with mifos platform is:
 
 ## 1. Amazon Public AMI
 
-  Use AWS Wizard to launch instance by using this link: <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=eu-west-1#launchAmi=ami-948b6be3" title="Mifos Platform Public AMI 1.13.0.RELEASE">Mifos Platform AMI (ami-948b6be3)</a>
+  Use AWS Wizard to launch instance by using this link: <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=ap-southeast-1#launchAmi=ami-20257a72" title="Latest Mifos Platform Public AMI">Mifos Platform AMI (ami-20257a72)</a>
 
   *Note:* Read through the following as you step through the AWS Wizard
   
