@@ -194,7 +194,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         this.status = status;
     }
 
-    public void recalculateAmountOutstanding() {
+    public void resetPropertiesForRecurringFees() {
         if (isMonthlyFee() || isAnnualFee()) {
             // FIXME: AA: If charge is percentage of x amount then need to
             // update amount outstanding accordingly.
@@ -282,7 +282,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
             this.amountOutstanding = BigDecimal.ZERO;
         }
         // to reset amount outstanding for annual and monthly fee
-        recalculateAmountOutstanding();
+        resetPropertiesForRecurringFees();
         updateToPreviousDueDate();// reset annual and monthly due date.
         this.paid = false;
     }
@@ -294,8 +294,8 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         this.amountOutstanding = BigDecimal.ZERO;
         this.waived = true;
 
-        recalculateAmountOutstanding();
-        updateToNextDueDate();
+        resetPropertiesForRecurringFees();
+        updateNextDueDateForRecurringFees();
 
         return amountOutstanding;
     }
@@ -307,7 +307,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         this.amountOutstanding = calculateAmountOutstanding(currency);
         this.waived = false;
 
-        recalculateAmountOutstanding();
+        resetPropertiesForRecurringFees();
         updateToPreviousDueDate();
     }
 
@@ -322,8 +322,8 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
         if (BigDecimal.ZERO.compareTo(this.amountOutstanding) == 0) {
             // full outstanding is paid, update to next due date
-            updateToNextDueDate();
-            recalculateAmountOutstanding();
+            updateNextDueDateForRecurringFees();
+            resetPropertiesForRecurringFees();
         }
 
         return Money.of(currency, this.amountOutstanding);
@@ -688,7 +688,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         }
     }
 
-    public void updateToNextDueDate() {
+    public void updateNextDueDateForRecurringFees() {
         if (isAnnualFee() || isMonthlyFee()) {
             LocalDate nextDueLocalDate = new LocalDate(dueDate);
             int maxDayOfMonth = nextDueLocalDate.dayOfMonth().withMaximumValue().getDayOfMonth();
