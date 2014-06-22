@@ -48,6 +48,10 @@ public class ChargeEnumerations {
                 optionData = new EnumOptionData(ChargeTimeType.MONTHLY_FEE.getValue().longValue(), ChargeTimeType.MONTHLY_FEE.getCode(),
                         "Monthly Fee");
             break;
+            case WEEKLY_FEE:
+            	optionData = new EnumOptionData(ChargeTimeType.WEEKLY_FEE.getValue().longValue(), ChargeTimeType.WEEKLY_FEE.getCode(),
+            			"Weekly Fee");
+            break;	
             case INSTALMENT_FEE:
                 optionData = new EnumOptionData(ChargeTimeType.INSTALMENT_FEE.getValue().longValue(),
                         ChargeTimeType.INSTALMENT_FEE.getCode(), "Instalment Fee");
