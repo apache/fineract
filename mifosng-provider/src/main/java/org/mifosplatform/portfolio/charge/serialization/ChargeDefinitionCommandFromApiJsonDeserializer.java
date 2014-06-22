@@ -113,6 +113,12 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             }
 
             final ChargeTimeType ctt = ChargeTimeType.fromInt(chargeTimeType);
+            
+            if (ctt.isWeeklyFee()) {
+            	final String monthDay = this.fromApiJsonHelper.extractStringNamed("feeOnMonthDay", element);
+            	baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay).mustBeBlankWhenParameterProvidedIs("chargeTimeType", chargeTimeType);
+            }
+            
             if (ctt.isMonthlyFee()) {
                 final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed("feeOnMonthDay", element);
                 baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay).notNull();

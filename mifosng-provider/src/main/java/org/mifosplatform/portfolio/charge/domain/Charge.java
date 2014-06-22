@@ -467,6 +467,10 @@ public class Charge extends AbstractPersistable<Long> {
     public Integer getChargePaymentMode() {
         return this.chargePaymentMode;
     }
+    
+    public Integer getFeeInterval(){
+    	return this.feeInterval;
+    }
 
     public boolean isMonthlyFee() {
         return ChargeTimeType.fromInt(this.chargeTime).isMonthlyFee();
