@@ -24,9 +24,9 @@ apply plugin: 'tomcat'
 apply plugin: 'project-report'
 
 /* define the valid syntax level for source files */
-sourceCompatibility = JavaVersion.VERSION_1_6
+sourceCompatibility = JavaVersion.VERSION_1_7
 /* define binary compatiblity version */
-targetCompatibility = JavaVersion.VERSION_1_6
+targetCompatibility = JavaVersion.VERSION_1_7
 
 project.ext.springVersion = '3.2.5.RELEASE'
 project.ext.springSecurityVersion = '3.1.4.RELEASE'

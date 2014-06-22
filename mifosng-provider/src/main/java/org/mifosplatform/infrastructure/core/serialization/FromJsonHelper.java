@@ -21,6 +21,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.UnsupportedParameterException;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
@@ -29,6 +30,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+@Primary
 @Component
 public class FromJsonHelper {
 
@@ -224,4 +226,9 @@ public class FromJsonHelper {
     public String extractMonthDayFormatParameter(final JsonObject element) {
         return this.helperDelegator.extractMonthDayFormatParameter(element);
     }
+
+	public Gson getGsonConverter() {
+	   	return this.gsonConverter;
+	}
+	
 }
