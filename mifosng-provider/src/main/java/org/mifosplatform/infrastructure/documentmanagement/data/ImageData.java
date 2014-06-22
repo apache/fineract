@@ -1,9 +1,17 @@
 package org.mifosplatform.infrastructure.documentmanagement.data;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+
+import javax.imageio.ImageIO;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.util.IOUtils;
@@ -19,7 +27,7 @@ public class ImageData {
     private final String entityDisplayName;
 
     private File file;
-    private String contentType;
+    private ContentRepositoryUtils.IMAGE_FILE_EXTENSION fileExtension;
     private InputStream inputStream;
 
     public ImageData(final Long imageId, final String location, final Integer storageType, final String entityDisplayName) {
@@ -43,23 +51,76 @@ public class ImageData {
         }
     }
 
-    private String setImageContentType() {
-        String contentType = ContentRepositoryUtils.IMAGE_MIME_TYPE.JPEG.getValue();
+    public byte[] resizeImage(InputStream in, int maxWidth, int maxHeight) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        resizeImage(in, out, maxWidth, maxHeight);
+        return out.toByteArray();
+    }
 
-        if (this.file != null) {
-            final String fileName = this.file.getName();
+    public void resizeImage(InputStream in, OutputStream out, int maxWidth, int maxHeight) throws IOException {
 
-            if (StringUtils.endsWith(fileName, ContentRepositoryUtils.IMAGE_FILE_EXTENSION.GIF.getValue())) {
-                contentType = ContentRepositoryUtils.IMAGE_MIME_TYPE.GIF.getValue();
-            } else if (StringUtils.endsWith(fileName, ContentRepositoryUtils.IMAGE_FILE_EXTENSION.PNG.getValue())) {
-                contentType = ContentRepositoryUtils.IMAGE_MIME_TYPE.PNG.getValue();
+        BufferedImage src = ImageIO.read(in);
+        if (src.getWidth() <= maxWidth && src.getHeight() <= maxHeight) {
+            out.write(getContent());
+            return;
+        }
+        float widthRatio = (float) src.getWidth() / maxWidth;
+        float heightRatio = (float) src.getHeight() / maxHeight;
+        float scaleRatio = widthRatio > heightRatio ? widthRatio : heightRatio;
+
+        // TODO(lindahl): Improve compressed image quality (perhaps quality
+        // ratio)
+
+        int newWidth = (int) (src.getWidth() / scaleRatio);
+        int newHeight = (int) (src.getHeight() / scaleRatio);
+        int colorModel = fileExtension == ContentRepositoryUtils.IMAGE_FILE_EXTENSION.JPEG ? BufferedImage.TYPE_INT_RGB
+                : BufferedImage.TYPE_INT_ARGB;
+        BufferedImage target = new BufferedImage(newWidth, newHeight, colorModel);
+        Graphics2D g = target.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.drawImage(src, 0, 0, newWidth, newHeight, Color.BLACK, null);
+        g.dispose();
+        ImageIO.write(target, fileExtension != null ? fileExtension.getValueWithoutDot() : "jpeg", out);
+    }
+
+    public byte[] getContentOfSize(Integer maxWidth, Integer maxHeight) {
+        if (maxWidth == null && maxHeight == null) { return getContent(); }
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(this.file);
+            byte[] out = resizeImage(fis, maxWidth != null ? maxWidth : Integer.MAX_VALUE, maxHeight != null ? maxHeight
+                    : Integer.MAX_VALUE);
+            return out;
+        } catch (IOException ex) {
+            return null;
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException ex) {}
             }
         }
-        return contentType;
+    }
+
+    private void setImageContentType(String filename) {
+        fileExtension = ContentRepositoryUtils.IMAGE_FILE_EXTENSION.JPEG;
+
+        if (StringUtils.endsWith(filename.toLowerCase(), ContentRepositoryUtils.IMAGE_FILE_EXTENSION.GIF.getValue())) {
+            fileExtension = ContentRepositoryUtils.IMAGE_FILE_EXTENSION.GIF;
+        } else if (StringUtils.endsWith(filename, ContentRepositoryUtils.IMAGE_FILE_EXTENSION.PNG.getValue())) {
+            fileExtension = ContentRepositoryUtils.IMAGE_FILE_EXTENSION.PNG;
+        }
+    }
+
+    public void updateContent(final File file) {
+        this.file = file;
+        if (this.file != null) {
+            setImageContentType(this.file.getName());
+        }
     }
 
     public String contentType() {
-        return this.contentType;
+        return ContentRepositoryUtils.IMAGE_MIME_TYPE.fromFileExtension(this.fileExtension).getValue();
     }
 
     public StorageType storageType() {
@@ -76,11 +137,6 @@ public class ImageData {
 
     public void updateContent(final InputStream objectContent) {
         this.inputStream = objectContent;
-    }
-
-    public void updateContent(final File file) {
-        this.file = file;
-        setImageContentType();
     }
 
     public String getEntityDisplayName() {
