@@ -41,8 +41,7 @@ import org.springframework.stereotype.Component;
 public class BatchApiResource {
 	
 	private final PlatformSecurityContext context;
-	@SuppressWarnings("rawtypes")
-	private final ToApiJsonSerializer toApiJsonSerializer; 
+	private final ToApiJsonSerializer<BatchResponse> toApiJsonSerializer; 
 	private final BatchApiService service;
 	private final BatchRequestJsonHelper batchRequestJsonHelper;	
 	
@@ -56,9 +55,8 @@ public class BatchApiResource {
 	 * @param batchRequestJsonHelper
 	 */
 	@Autowired
-	public BatchApiResource(final PlatformSecurityContext context, @SuppressWarnings("rawtypes")
-							final ToApiJsonSerializer toApiJsonSerializer, final BatchApiService service,
-							final BatchRequestJsonHelper batchRequestJsonHelper) {
+	public BatchApiResource(final PlatformSecurityContext context, final ToApiJsonSerializer<BatchResponse>
+			toApiJsonSerializer, final BatchApiService service, final BatchRequestJsonHelper batchRequestJsonHelper) {
 		
 		this.context = context;
 		this.toApiJsonSerializer = toApiJsonSerializer;
@@ -88,7 +86,7 @@ public class BatchApiResource {
 		//Gets back the consolidated BatchResponse from BatchApiservice 
 		List<BatchResponse> result = new ArrayList<>();
 
-		//if the request is to be handled as a Transaction. All requests will be rolled back on error
+		//If the request is to be handled as a Transaction. All requests will be rolled back on error
 		if(enclosingTransaction) {
 			
 			try {

@@ -3,6 +3,7 @@ package org.mifosplatform.batch.command.internal;
 import org.mifosplatform.batch.command.CommandStrategy;
 import org.mifosplatform.batch.domain.BatchRequest;
 import org.mifosplatform.batch.domain.BatchResponse;
+import org.springframework.stereotype.Component;
 
 /**
  * Provides a default CommandStrategy by implementing
@@ -12,6 +13,7 @@ import org.mifosplatform.batch.domain.BatchResponse;
  * 
  * @author Rishabh Shukla
  */
+@Component
 public class UnknownCommandStrategy implements CommandStrategy {
 
 	@Override
