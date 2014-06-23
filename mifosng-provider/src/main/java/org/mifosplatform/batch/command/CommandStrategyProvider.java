@@ -52,6 +52,12 @@ public class CommandStrategyProvider {
 			return (CommandStrategy) this.applicationContext.getBean(this.commandStrategies.get(commandContext));
 		}
 		
+		for(ConcurrentHashMap.Entry<CommandContext,String> entry : this.commandStrategies.entrySet()) {
+		    if(commandContext.matcher(entry.getKey())) {
+		    	return (CommandStrategy) this.applicationContext.getBean(this.commandStrategies.get(entry.getKey()));
+		    }
+		}	
+		
 		return new UnknownCommandStrategy();		
 	}
 	
@@ -61,7 +67,9 @@ public class CommandStrategyProvider {
 	 * within the constructor. 
 	 */
 	private void init() {
-		this.commandStrategies.put(CommandContext.resource("clients").method("POST").build(), "CreateClientCommandStrategy");
+		this.commandStrategies.put(CommandContext.resource("clients").method("POST").build(), "createClientCommandStrategy");
+		this.commandStrategies.put(CommandContext.resource("clients\\/\\d+").method("PUT").build(), "updateClientCommandStrategy");
+		this.commandStrategies.put(CommandContext.resource("loans").method("POST").build(), "applyLoanCommandStrategy");
 	}
 	
 }

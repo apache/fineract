@@ -48,6 +48,21 @@ public class CommandContext {
 	public static Builder resource(final String resource) {
 		return new Builder(resource);
 	}
+	
+	/**
+	 * Returns a boolean value if the relativeUrl 'matches' one of the regex keys in 
+	 * the available commandStrategies. It take CommandContext object as parameter 
+	 * which contains a 'resource' member as a regex key for available commandStrategies.
+	 * 
+	 * @param other
+	 * @return boolean
+	 */
+	public boolean matcher(CommandContext other) {		
+		if(this.resource.matches(other.resource) && this.method.equals(other.method)) {		
+			return true;
+		}
+		return false;
+	}
 
 	@Override
 	public int hashCode() {

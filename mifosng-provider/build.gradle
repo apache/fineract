@@ -136,8 +136,8 @@ dependencies {
                 [group: 'org.quartz-scheduler', name: 'quartz', version: '2.1.7'],
                 [group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.2.1'],
                 [group: 'net.sf.ehcache', name: 'ehcache', version: '2.7.2'],
-                [group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.8.12']
- 	        )
+                [group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.8.12'],
+                [group: 'com.jayway.jsonpath', name: 'json-path', version: '0.9.1'])
 
  	 testCompile 'junit:junit:4.10',
  	 			 'junit:junit-dep:4.10',
@@ -401,3 +401,4 @@ def qualifyVersionIfNecessary(version) {
 	}
 	return version
 }
+
