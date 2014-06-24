@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -399,6 +400,35 @@ public class ClientSavingsIntegrationTest {
         BigDecimal totalWaiveAmount = BigDecimal.valueOf(Double.valueOf((Float) savingsChargeForWaive.get("amount")));
         totalWaiveAmount = totalWaiveAmount.add(totalWaiveAmount);
         assertEquals(totalWaiveAmount.floatValue(), waiveCharge.get("amountWaived"));
+        
+        final Integer weeklyFeeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec, ChargesHelper.getSavingsWeeklyFeeJSON());
+        Assert.assertNotNull(weeklyFeeId);
+        
+        this.savingsAccountHelper.addChargesForSavings(savingsId, weeklyFeeId);
+        charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
+        Assert.assertEquals(3, charges.size());
+
+        savingsChargeForPay = charges.get(2);
+        cal = Calendar.getInstance();
+        dates = (List) savingsChargeForPay.get("dueDate");
+        cal.set(Calendar.YEAR, (Integer) dates.get(0));
+        cal.set(Calendar.MONTH, (Integer) dates.get(1) - 1);
+        cal.set(Calendar.DAY_OF_MONTH, (Integer) dates.get(2));
+
+        // Depositing huge amount as scheduler job deducts the fee amount
+        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100000",
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        Assert.assertNotNull(depositTransactionId);
+
+        this.savingsAccountHelper.payCharge((Integer) savingsChargeForPay.get("id"), savingsId,
+                ((Float) savingsChargeForPay.get("amount")).toString(), sdf.format(cal.getTime()));
+        paidCharge = this.savingsAccountHelper.getSavingsCharge(savingsId, (Integer) savingsChargeForPay.get("id"));
+        assertEquals(savingsChargeForPay.get("amount"), paidCharge.get("amountPaid"));
+        List nextDueDates = (List) paidCharge.get("dueDate");
+        LocalDate nextDueDate = new LocalDate((Integer) nextDueDates.get(0), (Integer) nextDueDates.get(1), (Integer) nextDueDates.get(2));
+        LocalDate expectedNextDueDate = new LocalDate((Integer) dates.get(0), (Integer) dates.get(1), (Integer) dates.get(2))
+                .plusWeeks((Integer) paidCharge.get("feeInterval"));
+        assertEquals(expectedNextDueDate, nextDueDate);
     }
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

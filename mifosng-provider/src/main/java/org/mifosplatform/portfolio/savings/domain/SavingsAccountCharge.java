@@ -155,14 +155,6 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
         }
 
-        if (isWeeklyFee()) {
-            if (dueDate == null) {
-                final String defaultUserMessage = "Savings Account charge is missing due date.";
-                throw new SavingsAccountChargeWithoutMandatoryFieldException("savingsaccount.charge", dueAsOfDateParamName,
-                        defaultUserMessage, chargeDefinition.getId(), chargeDefinition.getName());
-            }
-        }
-
         if (isAnnualFee() || isMonthlyFee()) {
             feeOnMonthDay = (feeOnMonthDay == null) ? chargeDefinition.getFeeOnMonthDay() : feeOnMonthDay;
             if (feeOnMonthDay == null) {
@@ -174,6 +166,17 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
             this.feeOnMonth = feeOnMonthDay.getMonthOfYear();
             this.feeOnDay = feeOnMonthDay.getDayOfMonth();
 
+        } else if (isWeeklyFee()) {
+            if (dueDate == null) {
+                final String defaultUserMessage = "Savings Account charge is missing due date.";
+                throw new SavingsAccountChargeWithoutMandatoryFieldException("savingsaccount.charge", dueAsOfDateParamName,
+                        defaultUserMessage, chargeDefinition.getId(), chargeDefinition.getName());
+            }
+            /**
+             * For Weekly fee feeOnDay is ISO standard day of the week.
+             * Monday=1, Tuesday=2
+             */
+            this.feeOnDay = dueDate.getDayOfWeek();
         } else {
             this.feeOnDay = null;
             this.feeOnMonth = null;
@@ -355,6 +358,9 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         final BigDecimal transactionAmount = BigDecimal.ZERO;
         if (dueDate != null) {
             this.dueDate = dueDate.toDate();
+            if (isWeeklyFee()) {
+                this.feeOnDay = dueDate.getDayOfWeek();
+            }
         }
 
         if (feeOnMonthDay != null) {
@@ -410,6 +416,9 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(dueAsOfDateParamName);
             this.dueDate = newValue.toDate();
+            if (this.isWeeklyFee()) {
+                this.feeOnDay = newValue.getDayOfWeek();
+            }
         }
 
         if (command.hasParameter(feeOnMonthDayParamName)) {
@@ -696,6 +705,11 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
                 while (startingDate.isAfter(nextDueLocalDate)) {
                     nextDueLocalDate = calculateNextDueDate(nextDueLocalDate);
                 }
+            } else if (isWeeklyFee()) {
+                nextDueLocalDate = getDueLocalDate();
+                while (startingDate.isAfter(nextDueLocalDate)) {
+                    nextDueLocalDate = calculateNextDueDate(nextDueLocalDate);
+                }
             } else {
                 nextDueLocalDate = calculateNextDueDate(startingDate);
             }
@@ -714,7 +728,8 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
             nextDueLocalDate = date.plusMonths(this.feeInterval);
             nextDueLocalDate = setDayOfMonth(nextDueLocalDate);
         } else if (isWeeklyFee()) {
-            nextDueLocalDate = date.plusDays(7 * this.feeInterval);
+            nextDueLocalDate = date.plusWeeks(this.feeInterval);
+            nextDueLocalDate = setDayOfWeek(nextDueLocalDate);
         }
         return nextDueLocalDate;
     }
@@ -723,6 +738,13 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         int maxDayOfMonth = nextDueLocalDate.dayOfMonth().withMaximumValue().getDayOfMonth();
         int newDayOfMonth = (this.feeOnDay.intValue() < maxDayOfMonth) ? this.feeOnDay.intValue() : maxDayOfMonth;
         nextDueLocalDate = nextDueLocalDate.withDayOfMonth(newDayOfMonth);
+        return nextDueLocalDate;
+    }
+
+    private LocalDate setDayOfWeek(LocalDate nextDueLocalDate) {
+        if (this.feeOnDay != nextDueLocalDate.getDayOfWeek()) {
+            nextDueLocalDate = nextDueLocalDate.withDayOfWeek(this.feeOnDay);
+        }
         return nextDueLocalDate;
     }
 

@@ -1872,7 +1872,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         }
 
-        if (savingsAccountCharge.isAnnualFee() || savingsAccountCharge.isMonthlyFee()) {
+        if (savingsAccountCharge.isAnnualFee() || savingsAccountCharge.isMonthlyFee() || savingsAccountCharge.isWeeklyFee()) {
             // update due date
             if (isActive()) {
                 savingsAccountCharge.updateToNextDueDateFrom(getActivationLocalDate());
