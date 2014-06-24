@@ -166,7 +166,8 @@ public class BatchHelper {
 	 * @param reference
 	 * @return BatchRequest
 	 */
-	public static BatchRequest applyLoanRequest(final Long requestId, final Long reference) {
+	public static BatchRequest applyLoanRequest(final Long requestId, final Long reference, 
+			final Integer productId) {
 		
 		final BatchRequest br = new BatchRequest();
 		
@@ -177,7 +178,7 @@ public class BatchHelper {
 		
 		//NOTE: Set the value productId according to your db else will result in a '404' response
 		final String body = "{\"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en_GB\", \"clientId\": \"$.clientId\"," + 
-                "\"productId\": 26, \"principal\": \"10,000.00\", \"loanTermFrequency\": 12," +
+                "\"productId\": "+productId+", \"principal\": \"10,000.00\", \"loanTermFrequency\": 12," +
 				"\"loanTermFrequencyType\": 2, \"loanType\": \"individual\", \"numberOfRepayments\": 10," + 
                 "\"repaymentEvery\": 1, \"repaymentFrequencyType\": 2, \"interestRatePerPeriod\": 10," +
                 "\"amortizationType\": 1, \"interestType\": 0, \"interestCalculationPeriodType\": 1," +

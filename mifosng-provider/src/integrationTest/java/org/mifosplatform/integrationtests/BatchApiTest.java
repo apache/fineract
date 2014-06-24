@@ -11,6 +11,8 @@ import org.mifosplatform.batch.domain.BatchResponse;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.integrationtests.common.BatchHelper;
 import org.mifosplatform.integrationtests.common.Utils;
+import org.mifosplatform.integrationtests.common.loans.LoanProductTestBuilder;
+import org.mifosplatform.integrationtests.common.loans.LoanTransactionHelper;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -176,13 +178,27 @@ public class BatchApiTest {
 	 * @see org.mifosplatform.batch.command.internal.ApplyLoanCommandStrategy
 	 */
 	@Test
-	public void shouldReturnOkStatusForApplyLoanCommand(){
+	public void shouldReturnOkStatusForApplyLoanCommand(){		
+
+		final String loanProductJSON = new LoanProductTestBuilder() //
+        .withPrincipal("10000000.00") //
+        .withNumberOfRepayments("24") //
+        .withRepaymentAfterEvery("1") //
+        .withRepaymentTypeAsMonth() //
+        .withinterestRatePerPeriod("2") //
+        .withInterestRateFrequencyTypeAsMonths() //
+        .withAmortizationTypeAsEqualPrincipalPayment() //
+        .withInterestTypeAsDecliningBalance() //
+        .currencyDetails("0", "100").build(null);
+		
+		Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec)
+							.getLoanProductId(loanProductJSON);		
 		
 		//Create a createClient Request
 		final BatchRequest br1 = BatchHelper.createClientRequest(4718L, "");
 		
 		//Create a ApplyLoan Request
-		final BatchRequest br2 = BatchHelper.applyLoanRequest(4719L, 4718L);		
+		final BatchRequest br2 = BatchHelper.applyLoanRequest(4719L, 4718L, productId);		
 
 		final List<BatchRequest> batchRequests = new ArrayList<>();		
 		
@@ -198,11 +214,7 @@ public class BatchApiTest {
 		final JsonElement clientId = new FromJsonHelper().parse(response.get(0).getBody())
 				.getAsJsonObject().get("clientId");
 		
-		//Get the loanId parameter from applyLoan Response
-		final JsonElement loanId = new FromJsonHelper().parse(response.get(1).getBody())
-				.getAsJsonObject().get("loanId");
-		
-		Assert.assertEquals("Loan Successfully applied to client " + clientId.getAsString() + 
-				" with loanId: " + loanId.getAsString(), 200L, (long) response.get(1).getStatusCode());
+		Assert.assertEquals("Loan Successfully applied to client " + clientId.getAsString(),
+				200L, (long) response.get(1).getStatusCode());
 	}
 }
