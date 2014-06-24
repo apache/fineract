@@ -107,7 +107,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         final Object[] queryParameters = new Object[] { clientId };
         return this.jdbcTemplate.query(sqlBuilder.toString(), this.savingAccountMapper, queryParameters);
     }
-    
+
     @Override
     public Collection<SavingsAccountData> retrieveActiveForLookup(final Long clientId, DepositAccountType depositAccountType) {
 
@@ -188,6 +188,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         public SavingAccountMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId, ");
+            sqlBuilder.append("sa.deposit_type_enum as depositType, ");
             sqlBuilder.append("c.id as clientId, c.display_name as clientName, ");
             sqlBuilder.append("g.id as groupId, g.display_name as groupName, ");
             sqlBuilder.append("sp.id as productId, sp.name as productName, ");
@@ -275,6 +276,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final Long id = rs.getLong("id");
             final String accountNo = rs.getString("accountNo");
             final String externalId = rs.getString("externalId");
+            final Integer depositTypeId = rs.getInt("depositType");
+            final EnumOptionData depositType = SavingsEnumerations.depositType(depositTypeId);
 
             final Long groupId = JdbcSupport.getLong(rs, "groupId");
             final String groupName = rs.getString("groupName");
@@ -408,10 +411,11 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     totalWithdrawalFees, totalAnnualFees, totalInterestEarned, totalInterestPosted, accountBalance, totalFeeCharge,
                     totalPenaltyCharge);
 
-            return SavingsAccountData.instance(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
-                    fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
-                    interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, allowOverdraft, overdraftLimit);
+            return SavingsAccountData.instance(id, accountNo, depositType, externalId, groupId, groupName, clientId, clientName, productId,
+                    productName, fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate,
+                    interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
+                    minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,
+                    allowOverdraft, overdraftLimit);
         }
     }
 
@@ -422,6 +426,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         public SavingAccountMapperForLookup() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("sa.id as id, sa.account_no as accountNo, ");
+            sqlBuilder.append("sa.deposit_type_enum as depositType, ");
             sqlBuilder.append("sp.id as productId, sp.name as productName, ");
             sqlBuilder.append("sa.status_enum as statusEnum ");
 
@@ -440,6 +445,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             final Long id = rs.getLong("id");
             final String accountNo = rs.getString("accountNo");
+            final Integer depositTypeId = rs.getInt("depositType");
+            final EnumOptionData depositType = SavingsEnumerations.depositType(depositTypeId);
 
             final Long productId = rs.getLong("productId");
             final String productName = rs.getString("productName");
@@ -447,7 +454,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final Integer statusEnum = JdbcSupport.getInteger(rs, "statusEnum");
             final SavingsAccountStatusEnumData status = SavingsEnumerations.status(statusEnum);
 
-            return SavingsAccountData.lookupWithProductDetails(id, accountNo, productId, productName, status);
+            return SavingsAccountData.lookupWithProductDetails(id, accountNo, depositType, productId, productName, status);
         }
     }
 
@@ -583,12 +590,14 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     }
 
     @Override
-    public SavingsAccountTransactionData retrieveDepositTransactionTemplate(final Long savingsId, final DepositAccountType depositAccountType) {
+    public SavingsAccountTransactionData retrieveDepositTransactionTemplate(final Long savingsId,
+            final DepositAccountType depositAccountType) {
 
         try {
             final String sql = "select " + this.transactionTemplateMapper.schema() + " where sa.id = ? and sa.deposit_type_enum = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, this.transactionTemplateMapper, new Object[] { savingsId,  depositAccountType.getValue()});
+            return this.jdbcTemplate.queryForObject(sql, this.transactionTemplateMapper,
+                    new Object[] { savingsId, depositAccountType.getValue() });
         } catch (final EmptyResultDataAccessException e) {
             throw new SavingsAccountNotFoundException(savingsId);
         }
@@ -604,11 +613,13 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     }
 
     @Override
-    public SavingsAccountTransactionData retrieveSavingsTransaction(final Long savingsId, final Long transactionId, DepositAccountType depositAccountType) {
+    public SavingsAccountTransactionData retrieveSavingsTransaction(final Long savingsId, final Long transactionId,
+            DepositAccountType depositAccountType) {
 
         final String sql = "select " + this.transactionsMapper.schema() + " where sa.id = ? and sa.deposit_type_enum = ? and tr.id= ?";
 
-        return this.jdbcTemplate.queryForObject(sql, this.transactionsMapper, new Object[] { savingsId, depositAccountType.getValue(), transactionId });
+        return this.jdbcTemplate.queryForObject(sql, this.transactionsMapper, new Object[] { savingsId, depositAccountType.getValue(),
+                transactionId });
     }
 
     /*
@@ -900,11 +911,12 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final SavingsAccountSummaryData summary = null;
 
             final SavingsAccountApplicationTimelineData timeline = SavingsAccountApplicationTimelineData.templateDefault();
-
-            return SavingsAccountData.instance(null, null, null, groupId, groupName, clientId, clientName, productId, productName,
-                    fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualIterestRate, interestCompoundingPeriodType,
-                    interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, allowOverdraft, overdraftLimit);
+            final EnumOptionData depositType = null;
+            return SavingsAccountData.instance(null, null, depositType, null, groupId, groupName, clientId, clientName, productId,
+                    productName, fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualIterestRate,
+                    interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
+                    minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,
+                    allowOverdraft, overdraftLimit);
         }
     }
 
