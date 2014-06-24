@@ -63,8 +63,9 @@ public class DepositAccountPreMatureCalculationPlatformServiceImpl implements De
         final SavingsAccount account = this.depositAccountAssembler.assembleFrom(accountId, depositAccountType);
 
         DepositAccountData accountData = null;
-        Collection<EnumOptionData> onAccountClosureOptions = SavingsEnumerations.depositAccountOnClosureType(DepositAccountOnClosureType
-                .values());
+        Collection<EnumOptionData> onAccountClosureOptions = SavingsEnumerations
+                .depositAccountOnClosureType(new DepositAccountOnClosureType[] { DepositAccountOnClosureType.WITHDRAW_DEPOSIT,
+                        DepositAccountOnClosureType.TRANSFER_TO_SAVINGS });
         final Collection<CodeValueData> paymentTypeOptions = this.codeValueReadPlatformService
                 .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
         final Collection<SavingsAccountData> savingsAccountDatas = this.savingsAccountReadPlatformService.retrieveActiveForLookup(
