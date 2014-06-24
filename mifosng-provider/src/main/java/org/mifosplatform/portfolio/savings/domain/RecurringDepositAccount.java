@@ -42,6 +42,8 @@ import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
+import org.mifosplatform.portfolio.calendar.domain.Calendar;
+import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.group.domain.Group;
@@ -1042,10 +1044,16 @@ public class RecurringDepositAccount extends SavingsAccount {
         return this.accountTermAndPreClosure.isTransferInterestToLinkedAccount();
     }
 
-    public void generateSchedule(final PeriodFrequencyType frequency, final Integer recurringEvery) {
+    public void generateSchedule(final PeriodFrequencyType frequency, final Integer recurringEvery, final Calendar calendar) {
         final List<RecurringDepositScheduleInstallment> depositScheduleInstallments = depositScheduleInstallments();
         depositScheduleInstallments.clear();
-        LocalDate installmentDate = depositStartDate();
+        LocalDate installmentDate = null;
+        if (this.isCalendarInherited()) {
+            installmentDate = CalendarUtils.getNextScheduleDate(calendar, accountSubmittedOrActivationDate());
+        } else {
+            installmentDate = depositStartDate();
+        }
+
         final LocalDate maturityDate = calculateMaturityDate();
         int installmentNumber = 1;
         final BigDecimal depositAmount = this.recurringDetail.mandatoryRecommendedDepositAmount();
