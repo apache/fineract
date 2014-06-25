@@ -9,8 +9,6 @@ import org.mifosplatform.portfolio.loanaccount.api.LoansApiResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
-
 /**
  * Implements {@link org.mifosplatform.batch.command.CommandStrategy} and applies a new loan
  * on an existing client. It passes the contents of the body from the BatchRequest
@@ -61,7 +59,7 @@ public class ApplyLoanCommandStrategy implements CommandStrategy{
 			ErrorInfo ex = ErrorHandler.handler(e);
 			
 			response.setStatusCode(ex.getStatusCode());
-			response.setBody(new Gson().toJson(ex));
+			response.setBody(ex.getMessage());
 		}
 		
 		return response;		

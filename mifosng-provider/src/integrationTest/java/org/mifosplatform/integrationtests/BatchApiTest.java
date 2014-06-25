@@ -13,6 +13,7 @@ import org.mifosplatform.integrationtests.common.BatchHelper;
 import org.mifosplatform.integrationtests.common.Utils;
 import org.mifosplatform.integrationtests.common.loans.LoanProductTestBuilder;
 import org.mifosplatform.integrationtests.common.loans.LoanTransactionHelper;
+import org.mifosplatform.integrationtests.common.savings.SavingsProductHelper;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -191,7 +192,7 @@ public class BatchApiTest {
         .withInterestTypeAsDecliningBalance() //
         .currencyDetails("0", "100").build(null);
 		
-		Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec)
+		final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec)
 							.getLoanProductId(loanProductJSON);		
 		
 		//Create a createClient Request
@@ -215,6 +216,50 @@ public class BatchApiTest {
 				.getAsJsonObject().get("clientId");
 		
 		Assert.assertEquals("Loan Successfully applied to client " + clientId.getAsString(),
+				200L, (long) response.get(1).getStatusCode());
+	}
+	
+	/**
+	 * Tests that a new savings accounts was applied to an existing client and a 
+	 * 200(OK) status was returned. It first creates a new client and a savings product,
+	 * then uses the cliendId and ProductId to apply a savings account.
+	 * 
+	 * @see org.mifosplatform.batch.command.internal.ApplySavingsCommandStrategy
+	 */
+	@Test
+	public void shouldReturnOkStatusForApplySavingsCommand(){
+		
+		final SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
+        final String savingsProductJSON = savingsProductHelper //
+                .withInterestCompoundingPeriodTypeAsDaily() //
+                .withInterestPostingPeriodTypeAsMonthly() //
+                .withInterestCalculationPeriodTypeAsDailyBalance() //
+                .withMinimumOpenningBalance("5000").build();
+        
+        final Integer productId = SavingsProductHelper.createSavingsProduct(savingsProductJSON,
+        		this.requestSpec, this.responseSpec);
+        
+        //Create a createClient Request
+		final BatchRequest br1 = BatchHelper.createClientRequest(4720L, "");
+		
+		//Create a applySavings Request
+		final BatchRequest br2 = BatchHelper.applySavingsRequest(4721L, 4720L, productId);		
+	
+		final List<BatchRequest> batchRequests = new ArrayList<>();		
+		
+		batchRequests.add(br1);
+		batchRequests.add(br2);
+		
+		final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
+	
+		final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec,
+				this.responseSpec, jsonifiedRequest);
+		
+		//Get the clientId parameter from createClient Response
+		final JsonElement clientId = new FromJsonHelper().parse(response.get(0).getBody())
+				.getAsJsonObject().get("clientId");
+		
+		Assert.assertEquals("Savings Successfully applied to client " + clientId.getAsString(),
 				200L, (long) response.get(1).getStatusCode());
 	}
 }

@@ -91,7 +91,7 @@ public class BatchApiServiceImpl implements BatchApiService{
 						//Some detail information about the error
 						final ErrorInfo conflictError = new ErrorInfo(Status.CONFLICT.getStatusCode(), 8001,
 								"Parent request with id " + parentResponse.getRequestId() + " was erroneous!");
-						response.setBody(new Gson().toJson(conflictError));
+						response.setBody(conflictError.getMessage());
 						responseList.add(response);
 						
 						//Proceed with next list entry

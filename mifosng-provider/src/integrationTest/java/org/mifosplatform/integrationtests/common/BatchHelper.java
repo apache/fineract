@@ -52,7 +52,7 @@ public class BatchHelper {
     
 
 	/**
-	 * Returns a list of BatchResponse with query paramater enclosing transaction set to
+	 * Returns a list of BatchResponse with query parameter enclosing transaction set to
 	 *  false by posting the jsonified BatchRequest to the server.
 	 * 
 	 * @param requestSpec
@@ -67,7 +67,7 @@ public class BatchHelper {
 	}
 	
 	/**
-	 * Returns a list of BatchResponse with query paramater enclosing transaction set to
+	 * Returns a list of BatchResponse with query parameter enclosing transaction set to
 	 * true by posting the jsonified BatchRequest to the server.
 	 * 
 	 * @param requestSpec
@@ -164,9 +164,10 @@ public class BatchHelper {
 	 * 
 	 * @param requestId
 	 * @param reference
+	 * @param productId
 	 * @return BatchRequest
 	 */
-	public static BatchRequest applyLoanRequest(final Long requestId, final Long reference, 
+	public static BatchRequest applyLoanRequest(final Long requestId, final Long reference,
 			final Integer productId) {
 		
 		final BatchRequest br = new BatchRequest();
@@ -176,7 +177,6 @@ public class BatchHelper {
 		br.setMethod("POST");
 		br.setReference(reference);
 		
-		//NOTE: Set the value productId according to your db else will result in a '404' response
 		final String body = "{\"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en_GB\", \"clientId\": \"$.clientId\"," + 
                 "\"productId\": "+productId+", \"principal\": \"10,000.00\", \"loanTermFrequency\": 12," +
 				"\"loanTermFrequencyType\": 2, \"loanType\": \"individual\", \"numberOfRepayments\": 10," + 
@@ -184,6 +184,32 @@ public class BatchHelper {
                 "\"amortizationType\": 1, \"interestType\": 0, \"interestCalculationPeriodType\": 1," +
                 "\"transactionProcessingStrategyId\": 1, \"expectedDisbursementDate\": \"10 Jun 2013\"," + 
                 "\"submittedOnDate\": \"10 Jun 2013\"}";
+		br.setBody(body);
+		
+		return br;		
+	}
+	
+	/**
+	 * Creates and returns a {@link org.mifosplatform.batch.command.internal.ApplySavingsCommandStrategy}
+	 * Request with given requestId and reference. 
+	 * 
+	 * @param requestId
+	 * @param reference
+	 * @param productId
+	 * @return BatchRequest
+	 */
+	public static BatchRequest applySavingsRequest(final Long requestId, final Long reference,
+			final Integer productId){
+		
+		final BatchRequest br = new BatchRequest();
+		
+		br.setRequestId(requestId);
+		br.setRelativeUrl("savingsaccounts");
+		br.setMethod("POST");
+		br.setReference(reference);
+		
+		final String body = "{\"clientId\": \"$.clientId\", \"productId\": "+productId+ "," + 
+              "\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"submittedOnDate\": \"01 March 2011\"}";
 		br.setBody(body);
 		
 		return br;		
