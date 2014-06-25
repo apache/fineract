@@ -289,7 +289,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 final PeriodFrequencyType frequencyType = CalendarFrequencyType.from(CalendarUtils.getFrequency(calendar.getRecurrence()));
                 Integer frequency = CalendarUtils.getInterval(calendar.getRecurrence());
                 frequency = frequency == -1 ? 1 : frequency;
-                account.generateSchedule(frequencyType, frequency);
+                account.generateSchedule(frequencyType, frequency, calendar);
                 account.updateMaturityDateAndAmount(mc, isPreMatureClosure);
             }
 

@@ -240,7 +240,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final PeriodFrequencyType frequencyType = CalendarFrequencyType.from(CalendarUtils.getFrequency(calendar.getRecurrence()));
             Integer frequency = CalendarUtils.getInterval(calendar.getRecurrence());
             frequency = frequency == -1 ? 1 : frequency;
-            account.generateSchedule(frequencyType, frequency);
+            account.generateSchedule(frequencyType, frequency, calendar);
             final boolean isPreMatureClosure = false;
             account.updateMaturityDateAndAmount(mc, isPreMatureClosure);
             account.validateApplicableInterestRate();
@@ -373,7 +373,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 final PeriodFrequencyType frequencyType = CalendarFrequencyType.from(CalendarUtils.getFrequency(calendar.getRecurrence()));
                 Integer frequency = CalendarUtils.getInterval(calendar.getRecurrence());
                 frequency = frequency == -1 ? 1 : frequency;
-                account.generateSchedule(frequencyType, frequency);
+                account.generateSchedule(frequencyType, frequency, calendar);
                 final boolean isPreMatureClosure = false;
                 account.updateMaturityDateAndAmount(mc, isPreMatureClosure);
                 account.validateApplicableInterestRate();

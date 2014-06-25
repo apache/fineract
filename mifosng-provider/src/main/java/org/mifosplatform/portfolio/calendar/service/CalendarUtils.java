@@ -462,4 +462,18 @@ public class CalendarUtils {
 
         return getNextRecurringDate(recur, seedDate, currentDate);
     }
+
+    public static LocalDate getNextScheduleDate(final Calendar calendar, final LocalDate startDate) {
+        final Recur recur = CalendarUtils.getICalRecur(calendar.getRecurrence());
+        if (recur == null) { return null; }
+        LocalDate date = startDate;
+        final LocalDate seedDate = calendar.getStartDateLocalDate();
+        if (isValidRedurringDate(calendar.getRecurrence(), seedDate, date)) {
+            date = date.plusDays(1);
+        }
+
+        final LocalDate scheduleDate = getNextRecurringDate(recur, seedDate, date);
+
+        return scheduleDate;
+    }
 }
