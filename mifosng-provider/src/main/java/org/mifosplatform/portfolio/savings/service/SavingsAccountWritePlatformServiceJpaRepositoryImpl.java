@@ -150,20 +150,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Set<Long> existingTransactionIds = new HashSet<Long>();
         final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
-        boolean isAccountTransfer = false;
         final Map<String, Object> changes = account.activate(user, command, DateUtils.getLocalDateOfTenant());
         if (!changes.isEmpty()) {
             final Locale locale = command.extractLocale();
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
-            Money amountForDeposit = account.activateWithBalance();
-            boolean isRegularTransaction = false;
-            if (amountForDeposit.isGreaterThanZero()) {
-                this.savingsAccountDomainService.handleDeposit(account, fmt, account.getActivationLocalDate(),
-                        amountForDeposit.getAmount(), null, isAccountTransfer, isRegularTransaction);
-                updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
-            }
-            account.processAccountUponActivation();
-            account.validateAccountBalanceDoesNotBecomeNegative(SavingsAccountTransactionType.PAY_CHARGE.name());
+            processPostActiveActions(account, fmt, existingTransactionIds, existingReversedTransactionIds);
 
             this.savingAccountRepository.save(account);
         }
@@ -178,6 +169,21 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withSavingsId(savingsId) //
                 .with(changes) //
                 .build();
+    }
+
+    @Override
+    public void processPostActiveActions(final SavingsAccount account, final DateTimeFormatter fmt, final Set<Long> existingTransactionIds,
+            final Set<Long> existingReversedTransactionIds) {
+        Money amountForDeposit = account.activateWithBalance();
+        boolean isRegularTransaction = false;
+        if (amountForDeposit.isGreaterThanZero()) {
+            boolean isAccountTransfer = false;
+            this.savingsAccountDomainService.handleDeposit(account, fmt, account.getActivationLocalDate(),
+                    amountForDeposit.getAmount(), null, isAccountTransfer, isRegularTransaction);
+            updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
+        }
+        account.processAccountUponActivation();
+        account.validateAccountBalanceDoesNotBecomeNegative(SavingsAccountTransactionType.PAY_CHARGE.name());
     }
 
     @Transactional

@@ -42,7 +42,6 @@ import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
-import org.mifosplatform.portfolio.savings.SavingsAccountTransactionType;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountDataDTO;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountDataValidator;
@@ -82,6 +81,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final SavingsAccountChargeAssembler savingsAccountChargeAssembler;
     private final CommandProcessingService commandProcessingService;
     private final SavingsAccountDomainService savingsAccountDomainService;
+    private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
 
     @Autowired
     public SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -92,7 +92,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final NoteRepository noteRepository, final StaffRepositoryWrapper staffRepository,
             final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator,
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final CommandProcessingService commandProcessingService,
-            final SavingsAccountDomainService savingsAccountDomainService) {
+            final SavingsAccountDomainService savingsAccountDomainService,
+            final SavingsAccountWritePlatformService savingsAccountWritePlatformService) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.savingAccountAssembler = savingAccountAssembler;
@@ -107,6 +108,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.savingsAccountChargeAssembler = savingsAccountChargeAssembler;
         this.commandProcessingService = commandProcessingService;
         this.savingsAccountDomainService = savingsAccountDomainService;
+        this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
     }
 
     /*
@@ -147,13 +149,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final SavingsAccount account = this.savingAccountAssembler.assembleFrom(command, submittedBy);
             this.savingAccountRepository.save(account);
 
-            if (account.isAccountNumberRequiresAutoGeneration()) {
-                final AccountNumberGenerator accountNoGenerator = this.accountIdentifierGeneratorFactory
-                        .determineSavingsAccountNoGenerator(account.getId());
-                account.updateAccountNo(accountNoGenerator.generate());
-
-                this.savingAccountRepository.save(account);
-            }
+            generateAccountNumber(account);
 
             final Long savingsId = account.getId();
             return new CommandProcessingResultBuilder() //
@@ -167,6 +163,16 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         } catch (final DataAccessException dve) {
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
+        }
+    }
+
+    private void generateAccountNumber(final SavingsAccount account) {
+        if (account.isAccountNumberRequiresAutoGeneration()) {
+            final AccountNumberGenerator accountNoGenerator = this.accountIdentifierGeneratorFactory
+                    .determineSavingsAccountNoGenerator(account.getId());
+            account.updateAccountNo(accountNoGenerator.generate());
+
+            this.savingAccountRepository.save(account);
         }
     }
 
@@ -453,42 +459,24 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 savingsAccountDataDTO.getAppliedBy());
         account.approveAndActivateApplication(savingsAccountDataDTO.getApplicationDate().toDate(), savingsAccountDataDTO.getAppliedBy());
         Money amountForDeposit = account.activateWithBalance();
-        
+
         final Set<Long> existingTransactionIds = new HashSet<Long>();
         final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
-        final boolean isAccountTransfer = false;
-        
+
         if (amountForDeposit.isGreaterThanZero()) {
-            // save account entity before performing deposit transaction, as
-            // accountId is required for persist transaction entity.
             this.savingAccountRepository.save(account);
-            boolean isRegularTransaction = false;
-            this.savingsAccountDomainService.handleDeposit(account, savingsAccountDataDTO.getFmt(), account.getActivationLocalDate(),
-                    amountForDeposit.getAmount(), null, isAccountTransfer, isRegularTransaction);
-            updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         }
-        account.processAccountUponActivation();
-        account.validateAccountBalanceDoesNotBecomeNegative(SavingsAccountTransactionType.PAY_CHARGE.name());
+        this.savingsAccountWritePlatformService.processPostActiveActions(account, savingsAccountDataDTO.getFmt(), existingTransactionIds,
+                existingReversedTransactionIds);
         this.savingAccountRepository.save(account);
 
-        if (account.isAccountNumberRequiresAutoGeneration()) {
-            final AccountNumberGenerator accountNoGenerator = this.accountIdentifierGeneratorFactory
-                    .determineSavingsAccountNoGenerator(account.getId());
-            account.updateAccountNo(accountNoGenerator.generate());
-            this.savingAccountRepository.save(account);
-        }
-        //post journal entries for activation charges
+        generateAccountNumber(account);
+        // post journal entries for activation charges
         this.savingsAccountDomainService.postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
-        
+
         return new CommandProcessingResultBuilder() //
                 .withSavingsId(account.getId()) //
                 .setRollbackTransaction(rollbackTransaction)//
                 .build();
-    }
-
-    private void updateExistingTransactionsDetails(SavingsAccount account, Set<Long> existingTransactionIds,
-            Set<Long> existingReversedTransactionIds) {
-        existingTransactionIds.addAll(account.findExistingTransactionIds());
-        existingReversedTransactionIds.addAll(account.findExistingReversedTransactionIds());
     }
 }
