@@ -132,7 +132,7 @@ The two ways to get up and running with mifos platform is:
 #### 2.3.1 Environment Variables Check
 
   Check that the following environment variables exist:
-  - JAVA_HOME ... should point to directory where a 1.6 JDK or JRE is on machine
+  - JAVA_HOME ... should point to directory where a 1.7 JDK or JRE is on machine
   - CATALINA_HOME ... should point to a directory where a Tomcat 7 instance is installed
 
   Check that the following is on your path:
