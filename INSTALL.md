@@ -49,7 +49,7 @@ The two ways to get up and running with mifos platform is:
 
   *Name:* Mifos Platform 1.13.0.RELEASE Public AMI
   
- - AMI ID: ami-948b6be3
+ - AMI ID: ami-20257a72
  - Kernel ID: aki-71665e05
  - Name: Mifos Platform 1.13.0.RELEASE Public AMI
  - Owner: 476083131096
@@ -59,8 +59,6 @@ The two ways to get up and running with mifos platform is:
  - Java 1.6_45 32 bit JVM
  - Tomcat 7.0.39 (with SSL configured for self-signed certificate)
  - MySql 5.5.31
- - Mifos Platform 1.13.0.RELEASE
- - Mifos Reference App 1.13.0.RELEASE
 
 ## 2. Manual Installation
 
