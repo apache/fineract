@@ -19723,7 +19723,7 @@ Request Body:
 	"locale":"en",
 	"closedOnDate":"19 April 2014",
 	"note":"Closing and transfering amount to savings",
-	"onAccountClosureId":"2",
+	"onAccountClosureId":"200",
 	"toSavingsAccountId":1,
 	"transferDescription":"Transfered matured amount to savings account"
 	}
@@ -19790,7 +19790,7 @@ Request Body:
 	"locale":"en",
 	"closedOnDate":"19 April 2014",
 	"note":"Close and transfer amount to savings",
-	"onAccountClosureId":"2",
+	"onAccountClosureId":"200",
 	"toSavingsAccountId":1,
 	"transferDescription":"Transfered matured amount to savings account"
 	}
@@ -20843,12 +20843,12 @@ No Request Body:
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-	            <tr class=alt><td>clientId or groupId, productId, submittedOnDate, recurringDepositAmount, depositPeriod, depositPeriodFrequencyId, recurringDepositFrequency, recurringDepositFrequencyTypeId, expectedFirstDepositOnDate</td></tr>
+	            <tr class=alt><td>clientId or groupId, productId, submittedOnDate, depositPeriod, depositPeriodFrequencyId, recurringFrequency, recurringFrequencyType, depositAmount,isCalendarInherited, mandatoryRecommendedDepositAmount</td></tr>
 	        </table>
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
-	            <tr class=alt><td>accountNo, externalId, fieldOfficerId</td></tr>
+	            <tr class=alt><td>accountNo, externalId, fieldOfficerId, expectedFirstDepositOnDate, allowWithdrawal, adjustAdvanceTowardsFuturePayments, isMandatoryDeposit</td></tr>
 	        </table>
 	        <br/>
 	        <table class=matrixHeading>
@@ -20868,12 +20868,14 @@ Request Body:
   "productId": 1,
   "locale": "en", 
   "dateFormat": "dd MMMM yyyy", 
-  "submittedOnDate": "01 March 2014",
-  "recurringDepositAmount":"100",
-  "recurringDepositFrequency":"1",
-  "recurringDepositFrequencyTypeId":"2",
-  "depositPeriod":"1",
-  "depositPeriodFrequencyId":"3"
+  "submittedOnDate": "02 June 2014",
+  "depositPeriod":"20",
+  "depositPeriodFrequencyId":"1",
+  "depositAmount":10000,
+  "isCalendarInherited":false,
+  "recurringFrequency":"2",
+  "recurringFrequencyType":1,
+  "mandatoryRecommendedDepositAmount":"2000"
 }
 			</code>
 			<p>Minimal request: accountNo provided (must be unique), remaining details inherited from recurring deposit product.</p>
@@ -20885,15 +20887,21 @@ Request Body:
   "productId": 1,
   "locale": "en", 
   "dateFormat": "dd MMMM yyyy", 
-  "submittedOnDate": "01 March 2014",
-  "recurringDepositAmount":"100",
-  "recurringDepositFrequency":"1",
-  "recurringDepositFrequencyTypeId":"2",
-  "depositPeriod":"6",
-  "depositPeriodFrequencyId":"2",
+  "submittedOnDate": "02 June 2014",
+  "depositPeriod":"20",
+  "depositPeriodFrequencyId":"1",
+  "depositAmount":10000,
+  "isCalendarInherited":false,
+  "recurringFrequency":"2",
+  "recurringFrequencyType":1,
+  "mandatoryRecommendedDepositAmount":"2000",
   "accountNo": "RD000023",
   "externalId": "RD-23",
-  expectedFirstDepositOnDate: "02 April 2014"
+  "expectedFirstDepositOnDate": "02 June 2014",
+  "allowWithdrawal":false,
+  "adjustAdvanceTowardsFuturePayments":false,
+  "isMandatoryDeposit":false
+  
 }
 			</code>
 			<p>Full request: accountNo provided (must be unique), remaining details override details from recurring deposit product (except currency).</p>
@@ -20906,18 +20914,24 @@ Request Body:
   "fieldOfficerId": 1,
   "locale": "en", 
   "dateFormat": "dd MMMM yyyy", 
-  "submittedOnDate": "01 March 2014",
-  "accountNo": "RD000024",
-  "externalId": "RD-24",
+  "submittedOnDate": "02 June 2014",
+  "depositPeriod":"20",
+  "depositPeriodFrequencyId":"1",
+  "depositAmount":10000,
+  "isCalendarInherited":false,
+  "recurringFrequency":"2",
+  "recurringFrequencyType":1,
+  "mandatoryRecommendedDepositAmount":"2000",
+  "accountNo": "RD000023",
+  "externalId": "RD-23",
+  "expectedFirstDepositOnDate": "02 June 2014",
+  "allowWithdrawal":false,
+  "adjustAdvanceTowardsFuturePayments":false,
+  "isMandatoryDeposit":false,
   "interestCompoundingPeriodType": 1,
   "interestPostingPeriodType": 4,
   "interestCalculationType": 1,
   "interestCalculationDaysInYearType": 365,
-  "recurringDepositAmount":"100",
-  "recurringDepositFrequency":"1",
-  "recurringDepositFrequencyTypeId":"2",
-  "depositPeriod":"6",
-  "depositPeriodFrequencyId":"2",
   "lockinPeriodFrequency": 6,
   "lockinPeriodFrequencyType": 2,
   "charges":[{"id":"1"}]
@@ -21193,8 +21207,7 @@ Request Body:
 	"locale":"en",
 	"closedOnDate":"19 April 2014",
 	"note":"Closing and transfering amount to savings",
-	"onAccountClosureId":"2",
-	"toSavingsAccountId":1,
+	"onAccountClosureId":"100",
 	"transferDescription":"Transfered matured amount to savings account"
 	}
 			</code>
@@ -21260,7 +21273,7 @@ Request Body:
 	"locale":"en",
 	"closedOnDate":"19 April 2014",
 	"note":"Close and transfer amount to savings",
-	"onAccountClosureId":"2",
+	"onAccountClosureId":"200",
 	"toSavingsAccountId":1,
 	"transferDescription":"Transfered matured amount to savings account"
 	}
