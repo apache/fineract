@@ -1662,7 +1662,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             // Update client loan counter if loan product includeInBorrowerCycle
             // is true
             if (loanToUpdate.loanProduct().isIncludeInBorrowerCycle()) {
-                Integer currentLoanCounter = loanToUpdate.getCurrentLoanCounter();
+                Integer currentLoanCounter = loanToUpdate.getCurrentLoanCounter() == null ? 1 : loanToUpdate.getCurrentLoanCounter();
                 if (newLoanCounter > currentLoanCounter) {
                     newLoanCounter = currentLoanCounter;
                 }

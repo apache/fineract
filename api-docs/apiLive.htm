@@ -14262,8 +14262,29 @@ Request Body:
 {
 "resourceId": 7
 }
-			</code>										
-		</div>
+			</code>
+            <code class="method-request">
+POST charges
+Content-Type: application/json
+Request Body:
+{
+    "chargeAppliesTo": 2,
+    "name": "Weekly Fee",
+    "currencyCode": "USD",
+    "chargeTimeType": 11,
+    "chargeCalculationType": 1,
+    "feeInterval": "1",
+    "amount": "10",
+    "active": true,
+    "locale": "en"
+}
+            </code>
+            <code class="method-response">
+{
+    "resourceId": 8
+}
+            </code>
+        </div>
 	</div>
 
 			<a id="charges_list" name="charges_list" class="old-syle-anchor">&nbsp;</a>
@@ -24295,6 +24316,36 @@ Request Body:
   "resourceIdentifier": "extra_client_details"
 } 
 				</code>
+                <code class="method-request">
+POST https://DomainName/api/v1/datatables
+
+Content-Type: application/json
+Request Body:
+{
+    "datatableName": "client_address",
+    "apptableName": "m_client",
+    "multiRow":"true",
+    "columns": [
+        {
+            "name": "Address1",
+            "type": "String",
+            "length": 100,
+            "mandatory": true
+        },
+        {
+            "name": "Address2",
+            "length": 100,
+            "type": "String"
+        }
+    ]
+}
+                </code>
+                <code class="method-response">
+{
+    "resourceIdentifier": "client_address"
+}
+                </code>
+
 				</div>
 			</div>
 

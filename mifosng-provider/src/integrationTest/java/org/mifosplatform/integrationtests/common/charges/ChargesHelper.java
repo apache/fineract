@@ -28,6 +28,7 @@ public class ChargesHelper {
     private static final Integer CHARGE_INSTALLMENT_FEE = 8;
     private static final Integer CHARGE_OVERDUE_INSTALLMENT_FEE = 9;
     private static final Integer CHARGE_OVERDRAFT_FEE = 10;
+    private static final Integer WEEKLY_FEE = 11;
 
     public static final Integer CHARGE_CALCULATION_TYPE_FLAT = 1;
     public static final Integer CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT = 2;
@@ -88,6 +89,15 @@ public class ChargesHelper {
         map.put("feeOnMonthDay", ChargesHelper.feeOnMonthDay);
         map.put("chargeTimeType", CHARGE_MONTHLY_FEE);
         map.put("feeInterval", 2);
+        String chargesCreateJson = new Gson().toJson(map);
+        System.out.println(chargesCreateJson);
+        return chargesCreateJson;
+    }
+    
+    public static String getSavingsWeeklyFeeJSON() {
+        final HashMap<String, Object> map = populateDefaultsForSavings();
+        map.put("chargeTimeType", WEEKLY_FEE);
+        map.put("feeInterval", 1);
         String chargesCreateJson = new Gson().toJson(map);
         System.out.println(chargesCreateJson);
         return chargesCreateJson;
