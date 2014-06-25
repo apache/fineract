@@ -56,7 +56,7 @@ public class CalendarsApiResource {
     /**
      * The set of parameters that are supported in response for {@link Calendar}
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "entityId", "entityType", "title",
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "entityId", "entityType", "title",
             "description", "location", "startDate", "endDate", "duration", "type", "repeating", "recurrence", "frequency", "interval",
             "repeatsOnDay", "remindBy", "firstReminder", "secondReminder", "humanReadable", "createdDate", "lastUpdatedDate",
             "createdByUserId", "createdByUsername", "lastUpdatedByUserId", "lastUpdatedByUsername", "recurringDates",
@@ -127,7 +127,7 @@ public class CalendarsApiResource {
 
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
 
-        Collection<CalendarData> calendarsData = new ArrayList<CalendarData>();
+        Collection<CalendarData> calendarsData = new ArrayList<>();
 
         final List<Integer> calendarTypeOptions = CalendarUtils.createIntegerListFromQueryParameter(calendarType);
 
@@ -168,7 +168,7 @@ public class CalendarsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createCalendar(@PathParam("entityType") final String entityType, @PathParam("entityId") final Long entityId,
             final String apiRequestBodyAsJson) {
-        
+
         final CalendarEntityType calendarEntityType = CalendarEntityType.getEntityType(entityType);
         if (calendarEntityType == null) { throw new CalendarEntityTypeNotSupportedException(entityType); }
 

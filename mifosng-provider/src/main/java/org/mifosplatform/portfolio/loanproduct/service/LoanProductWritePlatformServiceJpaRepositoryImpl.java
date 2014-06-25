@@ -188,7 +188,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
     private List<Charge> assembleListOfProductCharges(final JsonCommand command, final String currencyCode) {
 
-        final List<Charge> charges = new ArrayList<Charge>();
+        final List<Charge> charges = new ArrayList<>();
 
         String loanProductCurrencyCode = command.stringValueOfParameterNamed("currencyCode");
         if (loanProductCurrencyCode == null) {

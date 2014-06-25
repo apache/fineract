@@ -28,14 +28,14 @@ public interface AdHocQuerySearchConstants {
     public static final String maxOutstandingAmountParamName = "maxOutstandingAmount";
     public static final String outstandingAmountParamName = "outstandingAmount";
 
-    public static final Set<String> AD_HOC_SEARCH_QUERY_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(loanStatusParamName,
+    public static final Set<String> AD_HOC_SEARCH_QUERY_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(loanStatusParamName,
             loanProductsParamName, officesParamName, loanDateOptionParamName, loanFromDateParamName, loanToDateParamName,
             includeOutStandingAmountPercentageParamName, outStandingAmountPercentageConditionParamName,
             minOutStandingAmountPercentageParamName, maxOutStandingAmountPercentageParamName, outStandingAmountPercentageParamName,
             includeOutstandingAmountParamName, outstandingAmountConditionParamName, minOutstandingAmountParamName,
             maxOutstandingAmountParamName, outstandingAmountParamName, localeParamName, dateFormatParamName));
 
-    public static final Set<String> AD_HOC_SEARCH_QUERY_CONDITIONS = new HashSet<String>(
+    public static final Set<String> AD_HOC_SEARCH_QUERY_CONDITIONS = new HashSet<>(
             Arrays.asList("between", "<=", ">=", "<", ">", "="));
 
     public static final Object[] loanDateOptions = { "approvalDate", "createdDate", "disbursalDate" };

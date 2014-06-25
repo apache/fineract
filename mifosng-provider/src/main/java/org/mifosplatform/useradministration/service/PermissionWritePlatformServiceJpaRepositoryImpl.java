@@ -39,9 +39,7 @@ public class PermissionWritePlatformServiceJpaRepositoryImpl implements Permissi
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = "users", allEntries = true),
-            @CacheEvict(value = "usersByUsername", allEntries = true)})
+    @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
     @Transactional
     @Override
     public CommandProcessingResult updateMakerCheckerPermissions(final JsonCommand command) {
@@ -52,8 +50,8 @@ public class PermissionWritePlatformServiceJpaRepositoryImpl implements Permissi
         final PermissionsCommand permissionsCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
 
         final Map<String, Boolean> commandPermissions = permissionsCommand.getPermissions();
-        final Map<String, Object> changes = new HashMap<String, Object>();
-        final Map<String, Boolean> changedPermissions = new HashMap<String, Boolean>();
+        final Map<String, Object> changes = new HashMap<>();
+        final Map<String, Boolean> changedPermissions = new HashMap<>();
         for (final String permissionCode : commandPermissions.keySet()) {
 
             final Permission permission = findPermissionInCollectionByCode(allPermissions, permissionCode);

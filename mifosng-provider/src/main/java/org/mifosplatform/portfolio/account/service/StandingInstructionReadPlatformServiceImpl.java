@@ -66,7 +66,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
     private final StandingInstructionMapper standingInstructionMapper;
 
     // pagination
-    private final PaginationHelper<StandingInstructionData> paginationHelper = new PaginationHelper<StandingInstructionData>();
+    private final PaginationHelper<StandingInstructionData> paginationHelper = new PaginationHelper<>();
 
     @Autowired
     public StandingInstructionReadPlatformServiceImpl(final RoutingDataSource dataSource,
@@ -190,7 +190,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
 
             toClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantToOfficeId);
             if (toClientOptions != null && toClientOptions.size() == 1) {
-                toClient = new ArrayList<ClientData>(toClientOptions).get(0);
+                toClient = new ArrayList<>(toClientOptions).get(0);
 
                 toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
             }
@@ -250,7 +250,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             sqlBuilder.append(" where ");
         }
         boolean addAndCaluse = false;
-        List<Object> paramObj = new ArrayList<Object>();
+        List<Object> paramObj = new ArrayList<>();
         if (standingInstructionDTO.transferType() != null) {
             if (addAndCaluse) {
                 sqlBuilder.append(" and ");

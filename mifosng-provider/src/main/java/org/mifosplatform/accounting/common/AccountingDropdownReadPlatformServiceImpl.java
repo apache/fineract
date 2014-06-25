@@ -60,7 +60,7 @@ public class AccountingDropdownReadPlatformServiceImpl implements AccountingDrop
 
     @Override
     public Map<String, List<GLAccountData>> retrieveAccountMappingOptions() {
-        final Map<String, List<GLAccountData>> accountOptions = new HashMap<String, List<GLAccountData>>();
+        final Map<String, List<GLAccountData>> accountOptions = new HashMap<>();
         List<GLAccountData> assetAccountOptions = this.accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.ASSET);
         if (assetAccountOptions.isEmpty()) {
             assetAccountOptions = null;

@@ -61,7 +61,7 @@ public class Code extends AbstractPersistable<Long> {
 
         if (this.systemDefined) { throw new SystemDefinedCodeCannotBeChangedException(); }
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(1);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
 
         final String firstnameParamName = "name";
         if (command.isChangeInStringParameterNamed(firstnameParamName, this.name)) {

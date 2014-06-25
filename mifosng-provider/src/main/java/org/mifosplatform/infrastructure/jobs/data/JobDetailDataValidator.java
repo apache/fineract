@@ -36,7 +36,7 @@ public class JobDetailDataValidator {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SchedulerJobApiConstants.JOB_UPDATE_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SchedulerJobApiConstants.JOB_RESOURCE_NAME);

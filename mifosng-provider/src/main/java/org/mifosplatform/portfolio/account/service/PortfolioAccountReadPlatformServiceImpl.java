@@ -93,9 +93,9 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
 
     @Override
     public Collection<PortfolioAccountData> retrieveAllForLookup(final Integer accountTypeId, final Long clientId,
-            final String currencyCode, final long[] accountStatus,final Integer depositType) {
+            final String currencyCode, final long[] accountStatus, final Integer depositType) {
 
-        List<Object> sqlParams = new ArrayList<Object>();
+        List<Object> sqlParams = new ArrayList<>();
         sqlParams.add(clientId);
         Collection<PortfolioAccountData> accounts = null;
         String sql = null;
@@ -127,8 +127,8 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                     sql += " and sa.currency_code = ?";
                     sqlParams.add(currencyCode);
                 }
-                
-                if(depositType != null){
+
+                if (depositType != null) {
                     sql += " and sa.deposit_type_enum = ?";
                     sqlParams.add(depositType);
                 }

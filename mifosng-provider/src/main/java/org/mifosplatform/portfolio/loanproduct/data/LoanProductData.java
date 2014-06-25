@@ -147,12 +147,9 @@ public class LoanProductData {
         final Integer graceOnArrearsAgeing = null;
         final Integer overdueDaysForNPA = null;
         final Collection<ChargeData> charges = null;
-        final Collection<LoanProductBorrowerCycleVariationData> principalVariations = new ArrayList<LoanProductBorrowerCycleVariationData>(
-                1);
-        final Collection<LoanProductBorrowerCycleVariationData> interestRateVariations = new ArrayList<LoanProductBorrowerCycleVariationData>(
-                1);
-        final Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariations = new ArrayList<LoanProductBorrowerCycleVariationData>(
-                1);
+        final Collection<LoanProductBorrowerCycleVariationData> principalVariations = new ArrayList<>(1);
+        final Collection<LoanProductBorrowerCycleVariationData> interestRateVariations = new ArrayList<>(1);
+        final Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariations = new ArrayList<>(1);
         final EnumOptionData accountingType = null;
         final boolean includeInBorrowerCycle = false;
         final boolean useBorrowerCycle = false;
@@ -212,12 +209,9 @@ public class LoanProductData {
         final String status = null;
         final String externalId = null;
 
-        final Collection<LoanProductBorrowerCycleVariationData> principalVariations = new ArrayList<LoanProductBorrowerCycleVariationData>(
-                1);
-        final Collection<LoanProductBorrowerCycleVariationData> interestRateVariations = new ArrayList<LoanProductBorrowerCycleVariationData>(
-                1);
-        final Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariations = new ArrayList<LoanProductBorrowerCycleVariationData>(
-                1);
+        final Collection<LoanProductBorrowerCycleVariationData> principalVariations = new ArrayList<>(1);
+        final Collection<LoanProductBorrowerCycleVariationData> interestRateVariations = new ArrayList<>(1);
+        final Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariations = new ArrayList<>(1);
         final Boolean multiDisburseLoan = null;
         final Integer maxTrancheCount = null;
         final BigDecimal outstandingLoanBalance = null;
@@ -269,12 +263,9 @@ public class LoanProductData {
         final Integer overdueDaysForNPA = null;
 
         final Collection<ChargeData> charges = null;
-        final Collection<LoanProductBorrowerCycleVariationData> principalVariationsForBorrowerCycle = new ArrayList<LoanProductBorrowerCycleVariationData>(
-                1);
-        final Collection<LoanProductBorrowerCycleVariationData> interestRateVariationsForBorrowerCycle = new ArrayList<LoanProductBorrowerCycleVariationData>(
-                1);
-        final Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<LoanProductBorrowerCycleVariationData>(
-                1);
+        final Collection<LoanProductBorrowerCycleVariationData> principalVariationsForBorrowerCycle = new ArrayList<>(1);
+        final Collection<LoanProductBorrowerCycleVariationData> interestRateVariationsForBorrowerCycle = new ArrayList<>(1);
+        final Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>(1);
 
         final EnumOptionData accountingType = AccountingEnumerations.accountingRuleType(AccountingRuleType.NONE);
         final boolean includeInBorrowerCycle = false;
@@ -445,8 +436,7 @@ public class LoanProductData {
         this.fundOptions = fundOptions;
         this.transactionProcessingStrategyOptions = transactionStrategyOptions;
         if (this.transactionProcessingStrategyOptions != null && this.transactionProcessingStrategyOptions.size() == 1) {
-            final List<TransactionProcessingStrategyData> listOfOptions = new ArrayList<TransactionProcessingStrategyData>(
-                    this.transactionProcessingStrategyOptions);
+            final List<TransactionProcessingStrategyData> listOfOptions = new ArrayList<>(this.transactionProcessingStrategyOptions);
 
             this.transactionProcessingStrategyId = listOfOptions.get(0).id();
             this.transactionProcessingStrategyName = listOfOptions.get(0).name();
@@ -487,7 +477,7 @@ public class LoanProductData {
     }
 
     public Collection<ChargeData> charges() {
-        Collection<ChargeData> chargesLocal = new ArrayList<ChargeData>();
+        Collection<ChargeData> chargesLocal = new ArrayList<>();
         if (this.charges != null) {
             chargesLocal = this.charges;
         }
@@ -666,7 +656,7 @@ public class LoanProductData {
     }
 
     public Collection<ChargeData> overdueFeeCharges() {
-        Collection<ChargeData> overdueFeeCharges = new ArrayList<ChargeData>();
+        Collection<ChargeData> overdueFeeCharges = new ArrayList<>();
         Collection<ChargeData> charges = charges();
         for (ChargeData chargeData : charges) {
             if (chargeData.isOverdueInstallmentCharge()) {

@@ -23,7 +23,7 @@ public class SurveyHelper {
     }
 
     public static String getTestPPIAsJSON() {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
 
         map.put("date", "2014-05-19 00:00:00");
         map.put("ppi_household_members_cd_q1_householdmembers","107");

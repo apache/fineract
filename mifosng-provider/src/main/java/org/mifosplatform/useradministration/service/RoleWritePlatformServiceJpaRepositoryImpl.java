@@ -97,9 +97,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
         logger.error(dve.getMessage(), dve);
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = "users", allEntries = true),
-            @CacheEvict(value = "usersByUsername", allEntries = true)})
+    @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
     @Transactional
     @Override
     public CommandProcessingResult updateRole(final Long roleId, final JsonCommand command) {
@@ -129,9 +127,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
         }
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = "users", allEntries = true),
-            @CacheEvict(value = "usersByUsername", allEntries = true)})
+    @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
     @Transactional
     @Override
     public CommandProcessingResult updateRolePermissions(final Long roleId, final JsonCommand command) {
@@ -145,8 +141,8 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
         final PermissionsCommand permissionsCommand = this.permissionsFromApiJsonDeserializer.commandFromApiJson(command.json());
 
         final Map<String, Boolean> commandPermissions = permissionsCommand.getPermissions();
-        final Map<String, Object> changes = new HashMap<String, Object>();
-        final Map<String, Boolean> changedPermissions = new HashMap<String, Boolean>();
+        final Map<String, Object> changes = new HashMap<>();
+        final Map<String, Boolean> changedPermissions = new HashMap<>();
         for (final String permissionCode : commandPermissions.keySet()) {
             final boolean isSelected = commandPermissions.get(permissionCode).booleanValue();
 

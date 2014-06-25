@@ -175,12 +175,12 @@ public class ProductToGLAccountMappingHelper {
          * associated income Id's (value) extracted from the passed in
          * Jsoncommand
          **/
-        final Map<Long, Long> inputChargeToIncomeAccountMap = new HashMap<Long, Long>();
+        final Map<Long, Long> inputChargeToIncomeAccountMap = new HashMap<>();
         /***
          * Variable stores all charges which have already been mapped to Income
          * Accounts in the system
          **/
-        final Set<Long> existingCharges = new HashSet<Long>();
+        final Set<Long> existingCharges = new HashSet<>();
         if (chargeToIncomeAccountMappingArray != null && chargeToIncomeAccountMappingArray.size() > 0) {
             if (changes != null) {
                 changes.put(arrayFragmentName, command.jsonFragment(arrayFragmentName));
@@ -253,12 +253,12 @@ public class ProductToGLAccountMappingHelper {
          * Variable stores a map representation of Payment channels (key) and
          * their fund sources (value) extracted from the passed in Jsoncommand
          **/
-        final Map<Long, Long> inputPaymentChannelFundSourceMap = new HashMap<Long, Long>();
+        final Map<Long, Long> inputPaymentChannelFundSourceMap = new HashMap<>();
         /***
          * Variable stores all payment types which have already been mapped to
          * Fund Sources in the system
          **/
-        final Set<Long> existingPaymentTypes = new HashSet<Long>();
+        final Set<Long> existingPaymentTypes = new HashSet<>();
         if (paymentChannelMappingArray != null && paymentChannelMappingArray.size() > 0) {
             if (changes != null) {
                 changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(),

@@ -57,7 +57,7 @@ public class DepositPreClosureDetail {
     }
 
     protected Map<String, Object> update(final JsonCommand command, final DataValidatorBuilder baseDataValidator) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(10);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
 
         final String localeAsInput = command.locale();
 

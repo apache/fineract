@@ -79,7 +79,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
 
     @Override
     public Collection<InterestRateChartData> retrieveAllWithSlabsWithTemplate(Long productId) {
-        Collection<InterestRateChartData> chartDatas = new ArrayList<InterestRateChartData>();
+        Collection<InterestRateChartData> chartDatas = new ArrayList<>();
 
         for (InterestRateChartData chartData : retrieveAllWithSlabs(productId)) {
             chartDatas.add(retrieveWithTemplate(chartData));
@@ -107,13 +107,13 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
     @Override
     public InterestRateChartData retrieveWithTemplate(InterestRateChartData chartData) {
 
-        final List<CodeValueData> genderOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> genderOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.GENDER));
 
-        final List<CodeValueData> clientTypeOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> clientTypeOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_TYPE));
 
-        final List<CodeValueData> clientClassificationOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> clientClassificationOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_CLASSIFICATION));
         return InterestRateChartData.withTemplate(chartData, this.chartDropdownReadPlatformService.retrievePeriodTypeOptions(),
                 this.interestIncentiveDropdownReadPlatformService.retrieveEntityTypeOptions(),
@@ -131,13 +131,13 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
 
     @Override
     public InterestRateChartData template() {
-        final List<CodeValueData> genderOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> genderOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.GENDER));
 
-        final List<CodeValueData> clientTypeOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> clientTypeOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_TYPE));
 
-        final List<CodeValueData> clientClassificationOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> clientClassificationOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_CLASSIFICATION));
         return InterestRateChartData.template(this.chartDropdownReadPlatformService.retrievePeriodTypeOptions(),
                 this.interestIncentiveDropdownReadPlatformService.retrieveEntityTypeOptions(),
@@ -187,7 +187,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
         @Override
         public Collection<InterestRateChartData> extractData(ResultSet rs) throws SQLException, DataAccessException {
 
-            List<InterestRateChartData> chartDataList = new ArrayList<InterestRateChartData>();
+            List<InterestRateChartData> chartDataList = new ArrayList<>();
 
             InterestRateChartData chartData = null;
             Long interestRateChartId = null;

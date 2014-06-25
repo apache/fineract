@@ -120,8 +120,8 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
 
     @Transactional
     private void updateOrganizationRunningBalance(Date entityDate) {
-        Map<Long, BigDecimal> runningBalanceMap = new HashMap<Long, BigDecimal>(5);
-        Map<Long, Map<Long, BigDecimal>> officesRunningBalance = new HashMap<Long, Map<Long, BigDecimal>>();
+        Map<Long, BigDecimal> runningBalanceMap = new HashMap<>(5);
+        Map<Long, Map<Long, BigDecimal>> officesRunningBalance = new HashMap<>();
 
         List<Map<String, Object>> list = jdbcTemplate.queryForList(organizationRunningBalanceSql, entityDate, entityDate);
         for (Map<String, Object> entries : list) {
@@ -139,7 +139,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
             if (officesRunningBalance.containsKey(officeId)) {
                 runningBalance = officesRunningBalance.get(officeId);
             } else {
-                runningBalance = new HashMap<Long, BigDecimal>();
+                runningBalance = new HashMap<>();
                 officesRunningBalance.put(officeId, runningBalance);
             }
             if (!runningBalance.containsKey(accountId)) {
@@ -157,7 +157,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
                 if (officesRunningBalance.containsKey(entryData.getOfficeId())) {
                     officeRunningBalanceMap = officesRunningBalance.get(entryData.getOfficeId());
                 } else {
-                    officeRunningBalanceMap = new HashMap<Long, BigDecimal>();
+                    officeRunningBalanceMap = new HashMap<>();
                     officesRunningBalance.put(entryData.getOfficeId(), officeRunningBalanceMap);
                 }
                 BigDecimal officeRunningBalance = calculateRunningBalance(entryData, officeRunningBalanceMap);
@@ -173,7 +173,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
 
     @Transactional
     private void updateRunningBalance(Long officeId, Date entityDate) {
-        Map<Long, BigDecimal> runningBalanceMap = new HashMap<Long, BigDecimal>(5);
+        Map<Long, BigDecimal> runningBalanceMap = new HashMap<>(5);
 
         List<Map<String, Object>> list = jdbcTemplate.queryForList(officeRunningBalanceSql, officeId, entityDate, officeId, entityDate);
         for (Map<String, Object> entries : list) {

@@ -31,7 +31,7 @@ public class DepositAccountInterestRateChartData {
     private Set<DepositAccountInterestRateChartSlabData> chartSlabs;
 
     // template
-    private Collection<EnumOptionData> periodTypes;
+    private final Collection<EnumOptionData> periodTypes;
     private final Collection<EnumOptionData> entityTypeOptions;
     private final Collection<EnumOptionData> attributeNameOptions;
     private final Collection<EnumOptionData> conditionTypeOptions;
@@ -60,7 +60,7 @@ public class DepositAccountInterestRateChartData {
         final Long id = null;
         final Long accountId = null;
         final String accountNumber = null;
-        Set<DepositAccountInterestRateChartSlabData> fromProdChartSlabs = new HashSet<DepositAccountInterestRateChartSlabData>();
+        Set<DepositAccountInterestRateChartSlabData> fromProdChartSlabs = new HashSet<>();
         Set<InterestRateChartSlabData> productChartSlabDatas = productChartData.chartSlabs();
         if (productChartSlabDatas != null) {
             for (InterestRateChartSlabData productChartSlabData : productChartSlabDatas) {
@@ -142,7 +142,7 @@ public class DepositAccountInterestRateChartData {
 
     public void addChartSlab(final DepositAccountInterestRateChartSlabData chartSlab) {
         if (this.chartSlabs == null) {
-            this.chartSlabs = new HashSet<DepositAccountInterestRateChartSlabData>();
+            this.chartSlabs = new HashSet<>();
         }
 
         this.chartSlabs.add(chartSlab);

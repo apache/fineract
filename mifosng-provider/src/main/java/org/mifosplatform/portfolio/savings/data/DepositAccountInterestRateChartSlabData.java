@@ -71,7 +71,7 @@ public class DepositAccountInterestRateChartSlabData {
 
     public static DepositAccountInterestRateChartSlabData from(final InterestRateChartSlabData chartSlabData) {
         final Long id = null;
-        Set<DepositAccountInterestIncentiveData> fromProdIncentives = new HashSet<DepositAccountInterestIncentiveData>();
+        Set<DepositAccountInterestIncentiveData> fromProdIncentives = new HashSet<>();
         Set<InterestIncentiveData> productIncentiveData = chartSlabData.incentives();
         if (productIncentiveData != null) {
             for (InterestIncentiveData incentive : productIncentiveData) {
@@ -126,7 +126,7 @@ public class DepositAccountInterestRateChartSlabData {
 
     public void addIncentives(final DepositAccountInterestIncentiveData incentive) {
         if (this.incentives == null) {
-            this.incentives = new HashSet<DepositAccountInterestIncentiveData>();
+            this.incentives = new HashSet<>();
         }
         this.incentives.add(incentive);
     }

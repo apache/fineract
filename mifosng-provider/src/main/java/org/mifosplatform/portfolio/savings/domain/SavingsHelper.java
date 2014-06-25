@@ -27,7 +27,7 @@ public final class SavingsHelper {
     public List<LocalDateInterval> determineInterestPostingPeriods(final LocalDate activationLocalDate,
             final LocalDate interestPostingUpToDate, final SavingsPostingInterestPeriodType postingPeriodType) {
 
-        final List<LocalDateInterval> postingPeriods = new ArrayList<LocalDateInterval>();
+        final List<LocalDateInterval> postingPeriods = new ArrayList<>();
 
         LocalDate periodStartDate = activationLocalDate;
         LocalDate periodEndDate = periodStartDate;

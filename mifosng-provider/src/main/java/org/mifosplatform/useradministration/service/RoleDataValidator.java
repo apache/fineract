@@ -31,7 +31,7 @@ public final class RoleDataValidator {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "name", "description"));
+    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "name", "description"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -46,7 +46,7 @@ public final class RoleDataValidator {
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("role");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -66,7 +66,7 @@ public final class RoleDataValidator {
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("role");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);

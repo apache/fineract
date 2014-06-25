@@ -24,7 +24,7 @@ public enum GroupTypes {
         this.value = value;
     }
 
-    private static final Map<Long, GroupTypes> intToEnumMap = new HashMap<Long, GroupTypes>();
+    private static final Map<Long, GroupTypes> intToEnumMap = new HashMap<>();
     private static long minValue;
     private static long maxValue;
     static {

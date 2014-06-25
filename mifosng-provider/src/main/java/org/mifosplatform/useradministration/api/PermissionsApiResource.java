@@ -38,7 +38,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class PermissionsApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("grouping", "code", "entityName", "actionName",
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("grouping", "code", "entityName", "actionName",
             "selected", "isMakerChecker"));
     private final String resourceNameForPermissions = "PERMISSION";
 

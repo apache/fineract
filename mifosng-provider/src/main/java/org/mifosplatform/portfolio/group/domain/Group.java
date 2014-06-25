@@ -95,7 +95,7 @@ public final class Group extends AbstractPersistable<Long> {
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id")
-    private final List<Group> groupMembers = new LinkedList<Group>();
+    private final List<Group> groupMembers = new LinkedList<>();
 
     @ManyToMany
     @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "client_id"))
@@ -124,7 +124,7 @@ public final class Group extends AbstractPersistable<Long> {
     public Group() {
         this.name = null;
         this.externalId = null;
-        this.clientMembers = new HashSet<Client>();
+        this.clientMembers = new HashSet<>();
     }
 
     public static Group newGroup(final Office office, final Staff staff, final Group parent, final GroupLevel groupLevel,
@@ -184,7 +184,7 @@ public final class Group extends AbstractPersistable<Long> {
     }
 
     private void validate() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         validateActivationDate(dataValidationErrors);
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
@@ -235,7 +235,7 @@ public final class Group extends AbstractPersistable<Long> {
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.group.already.active", defaultUserMessage,
                     "activationDate", activationLocalDate.toString(formatter));
 
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             dataValidationErrors.add(error);
 
             throw new PlatformApiDataValidationException(dataValidationErrors);
@@ -273,7 +273,7 @@ public final class Group extends AbstractPersistable<Long> {
     }
 
     public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(9);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
         if (command.isChangeInIntegerParameterNamed(GroupingTypesApiConstants.statusParamName, this.status)) {
             final Integer newValue = command.integerValueOfParameterNamed(GroupingTypesApiConstants.statusParamName);
@@ -380,7 +380,7 @@ public final class Group extends AbstractPersistable<Long> {
     }
 
     public List<String> updateClientMembersIfDifferent(final Set<Client> clientMembersSet) {
-        List<String> differences = new ArrayList<String>();
+        List<String> differences = new ArrayList<>();
         if (!clientMembersSet.equals(this.clientMembers)) {
             final Set<Client> diffClients = Sets.symmetricDifference(clientMembersSet, this.clientMembers);
             final String[] diffClientsIds = getClientIds(diffClients);
@@ -394,7 +394,7 @@ public final class Group extends AbstractPersistable<Long> {
     }
 
     public List<String> associateClients(final Set<Client> clientMembersSet) {
-        final List<String> differences = new ArrayList<String>();
+        final List<String> differences = new ArrayList<>();
         for (final Client client : clientMembersSet) {
             if (hasClientAsMember(client)) { throw new ClientExistInGroupException(client.getId(), getId()); }
             this.clientMembers.add(client);
@@ -405,7 +405,7 @@ public final class Group extends AbstractPersistable<Long> {
     }
 
     public List<String> disassociateClients(final Set<Client> clientMembersSet) {
-        final List<String> differences = new ArrayList<String>();
+        final List<String> differences = new ArrayList<>();
         for (final Client client : clientMembersSet) {
             if (hasClientAsMember(client)) {
                 this.clientMembers.remove(client);

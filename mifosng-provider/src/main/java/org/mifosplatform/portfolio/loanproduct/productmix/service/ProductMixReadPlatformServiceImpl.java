@@ -83,7 +83,7 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
 
         @Override
         public Map<Long, ProductMixData> extractData(final ResultSet rs) throws SQLException, DataAccessException {
-            final Map<Long, ProductMixData> extractedData = new HashMap<Long, ProductMixData>();
+            final Map<Long, ProductMixData> extractedData = new HashMap<>();
 
             if (!rs.next()) {
                 final Collection<LoanProductData> restrictedProducts = this.loanProductReadPlatformService

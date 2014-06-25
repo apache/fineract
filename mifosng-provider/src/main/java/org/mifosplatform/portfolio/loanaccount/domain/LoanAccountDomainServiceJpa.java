@@ -99,8 +99,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
          * calendarInstance); }
          */
 
-        final List<Long> existingTransactionIds = new ArrayList<Long>();
-        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        final List<Long> existingTransactionIds = new ArrayList<>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<>();
 
         final Money repaymentAmount = Money.of(loan.getCurrency(), transactionAmount);
         LoanTransaction newRepaymentTransaction = null;
@@ -126,7 +126,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             this.loanTransactionRepository.save(newRepaymentTransaction);
         } catch (DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
             if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
                 baseDataValidator.reset().parameter("externalId").value(newRepaymentTransaction.getExternalId())
@@ -179,8 +179,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         boolean isAccountTransfer = true;
         checkClientOrGroupActive(loan);
 
-        final List<Long> existingTransactionIds = new ArrayList<Long>();
-        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        final List<Long> existingTransactionIds = new ArrayList<>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<>();
 
         final Money paymentAmout = Money.of(loan.getCurrency(), transactionAmount);
         final LoanTransactionType loanTransactionType = LoanTransactionType.fromInt(transactionType);
@@ -246,8 +246,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final Loan loan = this.loanAccountAssembler.assembleFrom(accountId);
         checkClientOrGroupActive(loan);
 
-        final List<Long> existingTransactionIds = new ArrayList<Long>();
-        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        final List<Long> existingTransactionIds = new ArrayList<>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<>();
 
         final Money refundAmount = Money.of(loan.getCurrency(), transactionAmount);
         final LoanTransaction newRefundTransaction = LoanTransaction.refund(loan.getOffice(), refundAmount, paymentDetail, transactionDate,
@@ -286,8 +286,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final Loan loan = this.loanAccountAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
         boolean isAccountTransfer = true;
-        final List<Long> existingTransactionIds = new ArrayList<Long>();
-        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        final List<Long> existingTransactionIds = new ArrayList<>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<>();
         final Money amount = Money.of(loan.getCurrency(), transactionAmount);
         LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan.getOffice(), amount, paymentDetail, transactionDate,
                 txnExternalId);
@@ -297,7 +297,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             this.loanTransactionRepository.save(disbursementTransaction);
         } catch (DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
             if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
                 baseDataValidator.reset().parameter("externalId").value(disbursementTransaction.getExternalId())

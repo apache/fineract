@@ -13,12 +13,10 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_deposit_account_interest_incentives")
 public class DepositAccountInterestIncentive extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "deposit_account_interest_rate_slab_id", nullable = false)
     private DepositAccountInterestRateChartSlabs depositAccountInterestRateChartSlabs;
 
-    @SuppressWarnings("unused")
     @Embedded
     private InterestIncentivesFields interestIncentivesFields;
 

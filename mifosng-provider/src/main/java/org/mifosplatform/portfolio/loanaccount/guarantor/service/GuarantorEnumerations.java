@@ -24,7 +24,7 @@ public class GuarantorEnumerations {
     }
 
     public static List<EnumOptionData> guarantorType(final GuarantorType[] guarantorTypes) {
-        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final GuarantorType guarantorType : guarantorTypes) {
             optionDatas.add(guarantorType(guarantorType));
         }

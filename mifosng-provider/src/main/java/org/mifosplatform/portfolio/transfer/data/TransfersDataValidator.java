@@ -48,7 +48,7 @@ public final class TransfersDataValidator {
                 TransferApiConstants.TRANSFER_CLIENTS_BETWEEN_GROUPS_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
@@ -81,7 +81,7 @@ public final class TransfersDataValidator {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, TransferApiConstants.PROPOSE_CLIENT_TRANSFER_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
@@ -101,7 +101,7 @@ public final class TransfersDataValidator {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, TransferApiConstants.ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS);
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
@@ -131,7 +131,7 @@ public final class TransfersDataValidator {
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
                 TransferApiConstants.PROPOSE_AND_ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS);
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
@@ -165,7 +165,7 @@ public final class TransfersDataValidator {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, TransferApiConstants.REJECT_CLIENT_TRANSFER_DATA_PARAMETERS);
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
@@ -182,7 +182,7 @@ public final class TransfersDataValidator {
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper
                 .checkForUnsupportedParameters(typeOfMap, json, TransferApiConstants.WITHDRAW_CLIENT_TRANSFER_DATA_PARAMETERS);
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);

@@ -363,7 +363,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             rptParamValues.put("userhierarchy", userhierarchy);
 
             final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
-            
+
             rptParamValues.put("tenantUrl", tenantUrl);
             rptParamValues.put("username", tenant.getSchemaUsername());
             rptParamValues.put("password", tenant.getSchemaPassword());
@@ -462,7 +462,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         final Collection<ReportParameterJoinData> rpJoins = this.jdbcTemplate.query(sql, rm, new Object[] {});
 
-        final Collection<ReportData> reportList = new ArrayList<ReportData>();
+        final Collection<ReportData> reportList = new ArrayList<>();
         if (rpJoins == null || rpJoins.size() == 0) { return reportList; }
 
         Collection<ReportParameterData> reportParameters = null;
@@ -484,7 +484,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             if (rpJoin.getReportId().equals(prevReportId)) {
                 // more than one parameter for report
                 if (reportParameters == null) {
-                    reportParameters = new ArrayList<ReportParameterData>();
+                    reportParameters = new ArrayList<>();
                 }
                 reportParameters.add(new ReportParameterData(rpJoin.getReportParameterId(), rpJoin.getParameterId(), rpJoin
                         .getReportParameterName(), rpJoin.getParameterName()));
@@ -512,7 +512,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
                 if (rpJoin.getReportParameterId() != null) {
                     // report has at least one parameter
-                    reportParameters = new ArrayList<ReportParameterData>();
+                    reportParameters = new ArrayList<>();
                     reportParameters.add(new ReportParameterData(rpJoin.getReportParameterId(), rpJoin.getParameterId(), rpJoin
                             .getReportParameterName(), rpJoin.getParameterName()));
                 } else {

@@ -103,7 +103,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         final Integer entityTypeId = entityType.getValue();
         final Calendar newCalendar = Calendar.fromJson(command);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("calendar");
         if (entityActivationDate == null || newCalendar.getStartDateLocalDate().isBefore(entityActivationDate)) {
             final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());

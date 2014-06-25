@@ -56,10 +56,10 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     private final AllGroupTypesDataMapper allGroupTypesDataMapper = new AllGroupTypesDataMapper();
-    private final PaginationHelper<GroupGeneralData> paginationHelper = new PaginationHelper<GroupGeneralData>();
+    private final PaginationHelper<GroupGeneralData> paginationHelper = new PaginationHelper<>();
     private final PaginationParametersDataValidator paginationParametersDataValidator;
 
-    private final static Set<String> supportedOrderByValues = new HashSet<String>(Arrays.asList("id", "name", "officeId", "officeName"));
+    private final static Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "name", "officeId", "officeName"));
 
     @Autowired
     public GroupReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -231,7 +231,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         if (StringUtils.isNotBlank(extraCriteria.toString())) {
             extraCriteria.delete(0, 4);
         }
-        
+
         final Long staffId = searchCriteria.getStaffId();
         if (staffId != null) {
             extraCriteria.append(" and g.staff_id = ").append(staffId);
@@ -279,7 +279,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
     @Override
     public GroupGeneralData retrieveGroupWithClosureReasons() {
-        final List<CodeValueData> closureReasons = new ArrayList<CodeValueData>(
+        final List<CodeValueData> closureReasons = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(GroupingTypesApiConstants.GROUP_CLOSURE_REASON));
         return GroupGeneralData.withClosureReasons(closureReasons);
     }

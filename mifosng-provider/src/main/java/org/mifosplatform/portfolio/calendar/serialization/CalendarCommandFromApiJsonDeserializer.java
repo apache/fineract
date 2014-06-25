@@ -86,7 +86,7 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("calendar");
 
@@ -196,7 +196,7 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("calendar");
 

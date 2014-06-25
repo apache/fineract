@@ -25,7 +25,7 @@ public class CalendarConstants {
             this.value = value;
         }
 
-        private static final Set<String> values = new HashSet<String>();
+        private static final Set<String> values = new HashSet<>();
         static {
             for (final CALENDAR_SUPPORTED_PARAMETERS param : CALENDAR_SUPPORTED_PARAMETERS.values()) {
                 values.add(param.value);

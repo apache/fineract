@@ -29,7 +29,7 @@ public final class LoanUpdateCommandFromApiJsonDeserializer extends AbstractFrom
     /**
      * The parameters supported for this command.
      */
-    final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("unassignedDate", "locale", "dateFormat"));
+    final Set<String> supportedParameters = new HashSet<>(Arrays.asList("unassignedDate", "locale", "dateFormat"));
 
     private final FromJsonHelper fromApiJsonHelper;
 

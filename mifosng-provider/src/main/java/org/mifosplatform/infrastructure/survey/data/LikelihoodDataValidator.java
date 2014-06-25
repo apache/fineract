@@ -39,7 +39,7 @@ public class LikelihoodDataValidator {
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, LikelihoodApiConstants.UPDATE_LIKELIHOOD_DATA_PARAMETERS);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(LikelihoodApiConstants.LIKELIHOOD_RESOURCE_NAME);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 

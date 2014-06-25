@@ -393,7 +393,7 @@ public class DepositAccountAssembler {
         final String json = command.json();
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
         final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final Collection<SavingsAccountTransactionDTO> savingsAccountTransactions = new ArrayList<SavingsAccountTransactionDTO>();
+        final Collection<SavingsAccountTransactionDTO> savingsAccountTransactions = new ArrayList<>();
         final PaymentDetail paymentDetail = null;
         final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
         final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(element.getAsJsonObject());

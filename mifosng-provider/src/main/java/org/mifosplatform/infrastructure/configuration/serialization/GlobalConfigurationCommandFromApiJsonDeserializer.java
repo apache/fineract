@@ -33,7 +33,7 @@ public final class GlobalConfigurationCommandFromApiJsonDeserializer extends
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("globalConfiguration"));
+    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("globalConfiguration"));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired

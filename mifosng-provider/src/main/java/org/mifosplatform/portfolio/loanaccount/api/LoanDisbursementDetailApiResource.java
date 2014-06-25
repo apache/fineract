@@ -38,7 +38,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class LoanDisbursementDetailApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "expectedDisbursementDate",
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "expectedDisbursementDate",
             "actualDisbursementDate", "principal", "approvedPrincipal"));
 
     private final String resourceNameForPermissions = "LOAN";

@@ -46,7 +46,7 @@ public class InterestRateChartEnumerations {
     }
 
     public static List<EnumOptionData> periodType(final PeriodFrequencyType[] periodTypes) {
-        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final PeriodFrequencyType periodType : periodTypes) {
             if (!periodType.isInvalid()) {
                 optionDatas.add(periodType(periodType));

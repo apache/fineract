@@ -99,8 +99,8 @@ import com.google.gson.JsonElement;
 @Scope("singleton")
 public class LoansApiResource {
 
-    private final Set<String> LOAN_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "accountNo", "status", "externalId",
-            "clientId", "group", "loanProductId", "loanProductName", "loanProductDescription", "fundId", "fundName", "loanPurposeId",
+    private final Set<String> LOAN_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "accountNo", "status", "externalId", "clientId",
+            "group", "loanProductId", "loanProductName", "loanProductDescription", "fundId", "fundName", "loanPurposeId",
             "loanPurposeName", "loanOfficerId", "loanOfficerName", "currency", "principal", "totalOverpaid", "inArrearsTolerance",
             "termFrequency", "termPeriodFrequencyType", "numberOfRepayments", "repaymentEvery", "interestRatePerPeriod",
             "annualInterestRate", "repaymentFrequencyType", "transactionProcessingStrategyId", "transactionProcessingStrategyName",
@@ -241,7 +241,7 @@ public class LoansApiResource {
                 newLoanAccount = newLoanAccount == null ? loanAccountGroupData : LoanAccountData.populateGroupDefaults(newLoanAccount,
                         loanAccountGroupData);
                 if (productId != null) {
-                    Map<Long, Integer> memberLoanCycle = new HashMap<Long, Integer>();
+                    Map<Long, Integer> memberLoanCycle = new HashMap<>();
                     Collection<ClientData> members = loanAccountGroupData.groupData().clientMembers();
                     for (ClientData clientData : members) {
                         Integer loanCounter = this.loanReadPlatformService.retriveLoanCounter(clientData.id(), productId);
@@ -303,7 +303,7 @@ public class LoansApiResource {
         Collection<DisbursementData> disbursementData = null;
         Collection<LoanTermVariationsData> emiAmountVariations = null;
 
-        final Set<String> mandatoryResponseParameters = new HashSet<String>();
+        final Set<String> mandatoryResponseParameters = new HashSet<>();
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
 

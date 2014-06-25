@@ -83,7 +83,7 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "calendar_id")
-    private Set<CalendarHistory> calendarHistory = new HashSet<CalendarHistory>();
+    private final Set<CalendarHistory> calendarHistory = new HashSet<>();
 
     protected Calendar() {
 
@@ -93,7 +93,7 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
             final LocalDate endDate, final Integer duration, final Integer typeId, final boolean repeating, final String recurrence,
             final Integer remindById, final Integer firstReminder, final Integer secondReminder) {
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(CALENDAR_RESOURCE_NAME);
 
         final CalendarType calendarType = CalendarType.fromInt(typeId);
@@ -171,7 +171,7 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
     public Map<String, Object> update(final JsonCommand command) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(9);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
         if (command.isChangeInStringParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.TITLE.getValue(), this.title)) {
             final String newValue = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.TITLE.getValue());
@@ -264,7 +264,7 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
         // if repeating is false then update recurrence to NULL
         if (!this.repeating) this.recurrence = null;
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(CALENDAR_RESOURCE_NAME);
 
         final CalendarType calendarType = CalendarType.fromInt(this.typeId);
@@ -318,18 +318,19 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
         return actualChanges;
     }
-    
+
     @SuppressWarnings("null")
-    public Map<String, Object> updateRepeatingCalendar(final LocalDate calendarStartDate, final CalendarFrequencyType frequencyType, final Integer interval, final Integer repeatsOnDay){
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(9);
-        
-        if(calendarStartDate != null & this.startDate != null){
-            if(!calendarStartDate.equals(this.getStartDateLocalDate())){
+    public Map<String, Object> updateRepeatingCalendar(final LocalDate calendarStartDate, final CalendarFrequencyType frequencyType,
+            final Integer interval, final Integer repeatsOnDay) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
+
+        if (calendarStartDate != null & this.startDate != null) {
+            if (!calendarStartDate.equals(this.getStartDateLocalDate())) {
                 actualChanges.put("startDate", calendarStartDate);
                 this.startDate = calendarStartDate.toDate();
             }
         }
-        
+
         final String newRecurrence = Calendar.constructRecurrence(frequencyType, interval, repeatsOnDay);
         if (!StringUtils.isBlank(this.recurrence) && !newRecurrence.equalsIgnoreCase(this.recurrence)) {
             actualChanges.put("recurrence", newRecurrence);

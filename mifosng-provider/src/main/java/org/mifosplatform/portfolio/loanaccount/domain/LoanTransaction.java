@@ -93,7 +93,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanTransaction", orphanRemoval = true)
-    private Set<LoanChargePaidBy> loanChargesPaid = new HashSet<LoanChargePaidBy>();
+    private Set<LoanChargePaidBy> loanChargesPaid = new HashSet<>();
 
     protected LoanTransaction() {
         this.loan = null;
@@ -465,7 +465,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     }
 
     public Map<String, Object> toMapData(final CurrencyData currencyData) {
-        final Map<String, Object> thisTransactionData = new LinkedHashMap<String, Object>();
+        final Map<String, Object> thisTransactionData = new LinkedHashMap<>();
 
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(this.typeOf);
 
@@ -487,9 +487,9 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         }
 
         if (!this.loanChargesPaid.isEmpty()) {
-            final List<Map<String, Object>> loanChargesPaidData = new ArrayList<Map<String, Object>>();
+            final List<Map<String, Object>> loanChargesPaidData = new ArrayList<>();
             for (final LoanChargePaidBy chargePaidBy : this.loanChargesPaid) {
-                final Map<String, Object> loanChargePaidData = new LinkedHashMap<String, Object>();
+                final Map<String, Object> loanChargePaidData = new LinkedHashMap<>();
                 loanChargePaidData.put("chargeId", chargePaidBy.getLoanCharge().getCharge().getId());
                 loanChargePaidData.put("isPenalty", chargePaidBy.getLoanCharge().getCharge().isPenalty());
                 loanChargePaidData.put("loanChargeId", chargePaidBy.getLoanCharge().getId());

@@ -42,7 +42,7 @@ public class DepositAccountInterestRateChart extends AbstractPersistable<Long> {
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(mappedBy = "depositAccountInterestRateChart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<DepositAccountInterestRateChartSlabs> chartSlabs = new HashSet<DepositAccountInterestRateChartSlabs>();
+    private Set<DepositAccountInterestRateChartSlabs> chartSlabs = new HashSet<>();
 
     protected DepositAccountInterestRateChart() {
         //
@@ -50,7 +50,7 @@ public class DepositAccountInterestRateChart extends AbstractPersistable<Long> {
 
     public static DepositAccountInterestRateChart from(InterestRateChart productChart) {
         final Set<InterestRateChartSlab> chartSlabs = productChart.setOfChartSlabs();
-        final Set<DepositAccountInterestRateChartSlabs> depostiChartSlabs = new HashSet<DepositAccountInterestRateChartSlabs>();
+        final Set<DepositAccountInterestRateChartSlabs> depostiChartSlabs = new HashSet<>();
         for (InterestRateChartSlab interestRateChartSlab : chartSlabs) {
             depostiChartSlabs.add(DepositAccountInterestRateChartSlabs.from(interestRateChartSlab, null));
         }
@@ -77,7 +77,7 @@ public class DepositAccountInterestRateChart extends AbstractPersistable<Long> {
 
     public Set<DepositAccountInterestRateChartSlabs> setOfChartSlabs() {
         if (this.chartSlabs == null) {
-            this.chartSlabs = new HashSet<DepositAccountInterestRateChartSlabs>();
+            this.chartSlabs = new HashSet<>();
         }
         return this.chartSlabs;
     }

@@ -246,7 +246,7 @@ public class Loan extends AbstractPersistable<Long> {
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
-    private Set<LoanCharge> charges = new HashSet<LoanCharge>();
+    private Set<LoanCharge> charges = new HashSet<>();
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
@@ -260,14 +260,14 @@ public class Loan extends AbstractPersistable<Long> {
     // http://stackoverflow.com/questions/4334970/hibernate-cannot-simultaneously-fetch-multiple-bags
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
-    private final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = new ArrayList<LoanRepaymentScheduleInstallment>();
+    private final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = new ArrayList<>();
 
     // see
     // http://stackoverflow.com/questions/4334970/hibernate-cannot-simultaneously-fetch-multiple-bags
     @OrderBy(value = "dateOf, id")
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
-    private final List<LoanTransaction> loanTransactions = new ArrayList<LoanTransaction>();
+    private final List<LoanTransaction> loanTransactions = new ArrayList<>();
 
     @Embedded
     private LoanSummary summary;
@@ -296,12 +296,12 @@ public class Loan extends AbstractPersistable<Long> {
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
-    private Set<LoanDisbursementDetails> disbursementDetails = new HashSet<LoanDisbursementDetails>();
+    private Set<LoanDisbursementDetails> disbursementDetails = new HashSet<>();
 
     @OrderBy(value = "termApplicableFrom, id")
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
-    private final Set<LoanTermVariations> loanTermVariations = new HashSet<LoanTermVariations>();
+    private final Set<LoanTermVariations> loanTermVariations = new HashSet<>();
 
     @Column(name = "total_recovered_derived", scale = 6, precision = 19)
     private BigDecimal totalRecovered;
@@ -576,7 +576,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategy);
-        final List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<LoanRepaymentScheduleInstallment>();
+        final List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<>();
         LocalDate startDate = getDisbursementDate();
         for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
             if (installmentNumber == null && charge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())) {
@@ -588,7 +588,7 @@ public class Loan extends AbstractPersistable<Long> {
             }
             startDate = installment.getDueDate();
         }
-        final Set<LoanCharge> loanCharges = new HashSet<LoanCharge>(1);
+        final Set<LoanCharge> loanCharges = new HashSet<>(1);
         loanCharges.add(charge);
         loanRepaymentScheduleTransactionProcessor.handleTransaction(chargesPayment, getCurrency(), chargePaymentInstallments, loanCharges);
         updateLoanSummaryDerivedFields();
@@ -691,7 +691,7 @@ public class Loan extends AbstractPersistable<Long> {
 
     public Map<String, Object> updateLoanCharge(final LoanCharge loanCharge, final JsonCommand command) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(3);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(3);
 
         validateLoanIsNotClosed(loanCharge);
         if (charges().contains(loanCharge)) {
@@ -948,7 +948,7 @@ public class Loan extends AbstractPersistable<Long> {
 
     public void updateLoanCollateral(final Set<LoanCollateral> loanCollateral) {
         if (this.collateral == null) {
-            this.collateral = new HashSet<LoanCollateral>();
+            this.collateral = new HashSet<>();
         }
         this.collateral.clear();
         this.collateral.addAll(associateWithThisLoan(loanCollateral));
@@ -1375,7 +1375,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     private List<Long> fetchDisbursementIds() {
-        List<Long> list = new ArrayList<Long>();
+        List<Long> list = new ArrayList<>();
         for (LoanDisbursementDetails disbursementDetails : this.disbursementDetails) {
             list.add(disbursementDetails.getId());
         }
@@ -1386,7 +1386,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         CollateralData[] existingLoanCollateral = null;
 
-        final List<CollateralData> loanCollateralList = new ArrayList<CollateralData>();
+        final List<CollateralData> loanCollateralList = new ArrayList<>();
         for (final LoanCollateral loanCollateral : setOfLoanCollateral) {
 
             final CollateralData data = loanCollateral.toData();
@@ -1403,7 +1403,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         LoanChargeCommand[] existingLoanCharges = null;
 
-        final List<LoanChargeCommand> loanChargesList = new ArrayList<LoanChargeCommand>();
+        final List<LoanChargeCommand> loanChargesList = new ArrayList<>();
         for (final LoanCharge loanCharge : setOfLoanCharges) {
             loanChargesList.add(loanCharge.toCommand());
         }
@@ -1494,7 +1494,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         validateAccountStatus(LoanEvent.LOAN_REJECTED);
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
+        final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
         final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECTED, LoanStatus.fromInt(this.loanStatus));
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
@@ -1540,7 +1540,7 @@ public class Loan extends AbstractPersistable<Long> {
     public Map<String, Object> loanApplicationWithdrawnByApplicant(final AppUser currentUser, final JsonCommand command,
             final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
+        final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
         final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_WITHDRAWN, LoanStatus.fromInt(this.loanStatus));
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
@@ -1591,7 +1591,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         validateAccountStatus(LoanEvent.LOAN_APPROVED);
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
+        final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
         final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVED, LoanStatus.fromInt(this.loanStatus));
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
@@ -1640,7 +1640,7 @@ public class Loan extends AbstractPersistable<Long> {
     public Map<String, Object> undoApproval(final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
         validateAccountStatus(LoanEvent.LOAN_APPROVAL_UNDO);
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
+        final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
         final LoanStatus currentStatus = LoanStatus.fromInt(this.loanStatus);
         final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVAL_UNDO, currentStatus);
@@ -1660,7 +1660,7 @@ public class Loan extends AbstractPersistable<Long> {
 
     public Collection<Long> findExistingTransactionIds() {
 
-        final Collection<Long> ids = new ArrayList<Long>();
+        final Collection<Long> ids = new ArrayList<>();
 
         for (final LoanTransaction transaction : this.loanTransactions) {
             ids.add(transaction.getId());
@@ -1671,7 +1671,7 @@ public class Loan extends AbstractPersistable<Long> {
 
     public Collection<Long> findExistingReversedTransactionIds() {
 
-        final Collection<Long> ids = new ArrayList<Long>();
+        final Collection<Long> ids = new ArrayList<>();
 
         for (final LoanTransaction transaction : this.loanTransactions) {
             if (transaction.isReversed()) {
@@ -1841,7 +1841,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     private Collection<LoanDisbursementDetails> fetchUndisbursedDetail() {
-        Collection<LoanDisbursementDetails> disbursementDetails = new ArrayList<LoanDisbursementDetails>();
+        Collection<LoanDisbursementDetails> disbursementDetails = new ArrayList<>();
         Date date = null;
         for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
             if (disbursementDetail.actualDisbursementDate() == null) {
@@ -1885,7 +1885,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     private void removeDisbursementDetail() {
-        Set<LoanDisbursementDetails> details = new HashSet<LoanDisbursementDetails>(this.disbursementDetails);
+        Set<LoanDisbursementDetails> details = new HashSet<>(this.disbursementDetails);
         for (LoanDisbursementDetails disbursementDetail : details) {
             if (disbursementDetail.actualDisbursementDate() == null) {
                 this.disbursementDetails.remove(disbursementDetail);
@@ -1938,11 +1938,11 @@ public class Loan extends AbstractPersistable<Long> {
 
         final Integer loanTermFrequency = this.termFrequency;
         final PeriodFrequencyType loanTermPeriodFrequencyType = PeriodFrequencyType.fromInt(this.termPeriodFrequencyType);
-        final List<DisbursementData> disbursementData = new ArrayList<DisbursementData>();
+        final List<DisbursementData> disbursementData = new ArrayList<>();
         for (LoanDisbursementDetails disbursementDetails : this.disbursementDetails) {
             disbursementData.add(disbursementDetails.toData());
         }
-        final List<LoanTermVariationsData> loanVariationTermsData = new ArrayList<LoanTermVariationsData>();
+        final List<LoanTermVariationsData> loanVariationTermsData = new ArrayList<>();
         boolean isDefaultEmiAmountReq = true;
         for (LoanTermVariations variationTerms : this.loanTermVariations) {
             if (variationTerms.getTermType().isEMIAmountVariation()) {
@@ -2069,7 +2069,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         validateAccountStatus(LoanEvent.LOAN_DISBURSAL_UNDO);
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
+        final Map<String, Object> actualChanges = new LinkedHashMap<>();
         final LoanStatus currentStatus = LoanStatus.fromInt(this.loanStatus);
         final LoanStatus statusEnum = this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSAL_UNDO, currentStatus);
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_DISBURSAL_UNDO, getDisbursementDate());
@@ -2097,7 +2097,7 @@ public class Loan extends AbstractPersistable<Long> {
 
                 regenerateRepaymentSchedule(loanScheduleFactory, applicationCurrency, calculatedRepaymentsStartingFromDate,
                         isHolidayEnabled, holidays, workingDays);
-                if(isDisbueseAmtChanged){
+                if (isDisbueseAmtChanged) {
                     Set<LoanCharge> charges = charges();
                     for (LoanCharge loanCharge : charges) {
                         recalculateLoanCharge(loanCharge);
@@ -2348,7 +2348,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     private List<LoanTransaction> retreiveListOfTransactionsPostDisbursement() {
-        final List<LoanTransaction> repaymentsOrWaivers = new ArrayList<LoanTransaction>();
+        final List<LoanTransaction> repaymentsOrWaivers = new ArrayList<>();
         for (final LoanTransaction transaction : this.loanTransactions) {
             if (!transaction.isDisbursement() && transaction.isNotReversed()) {
                 repaymentsOrWaivers.add(transaction);
@@ -3316,7 +3316,7 @@ public class Loan extends AbstractPersistable<Long> {
     public Map<String, Object> deriveAccountingBridgeData(final CurrencyData currencyData, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds, boolean isAccountTransfer) {
 
-        final Map<String, Object> accountingBridgeData = new LinkedHashMap<String, Object>();
+        final Map<String, Object> accountingBridgeData = new LinkedHashMap<>();
         accountingBridgeData.put("loanId", getId());
         accountingBridgeData.put("loanProductId", productId());
         accountingBridgeData.put("officeId", getOfficeId());
@@ -3327,7 +3327,7 @@ public class Loan extends AbstractPersistable<Long> {
         accountingBridgeData.put("periodicAccrualBasedAccountingEnabled", isPeriodicAccrualAccountingEnabledOnLoanProduct());
         accountingBridgeData.put("isAccountTransfer", isAccountTransfer);
 
-        final List<Map<String, Object>> newLoanTransactions = new ArrayList<Map<String, Object>>();
+        final List<Map<String, Object>> newLoanTransactions = new ArrayList<>();
         for (final LoanTransaction transaction : this.loanTransactions) {
             if (transaction.isReversed() && !existingReversedTransactionIds.contains(transaction.getId())) {
                 newLoanTransactions.add(transaction.toMapData(currencyData));
@@ -3614,7 +3614,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public Set<LoanCharge> charges() {
-        Set<LoanCharge> loanCharges = new HashSet<LoanCharge>();
+        Set<LoanCharge> loanCharges = new HashSet<>();
         if (this.charges != null) {
             for (LoanCharge charge : this.charges) {
                 if (charge.isActive()) {
@@ -3626,7 +3626,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public Set<LoanInstallmentCharge> generateInstallmentLoanCharges(final LoanCharge loanCharge) {
-        final Set<LoanInstallmentCharge> loanChargePerInstallments = new HashSet<LoanInstallmentCharge>();
+        final Set<LoanInstallmentCharge> loanChargePerInstallments = new HashSet<>();
         if (loanCharge.isInstalmentFee()) {
             for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
                 BigDecimal amount = BigDecimal.ZERO;
@@ -3645,7 +3645,7 @@ public class Loan extends AbstractPersistable<Long> {
 
     public void validateAccountStatus(final LoanEvent event) {
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         switch (event) {
             case LOAN_CREATED:
@@ -3777,7 +3777,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     private List<Long> fetchAllLoanChargeIds() {
-        List<Long> list = new ArrayList<Long>();
+        List<Long> list = new ArrayList<>();
         for (LoanCharge loanCharge : this.charges) {
             list.add(loanCharge.getId());
         }

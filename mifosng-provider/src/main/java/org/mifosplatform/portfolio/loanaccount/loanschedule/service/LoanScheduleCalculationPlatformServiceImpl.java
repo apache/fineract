@@ -58,7 +58,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         }
         this.fromApiJsonDeserializer.validate(query.json());
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
 
         final Long productId = this.fromJsonHelper.extractLongNamed("productId", query.parsedJson());

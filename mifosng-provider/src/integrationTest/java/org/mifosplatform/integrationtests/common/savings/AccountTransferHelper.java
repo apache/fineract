@@ -31,7 +31,7 @@ public class AccountTransferHelper {
     public String build(final String fromAccountId, final String fromClientId, final String toAccountId, final String toClientId,
             final String fromAccountType, final String toAccountType, final String transferAmount) {
 
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", LOCALE);
         map.put("fromClientId", fromClientId);

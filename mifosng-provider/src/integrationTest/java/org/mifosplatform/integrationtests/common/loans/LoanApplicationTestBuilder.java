@@ -42,7 +42,7 @@ public class LoanApplicationTestBuilder {
 
     public String build(final String ID, final String loanProductId, final String savingsID) {
 
-        final HashMap<String, Object> map = new HashMap<String, Object>();
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en_GB");
         if (this.loanType == "group") {

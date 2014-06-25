@@ -47,7 +47,7 @@ public class UnrecognizedQueryParamExceptionMapper implements ExceptionMapper<Un
         final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
                 parameterName, parameterName, parameterValue, exception.getSupportedParams());
 
-        final List<ApiParameterError> errors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> errors = new ArrayList<>();
         errors.add(error);
 
         final ApiGlobalErrorResponse invalidParameterError = ApiGlobalErrorResponse.badClientRequest(

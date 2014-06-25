@@ -35,7 +35,7 @@ public enum LendingStrategy {
         this.value = value;
     }
 
-    private static final Map<Integer, LendingStrategy> intToEnumMap = new HashMap<Integer, LendingStrategy>();
+    private static final Map<Integer, LendingStrategy> intToEnumMap = new HashMap<>();
     private static int minValue;
     private static int maxValue;
     static {

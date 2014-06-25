@@ -160,7 +160,7 @@ public class FixedDepositAccountsApiResource {
         final FixedDepositAccountData account = (FixedDepositAccountData) this.depositAccountReadPlatformService.retrieveOneWithChartSlabs(
                 DepositAccountType.FIXED_DEPOSIT, accountId);
 
-        final Set<String> mandatoryResponseParameters = new HashSet<String>();
+        final Set<String> mandatoryResponseParameters = new HashSet<>();
         final FixedDepositAccountData accountTemplate = populateTemplateAndAssociations(accountId, account, staffInSelectedOfficeOnly,
                 uriInfo, mandatoryResponseParameters);
 

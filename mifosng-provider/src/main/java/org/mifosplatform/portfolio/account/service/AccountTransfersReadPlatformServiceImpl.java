@@ -50,7 +50,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     private final AccountTransfersMapper accountTransfersMapper;
 
     // pagination
-    private final PaginationHelper<AccountTransferData> paginationHelper = new PaginationHelper<AccountTransferData>();
+    private final PaginationHelper<AccountTransferData> paginationHelper = new PaginationHelper<>();
 
     @Autowired
     public AccountTransfersReadPlatformServiceImpl(final RoutingDataSource dataSource,
@@ -162,7 +162,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
             toClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantToOfficeId);
             if (toClientOptions != null && toClientOptions.size() == 1) {
-                toClient = new ArrayList<ClientData>(toClientOptions).get(0);
+                toClient = new ArrayList<>(toClientOptions).get(0);
 
                 toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
             }

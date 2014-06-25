@@ -40,7 +40,7 @@ public class CollateralAssembler {
 
     public Set<LoanCollateral> fromParsedJson(final JsonElement element) {
 
-        final Set<LoanCollateral> collateralItems = new HashSet<LoanCollateral>();
+        final Set<LoanCollateral> collateralItems = new HashSet<>();
 
         if (element.isJsonObject()) {
             final JsonObject topLevelJsonElement = element.getAsJsonObject();

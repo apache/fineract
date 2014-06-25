@@ -35,7 +35,7 @@ public class AccountingConstants {
             return this.value;
         }
 
-        private static final Map<Integer, CASH_ACCOUNTS_FOR_LOAN> intToEnumMap = new HashMap<Integer, CASH_ACCOUNTS_FOR_LOAN>();
+        private static final Map<Integer, CASH_ACCOUNTS_FOR_LOAN> intToEnumMap = new HashMap<>();
         static {
             for (final CASH_ACCOUNTS_FOR_LOAN type : CASH_ACCOUNTS_FOR_LOAN.values()) {
                 intToEnumMap.put(type.value, type);
@@ -68,7 +68,7 @@ public class AccountingConstants {
             return this.value;
         }
 
-        private static final Map<Integer, ACCRUAL_ACCOUNTS_FOR_LOAN> intToEnumMap = new HashMap<Integer, ACCRUAL_ACCOUNTS_FOR_LOAN>();
+        private static final Map<Integer, ACCRUAL_ACCOUNTS_FOR_LOAN> intToEnumMap = new HashMap<>();
         static {
             for (final ACCRUAL_ACCOUNTS_FOR_LOAN type : ACCRUAL_ACCOUNTS_FOR_LOAN.values()) {
                 intToEnumMap.put(type.value, type);
@@ -155,7 +155,7 @@ public class AccountingConstants {
             return this.value;
         }
 
-        private static final Map<Integer, CASH_ACCOUNTS_FOR_SAVINGS> intToEnumMap = new HashMap<Integer, CASH_ACCOUNTS_FOR_SAVINGS>();
+        private static final Map<Integer, CASH_ACCOUNTS_FOR_SAVINGS> intToEnumMap = new HashMap<>();
         static {
             for (final CASH_ACCOUNTS_FOR_SAVINGS type : CASH_ACCOUNTS_FOR_SAVINGS.values()) {
                 intToEnumMap.put(type.value, type);
@@ -255,7 +255,7 @@ public class AccountingConstants {
             return this.value.toString();
         }
 
-        private static final Map<Integer, FINANCIAL_ACTIVITY> intToEnumMap = new HashMap<Integer, FINANCIAL_ACTIVITY>();
+        private static final Map<Integer, FINANCIAL_ACTIVITY> intToEnumMap = new HashMap<>();
         static {
             for (final FINANCIAL_ACTIVITY type : FINANCIAL_ACTIVITY.values()) {
                 intToEnumMap.put(type.value, type);
@@ -274,7 +274,7 @@ public class AccountingConstants {
 
         public static List<FinancialActivityData> getAllFinancialActivities() {
             if (financialActivities == null) {
-                financialActivities = new ArrayList<FinancialActivityData>();
+                financialActivities = new ArrayList<>();
                 for (final FINANCIAL_ACTIVITY type : FINANCIAL_ACTIVITY.values()) {
                     FinancialActivityData financialActivityData = convertToFinancialActivityData(type);
                     financialActivities.add(financialActivityData);

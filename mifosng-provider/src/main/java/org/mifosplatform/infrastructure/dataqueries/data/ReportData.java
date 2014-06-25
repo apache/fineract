@@ -75,13 +75,13 @@ final public class ReportData {
 
     public void appendedTemplate(final Collection<ReportParameterData> allowedParameters) {
 
-        final List<String> reportTypes = new ArrayList<String>();
+        final List<String> reportTypes = new ArrayList<>();
         reportTypes.add("Table");
         reportTypes.add("Pentaho");
         reportTypes.add("Chart");
         this.allowedReportTypes = reportTypes;
 
-        final List<String> reportSubTypes = new ArrayList<String>();
+        final List<String> reportSubTypes = new ArrayList<>();
         reportSubTypes.add("Bar");
         reportSubTypes.add("Pie");
         this.allowedReportSubTypes = reportSubTypes;

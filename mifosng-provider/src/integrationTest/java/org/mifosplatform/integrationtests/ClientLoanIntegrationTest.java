@@ -963,22 +963,22 @@ public class ClientLoanIntegrationTest {
     private void verifyLoanRepaymentSchedule(final ArrayList<HashMap> loanSchedule) {
         System.out.println("--------------------VERIFYING THE PRINCIPAL DUES,INTEREST DUE AND DUE DATE--------------------------");
 
-        assertEquals("Checking for Due Date for 1st Month", new ArrayList<Integer>(Arrays.asList(2011, 10, 20)),
+        assertEquals("Checking for Due Date for 1st Month", new ArrayList<>(Arrays.asList(2011, 10, 20)),
                 loanSchedule.get(1).get("dueDate"));
         assertEquals("Checking for Principal Due for 1st Month", new Float("2911.49"), loanSchedule.get(1).get("principalOriginalDue"));
         assertEquals("Checking for Interest Due for 1st Month", new Float("240.00"), loanSchedule.get(1).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 2nd Month", new ArrayList<Integer>(Arrays.asList(2011, 11, 20)),
+        assertEquals("Checking for Due Date for 2nd Month", new ArrayList<>(Arrays.asList(2011, 11, 20)),
                 loanSchedule.get(2).get("dueDate"));
         assertEquals("Checking for Principal Due for 2nd Month", new Float("2969.71"), loanSchedule.get(2).get("principalDue"));
         assertEquals("Checking for Interest Due for 2nd Month", new Float("181.77"), loanSchedule.get(2).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 3rd Month", new ArrayList<Integer>(Arrays.asList(2011, 12, 20)),
+        assertEquals("Checking for Due Date for 3rd Month", new ArrayList<>(Arrays.asList(2011, 12, 20)),
                 loanSchedule.get(3).get("dueDate"));
         assertEquals("Checking for Principal Due for 3rd Month", new Float("3029.1"), loanSchedule.get(3).get("principalDue"));
         assertEquals("Checking for Interest Due for 3rd Month", new Float("122.38"), loanSchedule.get(3).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 4th Month", new ArrayList<Integer>(Arrays.asList(2012, 1, 20)),
+        assertEquals("Checking for Due Date for 4th Month", new ArrayList<>(Arrays.asList(2012, 1, 20)),
                 loanSchedule.get(4).get("dueDate"));
         assertEquals("Checking for Principal Due for 4th Month", new Float("3089.7"), loanSchedule.get(4).get("principalDue"));
         assertEquals("Checking for Interest Due for 4th Month", new Float("61.79"), loanSchedule.get(4).get("interestOriginalDue"));
@@ -987,47 +987,47 @@ public class ClientLoanIntegrationTest {
     private void verifyLoanRepaymentScheduleForEqualPrincipal(final ArrayList<HashMap> loanSchedule) {
         System.out.println("--------------------VERIFYING THE PRINCIPAL DUES,INTEREST DUE AND DUE DATE--------------------------");
 
-        assertEquals("Checking for Due Date for 1st Month", new ArrayList<Integer>(Arrays.asList(2014, 7, 2)),
+        assertEquals("Checking for Due Date for 1st Month", new ArrayList<>(Arrays.asList(2014, 7, 2)),
                 loanSchedule.get(1).get("dueDate"));
         assertEquals("Checking for Principal Due for 1st Month", new Float("416700"), loanSchedule.get(1).get("principalOriginalDue"));
         assertEquals("Checking for Interest Due for 1st Month", new Float("200000"), loanSchedule.get(1).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 2nd Month", new ArrayList<Integer>(Arrays.asList(2014, 8, 2)),
+        assertEquals("Checking for Due Date for 2nd Month", new ArrayList<>(Arrays.asList(2014, 8, 2)),
                 loanSchedule.get(2).get("dueDate"));
         assertEquals("Checking for Principal Due for 2nd Month", new Float("416700"), loanSchedule.get(2).get("principalDue"));
         assertEquals("Checking for Interest Due for 2nd Month", new Float("191700"), loanSchedule.get(2).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 3rd Month", new ArrayList<Integer>(Arrays.asList(2014, 9, 2)),
+        assertEquals("Checking for Due Date for 3rd Month", new ArrayList<>(Arrays.asList(2014, 9, 2)),
                 loanSchedule.get(3).get("dueDate"));
         assertEquals("Checking for Principal Due for 3rd Month", new Float("416700"), loanSchedule.get(3).get("principalDue"));
         assertEquals("Checking for Interest Due for 3rd Month", new Float("183300"), loanSchedule.get(3).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 4th Month", new ArrayList<Integer>(Arrays.asList(2014, 10, 2)),
+        assertEquals("Checking for Due Date for 4th Month", new ArrayList<>(Arrays.asList(2014, 10, 2)),
                 loanSchedule.get(4).get("dueDate"));
         assertEquals("Checking for Principal Due for 4th Month", new Float("416700"), loanSchedule.get(4).get("principalDue"));
         assertEquals("Checking for Interest Due for 4th Month", new Float("175000"), loanSchedule.get(4).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 5th Month", new ArrayList<Integer>(Arrays.asList(2014, 11, 2)),
+        assertEquals("Checking for Due Date for 5th Month", new ArrayList<>(Arrays.asList(2014, 11, 2)),
                 loanSchedule.get(5).get("dueDate"));
         assertEquals("Checking for Principal Due for 5th Month", new Float("416700"), loanSchedule.get(5).get("principalDue"));
         assertEquals("Checking for Interest Due for 5th Month", new Float("166700"), loanSchedule.get(5).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 6th Month", new ArrayList<Integer>(Arrays.asList(2014, 12, 2)),
+        assertEquals("Checking for Due Date for 6th Month", new ArrayList<>(Arrays.asList(2014, 12, 2)),
                 loanSchedule.get(6).get("dueDate"));
         assertEquals("Checking for Principal Due for 6th Month", new Float("416700"), loanSchedule.get(6).get("principalDue"));
         assertEquals("Checking for Interest Due for 6th Month", new Float("158300"), loanSchedule.get(6).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 10th Month", new ArrayList<Integer>(Arrays.asList(2015, 4, 2)),
+        assertEquals("Checking for Due Date for 10th Month", new ArrayList<>(Arrays.asList(2015, 4, 2)),
                 loanSchedule.get(10).get("dueDate"));
         assertEquals("Checking for Principal Due for 10th Month", new Float("416700"), loanSchedule.get(10).get("principalDue"));
         assertEquals("Checking for Interest Due for 10th Month", new Float("125000"), loanSchedule.get(10).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 20th Month", new ArrayList<Integer>(Arrays.asList(2016, 2, 2)),
+        assertEquals("Checking for Due Date for 20th Month", new ArrayList<>(Arrays.asList(2016, 2, 2)),
                 loanSchedule.get(20).get("dueDate"));
         assertEquals("Checking for Principal Due for 20th Month", new Float("416700"), loanSchedule.get(20).get("principalDue"));
         assertEquals("Checking for Interest Due for 20th Month", new Float("41700"), loanSchedule.get(20).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 24th Month", new ArrayList<Integer>(Arrays.asList(2016, 6, 2)),
+        assertEquals("Checking for Due Date for 24th Month", new ArrayList<>(Arrays.asList(2016, 6, 2)),
                 loanSchedule.get(24).get("dueDate"));
         assertEquals("Checking for Principal Due for 24th Month", new Float("415900"), loanSchedule.get(24).get("principalDue"));
         assertEquals("Checking for Interest Due for 24th Month", new Float("8300"), loanSchedule.get(24).get("interestOriginalDue"));
@@ -1037,54 +1037,54 @@ public class ClientLoanIntegrationTest {
     private void verifyLoanRepaymentScheduleForEqualPrincipalWithGrace(final ArrayList<HashMap> loanSchedule) {
         System.out.println("--------------------VERIFYING THE PRINCIPAL DUES,INTEREST DUE AND DUE DATE--------------------------");
 
-        assertEquals("Checking for Due Date for 1st Month", new ArrayList<Integer>(Arrays.asList(2014, 7, 2)),
+        assertEquals("Checking for Due Date for 1st Month", new ArrayList<>(Arrays.asList(2014, 7, 2)),
                 loanSchedule.get(1).get("dueDate"));
         validateNumberForEqualWithMsg("Checking for Principal Due for 1st Month", "0.0",
                 String.valueOf(loanSchedule.get(1).get("principalOriginalDue")));
         assertEquals("Checking for Interest Due for 1st Month", new Float("200000"), loanSchedule.get(1).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 2nd Month", new ArrayList<Integer>(Arrays.asList(2014, 8, 2)),
+        assertEquals("Checking for Due Date for 2nd Month", new ArrayList<>(Arrays.asList(2014, 8, 2)),
                 loanSchedule.get(2).get("dueDate"));
         validateNumberForEqualWithMsg("Checking for Principal Due for 2nd Month", "0.0",
                 String.valueOf(loanSchedule.get(2).get("principalOriginalDue")));
         assertEquals("Checking for Interest Due for 2nd Month", new Float("200000"), loanSchedule.get(2).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 3rd Month", new ArrayList<Integer>(Arrays.asList(2014, 9, 2)),
+        assertEquals("Checking for Due Date for 3rd Month", new ArrayList<>(Arrays.asList(2014, 9, 2)),
                 loanSchedule.get(3).get("dueDate"));
         validateNumberForEqualWithMsg("Checking for Principal Due for 3rd Month", "0.0", String.valueOf(loanSchedule.get(3).get("principalDue")));
         assertEquals("Checking for Interest Due for 3rd Month", new Float("200000"), loanSchedule.get(3).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 4th Month", new ArrayList<Integer>(Arrays.asList(2014, 10, 2)),
+        assertEquals("Checking for Due Date for 4th Month", new ArrayList<>(Arrays.asList(2014, 10, 2)),
                 loanSchedule.get(4).get("dueDate"));
         validateNumberForEqualWithMsg("Checking for Principal Due for 4th Month", "0", String.valueOf(loanSchedule.get(4).get("principalDue")));
         assertEquals("Checking for Interest Due for 4th Month", new Float("200000"), loanSchedule.get(4).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 5th Month", new ArrayList<Integer>(Arrays.asList(2014, 11, 2)),
+        assertEquals("Checking for Due Date for 5th Month", new ArrayList<>(Arrays.asList(2014, 11, 2)),
                 loanSchedule.get(5).get("dueDate"));
         validateNumberForEqualWithMsg("Checking for Principal Due for 5th Month", "0", String.valueOf(loanSchedule.get(5).get("principalDue")));
         assertEquals("Checking for Interest Due for 5th Month", new Float("200000"), loanSchedule.get(5).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 6th Month", new ArrayList<Integer>(Arrays.asList(2014, 12, 2)),
+        assertEquals("Checking for Due Date for 6th Month", new ArrayList<>(Arrays.asList(2014, 12, 2)),
                 loanSchedule.get(6).get("dueDate"));
         assertEquals("Checking for Principal Due for 6th Month", new Float("526300"), loanSchedule.get(6).get("principalDue"));
         assertEquals("Checking for Interest Due for 6th Month", new Float("200000"), loanSchedule.get(6).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 7th Month", new ArrayList<Integer>(Arrays.asList(2015, 1, 2)),
+        assertEquals("Checking for Due Date for 7th Month", new ArrayList<>(Arrays.asList(2015, 1, 2)),
                 loanSchedule.get(7).get("dueDate"));
         assertEquals("Checking for Principal Due for 7th Month", new Float("526300"), loanSchedule.get(7).get("principalDue"));
         assertEquals("Checking for Interest Due for 7th Month", new Float("189500"), loanSchedule.get(7).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 10th Month", new ArrayList<Integer>(Arrays.asList(2015, 4, 2)),
+        assertEquals("Checking for Due Date for 10th Month", new ArrayList<>(Arrays.asList(2015, 4, 2)),
                 loanSchedule.get(10).get("dueDate"));
         assertEquals("Checking for Principal Due for 10th Month", new Float("526300"), loanSchedule.get(10).get("principalDue"));
         assertEquals("Checking for Interest Due for 10th Month", new Float("157900"), loanSchedule.get(10).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 20th Month", new ArrayList<Integer>(Arrays.asList(2016, 2, 2)),
+        assertEquals("Checking for Due Date for 20th Month", new ArrayList<>(Arrays.asList(2016, 2, 2)),
                 loanSchedule.get(20).get("dueDate"));
         assertEquals("Checking for Principal Due for 20th Month", new Float("526300"), loanSchedule.get(20).get("principalDue"));
         assertEquals("Checking for Interest Due for 20th Month", new Float("52600"), loanSchedule.get(20).get("interestOriginalDue"));
 
-        assertEquals("Checking for Due Date for 24th Month", new ArrayList<Integer>(Arrays.asList(2016, 6, 2)),
+        assertEquals("Checking for Due Date for 24th Month", new ArrayList<>(Arrays.asList(2016, 6, 2)),
                 loanSchedule.get(24).get("dueDate"));
         assertEquals("Checking for Principal Due for 24th Month", new Float("526600"), loanSchedule.get(24).get("principalDue"));
         assertEquals("Checking for Interest Due for 24th Month", new Float("10500"), loanSchedule.get(24).get("interestOriginalDue"));

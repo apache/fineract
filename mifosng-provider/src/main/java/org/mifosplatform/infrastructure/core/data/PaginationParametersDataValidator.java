@@ -17,11 +17,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class PaginationParametersDataValidator {
 
-    public static Set<String> sortOrderValues = new HashSet<String>(Arrays.asList("ASC", "DESC"));
+    public static Set<String> sortOrderValues = new HashSet<>(Arrays.asList("ASC", "DESC"));
 
     public void validateParameterValues(PaginationParameters parameters, final Set<String> supportedOrdeByValues, final String resourceName) {
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         if (parameters.isOrderByRequested() && !supportedOrdeByValues.contains(parameters.getOrderBy())) {
             final String defaultUserMessage = "The orderBy value '" + parameters.getOrderBy()

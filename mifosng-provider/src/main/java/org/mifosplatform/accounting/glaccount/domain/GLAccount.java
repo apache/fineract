@@ -39,7 +39,7 @@ public class GLAccount extends AbstractPersistable<Long> {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private final List<GLAccount> children = new LinkedList<GLAccount>();
+    private final List<GLAccount> children = new LinkedList<>();
 
     @Column(name = "name", nullable = false, length = 45)
     private String name;
@@ -96,7 +96,7 @@ public class GLAccount extends AbstractPersistable<Long> {
     }
 
     public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(15);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(15);
         handlePropertyUpdate(command, actualChanges, GLAccountJsonInputParams.DESCRIPTION.getValue(), this.description);
         handlePropertyUpdate(command, actualChanges, GLAccountJsonInputParams.DISABLED.getValue(), this.disabled);
         handlePropertyUpdate(command, actualChanges, GLAccountJsonInputParams.GL_CODE.getValue(), this.glCode);

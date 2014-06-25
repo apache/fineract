@@ -66,13 +66,13 @@ public class CodeHelper {
     }
 
     public static String getTestCodeAsJSON(final String codeName) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put(CODE_NAME_ATTRIBUTE_NAME, codeName);
         return new Gson().toJson(map);
     }
 
     public static String getTestCodeValueAsJSON(final String codeValueName, final Integer position) {
-        final HashMap<String, Object> map = new HashMap<String, Object>();
+        final HashMap<String, Object> map = new HashMap<>();
         map.put(CODE_VALUE_NAME_ATTRIBUTE_NAME, codeValueName);
         map.put(CODE_VALUE_POSITION_ATTRIBUTE_NAME, position);
         return new Gson().toJson(map);

@@ -159,7 +159,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
                 }
             }
-            
+
             if (!newGroup.isCenter() && newGroup.hasActiveClients()) {
                 final CommandWrapper commandWrapper = new CommandWrapperBuilder().associateClientsToGroup(newGroup.getId()).build();
                 rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
@@ -367,7 +367,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         this.context.authenticatedUser();
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(9);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
         this.fromApiJsonDeserializer.validateForUnassignStaff(command.json());
 
@@ -400,7 +400,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         this.context.authenticatedUser();
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(5);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
 
         this.fromApiJsonDeserializer.validateForAssignStaff(command.json());
 
@@ -547,7 +547,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
     private Set<Client> assembleSetOfClients(final Long groupOfficeId, final JsonCommand command) {
 
-        final Set<Client> clientMembers = new HashSet<Client>();
+        final Set<Client> clientMembers = new HashSet<>();
         final String[] clientMembersArray = command.arrayValueOfParameterNamed(GroupingTypesApiConstants.clientMembersParamName);
 
         if (!ObjectUtils.isEmpty(clientMembersArray)) {
@@ -567,7 +567,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
     private Set<Group> assembleSetOfChildGroups(final Long officeId, final JsonCommand command) {
 
-        final Set<Group> childGroups = new HashSet<Group>();
+        final Set<Group> childGroups = new HashSet<>();
         final String[] childGroupsArray = command.arrayValueOfParameterNamed(GroupingTypesApiConstants.groupMembersParamName);
 
         if (!ObjectUtils.isEmpty(childGroupsArray)) {
@@ -637,7 +637,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(groupId);
         final Set<Client> clientMembers = assembleSetOfClients(groupForUpdate.officeId(), command);
-        final Map<String, Object> actualChanges = new HashMap<String, Object>();
+        final Map<String, Object> actualChanges = new HashMap<>();
 
         final List<String> changes = groupForUpdate.associateClients(clientMembers);
         if (!changes.isEmpty()) {
@@ -666,7 +666,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         // check if any client has got group loans
         validateForJLGLoan(groupForUpdate.getId(), clientMembers);
         validateForJLGSavings(groupForUpdate.getId(), clientMembers);
-        final Map<String, Object> actualChanges = new HashMap<String, Object>();
+        final Map<String, Object> actualChanges = new HashMap<>();
 
         final List<String> changes = groupForUpdate.disassociateClients(clientMembers);
         if (!changes.isEmpty()) {

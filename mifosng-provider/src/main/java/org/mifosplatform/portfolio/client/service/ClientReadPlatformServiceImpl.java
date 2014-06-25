@@ -54,7 +54,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final SavingsProductReadPlatformService savingsProductReadPlatformService;
     // data mappers
-    private final PaginationHelper<ClientData> paginationHelper = new PaginationHelper<ClientData>();
+    private final PaginationHelper<ClientData> paginationHelper = new PaginationHelper<>();
     private final ClientMapper clientMapper = new ClientMapper();
     private final ClientLookupMapper lookupMapper = new ClientLookupMapper();
     private final ClientMembersOfGroupMapper membersOfGroupMapper = new ClientMembersOfGroupMapper();
@@ -95,13 +95,13 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         if (CollectionUtils.isEmpty(staffOptions)) {
             staffOptions = null;
         }
-        final List<CodeValueData> genderOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> genderOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.GENDER));
 
-        final List<CodeValueData> clientTypeOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> clientTypeOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_TYPE));
 
-        final List<CodeValueData> clientClassificationOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> clientClassificationOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_CLASSIFICATION));
 
         return ClientData.template(defaultOfficeId, new LocalDate(), offices, staffOptions, null, genderOptions, savingsProductDatas,
@@ -645,7 +645,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     @Override
     public ClientData retrieveAllClosureReasons(final String clientClosureReason) {
-        final List<CodeValueData> closureReasons = new ArrayList<CodeValueData>(
+        final List<CodeValueData> closureReasons = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(clientClosureReason));
         final Collection<CodeValueData> clientTypeOptions = null;
         final Collection<CodeValueData> clientClassificationOptions = null;

@@ -20,7 +20,7 @@ public enum GLClosureJsonInputParams {
         this.value = value;
     }
 
-    private static final Set<String> values = new HashSet<String>();
+    private static final Set<String> values = new HashSet<>();
     static {
         for (final GLClosureJsonInputParams type : GLClosureJsonInputParams.values()) {
             values.add(type.value);

@@ -117,7 +117,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             validateBusinessRulesForJournalEntries(journalEntryCommand);
 
             /** Capture payment details **/
-            final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+            final Map<String, Object> changes = new LinkedHashMap<>();
             final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
             /** Set a transaction Id and save these Journal entries **/
@@ -203,8 +203,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private void checkDebitOrCreditAccountsAreValid(final AccountingRule accountingRule, final SingleDebitOrCreditEntryCommand[] credits,
             final SingleDebitOrCreditEntryCommand[] debits) {
         // Validate the debit and credit arrays are appropriate accounts
-        List<GLAccountDataForLookup> allowedCreditGLAccounts = new ArrayList<GLAccountDataForLookup>();
-        List<GLAccountDataForLookup> allowedDebitGLAccounts = new ArrayList<GLAccountDataForLookup>();
+        List<GLAccountDataForLookup> allowedCreditGLAccounts = new ArrayList<>();
+        List<GLAccountDataForLookup> allowedDebitGLAccounts = new ArrayList<>();
         final SingleDebitOrCreditEntryCommand[] validCredits = new SingleDebitOrCreditEntryCommand[credits.length];
         final SingleDebitOrCreditEntryCommand[] validDebits = new SingleDebitOrCreditEntryCommand[debits.length];
 

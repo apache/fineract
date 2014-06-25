@@ -21,7 +21,7 @@ public enum ConditionType {
     private final Integer value;
     private final String code;
 
-    private static final Map<Integer, ConditionType> intToEnumMap = new HashMap<Integer, ConditionType>();
+    private static final Map<Integer, ConditionType> intToEnumMap = new HashMap<>();
     static {
         for (final ConditionType type : ConditionType.values()) {
             intToEnumMap.put(type.value, type);
@@ -72,7 +72,7 @@ public enum ConditionType {
     }
 
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<Integer>();
+        final List<Integer> values = new ArrayList<>();
         for (final ConditionType enumType : values()) {
             if (!enumType.isInvalid()) {
                 values.add(enumType.getValue());

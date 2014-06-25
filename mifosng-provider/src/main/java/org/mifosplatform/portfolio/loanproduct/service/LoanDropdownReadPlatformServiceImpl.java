@@ -9,9 +9,9 @@ import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.a
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestCalculationPeriodType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestRateFrequencyType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestType;
+import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.loanCycleValueConditionType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.loanTermFrequencyType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyType;
-import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.loanCycleValueConditionType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,7 +93,7 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
     @Override
     public Collection<TransactionProcessingStrategyData> retreiveTransactionProcessingStrategies() {
 
-        final Collection<TransactionProcessingStrategyData> strategyOptions = new ArrayList<TransactionProcessingStrategyData>();
+        final Collection<TransactionProcessingStrategyData> strategyOptions = new ArrayList<>();
 
         final List<LoanTransactionProcessingStrategy> strategies = this.loanTransactionProcessingStrategyRepository.findAll();
         for (final LoanTransactionProcessingStrategy strategy : strategies) {

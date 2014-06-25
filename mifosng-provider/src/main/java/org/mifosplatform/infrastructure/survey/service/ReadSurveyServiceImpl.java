@@ -49,7 +49,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
 
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
 
-        final List<SurveyDataTableData> surveyDataTables = new ArrayList<SurveyDataTableData>();
+        final List<SurveyDataTableData> surveyDataTables = new ArrayList<>();
         while (rs.next()) {
             final String appTableName = rs.getString("application_table_name");
             final String registeredDatatableName = rs.getString("registered_table_name");
@@ -115,7 +115,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
 
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
 
-        List<ClientScoresOverview> scoresOverviews = new ArrayList<ClientScoresOverview>();
+        List<ClientScoresOverview> scoresOverviews = new ArrayList<>();
 
         while (rs.next()) {
             scoresOverviews.add(new ClientScoresOverview(rs.getString("code"), rs.getString("name"), rs.getLong("score"), rs
@@ -130,7 +130,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
         final String surveyNameSql = retrieveAllSurveyNameSQL();
         final SqlRowSet surveyNames = this.jdbcTemplate.queryForRowSet(surveyNameSql);
 
-        ArrayList<String> sqls = new ArrayList<String>();
+        ArrayList<String> sqls = new ArrayList<>();
 
         while (surveyNames.next()) {
             sqls.add("SELECT '" + surveyNames.getString("name")
@@ -141,7 +141,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
                     + " JOIN ppi_likelihoods lkh on lkh.id = lkp.likelihood_id " + " WHERE  client_id = " + clientId);
         }
 
-        List<ClientScoresOverview> scoresOverviews = new ArrayList<ClientScoresOverview>();
+        List<ClientScoresOverview> scoresOverviews = new ArrayList<>();
 
         for (String sql : sqls) {
             final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);

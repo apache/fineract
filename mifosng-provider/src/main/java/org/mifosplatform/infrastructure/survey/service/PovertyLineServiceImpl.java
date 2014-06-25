@@ -34,12 +34,12 @@ public class PovertyLineServiceImpl implements PovertyLineService {
 
         final SqlRowSet likelihoods = this._getLikelihoods();
 
-        List<LikeliHoodPovertyLineData> listOfLikeliHoodPovertyLineData = new ArrayList<LikeliHoodPovertyLineData>();
+        List<LikeliHoodPovertyLineData> listOfLikeliHoodPovertyLineData = new ArrayList<>();
 
         while (likelihoods.next()) {
             final String codeName = likelihoods.getString("code");
 
-            List<PovertyLineData> povertyLineDatas = new ArrayList<PovertyLineData>();
+            List<PovertyLineData> povertyLineDatas = new ArrayList<>();
 
             // create a new povertyLine object when ever it belong to the
             // current likelihood
@@ -74,7 +74,7 @@ public class PovertyLineServiceImpl implements PovertyLineService {
 
         final SqlRowSet povertyLines = this._getPovertyLines(likelihoodId);
 
-        List<PovertyLineData> povertyLineDatas = new ArrayList<PovertyLineData>();
+        List<PovertyLineData> povertyLineDatas = new ArrayList<>();
 
         while (povertyLines.next()) {
 

@@ -28,7 +28,7 @@ public enum GLAccountUsage {
         return this.code;
     }
 
-    private static final Map<Integer, GLAccountUsage> intToEnumMap = new HashMap<Integer, GLAccountUsage>();
+    private static final Map<Integer, GLAccountUsage> intToEnumMap = new HashMap<>();
     private static int minValue;
     private static int maxValue;
     static {

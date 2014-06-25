@@ -403,7 +403,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
     public Map<String, Object> update(final JsonCommand command) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();

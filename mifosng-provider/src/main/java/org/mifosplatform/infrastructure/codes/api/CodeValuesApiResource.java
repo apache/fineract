@@ -45,7 +45,7 @@ public class CodeValuesApiResource {
     /**
      * The set of parameters that are supported in response for {@link CodeData}
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "position"));
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "position"));
     private final String resourceNameForPermissions = "CODEVALUE";
 
     private final PlatformSecurityContext context;

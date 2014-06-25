@@ -37,7 +37,7 @@ public final class NoteCommandFromApiJsonDeserializer extends AbstractFromApiJso
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("note"));
+    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("note"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -67,7 +67,7 @@ public final class NoteCommandFromApiJsonDeserializer extends AbstractFromApiJso
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("note");
 

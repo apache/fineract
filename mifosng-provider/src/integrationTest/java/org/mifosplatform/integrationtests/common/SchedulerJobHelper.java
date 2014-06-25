@@ -60,7 +60,7 @@ public class SchedulerJobHelper {
     }
 
     public static String updateSchedulerJobAsJSON(final String active) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("active", active);
         System.out.println("map : " + map);
         return new Gson().toJson(map);
@@ -82,7 +82,7 @@ public class SchedulerJobHelper {
     }
     
     public static String runSchedulerJobAsJSON() {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         String runSchedulerJob = new Gson().toJson(map);
         System.out.println(runSchedulerJob);
         return runSchedulerJob;

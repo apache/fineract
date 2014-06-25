@@ -59,11 +59,11 @@ public class AuthenticationApiResource {
         final Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
         final Authentication authenticationCheck = this.customAuthenticationProvider.authenticate(authentication);
 
-        final Collection<String> permissions = new ArrayList<String>();
+        final Collection<String> permissions = new ArrayList<>();
         AuthenticatedUserData authenticatedUserData = new AuthenticatedUserData(username, permissions);
 
         if (authenticationCheck.isAuthenticated()) {
-            final Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>(authenticationCheck.getAuthorities());
+            final Collection<GrantedAuthority> authorities = new ArrayList<>(authenticationCheck.getAuthorities());
             for (final GrantedAuthority grantedAuthority : authorities) {
                 permissions.add(grantedAuthority.getAuthority());
             }
@@ -71,7 +71,7 @@ public class AuthenticationApiResource {
             final byte[] base64EncodedAuthenticationKey = Base64.encode(username + ":" + password);
 
             final AppUser principal = (AppUser) authenticationCheck.getPrincipal();
-            final Collection<RoleData> roles = new ArrayList<RoleData>();
+            final Collection<RoleData> roles = new ArrayList<>();
             final Set<Role> userRoles = principal.getRoles();
             for (final Role role : userRoles) {
                 roles.add(role.toData());

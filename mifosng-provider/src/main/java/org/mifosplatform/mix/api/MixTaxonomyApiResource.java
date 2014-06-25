@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class MixTaxonomyApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("taxonomyId", "name", "namespace", "dimension",
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("taxonomyId", "name", "namespace", "dimension",
             "description"));
 
     private final PlatformSecurityContext context;

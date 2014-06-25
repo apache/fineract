@@ -42,7 +42,7 @@ public class InterestIncentiveAssembler {
 
     public Collection<InterestIncentives> assembleIncentivesFrom(final JsonElement element, InterestRateChartSlab interestRateChartSlab,
             final Locale locale) {
-        final Collection<InterestIncentives> interestIncentivesSet = new HashSet<InterestIncentives>();
+        final Collection<InterestIncentives> interestIncentivesSet = new HashSet<>();
 
         if (element.isJsonObject()) {
             final JsonObject topLevelJsonElement = element.getAsJsonObject();
@@ -61,7 +61,7 @@ public class InterestIncentiveAssembler {
 
     private InterestIncentives assembleFrom(final JsonElement element, final InterestRateChartSlab interestRateChartSlab,
             final Locale locale) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(INCENTIVE_RESOURCE_NAME);
         InterestIncentivesFields incentivesFields = createInterestIncentiveFields(element, baseDataValidator, locale);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

@@ -112,7 +112,7 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
         final boolean userCredentialsNonExpired = true;
         final boolean userAccountNonLocked = true;
 
-        final Collection<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
+        final Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("DUMMY_ROLE_NOT_USED_OR_PERSISTED_TO_AVOID_EXCEPTION"));
 
         final User user = new User(username, password, userEnabled, userAccountNonExpired, userCredentialsNonExpired, userAccountNonLocked,
@@ -128,7 +128,7 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
     protected AppUser() {
         this.accountNonLocked = false;
         this.credentialsNonExpired = false;
-        this.roles = new HashSet<Role>();
+        this.roles = new HashSet<>();
     }
 
     public AppUser(final Office office, final User user, final Set<Role> roles, final String email, final String firstname,
@@ -181,7 +181,7 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
 
     public Map<String, Object> update(final JsonCommand command, final PlatformPasswordEncoder platformPasswordEncoder) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
         // unencoded password provided
         final String passwordParamName = "password";
@@ -254,7 +254,7 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
     }
 
     private String[] getRolesAsIdStringArray() {
-        final List<String> roleIds = new ArrayList<String>();
+        final List<String> roleIds = new ArrayList<>();
 
         for (final Role role : this.roles) {
             roleIds.add(role.getId().toString());
@@ -287,7 +287,7 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
     }
 
     private List<GrantedAuthority> populateGrantedAuthorities() {
-        final List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
+        final List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
         for (final Role role : this.roles) {
             final Collection<Permission> permissions = role.getPermissions();
             for (final Permission permission : permissions) {

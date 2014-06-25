@@ -13,10 +13,8 @@ public class LikeliHoodPovertyLineData {
     final long enabled;
     List<PovertyLineData> povertyLineData;
 
-    public LikeliHoodPovertyLineData(final long resourceId, final List<PovertyLineData> povertyLineData,
-                              final String likeliHoodName,
-                              final String likeliHoodCode,
-                              final long enabled){
+    public LikeliHoodPovertyLineData(final long resourceId, final List<PovertyLineData> povertyLineData, final String likeliHoodName,
+            final String likeliHoodCode, final long enabled) {
         this.resourceId = resourceId;
         this.povertyLineData = povertyLineData;
         this.likeliHoodName = likeliHoodName;
@@ -25,14 +23,8 @@ public class LikeliHoodPovertyLineData {
 
     }
 
-
-    public void addPovertyLine(PovertyLineData povertyLineData)
-    {
+    public void addPovertyLine(PovertyLineData povertyLineData) {
         this.povertyLineData.add(povertyLineData);
     }
 
-    public void setEnabled(final Long enabled)
-    {
-       // this.enabled = enabled;
-    }
 }

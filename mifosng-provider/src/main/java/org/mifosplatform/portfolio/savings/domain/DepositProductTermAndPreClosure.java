@@ -28,11 +28,10 @@ public class DepositProductTermAndPreClosure extends AbstractPersistable<Long> {
     @Embedded
     protected DepositTermDetail depositTermDetail;
 
-    @SuppressWarnings("unused")
     @OneToOne
     @JoinColumn(name = "savings_product_id", nullable = false)
     private FixedDepositProduct product;
-    
+
     @Embedded
     private DepositProductAmountDetails depositProductAmountDetails;
 
@@ -41,22 +40,21 @@ public class DepositProductTermAndPreClosure extends AbstractPersistable<Long> {
     }
 
     public static DepositProductTermAndPreClosure createNew(DepositPreClosureDetail preClosureDetail, DepositTermDetail depositTermDetail,
-    		DepositProductAmountDetails depositProductMinMaxAmountDetails, 
-            SavingsProduct product) {
+            DepositProductAmountDetails depositProductMinMaxAmountDetails, SavingsProduct product) {
 
         return new DepositProductTermAndPreClosure(preClosureDetail, depositTermDetail, depositProductMinMaxAmountDetails, product);
     }
 
     private DepositProductTermAndPreClosure(DepositPreClosureDetail preClosureDetail, DepositTermDetail depositTermDetail,
-    		DepositProductAmountDetails depositProductMinMaxAmountDetails, SavingsProduct product) {
+            DepositProductAmountDetails depositProductMinMaxAmountDetails, SavingsProduct product) {
         this.preClosureDetail = preClosureDetail;
         this.depositTermDetail = depositTermDetail;
         this.depositProductAmountDetails = depositProductMinMaxAmountDetails;
-        this.product = (FixedDepositProduct)product;
+        this.product = (FixedDepositProduct) product;
     }
 
     public Map<String, Object> update(final JsonCommand command, final DataValidatorBuilder baseDataValidator) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(10);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
         if (this.preClosureDetail != null) {
             actualChanges.putAll(this.preClosureDetail.update(command, baseDataValidator));
         }
@@ -64,13 +62,13 @@ public class DepositProductTermAndPreClosure extends AbstractPersistable<Long> {
         if (this.depositTermDetail != null) {
             actualChanges.putAll(this.depositTermDetail.update(command, baseDataValidator));
         }
-        
-        if(this.depositProductAmountDetails != null) {
-        	actualChanges.putAll(this.depositProductAmountDetails.update(command));
+
+        if (this.depositProductAmountDetails != null) {
+            actualChanges.putAll(this.depositProductAmountDetails.update(command));
         }
         return actualChanges;
     }
-    
+
     public DepositPreClosureDetail depositPreClosureDetail() {
         return this.preClosureDetail;
     }
@@ -78,12 +76,12 @@ public class DepositProductTermAndPreClosure extends AbstractPersistable<Long> {
     public DepositTermDetail depositTermDetail() {
         return this.depositTermDetail;
     }
-    
+
     public DepositProductAmountDetails depositProductAmountDetails() {
-		return this.depositProductAmountDetails;
-	}
-    
-    public void updateProductReference(final SavingsProduct product){
-        this.product = (FixedDepositProduct)product;
+        return this.depositProductAmountDetails;
+    }
+
+    public void updateProductReference(final SavingsProduct product) {
+        this.product = (FixedDepositProduct) product;
     }
 }

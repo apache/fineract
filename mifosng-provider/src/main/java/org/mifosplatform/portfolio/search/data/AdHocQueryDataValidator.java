@@ -40,7 +40,7 @@ public class AdHocQueryDataValidator {
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(AdHocQuerySearchConstants.AD_HOC_SEARCH_QUERY_RESOURCE_NAME);
 
@@ -266,7 +266,7 @@ public class AdHocQueryDataValidator {
     }
 
     private List<Long> extractLongValuesList(List<String> listTobeConverted) {
-        List<Long> tempList = new ArrayList<Long>();
+        List<Long> tempList = new ArrayList<>();
         for (String temp : listTobeConverted) {
             tempList.add(Long.valueOf(temp));
         }

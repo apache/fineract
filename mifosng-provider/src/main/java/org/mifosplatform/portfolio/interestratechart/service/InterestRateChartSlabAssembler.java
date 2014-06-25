@@ -71,7 +71,7 @@ public class InterestRateChartSlabAssembler {
 
         final InterestRateChart chart = this.interestRateChartRepositoryWrapper.findOneWithNotFoundDetection(chartId);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(INTERESTRATE_CHART_SLAB_RESOURCE_NAME);
 
@@ -113,7 +113,7 @@ public class InterestRateChartSlabAssembler {
     }
 
     public Collection<InterestRateChartSlab> assembleChartSlabsFrom(final JsonElement element, String currencyCode) {
-        final Collection<InterestRateChartSlab> interestRateChartSlabsSet = new HashSet<InterestRateChartSlab>();
+        final Collection<InterestRateChartSlab> interestRateChartSlabsSet = new HashSet<>();
 
         if (element.isJsonObject()) {
             final JsonObject topLevelJsonElement = element.getAsJsonObject();

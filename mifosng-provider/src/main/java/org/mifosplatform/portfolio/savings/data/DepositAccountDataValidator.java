@@ -99,7 +99,7 @@ public class DepositAccountDataValidator {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
                 DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -119,7 +119,7 @@ public class DepositAccountDataValidator {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
                 DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -139,7 +139,7 @@ public class DepositAccountDataValidator {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
                 DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -160,7 +160,7 @@ public class DepositAccountDataValidator {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
                 DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -630,7 +630,7 @@ public class DepositAccountDataValidator {
     }
 
     public void validatelinkedSavingsAccount(final SavingsAccount linkedSavingsAccount, final SavingsAccount savingsAccount) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         if (linkedSavingsAccount.isNotActive()) {
             final ApiParameterError error = ApiParameterError.parameterError("validation.msg.deposit.linked.savings.account.is.not.active",
                     "Linked Savings account with id:" + linkedSavingsAccount.getId() + " is not in active state", "linkAccountId",
@@ -648,7 +648,7 @@ public class DepositAccountDataValidator {
     }
 
     public void throwLinkedAccountRequiredError() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final ApiParameterError error = ApiParameterError.parameterError(
                 "validation.msg.fixeddepositaccount.linkAccountId.cannot.be.blank", "Linked Savings account required", "linkAccountId");
         dataValidationErrors.add(error);

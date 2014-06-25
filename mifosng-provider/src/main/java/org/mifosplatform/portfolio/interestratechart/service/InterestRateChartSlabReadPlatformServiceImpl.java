@@ -74,13 +74,13 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
 
     @Override
     public InterestRateChartSlabData retrieveWithTemplate(InterestRateChartSlabData chartSlab) {
-        final List<CodeValueData> genderOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> genderOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.GENDER));
 
-        final List<CodeValueData> clientTypeOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> clientTypeOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_TYPE));
 
-        final List<CodeValueData> clientClassificationOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> clientClassificationOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_CLASSIFICATION));
 
         return InterestRateChartSlabData.withTemplate(chartSlab, this.chartDropdownReadPlatformService.retrievePeriodTypeOptions(),
@@ -93,13 +93,13 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
 
     @Override
     public InterestRateChartSlabData retrieveTemplate() {
-        final List<CodeValueData> genderOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> genderOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.GENDER));
 
-        final List<CodeValueData> clientTypeOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> clientTypeOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_TYPE));
 
-        final List<CodeValueData> clientClassificationOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> clientClassificationOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_CLASSIFICATION));
         return InterestRateChartSlabData.template(this.chartDropdownReadPlatformService.retrievePeriodTypeOptions(),
                 this.interestIncentiveDropdownReadPlatformService.retrieveEntityTypeOptions(),
@@ -128,8 +128,8 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
                     .append("curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf, ")
                     .append("iri.id as iriId, ").append(" iri.entiry_type as entityType, iri.attribute_name as attributeName ,")
                     .append(" iri.condition_type as conditionType, iri.attribute_value as attributeValue, ")
-                    .append(" iri.incentive_type as incentiveType, iri.amount as amount, ").append("code.code_value as attributeValueDesc ")
-                    .append("from ").append("m_interest_rate_slab ircd ")
+                    .append(" iri.incentive_type as incentiveType, iri.amount as amount, ")
+                    .append("code.code_value as attributeValueDesc ").append("from ").append("m_interest_rate_slab ircd ")
                     .append(" left join m_interest_incentives iri on iri.interest_rate_slab_id = ircd.id ")
                     .append(" left join m_code_value code on code.id = iri.attribute_value ")
                     .append("left join m_currency curr on ircd.currency_code= curr.code ");
@@ -187,7 +187,7 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
         @Override
         public Collection<InterestRateChartSlabData> extractData(ResultSet rs) throws SQLException, DataAccessException {
 
-            List<InterestRateChartSlabData> chartDataList = new ArrayList<InterestRateChartSlabData>();
+            List<InterestRateChartSlabData> chartDataList = new ArrayList<>();
 
             InterestRateChartSlabData chartSlabData = null;
             Long interestRateChartSlabId = null;

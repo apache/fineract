@@ -50,7 +50,7 @@ public enum RecurringDepositType {
     }
     
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<Integer>();
+        final List<Integer> values = new ArrayList<>();
         for (final RecurringDepositType enumType : values()) {
             if (enumType.getValue() > 0) {
                 values.add(enumType.getValue());

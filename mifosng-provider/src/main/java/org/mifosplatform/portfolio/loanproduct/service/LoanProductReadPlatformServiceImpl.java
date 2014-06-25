@@ -201,9 +201,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                 status = "loanProduct.active";
             }
             final String externalId = rs.getString("externalId");
-            final Collection<LoanProductBorrowerCycleVariationData> principalVariationsForBorrowerCycle = new ArrayList<LoanProductBorrowerCycleVariationData>();
-            final Collection<LoanProductBorrowerCycleVariationData> interestRateVariationsForBorrowerCycle = new ArrayList<LoanProductBorrowerCycleVariationData>();
-            final Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<LoanProductBorrowerCycleVariationData>();
+            final Collection<LoanProductBorrowerCycleVariationData> principalVariationsForBorrowerCycle = new ArrayList<>();
+            final Collection<LoanProductBorrowerCycleVariationData> interestRateVariationsForBorrowerCycle = new ArrayList<>();
+            final Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
             if (this.borrowerCycleVariationDatas != null) {
                 for (final LoanProductBorrowerCycleVariationData borrowerCycleVariationData : this.borrowerCycleVariationDatas) {
                     final LoanProductParamType loanProductParamType = borrowerCycleVariationData.getParamType();

@@ -62,9 +62,9 @@ import com.google.gson.JsonObject;
 public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
     private final static Logger logger = LoggerFactory.getLogger(AuditReadPlatformServiceImpl.class);
-    private final static Set<String> supportedOrderByValues = new HashSet<String>(Arrays.asList("id", "actionName", "entityName",
-            "resourceId", "subresourceId", "madeOnDate", "checkedOnDate", "officeName", "groupName", "clientName", "loanAccountNo",
-            "savingsAccountNo", "clientId", "loanId"));
+    private final static Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "actionName", "entityName", "resourceId",
+            "subresourceId", "madeOnDate", "checkedOnDate", "officeName", "groupName", "clientName", "loanAccountNo", "savingsAccountNo",
+            "clientId", "loanId"));
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
@@ -74,7 +74,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     private final ClientReadPlatformService clientReadPlatformService;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
-    private final PaginationHelper<AuditData> paginationHelper = new PaginationHelper<AuditData>();
+    private final PaginationHelper<AuditData> paginationHelper = new PaginationHelper<>();
     private final PaginationParametersDataValidator paginationParametersDataValidator;
     private final SavingsProductReadPlatformService savingsProductReadPlatformService;
     private final DepositProductReadPlatformService depositProductReadPlatformService;
@@ -377,7 +377,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     private void updateEnumerations(Map<String, Object> commandAsJsonMap, JsonObject auditObject, String entityName) {
 
         if (entityName.equalsIgnoreCase("LOAN") || entityName.equalsIgnoreCase("LOANPRODUCT")) {
-            
+
             final String[] enumTypes = { "loanTermFrequencyType", "termFrequencyType", "repaymentFrequencyType", "amortizationType",
                     "interestType", "interestCalculationPeriodType", "interestRateFrequencyType", "accountingRule" };
 
@@ -394,7 +394,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
                     }
                 }
             }
-            
+
         } else if (entityName.equalsIgnoreCase("SAVINGSPRODUCT") || entityName.equalsIgnoreCase("SAVINGSACCOUNT")
                 || entityName.equalsIgnoreCase("RECURRINGDEPOSITPRODUCT") || entityName.equalsIgnoreCase("RECURRINGDEPOSITACCOUNT")
                 || entityName.equalsIgnoreCase("FIXEDDEPOSITPRODUCT") || entityName.equalsIgnoreCase("FIXEDDEPOSITACCOUNT")) {
@@ -416,7 +416,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
                         }
                     }
                 }
-            }            
+            }
         }
     }
 

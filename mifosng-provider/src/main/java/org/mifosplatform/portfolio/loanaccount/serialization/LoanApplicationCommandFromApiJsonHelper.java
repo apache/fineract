@@ -43,8 +43,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     /**
      * The parameters supported for this command.
      */
-    final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("dateFormat", "locale", "id", "clientId", "groupId",
-            "loanType", "productId", "principal", "loanTermFrequency", "loanTermFrequencyType", "numberOfRepayments", "repaymentEvery",
+    final Set<String> supportedParameters = new HashSet<>(Arrays.asList("dateFormat", "locale", "id", "clientId", "groupId", "loanType",
+            "productId", "principal", "loanTermFrequency", "loanTermFrequencyType", "numberOfRepayments", "repaymentEvery",
             "repaymentFrequencyType", "interestRatePerPeriod", "amortizationType", "interestType", "interestCalculationPeriodType",
             "expectedDisbursementDate", "repaymentsStartingFromDate", "graceOnPrincipalPayment", "graceOnInterestPayment",
             "graceOnInterestCharged",
@@ -77,7 +77,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -266,7 +266,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
             if (topLevelJsonElement.get(chargesParameterName).isJsonArray()) {
                 final Type arrayObjectParameterTypeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-                final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "chargeId", "amount", "chargeTimeType",
+                final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "chargeId", "amount", "chargeTimeType",
                         "chargeCalculationType", "dueDate"));
 
                 final JsonArray array = topLevelJsonElement.get("charges").getAsJsonArray();
@@ -298,7 +298,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             if (topLevelJsonElement.get("collateral").isJsonArray()) {
 
                 final Type collateralParameterTypeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-                final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "type", "value", "description"));
+                final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "type", "value", "description"));
                 final JsonArray array = topLevelJsonElement.get("collateral").getAsJsonArray();
                 for (int i = 1; i <= array.size(); i++) {
                     final JsonObject collateralItemElement = array.get(i - 1).getAsJsonObject();
@@ -366,7 +366,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         boolean atLeastOneParameterPassedForUpdate = false;
@@ -603,7 +603,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
             if (topLevelJsonElement.get(chargesParameterName).isJsonArray()) {
                 final Type arrayObjectParameterTypeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-                final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "chargeId", "amount", "chargeTimeType",
+                final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "chargeId", "amount", "chargeTimeType",
                         "chargeCalculationType", "dueDate"));
 
                 final JsonArray array = topLevelJsonElement.get("charges").getAsJsonArray();
@@ -635,7 +635,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             if (topLevelJsonElement.get("collateral").isJsonArray()) {
 
                 final Type collateralParameterTypeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-                final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "type", "value", "description"));
+                final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "type", "value", "description"));
                 final JsonArray array = topLevelJsonElement.get("collateral").getAsJsonArray();
                 for (int i = 1; i <= array.size(); i++) {
                     final JsonObject collateralItemElement = array.get(i - 1).getAsJsonObject();
@@ -708,11 +708,11 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     public void validateForUndo(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Set<String> undoSupportedParameters = new HashSet<String>(Arrays.asList("note"));
+        final Set<String> undoSupportedParameters = new HashSet<>(Arrays.asList("note"));
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, undoSupportedParameters);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loanapplication.undo");
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
@@ -727,7 +727,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
     public void validateMinMaxConstraintValues(final JsonElement element, final LoanProduct loanProduct) {
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
 
         final BigDecimal minPrincipal = loanProduct.getMinPrincipalAmount().getAmount();
@@ -746,7 +746,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
     public void validateLoanTermAndRepaidEveryValues(final Integer loanTermFrequency, final Integer loanTermFrequencyType,
             final Integer numberOfRepayments, final Integer repaymentEvery, final Integer repaymentEveryType) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         this.apiJsonHelper.validateSelectedPeriodFrequencyTypeIsTheSame(dataValidationErrors, loanTermFrequency, loanTermFrequencyType,
                 numberOfRepayments, repaymentEvery, repaymentEveryType);
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
@@ -754,7 +754,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     }
 
     public void validatelinkedSavingsAccount(final SavingsAccount savingsAccount, final Loan loanApplication) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         if (savingsAccount.isNotActive()) {
             final ApiParameterError error = ApiParameterError.parameterError("validation.msg.loan.linked.savings.account.is.not.active",
                     "Linked Savings account with id:" + savingsAccount.getId() + " is not in active state", "linkAccountId",
@@ -781,7 +781,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             boolean isFirstinstallmentOnExpectedDisbursementDate = false;
             final JsonArray variationArray = this.fromApiJsonHelper.extractJsonArrayNamed(LoanApiConstants.disbursementDataParameterName,
                     element);
-            List<LocalDate> expectedDisbursementDates = new ArrayList<LocalDate>();
+            List<LocalDate> expectedDisbursementDates = new ArrayList<>();
             if (variationArray != null && variationArray.size() > 0) {
                 int i = 0;
                 do {

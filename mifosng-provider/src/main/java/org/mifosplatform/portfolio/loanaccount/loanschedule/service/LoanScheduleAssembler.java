@@ -195,8 +195,9 @@ public class LoanScheduleAssembler {
         final Integer graceOnInterestPayment = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestPayment", element);
         final Integer graceOnInterestCharged = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestCharged", element);
         final LocalDate interestChargedFromDate = this.fromApiJsonHelper.extractLocalDateNamed("interestChargedFromDate", element);
-        
-        final Integer graceOnArrearsAgeing = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(LoanProductConstants.graceOnArrearsAgeingParameterName, element);
+
+        final Integer graceOnArrearsAgeing = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
+                LoanProductConstants.graceOnArrearsAgeingParameterName, element);
 
         // other
         final BigDecimal inArrearsTolerance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element);
@@ -209,7 +210,7 @@ public class LoanScheduleAssembler {
 
         final List<DisbursementData> disbursementDatas = fetchDisbursementData(element.getAsJsonObject());
 
-        final List<LoanTermVariationsData> loanVariationTermsData = new ArrayList<LoanTermVariationsData>();
+        final List<LoanTermVariationsData> loanVariationTermsData = new ArrayList<>();
         LoanTermVariationsData data = new LoanTermVariationsData(null,
                 LoanEnumerations.loanvariationType(LoanTermVariationType.EMI_AMOUNT), expectedDisbursementDate, emiAmount);
         loanVariationTermsData.add(data);
@@ -219,13 +220,14 @@ public class LoanScheduleAssembler {
                 interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod, principalMoney,
                 expectedDisbursementDate, repaymentsStartingFromDate, calculatedRepaymentsStartingFromDate, graceOnPrincipalPayment,
                 graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, inArrearsToleranceMoney,
-                loanProduct.isMultiDisburseLoan(), emiAmount, disbursementDatas, maxOutstandingBalance, loanVariationTermsData,graceOnArrearsAgeing);
+                loanProduct.isMultiDisburseLoan(), emiAmount, disbursementDatas, maxOutstandingBalance, loanVariationTermsData,
+                graceOnArrearsAgeing);
     }
 
     private List<DisbursementData> fetchDisbursementData(final JsonObject command) {
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(command);
         final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(command);
-        List<DisbursementData> disbursementDatas = new ArrayList<DisbursementData>();
+        List<DisbursementData> disbursementDatas = new ArrayList<>();
         if (command.has(LoanApiConstants.disbursementDataParameterName)) {
             final JsonArray disbursementDataArray = command.getAsJsonArray(LoanApiConstants.disbursementDataParameterName);
             if (disbursementDataArray != null && disbursementDataArray.size() > 0) {

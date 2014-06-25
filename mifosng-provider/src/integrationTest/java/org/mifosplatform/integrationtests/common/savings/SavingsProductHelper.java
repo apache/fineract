@@ -65,7 +65,7 @@ public class SavingsProductHelper {
     private Account[] accountList = null;
 
     public String build() {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
 
         map.put("name", this.nameOfSavingsProduct);
         map.put("shortName", this.shortName);
@@ -159,7 +159,7 @@ public class SavingsProductHelper {
     }
 
     private Map<String, String> getAccountMappingForCashBased() {
-        final Map<String, String> map = new HashMap<String, String>();
+        final Map<String, String> map = new HashMap<>();
         if (accountList != null) {
             for (int i = 0; i < this.accountList.length; i++) {
                 if (this.accountList[i].getAccountType().equals(Account.AccountType.ASSET)) {

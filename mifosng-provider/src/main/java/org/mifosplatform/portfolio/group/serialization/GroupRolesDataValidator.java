@@ -43,7 +43,7 @@ public class GroupRolesDataValidator {
         this.fromApiJsonHelper
                 .checkForUnsupportedParameters(typeOfMap, json, GroupingTypesApiConstants.GROUP_ROLES_REQUEST_DATA_PARAMETERS);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(GroupingTypesApiConstants.GROUP_ROLE_RESOURCE_NAME);
@@ -68,7 +68,7 @@ public class GroupRolesDataValidator {
         this.fromApiJsonHelper
                 .checkForUnsupportedParameters(typeOfMap, json, GroupingTypesApiConstants.GROUP_ROLES_REQUEST_DATA_PARAMETERS);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(GroupingTypesApiConstants.GROUP_ROLE_RESOURCE_NAME);

@@ -24,7 +24,6 @@ public class DepositProductRecurringDetail extends AbstractPersistable<Long> {
     @Embedded
     private DepositRecurringDetail recurringDetail;
 
-    @SuppressWarnings("unused")
     @OneToOne
     @JoinColumn(name = "savings_product_id", nullable = false)
     private RecurringDepositProduct product;
@@ -44,7 +43,7 @@ public class DepositProductRecurringDetail extends AbstractPersistable<Long> {
     }
 
     public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(10);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
         if (this.recurringDetail != null) {
             actualChanges.putAll(this.recurringDetail.update(command));
         }

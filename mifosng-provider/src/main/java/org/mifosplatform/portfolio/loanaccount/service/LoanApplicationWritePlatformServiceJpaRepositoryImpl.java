@@ -171,7 +171,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
 
             final Long productId = this.fromJsonHelper.extractLongNamed("productId", command.parsedJson());
@@ -272,7 +272,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     loanId); }
 
             final Set<LoanCharge> existingCharges = existingLoanApplication.charges();
-            Map<Long, LoanChargeData> chargesMap = new HashMap<Long, LoanChargeData>();
+            Map<Long, LoanChargeData> chargesMap = new HashMap<>();
             for (LoanCharge charge : existingCharges) {
                 LoanChargeData chargeData = new LoanChargeData(charge.getId(), charge.getDueLocalDate(), charge.amountOrPercentage());
                 chargesMap.put(charge.getId(), chargeData);
@@ -348,7 +348,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 if (!changes.containsKey("interestRateFrequencyType")) {
                     existingLoanApplication.updateInterestRateFrequencyType();
                 }
-                final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+                final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
                 final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
                 if (loanProduct.useBorrowerCycle()) {
                     final Long clientId = this.fromJsonHelper.extractLongNamed("clientId", command.parsedJson());

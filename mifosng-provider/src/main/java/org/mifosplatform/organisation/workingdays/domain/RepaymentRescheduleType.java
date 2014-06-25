@@ -31,7 +31,7 @@ public enum RepaymentRescheduleType {
         return this.code;
     }
 
-    private static final Map<Integer, RepaymentRescheduleType> intToEnumMap = new HashMap<Integer, RepaymentRescheduleType>();
+    private static final Map<Integer, RepaymentRescheduleType> intToEnumMap = new HashMap<>();
     private static int minValue;
     private static int maxValue;
     static {

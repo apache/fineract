@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class MixTaxonomyMappingApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("identifier", "config"));
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("identifier", "config"));
 
     private final PlatformSecurityContext context;
     private final ToApiJsonSerializer<MixTaxonomyMappingData> toApiJsonSerializer;

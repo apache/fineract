@@ -279,7 +279,7 @@ public class LoanAssembler {
     private Set<LoanDisbursementDetails> fetchDisbursementData(final JsonObject command) {
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(command);
         final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(command);
-        Set<LoanDisbursementDetails> disbursementDatas = new HashSet<LoanDisbursementDetails>();
+        Set<LoanDisbursementDetails> disbursementDatas = new HashSet<>();
         if (command.has(LoanApiConstants.disbursementDataParameterName)) {
             final JsonArray disbursementDataArray = command.getAsJsonArray(LoanApiConstants.disbursementDataParameterName);
             if (disbursementDataArray != null && disbursementDataArray.size() > 0) {

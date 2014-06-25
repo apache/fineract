@@ -400,7 +400,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
         this.context.authenticatedUser();
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(5);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
 
         this.fromApiJsonDeserializer.validateForUnassignStaff(command.json());
 
@@ -432,7 +432,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
         this.context.authenticatedUser();
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(5);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
 
         this.fromApiJsonDeserializer.validateForAssignStaff(command.json());
 
@@ -536,7 +536,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
         this.context.authenticatedUser();
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(5);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
 
         this.fromApiJsonDeserializer.validateForSavingsAccount(command.json());
 

@@ -58,19 +58,19 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
-            final Set<String> restrictedIds = new HashSet<String>(Arrays.asList(command.arrayValueOfParameterNamed("restrictedProducts")));
+            final Set<String> restrictedIds = new HashSet<>(Arrays.asList(command.arrayValueOfParameterNamed("restrictedProducts")));
 
             // remove the existed restriction if it is not exists in
             // restrictedIds.
             final List<Long> removedRestrictions = updateRestrictionsForProduct(productId, restrictedIds);
             final Map<Long, LoanProduct> restrictedProductsAsMap = getRestrictedProducts(restrictedIds);
-            final List<ProductMix> productMixes = new ArrayList<ProductMix>();
+            final List<ProductMix> productMixes = new ArrayList<>();
 
             createNewProductMix(restrictedProductsAsMap, productId, productMixes);
 
             this.productMixRepository.save(productMixes);
 
-            final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+            final Map<String, Object> changes = new LinkedHashMap<>();
             changes.put("restrictedProductsForMix", restrictedProductsAsMap.keySet());
             changes.put("removedProductsForMix", removedRestrictions);
             return new CommandProcessingResultBuilder().withProductId(productId).with(changes).withCommandId(command.commandId()).build();
@@ -83,8 +83,8 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
 
     private List<Long> updateRestrictionsForProduct(final Long productId, final Set<String> restrictedIds) {
 
-        final List<Long> removedRestrictions = new ArrayList<Long>();
-        final List<ProductMix> mixesToRemove = new ArrayList<ProductMix>();
+        final List<Long> removedRestrictions = new ArrayList<>();
+        final List<ProductMix> mixesToRemove = new ArrayList<>();
 
         final List<ProductMix> existedProductMixes = this.productMixRepository.findRestrictedProducts(productId);
         for (final ProductMix productMix : existedProductMixes) {
@@ -115,11 +115,11 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
         try {
             this.context.authenticatedUser();
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
-            final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+            final Map<String, Object> changes = new LinkedHashMap<>();
 
             final List<ProductMix> existedProductMixes = this.productMixRepository.findByProductId(productId);
             if (CollectionUtils.isEmpty(existedProductMixes)) { throw new ProductMixNotFoundException(productId); }
-            final Set<String> restrictedIds = new HashSet<String>(Arrays.asList(command.arrayValueOfParameterNamed("restrictedProducts")));
+            final Set<String> restrictedIds = new HashSet<>(Arrays.asList(command.arrayValueOfParameterNamed("restrictedProducts")));
 
             // updating with empty array means deleting the existed records.
             if (restrictedIds.isEmpty()) {
@@ -162,7 +162,7 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
 
     private Map<Long, LoanProduct> getRestrictedProducts(final Set<String> restrictedIds) {
 
-        final Map<Long, LoanProduct> restricrtedProducts = new HashMap<Long, LoanProduct>();
+        final Map<Long, LoanProduct> restricrtedProducts = new HashMap<>();
 
         for (final String restrictedId : restrictedIds) {
             final Long restrictedIdAsLong = Long.valueOf(restrictedId);
@@ -184,7 +184,7 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
 
     private List<ProductMix> updateRestrictedIds(final Set<String> restrictedIds, final List<ProductMix> existedProductMixes) {
 
-        final List<ProductMix> productMixesToRemove = new ArrayList<ProductMix>();
+        final List<ProductMix> productMixesToRemove = new ArrayList<>();
         for (final ProductMix productMix : existedProductMixes) {
             final String currentMixId = productMix.getRestrictedProductId().toString();
             if (restrictedIds.contains(currentMixId)) {
@@ -201,7 +201,7 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
     public CommandProcessingResult deleteProductMix(final Long productId) {
         try {
             this.context.authenticatedUser();
-            final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+            final Map<String, Object> changes = new LinkedHashMap<>();
 
             final List<ProductMix> existedProductMixes = this.productMixRepository.findByProductId(productId);
             if (CollectionUtils.isEmpty(existedProductMixes)) { throw new ProductMixNotFoundException(productId); }
@@ -216,7 +216,7 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
     }
 
     private List<Long> getProductIdsFromCollection(final List<ProductMix> collection) {
-        final List<Long> productIds = new ArrayList<Long>();
+        final List<Long> productIds = new ArrayList<>();
         for (final ProductMix productMix : collection) {
             productIds.add(productMix.getRestrictedProductId());
         }

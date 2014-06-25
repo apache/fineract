@@ -18,7 +18,7 @@ public enum AccountingRuleType {
     private final Integer value;
     private final String code;
 
-    private static final Map<Integer, AccountingRuleType> intToEnumMap = new HashMap<Integer, AccountingRuleType>();
+    private static final Map<Integer, AccountingRuleType> intToEnumMap = new HashMap<>();
     static {
         for (final AccountingRuleType type : AccountingRuleType.values()) {
             intToEnumMap.put(type.value, type);

@@ -225,7 +225,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
          * Variable tracks all accounting mapping properties that have been
          * updated
          ***/
-        Map<String, Object> changes = new HashMap<String, Object>();
+        Map<String, Object> changes = new HashMap<>();
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(accountingRuleTypeId);
 
@@ -256,7 +256,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
          * Variable tracks all accounting mapping properties that have been
          * updated
          ***/
-        Map<String, Object> changes = new HashMap<String, Object>();
+        Map<String, Object> changes = new HashMap<>();
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(accountingRuleTypeId);
 

@@ -60,7 +60,7 @@ public enum SavingsPeriodFrequencyType {
     }
     
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<Integer>();
+        final List<Integer> values = new ArrayList<>();
         for (final SavingsPeriodFrequencyType enumType : values()) {
             if (!enumType.isInvalid()) {
                 values.add(enumType.getValue());

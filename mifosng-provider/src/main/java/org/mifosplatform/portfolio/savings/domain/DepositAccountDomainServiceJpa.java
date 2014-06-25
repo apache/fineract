@@ -114,8 +114,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         boolean isRegularTransaction = false;
         boolean isAccountTransfer = false;
         final boolean isPreMatureClosure = false;
-        final Set<Long> existingTransactionIds = new HashSet<Long>();
-        final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
+        final Set<Long> existingTransactionIds = new HashSet<>();
+        final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         /*
          * <<<<<<< HEAD final SavingsAccountTransactionDTO transactionDTO = new
@@ -179,8 +179,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         boolean isRegularTransaction = false;
         boolean isAccountTransfer = false;
         final boolean isPreMatureClosure = false;
-        final Set<Long> existingTransactionIds = new HashSet<Long>();
-        final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
+        final Set<Long> existingTransactionIds = new HashSet<>();
+        final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
 
         final MathContext mc = MathContext.DECIMAL64;
@@ -255,8 +255,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         boolean isAccountTransfer = false;
         boolean isRegularTransaction = false;
         final boolean isPreMatureClosure = true;
-        final Set<Long> existingTransactionIds = new HashSet<Long>();
-        final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
+        final Set<Long> existingTransactionIds = new HashSet<>();
+        final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
 
         final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
@@ -301,8 +301,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         boolean isAccountTransfer = false;
         final boolean isPreMatureClosure = true;
         boolean isRegularTransaction = false;
-        final Set<Long> existingTransactionIds = new HashSet<Long>();
-        final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
+        final Set<Long> existingTransactionIds = new HashSet<>();
+        final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
 
         final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);

@@ -32,7 +32,7 @@ public class UnsupportedCommandExceptionMapper implements ExceptionMapper<Unsupp
     @Override
     public Response toResponse(final UnsupportedCommandException exception) {
 
-        final List<ApiParameterError> errors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> errors = new ArrayList<>();
 
         final StringBuilder validationErrorCode = new StringBuilder("error.msg.command.unsupported");
         final StringBuilder defaultEnglishMessage = new StringBuilder("The command ").append(exception.getUnsupportedCommandName()).append(

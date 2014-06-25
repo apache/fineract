@@ -71,7 +71,7 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
 
     public Map<String, Object> switchToCache(final boolean ehcacheEnabled, final CacheType toCacheType) {
 
-        final Map<String, Object> changes = new HashMap<String, Object>();
+        final Map<String, Object> changes = new HashMap<>();
 
         final boolean noCacheEnabled = !ehcacheEnabled;
         final boolean distributedCacheEnabled = !ehcacheEnabled;

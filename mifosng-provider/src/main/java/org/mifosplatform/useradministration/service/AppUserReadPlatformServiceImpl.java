@@ -39,7 +39,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
     private final RoleReadPlatformService roleReadPlatformService;
     private final AppUserRepository appUserRepository;
     private final StaffReadPlatformService staffReadPlatformService;
-    
+
     @Autowired
     public AppUserReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final OfficeReadPlatformService officeReadPlatformService, final RoleReadPlatformService roleReadPlatformService,
@@ -104,7 +104,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 
         final Collection<RoleData> availableRoles = this.roleReadPlatformService.retrieveAll();
 
-        final Collection<RoleData> selectedUserRoles = new ArrayList<RoleData>();
+        final Collection<RoleData> selectedUserRoles = new ArrayList<>();
         final Set<Role> userRoles = user.getRoles();
         for (final Role role : userRoles) {
             selectedUserRoles.add(role.toData());
@@ -113,12 +113,12 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         availableRoles.removeAll(selectedUserRoles);
 
         final StaffData linkedStaff;
-        if(user.getStaff()!=null) {
+        if (user.getStaff() != null) {
             linkedStaff = this.staffReadPlatformService.retrieveStaff(user.getStaffId());
         } else {
             linkedStaff = null;
         }
-        
+
         return AppUserData.instance(user.getId(), user.getUsername(), user.getEmail(), user.getOffice().getId(),
                 user.getOffice().getName(), user.getFirstname(), user.getLastname(), availableRoles, selectedUserRoles, linkedStaff);
     }
@@ -147,12 +147,13 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
             final Collection<RoleData> selectedRoles = this.roleReadPlatformService.retrieveAppUserRoles(id);
 
             final StaffData linkedStaff;
-            if(staffId!=null) {
+            if (staffId != null) {
                 linkedStaff = this.staffReadPlatformService.retrieveStaff(staffId);
             } else {
                 linkedStaff = null;
-            }            
-            return AppUserData.instance(id, username, email, officeId, officeName, firstname, lastname, null, selectedRoles, linkedStaff);        }
+            }
+            return AppUserData.instance(id, username, email, officeId, officeName, firstname, lastname, null, selectedRoles, linkedStaff);
+        }
 
         public String schema() {
             return " u.id as id, u.username as username, u.firstname as firstname, u.lastname as lastname, u.email as email,"

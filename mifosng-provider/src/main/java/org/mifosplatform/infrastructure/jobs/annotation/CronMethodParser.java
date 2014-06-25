@@ -29,7 +29,7 @@ public class CronMethodParser {
 
     private static final String RESOURCE_PATTERN = "**/*.class";
 
-    private static final Map<String, String[]> targetMethosMap = new HashMap<String, String[]>();
+    private static final Map<String, String[]> targetMethosMap = new HashMap<>();
 
     private static final ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 

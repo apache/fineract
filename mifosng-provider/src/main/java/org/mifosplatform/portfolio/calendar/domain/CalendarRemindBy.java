@@ -28,7 +28,7 @@ public enum CalendarRemindBy {
         return this.code;
     }
 
-    private static final Map<Integer, CalendarRemindBy> intToEnumMap = new HashMap<Integer, CalendarRemindBy>();
+    private static final Map<Integer, CalendarRemindBy> intToEnumMap = new HashMap<>();
     private static int minValue;
     private static int maxValue;
     static {

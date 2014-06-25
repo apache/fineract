@@ -88,7 +88,7 @@ public class TemplateMergeService {
         final HttpURLConnection connection = getConnection(url);
 
         final String response = getStringFromInputStream(connection.getInputStream());
-        HashMap<String, Object> result = new HashMap<String, Object>();
+        HashMap<String, Object> result = new HashMap<>();
         if (connection.getContentType().equals("text/plain")) {
             result.put("src", response);
         } else {

@@ -32,7 +32,7 @@ public enum PortfolioProductType {
         return this.code;
     }
 
-    private static final Map<Integer, PortfolioProductType> intToEnumMap = new HashMap<Integer, PortfolioProductType>();
+    private static final Map<Integer, PortfolioProductType> intToEnumMap = new HashMap<>();
     static {
         for (final PortfolioProductType type : PortfolioProductType.values()) {
             intToEnumMap.put(type.value, type);

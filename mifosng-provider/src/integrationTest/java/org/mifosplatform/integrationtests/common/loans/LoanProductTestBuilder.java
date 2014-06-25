@@ -60,11 +60,11 @@ public class LoanProductTestBuilder {
     private String maxTrancheCount = "35000";
 
     public String build(final String chargeId) {
-        final HashMap<String, Object> map = new HashMap<String, Object>();
+        final HashMap<String, Object> map = new HashMap<>();
 
         if (chargeId != null) {
             List<HashMap<String, String>> charges = new ArrayList<HashMap<String, String>>();
-            HashMap<String, String> chargeMap = new HashMap<String, String>();
+            HashMap<String, String> chargeMap = new HashMap<>();
             chargeMap.put("id", chargeId);
             charges.add(chargeMap);
             map.put("charges", charges);
@@ -233,7 +233,7 @@ public class LoanProductTestBuilder {
     }
 
     private Map<String, String> getAccountMappingForCashBased() {
-        final Map<String, String> map = new HashMap<String, String>();
+        final Map<String, String> map = new HashMap<>();
         for (int i = 0; i < this.accountList.length; i++) {
             if (this.accountList[i].getAccountType().equals(Account.AccountType.ASSET)) {
                 final String ID = this.accountList[i].getAccountID().toString();
@@ -261,7 +261,7 @@ public class LoanProductTestBuilder {
     }
 
     private Map<String, String> getAccountMappingForAccrualBased() {
-        final Map<String, String> map = new HashMap<String, String>();
+        final Map<String, String> map = new HashMap<>();
         for (int i = 0; i < this.accountList.length; i++) {
             if (this.accountList[i].getAccountType().equals(Account.AccountType.ASSET)) {
                 final String ID = this.accountList[i].getAccountID().toString();

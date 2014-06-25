@@ -20,7 +20,7 @@ public enum FinancialActivityAccountsJsonInputParams {
         this.value = value;
     }
 
-    private static final Set<String> values = new HashSet<String>();
+    private static final Set<String> values = new HashSet<>();
     static {
         for (final FinancialActivityAccountsJsonInputParams type : FinancialActivityAccountsJsonInputParams.values()) {
             values.add(type.value);

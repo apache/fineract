@@ -91,9 +91,9 @@ public class Holiday extends AbstractPersistable<Long> {
     }
 
     public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("holiday" + ".update");
 
         final HolidayStatusType currentStatus = HolidayStatusType.fromInt(this.status);
@@ -177,8 +177,8 @@ public class Holiday extends AbstractPersistable<Long> {
 
         boolean updated = false;
         if (this.offices != null) {
-            final Set<Office> currentSetOfOffices = new HashSet<Office>(this.offices);
-            final Set<Office> newSetOfOffices = new HashSet<Office>(newOffices);
+            final Set<Office> currentSetOfOffices = new HashSet<>(this.offices);
+            final Set<Office> newSetOfOffices = new HashSet<>(newOffices);
 
             if (!(currentSetOfOffices.equals(newSetOfOffices))) {
                 updated = true;
@@ -262,7 +262,7 @@ public class Holiday extends AbstractPersistable<Long> {
     }
 
     public void activate() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("holiday" + ".activate");
 
         final HolidayStatusType currentStatus = HolidayStatusType.fromInt(this.status);
@@ -275,7 +275,7 @@ public class Holiday extends AbstractPersistable<Long> {
     }
 
     public void delete() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("holiday" + ".delete");
 
         final HolidayStatusType currentStatus = HolidayStatusType.fromInt(this.status);

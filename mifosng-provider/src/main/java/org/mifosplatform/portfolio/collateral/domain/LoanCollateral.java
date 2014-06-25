@@ -77,7 +77,7 @@ public class LoanCollateral extends AbstractPersistable<Long> {
 
     public Map<String, Object> update(final JsonCommand command) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
         final String collateralTypeIdParamName = COLLATERAL_JSON_INPUT_PARAMS.COLLATERAL_TYPE_ID.getValue();
         if (command.isChangeInLongParameterNamed(collateralTypeIdParamName, this.type.getId())) {

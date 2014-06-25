@@ -147,7 +147,7 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
     }
 
     private Collection<ClientAttendance> getClientsAttendance(final Meeting meeting, final JsonCommand command) {
-        final Collection<ClientAttendance> clientsAttendance = new ArrayList<ClientAttendance>();
+        final Collection<ClientAttendance> clientsAttendance = new ArrayList<>();
 
         Collection<Group> childGroups = null;
         if (meeting.isCenterEntity()) {

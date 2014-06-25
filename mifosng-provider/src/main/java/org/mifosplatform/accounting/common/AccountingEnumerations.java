@@ -27,7 +27,7 @@ public class AccountingEnumerations {
     }
 
     public static List<EnumOptionData> gLAccountType(final GLAccountType[] accountTypes) {
-        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final GLAccountType accountType : accountTypes) {
             optionDatas.add(gLAccountType(accountType));
         }
@@ -45,7 +45,7 @@ public class AccountingEnumerations {
     }
 
     public static List<EnumOptionData> gLAccountUsage(final GLAccountUsage[] accountUsages) {
-        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final GLAccountUsage accountUsage : accountUsages) {
             optionDatas.add(gLAccountUsage(accountUsage));
         }
@@ -63,7 +63,7 @@ public class AccountingEnumerations {
     }
 
     public static List<EnumOptionData> journalEntryTypes(final JournalEntryType[] journalEntryTypes) {
-        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final JournalEntryType journalEntryType : journalEntryTypes) {
             optionDatas.add(journalEntryType(journalEntryType));
         }
@@ -90,7 +90,7 @@ public class AccountingEnumerations {
     }
 
     public static List<EnumOptionData> accountingRuleTypes(final AccountingRuleType[] accountingRuleTypes) {
-        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final AccountingRuleType accountingRuleType : accountingRuleTypes) {
             optionDatas.add(accountingRuleType(accountingRuleType));
         }

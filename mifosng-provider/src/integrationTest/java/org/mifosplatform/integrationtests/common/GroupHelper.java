@@ -72,7 +72,7 @@ public class GroupHelper {
     }
 
     public static String getTestGroupAsJSON(final boolean active, final String activationDate) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("officeId", "1");
         map.put("name", randomNameGenerator("Group_Name_", 5));
         map.put("externalId", randomIDGenerator("ID_", 7));
@@ -93,7 +93,7 @@ public class GroupHelper {
 
     public static String associateClientAsJSON(final String clientMember) {
         final HashMap<String, List<String>> map = new HashMap<String, List<String>>();
-        final List<String> list = new ArrayList<String>();
+        final List<String> list = new ArrayList<>();
         list.add(clientMember);
         map.put("clientMembers", list);
         System.out.println("map : " + map);
@@ -101,7 +101,7 @@ public class GroupHelper {
     }
 
     public static String activateGroupAsJSON(final String activationDate) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
         if (StringUtils.isNotEmpty(activationDate)) {
@@ -115,7 +115,7 @@ public class GroupHelper {
     }
 
     public static String updateGroupAsJSON(final String name) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("name", name);
         System.out.println("map : " + map);
         return new Gson().toJson(map);
@@ -147,7 +147,7 @@ public class GroupHelper {
 
     public static void verifyGroupMembers(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID, final Integer groupMember) {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         System.out.println("------------------------------CHECK GROUP MEMBERS------------------------------------\n");
         final String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID
                 + "?associations=clientMembers&tenantIdentifier=default";
@@ -157,7 +157,7 @@ public class GroupHelper {
 
     public static void verifyEmptyGroupMembers(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID) {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         System.out.println("------------------------------CHECK EMPTY GROUP MEMBER LIST------------------------------------\n");
         final String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID
                 + "?associations=clientMembers&tenantIdentifier=default";
@@ -167,7 +167,7 @@ public class GroupHelper {
 
     public static void verifyGroupDeleted(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID) {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         System.out.println("------------------------------CHECK GROUP DELETED------------------------------------\n");
         final String GROUP_URL = "/mifosng-provider/api/v1/groups/?tenantIdentifier=default";
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "pageItems");

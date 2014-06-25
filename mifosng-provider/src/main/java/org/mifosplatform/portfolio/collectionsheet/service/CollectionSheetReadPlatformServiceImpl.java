@@ -95,14 +95,14 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         Long prevGroupId = null;
         Long prevClientId = null;
 
-        final List<JLGGroupData> jlgGroupsData = new ArrayList<JLGGroupData>();
-        List<JLGClientData> clientsData = new ArrayList<JLGClientData>();
-        List<LoanDueData> loansDueData = new ArrayList<LoanDueData>();
+        final List<JLGGroupData> jlgGroupsData = new ArrayList<>();
+        List<JLGClientData> clientsData = new ArrayList<>();
+        List<LoanDueData> loansDueData = new ArrayList<>();
 
         JLGCollectionSheetData jlgCollectionSheetData = null;
         JLGCollectionSheetFlatData prevCollectioSheetFlatData = null;
         JLGCollectionSheetFlatData corrCollectioSheetFlatData = null;
-        final Set<LoanProductData> loanProducts = new HashSet<LoanProductData>();
+        final Set<LoanProductData> loanProducts = new HashSet<>();
         if (jlgCollectionSheetFlatData != null) {
 
             for (final JLGCollectionSheetFlatData collectionSheetFlatData : jlgCollectionSheetFlatData) {
@@ -122,7 +122,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                         final JLGClientData clientData = prevCollectioSheetFlatData.getClientData();
                         clientData.setLoans(loansDueData);
                         clientsData.add(clientData);
-                        loansDueData = new ArrayList<LoanDueData>();
+                        loansDueData = new ArrayList<>();
 
                         if (collectionSheetFlatData.getLoanId() != null) {
                             loansDueData.add(collectionSheetFlatData.getLoanDueData());
@@ -140,8 +140,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
                     jlgGroupsData.add(jlgGroupData);
 
-                    loansDueData = new ArrayList<LoanDueData>();
-                    clientsData = new ArrayList<JLGClientData>();
+                    loansDueData = new ArrayList<>();
+                    clientsData = new ArrayList<>();
 
                     if (collectionSheetFlatData.getLoanId() != null) {
                         loansDueData.add(collectionSheetFlatData.getLoanDueData());
@@ -368,7 +368,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     }
 
     private Collection<SavingsProductData> retrieveSavingsProducts(Collection<JLGGroupData> groupsWithSavingsData) {
-        List<SavingsProductData> savingsProducts = new ArrayList<SavingsProductData>();
+        List<SavingsProductData> savingsProducts = new ArrayList<>();
         for (JLGGroupData groupSavingsData : groupsWithSavingsData) {
             Collection<JLGClientData> clientsSavingsData = groupSavingsData.getClients();
             for (JLGClientData clientSavingsData : clientsSavingsData) {
@@ -429,7 +429,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
     private static final class MandatorySavingsCollectionsheetExtractor implements ResultSetExtractor<Collection<JLGGroupData>> {
 
-        private GroupSavingsDataMapper groupSavingsDataMapper = new GroupSavingsDataMapper();
+        private final GroupSavingsDataMapper groupSavingsDataMapper = new GroupSavingsDataMapper();
 
         public String collectionSheetSchema(final boolean isCenterCollection) {
 
@@ -482,7 +482,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         @Override
         public Collection<JLGGroupData> extractData(ResultSet rs) throws SQLException, DataAccessException {
-            List<JLGGroupData> groups = new ArrayList<JLGGroupData>();
+            List<JLGGroupData> groups = new ArrayList<>();
 
             JLGGroupData group = null;
             int groupIndex = 0;
@@ -504,20 +504,20 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
     private static final class GroupSavingsDataMapper implements RowMapper<JLGGroupData> {
 
-        private ClientSavingsDataMapper clientSavingsDataMapper = new ClientSavingsDataMapper();
+        private final ClientSavingsDataMapper clientSavingsDataMapper = new ClientSavingsDataMapper();
 
         private GroupSavingsDataMapper() {}
 
         public JLGGroupData mapRowData(ResultSet rs, int rowNum) throws SQLException {
-            final List<JLGClientData> clients = new ArrayList<JLGClientData>();
+            final List<JLGClientData> clients = new ArrayList<>();
             final JLGGroupData group = this.mapRow(rs, rowNum);
             final Long previousGroupId = group.getGroupId();
-            
+
             // first client row of new group
             JLGClientData client = clientSavingsDataMapper.mapRowData(rs, rowNum);
             clients.add(client);
-            
-          //if its not after last row loop
+
+            // if its not after last row loop
             while (!rs.isAfterLast()) {
                 final Long groupId = JdbcSupport.getLong(rs, "groupId");
                 if (previousGroupId != null && groupId.compareTo(previousGroupId) != 0) {
@@ -546,17 +546,17 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
     private static final class ClientSavingsDataMapper implements RowMapper<JLGClientData> {
 
-        private SavingsDueDataMapper savingsDueDataMapper = new SavingsDueDataMapper();
+        private final SavingsDueDataMapper savingsDueDataMapper = new SavingsDueDataMapper();
 
         private ClientSavingsDataMapper() {}
 
         public JLGClientData mapRowData(ResultSet rs, int rowNum) throws SQLException {
 
-            List<SavingsDueData> savings = new ArrayList<SavingsDueData>();
+            List<SavingsDueData> savings = new ArrayList<>();
 
             JLGClientData client = this.mapRow(rs, rowNum);
             final Long previousClientId = client.getClientId();
-            
+
             // first savings row of new client record
             SavingsDueData saving = savingsDueDataMapper.mapRow(rs, rowNum);
             savings.add(saving);

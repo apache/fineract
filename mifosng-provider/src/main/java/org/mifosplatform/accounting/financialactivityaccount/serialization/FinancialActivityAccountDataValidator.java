@@ -46,7 +46,7 @@ public final class FinancialActivityAccountDataValidator {
     public void validateForCreate(final String json) {
         validateJSONAndCheckForUnsupportedParams(json);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = getDataValidator(dataValidationErrors);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -69,7 +69,7 @@ public final class FinancialActivityAccountDataValidator {
     public void validateForUpdate(final String json) {
         validateJSONAndCheckForUnsupportedParams(json);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = getDataValidator(dataValidationErrors);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);

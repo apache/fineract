@@ -37,7 +37,7 @@ public class CollectionSheetGenerateCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    final Set<String> supportedParameters = new HashSet<String>(Arrays.asList(transactionDateParamName, localeParamName,
+    final Set<String> supportedParameters = new HashSet<>(Arrays.asList(transactionDateParamName, localeParamName,
             dateFormatParamName, calendarIdParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -55,7 +55,7 @@ public class CollectionSheetGenerateCommandFromApiJsonDeserializer {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("collectionsheet");
 

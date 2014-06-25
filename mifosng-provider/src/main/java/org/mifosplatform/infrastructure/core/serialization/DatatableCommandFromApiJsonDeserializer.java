@@ -34,17 +34,17 @@ public class DatatableCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParametersForCreate = new HashSet<String>(Arrays.asList("datatableName", "apptableName", "multiRow",
+    private final Set<String> supportedParametersForCreate = new HashSet<>(Arrays.asList("datatableName", "apptableName", "multiRow",
             "columns"));
-    private final Set<String> supportedParametersForCreateColumns = new HashSet<String>(Arrays.asList("name", "type", "length",
+    private final Set<String> supportedParametersForCreateColumns = new HashSet<>(Arrays.asList("name", "type", "length",
             "mandatory", "code"));
-    private final Set<String> supportedParametersForUpdate = new HashSet<String>(Arrays.asList("apptableName", "changeColumns",
+    private final Set<String> supportedParametersForUpdate = new HashSet<>(Arrays.asList("apptableName", "changeColumns",
             "addColumns", "dropColumns"));
-    private final Set<String> supportedParametersForAddColumns = new HashSet<String>(Arrays.asList("name", "type", "length", "mandatory",
+    private final Set<String> supportedParametersForAddColumns = new HashSet<>(Arrays.asList("name", "type", "length", "mandatory",
             "after", "code"));
-    private final Set<String> supportedParametersForChangeColumns = new HashSet<String>(Arrays.asList("name", "newName", "length",
+    private final Set<String> supportedParametersForChangeColumns = new HashSet<>(Arrays.asList("name", "newName", "length",
             "mandatory", "after", "code", "newCode"));
-    private final Set<String> supportedParametersForDropColumns = new HashSet<String>(Arrays.asList("name"));
+    private final Set<String> supportedParametersForDropColumns = new HashSet<>(Arrays.asList("name"));
     private final Object[] supportedColumnTypes = { "string", "number", "decimal", "date", "text", "dropdown" };
     private final Object[] supportedApptableNames = { "m_loan", "m_savings_account", "m_client", "m_group", "m_center", "m_office",
             "m_savings_product", "m_product_loan" };
@@ -97,7 +97,7 @@ public class DatatableCommandFromApiJsonDeserializer {
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParametersForCreate);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("datatable");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -147,7 +147,7 @@ public class DatatableCommandFromApiJsonDeserializer {
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParametersForUpdate);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("datatable");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);

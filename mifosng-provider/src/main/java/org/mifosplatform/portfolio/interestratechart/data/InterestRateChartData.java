@@ -30,7 +30,7 @@ public class InterestRateChartData {
     private Set<InterestRateChartSlabData> chartSlabs;
 
     // template
-    private Collection<EnumOptionData> periodTypes;
+    private final Collection<EnumOptionData> periodTypes;
     private final Collection<EnumOptionData> entityTypeOptions;
     private final Collection<EnumOptionData> attributeNameOptions;
     private final Collection<EnumOptionData> conditionTypeOptions;
@@ -120,7 +120,7 @@ public class InterestRateChartData {
 
     public void addChartSlab(final InterestRateChartSlabData chartSlab) {
         if (this.chartSlabs == null) {
-            this.chartSlabs = new HashSet<InterestRateChartSlabData>();
+            this.chartSlabs = new HashSet<>();
         }
 
         this.chartSlabs.add(chartSlab);
@@ -153,7 +153,7 @@ public class InterestRateChartData {
     public Collection<EnumOptionData> periodTypes() {
         return this.periodTypes;
     }
-    
+
     public Collection<EnumOptionData> entityTypeOptions() {
         return this.entityTypeOptions;
     }

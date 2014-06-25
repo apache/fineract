@@ -143,7 +143,7 @@ public class Guarantor extends AbstractPersistable<Long> {
 
     public Map<String, Object> update(final JsonCommand command) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
+        final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
         handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID.getValue(), this.gurantorType, true);
         handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.CLIENT_RELATIONSHIP_TYPE_ID.getValue(), 0, true);

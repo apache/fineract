@@ -44,12 +44,12 @@ public final class SavingsAccountApplicationTransitionApiJsonValidator {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Set<String> disbursementParameters = new HashSet<String>(Arrays.asList("approvedOnDate", "note", "locale", "dateFormat"));
+        final Set<String> disbursementParameters = new HashSet<>(Arrays.asList("approvedOnDate", "note", "locale", "dateFormat"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("savingsaccountapplication");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -66,12 +66,12 @@ public final class SavingsAccountApplicationTransitionApiJsonValidator {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Set<String> disbursementParameters = new HashSet<String>(Arrays.asList("rejectedOnDate", "note", "locale", "dateFormat"));
+        final Set<String> disbursementParameters = new HashSet<>(Arrays.asList("rejectedOnDate", "note", "locale", "dateFormat"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("savingsaccountapplication");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -88,12 +88,12 @@ public final class SavingsAccountApplicationTransitionApiJsonValidator {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Set<String> disbursementParameters = new HashSet<String>(Arrays.asList("withdrawnOnDate", "note", "locale", "dateFormat"));
+        final Set<String> disbursementParameters = new HashSet<>(Arrays.asList("withdrawnOnDate", "note", "locale", "dateFormat"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("savingsaccountapplication");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -109,11 +109,11 @@ public final class SavingsAccountApplicationTransitionApiJsonValidator {
     public void validateForUndo(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Set<String> undoSupportedParameters = new HashSet<String>(Arrays.asList("note"));
+        final Set<String> undoSupportedParameters = new HashSet<>(Arrays.asList("note"));
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, undoSupportedParameters);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource("savingsaccountapplication.undo");
         final JsonElement element = this.fromApiJsonHelper.parse(json);

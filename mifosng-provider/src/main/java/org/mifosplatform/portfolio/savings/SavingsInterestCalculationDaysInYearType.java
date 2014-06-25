@@ -39,7 +39,7 @@ public enum SavingsInterestCalculationDaysInYearType {
     }
 
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<Integer>();
+        final List<Integer> values = new ArrayList<>();
         for (final SavingsInterestCalculationDaysInYearType enumType : values()) {
             if (enumType.getValue() > 0) {
                 values.add(enumType.getValue());

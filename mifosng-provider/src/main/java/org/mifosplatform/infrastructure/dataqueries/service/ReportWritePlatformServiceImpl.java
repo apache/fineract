@@ -176,7 +176,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
             final JsonArray reportParametersArray = command.arrayOfParameterNamed("reportParameters");
             if (reportParametersArray != null) {
 
-                reportParameterUsages = new HashSet<ReportParameterUsage>();
+                reportParameterUsages = new HashSet<>();
 
                 for (int i = 0; i < reportParametersArray.size(); i++) {
 

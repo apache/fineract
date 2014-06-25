@@ -50,7 +50,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class GLAccountsApiResource {
 
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "parentId", "glCode",
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "parentId", "glCode",
             "disabled", "manualEntriesAllowed", "type", "usage", "description", "assetHeaderAccountOptions",
             "liabilityHeaderAccountOptions", "equityHeaderAccountOptions", "incomeHeaderAccountOptions", "expenseHeaderAccountOptions",
             "nameDecorated", "tagId", "allowedAssetsTagOptions", "allowedLiabilitiesTagOptions", "allowedEquityTagOptions",

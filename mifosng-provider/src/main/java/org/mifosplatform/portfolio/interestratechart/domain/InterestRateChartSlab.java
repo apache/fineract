@@ -56,7 +56,7 @@ public class InterestRateChartSlab extends AbstractPersistable<Long> {
     private InterestRateChart interestRateChart;
 
     @OneToMany(mappedBy = "interestRateChartSlab", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<InterestIncentives> interestIncentives = new HashSet<InterestIncentives>();
+    private Set<InterestIncentives> interestIncentives = new HashSet<>();
 
     protected InterestRateChartSlab() {
         //
@@ -67,7 +67,7 @@ public class InterestRateChartSlab extends AbstractPersistable<Long> {
     }
 
     public void update(JsonCommand command, final Map<String, Object> actualChanges, final Locale locale) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(INTERESTRATE_CHART_SLAB_RESOURCE_NAME);
         this.update(command, actualChanges, baseDataValidator, locale);
@@ -77,7 +77,7 @@ public class InterestRateChartSlab extends AbstractPersistable<Long> {
 
     public void update(JsonCommand command, final Map<String, Object> actualChanges, final DataValidatorBuilder baseDataValidator,
             final Locale locale) {
-        this.slabFields.update(command, actualChanges, baseDataValidator,locale);
+        this.slabFields.update(command, actualChanges, baseDataValidator, locale);
         updateIncentives(command, actualChanges, baseDataValidator, this, locale);
     }
 
@@ -104,7 +104,7 @@ public class InterestRateChartSlab extends AbstractPersistable<Long> {
 
     public Set<InterestIncentives> setOfInterestIncentives() {
         if (this.interestIncentives == null) {
-            this.interestIncentives = new HashSet<InterestIncentives>();
+            this.interestIncentives = new HashSet<>();
         }
         return this.interestIncentives;
     }
@@ -130,8 +130,8 @@ public class InterestRateChartSlab extends AbstractPersistable<Long> {
 
     public void updateIncentives(JsonCommand command, final Map<String, Object> actualChanges,
             final DataValidatorBuilder baseDataValidator, final InterestRateChartSlab chartSlab, final Locale locale) {
-        final Map<String, Object> deleteIncentives = new HashMap<String, Object>();
-        final Map<String, Object> IncentiveChanges = new HashMap<String, Object>();
+        final Map<String, Object> deleteIncentives = new HashMap<>();
+        final Map<String, Object> IncentiveChanges = new HashMap<>();
         if (command.hasParameter(InterestRateChartSlabApiConstants.incentivesParamName)) {
             final JsonArray array = command.arrayOfParameterNamed(InterestRateChartSlabApiConstants.incentivesParamName);
             if (array != null) {

@@ -265,9 +265,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
         Collection<LoanScheduleModelPeriod> periods = null;
         if (loanApplicationTerms.isMultiDisburseLoan()) {
-            periods = new ArrayList<LoanScheduleModelPeriod>(numberOfRepayments + loanApplicationTerms.getDisbursementDatas().size());
+            periods = new ArrayList<>(numberOfRepayments + loanApplicationTerms.getDisbursementDatas().size());
         } else {
-            periods = new ArrayList<LoanScheduleModelPeriod>(numberOfRepayments + 1);
+            periods = new ArrayList<>(numberOfRepayments + 1);
             final LoanScheduleModelDisbursementPeriod disbursementPeriod = LoanScheduleModelDisbursementPeriod.disbursement(
                     loanApplicationTerms, chargesDueAtTimeOfDisbursement);
             periods.add(disbursementPeriod);
@@ -354,7 +354,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         && loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)
                         && loanCharge.getChargeCalculation().isPercentageBased()) {
                     cumulative = cumulative.plus(loanCharge.chargeAmount());
-                }else if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)
+                } else if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)
                         && loanCharge.getChargeCalculation().isPercentageBased()) {
                     BigDecimal amount = BigDecimal.ZERO;
                     if (loanCharge.getChargeCalculation().isPercentageOfAmountAndInterest()) {

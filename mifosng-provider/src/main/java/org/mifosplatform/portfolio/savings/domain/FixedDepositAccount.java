@@ -120,7 +120,7 @@ public class FixedDepositAccount extends SavingsAccount {
 
     @Override
     public void modifyApplication(final JsonCommand command, final Map<String, Object> actualChanges) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.modifyApplicationAction);
         super.modifyApplication(command, actualChanges, baseDataValidator);
@@ -175,7 +175,7 @@ public class FixedDepositAccount extends SavingsAccount {
     }
 
     public void updateMaturityDateAndAmountBeforeAccountActivation(final MathContext mc, final boolean isPreMatureClosure) {
-        List<SavingsAccountTransaction> allTransactions = new ArrayList<SavingsAccountTransaction>();
+        List<SavingsAccountTransaction> allTransactions = new ArrayList<>();
         final Money transactionAmountMoney = Money.of(getCurrency(), this.accountTermAndPreClosure.depositAmount());
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(null, office(), null,
                 this.accountSubmittedOrActivationDate(), transactionAmountMoney, new Date());
@@ -214,7 +214,7 @@ public class FixedDepositAccount extends SavingsAccount {
     }
 
     public void updateMaturityStatus() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.updateMaturityDetailsAction);
 
@@ -271,7 +271,7 @@ public class FixedDepositAccount extends SavingsAccount {
         final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(
                 accountSubmittedOrActivationDate(), maturityDate, postingPeriodType);
 
-        final List<PostingPeriod> allPostingPeriods = new ArrayList<PostingPeriod>();
+        final List<PostingPeriod> allPostingPeriods = new ArrayList<>();
 
         Money periodStartingBalance = Money.zero(currency);
 
@@ -299,7 +299,7 @@ public class FixedDepositAccount extends SavingsAccount {
     public void prematureClosure(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate,
             final Map<String, Object> actualChanges) {
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME + DepositsApiConstants.preMatureCloseAction);
 
@@ -383,7 +383,7 @@ public class FixedDepositAccount extends SavingsAccount {
     public void close(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate,
             final Map<String, Object> actualChanges) {
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.closeAction);
 
@@ -633,7 +633,7 @@ public class FixedDepositAccount extends SavingsAccount {
     }
 
     public void validateDomainRules() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME);
         validateDomainRules(baseDataValidator);

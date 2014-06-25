@@ -66,12 +66,12 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         wrapper.reprocess(currency, disbursementDate, installments, charges);
 
         final ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
-        final List<LoanTransaction> transactionstoBeProcessed = new ArrayList<LoanTransaction>();
+        final List<LoanTransaction> transactionstoBeProcessed = new ArrayList<>();
         for (final LoanTransaction loanTransaction : transactionsPostDisbursement) {
             if (loanTransaction.isChargePayment()) {
-                final List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<LoanRepaymentScheduleInstallment>();
+                final List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<>();
                 final Set<LoanChargePaidBy> chargePaidBies = loanTransaction.getLoanChargesPaid();
-                final Set<LoanCharge> transferCharges = new HashSet<LoanCharge>();
+                final Set<LoanCharge> transferCharges = new HashSet<>();
                 for (final LoanChargePaidBy chargePaidBy : chargePaidBies) {
                     LoanCharge loanCharge = chargePaidBy.getLoanCharge();
                     transferCharges.add(loanCharge);
@@ -209,7 +209,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     }
 
     private Set<LoanCharge> extractFeeCharges(final Set<LoanCharge> loanCharges) {
-        final Set<LoanCharge> feeCharges = new HashSet<LoanCharge>();
+        final Set<LoanCharge> feeCharges = new HashSet<>();
         for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isFeeCharge()) {
                 feeCharges.add(loanCharge);
@@ -219,7 +219,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     }
 
     private Set<LoanCharge> extractPenaltyCharges(final Set<LoanCharge> loanCharges) {
-        final Set<LoanCharge> penaltyCharges = new HashSet<LoanCharge>();
+        final Set<LoanCharge> penaltyCharges = new HashSet<>();
         for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isPenaltyCharge()) {
                 penaltyCharges.add(loanCharge);

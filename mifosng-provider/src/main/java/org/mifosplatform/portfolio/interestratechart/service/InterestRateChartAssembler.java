@@ -54,7 +54,7 @@ public class InterestRateChartAssembler {
     public InterestRateChart assembleFrom(final JsonCommand command) {
 
         final JsonElement element = command.parsedJson();
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         @SuppressWarnings("unused")
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(INTERESTRATE_CHART_RESOURCE_NAME);

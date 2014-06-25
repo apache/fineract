@@ -38,7 +38,7 @@ import java.util.Set;
 @Scope("singleton")
 public class LoanTransactionsApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "type", "date", "currency", "amount",
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "type", "date", "currency", "amount",
             "externalId"));
 
     private final String resourceNameForPermissions = "LOAN";

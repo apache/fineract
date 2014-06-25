@@ -67,7 +67,7 @@ public class GlobalConfigurationHelper {
     }
 
     public static String updateGlobalConfigUpdateValueAsJSON(final String value) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("value", value);
         System.out.println("map : " + map);
         return new Gson().toJson(map);
@@ -81,7 +81,7 @@ public class GlobalConfigurationHelper {
     }
 
     public static String updateIsCacheEnabledGlobalConfigUpdateAsJSON(final String cacheType) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("cacheType", cacheType);
         System.out.println("map : " + map);
         return new Gson().toJson(map);

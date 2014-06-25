@@ -81,7 +81,7 @@ public class CommandProcessingResult {
         this.loanId = null;
         this.savingsId = null;
         this.transactionId = null;
-        this.changes = new HashMap<String, Object>();
+        this.changes = new HashMap<>();
         this.productId = null;
         this.subResourceId = null;
     }

@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class GlobalConfigurationApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("globalConfiguration"));
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("globalConfiguration"));
 
     private final String resourceNameForPermissions = "CONFIGURATION";
 

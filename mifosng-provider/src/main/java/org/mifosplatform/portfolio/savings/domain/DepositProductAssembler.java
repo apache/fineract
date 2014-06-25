@@ -382,7 +382,7 @@ public class DepositProductAssembler {
 
     public Set<Charge> assembleListOfSavingsProductCharges(final JsonCommand command, final String savingsProductCurrencyCode) {
 
-        final Set<Charge> charges = new HashSet<Charge>();
+        final Set<Charge> charges = new HashSet<>();
 
         if (command.parameterExists(chargesParamName)) {
             final JsonArray chargesArray = command.arrayOfParameterNamed(chargesParamName);
@@ -415,7 +415,7 @@ public class DepositProductAssembler {
     }
 
     private Set<InterestRateChart> assembleListOfCharts(JsonCommand command, String currencyCode) {
-        final Set<InterestRateChart> charts = new HashSet<InterestRateChart>();
+        final Set<InterestRateChart> charts = new HashSet<>();
 
         if (command.parameterExists(chartsParamName)) {
             final JsonArray chartsArray = command.arrayOfParameterNamed(chartsParamName);

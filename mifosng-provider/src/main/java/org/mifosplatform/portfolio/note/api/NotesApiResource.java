@@ -43,7 +43,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class NotesApiResource {
 
-    private final Set<String> NOTE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "clientId", "groupId", "loanId",
+    private final Set<String> NOTE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "clientId", "groupId", "loanId",
             "loanTransactionId", "depositAccountId", "savingAccountId", "noteType", "note", "createdById", "createdByUsername",
             "createdOn", "updatedById", "updatedByUsername", "updatedOn"));
 

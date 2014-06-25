@@ -44,7 +44,7 @@ public class PostingPeriod {
             final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
             final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer) {
 
-        final List<EndOfDayBalance> accountEndOfDayBalances = new ArrayList<EndOfDayBalance>();
+        final List<EndOfDayBalance> accountEndOfDayBalances = new ArrayList<>();
         boolean interestTransfered = false;
         Money openingDayBalance = periodStartingBalance;
         Money closeOfDayBalance = openingDayBalance;
@@ -166,7 +166,7 @@ public class PostingPeriod {
             final SavingsCompoundingInterestPeriodType interestPeriodType, final List<EndOfDayBalance> allEndOfDayBalances,
             final LocalDate upToInterestCalculationDate) {
 
-        final List<CompoundingPeriod> compoundingPeriods = new ArrayList<CompoundingPeriod>();
+        final List<CompoundingPeriod> compoundingPeriods = new ArrayList<>();
 
         CompoundingPeriod compoundingPeriod = null;
         switch (interestPeriodType) {

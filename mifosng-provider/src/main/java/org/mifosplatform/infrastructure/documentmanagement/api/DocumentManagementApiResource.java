@@ -49,7 +49,7 @@ import com.sun.jersey.multipart.FormDataParam;
 @Scope("singleton")
 public class DocumentManagementApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "parentEntityType", "parentEntityId",
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "parentEntityType", "parentEntityId",
             "name", "fileName", "size", "type", "description"));
 
     private final String SystemEntityType = "DOCUMENT";
@@ -120,7 +120,7 @@ public class DocumentManagementApiResource {
             @FormDataParam("file") final FormDataBodyPart bodyPart, @FormDataParam("name") final String name,
             @FormDataParam("description") final String description) {
 
-        final Set<String> modifiedParams = new HashSet<String>();
+        final Set<String> modifiedParams = new HashSet<>();
         modifiedParams.add("name");
         modifiedParams.add("description");
 

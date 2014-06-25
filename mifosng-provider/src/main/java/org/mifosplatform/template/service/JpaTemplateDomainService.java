@@ -24,7 +24,7 @@ public class JpaTemplateDomainService implements TemplateDomainService {
 
     private static final String PROPERTY_NAME = "name";
     private static final String PROPERTY_TEXT = "text";
-//    private static final String PROPERTY_MAPPERS = "mappers";
+    // private static final String PROPERTY_MAPPERS = "mappers";
     private static final String PROPERTY_ENTITY = "entity";
     private static final String PROPERTY_TYPE = "type";
 
@@ -46,8 +46,10 @@ public class JpaTemplateDomainService implements TemplateDomainService {
     @Transactional
     @Override
     public CommandProcessingResult createTemplate(final JsonCommand command) {
-        // FIXME - no validation here of the data in the command object, is name, text populated etc
-        // FIXME - handle cases where data integrity constraints are fired from database when saving.
+        // FIXME - no validation here of the data in the command object, is
+        // name, text populated etc
+        // FIXME - handle cases where data integrity constraints are fired from
+        // database when saving.
         final Template template = Template.fromJson(command);
 
         this.templateRepository.saveAndFlush(template);
@@ -57,8 +59,10 @@ public class JpaTemplateDomainService implements TemplateDomainService {
     @Transactional
     @Override
     public CommandProcessingResult updateTemplate(final Long templateId, final JsonCommand command) {
-     // FIXME - no validation here of the data in the command object, is name, text populated etc
-        // FIXME - handle cases where data integrity constraints are fired from database when saving.
+        // FIXME - no validation here of the data in the command object, is
+        // name, text populated etc
+        // FIXME - handle cases where data integrity constraints are fired from
+        // database when saving.
 
         final Template template = findOneById(templateId);
         template.setName(command.stringValueOfParameterNamed(PROPERTY_NAME));
@@ -67,7 +71,7 @@ public class JpaTemplateDomainService implements TemplateDomainService {
         template.setType(TemplateType.values()[command.integerValueSansLocaleOfParameterNamed(PROPERTY_TYPE)]);
 
         final JsonArray array = command.arrayOfParameterNamed("mappers");
-        final List<TemplateMapper> mappersList = new ArrayList<TemplateMapper>();
+        final List<TemplateMapper> mappersList = new ArrayList<>();
         for (final JsonElement element : array) {
             mappersList.add(new TemplateMapper(element.getAsJsonObject().get("mappersorder").getAsInt(), element.getAsJsonObject()
                     .get("mapperskey").getAsString(), element.getAsJsonObject().get("mappersvalue").getAsString()));

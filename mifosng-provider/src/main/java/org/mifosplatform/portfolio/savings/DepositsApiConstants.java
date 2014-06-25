@@ -183,13 +183,13 @@ public class DepositsApiConstants {
     public static final String chartTemplate = "chartTemplate";
 
     // allowed column names for sorting the query result
-    public final static Set<String> supportedOrderByValues = new HashSet<String>(Arrays.asList("id", "accountNumbr", "officeId",
+    public final static Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "accountNumbr", "officeId",
             "officeName"));
 
     /**
      * Deposit Product Parameters
      */
-    private static final Set<String> DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
+    private static final Set<String> DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             monthDayFormatParamName, nameParamName, shortNameParamName, descriptionParamName, currencyCodeParamName,
             digitsAfterDecimalParamName, inMultiplesOfParamName, nominalAnnualInterestRateParamName,
             interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName, interestCalculationTypeParamName,
@@ -203,31 +203,31 @@ public class DepositsApiConstants {
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.FEE_INCOME_ACCOUNT_MAPPING.getValue(),
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PENALTY_INCOME_ACCOUNT_MAPPING.getValue(), chartsParamName));
 
-    private static final Set<String> PRECLOSURE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
+    private static final Set<String> PRECLOSURE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
             preClosurePenalApplicableParamName, preClosurePenalInterestParamName, preClosurePenalInterestOnTypeIdParamName));
 
-    private static final Set<String> PRECLOSURE_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
+    private static final Set<String> PRECLOSURE_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
             preClosurePenalApplicableParamName, preClosurePenalInterestParamName, preClosurePenalInterestOnType));
 
-    private static final Set<String> DEPOSIT_TERM_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(minDepositTermParamName,
+    private static final Set<String> DEPOSIT_TERM_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(minDepositTermParamName,
             maxDepositTermParamName, minDepositTermTypeIdParamName, maxDepositTermTypeIdParamName, inMultiplesOfDepositTermParamName,
             inMultiplesOfDepositTermTypeIdParamName, depositAmountParamName, depositMinAmountParamName, depositMaxAmountParamName));
 
-    private static final Set<String> DEPOSIT_TERM_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(minDepositTermParamName,
+    private static final Set<String> DEPOSIT_TERM_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(minDepositTermParamName,
             maxDepositTermParamName, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTermParamName,
             inMultiplesOfDepositTermType, depositAmountParamName, depositMinAmountParamName, depositMaxAmountParamName));
 
-    private static final Set<String> RECURRING_DETAILS_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
+    private static final Set<String> RECURRING_DETAILS_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
             mandatoryRecommendedDepositAmountParamName, isMandatoryDepositParamName, allowWithdrawalParamName,
             adjustAdvanceTowardsFuturePaymentsParamName, recurringFrequencyTypeParamName, recurringFrequencyParamName,
             isCalendarInheritedParamName));
 
-    private static final Set<String> RECURRING_DETAILS_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
+    private static final Set<String> RECURRING_DETAILS_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
             mandatoryRecommendedDepositAmountParamName, isMandatoryDepositParamName, allowWithdrawalParamName,
             adjustAdvanceTowardsFuturePaymentsParamName, recurringFrequencyTypeParamName, recurringFrequencyParamName,
             isCalendarInheritedParamName));
 
-    public static final Set<String> DEPOSIT_PRECLOSURE_CALCULATION_REQUEST_DATA_PARAMETERS = new HashSet<String>(
+    public static final Set<String> DEPOSIT_PRECLOSURE_CALCULATION_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(preMatureCloseOnDateParamName));
 
     public static final Set<String> FIXED_DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS = fixedDepositProductRequestData();
@@ -237,7 +237,7 @@ public class DepositsApiConstants {
     public static final Set<String> RECURRING_DEPOSIT_PRODUCT_RESPONSE_DATA_PARAMETERS = recurringDepositProductResponseData();
 
     private static Set<String> fixedDepositProductRequestData() {
-        final Set<String> fixedDepositRequestData = new HashSet<String>();
+        final Set<String> fixedDepositRequestData = new HashSet<>();
         fixedDepositRequestData.addAll(DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS);
         fixedDepositRequestData.addAll(PRECLOSURE_REQUEST_DATA_PARAMETERS);
         fixedDepositRequestData.addAll(DEPOSIT_TERM_REQUEST_DATA_PARAMETERS);
@@ -245,7 +245,7 @@ public class DepositsApiConstants {
     }
 
     private static Set<String> fixedDepositProductResponseData() {
-        final Set<String> fixedDepositRequestData = new HashSet<String>();
+        final Set<String> fixedDepositRequestData = new HashSet<>();
         fixedDepositRequestData.addAll(DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS);
         fixedDepositRequestData.addAll(PRECLOSURE_RESPONSE_DATA_PARAMETERS);
         fixedDepositRequestData.addAll(DEPOSIT_TERM_RESPONSE_DATA_PARAMETERS);
@@ -253,7 +253,7 @@ public class DepositsApiConstants {
     }
 
     private static Set<String> recurringDepositProductRequestData() {
-        final Set<String> recurringDepositRequestData = new HashSet<String>();
+        final Set<String> recurringDepositRequestData = new HashSet<>();
         recurringDepositRequestData.addAll(DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS);
         recurringDepositRequestData.addAll(PRECLOSURE_REQUEST_DATA_PARAMETERS);
         recurringDepositRequestData.addAll(DEPOSIT_TERM_REQUEST_DATA_PARAMETERS);
@@ -262,7 +262,7 @@ public class DepositsApiConstants {
     }
 
     private static Set<String> recurringDepositProductResponseData() {
-        final Set<String> recurringDepositRequestData = new HashSet<String>();
+        final Set<String> recurringDepositRequestData = new HashSet<>();
         recurringDepositRequestData.addAll(DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS);
         recurringDepositRequestData.addAll(PRECLOSURE_RESPONSE_DATA_PARAMETERS);
         recurringDepositRequestData.addAll(DEPOSIT_TERM_RESPONSE_DATA_PARAMETERS);
@@ -274,7 +274,7 @@ public class DepositsApiConstants {
      * Depost Account parameters
      */
 
-    public static final Set<String> DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
+    public static final Set<String> DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, monthDayFormatParamName, accountNoParamName, externalIdParamName, clientIdParamName, groupIdParamName,
             productIdParamName, fieldOfficerIdParamName, submittedOnDateParamName, nominalAnnualInterestRateParamName,
             interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName, interestCalculationTypeParamName,
@@ -289,7 +289,7 @@ public class DepositsApiConstants {
     public static final Set<String> RECURRING_DEPOSIT_ACCOUNT_RESPONSE_DATA_PARAMETERS = recurringDepositAccountResponseData();
 
     private static Set<String> fixedDepositAccountRequestData() {
-        final Set<String> fixedDepositRequestData = new HashSet<String>();
+        final Set<String> fixedDepositRequestData = new HashSet<>();
         fixedDepositRequestData.addAll(DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS);
         fixedDepositRequestData.addAll(PRECLOSURE_REQUEST_DATA_PARAMETERS);
         fixedDepositRequestData.addAll(DEPOSIT_TERM_REQUEST_DATA_PARAMETERS);
@@ -299,7 +299,7 @@ public class DepositsApiConstants {
     }
 
     private static Set<String> fixedDepositAccountResponseData() {
-        final Set<String> fixedDepositResponseData = new HashSet<String>();
+        final Set<String> fixedDepositResponseData = new HashSet<>();
         fixedDepositResponseData.addAll(DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS);
         fixedDepositResponseData.addAll(PRECLOSURE_RESPONSE_DATA_PARAMETERS);
         fixedDepositResponseData.addAll(DEPOSIT_TERM_RESPONSE_DATA_PARAMETERS);
@@ -309,7 +309,7 @@ public class DepositsApiConstants {
     }
 
     private static Set<String> recurringDepositAccountRequestData() {
-        final Set<String> recurringDepositRequestData = new HashSet<String>();
+        final Set<String> recurringDepositRequestData = new HashSet<>();
         recurringDepositRequestData.addAll(DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS);
         recurringDepositRequestData.addAll(PRECLOSURE_REQUEST_DATA_PARAMETERS);
         recurringDepositRequestData.addAll(DEPOSIT_TERM_REQUEST_DATA_PARAMETERS);
@@ -318,7 +318,7 @@ public class DepositsApiConstants {
     }
 
     private static Set<String> recurringDepositAccountResponseData() {
-        final Set<String> recurringDepositResponseData = new HashSet<String>();
+        final Set<String> recurringDepositResponseData = new HashSet<>();
         recurringDepositResponseData.addAll(DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS);
         recurringDepositResponseData.addAll(PRECLOSURE_RESPONSE_DATA_PARAMETERS);
         recurringDepositResponseData.addAll(DEPOSIT_TERM_RESPONSE_DATA_PARAMETERS);
@@ -326,39 +326,39 @@ public class DepositsApiConstants {
         return recurringDepositResponseData;
     }
 
-    public static final Set<String> DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
+    public static final Set<String> DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
             localeParamName, dateFormatParamName, transactionDateParamName, transactionAmountParamName, paymentTypeIdParamName,
             transactionAccountNumberParamName, checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
 
-    public static final Set<String> FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName,
+    public static final Set<String> FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
             "accountId", accountNoParamName, "currency", "amount", dateParamName, paymentDetailDataParamName, runningBalanceParamName,
             reversedParamName));
 
-    public static final Set<String> RECURRING_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName,
+    public static final Set<String> RECURRING_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
             "accountId", accountNoParamName, "currency", "amount", dateParamName, paymentDetailDataParamName, runningBalanceParamName,
             reversedParamName));
 
-    public static final Set<String> SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
+    public static final Set<String> SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, activatedOnDateParamName));
 
-    public static final Set<String> DEPOSIT_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
+    public static final Set<String> DEPOSIT_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, closedOnDateParamName, noteParamName, onAccountClosureIdParamName, paymentTypeIdParamName,
             transactionAccountNumberParamName, checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName,
             transferDescriptionParamName, toSavingsAccountIdParamName));
 
-    public static final Set<String> DEPOSIT_ACCOUNT_PRE_MATURE_CALCULATION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
+    public static final Set<String> DEPOSIT_ACCOUNT_PRE_MATURE_CALCULATION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
             localeParamName, dateFormatParamName, closedOnDateParamName));
 
-    public static final Set<String> SAVINGS_ACCOUNT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(chargeIdParamName,
+    public static final Set<String> SAVINGS_ACCOUNT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(chargeIdParamName,
             savingsAccountChargeIdParamName, chargeNameParamName, penaltyParamName, chargeTimeTypeParamName, dueAsOfDateParamName,
             chargeCalculationTypeParamName, percentageParamName, amountPercentageAppliedToParamName, currencyParamName,
             amountWaivedParamName, amountWrittenOffParamName, amountOutstandingParamName, amountOrPercentageParamName, amountParamName,
             amountPaidParamName, chargeOptionsParamName));
 
-    public static final Set<String> SAVINGS_ACCOUNT_CHARGES_ADD_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
+    public static final Set<String> SAVINGS_ACCOUNT_CHARGES_ADD_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
             chargeIdParamName, amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName, feeOnMonthDayParamName,
             monthDayFormatParamName, feeIntervalParamName));
 
-    public static final Set<String> SAVINGS_ACCOUNT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
+    public static final Set<String> SAVINGS_ACCOUNT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
             amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName));
 }

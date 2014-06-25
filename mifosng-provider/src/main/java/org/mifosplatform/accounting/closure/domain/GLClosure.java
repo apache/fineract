@@ -64,7 +64,7 @@ public class GLClosure extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(5);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
         handlePropertyUpdate(command, actualChanges, GLClosureJsonInputParams.COMMENTS.getValue(), this.comments);
         return actualChanges;
     }

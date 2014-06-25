@@ -85,9 +85,9 @@ public class RecurringDepositProduct extends FixedDepositProduct {
 
     @Override
     public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(10);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME);
 
@@ -102,7 +102,7 @@ public class RecurringDepositProduct extends FixedDepositProduct {
 
     @Override
     protected Map<String, Object> update(final JsonCommand command, final DataValidatorBuilder baseDataValidator) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(10);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
 
         actualChanges.putAll(super.update(command, baseDataValidator));
 
@@ -123,7 +123,7 @@ public class RecurringDepositProduct extends FixedDepositProduct {
 
     @Override
     public void validateDomainRules() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME);
 

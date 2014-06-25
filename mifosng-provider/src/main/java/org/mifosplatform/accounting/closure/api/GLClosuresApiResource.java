@@ -43,7 +43,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class GLClosuresApiResource {
 
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "officeName",
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "officeId", "officeName",
             "closingDate", "deleted", "createdDate", "lastUpdatedDate", "createdByUserId", "createdByUsername", "lastUpdatedByUserId",
             "lastUpdatedByUsername"));
 

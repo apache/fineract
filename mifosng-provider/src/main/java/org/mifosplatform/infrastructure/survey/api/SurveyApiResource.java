@@ -12,7 +12,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -25,8 +24,6 @@ import org.mifosplatform.infrastructure.survey.data.ClientScoresOverview;
 import org.mifosplatform.infrastructure.survey.data.SurveyData;
 import org.mifosplatform.infrastructure.survey.data.SurveyDataTableData;
 import org.mifosplatform.infrastructure.survey.service.ReadSurveyService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -45,8 +42,6 @@ public class SurveyApiResource {
     private final ReadSurveyService readSurveyService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final GenericDataService genericDataService;
-
-    private final static Logger logger = LoggerFactory.getLogger(SurveyApiResource.class);
 
     @Autowired
     public SurveyApiResource(final DefaultToApiJsonSerializer<SurveyData> toApiJsonSerializer, final PlatformSecurityContext context,
@@ -147,10 +142,6 @@ public class SurveyApiResource {
 
         return this.toApiJsonSerializer.serialize(result);
 
-    }
-
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
 
     @DELETE

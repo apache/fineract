@@ -27,7 +27,7 @@ public class CalendarEnumerations {
     }
 
     public static List<EnumOptionData> calendarEntityType(final CalendarEntityType[] entityTypes) {
-        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final CalendarEntityType entityType : entityTypes) {
             optionDatas.add(calendarEntityType(entityType));
         }
@@ -44,7 +44,7 @@ public class CalendarEnumerations {
     }
 
     public static List<EnumOptionData> calendarType(final CalendarType[] types) {
-        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final CalendarType type : types) {
             optionDatas.add(calendarType(type));
         }
@@ -61,7 +61,7 @@ public class CalendarEnumerations {
     }
 
     public static List<EnumOptionData> calendarRemindBy(final CalendarRemindBy[] remindBys) {
-        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final CalendarRemindBy remindBy : remindBys) {
             optionDatas.add(calendarRemindBy(remindBy));
         }
@@ -79,7 +79,7 @@ public class CalendarEnumerations {
     }
 
     public static List<EnumOptionData> calendarFrequencyType(final CalendarFrequencyType[] calendarFrequencyTypes) {
-        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final CalendarFrequencyType calendarFrequencyType : calendarFrequencyTypes) {
             if (!calendarFrequencyType.isInvalid()) {
                 optionDatas.add(calendarFrequencyType(calendarFrequencyType));
@@ -99,7 +99,7 @@ public class CalendarEnumerations {
     }
 
     public static List<EnumOptionData> calendarWeekDaysType(final CalendarWeekDaysType[] calendarWeekDaysTypes) {
-        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final CalendarWeekDaysType calendarWeekDaysType : calendarWeekDaysTypes) {
             if (!calendarWeekDaysType.isInvalid()) {
                 optionDatas.add(calendarWeekDaysType(calendarWeekDaysType));

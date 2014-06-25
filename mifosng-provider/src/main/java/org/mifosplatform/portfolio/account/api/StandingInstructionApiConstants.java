@@ -28,7 +28,7 @@ public class StandingInstructionApiConstants {
     public static final String recurrenceOnMonthDayParamName = "recurrenceOnMonthDay";
     public static final String monthDayFormatParamName = "monthDayFormat";
 
-    public static final Set<String> CREATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
+    public static final Set<String> CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
             AccountDetailConstants.localeParamName, AccountDetailConstants.dateFormatParamName,
             AccountDetailConstants.fromOfficeIdParamName, AccountDetailConstants.fromClientIdParamName,
             AccountDetailConstants.fromAccountTypeParamName, AccountDetailConstants.fromAccountIdParamName,
@@ -38,12 +38,12 @@ public class StandingInstructionApiConstants {
             validFromParamName, validTillParamName, recurrenceTypeParamName, recurrenceFrequencyParamName, recurrenceIntervalParamName,
             recurrenceOnMonthDayParamName, nameParamName, monthDayFormatParamName));
 
-    public static final Set<String> UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
+    public static final Set<String> UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
             AccountDetailConstants.localeParamName, AccountDetailConstants.dateFormatParamName, priorityParamName,
             instructionTypeParamName, statusParamName, amountParamName, validFromParamName, validTillParamName, recurrenceTypeParamName,
             recurrenceFrequencyParamName, recurrenceIntervalParamName, recurrenceOnMonthDayParamName, monthDayFormatParamName));
 
-    public static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(AccountDetailConstants.idParamName,
+    public static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(AccountDetailConstants.idParamName,
             nameParamName, priorityParamName, instructionTypeParamName, statusParamName, AccountDetailConstants.transferTypeParamName,
             validFromParamName, validTillParamName));
 

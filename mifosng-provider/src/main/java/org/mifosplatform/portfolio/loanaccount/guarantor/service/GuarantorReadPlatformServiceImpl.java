@@ -103,7 +103,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
         sql += " where loan_id = ?";
         final List<GuarantorData> guarantorDatas = this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
 
-        final List<GuarantorData> mergedGuarantorDatas = new ArrayList<GuarantorData>();
+        final List<GuarantorData> mergedGuarantorDatas = new ArrayList<>();
 
         for (final GuarantorData guarantorData : guarantorDatas) {
             mergedGuarantorDatas.add(mergeDetailsForClientOrStaffGuarantor(guarantorData));

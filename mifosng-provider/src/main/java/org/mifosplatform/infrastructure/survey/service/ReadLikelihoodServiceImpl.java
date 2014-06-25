@@ -29,7 +29,7 @@ public class ReadLikelihoodServiceImpl implements ReadLikelihoodService {
     public List<LikelihoodData> retrieveAll(final String ppiName) {
         final SqlRowSet likelihood = this._getLikelihood(ppiName);
 
-        List<LikelihoodData> likelihoodDatas = new ArrayList<LikelihoodData>();
+        List<LikelihoodData> likelihoodDatas = new ArrayList<>();
 
         while (likelihood.next()) {
             likelihoodDatas.add(new LikelihoodData(likelihood.getLong("id"), likelihood.getString("name"), likelihood.getString("code"),

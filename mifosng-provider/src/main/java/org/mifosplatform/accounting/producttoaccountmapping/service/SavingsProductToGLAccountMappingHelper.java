@@ -110,7 +110,7 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
 
     public Map<String, Object> populateChangesForNewSavingsProductToGLAccountMappingCreation(final JsonElement element,
             final AccountingRuleType accountingRuleType) {
-        final Map<String, Object> changes = new HashMap<String, Object>();
+        final Map<String, Object> changes = new HashMap<>();
 
         final Long savingsReferenceId = this.fromApiJsonHelper.extractLongNamed(
                 SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue(), element);

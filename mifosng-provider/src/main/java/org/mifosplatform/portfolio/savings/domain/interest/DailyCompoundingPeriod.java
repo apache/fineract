@@ -16,9 +16,11 @@ public class DailyCompoundingPeriod implements CompoundingPeriod {
     private final LocalDateInterval periodInterval;
     private final List<EndOfDayBalance> endOfDayBalances;
 
-    public static DailyCompoundingPeriod create(final LocalDateInterval periodInterval, final List<EndOfDayBalance> allEndOfDayBalances, final LocalDate upToInterestCalculationDate) {
+    public static DailyCompoundingPeriod create(final LocalDateInterval periodInterval, final List<EndOfDayBalance> allEndOfDayBalances,
+            final LocalDate upToInterestCalculationDate) {
 
-        final List<EndOfDayBalance> endOfDayBalancesWithinPeriod = endOfDayBalancesWithinPeriodInterval(periodInterval, allEndOfDayBalances, upToInterestCalculationDate);
+        final List<EndOfDayBalance> endOfDayBalancesWithinPeriod = endOfDayBalancesWithinPeriodInterval(periodInterval,
+                allEndOfDayBalances, upToInterestCalculationDate);
 
         return new DailyCompoundingPeriod(periodInterval, endOfDayBalancesWithinPeriod);
     }
@@ -26,7 +28,7 @@ public class DailyCompoundingPeriod implements CompoundingPeriod {
     private static List<EndOfDayBalance> endOfDayBalancesWithinPeriodInterval(final LocalDateInterval compoundingPeriodInterval,
             final List<EndOfDayBalance> allEndOfDayBalances, final LocalDate upToInterestCalculationDate) {
 
-        final List<EndOfDayBalance> endOfDayBalancesForPeriodInterval = new ArrayList<EndOfDayBalance>();
+        final List<EndOfDayBalance> endOfDayBalancesForPeriodInterval = new ArrayList<>();
 
         EndOfDayBalance cappedToPeriodEndDate = null;
 

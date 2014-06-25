@@ -49,14 +49,14 @@ public class InterestRateChartApiConstants {
     // to delete chart Slabs from chart
     public static final String deleteParamName = "delete";
 
-    public static final Set<String> INTERESTRATE_CHART_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
+    public static final Set<String> INTERESTRATE_CHART_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, productIdParamName,
             chartSlabs));
 
-    public static final Set<String> INTERESTRATE_CHART_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
+    public static final Set<String> INTERESTRATE_CHART_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, idParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, chartSlabs,
             deleteParamName));
 
-    public static final Set<String> INTERESTRATE_CHART_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
+    public static final Set<String> INTERESTRATE_CHART_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, idParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, chartSlabs));
 }

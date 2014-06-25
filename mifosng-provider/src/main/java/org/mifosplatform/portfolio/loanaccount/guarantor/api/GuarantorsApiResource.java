@@ -48,7 +48,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class GuarantorsApiResource {
 
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "loanId", "clientRelationshipType",
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "loanId", "clientRelationshipType",
             "guarantorType", "firstname", "lastname", "entityId", "externalId", "officeName", "joinedDate", "addressLine1", "addressLine2",
             "city", "state", "zip", "country", "mobileNumber", "housePhoneNumber", "comment", "dob", "guarantorTypeOptions",
             "allowedClientRelationshipTypes"));

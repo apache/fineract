@@ -32,7 +32,7 @@ public enum CalendarWeekDaysType {
         return this.code;
     }
 
-    private static final Map<Integer, CalendarWeekDaysType> intToEnumMap = new HashMap<Integer, CalendarWeekDaysType>();
+    private static final Map<Integer, CalendarWeekDaysType> intToEnumMap = new HashMap<>();
     private static int minValue = CalendarWeekDaysType.MO.value;
     private static int maxValue = CalendarWeekDaysType.SU.value;
 

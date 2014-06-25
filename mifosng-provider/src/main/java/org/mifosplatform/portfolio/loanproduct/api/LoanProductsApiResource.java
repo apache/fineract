@@ -63,7 +63,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class LoanProductsApiResource {
 
-    private final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "shortName", "description",
+    private final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "shortName", "description",
             "fundId", "fundName", "includeInBorrowerCycle", "currency", "principal", "minPrincipal", "maxPrincipal", "numberOfRepayments",
             "minNumberOfRepayments", "maxNumberOfRepayments", "repaymentEvery", "repaymentFrequencyType", "graceOnPrincipalPayment",
             "graceOnInterestPayment", "graceOnInterestCharged", "interestRatePerPeriod", "minInterestRatePerPeriod",
@@ -75,7 +75,7 @@ public class LoanProductsApiResource {
             "transactionProcessingStrategyOptions", "chargeOptions", "accountingOptions", "accountingRuleOptions",
             "accountingMappingOptions"));
 
-    private final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("productId", "productName",
+    private final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(Arrays.asList("productId", "productName",
             "restrictedProducts", "allowedProducts", "productOptions"));
 
     private final String resourceNameForPermissions = "LOANPRODUCT";

@@ -40,7 +40,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class OfficeTransactionsApiResource {
 
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "transactionDate", "fromOfficeId",
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "transactionDate", "fromOfficeId",
             "fromOfficeName", "toOfficeId", "toOfficeIdName", "currencyCode", "digitsAfterDecimal", "inMultiplesOf", "transactionAmount",
             "description", "allowedOffices", "currencyOptions"));
 

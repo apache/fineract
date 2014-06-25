@@ -20,7 +20,7 @@ public class SearchConstants {
             this.value = value;
         }
 
-        private static final Set<String> values = new HashSet<String>();
+        private static final Set<String> values = new HashSet<>();
         static {
             for (final SEARCH_RESPONSE_PARAMETERS param : SEARCH_RESPONSE_PARAMETERS.values()) {
                 values.add(param.value);
@@ -50,7 +50,7 @@ public class SearchConstants {
             this.value = value;
         }
 
-        private static final Set<String> values = new HashSet<String>();
+        private static final Set<String> values = new HashSet<>();
         static {
             for (final SEARCH_SUPPORTED_PARAMETERS param : SEARCH_SUPPORTED_PARAMETERS.values()) {
                 values.add(param.value);
@@ -80,7 +80,7 @@ public class SearchConstants {
             this.value = value;
         }
 
-        private static final Set<String> values = new HashSet<String>();
+        private static final Set<String> values = new HashSet<>();
         static {
             for (final SEARCH_SUPPORTED_RESOURCES param : SEARCH_SUPPORTED_RESOURCES.values()) {
                 values.add(param.value);
@@ -110,7 +110,7 @@ public class SearchConstants {
             this.value = value;
         }
 
-        private static final Set<String> values = new HashSet<String>();
+        private static final Set<String> values = new HashSet<>();
         static {
             for (final SEARCH_LOAN_DATE param : SEARCH_LOAN_DATE.values()) {
                 values.add(param.value);

@@ -123,7 +123,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         } catch (final PlatformEmailSendException e) {
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
             final String email = command.stringValueOfParameterNamed("email");
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.user.email.invalid",
@@ -239,7 +239,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     private Set<Role> assembleSetOfRoles(final String[] rolesArray) {
 
-        final Set<Role> allRoles = new HashSet<Role>();
+        final Set<Role> allRoles = new HashSet<>();
 
         if (!ObjectUtils.isEmpty(rolesArray)) {
             for (final String roleId : rolesArray) {

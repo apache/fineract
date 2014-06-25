@@ -222,7 +222,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
     public Map<String, Object> update(final JsonCommand command, final AprCalculator aprCalculator) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(20);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(20);
 
         final String localeAsInput = command.locale();
 
@@ -263,7 +263,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     }
 
     public Map<String, Object> updateLoanApplicationAttributes(final JsonCommand command, final AprCalculator aprCalculator) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(20);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(20);
 
         final String localeAsInput = command.locale();
 
@@ -387,7 +387,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     }
 
     public void validateRepaymentPeriodWithGraceSettings() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loanproduct");
 
         if (this.numberOfRepayments <= defaultToZeroIfNull(this.graceOnPrincipalPayment)) {

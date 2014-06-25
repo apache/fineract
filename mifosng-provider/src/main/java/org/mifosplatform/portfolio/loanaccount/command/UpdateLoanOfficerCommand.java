@@ -41,7 +41,7 @@ public class UpdateLoanOfficerCommand {
     }
 
     public void validateForBulkLoanReassignment() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loans.reassignment");
 
@@ -58,7 +58,7 @@ public class UpdateLoanOfficerCommand {
     }
 
     public void validateForLoanReassignment() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loans.reassignment");
 

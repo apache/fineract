@@ -33,7 +33,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
     /**
      * The parameters supported for this command.
      */
-    final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "clientId", "groupId", "loanType", "calendarId",
+    final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "clientId", "groupId", "loanType", "calendarId",
             "productId", "accountNo", "externalId", "fundId", "loanOfficerId", "loanPurposeId", "transactionProcessingStrategyId",
             "principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", "loanTermFrequency",
             "loanTermFrequencyType", "repaymentFrequencyType", "amortizationType", "interestType",
@@ -56,7 +56,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 

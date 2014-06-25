@@ -64,7 +64,7 @@ public class InterestRateChartWritePlatformServiceJpaRepositoryImpl implements I
     @Transactional
     public CommandProcessingResult update(Long interestRateChartId, JsonCommand command) {
         this.interestRateChartDataValidator.validateUpdate(command.json());
-        final Map<String, Object> changes = new LinkedHashMap<String, Object>(20);
+        final Map<String, Object> changes = new LinkedHashMap<>(20);
         final InterestRateChart interestRateChart = this.interestRateChartAssembler.assembleFrom(interestRateChartId);
 
         interestRateChart.update(command, changes);

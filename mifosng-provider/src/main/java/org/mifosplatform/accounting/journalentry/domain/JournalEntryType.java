@@ -28,7 +28,7 @@ public enum JournalEntryType {
         return this.code;
     }
 
-    private static final Map<Integer, JournalEntryType> intToEnumMap = new HashMap<Integer, JournalEntryType>();
+    private static final Map<Integer, JournalEntryType> intToEnumMap = new HashMap<>();
     static {
         for (final JournalEntryType type : JournalEntryType.values()) {
             intToEnumMap.put(type.value, type);

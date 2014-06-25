@@ -68,7 +68,7 @@ public class SmsMessage extends AbstractPersistable<Long> {
 
     public Map<String, Object> update(final JsonCommand command) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(1);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
 
         if (command.isChangeInStringParameterNamed(SmsApiConstants.messageParamName, this.message)) {
             final String newValue = command.stringValueOfParameterNamed(SmsApiConstants.messageParamName);

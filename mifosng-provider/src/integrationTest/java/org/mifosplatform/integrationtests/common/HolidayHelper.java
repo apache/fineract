@@ -28,9 +28,9 @@ public class HolidayHelper {
     }
 
     public static String getCreateHolidayDataAsJSON() {
-        final HashMap<String, Object> map = new HashMap<String, Object>();
+        final HashMap<String, Object> map = new HashMap<>();
         List<HashMap<String, String>> offices = new ArrayList<HashMap<String, String>>();
-        HashMap<String, String> officeMap = new HashMap<String, String>();
+        HashMap<String, String> officeMap = new HashMap<>();
         officeMap.put("officeId", OFFICE_ID);
         offices.add(officeMap);
 
@@ -48,7 +48,7 @@ public class HolidayHelper {
     }
     
     public static String getActivateHolidayDataAsJSON() {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         String activateHoliday = new Gson().toJson(map);
         System.out.println(activateHoliday);
         return activateHoliday;

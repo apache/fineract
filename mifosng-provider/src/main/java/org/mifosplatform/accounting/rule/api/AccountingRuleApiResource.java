@@ -55,7 +55,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class AccountingRuleApiResource {
 
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "officeName",
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "officeId", "officeName",
             "accountToDebitId", "accountToCreditId", "name", "description", "systemDefined", "allowedCreditTagOptions",
             "allowedDebitTagOptions", "debitTags", "creditTags", "creditAccounts", "debitAccounts", "allowMultipleCreditEntries",
             "allowMultipleDebitEntries", "tag"));
@@ -232,8 +232,8 @@ public class AccountingRuleApiResource {
 
     private Collection<CodeValueData> retrieveSelectedTags(final Collection<CodeValueData> allowedTagOptions,
             final List<AccountingTagRuleData> existedTags) {
-        final Collection<CodeValueData> tempOptions = new ArrayList<CodeValueData>(allowedTagOptions);
-        final Map<Long, CodeValueData> selectedTags = new HashMap<Long, CodeValueData>();
+        final Collection<CodeValueData> tempOptions = new ArrayList<>(allowedTagOptions);
+        final Map<Long, CodeValueData> selectedTags = new HashMap<>();
         for (final AccountingTagRuleData accountingTagRuleData : existedTags) {
             for (final CodeValueData codeValueData : tempOptions) {
                 if (codeValueData.getId().equals(accountingTagRuleData.getTag().getId())) {

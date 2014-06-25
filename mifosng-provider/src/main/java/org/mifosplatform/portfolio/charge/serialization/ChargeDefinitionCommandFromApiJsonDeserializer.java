@@ -39,7 +39,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("name", "amount", "locale", "currencyCode",
+    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("name", "amount", "locale", "currencyCode",
             "currencyOptions", "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions", "penalty",
             "active", "chargePaymentMode", "feeOnMonthDay", "feeInterval", "monthDayFormat", "minCap", "maxCap", "feeFrequency"));
 
@@ -56,7 +56,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charge");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -113,12 +113,13 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             }
 
             final ChargeTimeType ctt = ChargeTimeType.fromInt(chargeTimeType);
-            
+
             if (ctt.isWeeklyFee()) {
-            	final String monthDay = this.fromApiJsonHelper.extractStringNamed("feeOnMonthDay", element);
-            	baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay).mustBeBlankWhenParameterProvidedIs("chargeTimeType", chargeTimeType);
+                final String monthDay = this.fromApiJsonHelper.extractStringNamed("feeOnMonthDay", element);
+                baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay)
+                        .mustBeBlankWhenParameterProvidedIs("chargeTimeType", chargeTimeType);
             }
-            
+
             if (ctt.isMonthlyFee()) {
                 final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed("feeOnMonthDay", element);
                 baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay).notNull();
@@ -174,7 +175,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charge");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -217,7 +218,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final Collection<Object> validLoanValues = Arrays.asList(ChargeTimeType.validLoanValues());
             final Collection<Object> validSavingsValues = Arrays.asList(ChargeTimeType.validSavingsValues());
 
-            final Collection<Object> allValidValues = new ArrayList<Object>(validLoanValues);
+            final Collection<Object> allValidValues = new ArrayList<>(validLoanValues);
             allValidValues.addAll(validSavingsValues);
 
             baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull()

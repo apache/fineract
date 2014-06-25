@@ -58,16 +58,16 @@ public final class GoogleGsonSerializerHelper {
     public Gson createGsonBuilderWithParameterExclusionSerializationStrategy(final Set<String> supportedParameters,
             final boolean prettyPrint, final Set<String> responseParameters) {
 
-        final Set<String> parameterNamesToSkip = new HashSet<String>();
+        final Set<String> parameterNamesToSkip = new HashSet<>();
 
         if (!responseParameters.isEmpty()) {
 
             // strip out all known support parameters from expected response to
             // see if unsupported parameters requested for response.
-            final Set<String> differentParametersDetectedSet = new HashSet<String>(responseParameters);
+            final Set<String> differentParametersDetectedSet = new HashSet<>(responseParameters);
             differentParametersDetectedSet.removeAll(supportedParameters);
 
-            if (!differentParametersDetectedSet.isEmpty()) { throw new UnsupportedParameterException(new ArrayList<String>(
+            if (!differentParametersDetectedSet.isEmpty()) { throw new UnsupportedParameterException(new ArrayList<>(
                     differentParametersDetectedSet)); }
 
             parameterNamesToSkip.addAll(supportedParameters);

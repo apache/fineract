@@ -69,7 +69,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
             final String chargeName = rs.getString("chargeName");
             final Boolean penalty = rs.getBoolean("penalty");
 
-            final Map<String, Object> loanProductToGLAccountMap = new LinkedHashMap<String, Object>(5);
+            final Map<String, Object> loanProductToGLAccountMap = new LinkedHashMap<>(5);
             loanProductToGLAccountMap.put("id", id);
             loanProductToGLAccountMap.put("glAccountId", glAccountId);
             loanProductToGLAccountMap.put("productId", productId);
@@ -89,7 +89,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
     @Override
     public Map<String, Object> fetchAccountMappingDetailsForLoanProduct(final Long loanProductId, final Integer accountingType) {
 
-        final Map<String, Object> accountMappingDetails = new LinkedHashMap<String, Object>(8);
+        final Map<String, Object> accountMappingDetails = new LinkedHashMap<>(8);
 
         final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
         final String sql = "select " + rm.schema() + " and product_id = ? and payment_type is null and mapping.charge_id is null";
@@ -127,7 +127,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
                     accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_DATA_PARAMS.OVERPAYMENT.getValue(), gLAccountData);
                 } else if (glAccountForLoan.equals(CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_RECOVERY)) {
                     accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_DATA_PARAMS.INCOME_FROM_RECOVERY.getValue(), gLAccountData);
-                } 
+                }
             }
         } else if (AccountingRuleType.ACCRUAL_UPFRONT.getValue().equals(accountingType)
                 || AccountingRuleType.ACCRUAL_PERIODIC.getValue().equals(accountingType)) {
@@ -175,7 +175,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
 
     @Override
     public Map<String, Object> fetchAccountMappingDetailsForSavingsProduct(final Long savingsProductId, final Integer accountingType) {
-        final Map<String, Object> accountMappingDetails = new LinkedHashMap<String, Object>(8);
+        final Map<String, Object> accountMappingDetails = new LinkedHashMap<>(8);
 
         final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
         final String sql = "select " + rm.schema() + " and product_id = ? and payment_type is null and mapping.charge_id is null ";
@@ -245,7 +245,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         List<PaymentTypeToGLAccountMapper> paymentTypeToGLAccountMappers = null;
         for (final Map<String, Object> productToGLAccountMap : paymentTypeToFundSourceMappingsList) {
             if (paymentTypeToGLAccountMappers == null) {
-                paymentTypeToGLAccountMappers = new ArrayList<PaymentTypeToGLAccountMapper>();
+                paymentTypeToGLAccountMappers = new ArrayList<>();
             }
             final Long paymentTypeId = (Long) productToGLAccountMap.get("paymentTypeId");
             final String paymentTypeValue = (String) productToGLAccountMap.get("paymentTypeValue");
@@ -296,7 +296,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         List<ChargeToGLAccountMapper> chargeToGLAccountMappers = null;
         for (final Map<String, Object> chargeToIncomeAccountMap : chargeToFundSourceMappingsList) {
             if (chargeToGLAccountMappers == null) {
-                chargeToGLAccountMappers = new ArrayList<ChargeToGLAccountMapper>();
+                chargeToGLAccountMappers = new ArrayList<>();
             }
             final Long glAccountId = (Long) chargeToIncomeAccountMap.get("glAccountId");
             final String glAccountName = (String) chargeToIncomeAccountMap.get("glAccountName");

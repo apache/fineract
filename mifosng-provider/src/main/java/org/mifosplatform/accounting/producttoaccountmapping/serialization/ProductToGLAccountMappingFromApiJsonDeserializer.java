@@ -67,7 +67,7 @@ public final class ProductToGLAccountMappingFromApiJsonDeserializer {
     public void validateForLoanProductCreate(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loanproduct");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -149,7 +149,7 @@ public final class ProductToGLAccountMappingFromApiJsonDeserializer {
     public void validateForSavingsProductCreate(final String json, DepositAccountType accountType) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_PRODUCT_RESOURCE_NAME);
 

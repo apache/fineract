@@ -120,16 +120,16 @@ public class FixedDepositProduct extends SavingsProduct {
 
     public Set<InterestRateChart> setOfCharts() {
         if (this.charts == null) {
-            this.charts = new HashSet<InterestRateChart>();
+            this.charts = new HashSet<>();
         }
         return this.charts;
     }
 
     @Override
     public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(10);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME);
 
@@ -143,7 +143,7 @@ public class FixedDepositProduct extends SavingsProduct {
     }
 
     protected Map<String, Object> update(final JsonCommand command, final DataValidatorBuilder baseDataValidator) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(10);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
 
         actualChanges.putAll(super.update(command));
 
@@ -160,8 +160,8 @@ public class FixedDepositProduct extends SavingsProduct {
     }
 
     private void updateCharts(JsonCommand command, Map<String, Object> actualChanges, final DataValidatorBuilder baseDataValidator) {
-        final Map<String, Object> deletedCharts = new HashMap<String, Object>();
-        final Map<String, Object> chartsChanges = new HashMap<String, Object>();
+        final Map<String, Object> deletedCharts = new HashMap<>();
+        final Map<String, Object> chartsChanges = new HashMap<>();
 
         if (command.hasParameter(DepositsApiConstants.chartsParamName)) {
             final JsonArray array = command.arrayOfParameterNamed(DepositsApiConstants.chartsParamName);
@@ -265,7 +265,7 @@ public class FixedDepositProduct extends SavingsProduct {
     }
 
     public void validateInterestPostingAndCompoundingPeriodTypes(final DataValidatorBuilder baseDataValidator) {
-        Map<SavingsPostingInterestPeriodType, List<SavingsCompoundingInterestPeriodType>> postingtoCompoundMap = new HashMap<SavingsPostingInterestPeriodType, List<SavingsCompoundingInterestPeriodType>>();
+        Map<SavingsPostingInterestPeriodType, List<SavingsCompoundingInterestPeriodType>> postingtoCompoundMap = new HashMap<>();
         postingtoCompoundMap.put(
                 SavingsPostingInterestPeriodType.MONTHLY,
                 Arrays.asList(new SavingsCompoundingInterestPeriodType[] { SavingsCompoundingInterestPeriodType.DAILY,
@@ -302,7 +302,7 @@ public class FixedDepositProduct extends SavingsProduct {
     }
 
     public void validateDomainRules() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME);
         validateDomainRules(baseDataValidator);
@@ -310,7 +310,7 @@ public class FixedDepositProduct extends SavingsProduct {
     }
 
     private void validateDomainRules(final DataValidatorBuilder baseDataValidator) {
-        
+
         final DepositTermDetail termDetails = this.depositProductTermAndPreClosure().depositTermDetail();
         final boolean isMinTermGreaterThanMax = termDetails.isMinDepositTermGreaterThanMaxDepositTerm();
         if (isMinTermGreaterThanMax) {
@@ -325,7 +325,7 @@ public class FixedDepositProduct extends SavingsProduct {
             baseDataValidator.reset().parameter(DepositsApiConstants.nominalAnnualInterestRateParamName).value(nominalAnnualInterestRate)
                     .failWithCodeNoParameterAddedToErrorCode("interest.chart.or.nominal.interest.rate.required");
         }
-        
+
         this.validateInterestPostingAndCompoundingPeriodTypes(baseDataValidator);
     }
 

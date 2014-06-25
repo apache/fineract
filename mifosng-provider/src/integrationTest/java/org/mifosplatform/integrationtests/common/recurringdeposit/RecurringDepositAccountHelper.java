@@ -91,10 +91,10 @@ public class RecurringDepositAccountHelper {
 
     public String build(final String clientId, final String productId, final String validFrom, final String validTo,
             final String penalInterestType) {
-        final HashMap<String, Object> map = new HashMap<String, Object>();
+        final HashMap<String, Object> map = new HashMap<>();
 
         List<HashMap<String, String>> chartSlabs = new ArrayList<HashMap<String, String>>();
-        HashMap<String, String> chartSlabsMap1 = new HashMap<String, String>();
+        HashMap<String, String> chartSlabsMap1 = new HashMap<>();
         chartSlabsMap1.put("description", "First");
         chartSlabsMap1.put("periodType", MONTHS);
         chartSlabsMap1.put("fromPeriod", "1");
@@ -103,7 +103,7 @@ public class RecurringDepositAccountHelper {
         chartSlabsMap1.put("locale", LOCALE);
         chartSlabs.add(0, chartSlabsMap1);
 
-        HashMap<String, String> chartSlabsMap2 = new HashMap<String, String>();
+        HashMap<String, String> chartSlabsMap2 = new HashMap<>();
         chartSlabsMap2.put("description", "Second");
         chartSlabsMap2.put("periodType", MONTHS);
         chartSlabsMap2.put("fromPeriod", "7");
@@ -112,7 +112,7 @@ public class RecurringDepositAccountHelper {
         chartSlabsMap2.put("locale", LOCALE);
         chartSlabs.add(1, chartSlabsMap2);
 
-        HashMap<String, String> chartSlabsMap3 = new HashMap<String, String>();
+        HashMap<String, String> chartSlabsMap3 = new HashMap<>();
         chartSlabsMap3.put("description", "Third");
         chartSlabsMap3.put("periodType", MONTHS);
         chartSlabsMap3.put("fromPeriod", "13");
@@ -121,7 +121,7 @@ public class RecurringDepositAccountHelper {
         chartSlabsMap3.put("locale", LOCALE);
         chartSlabs.add(2, chartSlabsMap3);
 
-        HashMap<String, String> chartSlabsMap4 = new HashMap<String, String>();
+        HashMap<String, String> chartSlabsMap4 = new HashMap<>();
         chartSlabsMap4.put("description", "Fourth");
         chartSlabsMap4.put("periodType", MONTHS);
         chartSlabsMap4.put("fromPeriod", "19");
@@ -131,7 +131,7 @@ public class RecurringDepositAccountHelper {
         chartSlabs.add(3, chartSlabsMap4);
 
         List<HashMap<String, Object>> charts = new ArrayList<HashMap<String, Object>>();
-        HashMap<String, Object> chartsMap = new HashMap<String, Object>();
+        HashMap<String, Object> chartsMap = new HashMap<>();
         chartsMap.put("fromDate", validFrom);
         chartsMap.put("endDate", validTo);
         chartsMap.put("dateFormat", "dd MMMM yyyy");
@@ -378,7 +378,7 @@ public class RecurringDepositAccountHelper {
     }
 
     private String getApproveRecurringDepositAccountAsJSON(final String approvedOnDate) {
-        final HashMap<String, Object> map = new HashMap<String, Object>();
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
         map.put("approvedOnDate", approvedOnDate);
@@ -389,7 +389,7 @@ public class RecurringDepositAccountHelper {
     }
 
     private String getUpdateTransactionAsJSON(final String transactionDate, final Float transactionAmount) {
-        final HashMap<String, Object> map = new HashMap<String, Object>();
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
         map.put("transactionDate", transactionDate);
@@ -400,7 +400,7 @@ public class RecurringDepositAccountHelper {
     }
 
     private String getRejectedRecurringDepositAsJSON(final String rejectedOnDate) {
-        final HashMap<String, Object> map = new HashMap<String, Object>();
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
         map.put("rejectedOnDate", rejectedOnDate);
@@ -411,7 +411,7 @@ public class RecurringDepositAccountHelper {
     }
 
     private String getWithdrawnRecurringDepositAccountAsJSON(final String withdrawnApplicationOnDate) {
-        final HashMap<String, Object> map = new HashMap<String, Object>();
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
         map.put("withdrawnOnDate", withdrawnApplicationOnDate);
@@ -422,7 +422,7 @@ public class RecurringDepositAccountHelper {
     }
 
     private String getActivatedRecurringDepositAccountAsJSON(final String activationDate) {
-        final HashMap<String, Object> map = new HashMap<String, Object>();
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
         map.put("activatedOnDate", activationDate);
@@ -432,14 +432,14 @@ public class RecurringDepositAccountHelper {
     }
 
     private String getCalculatedInterestForRecurringDepositApplicationAsJSON() {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         String recurringDepositAccountCalculatedInterestJson = new Gson().toJson(map);
         System.out.println(recurringDepositAccountCalculatedInterestJson);
         return recurringDepositAccountCalculatedInterestJson;
     }
 
     private String getCalculatedPrematureAmountForRecurringDepositAccountAsJSON(final String closedOnDate) {
-        final HashMap<String, Object> map = new HashMap<String, Object>();
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
         map.put("closedOnDate", closedOnDate);
@@ -449,7 +449,7 @@ public class RecurringDepositAccountHelper {
     }
 
     private String getDepositToRecurringDepositAccountAsJSON(final Float depositAmount, final String depositedOnDate) {
-        final HashMap<String, Object> map = new HashMap<String, Object>();
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
         map.put("transactionAmount", depositAmount);
@@ -461,7 +461,7 @@ public class RecurringDepositAccountHelper {
 
     private String getPrematureCloseForRecurringDepositAccountAsJSON(final String closedOnDate, final String closureType,
             final Integer toSavingsId) {
-        final HashMap<String, Object> map = new HashMap<String, Object>();
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
         map.put("closedOnDate", closedOnDate);

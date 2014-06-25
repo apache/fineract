@@ -88,7 +88,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccountTransaction", orphanRemoval = true)
-    private final Set<SavingsAccountChargePaidBy> savingsAccountChargesPaid = new HashSet<SavingsAccountChargePaidBy>();
+    private final Set<SavingsAccountChargePaidBy> savingsAccountChargesPaid = new HashSet<>();
 
     @Column(name = "overdraft_amount_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal overdraftAmount;
@@ -335,7 +335,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     }
 
     public Map<String, Object> toMapData(final CurrencyData currencyData) {
-        final Map<String, Object> thisTransactionData = new LinkedHashMap<String, Object>();
+        final Map<String, Object> thisTransactionData = new LinkedHashMap<>();
 
         final SavingsAccountTransactionEnumData transactionType = SavingsEnumerations.transactionType(this.typeOf);
 
@@ -358,9 +358,9 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
          * single charge too)
          ***/
         if (!this.savingsAccountChargesPaid.isEmpty()) {
-            final List<Map<String, Object>> savingsChargesPaidData = new ArrayList<Map<String, Object>>();
+            final List<Map<String, Object>> savingsChargesPaidData = new ArrayList<>();
             for (final SavingsAccountChargePaidBy chargePaidBy : this.savingsAccountChargesPaid) {
-                final Map<String, Object> savingChargePaidData = new LinkedHashMap<String, Object>();
+                final Map<String, Object> savingChargePaidData = new LinkedHashMap<>();
                 savingChargePaidData.put("chargeId", chargePaidBy.getSavingsAccountCharge().getCharge().getId());
                 savingChargePaidData.put("isPenalty", chargePaidBy.getSavingsAccountCharge().getCharge().isPenalty());
                 savingChargePaidData.put("savingsChargeId", chargePaidBy.getSavingsAccountCharge().getId());

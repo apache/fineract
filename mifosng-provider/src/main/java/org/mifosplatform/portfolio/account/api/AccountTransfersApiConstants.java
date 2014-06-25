@@ -21,7 +21,7 @@ public class AccountTransfersApiConstants {
     public static final String transferAmountParamName = "transferAmount";
     public static final String transferDescriptionParamName = "transferDescription";
 
-    public static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(AccountDetailConstants.localeParamName,
+    public static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(AccountDetailConstants.localeParamName,
             AccountDetailConstants.dateFormatParamName, AccountDetailConstants.fromOfficeIdParamName,
             AccountDetailConstants.fromClientIdParamName, AccountDetailConstants.fromAccountTypeParamName,
             AccountDetailConstants.fromAccountIdParamName, AccountDetailConstants.toOfficeIdParamName,
@@ -33,6 +33,6 @@ public class AccountTransfersApiConstants {
      * {@link AccountTransferData}. Where possible, we try to get response
      * parameters to match those of request parameters.
      */
-    public static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(AccountDetailConstants.idParamName,
+    public static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(AccountDetailConstants.idParamName,
             transferDescriptionParamName, "currency"));
 }

@@ -209,7 +209,7 @@ public class SavingsProductsApiResource {
         CurrencyData currency = CurrencyData.blank();
         final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
         if (currencyOptions.size() == 1) {
-            currency = new ArrayList<CurrencyData>(currencyOptions).get(0);
+            currency = new ArrayList<>(currencyOptions).get(0);
         }
 
         final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = this.dropdownReadPlatformService

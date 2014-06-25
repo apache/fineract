@@ -48,7 +48,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class LoanChargesApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "chargeId", "name", "penalty",
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "chargeId", "name", "penalty",
             "chargeTimeType", "dueAsOfDate", "chargeCalculationType", "percentage", "amountPercentageAppliedTo", "currency",
             "amountWaived", "amountWrittenOff", "amountOutstanding", "amountOrPercentage", "amount", "amountPaid", "chargeOptions",
             "installmentChargeData"));

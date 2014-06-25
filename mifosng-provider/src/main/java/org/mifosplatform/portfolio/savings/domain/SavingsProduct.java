@@ -69,9 +69,9 @@ import com.google.gson.JsonArray;
 
 @Entity
 @Table(name = "m_savings_product", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "sp_unq_name"),
-        @UniqueConstraint(columnNames = { "short_name" }, name = "sp_unq_short_name")})
+        @UniqueConstraint(columnNames = { "short_name" }, name = "sp_unq_short_name") })
 @Inheritance
-@DiscriminatorColumn(name="deposit_type_enum", discriminatorType=DiscriminatorType.INTEGER)
+@DiscriminatorColumn(name = "deposit_type_enum", discriminatorType = DiscriminatorType.INTEGER)
 @DiscriminatorValue("100")
 public class SavingsProduct extends AbstractPersistable<Long> {
 
@@ -167,8 +167,8 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         this.description = null;
     }
 
-    protected SavingsProduct(final String name, final String shortName, final String description, final MonetaryCurrency currency, final BigDecimal interestRate,
-            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+    protected SavingsProduct(final String name, final String shortName, final String description, final MonetaryCurrency currency,
+            final BigDecimal interestRate, final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
@@ -252,7 +252,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
 
     public Map<String, Object> update(final JsonCommand command) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(10);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
 
         final String localeAsInput = command.locale();
 
@@ -401,7 +401,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
 
     private void validateLockinDetails() {
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_PRODUCT_RESOURCE_NAME);
 
@@ -450,8 +450,8 @@ public class SavingsProduct extends AbstractPersistable<Long> {
 
         boolean updated = false;
         if (this.charges != null) {
-            final Set<Charge> currentSetOfCharges = new HashSet<Charge>(this.charges);
-            final Set<Charge> newSetOfCharges = new HashSet<Charge>(newSavingsProductCharges);
+            final Set<Charge> currentSetOfCharges = new HashSet<>(this.charges);
+            final Set<Charge> newSetOfCharges = new HashSet<>(newSavingsProductCharges);
 
             if (!(currentSetOfCharges.equals(newSetOfCharges))) {
                 updated = true;
@@ -479,13 +479,13 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     public Set<Charge> charges() {
         return this.charges;
     }
-    
-    public InterestRateChart applicableChart(@SuppressWarnings("unused") final LocalDate target){
+
+    public InterestRateChart applicableChart(@SuppressWarnings("unused") final LocalDate target) {
         return null;
     }
-    
+
     public InterestRateChart findChart(@SuppressWarnings("unused") Long chartId) {
         return null;
     }
- 
+
 }

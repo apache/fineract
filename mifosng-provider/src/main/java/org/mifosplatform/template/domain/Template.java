@@ -44,7 +44,8 @@ public class Template extends AbstractPersistable<Long> {
     @OneToMany(targetEntity = TemplateMapper.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<TemplateMapper> mappers;
 
-    public Template(final String name, final String text, final TemplateEntity entity, final TemplateType type, final List<TemplateMapper> mappers) {
+    public Template(final String name, final String text, final TemplateEntity entity, final TemplateType type,
+            final List<TemplateMapper> mappers) {
         this.name = StringUtils.defaultIfEmpty(name, null);
         this.entity = entity;
         this.type = type;
@@ -64,7 +65,7 @@ public class Template extends AbstractPersistable<Long> {
 
         final JsonArray array = command.arrayOfParameterNamed("mappers");
 
-        final List<TemplateMapper> mappersList = new ArrayList<TemplateMapper>();
+        final List<TemplateMapper> mappersList = new ArrayList<>();
 
         for (final JsonElement element : array) {
             mappersList.add(new TemplateMapper(element.getAsJsonObject().get("mappersorder").getAsInt(), element.getAsJsonObject()
@@ -75,7 +76,7 @@ public class Template extends AbstractPersistable<Long> {
     }
 
     public LinkedHashMap<String, String> getMappersAsMap() {
-        final LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();
+        final LinkedHashMap<String, String> map = new LinkedHashMap<>();
         for (final TemplateMapper mapper : getMappers()) {
             map.put(mapper.getMapperkey(), mapper.getMappervalue());
         }

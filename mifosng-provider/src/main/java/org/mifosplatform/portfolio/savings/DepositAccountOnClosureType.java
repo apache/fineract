@@ -74,7 +74,7 @@ public enum DepositAccountOnClosureType {
     }
     
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<Integer>();
+        final List<Integer> values = new ArrayList<>();
         for (final DepositAccountOnClosureType enumType : values()) {
             if (!enumType.isInvalid()) {
                 values.add(enumType.getValue());

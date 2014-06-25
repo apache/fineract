@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class CacheApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id"));
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id"));
     private final String resourceNameForPermissions = "CACHE";
 
     private final PlatformSecurityContext context;

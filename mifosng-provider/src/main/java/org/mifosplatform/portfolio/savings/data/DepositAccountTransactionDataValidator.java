@@ -65,7 +65,7 @@ public class DepositAccountTransactionDataValidator {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
                 DepositsApiConstants.DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(depositAccountType.resourceName());
 
@@ -80,7 +80,7 @@ public class DepositAccountTransactionDataValidator {
         // Validate all string payment detail fields for max length
         final Integer paymentTypeId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
         baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).ignoreIfNull().integerGreaterThanZero();
-        final Set<String> paymentDetailParameters = new HashSet<String>(Arrays.asList(transactionAccountNumberParamName,
+        final Set<String> paymentDetailParameters = new HashSet<>(Arrays.asList(transactionAccountNumberParamName,
                 checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
         for (final String paymentDetailParameterName : paymentDetailParameters) {
             final String paymentDetailParameterValue = this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
@@ -100,7 +100,7 @@ public class DepositAccountTransactionDataValidator {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
                 SavingsApiConstants.SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
@@ -120,7 +120,7 @@ public class DepositAccountTransactionDataValidator {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
                 DepositsApiConstants.DEPOSIT_ACCOUNT_PRE_MATURE_CALCULATION_REQUEST_DATA_PARAMETERS);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(depositAccountType
                 .resourceName());
 
@@ -141,7 +141,7 @@ public class DepositAccountTransactionDataValidator {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
                 DepositsApiConstants.DEPOSIT_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(depositAccountType
                 .resourceName());
 
@@ -169,7 +169,7 @@ public class DepositAccountTransactionDataValidator {
         // Validate all string payment detail fields for max length
         final Integer paymentTypeId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
         baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).ignoreIfNull().integerGreaterThanZero();
-        final Set<String> paymentDetailParameters = new HashSet<String>(Arrays.asList(transactionAccountNumberParamName,
+        final Set<String> paymentDetailParameters = new HashSet<>(Arrays.asList(transactionAccountNumberParamName,
                 checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
         for (final String paymentDetailParameterName : paymentDetailParameters) {
             final String paymentDetailParameterValue = this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);

@@ -78,7 +78,7 @@ public class GuarantorCommand {
 
     public void validateForCreate() {
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = getDataValidator(dataValidationErrors);
 
@@ -106,7 +106,7 @@ public class GuarantorCommand {
     }
 
     public void validateForUpdate() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = getDataValidator(dataValidationErrors);
 

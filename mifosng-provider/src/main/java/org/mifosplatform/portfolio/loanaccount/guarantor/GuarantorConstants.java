@@ -27,7 +27,7 @@ public class GuarantorConstants {
             this.value = value;
         }
 
-        private static final Set<String> values = new HashSet<String>();
+        private static final Set<String> values = new HashSet<>();
         static {
             for (final GUARANTOR_JSON_INPUT_PARAMS type : GUARANTOR_JSON_INPUT_PARAMS.values()) {
                 values.add(type.value);

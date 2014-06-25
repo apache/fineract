@@ -182,7 +182,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         try {
             this.savingsAccountDataValidator.validateForUpdate(command.json());
 
-            final Map<String, Object> changes = new LinkedHashMap<String, Object>(20);
+            final Map<String, Object> changes = new LinkedHashMap<>(20);
 
             final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
             checkClientOrGroupActive(account);
@@ -274,7 +274,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         checkClientOrGroupActive(account);
 
         if (account.isNotSubmittedAndPendingApproval()) {
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                     .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.deleteApplicationAction);
 
@@ -460,8 +460,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         account.approveAndActivateApplication(savingsAccountDataDTO.getApplicationDate().toDate(), savingsAccountDataDTO.getAppliedBy());
         Money amountForDeposit = account.activateWithBalance();
 
-        final Set<Long> existingTransactionIds = new HashSet<Long>();
-        final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
+        final Set<Long> existingTransactionIds = new HashSet<>();
+        final Set<Long> existingReversedTransactionIds = new HashSet<>();
 
         if (amountForDeposit.isGreaterThanZero()) {
             this.savingAccountRepository.save(account);

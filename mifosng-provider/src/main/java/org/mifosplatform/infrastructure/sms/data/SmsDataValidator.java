@@ -41,7 +41,7 @@ public final class SmsDataValidator {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SmsApiConstants.CREATE_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SmsApiConstants.RESOURCE_NAME);
@@ -105,7 +105,7 @@ public final class SmsDataValidator {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SmsApiConstants.UPDATE_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SmsApiConstants.RESOURCE_NAME);

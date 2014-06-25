@@ -17,9 +17,11 @@ public class MonthlyCompoundingPeriod implements CompoundingPeriod {
     private final LocalDateInterval periodInterval;
     private final List<EndOfDayBalance> endOfDayBalances;
 
-    public static MonthlyCompoundingPeriod create(final LocalDateInterval periodInterval, final List<EndOfDayBalance> allEndOfDayBalances, final LocalDate upToInterestCalculationDate) {
+    public static MonthlyCompoundingPeriod create(final LocalDateInterval periodInterval, final List<EndOfDayBalance> allEndOfDayBalances,
+            final LocalDate upToInterestCalculationDate) {
 
-        final List<EndOfDayBalance> endOfDayBalancesWithinPeriod = endOfDayBalancesWithinPeriodInterval(periodInterval, allEndOfDayBalances, upToInterestCalculationDate);
+        final List<EndOfDayBalance> endOfDayBalancesWithinPeriod = endOfDayBalancesWithinPeriodInterval(periodInterval,
+                allEndOfDayBalances, upToInterestCalculationDate);
 
         return new MonthlyCompoundingPeriod(periodInterval, endOfDayBalancesWithinPeriod);
     }
@@ -119,7 +121,7 @@ public class MonthlyCompoundingPeriod implements CompoundingPeriod {
                 case INVALID:
                 break;
                 default:
-                    break;
+                break;
             }
 
             interestEarned = interestEarned.add(interestOnBalanceUnrounded);
@@ -130,7 +132,7 @@ public class MonthlyCompoundingPeriod implements CompoundingPeriod {
     private static List<EndOfDayBalance> endOfDayBalancesWithinPeriodInterval(final LocalDateInterval compoundingPeriodInterval,
             final List<EndOfDayBalance> allEndOfDayBalances, final LocalDate upToInterestCalculationDate) {
 
-        final List<EndOfDayBalance> endOfDayBalancesForPeriodInterval = new ArrayList<EndOfDayBalance>();
+        final List<EndOfDayBalance> endOfDayBalancesForPeriodInterval = new ArrayList<>();
 
         for (final EndOfDayBalance endOfDayBalance : allEndOfDayBalances) {
 

@@ -49,7 +49,7 @@ public class UpdateCacheCommandHandler implements NewCommandSourceHandler {
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         command.checkForUnsupportedParameters(typeOfMap, json, CacheApiConstants.REQUEST_DATA_PARAMETERS);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(CacheApiConstants.RESOURCE_NAME.toLowerCase());
 

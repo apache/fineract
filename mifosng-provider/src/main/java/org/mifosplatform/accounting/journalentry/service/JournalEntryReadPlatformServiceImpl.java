@@ -28,6 +28,7 @@ import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
+import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
@@ -35,7 +36,6 @@ import org.mifosplatform.portfolio.note.data.NoteData;
 import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
-import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -47,7 +47,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final PaginationHelper<JournalEntryData> paginationHelper = new PaginationHelper<JournalEntryData>();
+    private final PaginationHelper<JournalEntryData> paginationHelper = new PaginationHelper<>();
 
     @Autowired
     public JournalEntryReadPlatformServiceImpl(final RoutingDataSource dataSource) {

@@ -32,7 +32,7 @@ public class UnsupportedParameterExceptionMapper implements ExceptionMapper<Unsu
     @Override
     public Response toResponse(final UnsupportedParameterException exception) {
 
-        final List<ApiParameterError> errors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> errors = new ArrayList<>();
 
         for (final String parameterName : exception.getUnsupportedParameters()) {
             final StringBuilder validationErrorCode = new StringBuilder("error.msg.parameter.unsupported");

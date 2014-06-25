@@ -44,7 +44,7 @@ public class GLClosureData {
     @SuppressWarnings("unused")
     private final String comments;
 
-    private Collection<OfficeData> allowedOffices = new ArrayList<OfficeData>();
+    private Collection<OfficeData> allowedOffices = new ArrayList<>();
 
     public GLClosureData(final Long id, final Long officeId, final String officeName, final LocalDate closingDate, final boolean deleted,
             final LocalDate createdDate, final LocalDate lastUpdatedDate, final Long createdByUserId, final String createdByUsername,

@@ -43,7 +43,7 @@ public class XBRLBuilder {
     public String build(final Map<MixTaxonomyData, BigDecimal> map, final Date startDate, final Date endDate, final String currency) {
         this.instantScenarioCounter = 1;
         this.durationScenarioCounter = 1;
-        this.contextMap = new HashMap<ContextData, String>();
+        this.contextMap = new HashMap<>();
         final Document doc = DocumentHelper.createDocument();
         this.root = doc.addElement("xbrl");
 

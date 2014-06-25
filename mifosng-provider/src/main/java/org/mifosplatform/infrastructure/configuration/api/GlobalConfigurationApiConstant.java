@@ -11,6 +11,6 @@ public class GlobalConfigurationApiConstant {
     public static final String ID = "id";
     public static final String CONFIGURATION_RESOURCE_NAME = "globalConfiguration";
 
-    public static final Set<String> UPDATE_CONFIGURATION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(ENABLED, VALUE));
+    public static final Set<String> UPDATE_CONFIGURATION_DATA_PARAMETERS = new HashSet<>(Arrays.asList(ENABLED, VALUE));
 
 }

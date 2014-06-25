@@ -32,7 +32,7 @@ public final class PermissionsCommandFromApiJsonDeserializer extends AbstractFro
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("permissions"));
+    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("permissions"));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired

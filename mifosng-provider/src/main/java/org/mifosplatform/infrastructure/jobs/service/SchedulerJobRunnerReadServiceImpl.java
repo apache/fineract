@@ -24,7 +24,7 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final PaginationHelper<JobDetailHistoryData> paginationHelper = new PaginationHelper<JobDetailHistoryData>();
+    private final PaginationHelper<JobDetailHistoryData> paginationHelper = new PaginationHelper<>();
 
     @Autowired
     public SchedulerJobRunnerReadServiceImpl(final RoutingDataSource dataSource) {

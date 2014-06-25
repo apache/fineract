@@ -8,6 +8,6 @@ public class CacheApiConstants {
 
     public static final String RESOURCE_NAME = "CACHE";
     public static final String cacheTypeParameter = "cacheType";
-    public static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(cacheTypeParameter));
+    public static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(cacheTypeParameter));
 
 }

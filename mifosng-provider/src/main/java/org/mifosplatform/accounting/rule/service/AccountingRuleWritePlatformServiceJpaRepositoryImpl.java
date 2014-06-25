@@ -112,8 +112,8 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         // get the GL Accounts or tags to Debit and Credit
         final String[] debitTags = command.arrayValueOfParameterNamed(AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue());
         final String[] creditTags = command.arrayValueOfParameterNamed(AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue());
-        final Set<String> incomingDebitTags = debitTags == null ? new HashSet<String>() : new HashSet<String>(Arrays.asList(debitTags));
-        final Set<String> incomingCreditTags = creditTags == null ? new HashSet<String>() : new HashSet<String>(Arrays.asList(creditTags));
+        final Set<String> incomingDebitTags = debitTags == null ? new HashSet<String>() : new HashSet<>(Arrays.asList(debitTags));
+        final Set<String> incomingCreditTags = creditTags == null ? new HashSet<String>() : new HashSet<>(Arrays.asList(creditTags));
         final Long accountToDebitId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue());
         final Long accountToCreditId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue());
 
@@ -121,7 +121,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         boolean allowMultipleDebitEntries = false;
         GLAccount debitAccount = null;
         GLAccount creditAccount = null;
-        List<AccountingTagRule> accountingTagRules = new ArrayList<AccountingTagRule>();
+        List<AccountingTagRule> accountingTagRules = new ArrayList<>();
 
         if ((accountToDebitId != null && debitTags != null) || (accountToDebitId == null && debitTags == null)) {
             throw new AccountingRuleDataException(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue(),
@@ -226,7 +226,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
                         accountingRule);
 
                 if (!creditTagsToAdd.isEmpty()) {
-                    List<AccountingTagRule> accountingTagRules = new ArrayList<AccountingTagRule>();
+                    List<AccountingTagRule> accountingTagRules = new ArrayList<>();
                     accountingTagRules = saveDebitOrCreditTags(creditTagsToAdd, JournalEntryType.CREDIT, accountingTagRules);
                     accountingRule.updateAccountingRuleForTags(accountingTagRules);
                     accountingRule.updateCreditAccount(null);
@@ -243,7 +243,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
                 final Set<String> debitTagsToAdd = determineCreditTagToAddAndRemoveOldTags(debitTags, JournalEntryType.DEBIT,
                         accountingRule);
                 if (!debitTagsToAdd.isEmpty()) {
-                    List<AccountingTagRule> accountingTagRules = new ArrayList<AccountingTagRule>();
+                    List<AccountingTagRule> accountingTagRules = new ArrayList<>();
                     accountingTagRules = saveDebitOrCreditTags(debitTagsToAdd, JournalEntryType.DEBIT, accountingTagRules);
                     accountingRule.updateAccountingRuleForTags(accountingTagRules);
                     accountingRule.updateDebitAccount(null);
@@ -276,12 +276,12 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
     private Set<String> determineCreditTagToAddAndRemoveOldTags(final String[] creditOrDebitTags, final JournalEntryType type,
             final AccountingRule accountingRule) {
 
-        final Set<String> incomingTags = new HashSet<String>(Arrays.asList(creditOrDebitTags));
+        final Set<String> incomingTags = new HashSet<>(Arrays.asList(creditOrDebitTags));
         final Set<AccountingTagRule> existingTags = accountingRule.getAccountingTagRulesByType(type);
         final Set<String> existingTagIds = retrieveExistingTagIds(existingTags);
-        final Set<String> tagsToAdd = new HashSet<String>();
+        final Set<String> tagsToAdd = new HashSet<>();
         final Set<String> tagsToRemove = existingTagIds;
-        final Map<Long, AccountingTagRule> accountsToRemove = new HashMap<Long, AccountingTagRule>();
+        final Map<Long, AccountingTagRule> accountsToRemove = new HashMap<>();
 
         for (final String tagId : incomingTags) {
             if (existingTagIds.contains(tagId)) {
@@ -299,13 +299,13 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
                     }
                 }
             }
-            accountingRule.removeOldTags(new ArrayList<AccountingTagRule>(accountsToRemove.values()));
+            accountingRule.removeOldTags(new ArrayList<>(accountsToRemove.values()));
         }
         return tagsToAdd;
     }
 
     private Set<String> retrieveExistingTagIds(final Set<AccountingTagRule> existingCreditTags) {
-        final Set<String> existingCreditTagIds = new HashSet<String>();
+        final Set<String> existingCreditTagIds = new HashSet<>();
         for (final AccountingTagRule accountingTagRule : existingCreditTags) {
             existingCreditTagIds.add(accountingTagRule.getTagId().toString());
         }

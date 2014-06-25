@@ -105,7 +105,7 @@ public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFr
         for (int i = 0; i < array.size(); i++) {
 
             final JsonObject creditElement = array.get(i).getAsJsonObject();
-            final Set<String> parametersPassedInForCreditsCommand = new HashSet<String>();
+            final Set<String> parametersPassedInForCreditsCommand = new HashSet<>();
 
             final Long glAccountId = this.fromApiJsonHelper.extractLongNamed("glAccountId", creditElement);
             final String comments = this.fromApiJsonHelper.extractStringNamed("comments", creditElement);

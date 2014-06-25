@@ -29,7 +29,7 @@ public class ClientHelper {
     }
 
     public static String getTestClientAsJSON(final String dateOfJoining, final String officeId) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("officeId", officeId);
         map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
         map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));

@@ -49,7 +49,7 @@ public class DateUtils {
             final DateTime dateTime = dateStringFormat.parseDateTime(stringDate);
             return dateTime.toLocalDate();
         } catch (final IllegalArgumentException e) {
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.date.pattern", "The parameter date ("
                     + stringDate + ") is invalid w.r.t. pattern " + pattern, "date", stringDate, pattern);
             dataValidationErrors.add(error);

@@ -73,9 +73,9 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     private final CenterDataMapper centerMapper = new CenterDataMapper();
     private final GroupDataMapper groupDataMapper = new GroupDataMapper();
 
-    private final PaginationHelper<CenterData> paginationHelper = new PaginationHelper<CenterData>();
+    private final PaginationHelper<CenterData> paginationHelper = new PaginationHelper<>();
     private final PaginationParametersDataValidator paginationParametersDataValidator;
-    private final static Set<String> supportedOrderByValues = new HashSet<String>(Arrays.asList("id", "name", "officeId", "officeName"));
+    private final static Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "name", "officeId", "officeName"));
 
     @Autowired
     public CenterReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -129,12 +129,12 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         if (StringUtils.isNotBlank(extraCriteria.toString())) {
             extraCriteria.delete(0, 4);
         }
-        
+
         final Long staffId = searchCriteria.getStaffId();
         if (staffId != null) {
             extraCriteria.append(" and g.staff_id = ").append(staffId);
         }
-        
+
         return extraCriteria.toString();
     }
 
@@ -502,7 +502,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
     @Override
     public CenterData retrieveCenterWithClosureReasons() {
-        final List<CodeValueData> closureReasons = new ArrayList<CodeValueData>(
+        final List<CodeValueData> closureReasons = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(GroupingTypesApiConstants.GROUP_CLOSURE_REASON));
         return CenterData.withClosureReasons(closureReasons);
     }
@@ -521,12 +521,12 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, new Object[] { officeId });
         }
 
-        Collection<StaffCenterData> staffCenterDataArray = new ArrayList<StaffCenterData>();
+        Collection<StaffCenterData> staffCenterDataArray = new ArrayList<>();
         Boolean flag = false;
         for (CenterData centerData : centerDataArray) {
             if (centerData.getCollectionMeetingCalendar().isValidRecurringDate(new LocalDate(meetingDate))) {
                 if (staffCenterDataArray.size() <= 0) {
-                    Collection<CenterData> meetingFallCenter = new ArrayList<CenterData>();
+                    Collection<CenterData> meetingFallCenter = new ArrayList<>();
                     meetingFallCenter.add(centerData);
                     staffCenterDataArray.add(StaffCenterData.instance(centerData.staffId(), centerData.getStaffName(), meetingFallCenter));
                 } else {
@@ -539,7 +539,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
                         }
                     }
                     if (!flag) {
-                        Collection<CenterData> meetingFallCenter = new ArrayList<CenterData>();
+                        Collection<CenterData> meetingFallCenter = new ArrayList<>();
                         meetingFallCenter.add(centerData);
                         staffCenterDataArray.add(StaffCenterData.instance(centerData.staffId(), centerData.getStaffName(),
                                 meetingFallCenter));
@@ -550,15 +550,15 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         }
         return staffCenterDataArray;
     }
-    
+
     public void validateForGenerateCollectionSheet(final Long staffId) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("productivecollectionsheet");
         baseDataValidator.reset().parameter("staffId").value(staffId).notNull();
-        
+
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
-        
+
     }
 }

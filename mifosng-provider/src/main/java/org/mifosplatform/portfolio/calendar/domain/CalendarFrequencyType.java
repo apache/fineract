@@ -32,7 +32,7 @@ public enum CalendarFrequencyType {
         return this.code;
     }
 
-    private static final Map<Integer, CalendarFrequencyType> intToEnumMap = new HashMap<Integer, CalendarFrequencyType>();
+    private static final Map<Integer, CalendarFrequencyType> intToEnumMap = new HashMap<>();
     private static int minValue = CalendarFrequencyType.DAILY.value;
     private static int maxValue = CalendarFrequencyType.YEARLY.value;
 
@@ -86,8 +86,10 @@ public enum CalendarFrequencyType {
         return this.value.equals(CalendarFrequencyType.INVALID.value);
     }
 
-    /** To convert from period frequency type tp calendar frequency type.
-     * This method requires code refactoring.
+    /**
+     * To convert from period frequency type tp calendar frequency type. This
+     * method requires code refactoring.
+     * 
      * @param periodFrequencyType
      * @return
      */
@@ -105,9 +107,11 @@ public enum CalendarFrequencyType {
                 return CalendarFrequencyType.INVALID;
         }
     }
-    
-    /** To convert from period frequency type tp calendar frequency type.
-     * This method requires code refactoring.
+
+    /**
+     * To convert from period frequency type tp calendar frequency type. This
+     * method requires code refactoring.
+     * 
      * @param frequencyType
      * @return
      */

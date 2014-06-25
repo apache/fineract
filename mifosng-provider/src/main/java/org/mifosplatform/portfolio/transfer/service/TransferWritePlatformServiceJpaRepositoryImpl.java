@@ -455,7 +455,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
     private List<Client> assembleListOfClients(final JsonCommand command) {
 
-        final List<Client> clients = new ArrayList<Client>();
+        final List<Client> clients = new ArrayList<>();
 
         if (command.parameterExists(TransferApiConstants.clients)) {
             final JsonArray clientsArray = command.arrayOfParameterNamed(TransferApiConstants.clients);

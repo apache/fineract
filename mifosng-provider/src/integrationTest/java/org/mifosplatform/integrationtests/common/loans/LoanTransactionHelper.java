@@ -166,7 +166,7 @@ public class LoanTransactionHelper {
     }
 
     private String getDisburseLoanAsJSON(final String actualDisbursementDate, final String transactionAmount) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("actualDisbursementDate", actualDisbursementDate);
@@ -178,7 +178,7 @@ public class LoanTransactionHelper {
     }
 
     private String getApproveLoanAsJSON(final String approvalDate) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("approvedOnDate", approvalDate);
@@ -187,7 +187,7 @@ public class LoanTransactionHelper {
     }
 
     private String getRepaymentBodyAsJSON(final String transactionDate, final Float transactionAmount) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("transactionDate", transactionDate);
@@ -197,7 +197,7 @@ public class LoanTransactionHelper {
     }
 
     private String getWriteOffBodyAsJSON(final String transactionDate) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
         map.put("note", " LOAN WRITE OFF!!!");
@@ -206,7 +206,7 @@ public class LoanTransactionHelper {
     }
 
     private String getWaiveBodyAsJSON(final String transactionDate, final String amountToBeWaived) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("transactionDate", transactionDate);
@@ -216,7 +216,7 @@ public class LoanTransactionHelper {
     }
 
     private String getWithdrawLoanApplicationBodyAsJSON(final String withdrawDate) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("withdrawnOnDate", withdrawDate);
@@ -230,7 +230,7 @@ public class LoanTransactionHelper {
     }
 
     public static String getSpecifiedDueDateChargesForLoanAsJSON(final String chargeId, final String dueDate, final String amount) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("amount", amount);
@@ -246,7 +246,7 @@ public class LoanTransactionHelper {
     }
 
     public static String getDisbursementChargesForLoanAsJSON(final String chargeId, String amount) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("amount", amount);
@@ -257,7 +257,7 @@ public class LoanTransactionHelper {
     }
 
     public static String getInstallmentChargesForLoanAsJSON(final String chargeId, final String amount) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("amount", amount);
@@ -268,7 +268,7 @@ public class LoanTransactionHelper {
     }
 
     public static String getUpdateChargesForLoanAsJSON(String amount) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("amount", amount);
@@ -278,7 +278,7 @@ public class LoanTransactionHelper {
     }
 
     public static String getPayChargeJSON(final String date, final String installmentNumber) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("transactionDate", date);
@@ -291,7 +291,7 @@ public class LoanTransactionHelper {
     }
 
     public static String getWaiveChargeJSON(final String installmentNumber) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
         map.put("installmentNumber", installmentNumber);
         String json = new Gson().toJson(map);
@@ -300,7 +300,7 @@ public class LoanTransactionHelper {
     }
 
     public String getLoanCalculationBodyAsJSON(final String productID) {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en_GB");
         map.put("productId", productID);

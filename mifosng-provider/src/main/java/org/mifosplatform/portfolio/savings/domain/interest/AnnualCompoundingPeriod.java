@@ -17,9 +17,11 @@ public class AnnualCompoundingPeriod implements CompoundingPeriod {
     private final LocalDateInterval periodInterval;
     private final List<EndOfDayBalance> endOfDayBalances;
 
-    public static AnnualCompoundingPeriod create(final LocalDateInterval periodInterval, final List<EndOfDayBalance> allEndOfDayBalances, final LocalDate upToInterestCalculationDate) {
+    public static AnnualCompoundingPeriod create(final LocalDateInterval periodInterval, final List<EndOfDayBalance> allEndOfDayBalances,
+            final LocalDate upToInterestCalculationDate) {
 
-        final List<EndOfDayBalance> endOfDayBalancesWithinPeriod = endOfDayBalancesWithinPeriodInterval(periodInterval, allEndOfDayBalances, upToInterestCalculationDate);
+        final List<EndOfDayBalance> endOfDayBalancesWithinPeriod = endOfDayBalancesWithinPeriodInterval(periodInterval,
+                allEndOfDayBalances, upToInterestCalculationDate);
 
         return new AnnualCompoundingPeriod(periodInterval, endOfDayBalancesWithinPeriod);
     }
@@ -104,19 +106,19 @@ public class AnnualCompoundingPeriod implements CompoundingPeriod {
                 case MONTHLY:
                     interestOnBalanceUnrounded = balance.calculateInterestOnBalance(interestToCompound, interestRateAsFraction, daysInYear);
                 break;
-                 case QUATERLY:
-                	 interestOnBalanceUnrounded = balance.calculateInterestOnBalance(interestToCompound, interestRateAsFraction, daysInYear);
-                 break;
+                case QUATERLY:
+                    interestOnBalanceUnrounded = balance.calculateInterestOnBalance(interestToCompound, interestRateAsFraction, daysInYear);
+                break;
                 // case WEEKLY:
                 // break;
                 // case BIWEEKLY:
                 // break;
-                 case BI_ANNUAL:
-                	 interestOnBalanceUnrounded = balance.calculateInterestOnBalance(interestToCompound, interestRateAsFraction, daysInYear);
-                 break;
-                 case ANNUAL:
-                	 interestOnBalanceUnrounded = balance.calculateInterestOnBalance(interestToCompound, interestRateAsFraction, daysInYear);
-                 break;
+                case BI_ANNUAL:
+                    interestOnBalanceUnrounded = balance.calculateInterestOnBalance(interestToCompound, interestRateAsFraction, daysInYear);
+                break;
+                case ANNUAL:
+                    interestOnBalanceUnrounded = balance.calculateInterestOnBalance(interestToCompound, interestRateAsFraction, daysInYear);
+                break;
                 // case NO_COMPOUNDING_SIMPLE_INTEREST:
                 // break;
                 case INVALID:
@@ -131,7 +133,7 @@ public class AnnualCompoundingPeriod implements CompoundingPeriod {
     private static List<EndOfDayBalance> endOfDayBalancesWithinPeriodInterval(final LocalDateInterval compoundingPeriodInterval,
             final List<EndOfDayBalance> allEndOfDayBalances, final LocalDate upToInterestCalculationDate) {
 
-        final List<EndOfDayBalance> endOfDayBalancesForPeriodInterval = new ArrayList<EndOfDayBalance>();
+        final List<EndOfDayBalance> endOfDayBalancesForPeriodInterval = new ArrayList<>();
 
         for (final EndOfDayBalance endOfDayBalance : allEndOfDayBalances) {
 

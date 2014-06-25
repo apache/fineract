@@ -20,6 +20,6 @@ public class PaginationHelper<E> {
         // determine how many rows are available
         final int totalFilteredRecords = jt.queryForInt(sqlCountRows);
 
-        return new Page<E>(items, totalFilteredRecords);
+        return new Page<>(items, totalFilteredRecords);
     }
 }

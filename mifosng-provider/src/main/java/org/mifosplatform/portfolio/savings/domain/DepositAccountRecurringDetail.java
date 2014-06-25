@@ -29,25 +29,22 @@ public class DepositAccountRecurringDetail extends AbstractPersistable<Long> {
     @Column(name = "mandatory_recommended_deposit_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal mandatoryRecommendedDepositAmount;
 
-    @SuppressWarnings("unused")
     @Column(name = "total_overdue_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal totalOverdueAmount;
 
     @Column(name = "is_calendar_inherited", nullable = false)
-    private boolean isCalendarInherited;
-    
-    @SuppressWarnings("unused")
+    private final boolean isCalendarInherited;
+
     @Column(name = "no_of_overdue_installments", nullable = false)
     private Integer noOfOverdueInstallments;
 
     @Embedded
     private DepositRecurringDetail recurringDetail;
 
-    @SuppressWarnings("unused")
     @OneToOne
     @JoinColumn(name = "savings_account_id", nullable = false)
     private SavingsAccount account;
-    
+
     /**
      * 
      */
@@ -55,8 +52,6 @@ public class DepositAccountRecurringDetail extends AbstractPersistable<Long> {
         this.noOfOverdueInstallments = 0;
         this.isCalendarInherited = false;
     }
-
-    
 
     public static DepositAccountRecurringDetail createNew(final BigDecimal mandatoryRecommendedDepositAmount,
             final DepositRecurringDetail recurringDetail, final SavingsAccount account, final boolean isCalendarInherited) {
@@ -74,7 +69,8 @@ public class DepositAccountRecurringDetail extends AbstractPersistable<Long> {
      * @param account
      */
     protected DepositAccountRecurringDetail(final BigDecimal mandatoryRecommendedDepositAmount, final BigDecimal totalOverdueAmount,
-            final Integer noOfOverdueInstallments, final DepositRecurringDetail recurringDetail, final SavingsAccount account, final boolean isCalendarInherited) {
+            final Integer noOfOverdueInstallments, final DepositRecurringDetail recurringDetail, final SavingsAccount account,
+            final boolean isCalendarInherited) {
         this.mandatoryRecommendedDepositAmount = mandatoryRecommendedDepositAmount;
         this.totalOverdueAmount = totalOverdueAmount;
         this.noOfOverdueInstallments = noOfOverdueInstallments;
@@ -84,7 +80,7 @@ public class DepositAccountRecurringDetail extends AbstractPersistable<Long> {
     }
 
     public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(10);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
         if (command.isChangeInBigDecimalParameterNamed(mandatoryRecommendedDepositAmountParamName, this.mandatoryRecommendedDepositAmount)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(mandatoryRecommendedDepositAmountParamName);
             actualChanges.put(mandatoryRecommendedDepositAmountParamName, newValue);
@@ -120,18 +116,18 @@ public class DepositAccountRecurringDetail extends AbstractPersistable<Long> {
         return this.mandatoryRecommendedDepositAmount;
     }
 
-    public boolean isCalendarInherited(){
+    public boolean isCalendarInherited() {
         return this.isCalendarInherited;
     }
-    
+
     public DepositAccountRecurringDetail copy() {
         final BigDecimal mandatoryRecommendedDepositAmount = this.mandatoryRecommendedDepositAmount;
         final DepositRecurringDetail recurringDetail = this.recurringDetail.copy();
         final boolean isCalendarInherited = this.isCalendarInherited;
         return DepositAccountRecurringDetail.createNew(mandatoryRecommendedDepositAmount, recurringDetail, null, isCalendarInherited);
     }
-    
-    public void updateOverdueDetails(final int noOfOverdueInstallments, final Money totalOverdueAmount){
+
+    public void updateOverdueDetails(final int noOfOverdueInstallments, final Money totalOverdueAmount) {
         this.noOfOverdueInstallments = noOfOverdueInstallments;
         this.totalOverdueAmount = totalOverdueAmount.getAmount();
     }

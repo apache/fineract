@@ -18,7 +18,7 @@ public enum CacheType {
     private final Integer value;
     private final String code;
 
-    private static final Map<Integer, CacheType> intToEnumMap = new HashMap<Integer, CacheType>();
+    private static final Map<Integer, CacheType> intToEnumMap = new HashMap<>();
 
     static {
         for (final CacheType type : CacheType.values()) {

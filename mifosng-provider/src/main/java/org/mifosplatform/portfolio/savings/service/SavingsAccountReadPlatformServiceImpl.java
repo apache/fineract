@@ -76,7 +76,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     // private final SavingsAccountAnnualFeeMapper annualFeeMapper;
 
     // pagination
-    private final PaginationHelper<SavingsAccountData> paginationHelper = new PaginationHelper<SavingsAccountData>();
+    private final PaginationHelper<SavingsAccountData> paginationHelper = new PaginationHelper<>();
 
     @Autowired
     public SavingsAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -522,7 +522,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                             .retrieveAllLoanOfficersInOfficeById(officeId);
 
                     if (!CollectionUtils.isEmpty(fieldOfficersInBranch)) {
-                        fieldOfficerOptions = new ArrayList<StaffData>(fieldOfficersInBranch);
+                        fieldOfficerOptions = new ArrayList<>(fieldOfficersInBranch);
                     }
                 } else {
                     // by default bring back all officers in selected
@@ -533,7 +533,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                             .retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(officeId, restrictToLoanOfficersOnly);
 
                     if (!CollectionUtils.isEmpty(loanOfficersInHierarchy)) {
-                        fieldOfficerOptions = new ArrayList<StaffData>(loanOfficersInHierarchy);
+                        fieldOfficerOptions = new ArrayList<>(loanOfficersInHierarchy);
                     }
                 }
             }
@@ -581,7 +581,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     }
 
     private Collection<SavingsAccountChargeData> fromChargesToSavingsCharges(final Collection<ChargeData> productCharges) {
-        final Collection<SavingsAccountChargeData> savingsCharges = new ArrayList<SavingsAccountChargeData>();
+        final Collection<SavingsAccountChargeData> savingsCharges = new ArrayList<>();
         for (final ChargeData chargeData : productCharges) {
             final SavingsAccountChargeData savingsCharge = chargeData.toSavingsAccountChargeData();
             savingsCharges.add(savingsCharge);

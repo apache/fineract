@@ -135,7 +135,7 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
 
     public Map<String, Object> findChanges(JsonCommand command, FinancialActivityAccount financialActivityAccount) {
 
-        Map<String, Object> changes = new HashMap<String, Object>();
+        Map<String, Object> changes = new HashMap<>();
 
         Long existingGLAccountId = financialActivityAccount.getGlAccount().getId();
         Integer financialActivityType = financialActivityAccount.getFinancialActivityType();

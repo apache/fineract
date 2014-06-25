@@ -41,7 +41,7 @@ public class TemplateMergeServiceTest {
 
         this.template = new Template(name, text, null, null, null);
 
-        final HashMap<String, Object> scopes = new HashMap<String, Object>();
+        final HashMap<String, Object> scopes = new HashMap<>();
         scopes.put("template", this.template);
 
         String output = "";
@@ -65,7 +65,7 @@ public class TemplateMergeServiceTest {
 
         this.template = new Template("TemplateName", content, null, null, null);
 
-        final HashMap<String, Object> scopes = new HashMap<String, Object>();
+        final HashMap<String, Object> scopes = new HashMap<>();
         scopes.put("installments", installments);
 
         final String output = tms.compile(this.template, scopes);

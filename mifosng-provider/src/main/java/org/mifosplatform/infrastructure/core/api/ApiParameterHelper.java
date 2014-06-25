@@ -32,24 +32,24 @@ public class ApiParameterHelper {
     }
 
     public static Set<String> extractFieldsForResponseIfProvided(final MultivaluedMap<String, String> queryParams) {
-        Set<String> fields = new HashSet<String>();
+        Set<String> fields = new HashSet<>();
         String commaSerperatedParameters = "";
         if (queryParams.getFirst("fields") != null) {
             commaSerperatedParameters = queryParams.getFirst("fields");
             if (StringUtils.isNotBlank(commaSerperatedParameters)) {
-                fields = new HashSet<String>(Arrays.asList(commaSerperatedParameters.split("\\s*,\\s*")));
+                fields = new HashSet<>(Arrays.asList(commaSerperatedParameters.split("\\s*,\\s*")));
             }
         }
         return fields;
     }
 
     public static Set<String> extractAssociationsForResponseIfProvided(final MultivaluedMap<String, String> queryParams) {
-        Set<String> fields = new HashSet<String>();
+        Set<String> fields = new HashSet<>();
         String commaSerperatedParameters = "";
         if (queryParams.getFirst("associations") != null) {
             commaSerperatedParameters = queryParams.getFirst("associations");
             if (StringUtils.isNotBlank(commaSerperatedParameters)) {
-                fields = new HashSet<String>(Arrays.asList(commaSerperatedParameters.split("\\s*,\\s*")));
+                fields = new HashSet<>(Arrays.asList(commaSerperatedParameters.split("\\s*,\\s*")));
             }
         }
         return fields;
@@ -148,7 +148,7 @@ public class ApiParameterHelper {
 
     public static Map<String, String> asMap(final MultivaluedMap<String, String> queryParameters) {
 
-        final Map<String, String> map = new HashMap<String, String>(queryParameters.size());
+        final Map<String, String> map = new HashMap<>(queryParameters.size());
 
         for (final String parameterName : queryParameters.keySet()) {
             final List<String> values = queryParameters.get(parameterName);

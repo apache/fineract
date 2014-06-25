@@ -62,7 +62,7 @@ public final class Report extends AbstractPersistable<Long> {
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "report", orphanRemoval = true)
-    private final Set<ReportParameterUsage> reportParameterUsages = new HashSet<ReportParameterUsage>();
+    private final Set<ReportParameterUsage> reportParameterUsages = new HashSet<>();
 
     public static Report fromJson(final JsonCommand command) {
 
@@ -118,7 +118,7 @@ public final class Report extends AbstractPersistable<Long> {
 
     public Map<String, Object> update(final JsonCommand command) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(8);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(8);
 
         String paramName = "reportName";
         if (command.isChangeInStringParameterNamed(paramName, this.reportName)) {
@@ -203,7 +203,7 @@ public final class Report extends AbstractPersistable<Long> {
 
     private void validate() {
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("report");
 
         baseDataValidator.reset().parameter("reportName").value(this.reportName).notBlank().notExceedingLengthOf(100);

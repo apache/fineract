@@ -48,7 +48,7 @@ public class InterestIncentivesEnumerations {
     }
 
     public static List<EnumOptionData> attributeName(final InterestIncentiveAttributeName[] attributeNames) {
-        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final InterestIncentiveAttributeName attributeName : attributeNames) {
             if (!attributeName.isInvalid()) {
                 optionDatas.add(attributeName(attributeName));
@@ -82,7 +82,7 @@ public class InterestIncentivesEnumerations {
     }
 
     public static List<EnumOptionData> entityType(final InterestIncentiveEntityType[] entityTypes) {
-        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final InterestIncentiveEntityType entityType : entityTypes) {
             if (!entityType.isInvalid()) {
                 optionDatas.add(entityType(entityType));
@@ -116,7 +116,7 @@ public class InterestIncentivesEnumerations {
     }
 
     public static List<EnumOptionData> incentiveType(final InterestIncentiveType[] incentiveTypes) {
-        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final InterestIncentiveType incentiveType : incentiveTypes) {
             if (!incentiveType.isInvalid()) {
                 optionDatas.add(incentiveType(incentiveType));

@@ -157,7 +157,7 @@ public class RecurringDepositAccountsApiResource {
         final RecurringDepositAccountData account = (RecurringDepositAccountData) this.depositAccountReadPlatformService
                 .retrieveOneWithChartSlabs(DepositAccountType.RECURRING_DEPOSIT, accountId);
 
-        final Set<String> mandatoryResponseParameters = new HashSet<String>();
+        final Set<String> mandatoryResponseParameters = new HashSet<>();
         final RecurringDepositAccountData accountTemplate = populateTemplateAndAssociations(accountId, account, staffInSelectedOfficeOnly,
                 uriInfo, mandatoryResponseParameters);
 

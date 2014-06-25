@@ -47,7 +47,7 @@ public class GroupRole extends AbstractPersistable<Long> {
 
     public Map<String, Object> update(final JsonCommand command) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(2);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(2);
 
         if (command.isChangeInLongParameterNamed(GroupingTypesApiConstants.clientIdParamName, this.client.getId())) {
             final Long newValue = command.longValueOfParameterNamed(GroupingTypesApiConstants.clientIdParamName);

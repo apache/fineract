@@ -67,7 +67,7 @@ public class AccountTransferDetails extends AbstractPersistable<Long> {
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "accountTransferDetails", orphanRemoval = true)
-    private final List<AccountTransferTransaction> accountTransferTransactions = new ArrayList<AccountTransferTransaction>();
+    private final List<AccountTransferTransaction> accountTransferTransactions = new ArrayList<>();
 
     @OneToOne(mappedBy = "accountTransferDetails", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.LAZY)
     private AccountTransferStandingInstruction accountTransferStandingInstruction;

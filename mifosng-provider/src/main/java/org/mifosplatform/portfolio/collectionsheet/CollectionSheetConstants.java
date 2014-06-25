@@ -33,7 +33,7 @@ public class CollectionSheetConstants {
     public static final String savingsIdParamName = "savingsId";
     public static final String transactionAmountParamName = "transactionAmount";
 
-    public static final Set<String> COLLECTIONSHEET_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
+    public static final Set<String> COLLECTIONSHEET_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, transactionDateParamName, actualDisbursementDateParamName, bulkRepaymentTransactionsParamName,
             bulkDisbursementTransactionsParamName, noteParamName, calendarIdParamName, clientsAttendanceParamName, bulkSavingsDueTransactionsParamName));
 }

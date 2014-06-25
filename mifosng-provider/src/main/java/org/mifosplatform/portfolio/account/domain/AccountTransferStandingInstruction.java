@@ -129,7 +129,7 @@ public class AccountTransferStandingInstruction extends AbstractPersistable<Long
         this.recurrenceInterval = recurrenceInterval;
         this.recurrenceOnDay = recurrenceOnDay;
         this.recurrenceOnMonth = recurrenceOnMonth;
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(STANDING_INSTRUCTION_RESOURCE_NAME);
 
@@ -138,9 +138,9 @@ public class AccountTransferStandingInstruction extends AbstractPersistable<Long
     }
 
     public Map<String, Object> update(JsonCommand command) {
-        final Map<String, Object> actualChanges = new HashMap<String, Object>();
+        final Map<String, Object> actualChanges = new HashMap<>();
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(STANDING_INSTRUCTION_RESOURCE_NAME);
 

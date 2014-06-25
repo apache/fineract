@@ -27,7 +27,7 @@ public enum GuarantorType {
         return this.code;
     }
 
-    private static final Map<Integer, GuarantorType> intToEnumMap = new HashMap<Integer, GuarantorType>();
+    private static final Map<Integer, GuarantorType> intToEnumMap = new HashMap<>();
     private static int minValue;
     private static int maxValue;
     static {

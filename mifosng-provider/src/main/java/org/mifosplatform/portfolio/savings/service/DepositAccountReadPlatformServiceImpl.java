@@ -89,7 +89,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     private final DepositAccountLookupMapper depositAccountLookupsRowMapper = new DepositAccountLookupMapper();
     private final DepositAccountForMaturityMapper depositAccountForMaturityRowMapper = new DepositAccountForMaturityMapper();
     private final PaginationParametersDataValidator paginationParametersDataValidator;
-    private final PaginationHelper<DepositAccountData> paginationHelper = new PaginationHelper<DepositAccountData>();
+    private final PaginationHelper<DepositAccountData> paginationHelper = new PaginationHelper<>();
     private final SavingsAccountTransactionsMapper transactionsMapper;
     private final ClientReadPlatformService clientReadPlatformService;
     private final GroupReadPlatformService groupReadPlatformService;
@@ -363,7 +363,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                             .retrieveAllLoanOfficersInOfficeById(officeId);
 
                     if (!CollectionUtils.isEmpty(fieldOfficersInBranch)) {
-                        fieldOfficerOptions = new ArrayList<StaffData>(fieldOfficersInBranch);
+                        fieldOfficerOptions = new ArrayList<>(fieldOfficersInBranch);
                     }
                 } else {
                     // by default bring back all officers in selected
@@ -374,7 +374,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                             .retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(officeId, restrictToLoanOfficersOnly);
 
                     if (!CollectionUtils.isEmpty(loanOfficersInHierarchy)) {
-                        fieldOfficerOptions = new ArrayList<StaffData>(loanOfficersInHierarchy);
+                        fieldOfficerOptions = new ArrayList<>(loanOfficersInHierarchy);
                     }
                 }
             }
@@ -1276,7 +1276,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     }
 
     private Collection<SavingsAccountChargeData> fromChargesToSavingsCharges(final Collection<ChargeData> productCharges) {
-        final Collection<SavingsAccountChargeData> savingsCharges = new ArrayList<SavingsAccountChargeData>();
+        final Collection<SavingsAccountChargeData> savingsCharges = new ArrayList<>();
         for (final ChargeData chargeData : productCharges) {
             final SavingsAccountChargeData savingsCharge = chargeData.toSavingsAccountChargeData();
             savingsCharges.add(savingsCharge);

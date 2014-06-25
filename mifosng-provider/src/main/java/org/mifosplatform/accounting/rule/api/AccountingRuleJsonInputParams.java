@@ -22,7 +22,7 @@ public enum AccountingRuleJsonInputParams {
         this.value = value;
     }
 
-    private static final Set<String> values = new HashSet<String>();
+    private static final Set<String> values = new HashSet<>();
     static {
         for (final AccountingRuleJsonInputParams type : AccountingRuleJsonInputParams.values()) {
             values.add(type.value);

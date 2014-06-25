@@ -45,7 +45,7 @@ public class LoanChargeAssembler {
 
     public Set<LoanCharge> fromParsedJson(final JsonElement element) {
 
-        final Set<LoanCharge> loanCharges = new HashSet<LoanCharge>();
+        final Set<LoanCharge> loanCharges = new HashSet<>();
 
         final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
         final Integer numberOfRepayments = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("numberOfRepayments", element);
@@ -76,8 +76,8 @@ public class LoanChargeAssembler {
                         if (chargeDefinition.isOverdueInstallment()) {
 
                             final String defaultUserMessage = "Installment charge cannot be added to the loan.";
-                            throw new LoanChargeCannotBeAddedException("loanCharge", "overdue.charge",
-                                    defaultUserMessage, null, chargeDefinition.getName());
+                            throw new LoanChargeCannotBeAddedException("loanCharge", "overdue.charge", defaultUserMessage, null,
+                                    chargeDefinition.getName());
                         }
 
                         ChargeTimeType chargeTime = null;

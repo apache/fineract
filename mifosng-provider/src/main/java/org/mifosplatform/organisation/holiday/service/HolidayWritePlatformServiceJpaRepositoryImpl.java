@@ -144,7 +144,7 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
                 && topLevelJsonElement.get(HolidayApiConstants.officesParamName).isJsonArray()) {
 
             final JsonArray array = topLevelJsonElement.get(HolidayApiConstants.officesParamName).getAsJsonArray();
-            offices = new HashSet<Office>(array.size());
+            offices = new HashSet<>(array.size());
             for (int i = 0; i < array.size(); i++) {
                 final JsonObject officeElement = array.get(i).getAsJsonObject();
                 final Long officeId = this.fromApiJsonHelper.extractLongNamed(HolidayApiConstants.officeIdParamName, officeElement);

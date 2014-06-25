@@ -53,8 +53,8 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
         if (isRegularTransaction && !account.allowWithdrawal()) { throw new DepositAccountTransactionNotAllowedException(account.getId(),
                 "withdraw", account.depositAccountType()); }
-        final Set<Long> existingTransactionIds = new HashSet<Long>();
-        final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
+        final Set<Long> existingTransactionIds = new HashSet<>();
+        final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
                 paymentDetail, new Date());
@@ -87,8 +87,8 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
                 "deposit", account.depositAccountType()); }
 
         boolean isInterestTransfer = false;
-        final Set<Long> existingTransactionIds = new HashSet<Long>();
-        final Set<Long> existingReversedTransactionIds = new HashSet<Long>();
+        final Set<Long> existingTransactionIds = new HashSet<>();
+        final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
                 paymentDetail, new Date());

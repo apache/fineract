@@ -53,7 +53,7 @@ public class InterestRateChart extends AbstractPersistable<Long> {
     private InterestRateChartFields chartFields;
 
     @OneToMany(mappedBy = "interestRateChart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<InterestRateChartSlab> chartSlabs = new HashSet<InterestRateChartSlab>();
+    private Set<InterestRateChartSlab> chartSlabs = new HashSet<>();
 
     protected InterestRateChart() {
         //
@@ -61,12 +61,12 @@ public class InterestRateChart extends AbstractPersistable<Long> {
 
     public static InterestRateChart createNew(InterestRateChartFields chartFields, Collection<InterestRateChartSlab> interestRateChartSlabs) {
 
-        return new InterestRateChart(chartFields, new HashSet<InterestRateChartSlab>(interestRateChartSlabs));
+        return new InterestRateChart(chartFields, new HashSet<>(interestRateChartSlabs));
     }
 
     private InterestRateChart(InterestRateChartFields chartFields, Set<InterestRateChartSlab> interestRateChartSlabs) {
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(INTERESTRATE_CHART_RESOURCE_NAME);
 
@@ -83,7 +83,7 @@ public class InterestRateChart extends AbstractPersistable<Long> {
         Collection<InterestRateChartSlab> chartSlabs = this.setOfChartSlabs();
 
         Integer tmpPeriodType = null;
-        List<InterestRateChartSlab> chartSlabsList = new ArrayList<InterestRateChartSlab>(chartSlabs);
+        List<InterestRateChartSlab> chartSlabsList = new ArrayList<>(chartSlabs);
 
         for (int i = 0; i < chartSlabsList.size(); i++) {
             InterestRateChartSlab iSlabs = chartSlabsList.get(i);
@@ -119,13 +119,13 @@ public class InterestRateChart extends AbstractPersistable<Long> {
 
     public Set<InterestRateChartSlab> setOfChartSlabs() {
         if (this.chartSlabs == null) {
-            this.chartSlabs = new HashSet<InterestRateChartSlab>();
+            this.chartSlabs = new HashSet<>();
         }
         return this.chartSlabs;
     }
 
     public void update(JsonCommand command, final Map<String, Object> actualChanges) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(INTERESTRATE_CHART_RESOURCE_NAME);
 
@@ -164,8 +164,8 @@ public class InterestRateChart extends AbstractPersistable<Long> {
     public void updateChartSlabs(JsonCommand command, final Map<String, Object> actualChanges,
             final DataValidatorBuilder baseDataValidator, String currencyCode) {
 
-        final Map<String, Object> deleteChartSlabs = new HashMap<String, Object>();
-        final Map<String, Object> chartSlabsChanges = new HashMap<String, Object>();
+        final Map<String, Object> deleteChartSlabs = new HashMap<>();
+        final Map<String, Object> chartSlabsChanges = new HashMap<>();
         final Locale locale = command.extractLocale();
         if (command.hasParameter(InterestRateChartApiConstants.chartSlabs)) {
             final JsonArray array = command.arrayOfParameterNamed(InterestRateChartApiConstants.chartSlabs);

@@ -90,7 +90,7 @@ public class AccountingProcessorHelper {
         final Long loanProductId = (Long) accountingBridgeData.get("loanProductId");
         final Long officeId = (Long) accountingBridgeData.get("officeId");
         final CurrencyData currencyData = (CurrencyData) accountingBridgeData.get("currency");
-        final List<LoanTransactionDTO> newLoanTransactions = new ArrayList<LoanTransactionDTO>();
+        final List<LoanTransactionDTO> newLoanTransactions = new ArrayList<>();
         boolean isAccountTransfer = (Boolean) accountingBridgeData.get("isAccountTransfer");
 
         @SuppressWarnings("unchecked")
@@ -110,8 +110,8 @@ public class AccountingProcessorHelper {
             final boolean reversed = (Boolean) map.get("reversed");
             final Long paymentTypeId = (Long) map.get("paymentTypeId");
 
-            final List<ChargePaymentDTO> feePaymentDetails = new ArrayList<ChargePaymentDTO>();
-            final List<ChargePaymentDTO> penaltyPaymentDetails = new ArrayList<ChargePaymentDTO>();
+            final List<ChargePaymentDTO> feePaymentDetails = new ArrayList<>();
+            final List<ChargePaymentDTO> penaltyPaymentDetails = new ArrayList<>();
             // extract charge payment details (if exists)
             if (map.containsKey("loanChargesPaid")) {
                 @SuppressWarnings("unchecked")
@@ -152,7 +152,7 @@ public class AccountingProcessorHelper {
         final Long loanProductId = (Long) accountingBridgeData.get("savingsProductId");
         final Long officeId = (Long) accountingBridgeData.get("officeId");
         final CurrencyData currencyData = (CurrencyData) accountingBridgeData.get("currency");
-        final List<SavingsTransactionDTO> newSavingsTransactions = new ArrayList<SavingsTransactionDTO>();
+        final List<SavingsTransactionDTO> newSavingsTransactions = new ArrayList<>();
         boolean isAccountTransfer = (Boolean) accountingBridgeData.get("isAccountTransfer");
 
         @SuppressWarnings("unchecked")
@@ -168,8 +168,8 @@ public class AccountingProcessorHelper {
             final Long paymentTypeId = (Long) map.get("paymentTypeId");
             final BigDecimal overdraftAmount = (BigDecimal) map.get("overdraftAmount");
 
-            final List<ChargePaymentDTO> feePayments = new ArrayList<ChargePaymentDTO>();
-            final List<ChargePaymentDTO> penaltyPayments = new ArrayList<ChargePaymentDTO>();
+            final List<ChargePaymentDTO> feePayments = new ArrayList<>();
+            final List<ChargePaymentDTO> penaltyPayments = new ArrayList<>();
             // extract charge payment details (if exists)
             if (map.containsKey("savingsChargesPaid")) {
                 @SuppressWarnings("unchecked")
@@ -383,7 +383,7 @@ public class AccountingProcessorHelper {
          * Map to track each account and the net credit to be made for a
          * particular account
          ***/
-        final Map<GLAccount, BigDecimal> creditDetailsMap = new LinkedHashMap<GLAccount, BigDecimal>();
+        final Map<GLAccount, BigDecimal> creditDetailsMap = new LinkedHashMap<>();
         for (final ChargePaymentDTO chargePaymentDTO : chargePaymentDTOs) {
             final Long chargeId = chargePaymentDTO.getChargeId();
             final GLAccount chargeSpecificAccount = getLinkedGLAccountForLoanCharges(loanProductId, accountMappingTypeId, chargeId);

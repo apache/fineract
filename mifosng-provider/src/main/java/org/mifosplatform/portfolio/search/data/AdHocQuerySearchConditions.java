@@ -72,7 +72,7 @@ public class AdHocQuerySearchConditions {
     }
 
     private List<String> getStatusVluesFromStatusCodes() {
-        List<String> loanStatusValues = new ArrayList<String>();
+        List<String> loanStatusValues = new ArrayList<>();
         if (this.loanStatus != null) {
             for (String statusCode : this.loanStatus) {
 

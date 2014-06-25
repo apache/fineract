@@ -78,7 +78,7 @@ public class InterestRateChartSlabWritePlatformServiceJpaRepositoryImpl implemen
     @Transactional
     public CommandProcessingResult update(Long chartSlabId, Long interestRateChartId, JsonCommand command) {
         this.interestRateChartSlabDataValidator.validateUpdate(command.json());
-        final Map<String, Object> changes = new LinkedHashMap<String, Object>(20);
+        final Map<String, Object> changes = new LinkedHashMap<>(20);
         final InterestRateChartSlab updateChartSlabs = this.interestRateChartSlabAssembler.assembleFrom(chartSlabId,
                 interestRateChartId);
         final Locale locale = command.extractLocale();

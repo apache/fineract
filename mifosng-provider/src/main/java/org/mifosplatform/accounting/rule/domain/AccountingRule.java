@@ -58,7 +58,7 @@ public class AccountingRule extends AbstractPersistable<Long> {
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "accountingRule", orphanRemoval = true)
-    private final List<AccountingTagRule> accountingTagRules = new ArrayList<AccountingTagRule>();
+    private final List<AccountingTagRule> accountingTagRules = new ArrayList<>();
 
     @Column(name = "allow_multiple_credits", nullable = false)
     private boolean allowMultipleCreditEntries;
@@ -94,7 +94,7 @@ public class AccountingRule extends AbstractPersistable<Long> {
     }
 
     public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(10);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
         handlePropertyUpdate(command, actualChanges, AccountingRuleJsonInputParams.OFFICE_ID.getValue(), this.office == null ? 0L
                 : this.office.getId());
         handlePropertyUpdate(command, actualChanges, AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue(),
@@ -219,8 +219,8 @@ public class AccountingRule extends AbstractPersistable<Long> {
     }
 
     public void updateTags(final JournalEntryType type) {
-        final Set<AccountingTagRule> existedCreditTags = new HashSet<AccountingTagRule>();
-        final Set<AccountingTagRule> existedDebitTags = new HashSet<AccountingTagRule>();
+        final Set<AccountingTagRule> existedCreditTags = new HashSet<>();
+        final Set<AccountingTagRule> existedDebitTags = new HashSet<>();
         for (final AccountingTagRule accountingTagRule : this.accountingTagRules) {
             if (accountingTagRule.isCreditAccount()) {
                 existedCreditTags.add(accountingTagRule);
@@ -238,7 +238,7 @@ public class AccountingRule extends AbstractPersistable<Long> {
     }
 
     public Set<AccountingTagRule> getAccountingTagRulesByType(final JournalEntryType type) {
-        final Set<AccountingTagRule> existedTags = new HashSet<AccountingTagRule>();
+        final Set<AccountingTagRule> existedTags = new HashSet<>();
         for (final AccountingTagRule accountingTagRule : this.accountingTagRules) {
             if (accountingTagRule.getAccountType().equals(type.getValue())) {
                 existedTags.add(accountingTagRule);

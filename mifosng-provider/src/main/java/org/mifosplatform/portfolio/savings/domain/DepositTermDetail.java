@@ -79,7 +79,7 @@ public class DepositTermDetail {
     }
 
     public Map<String, Object> update(final JsonCommand command, final DataValidatorBuilder baseDataValidator) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(10);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
 
         if (command.isChangeInIntegerParameterNamed(minDepositTermParamName, this.minDepositTerm)) {
             final Integer newValue = command.integerValueOfParameterNamed(minDepositTermParamName);

@@ -145,7 +145,7 @@ public class RunreportsApiResource {
 
     private Map<String, String> getReportParams(final MultivaluedMap<String, String> queryParams, final Boolean isPentaho) {
 
-        final Map<String, String> reportParams = new HashMap<String, String>();
+        final Map<String, String> reportParams = new HashMap<>();
         final Set<String> keys = queryParams.keySet();
         String pKey;
         String pValue;

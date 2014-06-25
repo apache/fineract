@@ -40,7 +40,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class AuditsApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "actionName", "entityName", "resourceId",
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "actionName", "entityName", "resourceId",
             "subresourceId", "maker", "madeOnDate", "checker", "checkedOnDate", "processingResult", "commandAsJson", "officeName",
             "groupLevelName", "groupName", "clientName", "loanAccountNo", "savingsAccountNo", "clientId", "loanId", "url"));
 
@@ -123,7 +123,7 @@ public class AuditsApiResource {
 
         final AuditSearchData auditSearchData = this.auditReadPlatformService.retrieveSearchTemplate("audit");
 
-        final Set<String> RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE = new HashSet<String>(Arrays.asList("appUsers", "actionNames",
+        final Set<String> RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE = new HashSet<>(Arrays.asList("appUsers", "actionNames",
                 "entityNames", "processingResults"));
 
         return this.toApiJsonSerializerSearchTemplate.serialize(settings, auditSearchData, RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE);

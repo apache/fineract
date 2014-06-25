@@ -53,7 +53,7 @@ public class InterestRateChartDataValidator {
     public void validateForCreate(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(INTERESTRATE_CHART_RESOURCE_NAME);
 
@@ -99,7 +99,7 @@ public class InterestRateChartDataValidator {
     public void validateUpdate(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(INTERESTRATE_CHART_RESOURCE_NAME);
         this.validateForUpdate(json, baseDataValidator);

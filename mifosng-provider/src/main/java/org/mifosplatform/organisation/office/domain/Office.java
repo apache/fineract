@@ -36,7 +36,7 @@ public class Office extends AbstractPersistable<Long> {
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id")
-    private final List<Office> children = new LinkedList<Office>();
+    private final List<Office> children = new LinkedList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
@@ -99,7 +99,7 @@ public class Office extends AbstractPersistable<Long> {
 
     public Map<String, Object> update(final JsonCommand command) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();

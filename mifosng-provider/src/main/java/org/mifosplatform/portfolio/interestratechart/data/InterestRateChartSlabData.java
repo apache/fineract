@@ -155,7 +155,7 @@ public class InterestRateChartSlabData {
 
     public void addIncentives(final InterestIncentiveData incentiveData) {
         if (this.incentives == null) {
-            this.incentives = new HashSet<InterestIncentiveData>();
+            this.incentives = new HashSet<>();
         }
 
         this.incentives.add(incentiveData);

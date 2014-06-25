@@ -31,7 +31,7 @@ public final class ResultsetColumnHeaderData {
         final Long columnLength = null;
         final boolean columnNullable = false;
         final boolean columnIsPrimaryKey = false;
-        final List<ResultsetColumnValueData> columnValues = new ArrayList<ResultsetColumnValueData>();
+        final List<ResultsetColumnValueData> columnValues = new ArrayList<>();
         final String columnCode = null;
         return new ResultsetColumnHeaderData(columnName, columnType, columnLength, columnNullable, columnIsPrimaryKey, columnValues,
                 columnCode);

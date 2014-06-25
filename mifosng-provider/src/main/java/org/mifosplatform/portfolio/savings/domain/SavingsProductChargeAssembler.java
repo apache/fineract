@@ -52,7 +52,7 @@ public class SavingsProductChargeAssembler {
 
     public Set<SavingsAccountCharge> fromParsedJson(final JsonElement element) {
 
-        final Set<SavingsAccountCharge> savingsAccountCharges = new HashSet<SavingsAccountCharge>();
+        final Set<SavingsAccountCharge> savingsAccountCharges = new HashSet<>();
 
         if (element.isJsonObject()) {
             final JsonObject topLevelJsonElement = element.getAsJsonObject();

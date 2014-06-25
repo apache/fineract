@@ -35,7 +35,7 @@ public class PlatformRequestLog {
         final String requestUrl = request.getRequestURL().toString();
 
         @SuppressWarnings("unchecked")
-        final Map<String, String> parameters = new HashMap<String, String>(request.getParameterMap());
+        final Map<String, String> parameters = new HashMap<>(request.getParameterMap());
         parameters.remove("password");
         parameters.remove("_");
 

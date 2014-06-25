@@ -76,7 +76,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
 
         @Override
         public Map<Long, AccountingRuleData> extractData(final ResultSet rs) throws SQLException, DataAccessException {
-            final Map<Long, AccountingRuleData> extractedData = new HashMap<Long, AccountingRuleData>();
+            final Map<Long, AccountingRuleData> extractedData = new HashMap<>();
 
             while (rs.next()) {
                 final Long id = rs.getLong("id");
@@ -110,7 +110,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
                         creditTags = null;
                         final GLAccountDataForLookup creditAccount = new GLAccountDataForLookup(accountToCreditId, creditAccountName,
                                 creditAccountGLCode);
-                        creditAccounts = new ArrayList<GLAccountDataForLookup>(Arrays.asList(creditAccount));
+                        creditAccounts = new ArrayList<>(Arrays.asList(creditAccount));
                     }
                     if (accountToDebitId == null) {
                         debitTags = !this.isAssociationParametersExists ? getCreditOrDebitTags(id, JournalEntryType.DEBIT.getValue())
@@ -121,7 +121,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
                         debitTags = null;
                         final GLAccountDataForLookup debitAccount = new GLAccountDataForLookup(accountToDebitId, debitAccountName,
                                 debitAccountGLCode);
-                        debitAccounts = new ArrayList<GLAccountDataForLookup>(Arrays.asList(debitAccount));
+                        debitAccounts = new ArrayList<>(Arrays.asList(debitAccount));
                     }
                     accountingRuleData = new AccountingRuleData(id, officeId, officeName, name, description, systemDefined,
                             allowMultipleDebitEntries, allowMultipleCreditEntries, creditTags, debitTags, creditAccounts, debitAccounts);
@@ -153,7 +153,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
         }
         sql = sql + " order by rule.id asc";
         final Map<Long, AccountingRuleData> extractedData = this.jdbcTemplate.query(sql, resultSetExtractor, arguments);
-        return new ArrayList<AccountingRuleData>(extractedData.values());
+        return new ArrayList<>(extractedData.values());
     }
 
     @Override

@@ -78,11 +78,11 @@ public class Meeting extends AbstractPersistable<Long> {
             final String errorMessage = "Attendance cannot be in the future.";
             throw new MeetingDateException("cannot.be.a.future.date", errorMessage, getMeetingDateLocalDate());
         }
-        this.clientsAttendance = new HashSet<ClientAttendance>(clientsAttendance);
+        this.clientsAttendance = new HashSet<>(clientsAttendance);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(9);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
 
@@ -103,19 +103,19 @@ public class Meeting extends AbstractPersistable<Long> {
     }
 
     public Map<String, Object> updateAttendance(final Collection<ClientAttendance> clientsAttendance) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(1);
-        final Map<String, Object> clientAttendanceChanges = new LinkedHashMap<String, Object>(clientsAttendance.size());
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
+        final Map<String, Object> clientAttendanceChanges = new LinkedHashMap<>(clientsAttendance.size());
 
         updateAttendanceLoop: for (final ClientAttendance clientAttendance : clientsAttendance) {
             if (this.clientsAttendance == null) {
-                this.clientsAttendance = new HashSet<ClientAttendance>();
+                this.clientsAttendance = new HashSet<>();
             }
             for (final ClientAttendance clientAttendanceOriginal : this.clientsAttendance) {
                 if (clientAttendanceOriginal.clientId().equals(clientAttendance.clientId())) {
                     final Integer newValue = clientAttendance.getAttendanceTypeId();
                     if (!newValue.equals(clientAttendanceOriginal.getAttendanceTypeId())) {
                         clientAttendanceOriginal.updateAttendanceTypeId(newValue);
-                        final Map<String, Object> clientAttendanceChange = new LinkedHashMap<String, Object>(2);
+                        final Map<String, Object> clientAttendanceChange = new LinkedHashMap<>(2);
                         clientAttendanceChange.put(clientIdParamName, clientAttendanceOriginal.clientId());
                         clientAttendanceChange.put(attendanceTypeParamName, newValue);
                         clientAttendanceChanges.put(clientAttendanceOriginal.clientId().toString(), clientAttendanceChange);
@@ -124,7 +124,7 @@ public class Meeting extends AbstractPersistable<Long> {
                 }
             }
 
-            final Map<String, Object> clientAttendanceChange = new LinkedHashMap<String, Object>();
+            final Map<String, Object> clientAttendanceChange = new LinkedHashMap<>();
             clientAttendanceChange.put(clientIdParamName, clientAttendance.clientId());
             clientAttendanceChange.put(attendanceTypeParamName, clientAttendance.getAttendanceTypeId());
             clientAttendanceChanges.put(clientAttendance.clientId().toString(), clientAttendanceChange);

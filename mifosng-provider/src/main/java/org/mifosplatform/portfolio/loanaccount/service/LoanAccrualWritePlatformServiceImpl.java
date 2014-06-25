@@ -139,7 +139,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     public Map<String, Object> deriveAccountingBridgeData(final LoanScheduleAccrualData loanScheduleAccrualData,
             final Map<String, Object> transactionMap) {
 
-        final Map<String, Object> accountingBridgeData = new LinkedHashMap<String, Object>();
+        final Map<String, Object> accountingBridgeData = new LinkedHashMap<>();
         accountingBridgeData.put("loanId", loanScheduleAccrualData.getLoanId());
         accountingBridgeData.put("loanProductId", loanScheduleAccrualData.getLoanProductId());
         accountingBridgeData.put("officeId", loanScheduleAccrualData.getOfficeId());
@@ -149,7 +149,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         accountingBridgeData.put("periodicAccrualBasedAccountingEnabled", true);
         accountingBridgeData.put("isAccountTransfer", false);
 
-        final List<Map<String, Object>> newLoanTransactions = new ArrayList<Map<String, Object>>();
+        final List<Map<String, Object>> newLoanTransactions = new ArrayList<>();
         newLoanTransactions.add(transactionMap);
 
         accountingBridgeData.put("newLoanTransactions", newLoanTransactions);
@@ -158,7 +158,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
 
     public Map<String, Object> toMapData(final Long id, final BigDecimal amount, final BigDecimal interestportion,
             final BigDecimal feeportion, final BigDecimal penaltyportion, final LoanScheduleAccrualData loanScheduleAccrualData) {
-        final Map<String, Object> thisTransactionData = new LinkedHashMap<String, Object>();
+        final Map<String, Object> thisTransactionData = new LinkedHashMap<>();
 
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.ACCRUAL);
 

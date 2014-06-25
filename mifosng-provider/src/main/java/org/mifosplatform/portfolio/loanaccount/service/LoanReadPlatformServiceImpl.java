@@ -108,7 +108,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
-    private final PaginationHelper<LoanAccountData> paginationHelper = new PaginationHelper<LoanAccountData>();
+    private final PaginationHelper<LoanAccountData> paginationHelper = new PaginationHelper<>();
     private final LoanMapper loaanLoanMapper = new LoanMapper();
 
     @Autowired
@@ -219,7 +219,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         sqlBuilder.append(" where ( o.hierarchy like ? or transferToOffice.hierarchy like ?)");
 
         int arrayPos = 2;
-        List<Object> extraCriterias = new ArrayList<Object>();
+        List<Object> extraCriterias = new ArrayList<>();
         extraCriterias.add(hierarchySearchString);
         extraCriterias.add(hierarchySearchString);
 
@@ -811,7 +811,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     this.disbursement.disbursementDate(), this.disbursement.amount(), this.totalFeeChargesDueAtDisbursement,
                     this.disbursement.isDisbursed());
 
-            final Collection<LoanSchedulePeriodData> periods = new ArrayList<LoanSchedulePeriodData>();
+            final Collection<LoanSchedulePeriodData> periods = new ArrayList<>();
             final MonetaryCurrency monCurrency = new MonetaryCurrency(this.currency.code(), this.currency.decimalPlaces(),
                     this.currency.currencyInMultiplesOf());
             BigDecimal totalPrincipalDisbursed = BigDecimal.ZERO;
@@ -1198,7 +1198,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     @Override
     public Collection<CalendarData> retrieveCalendars(final Long groupId) {
-        Collection<CalendarData> calendarsData = new ArrayList<CalendarData>();
+        Collection<CalendarData> calendarsData = new ArrayList<>();
         calendarsData.addAll(this.calendarReadPlatformService.retrieveParentCalendarsByEntity(groupId,
                 CalendarEntityType.GROUPS.getValue(), null));
         calendarsData

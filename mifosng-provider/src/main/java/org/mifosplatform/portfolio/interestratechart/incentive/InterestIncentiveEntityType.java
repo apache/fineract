@@ -19,7 +19,7 @@ public enum InterestIncentiveEntityType {
     private final Integer value;
     private final String code;
 
-    private static final Map<Integer, InterestIncentiveEntityType> intToEnumMap = new HashMap<Integer, InterestIncentiveEntityType>();
+    private static final Map<Integer, InterestIncentiveEntityType> intToEnumMap = new HashMap<>();
     static {
         for (final InterestIncentiveEntityType type : InterestIncentiveEntityType.values()) {
             intToEnumMap.put(type.value, type);
@@ -58,7 +58,7 @@ public enum InterestIncentiveEntityType {
     }
 
     public static Object[] integerValues() {
-        final List<Integer> values = new ArrayList<Integer>();
+        final List<Integer> values = new ArrayList<>();
         for (final InterestIncentiveEntityType enumType : values()) {
             if (!enumType.isInvalid()) {
                 values.add(enumType.getValue());

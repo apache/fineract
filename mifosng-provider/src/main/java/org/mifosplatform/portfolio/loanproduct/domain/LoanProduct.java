@@ -114,7 +114,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanProduct", orphanRemoval = true)
-    private Set<LoanProductBorrowerCycleVariations> borrowerCycleVariations = new HashSet<LoanProductBorrowerCycleVariations>();
+    private Set<LoanProductBorrowerCycleVariations> borrowerCycleVariations = new HashSet<>();
 
     @Column(name = "overdue_days_for_npa", nullable = true)
     private Integer overdueDaysForNPA;
@@ -166,7 +166,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         final String externalId = command.stringValueOfParameterNamedAllowingNull("externalId");
 
         final boolean useBorrowerCycle = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.useBorrowerCycleParameterName);
-        final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations = new HashSet<LoanProductBorrowerCycleVariations>();
+        final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations = new HashSet<>();
 
         if (useBorrowerCycle) {
             populateBorrowerCyclevariations(command, loanProductBorrowerCycleVariations);
@@ -285,7 +285,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     }
 
     private Map<String, Object> updateBorrowerCycleVariations(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(20);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(20);
         List<Long> variationIds = fetchAllVariationIds();
         updateBorrowerCycleVaritions(command, LoanProductParamType.PRINCIPAL.getValue(),
                 LoanProductConstants.principalVariationsForBorrowerCycleParameterName, actualChanges, variationIds);
@@ -300,7 +300,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     }
 
     private List<Long> fetchAllVariationIds() {
-        List<Long> list = new ArrayList<Long>();
+        List<Long> list = new ArrayList<>();
         for (LoanProductBorrowerCycleVariations cycleVariation : this.borrowerCycleVariations) {
             list.add(cycleVariation.getId());
         }
@@ -372,7 +372,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         if (clearAll) {
             this.borrowerCycleVariations.clear();
         } else {
-            Set<LoanProductBorrowerCycleVariations> remove = new HashSet<LoanProductBorrowerCycleVariations>();
+            Set<LoanProductBorrowerCycleVariations> remove = new HashSet<>();
             for (LoanProductBorrowerCycleVariations borrowerCycleVariations : this.borrowerCycleVariations) {
                 if (paramType.equals(borrowerCycleVariations.getParamType())) {
                     remove.add(borrowerCycleVariations);
@@ -472,8 +472,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
         boolean updated = false;
         if (this.charges != null) {
-            final Set<Charge> currentSetOfCharges = new HashSet<Charge>(this.charges);
-            final Set<Charge> newSetOfCharges = new HashSet<Charge>(newProductCharges);
+            final Set<Charge> currentSetOfCharges = new HashSet<>(this.charges);
+            final Set<Charge> newSetOfCharges = new HashSet<>(newProductCharges);
 
             if (!currentSetOfCharges.equals(newSetOfCharges)) {
                 updated = true;
@@ -748,7 +748,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     }
 
     public Map<String, BigDecimal> fetchBorrowerCycleVariationsForCycleNumber(final Integer cycleNumber) {
-        Map<String, BigDecimal> borrowerCycleVariations = new HashMap<String, BigDecimal>();
+        Map<String, BigDecimal> borrowerCycleVariations = new HashMap<>();
         borrowerCycleVariations.put(LoanProductConstants.principal, this.loanProductRelatedDetail.getPrincipal().getAmount());
         borrowerCycleVariations.put(LoanProductConstants.interestRatePerPeriod,
                 this.loanProductRelatedDetail.getNominalInterestRatePerPeriod());

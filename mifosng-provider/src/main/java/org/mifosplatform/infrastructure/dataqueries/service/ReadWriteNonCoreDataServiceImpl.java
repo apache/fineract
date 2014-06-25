@@ -134,7 +134,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
 
-        final List<DatatableData> datatables = new ArrayList<DatatableData>();
+        final List<DatatableData> datatables = new ArrayList<>();
         while (rs.next()) {
             final String appTableName = rs.getString("application_table_name");
             final String registeredDatatableName = rs.getString("registered_table_name");
@@ -528,7 +528,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final String fkName = dataTableNameAlias + "_" + fkColumnName;
             StringBuilder sqlBuilder = new StringBuilder();
             final StringBuilder constrainBuilder = new StringBuilder();
-            final Map<String, Long> codeMappings = new HashMap<String, Long>();
+            final Map<String, Long> codeMappings = new HashMap<>();
             sqlBuilder = sqlBuilder.append("CREATE TABLE `" + datatableName + "` (");
 
             if (multiRow) {
@@ -565,7 +565,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             registerColumnCodeMapping(codeMappings);
         } catch (final SQLGrammarException e) {
             final Throwable realCause = e.getCause();
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("datatable");
 
             if (realCause.getMessage().toLowerCase().contains("duplicate column name")) {
@@ -787,7 +787,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             validateDatatableName(datatableName);
 
             final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService.fillResultsetColumnHeaders(datatableName);
-            final Map<String, ResultsetColumnHeaderData> mapColumnNameDefinition = new HashMap<String, ResultsetColumnHeaderData>();
+            final Map<String, ResultsetColumnHeaderData> mapColumnNameDefinition = new HashMap<>();
             for (final ResultsetColumnHeaderData columnHeader : columnHeaderData) {
                 mapColumnNameDefinition.put(columnHeader.getColumnName(), columnHeader);
             }
@@ -834,7 +834,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
                 StringBuilder sqlBuilder = new StringBuilder("ALTER TABLE `" + datatableName + "`");
                 final StringBuilder constrainBuilder = new StringBuilder();
-                final List<String> codeMappings = new ArrayList<String>();
+                final List<String> codeMappings = new ArrayList<>();
                 for (final JsonElement column : dropColumns) {
                     parseDatatableColumnForDrop(column.getAsJsonObject(), sqlBuilder, datatableName, constrainBuilder, codeMappings);
                 }
@@ -852,7 +852,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
                 StringBuilder sqlBuilder = new StringBuilder("ALTER TABLE `" + datatableName + "`");
                 final StringBuilder constrainBuilder = new StringBuilder();
-                final Map<String, Long> codeMappings = new HashMap<String, Long>();
+                final Map<String, Long> codeMappings = new HashMap<>();
                 for (final JsonElement column : addColumns) {
                     parseDatatableColumnForAdd(column.getAsJsonObject(), sqlBuilder, datatableName.toLowerCase().replaceAll("\\s", "_"),
                             constrainBuilder, codeMappings, isConstraintApproach);
@@ -871,8 +871,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
                 StringBuilder sqlBuilder = new StringBuilder("ALTER TABLE `" + datatableName + "`");
                 final StringBuilder constrainBuilder = new StringBuilder();
-                final Map<String, Long> codeMappings = new HashMap<String, Long>();
-                final List<String> removeMappings = new ArrayList<String>();
+                final Map<String, Long> codeMappings = new HashMap<>();
+                final List<String> removeMappings = new ArrayList<>();
                 for (final JsonElement column : changeColumns) {
                     parseDatatableColumnForUpdate(column.getAsJsonObject(), mapColumnNameDefinition, sqlBuilder, datatableName,
                             constrainBuilder, codeMappings, removeMappings, isConstraintApproach);
@@ -895,7 +895,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
         } catch (final SQLGrammarException e) {
             final Throwable realCause = e.getCause();
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("datatable");
 
             if (realCause.getMessage().toLowerCase().contains("unknown column")) {
@@ -933,7 +933,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             this.jdbcTemplate.batchUpdate(sqlArray);
         } catch (final SQLGrammarException e) {
             final Throwable realCause = e.getCause();
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("datatable");
             if (realCause.getMessage().contains("Unknown table")) {
                 baseDataValidator.reset().parameter("datatableName").failWithCode("does.not.exist");
@@ -1218,12 +1218,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
 
-        final List<ResultsetRowData> resultsetDataRows = new ArrayList<ResultsetRowData>();
+        final List<ResultsetRowData> resultsetDataRows = new ArrayList<>();
 
         final SqlRowSetMetaData rsmd = rs.getMetaData();
 
         while (rs.next()) {
-            final List<String> columnValues = new ArrayList<String>();
+            final List<String> columnValues = new ArrayList<>();
             for (int i = 0; i < rsmd.getColumnCount(); i++) {
                 final String columnName = rsmd.getColumnName(i + 1);
                 final String columnValue = rs.getString(columnName);
@@ -1387,7 +1387,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final String fkName) {
 
         final Map<String, String> affectedColumns = getAffectedColumns(grs.getColumnHeaders(), queryParams, fkName);
-        final Map<String, Object> affectedAndChangedColumns = new HashMap<String, Object>();
+        final Map<String, Object> affectedAndChangedColumns = new HashMap<>();
 
         for (final String key : affectedColumns.keySet()) {
             final String columnValue = affectedColumns.get(key);
@@ -1435,7 +1435,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         String columnHeaderUnderscored;
         boolean notFound;
 
-        final Map<String, String> affectedColumns = new HashMap<String, String>();
+        final Map<String, String> affectedColumns = new HashMap<>();
         final Set<String> keys = queryParams.keySet();
         for (final String key : keys) {
             // ignores id and foreign key fields
@@ -1475,7 +1475,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         if (StringUtils.isEmpty(paramValue) && columnHeader.isMandatory()) {
 
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.column.mandatory", "Mandatory",
                     columnHeader.getColumnName());
             dataValidationErrors.add(error);
@@ -1489,7 +1489,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 if (columnHeader.isCodeValueDisplayType()) {
 
                     if (columnHeader.isColumnValueNotAllowed(paramValue)) {
-                        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+                        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
                         final ApiParameterError error = ApiParameterError.parameterError("error.msg.invalid.columnValue",
                                 "Value not found in Allowed Value list", columnHeader.getColumnName(), paramValue);
                         dataValidationErrors.add(error);
@@ -1502,7 +1502,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
                     final Integer codeLookup = Integer.valueOf(paramValue);
                     if (columnHeader.isColumnCodeNotAllowed(codeLookup)) {
-                        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+                        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
                         final ApiParameterError error = ApiParameterError.parameterError("error.msg.invalid.columnValue",
                                 "Value not found in Allowed Value list", columnHeader.getColumnName(), paramValue);
                         dataValidationErrors.add(error);
@@ -1544,7 +1544,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                     final ApiParameterError error = ApiParameterError.parameterError(
                             "validation.msg.datatable.entry.column.exceeds.maxlength", "The column `" + columnHeader.getColumnName()
                                     + "` exceeds its defined max-length ", columnHeader.getColumnName(), paramValue);
-                    final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+                    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
                     dataValidationErrors.add(error);
                     throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                             dataValidationErrors);

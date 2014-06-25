@@ -29,7 +29,7 @@ public enum CalendarEntityType {
         return this.code;
     }
 
-    private static final Map<Integer, CalendarEntityType> intToEnumMap = new HashMap<Integer, CalendarEntityType>();
+    private static final Map<Integer, CalendarEntityType> intToEnumMap = new HashMap<>();
     private static int minValue;
     private static int maxValue;
     static {
@@ -115,7 +115,7 @@ public enum CalendarEntityType {
         return this.value.equals(CalendarEntityType.CLIENTS.getValue());
     }
 
-    private static final Map<String, CalendarEntityType> entityNameToEnumMap = new HashMap<String, CalendarEntityType>();
+    private static final Map<String, CalendarEntityType> entityNameToEnumMap = new HashMap<>();
 
     static {
         for (final CalendarEntityType entityType : CalendarEntityType.values()) {
@@ -126,7 +126,7 @@ public enum CalendarEntityType {
     public static CalendarEntityType getEntityType(String entityType) {
         return entityNameToEnumMap.get(entityType.toLowerCase());
     }
-    
+
     public static boolean isSavings(final Integer value) {
         return CalendarEntityType.SAVINGS.value.equals(value) ? true : false;
     }
@@ -134,7 +134,7 @@ public enum CalendarEntityType {
     public static boolean isSavings(final String name) {
         return CalendarEntityType.SAVINGS.name().equalsIgnoreCase(name) ? true : false;
     }
-    
+
     public boolean isSavings() {
         return this.value.equals(CalendarEntityType.SAVINGS.getValue());
     }

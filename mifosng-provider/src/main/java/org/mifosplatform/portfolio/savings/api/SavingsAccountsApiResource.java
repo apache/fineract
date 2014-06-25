@@ -136,7 +136,7 @@ public class SavingsAccountsApiResource {
 
         final SavingsAccountData savingsAccount = this.savingsAccountReadPlatformService.retrieveOne(accountId);
 
-        final Set<String> mandatoryResponseParameters = new HashSet<String>();
+        final Set<String> mandatoryResponseParameters = new HashSet<>();
         final SavingsAccountData savingsAccountTemplate = populateTemplateAndAssociations(accountId, savingsAccount,
                 staffInSelectedOfficeOnly, uriInfo, mandatoryResponseParameters);
 

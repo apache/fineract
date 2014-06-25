@@ -273,7 +273,7 @@ public final class Client extends AbstractPersistable<Long> {
         }
 
         if (clientParentGroup != null) {
-            this.groups = new HashSet<Group>();
+            this.groups = new HashSet<>();
             this.groups.add(clientParentGroup);
         }
 
@@ -295,7 +295,7 @@ public final class Client extends AbstractPersistable<Long> {
     }
 
     private void validate() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         validateNameParts(dataValidationErrors);
         validateActivationDate(dataValidationErrors);
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
@@ -329,7 +329,7 @@ public final class Client extends AbstractPersistable<Long> {
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.already.active", defaultUserMessage,
                     ClientApiConstants.activationDateParamName, activationLocalDate.toString(formatter));
 
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             dataValidationErrors.add(error);
 
             throw new PlatformApiDataValidationException(dataValidationErrors);
@@ -381,7 +381,7 @@ public final class Client extends AbstractPersistable<Long> {
 
     public Map<String, Object> update(final JsonCommand command) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(9);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
         if (command.isChangeInIntegerParameterNamed(ClientApiConstants.statusParamName, this.status)) {
             final Integer newValue = command.integerValueOfParameterNamed(ClientApiConstants.statusParamName);

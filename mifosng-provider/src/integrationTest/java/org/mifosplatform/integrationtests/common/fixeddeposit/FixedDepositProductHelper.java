@@ -81,10 +81,10 @@ public class FixedDepositProductHelper {
     private Account[] accountList = null;
 
     public String build(final String validFrom, final String validTo) {
-        final HashMap<String, Object> map = new HashMap<String, Object>();
+        final HashMap<String, Object> map = new HashMap<>();
 
         List<HashMap<String, String>> chartSlabs = new ArrayList<HashMap<String, String>>();
-        HashMap<String, String> chartSlabsMap1 = new HashMap<String, String>();
+        HashMap<String, String> chartSlabsMap1 = new HashMap<>();
         chartSlabsMap1.put("description", "First");
         chartSlabsMap1.put("periodType", MONTHS);
         chartSlabsMap1.put("fromPeriod", "1");
@@ -93,7 +93,7 @@ public class FixedDepositProductHelper {
         chartSlabsMap1.put("locale", LOCALE);
         chartSlabs.add(0, chartSlabsMap1);
 
-        HashMap<String, String> chartSlabsMap2 = new HashMap<String, String>();
+        HashMap<String, String> chartSlabsMap2 = new HashMap<>();
         chartSlabsMap2.put("description", "Second");
         chartSlabsMap2.put("periodType", MONTHS);
         chartSlabsMap2.put("fromPeriod", "7");
@@ -102,7 +102,7 @@ public class FixedDepositProductHelper {
         chartSlabsMap2.put("locale", LOCALE);
         chartSlabs.add(1, chartSlabsMap2);
 
-        HashMap<String, String> chartSlabsMap3 = new HashMap<String, String>();
+        HashMap<String, String> chartSlabsMap3 = new HashMap<>();
         chartSlabsMap3.put("description", "Third");
         chartSlabsMap3.put("periodType", MONTHS);
         chartSlabsMap3.put("fromPeriod", "13");
@@ -111,7 +111,7 @@ public class FixedDepositProductHelper {
         chartSlabsMap3.put("locale", LOCALE);
         chartSlabs.add(2, chartSlabsMap3);
 
-        HashMap<String, String> chartSlabsMap4 = new HashMap<String, String>();
+        HashMap<String, String> chartSlabsMap4 = new HashMap<>();
         chartSlabsMap4.put("description", "Fourth");
         chartSlabsMap4.put("periodType", MONTHS);
         chartSlabsMap4.put("fromPeriod", "19");
@@ -121,7 +121,7 @@ public class FixedDepositProductHelper {
         chartSlabs.add(3, chartSlabsMap4);
 
         List<HashMap<String, Object>> charts = new ArrayList<HashMap<String, Object>>();
-        HashMap<String, Object> chartsMap = new HashMap<String, Object>();
+        HashMap<String, Object> chartsMap = new HashMap<>();
         chartsMap.put("fromDate", validFrom);
         chartsMap.put("endDate", validTo);
         chartsMap.put("dateFormat", "dd MMMM yyyy");
@@ -177,7 +177,7 @@ public class FixedDepositProductHelper {
     }
 
     private Map<String, String> getAccountMappingForCashBased() {
-        final Map<String, String> map = new HashMap<String, String>();
+        final Map<String, String> map = new HashMap<>();
         if (accountList != null) {
             for (int i = 0; i < this.accountList.length; i++) {
                 if (this.accountList[i].getAccountType().equals(Account.AccountType.ASSET)) {

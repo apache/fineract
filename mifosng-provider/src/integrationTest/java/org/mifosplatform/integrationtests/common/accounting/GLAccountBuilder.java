@@ -29,7 +29,7 @@ public class GLAccountBuilder {
     private static String description = "DEFAULT_DESCRIPTION";
 
     public String build() {
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
         map.put("name", GLAccountBuilder.name);
         map.put("glCode", GLAccountBuilder.GLCode);
         map.put("manualEntriesAllowed", GLAccountBuilder.manualEntriesAllowed);

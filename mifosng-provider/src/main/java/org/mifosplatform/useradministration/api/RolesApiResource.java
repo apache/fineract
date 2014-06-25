@@ -46,13 +46,13 @@ public class RolesApiResource {
     /**
      * The set of parameters that are supported in response for {@link RoleData}
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "description",
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "description",
             "availablePermissions", "selectedPermissions"));
 
     /**
      * The set of parameters that are supported in response for {@link RoleData}
      */
-    private final Set<String> PERMISSIONS_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "description",
+    private final Set<String> PERMISSIONS_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "description",
             "permissionUsageData"));
 
     private final String resourceNameForPermissions = "ROLE";

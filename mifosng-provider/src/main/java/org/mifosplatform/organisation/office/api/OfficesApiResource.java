@@ -46,7 +46,7 @@ public class OfficesApiResource {
      * The set of parameters that are supported in response for
      * {@link OfficeData}.
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "nameDecorated", "externalId",
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "nameDecorated", "externalId",
             "openingDate", "hierarchy", "parentId", "parentName", "allowedParents"));
 
     private final String resourceNameForPermissions = "OFFICE";

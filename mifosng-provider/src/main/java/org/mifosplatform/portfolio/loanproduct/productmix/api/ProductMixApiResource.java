@@ -45,7 +45,7 @@ public class ProductMixApiResource {
 
     private final String resourceNameForPermissions = "PRODUCTMIX";
 
-    private final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("productId", "productName",
+    private final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(Arrays.asList("productId", "productName",
             "restrictedProducts", "allowedProducts", "productOptions"));
 
     private final PlatformSecurityContext context;

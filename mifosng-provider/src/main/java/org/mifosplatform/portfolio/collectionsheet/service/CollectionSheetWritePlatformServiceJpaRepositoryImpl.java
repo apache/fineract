@@ -58,7 +58,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
 
         this.transactionDataValidator.validateTransaction(command);
 
-        final Map<String, Object> changes = new HashMap<String, Object>();
+        final Map<String, Object> changes = new HashMap<>();
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
 
@@ -83,7 +83,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
     }
 
     private Map<String, Object> updateBulkReapayments(final JsonCommand command) {
-        final Map<String, Object> changes = new HashMap<String, Object>();
+        final Map<String, Object> changes = new HashMap<>();
         final CollectionSheetBulkRepaymentCommand bulkRepaymentCommand = this.bulkRepaymentCommandFromApiJsonDeserializer
                 .commandFromApiJson(command.json());
         changes.putAll(this.loanWritePlatformService.makeLoanBulkRepayment(bulkRepaymentCommand));
@@ -91,7 +91,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
     }
 
     private Map<String, Object> updateBulkDisbursals(final JsonCommand command) {
-        final Map<String, Object> changes = new HashMap<String, Object>();
+        final Map<String, Object> changes = new HashMap<>();
         final CollectionSheetBulkDisbursalCommand bulkDisbursalCommand = this.bulkDisbursalCommandFromApiJsonDeserializer
                 .commandFromApiJson(command.json());
         changes.putAll(this.loanWritePlatformService.bulkLoanDisbursal(command, bulkDisbursalCommand, false));
@@ -99,7 +99,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
     }
 
     private Map<String, Object> updateBulkMandatorySavingsDuePayments(final JsonCommand command) {
-        final Map<String, Object> changes = new HashMap<String, Object>();
+        final Map<String, Object> changes = new HashMap<>();
         final Collection<SavingsAccountTransactionDTO> savingsTransactions = this.accountAssembler.assembleBulkMandatorySavingsAccountTransactionDTOs(command);
         
         for (SavingsAccountTransactionDTO savingsAccountTransactionDTO : savingsTransactions) {

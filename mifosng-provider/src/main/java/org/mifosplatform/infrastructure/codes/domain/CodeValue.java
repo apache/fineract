@@ -69,7 +69,7 @@ public class CodeValue extends AbstractPersistable<Long> {
 
     public Map<String, Object> update(final JsonCommand command) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(2);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(2);
 
         final String labelParamName = CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue();
         if (command.isChangeInStringParameterNamed(labelParamName, this.label)) {

@@ -109,7 +109,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loancharge", orphanRemoval = true)
-    private final Set<LoanInstallmentCharge> loanInstallmentCharge = new HashSet<LoanInstallmentCharge>();
+    private final Set<LoanInstallmentCharge> loanInstallmentCharge = new HashSet<>();
 
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
@@ -420,7 +420,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     public Map<String, Object> update(final JsonCommand command, final BigDecimal amount) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();

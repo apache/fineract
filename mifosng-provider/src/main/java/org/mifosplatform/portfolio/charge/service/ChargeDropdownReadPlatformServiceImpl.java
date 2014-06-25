@@ -32,7 +32,7 @@ public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownRead
 
     @Override
     public List<EnumOptionData> retrieveApplicableToTypes() {
-        final List<EnumOptionData> chargeAppliesToTypes = new ArrayList<EnumOptionData>();
+        final List<EnumOptionData> chargeAppliesToTypes = new ArrayList<>();
         for (final ChargeAppliesTo chargeAppliesTo : ChargeAppliesTo.values()) {
             if (ChargeAppliesTo.INVALID.equals(chargeAppliesTo)) {
                 continue;
@@ -44,7 +44,7 @@ public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownRead
 
     @Override
     public List<EnumOptionData> retrieveCollectionTimeTypes() {
-        final List<EnumOptionData> chargeTimeTypes = new ArrayList<EnumOptionData>();
+        final List<EnumOptionData> chargeTimeTypes = new ArrayList<>();
         for (final ChargeTimeType chargeTimeType : ChargeTimeType.values()) {
             if (ChargeTimeType.INVALID.equals(chargeTimeType) || ChargeTimeType.SAVINGS_CLOSURE.equals(chargeTimeType)) {
                 continue;

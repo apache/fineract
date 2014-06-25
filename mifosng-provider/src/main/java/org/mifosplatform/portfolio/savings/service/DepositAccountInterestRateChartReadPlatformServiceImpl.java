@@ -88,13 +88,13 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
     @Override
     public DepositAccountInterestRateChartData retrieveWithTemplate(DepositAccountInterestRateChartData chartData) {
 
-        final List<CodeValueData> genderOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> genderOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.GENDER));
 
-        final List<CodeValueData> clientTypeOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> clientTypeOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_TYPE));
 
-        final List<CodeValueData> clientClassificationOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> clientClassificationOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_CLASSIFICATION));
 
         return DepositAccountInterestRateChartData.withTemplate(chartData,
@@ -120,13 +120,13 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
     @Override
     public DepositAccountInterestRateChartData template() {
 
-        final List<CodeValueData> genderOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> genderOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.GENDER));
 
-        final List<CodeValueData> clientTypeOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> clientTypeOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_TYPE));
 
-        final List<CodeValueData> clientClassificationOptions = new ArrayList<CodeValueData>(
+        final List<CodeValueData> clientClassificationOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_CLASSIFICATION));
         return DepositAccountInterestRateChartData.template(this.chartDropdownReadPlatformService.retrievePeriodTypeOptions(),
                 this.interestIncentiveDropdownReadPlatformService.retrieveEntityTypeOptions(),
@@ -178,7 +178,7 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
         @Override
         public Collection<DepositAccountInterestRateChartData> extractData(ResultSet rs) throws SQLException, DataAccessException {
 
-            List<DepositAccountInterestRateChartData> chartDataList = new ArrayList<DepositAccountInterestRateChartData>();
+            List<DepositAccountInterestRateChartData> chartDataList = new ArrayList<>();
 
             DepositAccountInterestRateChartData chartData = null;
             Long interestRateChartId = null;

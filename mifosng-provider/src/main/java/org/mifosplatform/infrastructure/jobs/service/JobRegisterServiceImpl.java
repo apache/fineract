@@ -51,7 +51,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
 
     private final TenantDetailsService tenantDetailsService;
 
-    private final HashMap<String, Scheduler> schedulers = new HashMap<String, Scheduler>(4);
+    private final HashMap<String, Scheduler> schedulers = new HashMap<>(4);
 
     @Autowired
     public JobRegisterServiceImpl(final ApplicationContext applicationContext, final SchedularWritePlatformService schedularService,
@@ -95,7 +95,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
             if (scheduler == null || !scheduler.checkExists(jobKey)) {
                 final JobDetail jobDetail = createJobDetail(scheduledJobDetail);
                 final String tempSchedulerName = "temp" + scheduledJobDetail.getId();
-                final List<Class<? extends JobListener>> listenerClasses = new ArrayList<Class<? extends JobListener>>(2);
+                final List<Class<? extends JobListener>> listenerClasses = new ArrayList<>(2);
                 listenerClasses.add(SchedulerJobListener.class);
                 listenerClasses.add(SchedulerStopListener.class);
                 final Scheduler tempScheduler = createScheduler(tempSchedulerName, 1, listenerClasses);
@@ -108,12 +108,9 @@ public class JobRegisterServiceImpl implements JobRegisterService {
             }
 
         } catch (final Exception e) {
-			final String msg = "Job execution failed for job with id:"
-					+ scheduledJobDetail.getId();
-			logger.error(msg, e);
-			throw new PlatformInternalServerException(
-					"error.msg.sheduler.job.execution.failed", msg,
-					scheduledJobDetail.getId());
+            final String msg = "Job execution failed for job with id:" + scheduledJobDetail.getId();
+            logger.error(msg, e);
+            throw new PlatformInternalServerException("error.msg.sheduler.job.execution.failed", msg, scheduledJobDetail.getId());
         }
 
     }
@@ -218,9 +215,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
             scheduledJobDetails.updateNextRunTime(null);
             final String stackTrace = getStackTraceAsString(throwable);
             scheduledJobDetails.updateErrorLog(stackTrace);
-			logger.error(
-					"Could not schedule job: "
-							+ scheduledJobDetails.getJobName(), throwable);
+            logger.error("Could not schedule job: " + scheduledJobDetails.getJobName(), throwable);
         }
         scheduledJobDetails.updateCurrentlyRunningStatus(false);
     }
@@ -264,7 +259,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
         final SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
         schedulerFactoryBean.setSchedulerName(name);
         if (listenerClasses == null) {
-            listenerClasses = new ArrayList<Class<? extends JobListener>>(1);
+            listenerClasses = new ArrayList<>(1);
             listenerClasses.add(SchedulerJobListener.class);
         }
         schedulerFactoryBean.setGlobalJobListeners(getGlobalListener(listenerClasses));
@@ -280,7 +275,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
     }
 
     private JobListener[] getGlobalListener(final List<Class<? extends JobListener>> listenerClasses) throws ClassNotFoundException {
-        final List<JobListener> listeners = new ArrayList<JobListener>(listenerClasses.size());
+        final List<JobListener> listeners = new ArrayList<>(listenerClasses.size());
         for (final Class<?> listenerClass : listenerClasses) {
             final JobListener listener = (JobListener) getBeanObject(listenerClass);
             listeners.add(listener);
@@ -309,7 +304,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
      * @throws ClassNotFoundException
      */
     private Object getBeanObject(final Class<?> classType) throws ClassNotFoundException {
-        final List<Class<?>> typesList = new ArrayList<Class<?>>();
+        final List<Class<?>> typesList = new ArrayList<>();
         final Class<?>[] interfaceType = classType.getInterfaces();
         if (interfaceType.length > 0) {
             typesList.addAll(Arrays.asList(interfaceType));
@@ -320,7 +315,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
             }
             typesList.add(superclassType);
         }
-        final List<String> beanNames = new ArrayList<String>();
+        final List<String> beanNames = new ArrayList<>();
         for (final Class<?> clazz : typesList) {
             beanNames.addAll(Arrays.asList(this.applicationContext.getBeanNamesForType(clazz)));
         }

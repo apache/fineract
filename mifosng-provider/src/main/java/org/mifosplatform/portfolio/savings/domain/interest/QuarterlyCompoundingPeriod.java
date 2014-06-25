@@ -131,7 +131,7 @@ public class QuarterlyCompoundingPeriod implements CompoundingPeriod {
     private static List<EndOfDayBalance> endOfDayBalancesWithinPeriodInterval(final LocalDateInterval compoundingPeriodInterval,
             final List<EndOfDayBalance> allEndOfDayBalances, final LocalDate upToInterestCalculationDate) {
 
-        final List<EndOfDayBalance> endOfDayBalancesForPeriodInterval = new ArrayList<EndOfDayBalance>();
+        final List<EndOfDayBalance> endOfDayBalancesForPeriodInterval = new ArrayList<>();
 
         for (final EndOfDayBalance endOfDayBalance : allEndOfDayBalances) {
 

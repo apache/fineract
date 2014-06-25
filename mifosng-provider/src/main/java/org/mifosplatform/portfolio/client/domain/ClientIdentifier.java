@@ -64,7 +64,7 @@ public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
 
     public Map<String, Object> update(final JsonCommand command) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
         final String documentTypeIdParamName = "documentTypeId";
         if (command.isChangeInLongParameterNamed(documentTypeIdParamName, this.documentType.getId())) {
