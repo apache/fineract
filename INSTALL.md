@@ -32,7 +32,7 @@ The two ways to get up and running with mifos platform is:
 
 ## 1. Amazon Public AMI
 
-  Use AWS Wizard to launch instance by using this link: <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=ap-southeast-1#launchAmi=ami-20257a72" title="Latest Mifos Platform Public AMI">Mifos Platform AMI (ami-20257a72)</a>
+  Use AWS Wizard to launch instance by using this link: <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=ap-southeast-1#launchAmi=ami-8ace91d8" title="Latest Mifos Platform Public AMI">Mifos Platform AMI (ami-8ace91d8)</a>
 
   *Note:* Read through the following as you step through the AWS Wizard
   
@@ -47,16 +47,16 @@ The two ways to get up and running with mifos platform is:
     - Community app should be available @ https://[public DNS]:8443/community-app
     - API docs should be available @ https://[public DNS]:8443/api-docs/apiLive.htm
 
-  *Name:* Mifos Platform 1.13.0.RELEASE Public AMI
+  *Name:* Mifos Platform 1.23.1.RELEASE Public AMI
   
- - AMI ID: ami-20257a72
- - Kernel ID: aki-71665e05
- - Name: Mifos Platform 1.13.0.RELEASE Public AMI
- - Owner: 476083131096
- - Source: 476083131096/Mifos Platform 1.13.0.RELEASE Public AMI
+ - AMI ID: ami-8ace91d8
+ - Kernel ID: aki-503e7402
+ - Name: Mifos Platform 1.23.1.RELEASE Public AMI
+ - Owner: 540782944231
+ - Source: 540782944231/Mifosx 1.23.1
  - Architecture: Ubuntu12.04 LTS x86_64
  - Built starting from Ubuntu AMI ami-35acbb41
- - Java 1.6_45 32 bit JVM
+ - Java 1.7.0_51 64 bit JVM
  - Tomcat 7.0.39 (with SSL configured for self-signed certificate)
  - MySql 5.5.31
 
