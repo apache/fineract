@@ -730,17 +730,57 @@
 							</tr>
 							<tr>
 								<td></td>
-								<td>recurringdepositaccounts/{accountId}?command=calculateInterest</td>
-								<td><a href="#rdaccounts_calculate_interest">Calculate interest on a recurring deposit account</a></td>
+								<td>recurringdepositaccounts/{accountId}?command=postInterest</td>
+								<td><a href="#rdaccounts_post_interest">Post interest on a recurring deposit account</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>							
+							<tr>
+								<td><a href="#recurringdepositaccounts_transactions">Recurring Deposit Transactions</a></td>
+								<td>recurringdepositaccounts/{accountId}/transactions?command=deposit</td>
+								<td><a href="#recurringdepositaccounts_deposit">Make a deposit</a></td>
 								<td></td>
 								<td></td>
 								<td></td>
 							</tr>
 							<tr>
 								<td></td>
-								<td>recurringdepositaccounts/{accountId}?command=postInterest</td>
-								<td><a href="#rdaccounts_post_interest">Post interest on a recurring deposit account</a></td>
+								<td>recurringdepositaccounts/{accountId}/transactions?command=withdrawal</td>
+								<td><a href="#recurringdepositaccounts_withdrawal">Make a withdrawal</a></td>
 								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>recurringdepositaccounts/{accountId}/transactions/{transactionId}?command=undo</td>
+								<td><a href="#recurringdepositaccounts_undotransaction">Undo transaction</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>recurringdepositaccounts/{accountId}/transactions/{transactionId}?command=modify</td>
+								<td><a href="#recurringdepositaccounts_adjusttransaction">Adjust transaction</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>recurringdepositaccounts/{accountId}/transactions/template</td>
+								<td></td>
+								<td><a href="#recurringdepositaccounts_transactions_template">Retrieve Deposit account transaction template</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>recurringdepositaccounts/{accountId}/transactions/{transactionId}</td>
+								<td></td>
+								<td><a href="#recurringdepositaccounts_transaction">Retrieve Deposit account transaction</a></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -21914,6 +21954,291 @@ No Request Body:
 	        </code>
 	    </div>
 	</div>
+	<a id="recurringdepositaccounts_transactions" name="recurringdepositaccounts_transactions" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Recurring Deposit Account Transactions:</h2>
+	        <p>Transactions possible on a recurring deposit account.</p>
+	      	<table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+
+				<tr class=alt><td>transactionDate</td></tr>
+				<tr><td class=fielddesc>The date of the transaction.</td></tr>
+
+				<tr class=alt><td>transactionAmount</td></tr>
+				<tr><td class=fielddesc>The amount of the transaction.</td></tr>
+	        </table>
+	    </div>
+	</div>
+
+	<a id="recurringdepositaccounts_transactions_template" name="recurringdepositaccounts_transactions_template" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Recurring Deposit Account Transaction Template:</h2>
+	            <p>This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+	                <ul>
+	                <li class=normalli>Field Defaults</li>   
+	                <li class=normalli>Allowed Value Lists</li>    
+	                </ul>
+	            </p>
+	        <p>Example Requests: </p>
+	        <div class=apiClick>recurringdepositaccounts/1/transactions/template?command=deposit</div>
+	        <br/>
+			<div class=apiClick>recurringdepositaccounts/1/transactions/template?command=withdrawal</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/recurringdepositaccounts/{accountId}/transactions/template?command=deposit
+	        </code>
+			<code class="method-response">
+{
+  "id": 1,
+  "transactionType": {
+    "id": 1,
+    "code": "savingsAccountTransactionType.deposit",
+    "value": "Deposit",
+    "deposit": true,
+    "withdrawal": false,
+    "interestPosting": false,
+    "feeDeduction": false,
+    "initiateTransfer": false,
+    "approveTransfer": false,
+    "withdrawTransfer": false,
+    "rejectTransfer": false,
+    "overdraftInterest": false,
+    "writtenoff": false,
+    "overdraftFee": true
+  },
+  "accountId": 1,
+  "accountNo": "000000001",
+  "date": [
+    2014,
+    6,
+    25
+  ],
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 4,
+    "inMultiplesOf": 100,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "amount": 100000.000000,
+  "reversed": false,
+  "paymentTypeOptions": []
+}
+			</code>
+	    </div>
+	</div>
+
+<a id="recurringdepositaccounts_transaction" name="recurringdepositaccounts_transaction" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Recurring Deposit Account Transaction:</h2>
+	        <p>Example Requests: </p>
+	        <div class=apiClick>recurringdepositaccounts/1/transactions/1</div>
+	        <br/>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/recurringdepositaccounts/{accountId}/transactions/{transactionId}
+	        </code>
+			<code class="method-response">
+{
+  "id": 1,
+  "transactionType": {
+    "id": 2,
+    "code": "savingsAccountTransactionType.withdrawal",
+    "value": "Withdrawal",
+    "deposit": false,
+    "withdrawal": true,
+    "interestPosting": false,
+    "feeDeduction": false
+  },
+  "accountId": 1,
+  "accountNo": "000000001",
+  "date": [
+    2013,
+    8,
+    7
+  ],
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "inMultiplesOf": 0,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "paymentDetailData": {
+    "id": 62,
+    "paymentType": {
+      "id": 11,
+      "name": "cash"
+    },
+    "accountNumber": "",
+    "checkNumber": "",
+    "routingCode": "",
+    "receiptNumber": "",
+    "bankNumber": ""
+  },
+  "amount": 5000,
+  "runningBalance": 0,
+  "reversed": true
+}
+</code>
+	    </div>
+	</div>
+
+	<a id="recurringdepositaccounts_deposit" name="recurringdepositaccounts_deposit" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Deposit Transaction</h2>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/recurringdepositaccounts/{accountsId}/transactions?command=deposit</code>
+	        <code class="method-request">POST recurringdepositaccounts/1/transactions?command=deposit              
+Content-Type: application/json
+No Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "transactionDate": "27 May 2013",
+  "transactionAmount": "500",
+  "paymentTypeId": "14",
+  "accountNumber": "acc123",
+  "checkNumber": "che123",
+  "routingCode": "rou123",
+  "receiptNumber": "rec123",
+  "bankNumber": "ban123"
+}
+	        </code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 2,
+  "savingsId": 1,
+  "resourceId": 47,
+  "changes": {
+    "accountNumber": "acc123",
+    "checkNumber": "che123",
+    "routingCode": "rou123",
+    "receiptNumber": "rec123",
+    "bankNumber": "ban123"
+  }
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="recurringdepositaccounts_withdrawal" name="recurringdepositaccounts_withdrawal" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Withdrawal Transaction</h2>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/recurringdepositaccounts/{accountsId}/transactions?command=withdrawal</code>
+	        <code class="method-request">POST recurringdepositaccounts/1/transactions?command=withdrawal
+Content-Type: application/json
+No Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "transactionDate": "27 May 2013",
+  "transactionAmount": "500",
+  "paymentTypeId": "14",
+  "accountNumber": "acc123",
+  "checkNumber": "che123",
+  "routingCode": "rou123",
+  "receiptNumber": "rec123",
+  "bankNumber": "ban123"
+}
+	        </code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 2,
+  "savingsId": 1,
+  "resourceId": 48,
+  "changes": {
+    "accountNumber": "acc123",
+    "checkNumber": "che123",
+    "routingCode": "rou123",
+    "receiptNumber": "rec123",
+    "bankNumber": "ban123"
+  }
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="recurringdepositaccounts_adjusttransaction" name="recurringdepositaccounts_adjusttransaction" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Adjust Transaction</h2>
+	        <p>This command modifies the given transaction.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/recurringdepositaccounts/{accountsId}/transactions/{transactionId}?command=modify</code>
+	        <code class="method-request">POST recurringdepositaccounts/1/transactions/1?command=modify             
+Content-Type: application/json
+No Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "transactionDate": "27 May 2013",
+  "transactionAmount": "500",
+  "paymentTypeId": "14",
+  "accountNumber": "acc123",
+  "checkNumber": "che123",
+  "routingCode": "rou123",
+  "receiptNumber": "rec123",
+  "bankNumber": "ban123"
+}
+	        </code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 2,
+  "savingsId": 1,
+  "resourceId": 48,
+  "changes": {
+    "accountNumber": "acc123",
+    "checkNumber": "che123",
+    "routingCode": "rou123",
+    "receiptNumber": "rec123",
+    "bankNumber": "ban123"
+  }
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="recurringdepositaccounts_undotransaction" name="recurringdepositaccounts_undotransaction" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Undo transaction</h2>
+	        <p>This command reverses the given transaction.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/recurringdepositaccounts/{accountsId}/transactions/{transactionId}?command=undo</code>
+	        <code class="method-request">POST recurringdepositaccounts/1/transactions/1?command=undo              
+Content-Type: application/json
+No Request Body:
+{
+}
+	        </code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 2,
+  "savingsId": 1,
+  "resourceId": 1
+}
+	        </code>
+	    </div>
+	</div>
 
 <!-- end of recurring deposit accounts api -->
 <!-- account transfers -->
@@ -24241,6 +24566,14 @@ No Request Body:
 						<tr>
                             <td class=fielddesc>An array of columns in the new Data Table.</td>
 						</tr>
+                        <tr class=alt>
+                            <td><em>Optional - </em>multiRow</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Allows to create multiple entries in the Data Table. Optional, defaults to <tt>false</tt>.
+                                If this property is not provided Data Table will allow only one entry.
+                            </td>
+                        </tr>
                     </table>
                     <table class=matrixHeading>
 						<tr class="matrixHeadingBG">
@@ -31470,6 +31803,278 @@ No Request Body:
 					<td>savingsaccounts/{accountId}/charges/{savingsAccountChargeId}?command=waive</td>
 					<td><a href="#savings_charges_waive">Waive a Savings Account Charge</a></td>
 					<td></td>
+					<td></td>
+					<td></td>
+				</tr>				
+				<tr>
+					<td><a href="#fdproducts">Fixed Deposit Product</a></td>
+					<td>fixeddepositproducts</td>
+					<td><a href="#fdproducts_create">Create a Fixed Deposit product</a></td>
+					<td><a href="#fdproducts_list">List Fixed Deposit products</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>fixeddepositproducts/{productId}</td>
+					<td></td>
+					<td><a href="#fdproducts_retrieve">Retrieve a Fixed Deposit product</a></td>
+					<td><a href="#fdproducts_update">Update a Fixed Deposit product</a></td>
+					<td><a href="#fdproducts_delete">Delete a Fixed Deposit product</a></td>
+				</tr>
+				<tr>
+					<td><a href="#fdaccounts">Fixed Deposit Accounts</a></td>
+					<td>fixeddepositaccounts</td>
+					<td><a href="#fdaccounts_create">Submit new fixed deposit application</a></td>
+					<td><a href="#fdaccounts_list">List fixed deposit application/accounts</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>fixeddepositaccounts/{accountId}</td>
+					<td></td>
+					<td><a href="#fdaccounts_retrieve">Retrieve a fixed deposit application/account</a></td>
+					<td><a href="#fdaccounts_update">Modify a fixed deposit application</a></td>
+					<td><a href="#fdaccounts_delete">Delete a fixed deposit application</a></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>fixeddepositaccounts/{accountId}?command=approve</td>
+					<td><a href="#fdaccounts_approve">Approve a fixed deposit application</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>fixeddepositaccounts/{accountId}?command=undoApproval</td>
+					<td><a href="#fdaccounts_undoapproval">Undo fixed deposit application approval</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>fixeddepositaccounts/{accountId}?command=reject</td>
+					<td><a href="#fdaccounts_reject">Reject a fixed deposit application</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>fixeddepositaccounts/{accountId}?command=withdraw</td>
+					<td><a href="#fdaccounts_withdrawbyapplicant">Withdraw fixed deposit application</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>fixeddepositaccounts/{accountId}?command=activate</td>
+					<td><a href="#fdaccounts_activate">Activate a fixed deposit account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>fixeddepositaccounts/{accountId}?command=close</td>
+					<td><a href="#fdaccounts_close">Close a fixed deposit account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>fixeddepositaccounts/{accountId}?command=prematureClose</td>
+					<td><a href="#fdaccounts_prematureclose">Premature Close a fixed deposit account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>fixeddepositaccounts/{accountId}?command=calculatePrematureAmount</td>
+					<td><a href="#fdaccounts_calculate_premature_amount">Calculate Premature amount on a fixed deposit account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>fixeddepositaccounts/{accountId}?command=calculateInterest</td>
+					<td><a href="#fdaccounts_calculate_interest">Calculate interest on a fixed deposit account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>fixeddepositaccounts/{accountId}?command=postInterest</td>
+					<td><a href="#fdaccounts_post_interest">Post interest on a fixed deposit account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td><a href="#rdproducts">Recurring Deposit Product</a></td>
+					<td>recurringdepositproducts</td>
+					<td><a href="#rdproducts_create">Create a Recurring Deposit product</a></td>
+					<td><a href="#rdproducts_list">List Recurring Deposit products</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>recurringdepositproducts/{productId}</td>
+					<td></td>
+					<td><a href="#rdproducts_retrieve">Retrieve a Recurring Deposit product</a></td>
+					<td><a href="#rdproducts_update">Update a Recurring Deposit product</a></td>
+					<td><a href="#rdproducts_delete">Delete a Recurring Deposit product</a></td>
+				</tr>
+				<tr>
+					<td><a href="#rdaccounts">Recurring Deposit Accounts</a></td>
+					<td>recurringdepositaccounts</td>
+					<td><a href="#rdaccounts_create">Submit new recurring deposit application</a></td>
+					<td><a href="#rdaccounts_list">List recurring deposit application/accounts</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>recurringdepositaccounts/{accountId}</td>
+					<td></td>
+					<td><a href="#rdaccounts_retrieve">Retrieve a recurring deposit application/account</a></td>
+					<td><a href="#rdaccounts_update">Modify a recurring deposit application</a></td>
+					<td><a href="#rdaccounts_delete">Delete a recurring deposit application</a></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>recurringdepositaccounts/{accountId}?command=approve</td>
+					<td><a href="#rdaccounts_approve">Approve a recurring deposit application</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>recurringdepositaccounts/{accountId}?command=undoApproval</td>
+					<td><a href="#rdaccounts_undoapproval">Undo recurring deposit application approval</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>recurringdepositaccounts/{accountId}?command=reject</td>
+					<td><a href="#rdaccounts_reject">Reject a recurring deposit application</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>recurringdepositaccounts/{accountId}?command=withdraw</td>
+					<td><a href="#rdaccounts_withdrawbyapplicant">Withdraw recurring deposit application</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>recurringdepositaccounts/{accountId}?command=activate</td>
+					<td><a href="#rdaccounts_activate">Activate a recurring deposit account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>recurringdepositaccounts/{accountId}?command=close</td>
+					<td><a href="#rdaccounts_close">Close a recurring deposit account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>recurringdepositaccounts/{accountId}?command=prematureClose</td>
+					<td><a href="#rdaccounts_prematureclose">Premature Close a recurring deposit account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>recurringdepositaccounts/{accountId}?command=calculatePrematureAmount</td>
+					<td><a href="#rdaccounts_calculate_premature_amount">Calculate Premature amount on a recurring deposit account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>recurringdepositaccounts/{accountId}?command=calculateInterest</td>
+					<td><a href="#rdaccounts_calculate_interest">Calculate interest on a recurring deposit account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>recurringdepositaccounts/{accountId}?command=postInterest</td>
+					<td><a href="#rdaccounts_post_interest">Post interest on a recurring deposit account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>							
+				<tr>
+					<td><a href="#recurringdepositaccounts_transactions">Recurring Deposit Transactions</a></td>
+					<td>recurringdepositaccounts/{accountId}/transactions?command=deposit</td>
+					<td><a href="#recurringdepositaccounts_deposit">Make a deposit</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>recurringdepositaccounts/{accountId}/transactions?command=withdrawal</td>
+					<td><a href="#recurringdepositaccounts_withdrawal">Make a withdrawal</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>recurringdepositaccounts/{accountId}/transactions/{transactionId}?command=undo</td>
+					<td><a href="#recurringdepositaccounts_undotransaction">Undo transaction</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>recurringdepositaccounts/{accountId}/transactions/{transactionId}?command=modify</td>
+					<td><a href="#recurringdepositaccounts_adjusttransaction">Adjust transaction</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>recurringdepositaccounts/{accountId}/transactions/template</td>
+					<td></td>
+					<td><a href="#recurringdepositaccounts_transactions_template">Retrieve Deposit account transaction template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>recurringdepositaccounts/{accountId}/transactions/{transactionId}</td>
+					<td></td>
+					<td><a href="#recurringdepositaccounts_transaction">Retrieve Deposit account transaction</a></td>
 					<td></td>
 					<td></td>
 				</tr>

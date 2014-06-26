@@ -53,10 +53,19 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
     @Override
     public LocalDate adjustRepaymentDate(final LocalDate dueRepaymentPeriodDate, final LoanApplicationTerms loanApplicationTerms,
             final boolean isHolidayEnabled, final List<Holiday> holidays, final WorkingDays workingDays) {
+
         LocalDate adjustedDate = dueRepaymentPeriodDate;
-        final LocalDate nextDueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
-                loanApplicationTerms.getRepaymentEvery(), adjustedDate);
-        adjustedDate = WorkingDaysUtil.getOffSetDateIfNonWorkingDay(adjustedDate, nextDueRepaymentPeriodDate, workingDays);
+        /**
+         * Fix for https://mifosforge.jira.com/browse/MIFOSX-1357
+         */
+        // recursively check for the next working day.
+        while (WorkingDaysUtil.isNonWorkingDay(workingDays, adjustedDate)) {
+
+            final LocalDate nextDueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
+                    loanApplicationTerms.getRepaymentEvery(), adjustedDate);
+            adjustedDate = WorkingDaysUtil.getOffSetDateIfNonWorkingDay(adjustedDate, nextDueRepaymentPeriodDate, workingDays);
+        }
+
         if (isHolidayEnabled) {
             adjustedDate = HolidayUtil.getRepaymentRescheduleDateToIfHoliday(adjustedDate, holidays);
         }
