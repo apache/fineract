@@ -40,4 +40,8 @@ public class WorkingDaysUtil {
     public static boolean isWorkingDay(final WorkingDays workingDays, final LocalDate date) {
         return CalendarUtils.isValidRedurringDate(workingDays.getRecurrence(), date, date);
     }
+    
+    public static boolean isNonWorkingDay(final WorkingDays workingDays, final LocalDate date) {
+        return !isWorkingDay(workingDays, date);
+    }
 }

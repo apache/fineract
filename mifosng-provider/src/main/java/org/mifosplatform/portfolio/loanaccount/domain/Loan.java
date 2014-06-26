@@ -2112,6 +2112,7 @@ public class Loan extends AbstractPersistable<Long> {
             existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
             reverseExistingTransactions();
+            updateLoanSummaryDerivedFields();
 
         }
 
