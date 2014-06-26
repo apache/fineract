@@ -5,36 +5,36 @@ import org.mifosplatform.batch.domain.BatchRequest;
 import org.mifosplatform.batch.domain.BatchResponse;
 import org.mifosplatform.batch.exception.ErrorHandler;
 import org.mifosplatform.batch.exception.ErrorInfo;
-import org.mifosplatform.portfolio.client.api.ClientsApiResource;
+import org.mifosplatform.portfolio.savings.api.SavingsAccountsApiResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Implements {@link org.mifosplatform.batch.command.CommandStrategy} to handle
- * creation of a new client. It passes the contents of the body from the BatchRequest
- * to {@link org.mifosplatform.portfolio.client.api.ClientsApiResource} and gets back
+ * Implements {@link org.mifosplatform.batch.command.CommandStrategy} and applies a new savings
+ * on an existing client. It passes the contents of the body from the BatchRequest
+ * to {@link org.mifosplatform.portfolio.client.api.SavingsAccountsApiResource} and gets back
  * the response. This class will also catch any errors raised by 
- * {@link org.mifosplatform.portfolio.client.api.ClientsApiResource} and map those errors
+ * {@link org.mifosplatform.portfolio.client.api.SavingsAccountsApiResource} and map those errors
  * to appropriate status codes in BatchResponse.
  * 
  * @author Rishabh Shukla
- * 
+ *
  * @see org.mifosplatform.batch.command.CommandStrategy
  * @see org.mifosplatform.batch.domain.BatchRequest
  * @see org.mifosplatform.batch.domain.BatchResponse
  */
 @Component
-public class CreateClientCommandStrategy implements CommandStrategy{
+public class ApplySavingsCommandStrategy implements CommandStrategy{
 
-	private final ClientsApiResource clientsApiResource;
+	private final SavingsAccountsApiResource savingsAccountsApiResource;
 	
 	@Autowired
-	public CreateClientCommandStrategy(final ClientsApiResource clientsApiResource) {
-		this.clientsApiResource = clientsApiResource;
-	}	
+	public ApplySavingsCommandStrategy(final SavingsAccountsApiResource savingsAccountsApiResource) {
+		this.savingsAccountsApiResource = savingsAccountsApiResource;
+	}
 	
 	@Override
-	public BatchResponse execute(final BatchRequest request) {
+	public BatchResponse execute(BatchRequest request) {
 		
 		final BatchResponse response = new BatchResponse();	
 		final String responseBody;		
@@ -45,11 +45,11 @@ public class CreateClientCommandStrategy implements CommandStrategy{
 		//Try-catch blocks to map exceptions to appropriate status codes
 		try {
 			
-			//Calls 'create' function from 'ClientsApiResource' to create a new client
-			responseBody = clientsApiResource.create(request.getBody());
+			//Calls 'submitApplication' function from 'SavingsAccountsApiResource' to Apply Savings to an existing client
+			responseBody = savingsAccountsApiResource.submitApplication(request.getBody());
 			
 			response.setStatusCode(200);
-			//Sets the body of the response after the successful creation of the client
+			//Sets the body of the response after savings is successfully applied
 			response.setBody(responseBody);
 			
 		}
@@ -64,5 +64,4 @@ public class CreateClientCommandStrategy implements CommandStrategy{
 		
 		return response;		
 	}
-
 }

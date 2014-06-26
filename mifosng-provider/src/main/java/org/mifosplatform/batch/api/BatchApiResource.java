@@ -13,6 +13,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.mifosplatform.batch.domain.BatchRequest;
 import org.mifosplatform.batch.domain.BatchResponse;
+import org.mifosplatform.batch.exception.ErrorHandler;
+import org.mifosplatform.batch.exception.ErrorInfo;
 import org.mifosplatform.batch.serialization.BatchRequestJsonHelper;
 import org.mifosplatform.batch.service.BatchApiService;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
@@ -96,9 +98,11 @@ public class BatchApiResource {
 				
 				BatchResponse response = new BatchResponse();
 				
-				response.setStatusCode(400);
-				response.setBody("One or more of your requests couldn't be completed because of errors" +
-						" - Rolling back the whole transaction\n\n" + e.toString());
+				//Gets an object of type ErrorInfo, containing information about raised exception
+				ErrorInfo ex = ErrorHandler.handler(e);
+				
+				response.setStatusCode(ex.getStatusCode());
+				response.setBody(ex.getMessage());				
 				result.add(response);
 				
 				return this.toApiJsonSerializer.serialize(result);
