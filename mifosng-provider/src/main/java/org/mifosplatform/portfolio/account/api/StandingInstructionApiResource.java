@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.account.api;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -144,8 +145,10 @@ public class StandingInstructionApiResource {
         final SearchParameters searchParameters = SearchParameters.forAccountTransfer(sqlSearch, externalId, offset, limit, orderBy,
                 sortOrder);
 
+        final Date startDateRange = null;
+        final Date endDateRange = null;
         StandingInstructionDTO standingInstructionDTO = new StandingInstructionDTO(searchParameters, transferType, clientName, clientId,
-                fromAccount, fromAccountType);
+                fromAccount, fromAccountType, startDateRange, endDateRange);
 
         final Page<StandingInstructionData> transfers = this.standingInstructionReadPlatformService.retrieveAll(standingInstructionDTO);
 
