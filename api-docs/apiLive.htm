@@ -3846,6 +3846,7 @@ No Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Get Client Image (DATA URI)</h4>
+					<p>Optional arguments are identical to those of <a href="#client_images_retrieve_binary">Get Client Image (Binary file)</a></p>
 					<p>Example Requests:</p>
 					<div class=apiClick>clients/1/images</div>
 					<br>
@@ -3853,6 +3854,8 @@ No Request Body:
 				<div class="method-example">
 					<code class="method-declaration">
 GET https://DomainName/api/v1/clients/{clientId}/images
+Accept: text/plain 
+
 					</code>
 					<code class="method-response">
 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJ
@@ -3869,10 +3872,37 @@ gAEAOg13B6R/SAgAAAAASUVORK5CYII=
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Get Client Image (Binary file)</h4>
+					<h5>Optional Arguments</h5>
+					<dl class="argument-list">
+						<dt>output</dt>
+						<dd>
+							String <span>optional</span> one of <span>octet or inline_octet</span>
+						</dd>
+						<dd>The query parameter overrides the <span>"Accept" Header</span> and sets the Media Type to "application/octet-stream" <br/>
+						<span><b>octet :</b></span> Returns the image binary file as an attachment. The <span>Content-Disposition</span> header is set to <span>attachment;filename=somefile.ext</span> <br/>
+						<span><b>inline_octet :</b></span>The <span>Content-Disposition</span> header is set to <span>inline;filename=somefile.ext</span>
+						</dd>
+						<dt>maxWidth</dt>
+						<dd>
+							Integer <span>optional</span>
+						</dd>
+						<dd>Triggers resizing of the image to the defined width</dd>
+						
+						<dt>maxHeight</dt>
+						<dd>
+						<dd>
+							Integer <span>optional</span>
+						</dd>	
+						</dd>
+						<dd>Triggers resizing of the image to the defined height</dd>
+
+									
+					</dl>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
 GET https://DomainName/api/v1/clients/{clientId}/images
+Accept: application/octet-stream
 					</code>
 					<code class="method-request">
 POST clients/1/images
