@@ -40,6 +40,8 @@ public class SavingsProductData {
     private final boolean withdrawalFeeForTransfers;
     private final boolean allowOverdraft;
     private final BigDecimal overdraftLimit;
+    private final BigDecimal minRequiredBalance;
+    private final boolean allowOverdraftMinBalance;
 
     // accounting
     private final EnumOptionData accountingRule;
@@ -93,6 +95,8 @@ public class SavingsProductData {
         final Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings = null;
         final boolean allowOverdraft = false;
         final BigDecimal overdraftLimit = null;
+        final BigDecimal minRequiredBalance = null;
+        final boolean allowOverdraftMinBalance = false;
 
         return new SavingsProductData(id, name, shortName, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
@@ -101,7 +105,7 @@ public class SavingsProductData {
                 interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                 lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions,
                 accountingMappingOptions, charges, chargeOptions, penaltyOptions, feeToIncomeAccountMappings,
-                penaltyToIncomeAccountMappings, allowOverdraft, overdraftLimit);
+                penaltyToIncomeAccountMappings, allowOverdraft, overdraftLimit, minRequiredBalance, allowOverdraftMinBalance);
     }
 
     public static SavingsProductData withCharges(final SavingsProductData product, final Collection<ChargeData> charges) {
@@ -114,7 +118,8 @@ public class SavingsProductData {
                 product.interestCalculationTypeOptions, product.interestCalculationDaysInYearTypeOptions,
                 product.lockinPeriodFrequencyTypeOptions, product.withdrawalFeeTypeOptions, product.paymentTypeOptions,
                 product.accountingRuleOptions, product.accountingMappingOptions, charges, product.chargeOptions, product.penaltyOptions,
-                product.feeToIncomeAccountMappings, product.penaltyToIncomeAccountMappings, product.allowOverdraft, product.overdraftLimit);
+                product.feeToIncomeAccountMappings, product.penaltyToIncomeAccountMappings, product.allowOverdraft, product.overdraftLimit,
+                product.minRequiredBalance, product.allowOverdraftMinBalance);
     }
 
     /**
@@ -142,7 +147,7 @@ public class SavingsProductData {
                 lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions,
                 accountingMappingOptions, existingProduct.charges, chargeOptions, penaltyOptions,
                 existingProduct.feeToIncomeAccountMappings, existingProduct.penaltyToIncomeAccountMappings, existingProduct.allowOverdraft,
-                existingProduct.overdraftLimit);
+                existingProduct.overdraftLimit, existingProduct.minRequiredBalance, existingProduct.allowOverdraftMinBalance);
     }
 
     public static SavingsProductData withAccountingDetails(final SavingsProductData existingProduct,
@@ -174,7 +179,8 @@ public class SavingsProductData {
                 interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                 lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions,
                 accountingMappingOptions, existingProduct.charges, chargeOptions, penaltyOptions, feeToIncomeAccountMappings,
-                penaltyToIncomeAccountMappings, existingProduct.allowOverdraft, existingProduct.overdraftLimit);
+                penaltyToIncomeAccountMappings, existingProduct.allowOverdraft, existingProduct.overdraftLimit,
+                existingProduct.minRequiredBalance, existingProduct.allowOverdraftMinBalance);
     }
 
     public static SavingsProductData instance(final Long id, final String name, final String shortName, final String description,
@@ -182,7 +188,8 @@ public class SavingsProductData {
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
             final EnumOptionData interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType, final boolean withdrawalFeeForTransfers,
-            final EnumOptionData accountingType, final boolean allowOverdraft, final BigDecimal overdraftLimit) {
+            final EnumOptionData accountingType, final boolean allowOverdraft, final BigDecimal overdraftLimit,
+            final BigDecimal minRequiredBalance, final boolean allowOverdraftMinBalance) {
 
         final Map<String, Object> accountingMappings = null;
         final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = null;
@@ -210,7 +217,7 @@ public class SavingsProductData {
                 interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                 lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions,
                 accountingMappingOptions, charges, chargeOptions, penaltyOptions, feeToIncomeAccountMappings,
-                penaltyToIncomeAccountMappings, allowOverdraft, overdraftLimit);
+                penaltyToIncomeAccountMappings, allowOverdraft, overdraftLimit, minRequiredBalance, allowOverdraftMinBalance);
     }
 
     public static SavingsProductData lookup(final Long id, final String name) {
@@ -232,6 +239,8 @@ public class SavingsProductData {
         final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = null;
         final boolean allowOverdraft = false;
         final BigDecimal overdraftLimit = null;
+        final BigDecimal minRequiredBalance = null;
+        final boolean allowOverdraftMinBalance = false;
 
         final Collection<CurrencyData> currencyOptions = null;
         final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = null;
@@ -256,7 +265,7 @@ public class SavingsProductData {
                 interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                 lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions,
                 accountingMappingOptions, charges, chargeOptions, penaltyOptions, feeToIncomeAccountMappings,
-                penaltyToIncomeAccountMappings, allowOverdraft, overdraftLimit);
+                penaltyToIncomeAccountMappings, allowOverdraft, overdraftLimit, minRequiredBalance, allowOverdraftMinBalance);
     }
 
     private SavingsProductData(final Long id, final String name, final String shortName, final String description,
@@ -276,7 +285,7 @@ public class SavingsProductData {
             final Collection<ChargeData> chargeOptions, final Collection<ChargeData> penaltyOptions,
             final Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings,
             final Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings, final boolean allowOverdraft,
-            final BigDecimal overdraftLimit) {
+            final BigDecimal overdraftLimit, final BigDecimal minRequiredBalance, final boolean allowOverdraftMinBalance) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -321,6 +330,8 @@ public class SavingsProductData {
         this.penaltyToIncomeAccountMappings = penaltyToIncomeAccountMappings;
         this.allowOverdraft = allowOverdraft;
         this.overdraftLimit = overdraftLimit;
+        this.minRequiredBalance = minRequiredBalance;
+        this.allowOverdraftMinBalance = allowOverdraftMinBalance;
     }
 
     public boolean hasAccountingEnabled() {
@@ -330,7 +341,7 @@ public class SavingsProductData {
     public int accountingRuleTypeId() {
         return this.accountingRule.getId().intValue();
     }
-    
+
     @Override
     public boolean equals(final Object obj) {
         final SavingsProductData productData = (SavingsProductData) obj;
