@@ -249,9 +249,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.total_interest_posted_derived as totalInterestPosted, ");
             sqlBuilder.append("sa.account_balance_derived as accountBalance, ");
             sqlBuilder.append("sa.total_fees_charge_derived as totalFeeCharge, ");
-            sqlBuilder.append("sa.total_penalty_charge_derived as totalPenaltyCharge ");
+            sqlBuilder.append("sa.total_penalty_charge_derived as totalPenaltyCharge, ");
             sqlBuilder.append("sp.min_required_balance as minRequiredBalance, ");
-            sqlBuilder.append("sp.allow_overdraft_min_balance as allowOverdraftMinBalance, ");
+            sqlBuilder.append("sp.allow_overdraft_min_balance as allowOverdraftMinBalance ");
             sqlBuilder.append("from m_savings_account sa ");
             sqlBuilder.append("join m_savings_product sp ON sa.product_id = sp.id ");
             sqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
