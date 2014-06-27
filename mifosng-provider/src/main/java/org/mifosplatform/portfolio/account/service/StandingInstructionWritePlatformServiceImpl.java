@@ -19,8 +19,10 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.core.exception.AbstractPlatformServiceUnavailableException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.exception.JobExecutionException;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
@@ -48,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,6 +65,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
     private final StandingInstructionRepository standingInstructionRepository;
     private final StandingInstructionReadPlatformService standingInstructionReadPlatformService;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
     public StandingInstructionWritePlatformServiceImpl(final StandingInstructionDataValidator standingInstructionDataValidator,
@@ -69,13 +73,14 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
             final AccountTransferDetailRepository accountTransferDetailRepository,
             final StandingInstructionRepository standingInstructionRepository,
             final StandingInstructionReadPlatformService standingInstructionReadPlatformService,
-            final AccountTransfersWritePlatformService accountTransfersWritePlatformService) {
+            final AccountTransfersWritePlatformService accountTransfersWritePlatformService, final RoutingDataSource dataSource) {
         this.standingInstructionDataValidator = standingInstructionDataValidator;
         this.standingInstructionAssembler = standingInstructionAssembler;
         this.accountTransferDetailRepository = accountTransferDetailRepository;
         this.standingInstructionRepository = standingInstructionRepository;
         this.standingInstructionReadPlatformService = standingInstructionReadPlatformService;
         this.accountTransfersWritePlatformService = accountTransfersWritePlatformService;
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     @Transactional
@@ -234,16 +239,43 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
      * @param accountTransferDTO
      */
     private void transferAmount(final StringBuilder sb, final AccountTransferDTO accountTransferDTO, final Long instructionId) {
+        StringBuffer errorLog = new StringBuffer();
+        StringBuffer updateQuery = new StringBuffer(
+                "INSERT INTO `m_account_transfer_standing_instructions_history` (`standing_instruction_id`, `status`, `amount`,`execution_time`, `error_log`) VALUES (");
         try {
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
         } catch (final PlatformApiDataValidationException e) {
             sb.append("Validation exception while trasfering funds for standing Instruction id").append(instructionId).append(" from ")
                     .append(accountTransferDTO.getFromAccountId()).append(" to ").append(accountTransferDTO.getToAccountId())
                     .append("--------");
+            errorLog.append("Validation exception while trasfering funds " + e.getDefaultUserMessage());
         } catch (final InsufficientAccountBalanceException e) {
             sb.append("InsufficientAccountBalance Exception while trasfering funds for standing Instruction id").append(instructionId)
                     .append(" from ").append(accountTransferDTO.getFromAccountId()).append(" to ")
                     .append(accountTransferDTO.getToAccountId()).append("--------");
+            errorLog.append("InsufficientAccountBalance Exception ");
+        } catch (final AbstractPlatformServiceUnavailableException e) {
+            sb.append("Platform exception while trasfering funds for standing Instruction id").append(instructionId).append(" from ")
+                    .append(accountTransferDTO.getFromAccountId()).append(" to ").append(accountTransferDTO.getToAccountId())
+                    .append("--------");
+            errorLog.append("Platform exception while trasfering funds " + e.getDefaultUserMessage());
+        } catch (Exception e) {
+            sb.append("Exception while trasfering funds for standing Instruction id").append(instructionId).append(" from ")
+                    .append(accountTransferDTO.getFromAccountId()).append(" to ").append(accountTransferDTO.getToAccountId())
+                    .append("--------");
+            errorLog.append("Exception while trasfering funds " + e.getMessage());
+
         }
+        updateQuery.append(instructionId).append(",");
+        if (errorLog.length() > 0) {
+            updateQuery.append("'failed'").append(",");
+        } else {
+            updateQuery.append("'success'").append(",");
+        }
+        updateQuery.append(accountTransferDTO.getTransactionAmount().doubleValue());
+        updateQuery.append(", now(),");
+        updateQuery.append("'").append(errorLog.toString()).append("')");
+        this.jdbcTemplate.update(updateQuery.toString());
+
     }
 }
