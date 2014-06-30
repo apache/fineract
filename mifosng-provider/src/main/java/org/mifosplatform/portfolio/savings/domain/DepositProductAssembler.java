@@ -33,6 +33,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCo
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestPostingPeriodTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minBalanceForInterestCalculationParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nameParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.shortNameParamName;
@@ -119,6 +120,9 @@ public class DepositProductAssembler {
             lockinPeriodFrequencyType = SavingsPeriodFrequencyType.fromInt(lockinPeriodFrequencyTypeValue);
         }
 
+        final BigDecimal minBalanceForInterestCalculation = command
+                .bigDecimalValueOfParameterNamedDefaultToNullIfZero(minBalanceForInterestCalculationParamName);
+
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
 
         final DepositPreClosureDetail preClosureDetail = this.assemblePreClosureDetail(command);
@@ -136,7 +140,8 @@ public class DepositProductAssembler {
         }
         FixedDepositProduct fixedDepositProduct = FixedDepositProduct.createNew(name, shortName, description, currency, interestRate,
                 interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
-                lockinPeriodFrequency, lockinPeriodFrequencyType, accountingRuleType, charges, productTermAndPreClosure, charts);
+                lockinPeriodFrequency, lockinPeriodFrequencyType, accountingRuleType, charges, productTermAndPreClosure, charts,
+                minBalanceForInterestCalculation);
 
         // update product reference
         productTermAndPreClosure.updateProductReference(fixedDepositProduct);
@@ -191,6 +196,9 @@ public class DepositProductAssembler {
             lockinPeriodFrequencyType = SavingsPeriodFrequencyType.fromInt(lockinPeriodFrequencyTypeValue);
         }
 
+        final BigDecimal minBalanceForInterestCalculation = command
+                .bigDecimalValueOfParameterNamedDefaultToNullIfZero(minBalanceForInterestCalculationParamName);
+
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
 
         final DepositPreClosureDetail preClosureDetail = this.assemblePreClosureDetail(command);
@@ -213,7 +221,7 @@ public class DepositProductAssembler {
         RecurringDepositProduct recurringDepositProduct = RecurringDepositProduct.createNew(name, shortName, description, currency,
                 interestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
                 interestCalculationDaysInYearType, lockinPeriodFrequency, lockinPeriodFrequencyType, accountingRuleType, charges,
-                productTermAndPreClosure, productRecurringDetail, charts);
+                productTermAndPreClosure, productRecurringDetail, charts, minBalanceForInterestCalculation);
 
         // update product reference
         productTermAndPreClosure.updateProductReference(recurringDepositProduct);
@@ -314,25 +322,25 @@ public class DepositProductAssembler {
 
         if (command.parameterExists(minDepositTermParamName)) {
             minDepositTerm = command.integerValueOfParameterNamed(minDepositTermParamName);
-        } else if(prodDepositTermDetail != null){
+        } else if (prodDepositTermDetail != null) {
             minDepositTerm = prodDepositTermDetail.minDepositTerm();
         }
 
         if (command.parameterExists(maxDepositTermParamName)) {
             maxDepositTerm = command.integerValueOfParameterNamed(maxDepositTermParamName);
-        } else if(prodDepositTermDetail != null){
+        } else if (prodDepositTermDetail != null) {
             maxDepositTerm = prodDepositTermDetail.maxDepositTerm();
         }
 
         if (command.parameterExists(minDepositTermTypeIdParamName)) {
             minDepositTermTypeId = command.integerValueOfParameterNamed(minDepositTermTypeIdParamName);
-        } else if(prodDepositTermDetail != null){
+        } else if (prodDepositTermDetail != null) {
             minDepositTermTypeId = prodDepositTermDetail.minDepositTermType();
         }
 
         if (command.parameterExists(maxDepositTermTypeIdParamName)) {
             maxDepositTermTypeId = command.integerValueOfParameterNamed(maxDepositTermTypeIdParamName);
-        } else if(prodDepositTermDetail != null){
+        } else if (prodDepositTermDetail != null) {
             maxDepositTermTypeId = prodDepositTermDetail.maxDepositTermType();
         }
 
@@ -344,13 +352,13 @@ public class DepositProductAssembler {
 
         if (command.parameterExists(inMultiplesOfDepositTermParamName)) {
             inMultiplesOfDepositTerm = command.integerValueOfParameterNamed(inMultiplesOfDepositTermParamName);
-        } else if(prodDepositTermDetail != null){
+        } else if (prodDepositTermDetail != null) {
             inMultiplesOfDepositTerm = prodDepositTermDetail.inMultiplesOfDepositTerm();
         }
 
         if (command.parameterExists(preClosurePenalApplicableParamName)) {
             inMultiplesOfDepositTermTypeId = command.integerValueOfParameterNamed(inMultiplesOfDepositTermTypeIdParamName);
-        } else if(prodDepositTermDetail != null){
+        } else if (prodDepositTermDetail != null) {
             inMultiplesOfDepositTermTypeId = prodDepositTermDetail.inMultiplesOfDepositTermType();
         }
 

@@ -8,11 +8,11 @@ package org.mifosplatform.portfolio.savings.data;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeAmountParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.descriptionParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeAmountParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.inMultiplesOfParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationTypeParamName;
@@ -20,12 +20,13 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCo
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestPostingPeriodTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minBalanceForInterestCalculationParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nameParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.shortNameParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -272,6 +273,13 @@ public class SavingsProductDataValidator {
 
         validateOverdraftParams(baseDataValidator, element);
 
+        if (this.fromApiJsonHelper.parameterExists(minBalanceForInterestCalculationParamName, element)) {
+            final BigDecimal minBalanceForInterestCalculation = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                    minBalanceForInterestCalculationParamName, element);
+            baseDataValidator.reset().parameter(minBalanceForInterestCalculationParamName).value(minBalanceForInterestCalculation)
+                    .ignoreIfNull().zeroOrPositiveAmount();
+        }
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -429,6 +437,13 @@ public class SavingsProductDataValidator {
         validatePaymentChannelFundSourceMappings(baseDataValidator, element);
         validateChargeToIncomeAccountMappings(baseDataValidator, element);
         validateOverdraftParams(baseDataValidator, element);
+
+        if (this.fromApiJsonHelper.parameterExists(minBalanceForInterestCalculationParamName, element)) {
+            final BigDecimal minBalanceForInterestCalculation = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                    minBalanceForInterestCalculationParamName, element);
+            baseDataValidator.reset().parameter(minBalanceForInterestCalculationParamName).value(minBalanceForInterestCalculation)
+                    .ignoreIfNull().zeroOrPositiveAmount();
+        }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

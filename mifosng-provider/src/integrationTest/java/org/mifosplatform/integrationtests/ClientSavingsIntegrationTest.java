@@ -57,8 +57,9 @@ public class ClientSavingsIntegrationTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientID);
-
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE);
+        final String minBalanceForInterestCalculation = null;
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation);
         Assert.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
@@ -92,13 +93,55 @@ public class ClientSavingsIntegrationTest {
     }
 
     @Test
+    public void testSavingsAccountWithMinBalanceForInterestCalculation() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientID);
+        final String minBalanceForInterestCalculation = "5000";
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation);
+        Assert.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertNotNull(savingsProductID);
+
+        HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(clientID, savingsProductID, savingsId,
+                ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        final HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        this.savingsAccountHelper.calculateInterestForSavings(savingsId);
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        assertEquals(summaryBefore, summary);
+
+        this.savingsAccountHelper.postInterestForSavings(savingsId);
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        assertEquals(summaryBefore, summary);
+
+        final Object savingsInterest = this.savingsAccountHelper.getSavingsInterest(savingsId);
+        Assert.assertNull(savingsInterest);
+
+    }
+
+    @Test
     public void testSavingsAccount_CLOSE_APPLICATION() {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientID);
+        final String minBalanceForInterestCalculation = null;
 
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, null);
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, null, minBalanceForInterestCalculation);
         Assert.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
@@ -127,8 +170,8 @@ public class ClientSavingsIntegrationTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientID);
-
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, null);
+        final String minBalanceForInterestCalculation = null;
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, null, minBalanceForInterestCalculation);
         Assert.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
@@ -166,8 +209,9 @@ public class ClientSavingsIntegrationTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientID);
-
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE);
+        final String minBalanceForInterestCalculation = null;
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation);
         Assert.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
@@ -207,8 +251,9 @@ public class ClientSavingsIntegrationTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientID);
-
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE);
+        final String minBalanceForInterestCalculation = null;
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation);
         Assert.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
@@ -231,8 +276,9 @@ public class ClientSavingsIntegrationTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientID);
-
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE);
+        final String minBalanceForInterestCalculation = null;
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation);
         Assert.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
@@ -325,8 +371,9 @@ public class ClientSavingsIntegrationTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientID);
-
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE);
+        final String minBalanceForInterestCalculation = null;
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation);
         Assert.assertNotNull(savingsProductID);
 
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
@@ -400,10 +447,11 @@ public class ClientSavingsIntegrationTest {
         BigDecimal totalWaiveAmount = BigDecimal.valueOf(Double.valueOf((Float) savingsChargeForWaive.get("amount")));
         totalWaiveAmount = totalWaiveAmount.add(totalWaiveAmount);
         assertEquals(totalWaiveAmount.floatValue(), waiveCharge.get("amountWaived"));
-        
-        final Integer weeklyFeeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec, ChargesHelper.getSavingsWeeklyFeeJSON());
+
+        final Integer weeklyFeeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+                ChargesHelper.getSavingsWeeklyFeeJSON());
         Assert.assertNotNull(weeklyFeeId);
-        
+
         this.savingsAccountHelper.addChargesForSavings(savingsId, weeklyFeeId);
         charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertEquals(3, charges.size());
@@ -432,13 +480,14 @@ public class ClientSavingsIntegrationTest {
     }
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String minOpenningBalance) {
+            final String minOpenningBalance, String minBalanceForInterestCalculation) {
         System.out.println("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         final String savingsProductJSON = savingsProductHelper //
                 .withInterestCompoundingPeriodTypeAsDaily() //
                 .withInterestPostingPeriodTypeAsMonthly() //
                 .withInterestCalculationPeriodTypeAsDailyBalance() //
+                .withMinBalanceForInterestCalculation(minBalanceForInterestCalculation)//
                 .withMinimumOpenningBalance(minOpenningBalance).build();
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
     }

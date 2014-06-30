@@ -21,6 +21,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestPo
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.localeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minBalanceForInterestCalculationParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nameParamName;
@@ -155,6 +156,9 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     @Column(name = "min_required_balance", scale = 6, precision = 19, nullable = true)
     private BigDecimal minRequiredBalance;
 
+    @Column(name = "min_balance_for_interest_calculation", scale = 6, precision = 19, nullable = true)
+    private BigDecimal minBalanceForInterestCalculation;
+
     public static SavingsProduct createNew(final String name, final String shortName, final String description,
             final MonetaryCurrency currency, final BigDecimal interestRate,
             final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
@@ -163,12 +167,12 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final AccountingRuleType accountingRuleType, final Set<Charge> charges,
             final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean allowOverdraftMinBalance,
-            final BigDecimal minRequiredBalance) {
+            final BigDecimal minRequiredBalance, final BigDecimal minBalanceForInterestCalculation) {
 
         return new SavingsProduct(name, shortName, description, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, accountingRuleType, charges,
-                allowOverdraft, overdraftLimit, allowOverdraftMinBalance, minRequiredBalance);
+                allowOverdraft, overdraftLimit, allowOverdraftMinBalance, minRequiredBalance, minBalanceForInterestCalculation);
     }
 
     protected SavingsProduct() {
@@ -182,11 +186,11 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final AccountingRuleType accountingRuleType, final Set<Charge> charges,
-            final boolean allowOverdraft, final BigDecimal overdraftLimit) {
+            final boolean allowOverdraft, final BigDecimal overdraftLimit, BigDecimal minBalanceForInterestCalculation) {
         this(name, shortName, description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
                 lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, accountingRuleType, charges, allowOverdraft, overdraftLimit,
-                false, null);
+                false, null, minBalanceForInterestCalculation);
     }
 
     protected SavingsProduct(final String name, final String shortName, final String description, final MonetaryCurrency currency,
@@ -196,7 +200,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final AccountingRuleType accountingRuleType, final Set<Charge> charges,
             final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean allowOverdraftMinBalance,
-            final BigDecimal minRequiredBalance) {
+            final BigDecimal minRequiredBalance, BigDecimal minBalanceForInterestCalculation) {
 
         this.name = name;
         this.shortName = shortName;
@@ -234,6 +238,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
 
         this.allowOverdraftMinBalance = allowOverdraftMinBalance;
         this.minRequiredBalance = minRequiredBalance;
+        this.minBalanceForInterestCalculation = minBalanceForInterestCalculation;
     }
 
     public MonetaryCurrency currency() {
@@ -433,6 +438,15 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             this.minRequiredBalance = newValue;
         }
 
+        if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(minBalanceForInterestCalculationParamName,
+                this.minBalanceForInterestCalculation)) {
+            final BigDecimal newValue = command
+                    .bigDecimalValueOfParameterNamedDefaultToNullIfZero(minBalanceForInterestCalculationParamName);
+            actualChanges.put(minBalanceForInterestCalculationParamName, newValue);
+            actualChanges.put(localeParamName, localeAsInput);
+            this.minBalanceForInterestCalculation = newValue;
+        }
+
         if (!this.allowOverdraftMinBalance) {
             this.minRequiredBalance = null;
         }
@@ -537,6 +551,10 @@ public class SavingsProduct extends AbstractPersistable<Long> {
 
     public InterestRateChart findChart(@SuppressWarnings("unused") Long chartId) {
         return null;
+    }
+
+    public BigDecimal minBalanceForInterestCalculation() {
+        return this.minBalanceForInterestCalculation;
     }
 
 }

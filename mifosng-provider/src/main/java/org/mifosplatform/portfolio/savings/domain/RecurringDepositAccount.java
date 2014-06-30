@@ -294,10 +294,11 @@ public class RecurringDepositAccount extends SavingsAccount {
         final BigDecimal interestRateAsFraction = getEffectiveInterestRateAsFraction(mc, maturityDate, isPreMatureClosure);
         final Collection<Long> interestPostTransactions = this.savingsHelper.fetchPostInterestTransactionIds(getId());
         boolean isInterestTransfer = false;
+        final Money minBalanceForInterestCalculation = Money.of(getCurrency(), minBalanceForInterestCalculation());
         for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
             final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance, transactions,
                     this.currency, compoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYearType.getValue(),
-                    maturityDate, interestPostTransactions, isInterestTransfer);
+                    maturityDate, interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation);
 
             periodStartingBalance = postingPeriod.closingBalance();
 

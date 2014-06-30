@@ -94,6 +94,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sqlBuilder.append("sp.overdraft_limit as overdraftLimit, ");
             sqlBuilder.append("sp.min_required_balance as minRequiredBalance, ");
             sqlBuilder.append("sp.allow_overdraft_min_balance as allowOverdraftMinBalance, ");
+            sqlBuilder.append("sp.min_balance_for_interest_calculation as minBalanceForInterestCalculation,");
             sqlBuilder.append("sp.accounting_type as accountingType ");
             sqlBuilder.append("from m_savings_product sp ");
             sqlBuilder.append("join m_currency curr on curr.code = sp.currency_code ");
@@ -158,11 +159,13 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
             final BigDecimal minRequiredBalance = rs.getBigDecimal("minRequiredBalance");
             final boolean allowOverdraftMinBalance = rs.getBoolean("allowOverdraftMinBalance");
+            final BigDecimal minBalanceForInterestCalculation = rs.getBigDecimal("minBalanceForInterestCalculation");
 
             return SavingsProductData.instance(id, name, shortName, description, currency, nominalAnnualInterestRate,
                     compoundingInterestPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers,
-                    accountingRuleType, allowOverdraft, overdraftLimit, minRequiredBalance, allowOverdraftMinBalance);
+                    accountingRuleType, allowOverdraft, overdraftLimit, minRequiredBalance, allowOverdraftMinBalance,
+                    minBalanceForInterestCalculation);
         }
     }
 

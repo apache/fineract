@@ -39,6 +39,7 @@ public class DepositProductData {
     protected final Integer lockinPeriodFrequency;
     protected final EnumOptionData lockinPeriodFrequencyType;
     // protected final boolean withdrawalFeeForTransfers;
+    protected final BigDecimal minBalanceForInterestCalculation;
 
     // accounting
     protected final EnumOptionData accountingRule;
@@ -88,6 +89,7 @@ public class DepositProductData {
         final BigDecimal nominalAnnualInterestRate = null;
         final Integer lockinPeriodFrequency = null;
         final EnumOptionData lockinPeriodFrequencyType = null;
+        final BigDecimal minBalanceForInterestCalculation = null;
         final Map<String, Object> accountingMappings = null;
         final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = null;
         final Collection<ChargeData> charges = null;
@@ -101,7 +103,7 @@ public class DepositProductData {
                 interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
                 interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions,
                 accountingRuleOptions, accountingMappingOptions, charges, chargeOptions, penaltyOptions, feeToIncomeAccountMappings,
-                penaltyToIncomeAccountMappings, interestRateCharts, chartTemplate);
+                penaltyToIncomeAccountMappings, interestRateCharts, chartTemplate, minBalanceForInterestCalculation);
     }
 
     public static DepositProductData withCharges(final DepositProductData existingProduct, final Collection<ChargeData> charges) {
@@ -116,7 +118,8 @@ public class DepositProductData {
                 existingProduct.lockinPeriodFrequencyTypeOptions, existingProduct.withdrawalFeeTypeOptions,
                 existingProduct.paymentTypeOptions, existingProduct.accountingRuleOptions, existingProduct.accountingMappingOptions,
                 charges, existingProduct.chargeOptions, existingProduct.penaltyOptions, existingProduct.feeToIncomeAccountMappings,
-                existingProduct.penaltyToIncomeAccountMappings, existingProduct.interestRateCharts, existingProduct.chartTemplate);
+                existingProduct.penaltyToIncomeAccountMappings, existingProduct.interestRateCharts, existingProduct.chartTemplate,
+                existingProduct.minBalanceForInterestCalculation);
     }
 
     /**
@@ -143,7 +146,7 @@ public class DepositProductData {
                 lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions,
                 accountingMappingOptions, existingProduct.charges, chargeOptions, penaltyOptions,
                 existingProduct.feeToIncomeAccountMappings, existingProduct.penaltyToIncomeAccountMappings,
-                existingProduct.interestRateCharts, chartTemplate);
+                existingProduct.interestRateCharts, chartTemplate, existingProduct.minBalanceForInterestCalculation);
     }
 
     public static DepositProductData withAccountingDetails(final DepositProductData existingProduct,
@@ -174,14 +177,16 @@ public class DepositProductData {
                 interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                 lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions,
                 accountingMappingOptions, existingProduct.charges, chargeOptions, penaltyOptions, feeToIncomeAccountMappings,
-                penaltyToIncomeAccountMappings, existingProduct.interestRateCharts, existingProduct.chartTemplate);
+                penaltyToIncomeAccountMappings, existingProduct.interestRateCharts, existingProduct.chartTemplate,
+                existingProduct.minBalanceForInterestCalculation);
     }
 
     public static DepositProductData instance(final Long id, final String name, final String shortName, final String description,
             final CurrencyData currency, final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestCompoundingPeriodType,
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
             final EnumOptionData interestCalculationDaysInYearType, final Integer lockinPeriodFrequency,
-            final EnumOptionData lockinPeriodFrequencyType, final EnumOptionData accountingType) {
+            final EnumOptionData lockinPeriodFrequencyType, final EnumOptionData accountingType,
+            final BigDecimal minBalanceForInterestCalculation) {
 
         final Map<String, Object> accountingMappings = null;
         final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = null;
@@ -210,7 +215,7 @@ public class DepositProductData {
                 interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
                 interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions,
                 accountingRuleOptions, accountingMappingOptions, charges, chargeOptions, penaltyOptions, feeToIncomeAccountMappings,
-                penaltyToIncomeAccountMappings, interestRateCharts, chartTemplate);
+                penaltyToIncomeAccountMappings, interestRateCharts, chartTemplate, minBalanceForInterestCalculation);
     }
 
     public static DepositProductData lookup(final Long id, final String name) {
@@ -225,6 +230,7 @@ public class DepositProductData {
         final EnumOptionData interestCalculationDaysInYearType = null;
         final Integer lockinPeriodFrequency = null;
         final EnumOptionData lockinPeriodFrequencyType = null;
+        final BigDecimal minBalanceForInterestCalculation = null;
 
         final EnumOptionData accountingType = null;
         final Map<String, Object> accountingMappings = null;
@@ -254,7 +260,7 @@ public class DepositProductData {
                 interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
                 interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions,
                 accountingRuleOptions, accountingMappingOptions, charges, chargeOptions, penaltyOptions, feeToIncomeAccountMappings,
-                penaltyToIncomeAccountMappings, interestRateCharts, chartTemplate);
+                penaltyToIncomeAccountMappings, interestRateCharts, chartTemplate, minBalanceForInterestCalculation);
     }
 
     public static DepositProductData withInterestChart(final DepositProductData existingProduct,
@@ -271,7 +277,7 @@ public class DepositProductData {
                 existingProduct.paymentTypeOptions, existingProduct.accountingRuleOptions, existingProduct.accountingMappingOptions,
                 existingProduct.charges, existingProduct.chargeOptions, existingProduct.penaltyOptions,
                 existingProduct.feeToIncomeAccountMappings, existingProduct.penaltyToIncomeAccountMappings, interestRateCharts,
-                existingProduct.chartTemplate);
+                existingProduct.chartTemplate, existingProduct.minBalanceForInterestCalculation);
     }
 
     protected DepositProductData(final Long id, final String name, final String shortName, final String description,
@@ -291,7 +297,8 @@ public class DepositProductData {
             final Collection<ChargeData> chargeOptions, final Collection<ChargeData> penaltyOptions,
             final Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings,
             final Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings,
-            final Collection<InterestRateChartData> interestRateCharts, final InterestRateChartData chartTemplate) {
+            final Collection<InterestRateChartData> interestRateCharts, final InterestRateChartData chartTemplate,
+            final BigDecimal minBalanceForInterestCalculation) {
 
         this.id = id;
         this.name = name;
@@ -336,6 +343,7 @@ public class DepositProductData {
         this.interestRateCharts = interestRateCharts;
         this.activeChart = activeChart(this.interestRateCharts);
         this.chartTemplate = chartTemplate;
+        this.minBalanceForInterestCalculation = minBalanceForInterestCalculation;
     }
 
     public static InterestRateChartData activeChart(Collection<InterestRateChartData> interestRateCharts) {

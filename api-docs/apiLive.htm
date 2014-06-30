@@ -15060,6 +15060,9 @@ Content-Type: application/json
 				<tr class=alt><td>overdraftLimit</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets the maximum allowed overdraft amount for a  savings account e.g. <b>5,000</b> else set the limit as zero</td></tr>
 
+				<tr class=alt><td>minBalanceForInterestCalculation</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, balance must be greater than provided value for calculation of interest  e.g. <b>5,000</b> </td></tr>
+
 	        </table>
 	    </div>
 	</div>
@@ -15631,7 +15634,7 @@ Content-Type: application/json
             <br/>
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
-                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, allowOverdraft, overdraftLimit</tr>
+                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, allowOverdraft, overdraftLimit, minBalanceForInterestCalculation</tr>
             </table>
         </div>
         <div class="method-example">
@@ -15680,6 +15683,7 @@ Request Body:
   "minRequiredOpeningBalance": "50",
   "allowOverdraft":true,
   "overdraftLimit":5000,
+  "minBalanceForInterestCalculation":5000,
   "lockinPeriodFrequency": "4",
   "lockinPeriodFrequencyType": "1",
   "withdrawalFeeForTransfers":false,

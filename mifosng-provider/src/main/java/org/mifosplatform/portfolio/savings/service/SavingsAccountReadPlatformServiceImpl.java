@@ -250,8 +250,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.account_balance_derived as accountBalance, ");
             sqlBuilder.append("sa.total_fees_charge_derived as totalFeeCharge, ");
             sqlBuilder.append("sa.total_penalty_charge_derived as totalPenaltyCharge, ");
-            sqlBuilder.append("sp.min_required_balance as minRequiredBalance, ");
-            sqlBuilder.append("sp.allow_overdraft_min_balance as allowOverdraftMinBalance ");
+            sqlBuilder.append("sa.min_balance_for_interest_calculation as minBalanceForInterestCalculation,");
+            sqlBuilder.append("sa.min_required_balance as minRequiredBalance, ");
+            sqlBuilder.append("sa.allow_overdraft_min_balance as allowOverdraftMinBalance ");
             sqlBuilder.append("from m_savings_account sa ");
             sqlBuilder.append("join m_savings_product sp ON sa.product_id = sp.id ");
             sqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
@@ -411,6 +412,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final BigDecimal accountBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "accountBalance");
             final BigDecimal totalFeeCharge = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalFeeCharge");
             final BigDecimal totalPenaltyCharge = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalPenaltyCharge");
+            final BigDecimal minBalanceForInterestCalculation = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,
+                    "minBalanceForInterestCalculation");
 
             final SavingsAccountSummaryData summary = new SavingsAccountSummaryData(currency, totalDeposits, totalWithdrawals,
                     totalWithdrawalFees, totalAnnualFees, totalInterestEarned, totalInterestPosted, accountBalance, totalFeeCharge,
@@ -420,7 +423,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     productName, fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate,
                     interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,
-                    allowOverdraft, overdraftLimit, minRequiredBalance, allowOverdraftMinBalance);
+                    allowOverdraft, overdraftLimit, minRequiredBalance, allowOverdraftMinBalance, minBalanceForInterestCalculation);
         }
     }
 
@@ -811,8 +814,11 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             // sqlBuilder.append("sp.withdrawal_fee_amount as withdrawalFeeAmount,");
             // sqlBuilder.append("sp.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
             sqlBuilder.append("sp.withdrawal_fee_for_transfer as withdrawalFeeForTransfers, ");
+            sqlBuilder.append("sp.min_balance_for_interest_calculation as minBalanceForInterestCalculation, ");
             sqlBuilder.append("sp.allow_overdraft as allowOverdraft, ");
-            sqlBuilder.append("sp.overdraft_limit as overdraftLimit ");
+            sqlBuilder.append("sp.overdraft_limit as overdraftLimit, ");
+            sqlBuilder.append("sp.min_required_balance as minRequiredBalance, ");
+            sqlBuilder.append("sp.allow_overdraft_min_balance as allowOverdraftMinBalance ");
             // sqlBuilder.append("sp.annual_fee_amount as annualFeeAmount,");
             // sqlBuilder.append("sp.annual_fee_on_month as annualFeeOnMonth, ");
             // sqlBuilder.append("sp.annual_fee_on_day as annualFeeOnDay ");
@@ -884,6 +890,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             final BigDecimal minRequiredBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "minRequiredBalance");
             final boolean allowOverdraftMinBalance = rs.getBoolean("allowOverdraftMinBalance");
+            final BigDecimal minBalanceForInterestCalculation = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,
+                    "minBalanceForInterestCalculation");
 
             // final BigDecimal annualFeeAmount =
             // JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,
@@ -924,7 +932,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     productName, fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualIterestRate,
                     interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,
-                    allowOverdraft, overdraftLimit, minRequiredBalance, allowOverdraftMinBalance);
+                    allowOverdraft, overdraftLimit, minRequiredBalance, allowOverdraftMinBalance, minBalanceForInterestCalculation);
         }
     }
 
