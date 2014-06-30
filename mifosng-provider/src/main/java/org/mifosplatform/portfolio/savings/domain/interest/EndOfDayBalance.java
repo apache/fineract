@@ -41,15 +41,19 @@ public class EndOfDayBalance {
     }
 
     public BigDecimal calculateInterestOnBalance(final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction,
-            final long daysInYear) {
+            final long daysInYear, final BigDecimal minBalanceForInterestCalculation) {
 
         final BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
         final BigDecimal dailyInterestRate = interestRateAsFraction.multiply(multiplicand, MathContext.DECIMAL64);
         final BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(this.numberOfDays), MathContext.DECIMAL64);
 
         final BigDecimal realBalanceForInterestCalculation = this.endOfDayBalance.getAmount().add(interestToCompound);
-
-        return realBalanceForInterestCalculation.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(9, RoundingMode.HALF_EVEN);
+        BigDecimal interest = BigDecimal.ZERO.setScale(9, RoundingMode.HALF_EVEN);
+        if (realBalanceForInterestCalculation.compareTo(minBalanceForInterestCalculation) >= 0) {
+            interest = realBalanceForInterestCalculation.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(9,
+                    RoundingMode.HALF_EVEN);
+        }
+        return interest;
     }
 
     /**
@@ -60,7 +64,7 @@ public class EndOfDayBalance {
      * 1/365 n = number of periods rate is compounded
      */
     public BigDecimal calculateInterestOnBalanceAndInterest(final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction,
-            final long daysInYear) {
+            final long daysInYear, final BigDecimal minBalanceForInterestCalculation) {
         final BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
 
         final BigDecimal presentValue = this.endOfDayBalance.getAmount().add(interestToCompound);
@@ -71,27 +75,29 @@ public class EndOfDayBalance {
 
         final double interestRateForCompoundingPeriodPowered = Math.pow(interestRateForCompoundingPeriodPlusOne.doubleValue(), Integer
                 .valueOf(this.numberOfDays).doubleValue());
-
-        final BigDecimal futureValue = presentValue.multiply(BigDecimal.valueOf(interestRateForCompoundingPeriodPowered),
-                MathContext.DECIMAL64).setScale(9, RoundingMode.HALF_EVEN);
+        BigDecimal futureValue = presentValue.setScale(9, RoundingMode.HALF_EVEN);
+        if (presentValue.compareTo(minBalanceForInterestCalculation) >= 0) {
+            futureValue = presentValue.multiply(BigDecimal.valueOf(interestRateForCompoundingPeriodPowered), MathContext.DECIMAL64)
+                    .setScale(9, RoundingMode.HALF_EVEN);
+        }
         return futureValue.subtract(presentValue);
     }
 
     /**
      * @param compoundingPeriodInterval
      * @param upToInterestCalculationDate
-     *            : For calculating maturity details in advance upToInterestCalculationDate
-     *            will be maturity date else it will be
-     *            DateUtils.getLocalDateOfTenant().
+     *            : For calculating maturity details in advance
+     *            upToInterestCalculationDate will be maturity date else it will
+     *            be DateUtils.getLocalDateOfTenant().
      * @return
      */
     public EndOfDayBalance upTo(final LocalDateInterval compoundingPeriodInterval, final LocalDate upToInterestCalculationDate) {
 
         Money startingBalance = this.openingBalance;
         LocalDate balanceStartDate = this.date;
-        
+
         LocalDate oldBalanceEndDate = this.date.plusDays(this.numberOfDays - 1);
-        
+
         int daysOfBalance = this.numberOfDays;
 
         if (this.date.isBefore(compoundingPeriodInterval.startDate())) {

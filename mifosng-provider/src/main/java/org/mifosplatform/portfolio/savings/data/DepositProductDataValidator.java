@@ -38,6 +38,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCo
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestPostingPeriodTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minBalanceForInterestCalculationParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nameParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
@@ -273,6 +274,13 @@ public class DepositProductDataValidator {
             }
         }
 
+        if (this.fromApiJsonHelper.parameterExists(minBalanceForInterestCalculationParamName, element)) {
+            final BigDecimal minBalanceForInterestCalculation = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                    minBalanceForInterestCalculationParamName, element);
+            baseDataValidator.reset().parameter(minBalanceForInterestCalculationParamName).value(minBalanceForInterestCalculation)
+                    .ignoreIfNull().zeroOrPositiveAmount();
+        }
+
         // accounting related data validation
         final Integer accountingRuleType = fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());
         baseDataValidator.reset().parameter("accountingRule").value(accountingRuleType).notNull().inMinMaxRange(1, 3);
@@ -477,6 +485,13 @@ public class DepositProductDataValidator {
         if (fromApiJsonHelper.parameterExists(feeOnMonthDayParamName, element)) {
             final MonthDay monthDayOfAnnualFee = fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, element);
             baseDataValidator.reset().parameter(feeOnMonthDayParamName).value(monthDayOfAnnualFee).ignoreIfNull();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(minBalanceForInterestCalculationParamName, element)) {
+            final BigDecimal minBalanceForInterestCalculation = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                    minBalanceForInterestCalculationParamName, element);
+            baseDataValidator.reset().parameter(minBalanceForInterestCalculationParamName).value(minBalanceForInterestCalculation)
+                    .ignoreIfNull().zeroOrPositiveAmount();
         }
 
         final Long savingsControlAccountId = fromApiJsonHelper.extractLongNamed(

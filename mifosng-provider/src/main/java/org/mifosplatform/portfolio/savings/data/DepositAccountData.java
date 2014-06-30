@@ -17,8 +17,8 @@ import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 
 /**
- * Immutable data object representing abstract for Fixed and Recurring Deposit Accounts
- * Accounts.
+ * Immutable data object representing abstract for Fixed and Recurring Deposit
+ * Accounts Accounts.
  */
 public class DepositAccountData {
 
@@ -46,6 +46,7 @@ public class DepositAccountData {
     protected final EnumOptionData lockinPeriodFrequencyType;
     protected final boolean withdrawalFeeForTransfers;
     protected final EnumOptionData depositType;
+    protected final BigDecimal minBalanceForInterestCalculation;
 
     // associations
     protected final SavingsAccountSummaryData summary;
@@ -78,7 +79,7 @@ public class DepositAccountData {
             final EnumOptionData interestCalculationType, final EnumOptionData interestCalculationDaysInYearType,
             final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency,
             final EnumOptionData lockinPeriodFrequencyType, final boolean withdrawalFeeForTransfers,
-            final SavingsAccountSummaryData summary, final EnumOptionData depositType) {
+            final SavingsAccountSummaryData summary, final EnumOptionData depositType, final BigDecimal minBalanceForInterestCalculation) {
 
         final Collection<DepositProductData> productOptions = null;
         final Collection<StaffData> fieldOfficerOptions = null;
@@ -101,7 +102,8 @@ public class DepositAccountData {
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, transactions, productOptions,
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
-                withdrawalFeeTypeOptions, charges, chargeOptions, accountChart, chartTemplate, depositType);
+                withdrawalFeeTypeOptions, charges, chargeOptions, accountChart, chartTemplate, depositType,
+                minBalanceForInterestCalculation);
     }
 
     public static DepositAccountData lookup(final Long id, final String accountNo, final EnumOptionData depositType) {
@@ -142,6 +144,7 @@ public class DepositAccountData {
         final Collection<ChargeData> chargeOptions = null;
         final DepositAccountInterestRateChartData accountChart = null;
         final DepositAccountInterestRateChartData chartTemplate = null;
+        final BigDecimal minBalanceForInterestCalculation = null;
 
         return new DepositAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                 fieldOfficerId, fieldOfficerName, status, timeline, currency, interestRate, interestCompoundingPeriodType,
@@ -149,7 +152,8 @@ public class DepositAccountData {
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, transactions, productOptions,
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
-                withdrawalFeeTypeOptions, charges, chargeOptions, accountChart, chartTemplate, depositType);
+                withdrawalFeeTypeOptions, charges, chargeOptions, accountChart, chartTemplate, depositType,
+                minBalanceForInterestCalculation);
     }
 
     protected DepositAccountData(final Long id, final String accountNo, final String externalId, final Long groupId,
@@ -169,7 +173,7 @@ public class DepositAccountData {
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
             final Collection<SavingsAccountChargeData> charges, final Collection<ChargeData> chargeOptions,
             final DepositAccountInterestRateChartData accountChart, final DepositAccountInterestRateChartData chartTemplate,
-            final EnumOptionData depositType) {
+            final EnumOptionData depositType, final BigDecimal minBalanceForInterestCalculation) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -215,6 +219,7 @@ public class DepositAccountData {
         this.accountChart = accountChart;
         this.chartTemplate = chartTemplate;
         this.depositType = depositType;
+        this.minBalanceForInterestCalculation = minBalanceForInterestCalculation;
     }
 
     private SavingsAccountChargeData getWithdrawalFee() {

@@ -78,16 +78,16 @@ public class FixedDepositAccountData extends DepositAccountData {
                 depositAccountData.interestPostingPeriodType, depositAccountData.interestCalculationType,
                 depositAccountData.interestCalculationDaysInYearType, depositAccountData.minRequiredOpeningBalance,
                 depositAccountData.lockinPeriodFrequency, depositAccountData.lockinPeriodFrequencyType,
-                depositAccountData.withdrawalFeeForTransfers, depositAccountData.summary, depositAccountData.transactions,
-                depositAccountData.productOptions, depositAccountData.fieldOfficerOptions,
-                depositAccountData.interestCompoundingPeriodTypeOptions, depositAccountData.interestPostingPeriodTypeOptions,
-                depositAccountData.interestCalculationTypeOptions, depositAccountData.interestCalculationDaysInYearTypeOptions,
-                depositAccountData.lockinPeriodFrequencyTypeOptions, depositAccountData.withdrawalFeeTypeOptions,
-                depositAccountData.charges, depositAccountData.chargeOptions, depositAccountData.accountChart,
-                depositAccountData.chartTemplate, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnType,
-                preClosurePenalInterestOnTypeOptions, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
-                inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
-                depositPeriodFrequency, periodFrequencyTypeOptions, depositType, onAccountClosure, onAccountClosureOptions,
+                depositAccountData.withdrawalFeeForTransfers, depositAccountData.minBalanceForInterestCalculation,
+                depositAccountData.summary, depositAccountData.transactions, depositAccountData.productOptions,
+                depositAccountData.fieldOfficerOptions, depositAccountData.interestCompoundingPeriodTypeOptions,
+                depositAccountData.interestPostingPeriodTypeOptions, depositAccountData.interestCalculationTypeOptions,
+                depositAccountData.interestCalculationDaysInYearTypeOptions, depositAccountData.lockinPeriodFrequencyTypeOptions,
+                depositAccountData.withdrawalFeeTypeOptions, depositAccountData.charges, depositAccountData.chargeOptions,
+                depositAccountData.accountChart, depositAccountData.chartTemplate, preClosurePenalApplicable, preClosurePenalInterest,
+                preClosurePenalInterestOnType, preClosurePenalInterestOnTypeOptions, minDepositTerm, maxDepositTerm, minDepositTermType,
+                maxDepositTermType, inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate,
+                depositPeriod, depositPeriodFrequency, periodFrequencyTypeOptions, depositType, onAccountClosure, onAccountClosureOptions,
                 paymentTypeOptions, savingsAccountDatas, linkedAccount, transferInterestToSavings);
     }
 
@@ -98,17 +98,18 @@ public class FixedDepositAccountData extends DepositAccountData {
                 account.fieldOfficerName, account.status, account.timeline, account.currency, account.nominalAnnualInterestRate,
                 account.interestCompoundingPeriodType, account.interestPostingPeriodType, account.interestCalculationType,
                 account.interestCalculationDaysInYearType, account.minRequiredOpeningBalance, account.lockinPeriodFrequency,
-                account.lockinPeriodFrequencyType, account.withdrawalFeeForTransfers, account.summary, account.transactions,
-                account.productOptions, account.fieldOfficerOptions, account.interestCompoundingPeriodTypeOptions,
-                account.interestPostingPeriodTypeOptions, account.interestCalculationTypeOptions,
-                account.interestCalculationDaysInYearTypeOptions, account.lockinPeriodFrequencyTypeOptions,
-                account.withdrawalFeeTypeOptions, account.charges, account.chargeOptions, accountChart, account.chartTemplate,
-                account.preClosurePenalApplicable, account.preClosurePenalInterest, account.preClosurePenalInterestOnType,
-                account.preClosurePenalInterestOnTypeOptions, account.minDepositTerm, account.maxDepositTerm, account.minDepositTermType,
-                account.maxDepositTermType, account.inMultiplesOfDepositTerm, account.inMultiplesOfDepositTermType, account.depositAmount,
-                account.maturityAmount, account.maturityDate, account.depositPeriod, account.depositPeriodFrequency,
-                account.periodFrequencyTypeOptions, account.depositType, account.onAccountClosure, account.onAccountClosureOptions,
-                account.paymentTypeOptions, account.savingsAccounts, account.linkedAccount, account.transferInterestToSavings);
+                account.lockinPeriodFrequencyType, account.withdrawalFeeForTransfers, account.minBalanceForInterestCalculation,
+                account.summary, account.transactions, account.productOptions, account.fieldOfficerOptions,
+                account.interestCompoundingPeriodTypeOptions, account.interestPostingPeriodTypeOptions,
+                account.interestCalculationTypeOptions, account.interestCalculationDaysInYearTypeOptions,
+                account.lockinPeriodFrequencyTypeOptions, account.withdrawalFeeTypeOptions, account.charges, account.chargeOptions,
+                accountChart, account.chartTemplate, account.preClosurePenalApplicable, account.preClosurePenalInterest,
+                account.preClosurePenalInterestOnType, account.preClosurePenalInterestOnTypeOptions, account.minDepositTerm,
+                account.maxDepositTerm, account.minDepositTermType, account.maxDepositTermType, account.inMultiplesOfDepositTerm,
+                account.inMultiplesOfDepositTermType, account.depositAmount, account.maturityAmount, account.maturityDate,
+                account.depositPeriod, account.depositPeriodFrequency, account.periodFrequencyTypeOptions, account.depositType,
+                account.onAccountClosure, account.onAccountClosureOptions, account.paymentTypeOptions, account.savingsAccounts,
+                account.linkedAccount, account.transferInterestToSavings);
     }
 
     public static FixedDepositAccountData associationsAndTemplate(final FixedDepositAccountData account, FixedDepositAccountData template,
@@ -124,17 +125,18 @@ public class FixedDepositAccountData extends DepositAccountData {
                 account.fieldOfficerName, account.status, account.timeline, account.currency, account.nominalAnnualInterestRate,
                 account.interestCompoundingPeriodType, account.interestPostingPeriodType, account.interestCalculationType,
                 account.interestCalculationDaysInYearType, account.minRequiredOpeningBalance, account.lockinPeriodFrequency,
-                account.lockinPeriodFrequencyType, account.withdrawalFeeForTransfers, account.summary, transactions,
-                template.productOptions, template.fieldOfficerOptions, template.interestCompoundingPeriodTypeOptions,
-                template.interestPostingPeriodTypeOptions, template.interestCalculationTypeOptions,
-                template.interestCalculationDaysInYearTypeOptions, template.lockinPeriodFrequencyTypeOptions,
-                template.withdrawalFeeTypeOptions, charges, template.chargeOptions, account.accountChart, account.chartTemplate,
-                account.preClosurePenalApplicable, account.preClosurePenalInterest, account.preClosurePenalInterestOnType,
-                template.preClosurePenalInterestOnTypeOptions, account.minDepositTerm, account.maxDepositTerm, account.minDepositTermType,
-                account.maxDepositTermType, account.inMultiplesOfDepositTerm, account.inMultiplesOfDepositTermType, account.depositAmount,
-                account.maturityAmount, account.maturityDate, account.depositPeriod, account.depositPeriodFrequency,
-                template.periodFrequencyTypeOptions, account.depositType, account.onAccountClosure, account.onAccountClosureOptions,
-                account.paymentTypeOptions, template.savingsAccounts, linkedAccount, account.transferInterestToSavings);
+                account.lockinPeriodFrequencyType, account.withdrawalFeeForTransfers, account.minBalanceForInterestCalculation,
+                account.summary, transactions, template.productOptions, template.fieldOfficerOptions,
+                template.interestCompoundingPeriodTypeOptions, template.interestPostingPeriodTypeOptions,
+                template.interestCalculationTypeOptions, template.interestCalculationDaysInYearTypeOptions,
+                template.lockinPeriodFrequencyTypeOptions, template.withdrawalFeeTypeOptions, charges, template.chargeOptions,
+                account.accountChart, account.chartTemplate, account.preClosurePenalApplicable, account.preClosurePenalInterest,
+                account.preClosurePenalInterestOnType, template.preClosurePenalInterestOnTypeOptions, account.minDepositTerm,
+                account.maxDepositTerm, account.minDepositTermType, account.maxDepositTermType, account.inMultiplesOfDepositTerm,
+                account.inMultiplesOfDepositTermType, account.depositAmount, account.maturityAmount, account.maturityDate,
+                account.depositPeriod, account.depositPeriodFrequency, template.periodFrequencyTypeOptions, account.depositType,
+                account.onAccountClosure, account.onAccountClosureOptions, account.paymentTypeOptions, template.savingsAccounts,
+                linkedAccount, account.transferInterestToSavings);
     }
 
     public static FixedDepositAccountData withTemplateOptions(final FixedDepositAccountData account,
@@ -148,22 +150,22 @@ public class FixedDepositAccountData extends DepositAccountData {
             final Collection<ChargeData> chargeOptions, final Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions,
             final Collection<EnumOptionData> periodFrequencyTypeOptions, final Collection<SavingsAccountData> savingsAccounts) {
 
-
         return new FixedDepositAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
                 account.clientId, account.clientName, account.depositProductId, account.depositProductName, account.fieldOfficerId,
                 account.fieldOfficerName, account.status, account.timeline, account.currency, account.nominalAnnualInterestRate,
                 account.interestCompoundingPeriodType, account.interestPostingPeriodType, account.interestCalculationType,
                 account.interestCalculationDaysInYearType, account.minRequiredOpeningBalance, account.lockinPeriodFrequency,
-                account.lockinPeriodFrequencyType, account.withdrawalFeeForTransfers, account.summary, transactions, productOptions,
-                fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
-                interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
-                withdrawalFeeTypeOptions, charges, chargeOptions, account.accountChart, account.chartTemplate,
-                account.preClosurePenalApplicable, account.preClosurePenalInterest, account.preClosurePenalInterestOnType,
-                preClosurePenalInterestOnTypeOptions, account.minDepositTerm, account.maxDepositTerm, account.minDepositTermType,
-                account.maxDepositTermType, account.inMultiplesOfDepositTerm, account.inMultiplesOfDepositTermType, account.depositAmount,
-                account.maturityAmount, account.maturityDate, account.depositPeriod, account.depositPeriodFrequency,
-                periodFrequencyTypeOptions, account.depositType, account.onAccountClosure, account.onAccountClosureOptions,
-                account.paymentTypeOptions, savingsAccounts, account.linkedAccount, account.transferInterestToSavings);
+                account.lockinPeriodFrequencyType, account.withdrawalFeeForTransfers, account.minBalanceForInterestCalculation,
+                account.summary, transactions, productOptions, fieldOfficerOptions, interestCompoundingPeriodTypeOptions,
+                interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
+                lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, charges, chargeOptions, account.accountChart,
+                account.chartTemplate, account.preClosurePenalApplicable, account.preClosurePenalInterest,
+                account.preClosurePenalInterestOnType, preClosurePenalInterestOnTypeOptions, account.minDepositTerm,
+                account.maxDepositTerm, account.minDepositTermType, account.maxDepositTermType, account.inMultiplesOfDepositTerm,
+                account.inMultiplesOfDepositTermType, account.depositAmount, account.maturityAmount, account.maturityDate,
+                account.depositPeriod, account.depositPeriodFrequency, periodFrequencyTypeOptions, account.depositType,
+                account.onAccountClosure, account.onAccountClosureOptions, account.paymentTypeOptions, savingsAccounts,
+                account.linkedAccount, account.transferInterestToSavings);
     }
 
     public static FixedDepositAccountData withClientTemplate(final Long clientId, final String clientName, final Long groupId,
@@ -188,6 +190,7 @@ public class FixedDepositAccountData extends DepositAccountData {
         final Integer lockinPeriodFrequency = null;
         final EnumOptionData lockinPeriodFrequencyType = null;
         final boolean withdrawalFeeForTransfers = false;
+        final BigDecimal minBalanceForInterestCalculation = null;
         final SavingsAccountSummaryData summary = null;
         final Collection<SavingsAccountTransactionData> transactions = null;
 
@@ -233,14 +236,15 @@ public class FixedDepositAccountData extends DepositAccountData {
         return new FixedDepositAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                 fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, transactions, productOptions,
-                fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
+                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, minBalanceForInterestCalculation, summary,
+                transactions, productOptions, fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
                 withdrawalFeeTypeOptions, charges, chargeOptions, accountChart, chartTemplate, preClosurePenalApplicable,
                 preClosurePenalInterest, preClosurePenalInterestOnType, preClosurePenalInterestOnTypeOptions, minDepositTerm,
                 maxDepositTerm, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTerm, inMultiplesOfDepositTermType,
                 depositAmount, maturityAmount, maturityDate, depositPeriod, depositPeriodFrequency, periodFrequencyTypeOptions,
-                depositType, onAccountClosure, onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas, linkedAccount, transferInterestToSavings);
+                depositType, onAccountClosure, onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas, linkedAccount,
+                transferInterestToSavings);
     }
 
     public static FixedDepositAccountData preClosureDetails(final Long accountId, BigDecimal maturityAmount,
@@ -269,6 +273,7 @@ public class FixedDepositAccountData extends DepositAccountData {
         final Integer lockinPeriodFrequency = null;
         final EnumOptionData lockinPeriodFrequencyType = null;
         final boolean withdrawalFeeForTransfers = false;
+        final BigDecimal minBalanceForInterestCalculation = null;
         final SavingsAccountSummaryData summary = null;
         final Collection<SavingsAccountTransactionData> transactions = null;
         final Collection<DepositProductData> productOptions = null;
@@ -310,14 +315,15 @@ public class FixedDepositAccountData extends DepositAccountData {
         return new FixedDepositAccountData(accountId, accountNo, externalId, groupId, groupName, clientId, clientName, productId,
                 productName, fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, transactions, productOptions,
-                fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
+                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, minBalanceForInterestCalculation, summary,
+                transactions, productOptions, fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
                 withdrawalFeeTypeOptions, charges, chargeOptions, accountChart, chartTemplate, preClosurePenalApplicable,
                 preClosurePenalInterest, preClosurePenalInterestOnType, preClosurePenalInterestOnTypeOptions, minDepositTerm,
                 maxDepositTerm, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTerm, inMultiplesOfDepositTermType,
                 depositAmount, maturityAmount, maturityDate, depositPeriod, depositPeriodFrequency, periodFrequencyTypeOptions,
-                depositType, onAccountClosure, onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas, linkedAccount, transferInterestToSavings);
+                depositType, onAccountClosure, onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas, linkedAccount,
+                transferInterestToSavings);
     }
 
     public static FixedDepositAccountData withClosureTemplateDetails(final FixedDepositAccountData account,
@@ -329,17 +335,18 @@ public class FixedDepositAccountData extends DepositAccountData {
                 account.fieldOfficerName, account.status, account.timeline, account.currency, account.nominalAnnualInterestRate,
                 account.interestCompoundingPeriodType, account.interestPostingPeriodType, account.interestCalculationType,
                 account.interestCalculationDaysInYearType, account.minRequiredOpeningBalance, account.lockinPeriodFrequency,
-                account.lockinPeriodFrequencyType, account.withdrawalFeeForTransfers, account.summary, account.transactions,
-                account.productOptions, account.fieldOfficerOptions, account.interestCompoundingPeriodTypeOptions,
-                account.interestPostingPeriodTypeOptions, account.interestCalculationTypeOptions,
-                account.interestCalculationDaysInYearTypeOptions, account.lockinPeriodFrequencyTypeOptions,
-                account.withdrawalFeeTypeOptions, account.charges, account.chargeOptions, account.accountChart, account.chartTemplate,
-                account.preClosurePenalApplicable, account.preClosurePenalInterest, account.preClosurePenalInterestOnType,
-                account.preClosurePenalInterestOnTypeOptions, account.minDepositTerm, account.maxDepositTerm, account.minDepositTermType,
-                account.maxDepositTermType, account.inMultiplesOfDepositTerm, account.inMultiplesOfDepositTermType, account.depositAmount,
-                account.maturityAmount, account.maturityDate, account.depositPeriod, account.depositPeriodFrequency,
-                account.periodFrequencyTypeOptions, account.depositType, account.onAccountClosure, onAccountClosureOptions,
-                paymentTypeOptions, savingsAccountDatas, account.linkedAccount, account.transferInterestToSavings);
+                account.lockinPeriodFrequencyType, account.withdrawalFeeForTransfers, account.minBalanceForInterestCalculation,
+                account.summary, account.transactions, account.productOptions, account.fieldOfficerOptions,
+                account.interestCompoundingPeriodTypeOptions, account.interestPostingPeriodTypeOptions,
+                account.interestCalculationTypeOptions, account.interestCalculationDaysInYearTypeOptions,
+                account.lockinPeriodFrequencyTypeOptions, account.withdrawalFeeTypeOptions, account.charges, account.chargeOptions,
+                account.accountChart, account.chartTemplate, account.preClosurePenalApplicable, account.preClosurePenalInterest,
+                account.preClosurePenalInterestOnType, account.preClosurePenalInterestOnTypeOptions, account.minDepositTerm,
+                account.maxDepositTerm, account.minDepositTermType, account.maxDepositTermType, account.inMultiplesOfDepositTerm,
+                account.inMultiplesOfDepositTermType, account.depositAmount, account.maturityAmount, account.maturityDate,
+                account.depositPeriod, account.depositPeriodFrequency, account.periodFrequencyTypeOptions, account.depositType,
+                account.onAccountClosure, onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas, account.linkedAccount,
+                account.transferInterestToSavings);
 
     }
 
@@ -351,9 +358,9 @@ public class FixedDepositAccountData extends DepositAccountData {
             final EnumOptionData interestCalculationType, final EnumOptionData interestCalculationDaysInYearType,
             final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency,
             final EnumOptionData lockinPeriodFrequencyType, final boolean withdrawalFeeForTransfers,
-            final SavingsAccountSummaryData summary, final Collection<SavingsAccountTransactionData> transactions,
-            final Collection<DepositProductData> productOptions, final Collection<StaffData> fieldOfficerOptions,
-            final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
+            final BigDecimal minBalanceForInterestCalculation, final SavingsAccountSummaryData summary,
+            final Collection<SavingsAccountTransactionData> transactions, final Collection<DepositProductData> productOptions,
+            final Collection<StaffData> fieldOfficerOptions, final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
             final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
             final Collection<EnumOptionData> interestCalculationTypeOptions,
             final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
@@ -377,7 +384,7 @@ public class FixedDepositAccountData extends DepositAccountData {
                 lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, transactions, productOptions, fieldOfficerOptions,
                 interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
                 interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, charges,
-                chargeOptions, accountChart, chartTemplate, depositType);
+                chargeOptions, accountChart, chartTemplate, depositType, minBalanceForInterestCalculation);
 
         this.preClosurePenalApplicable = preClosurePenalApplicable;
         this.preClosurePenalInterest = preClosurePenalInterest;

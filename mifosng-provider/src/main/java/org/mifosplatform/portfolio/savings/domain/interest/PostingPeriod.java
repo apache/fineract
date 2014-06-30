@@ -37,12 +37,17 @@ public class PostingPeriod {
     // include in compounding interest
     private boolean interestTransfered = false;
 
-    // isInterestTransfer boolean is to identify newly created transaction is interest transfer
+    // minimum balance for interest calculation
+    private final Money minBalanceForInterestCalculation;
+
+    // isInterestTransfer boolean is to identify newly created transaction is
+    // interest transfer
     public static PostingPeriod createFrom(final LocalDateInterval periodInterval, final Money periodStartingBalance,
             final List<SavingsAccountTransaction> orderedListOfTransactions, final MonetaryCurrency currency,
             final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
-            final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer) {
+            final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
+            final Money minBalanceForInterestCalculation) {
 
         final List<EndOfDayBalance> accountEndOfDayBalances = new ArrayList<>();
         boolean interestTransfered = false;
@@ -66,7 +71,8 @@ public class PostingPeriod {
                 openingDayBalance = closeOfDayBalance;
             }
 
-            // this check is to make sure to add interest if withdrawal is happened for already
+            // this check is to make sure to add interest if withdrawal is
+            // happened for already
             if (transaction.occursOn(periodInterval.endDate().plusDays(1))) {
                 if (transaction.getId() == null) {
                     interestTransfered = isInterestTransfer;
@@ -101,13 +107,14 @@ public class PostingPeriod {
                 accountEndOfDayBalances, upToInterestCalculationDate);
 
         return new PostingPeriod(periodInterval, currency, periodStartingBalance, openingDayBalance, interestCompoundingPeriodType,
-                interestCalculationType, interestRateAsFraction, daysInYear, compoundingPeriods, interestTransfered);
+                interestCalculationType, interestRateAsFraction, daysInYear, compoundingPeriods, interestTransfered,
+                minBalanceForInterestCalculation);
     }
 
     private PostingPeriod(final LocalDateInterval periodInterval, final MonetaryCurrency currency, final Money openingBalance,
             final Money closingBalance, final SavingsCompoundingInterestPeriodType interestCompoundingType,
             final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
-            final List<CompoundingPeriod> compoundingPeriods, boolean interestTransfered) {
+            final List<CompoundingPeriod> compoundingPeriods, boolean interestTransfered, final Money minBalanceForInterestCalculation) {
         this.periodInterval = periodInterval;
         this.currency = currency;
         this.openingBalance = openingBalance;
@@ -120,6 +127,7 @@ public class PostingPeriod {
 
         this.dateOfPostingTransaction = periodInterval.endDate().plusDays(1);
         this.interestTransfered = interestTransfered;
+        this.minBalanceForInterestCalculation = minBalanceForInterestCalculation;
     }
 
     public Money interest() {
@@ -147,7 +155,8 @@ public class PostingPeriod {
         for (final CompoundingPeriod compoundingPeriod : this.compoundingPeriods) {
 
             final BigDecimal interestUnrounded = compoundingPeriod.calculateInterest(this.interestCompoundingType,
-                    this.interestCalculationType, interestCompounded, this.interestRateAsFraction, this.daysInYear);
+                    this.interestCalculationType, interestCompounded, this.interestRateAsFraction, this.daysInYear,
+                    this.minBalanceForInterestCalculation.getAmount());
             interestCompounded = interestCompounded.add(interestUnrounded);
             interestEarned = interestEarned.add(interestUnrounded);
         }

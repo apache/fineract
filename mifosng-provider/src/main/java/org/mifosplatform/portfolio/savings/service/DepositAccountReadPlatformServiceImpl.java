@@ -540,7 +540,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             selectFieldsSqlBuilder.append("sa.account_balance_derived as accountBalance, ");
             selectFieldsSqlBuilder.append("sa.total_fees_charge_derived as totalFeeCharge, ");
             selectFieldsSqlBuilder.append("sa.total_penalty_charge_derived as totalPenaltyCharge, ");
-            selectFieldsSqlBuilder.append("sa.deposit_type_enum as depositTypeId ");
+            selectFieldsSqlBuilder.append("sa.deposit_type_enum as depositTypeId, ");
+            selectFieldsSqlBuilder.append("sa.min_balance_for_interest_calculation as minBalanceForInterestCalculation ");
 
             this.selectFieldsSql = selectFieldsSqlBuilder.toString();
 
@@ -668,6 +669,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             }
 
             final boolean withdrawalFeeForTransfers = rs.getBoolean("withdrawalFeeForTransfers");
+            final BigDecimal minBalanceForInterestCalculation = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,
+                    "minBalanceForInterestCalculation");
 
             final BigDecimal totalDeposits = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalDeposits");
             final BigDecimal totalWithdrawals = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalWithdrawals");
@@ -687,7 +690,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             return DepositAccountData.instance(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                     fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, depositType);
+                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, depositType,
+                    minBalanceForInterestCalculation);
         }
     }
 
@@ -1022,7 +1026,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             selectFieldsSqlBuilder.append("sa.lockin_period_frequency as lockinPeriodFrequency,");
             selectFieldsSqlBuilder.append("sa.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
             selectFieldsSqlBuilder.append("sa.withdrawal_fee_for_transfer as withdrawalFeeForTransfers, ");
-            selectFieldsSqlBuilder.append("sa.deposit_type_enum as depositTypeId ");
+            selectFieldsSqlBuilder.append("sa.deposit_type_enum as depositTypeId, ");
+            selectFieldsSqlBuilder.append("sa.min_balance_for_interest_calculation as minBalanceForInterestCalculation ");
 
             this.selectFieldsSql = selectFieldsSqlBuilder.toString();
 
@@ -1090,6 +1095,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             }
 
             final boolean withdrawalFeeForTransfers = rs.getBoolean("withdrawalFeeForTransfers");
+            final BigDecimal minBalanceForInterestCalculation = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,
+                    "minBalanceForInterestCalculation");
 
             Long clientId = null;
             String clientName = null;
@@ -1114,7 +1121,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             return DepositAccountData.instance(null, null, null, groupId, groupName, clientId, clientName, productId, productName,
                     fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualIterestRate, interestCompoundingPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, depositType);
+                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, depositType,
+                    minBalanceForInterestCalculation);
         }
     }
 

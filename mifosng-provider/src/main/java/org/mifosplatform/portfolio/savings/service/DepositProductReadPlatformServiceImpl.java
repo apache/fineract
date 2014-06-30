@@ -130,7 +130,8 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             sqlBuilder.append("sp.interest_calculation_days_in_year_type_enum as interestCalculationDaysInYearType, ");
             sqlBuilder.append("sp.lockin_period_frequency as lockinPeriodFrequency,");
             sqlBuilder.append("sp.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
-            sqlBuilder.append("sp.accounting_type as accountingType ");
+            sqlBuilder.append("sp.accounting_type as accountingType, ");
+            sqlBuilder.append("sp.min_balance_for_interest_calculation as minBalanceForInterestCalculation ");
             this.schemaSql = sqlBuilder.toString();
         }
 
@@ -181,10 +182,11 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             if (lockinPeriodFrequencyTypeValue != null) {
                 lockinPeriodFrequencyType = SavingsEnumerations.lockinPeriodFrequencyType(lockinPeriodFrequencyTypeValue);
             }
+            final BigDecimal minBalanceForInterestCalculation = rs.getBigDecimal("minBalanceForInterestCalculation");
 
             return DepositProductData.instance(id, name, shortName, description, currency, nominalAnnualInterestRate,
                     compoundingInterestPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, accountingRuleType);
+                    lockinPeriodFrequency, lockinPeriodFrequencyType, accountingRuleType, minBalanceForInterestCalculation);
         }
     }
 

@@ -7,9 +7,7 @@ import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
 
 public interface CompoundingPeriod {
 
-    BigDecimal calculateInterest(BigDecimal interestRateAsFraction, long daysInYear);
-
     BigDecimal calculateInterest(SavingsCompoundingInterestPeriodType compoundingInterestPeriodType,
             SavingsInterestCalculationType interestCalculationType, BigDecimal interestFromPreviousPostingPeriod,
-            BigDecimal interestRateAsFraction, long daysInYear);
+            BigDecimal interestRateAsFraction, long daysInYear, BigDecimal minBalanceForInterestCalculation);
 }

@@ -97,6 +97,7 @@ public class SavingsApiConstants {
     public static final String overdraftLimitParamName = "overdraftLimit";
     public static final String minRequiredBalanceParamName = "minRequiredBalance";
     public static final String allowOverdraftMinBalanceParamName = "allowOverdraftMinBalance";
+    public static final String minBalanceForInterestCalculationParamName = "minBalanceForInterestCalculation";
 
     // transaction parameters
     public static final String transactionDateParamName = "transactionDate";
@@ -152,15 +153,15 @@ public class SavingsApiConstants {
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(),
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(),
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue(), allowOverdraftParamName, overdraftLimitParamName,
-            minRequiredBalanceParamName, allowOverdraftMinBalanceParamName));
+            minRequiredBalanceParamName, allowOverdraftMinBalanceParamName, minBalanceForInterestCalculationParamName));
 
     /**
      * These parameters will match the class level parameters of
      * {@link SavingsProductData}. Where possible, we try to get response
      * parameters to match those of request parameters.
      */
-    public static final Set<String> SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
-            nameParamName, shortNameParamName, descriptionParamName, "currency", digitsAfterDecimalParamName, inMultiplesOfParamName,
+    public static final Set<String> SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, nameParamName,
+            shortNameParamName, descriptionParamName, "currency", digitsAfterDecimalParamName, inMultiplesOfParamName,
             nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName,
             interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName,
             lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, withdrawalFeeAmountParamName, withdrawalFeeTypeParamName,
@@ -183,9 +184,9 @@ public class SavingsApiConstants {
      * {@link SavingsAccountData}. Where possible, we try to get response
      * parameters to match those of request parameters.
      */
-    public static final Set<String> SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
-            accountNoParamName, externalIdParamName, statusParamName, activatedOnDateParamName, clientIdParamName, "clientName",
-            groupIdParamName, "groupName", "savingsProductId", "savingsProductName", "currency", nominalAnnualInterestRateParamName,
+    public static final Set<String> SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, accountNoParamName,
+            externalIdParamName, statusParamName, activatedOnDateParamName, clientIdParamName, "clientName", groupIdParamName, "groupName",
+            "savingsProductId", "savingsProductName", "currency", nominalAnnualInterestRateParamName,
             interestCompoundingPeriodTypeParamName, interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
             minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName,
             withdrawalFeeAmountParamName, withdrawalFeeTypeParamName, withdrawalFeeForTransfersParamName, feeAmountParamName,
@@ -193,13 +194,13 @@ public class SavingsApiConstants {
             "interestPostingPeriodTypeOptions", "interestCalculationTypeOptions", "interestCalculationDaysInYearTypeOptions",
             "lockinPeriodFrequencyTypeOptions", "withdrawalFeeTypeOptions", "withdrawalFee", "annualFee"));
 
-    public static final Set<String> SAVINGS_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            localeParamName, dateFormatParamName, transactionDateParamName, transactionAmountParamName, paymentTypeIdParamName,
+    public static final Set<String> SAVINGS_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
+            dateFormatParamName, transactionDateParamName, transactionAmountParamName, paymentTypeIdParamName,
             transactionAccountNumberParamName, checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
 
-    public static final Set<String> SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
-            "accountId", accountNoParamName, "currency", "amount", dateParamName, paymentDetailDataParamName, runningBalanceParamName,
-            reversedParamName));
+    public static final Set<String> SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(idParamName, "accountId", accountNoParamName, "currency", "amount", dateParamName, paymentDetailDataParamName,
+                    runningBalanceParamName, reversedParamName));
 
     public static final Set<String> SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, activatedOnDateParamName));
@@ -213,9 +214,9 @@ public class SavingsApiConstants {
             amountWaivedParamName, amountWrittenOffParamName, amountOutstandingParamName, amountOrPercentageParamName, amountParamName,
             amountPaidParamName, chargeOptionsParamName));
 
-    public static final Set<String> SAVINGS_ACCOUNT_CHARGES_ADD_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            chargeIdParamName, amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName, feeOnMonthDayParamName,
-            monthDayFormatParamName, feeIntervalParamName));
+    public static final Set<String> SAVINGS_ACCOUNT_CHARGES_ADD_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(chargeIdParamName,
+            amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName, feeOnMonthDayParamName, monthDayFormatParamName,
+            feeIntervalParamName));
 
     public static final Set<String> SAVINGS_ACCOUNT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
             amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName));

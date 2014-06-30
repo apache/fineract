@@ -63,6 +63,7 @@ public class SavingsProductHelper {
     private final String currencyCode = USD;
     private final String interestCalculationDaysInYearType = DAYS_365;
     private Account[] accountList = null;
+    private String minBalanceForInterestCalculation = null;
 
     public String build() {
         final HashMap<String, String> map = new HashMap<>();
@@ -93,6 +94,7 @@ public class SavingsProductHelper {
         map.put("lockinPeriodFrequency", this.lockinPeriodFrequency);
         map.put("lockinPeriodFrequencyType", this.lockingPeriodFrequencyType);
         map.put("withdrawalFeeForTransfers", this.withdrawalFeeForTransfers);
+        map.put("minBalanceForInterestCalculation", minBalanceForInterestCalculation);
 
         if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());
@@ -124,6 +126,11 @@ public class SavingsProductHelper {
 
     public SavingsProductHelper withInterestPostingPeriodTypeAsMonthly() {
         this.interestPostingPeriodType = MONTHLY;
+        return this;
+    }
+    
+    public SavingsProductHelper withMinBalanceForInterestCalculation(final String amount) {
+        this.minBalanceForInterestCalculation = amount;
         return this;
     }
 

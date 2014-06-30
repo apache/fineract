@@ -49,6 +49,7 @@ public class SavingsAccountData {
     private final BigDecimal overdraftLimit;
     private final BigDecimal minRequiredBalance;
     private final boolean allowOverdraftMinBalance;
+    private final BigDecimal minBalanceForInterestCalculation;
 
     // associations
     private final SavingsAccountSummaryData summary;
@@ -82,7 +83,7 @@ public class SavingsAccountData {
             final EnumOptionData interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType, final boolean withdrawalFeeForTransfers,
             final SavingsAccountSummaryData summary, final boolean allowOverdraft, final BigDecimal overdraftLimit,
-            final BigDecimal minRequiredBalance, final boolean allowOverdraftMinBalance) {
+            final BigDecimal minRequiredBalance, final boolean allowOverdraftMinBalance, final BigDecimal minBalanceForInterestCalculation) {
 
         final Collection<SavingsProductData> productOptions = null;
         final Collection<StaffData> fieldOfficerOptions = null;
@@ -104,7 +105,7 @@ public class SavingsAccountData {
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
                 withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit, minRequiredBalance,
-                allowOverdraftMinBalance);
+                allowOverdraftMinBalance, minBalanceForInterestCalculation);
     }
 
     public static SavingsAccountData lookup(final Long accountId, final String accountNo, final EnumOptionData depositType) {
@@ -139,6 +140,7 @@ public class SavingsAccountData {
         final BigDecimal overdraftLimit = null;
         final BigDecimal minRequiredBalance = null;
         final boolean allowOverdraftMinBalance = false;
+        final BigDecimal minBalanceForInterestCalculation = null;
 
         final SavingsAccountSummaryData summary = null;
         final Collection<SavingsAccountTransactionData> transactions = null;
@@ -162,7 +164,7 @@ public class SavingsAccountData {
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
                 withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit, minRequiredBalance,
-                allowOverdraftMinBalance);
+                allowOverdraftMinBalance, minBalanceForInterestCalculation);
     }
 
     public static SavingsAccountData lookupWithProductDetails(final Long accountId, final String accountNo,
@@ -195,6 +197,7 @@ public class SavingsAccountData {
         final BigDecimal overdraftLimit = null;
         final BigDecimal minRequiredBalance = null;
         final boolean allowOverdraftMinBalance = false;
+        final BigDecimal minBalanceForInterestCalculation = null;
 
         final SavingsAccountSummaryData summary = null;
         final Collection<SavingsAccountTransactionData> transactions = null;
@@ -218,7 +221,7 @@ public class SavingsAccountData {
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
                 withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit, minRequiredBalance,
-                allowOverdraftMinBalance);
+                allowOverdraftMinBalance, minBalanceForInterestCalculation);
     }
 
     public static SavingsAccountData withTemplateOptions(final SavingsAccountData account, final SavingsAccountData template,
@@ -250,7 +253,7 @@ public class SavingsAccountData {
                 template.interestPostingPeriodTypeOptions, template.interestCalculationTypeOptions,
                 template.interestCalculationDaysInYearTypeOptions, template.lockinPeriodFrequencyTypeOptions,
                 template.withdrawalFeeTypeOptions, charges, template.chargeOptions, account.allowOverdraft, account.overdraftLimit,
-                account.minRequiredBalance, account.allowOverdraftMinBalance);
+                account.minRequiredBalance, account.allowOverdraftMinBalance, account.minBalanceForInterestCalculation);
     }
 
     public static SavingsAccountData withTemplateOptions(final SavingsAccountData account,
@@ -272,7 +275,7 @@ public class SavingsAccountData {
                 transactions, productOptions, fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
                 withdrawalFeeTypeOptions, charges, chargeOptions, account.allowOverdraft, account.overdraftLimit,
-                account.minRequiredBalance, account.allowOverdraftMinBalance);
+                account.minRequiredBalance, account.allowOverdraftMinBalance, account.minBalanceForInterestCalculation);
     }
 
     public static SavingsAccountData withClientTemplate(final Long clientId, final String clientName, final Long groupId,
@@ -307,6 +310,7 @@ public class SavingsAccountData {
         final BigDecimal overdraftLimit = null;
         final BigDecimal minRequiredBalance = null;
         final boolean allowOverdraftMinBalance = false;
+        final BigDecimal minBalanceForInterestCalculation = null;
 
         final SavingsAccountSummaryData summary = null;
         final Collection<SavingsAccountTransactionData> transactions = null;
@@ -330,7 +334,7 @@ public class SavingsAccountData {
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
                 withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit, minRequiredBalance,
-                allowOverdraftMinBalance);
+                allowOverdraftMinBalance, minBalanceForInterestCalculation);
     }
 
     private SavingsAccountData(final Long id, final String accountNo, final EnumOptionData depositType, final String externalId,
@@ -349,7 +353,8 @@ public class SavingsAccountData {
             final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
             final Collection<SavingsAccountChargeData> charges, final Collection<ChargeData> chargeOptions, final boolean allowOverdraft,
-            final BigDecimal overdraftLimit, final BigDecimal minRequiredBalance, final boolean allowOverdraftMinBalance) {
+            final BigDecimal overdraftLimit, final BigDecimal minRequiredBalance, final boolean allowOverdraftMinBalance,
+            final BigDecimal minBalanceForInterestCalculation) {
         this.id = id;
         this.accountNo = accountNo;
         this.depositType = depositType;
@@ -403,6 +408,7 @@ public class SavingsAccountData {
         this.overdraftLimit = overdraftLimit;
         this.minRequiredBalance = minRequiredBalance;
         this.allowOverdraftMinBalance = allowOverdraftMinBalance;
+        this.minBalanceForInterestCalculation = minBalanceForInterestCalculation;
     }
 
     private SavingsAccountChargeData getWithdrawalFee() {
