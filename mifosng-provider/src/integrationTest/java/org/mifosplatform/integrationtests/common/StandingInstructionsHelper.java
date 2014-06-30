@@ -1,6 +1,7 @@
 package org.mifosplatform.integrationtests.common;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.mifosplatform.integrationtests.common.Utils;
 
@@ -10,7 +11,7 @@ import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
-@SuppressWarnings({ "unused", "rawtypes" })
+@SuppressWarnings({ "unused", "rawtypes", "unchecked" })
 public class StandingInstructionsHelper {
 
     private static final String STANDING_INSTRUCTIONS_URL = "/mifosng-provider/api/v1/standinginstructions";
@@ -93,6 +94,16 @@ public class StandingInstructionsHelper {
         final String GET_STANDING_INSTRUCTION_BY_ID_URL = STANDING_INSTRUCTIONS_URL + "/" + standingInstructionId + "?"
                 + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_STANDING_INSTRUCTION_BY_ID_URL, "");
+        return response;
+    }
+
+    public List<HashMap> getStandingInstructionHistory(Integer fromSavingsId, Integer fromAccountType, Integer fromClientId, Integer transferType) {
+        final String STANDING_INSTRUCTIONS_HISTORY_URL = STANDING_INSTRUCTIONS_URL + "/history?" + Utils.TENANT_IDENTIFIER
+                + "&fromSavingsId=" + fromSavingsId + "&fromAccountType=" + fromAccountType + "&clientId=" + fromClientId
+                + "&transferType=" + transferType;
+        System.out.println("STANDING_INSTRUCTIONS_HISTORY_URL="+STANDING_INSTRUCTIONS_HISTORY_URL);
+        final List<HashMap> response = (List<HashMap>) Utils.performServerGet(this.requestSpec, this.responseSpec,
+                STANDING_INSTRUCTIONS_HISTORY_URL, "pageItems");
         return response;
     }
 }
