@@ -318,7 +318,7 @@
 							</tr>
                             <tr>
                                 <td></td>
-                                <td>standinginstructions/history</td>
+                                <td>standinginstructionrunhistory</td>
                                 <td></td>
                                 <td><a href="#standinginstructions_history">Standinginstructions History</a></td>
                                 <td></td>
@@ -2010,7 +2010,7 @@
 							<tr>
 								<td></td>
 								<td>scheduler?command=stop</td>
-								<td><a href="#suspend_scheduler">Suspend a scheduler service</td>
+								<td><a href="#suspend_scheduler">Suspend a scheduler service</a></td>
 								<td></td>
 								<td></td>
 								<td></td>
@@ -2124,7 +2124,7 @@
 							<tr>
 								<td><a href="#notes">Notes</a></td>
 								<td>{resource}/{resourceId}/notes</td>
-								<td><a href="#resources_addnote">Add a Resource Note</td>
+								<td><a href="#resources_addnote">Add a Resource Note</a></td>
 								<td><a href="#resource_notelist">Retrieve a Resource's Notes</a></td>
 								<td></td>
 								<td></td>
@@ -2141,7 +2141,7 @@
 							<tr>
 								<td><a href="#documents">Documents</a></td>
 								<td>{entityType}/{entityId}/documents</td>
-								<td><a href="#documents_create">Create a Document</td>
+								<td><a href="#documents_create">Create a Document</a></td>
 								<td><a href="#documents_list">List All Document Details</a></td>
 								<td></td>
 								<td></td>
@@ -2169,14 +2169,14 @@
 								<td><a href="#search">Search</a></td>
 								<td>search</td>
 								<td></td>
-								<td><a href="#search_resource">Search Resources</td>
+								<td><a href="#search_resource">Search Resources</a></td>
 								<td></td>
 								<td></td>
 							</tr>
 							<tr>
 								<td><a href="#advance_search">AdHoc Search</a></td>
 								<td>search/advance</td>
-								<td><a href="#advance_search_resource">Advance Search</td>
+								<td><a href="#advance_search_resource">Advance Search</a></td>
 								<td></td>
 								<td></td>
 								<td></td>
@@ -24622,15 +24622,15 @@ No Request Body:
                 <dd>Use an sql fragment valid for the underlying standing instruction schema to filter results. e.g. name like %K%</dd>
             </dl>
 	        <p>Example Requests : </p>
-	        <div class=apiClick>standinginstructions/history</div>
+	        <div class=apiClick>standinginstructionrunhistory</div>
 	        <br>
-            <div class=apiClick>standinginstructions/history?orderBy=name&sortOrder=DESC</div>
+            <div class=apiClick>standinginstructionrunhistory?orderBy=name&sortOrder=DESC</div>
             <br>
-            <div class=apiClick>standinginstructions/history?offset=10&limit=50</div>
+            <div class=apiClick>standinginstructionrunhistory?offset=10&limit=50</div>
             <br>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">GET https://DomainName/api/v1/standinginstructions/history</code>
+	        <code class="method-declaration">GET https://DomainName/api/v1/standinginstructionrunhistory</code>
 	        <code class="method-response">
 {
   "totalFilteredRecords": 2,
@@ -30856,7 +30856,7 @@ No Request Body:
                 </tr>
                 <tr>
                     <td></td>
-                    <td>standinginstructions/history</td>
+                    <td>standinginstructionrunhistory</td>
                     <td></td>
                     <td><a href="#standinginstructions_history">Standinginstructions History</a></td>
                     <td></td>

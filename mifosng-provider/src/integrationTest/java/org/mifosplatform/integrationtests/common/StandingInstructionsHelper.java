@@ -15,6 +15,7 @@ import com.jayway.restassured.specification.ResponseSpecification;
 public class StandingInstructionsHelper {
 
     private static final String STANDING_INSTRUCTIONS_URL = "/mifosng-provider/api/v1/standinginstructions";
+    private static final String STANDING_INSTRUCTIONS_RUNHISTORY_URL = "/mifosng-provider/api/v1/standinginstructionrunhistory";
     private static final String LOCALE = "en_GB";
     private static final String OFFICE_ID = "1";
     private static final String INSTRUCTION_TYPE_FIXED = "1";
@@ -98,7 +99,7 @@ public class StandingInstructionsHelper {
     }
 
     public List<HashMap> getStandingInstructionHistory(Integer fromSavingsId, Integer fromAccountType, Integer fromClientId, Integer transferType) {
-        final String STANDING_INSTRUCTIONS_HISTORY_URL = STANDING_INSTRUCTIONS_URL + "/history?" + Utils.TENANT_IDENTIFIER
+        final String STANDING_INSTRUCTIONS_HISTORY_URL = STANDING_INSTRUCTIONS_RUNHISTORY_URL + "?" + Utils.TENANT_IDENTIFIER
                 + "&fromSavingsId=" + fromSavingsId + "&fromAccountType=" + fromAccountType + "&clientId=" + fromClientId
                 + "&transferType=" + transferType;
         System.out.println("STANDING_INSTRUCTIONS_HISTORY_URL="+STANDING_INSTRUCTIONS_HISTORY_URL);

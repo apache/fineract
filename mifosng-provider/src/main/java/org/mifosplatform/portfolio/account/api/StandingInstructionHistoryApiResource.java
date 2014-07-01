@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/standinginstructions/history")
+@Path("/standinginstructionrunhistory")
 @Component
 @Scope("singleton")
 public class StandingInstructionHistoryApiResource {
