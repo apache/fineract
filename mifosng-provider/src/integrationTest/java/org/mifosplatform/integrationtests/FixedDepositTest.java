@@ -717,6 +717,7 @@ public class FixedDepositTest {
         todaysDate.add(Calendar.DATE, daysInMonth);
         System.out.println(monthDayFormat.format(todaysDate.getTime()));
 
+        currentDate = currentDate - 1;
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
         System.out.println("IPM = " + interestPerMonth);
         principal += interestPerMonth;
@@ -824,6 +825,7 @@ public class FixedDepositTest {
         todaysDate.add(Calendar.DATE, daysInMonth);
         System.out.println(monthDayFormat.format(todaysDate.getTime()));
 
+        currentDate = currentDate - 1;
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
         System.out.println("IPM = " + interestPerMonth);
         principal += interestPerMonth;
@@ -936,6 +938,7 @@ public class FixedDepositTest {
         todaysDate.add(Calendar.DATE, daysInMonth);
         System.out.println(monthDayFormat.format(todaysDate.getTime()));
 
+        currentDate = currentDate - 1;
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
         System.out.println("IPM = " + interestPerMonth);
         principal += interestPerMonth;
@@ -1051,6 +1054,7 @@ public class FixedDepositTest {
         todaysDate.add(Calendar.DATE, daysInMonth);
         System.out.println(monthDayFormat.format(todaysDate.getTime()));
 
+        currentDate = currentDate - 1;
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
         System.out.println("IPM = " + interestPerMonth);
         principal += interestPerMonth;

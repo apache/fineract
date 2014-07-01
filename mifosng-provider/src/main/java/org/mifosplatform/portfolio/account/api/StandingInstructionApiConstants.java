@@ -13,7 +13,7 @@ import org.mifosplatform.portfolio.account.AccountDetailConstants;
 
 public class StandingInstructionApiConstants {
 
-    public static final String STANDING_INSTRUCTION_RESOURCE_NAME = "standinginstructions";
+    public static final String STANDING_INSTRUCTION_RESOURCE_NAME = "standinginstruction";
 
     public static final String nameParamName = "name";
     public static final String priorityParamName = "priority";

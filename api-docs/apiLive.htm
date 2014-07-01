@@ -316,6 +316,14 @@
                                 <td><a href="#standinginstruction_update">Update Standing Instruction</a></td>
 								<td><a href="#standinginstruction_delete">Delete Standing Instruction(status change)</a></td>
 							</tr>
+                            <tr>
+                                <td></td>
+                                <td>standinginstructions/history</td>
+                                <td></td>
+                                <td><a href="#standinginstructions_history">Standinginstructions History</a></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
 							<tr>
 								<td><a href="#accounttransfers">Account Transfer</a></td>
 								<td>accounttransfers</td>
@@ -24532,6 +24540,214 @@ No Request Body:
 	        </code>
 	    </div>
 	</div>
+        
+	<a id="standinginstructions_history" name="standinginstructions_history" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Standing Instructions Logged History:</h2>
+            <p>The <i>list</i> capability of history can support <b>pagination</b> and <b>sorting</b>.</p>
+            <h5>Optional Arguments</h5>
+            <dl class="argument-list">
+                <dt>offset</dt>
+                <dd>
+                    Integer <span>optional</span>, defaults to 0
+                </dd>
+                <dd>Indicates from what result to start from.</dd>
+
+                <dt>limit</dt>
+                <dd>
+                    Integer <span>optional</span>, defaults to 200
+                </dd>
+                <dd>Restricts the size of results returned. To override the default and return all entries you must explicitly pass a non-positive integer value for limit e.g. limit=0, or limit=-1</dd>
+
+                <dt>orderBy</dt>
+                <dd>
+                    String <span>optional</span>, one of <span>name,standingInstructionId</span>
+                </dd>
+                <dd>Orders the results by the field indicated.</dd>
+
+                <dt>sortBy</dt>
+                <dd>
+                    String <span>optional</span>, one of <span>ASC, DESC</span>
+                </dd>
+                <dd>Indicates what way to order results if <i>orderBy</i> is used.</dd>
+
+                <dt>clientId</dt>
+                <dd>
+                    Integer <span>optional</span>
+                </dd>
+                <dd>Use clientId of clients to restrict results.</dd>
+
+                <dt>clientName</dt>
+                <dd>
+                    String <span>optional</span>
+                </dd>
+                <dd>Use displayName of clients to restrict results.</dd>
+
+                <dt>fromAccountId</dt>
+                <dd>
+                    Integer <span>optional</span>
+                </dd>
+                <dd>Use fromAccountId of standing instruction transaction to restrict results. fromAccountId is id of <i>fromAccountType</i>.</dd>
+
+                <dt>fromAccountType</dt>
+                <dd>
+                    Integer <span>optional</span>
+                </dd>
+                <dd>Use fromAccountType of standing instruction transaction to restrict results. fromAccountType is enum value entity type Ex:Loan Account:1, Savings Account:2</dd>
+
+                <dt>transferType</dt>
+                <dd>
+                    Integer <span>optional</span>
+                </dd>
+                <dd>Use transferType of standing instruction transaction to restrict results. transferType is enum value transfer type Ex:Loan Repayment:2, Account Transfer:1</dd>
+
+                <dt>fromDate</dt>
+                <dd>
+                    Date<span>optional</span>
+                </dd>
+                <dd>Filters for transactions whose entry Date is greater than or equal to the passed in Date
+                </dd>
+                <dt>toDate</dt>
+                <dd>
+                    Date <span>optional</span>
+                </dd>
+                <dd>Filters for transactions whose entry Date is lesser than or equal to the passed in Date
+                </dd>
+
+                <dt>sqlSearch</dt>
+                <dd>
+                    String <span>optional</span>
+                </dd>
+                <dd>Use an sql fragment valid for the underlying standing instruction schema to filter results. e.g. name like %K%</dd>
+            </dl>
+	        <p>Example Requests : </p>
+	        <div class=apiClick>standinginstructions/history</div>
+	        <br>
+            <div class=apiClick>standinginstructions/history?orderBy=name&sortOrder=DESC</div>
+            <br>
+            <div class=apiClick>standinginstructions/history?offset=10&limit=50</div>
+            <br>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://DomainName/api/v1/standinginstructions/history</code>
+	        <code class="method-response">
+{
+  "totalFilteredRecords": 2,
+  "pageItems": [
+    {
+      "standingInstructionId": 1,
+      "name": "ACC Transfer",
+      "fromOffice": {
+        "id": 1,
+        "name": "Head Office"
+      },
+      "fromClient": {
+        "id": 1,
+        "displayName": "Test client",
+        "officeId": 1,
+        "officeName": "Head Office"
+      },
+      "fromAccountType": {
+        "id": 2,
+        "code": "accountType.savings",
+        "value": "Savings Account"
+      },
+      "fromAccount": {
+        "id": 2,
+        "accountNo": "000000002",
+        "productId": 1,
+        "productName": "General Savings"
+      },
+      "toAccountType": {
+        "id": 2,
+        "code": "accountType.savings",
+        "value": "Savings Account"
+      },
+      "toAccount": {
+        "id": 1,
+        "accountNo": "000000001",
+        "productId": 1,
+        "productName": "General Savings"
+      },
+      "toOffice": {
+        "id": 1,
+        "name": "Head Office"
+      },
+      "toClient": {
+        "id": 1,
+        "displayName": "Test client",
+        "officeId": 1,
+        "officeName": "Head Office"
+      },
+      "amount": 10,
+      "status": "success",
+      "executionTime": [
+        2014,
+        6,
+        30
+      ],
+      "errorLog": ""
+    },
+    {
+      "standingInstructionId": 2,
+      "name": "Pay overdues",
+      "fromOffice": {
+        "id": 1,
+        "name": "Head Office"
+      },
+      "fromClient": {
+        "id": 1,
+        "displayName": "Test client",
+        "officeId": 1,
+        "officeName": "Head Office"
+      },
+      "fromAccountType": {
+        "id": 2,
+        "code": "accountType.savings",
+        "value": "Savings Account"
+      },
+      "fromAccount": {
+        "id": 1,
+        "accountNo": "000000001",
+        "productId": 1,
+        "productName": "General Savings"
+      },
+      "toAccountType": {
+        "id": 1,
+        "code": "accountType.loan",
+        "value": "Loan Account"
+      },
+      "toAccount": {
+        "id": 1,
+        "accountNo": "000000001",
+        "productId": 1,
+        "productName": "Daily Loan"
+      },
+      "toOffice": {
+        "id": 1,
+        "name": "Head Office"
+      },
+      "toClient": {
+        "id": 1,
+        "displayName": "Test client",
+        "officeId": 1,
+        "officeName": "Head Office"
+      },
+      "amount": 7038.01,
+      "status": "success",
+      "executionTime": [
+        2014,
+        6,
+        30
+      ],
+      "errorLog": ""
+    }
+  ]
+}
+	        </code>
+	    </div>
+	</div>
 
 <!-- End Account Trasfer Standing Instrution-->
     
@@ -30637,6 +30853,14 @@ No Request Body:
                     <td><a href="#standinginstructions_retrieve">Retrive a Standing Instruction</a></td>
                     <td><a href="#standinginstruction_update">Update Standing Instruction</a></td>
                     <td><a href="#standinginstruction_delete">Delete Standing Instruction(status change)</a></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>standinginstructions/history</td>
+                    <td></td>
+                    <td><a href="#standinginstructions_history">Standinginstructions History</a></td>
+                    <td></td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td></td>

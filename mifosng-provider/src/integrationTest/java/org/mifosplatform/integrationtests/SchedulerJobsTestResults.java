@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,6 +34,8 @@ import org.mifosplatform.integrationtests.common.loans.LoanTransactionHelper;
 import org.mifosplatform.integrationtests.common.savings.SavingsAccountHelper;
 import org.mifosplatform.integrationtests.common.savings.SavingsProductHelper;
 import org.mifosplatform.integrationtests.common.savings.SavingsStatusChecker;
+import org.mifosplatform.portfolio.account.PortfolioAccountType;
+import org.mifosplatform.portfolio.account.domain.AccountTransferType;
 
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
@@ -628,6 +631,16 @@ public class SchedulerJobsTestResults {
                 fromSavingsBalanceAfter);
         Assert.assertEquals("Verifying To Savings Balance after Successful completion of Scheduler Job", expectedToSavingsBalance,
                 toSavingsBalanceAfter);
+        Integer fromAccountType = PortfolioAccountType.SAVINGS.getValue();
+        Integer transferType = AccountTransferType.ACCOUNT_TRANSFER.getValue();
+        List<HashMap> standinInstructionHistoryData = this.standingInstructionsHelper.getStandingInstructionHistory(fromSavingsId,
+                fromAccountType, clientID, transferType);
+        Assert.assertEquals("Verifying the no of stainding instruction transactions logged for the client", 1,
+                standinInstructionHistoryData.size());
+        HashMap loggedTransaction = standinInstructionHistoryData.get(0);
+
+        Assert.assertEquals("Verifying transferred amount and logged transaction amounts", (Float) standingInstructionData.get("amount"),
+                (Float) loggedTransaction.get("amount"));
 
     }
 
