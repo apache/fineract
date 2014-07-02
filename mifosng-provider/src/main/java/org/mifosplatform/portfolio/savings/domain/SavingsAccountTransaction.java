@@ -421,6 +421,8 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
             if (openingBalance.isGreaterThanZero()) {
                 endOfDayBalance = openingBalance.minus(getAmount(currency));
+            } else {
+                endOfDayBalance = Money.of(currency, this.runningBalance);
             }
         }
 

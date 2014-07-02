@@ -64,6 +64,8 @@ public class SavingsProductHelper {
     private final String interestCalculationDaysInYearType = DAYS_365;
     private Account[] accountList = null;
     private String minBalanceForInterestCalculation = null;
+    private String allowOverdraft = "false";
+    private String overdraftLimit = null; 
 
     public String build() {
         final HashMap<String, String> map = new HashMap<>();
@@ -95,6 +97,8 @@ public class SavingsProductHelper {
         map.put("lockinPeriodFrequencyType", this.lockingPeriodFrequencyType);
         map.put("withdrawalFeeForTransfers", this.withdrawalFeeForTransfers);
         map.put("minBalanceForInterestCalculation", minBalanceForInterestCalculation);
+        map.put("allowOverdraft", this.allowOverdraft);
+        map.put("overdraftLimit", this.overdraftLimit);
 
         if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());
@@ -162,6 +166,12 @@ public class SavingsProductHelper {
     public SavingsProductHelper withAccountingRuleAsCashBased(final Account[] account_list) {
         this.accountingRule = CASH_BASED;
         this.accountList = account_list;
+        return this;
+    }
+
+    public SavingsProductHelper withOverDraft(final String overDraftLimit) {
+        this.allowOverdraft = "true";
+        this.overdraftLimit = overDraftLimit;
         return this;
     }
 

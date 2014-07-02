@@ -3,6 +3,8 @@ package org.mifosplatform.integrationtests;
 import static org.junit.Assert.assertEquals;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -479,15 +481,152 @@ public class ClientSavingsIntegrationTest {
         assertEquals(expectedNextDueDate, nextDueDate);
     }
 
+    /***
+     * Test case for overdraft account functionality. Open account with zero
+     * balance, perform transactions then post interest and verify posted
+     * interest
+     */
+    @Test
+    public void testSavingsAccountWithOverdraft() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        /***
+         * Create a client to apply for savings account (overdraft account).
+         */
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientID);
+        final String minBalanceForInterestCalculation = null;
+
+        /***
+         * Create savings product with zero opening balance and overdraft
+         * enabled
+         */
+        final String zeroOpeningBalance = "0.0";
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, zeroOpeningBalance,
+                minBalanceForInterestCalculation);
+        Assert.assertNotNull(savingsProductID);
+
+        /***
+         * Apply for Savings account
+         */
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertNotNull(savingsProductID);
+
+        HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(clientID, savingsProductID, savingsId,
+                ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        /***
+         * Approve the savings account
+         */
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        Calendar todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -1);
+        todaysDate.set(Calendar.DAY_OF_MONTH, 1);
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        final Integer lastDayOfMonth = todaysDate.getActualMaximum(Calendar.DAY_OF_MONTH);
+        todaysDate.set(Calendar.DAY_OF_MONTH, lastDayOfMonth);
+        final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
+
+        /***
+         * Activate the application and verify account status
+         * 
+         * @param activationDate
+         *            this value is every time first day of previous month
+         */
+        savingsStatusHashMap = activateSavingsAccount(savingsId, ACTIVATION_DATE);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        /***
+         * Verify the account summary
+         */
+        final HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        this.savingsAccountHelper.calculateInterestForSavings(savingsId);
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        assertEquals(summaryBefore, summary);
+
+        Float balance = Float.valueOf(zeroOpeningBalance);
+
+        /***
+         * Perform withdraw transaction, verify account balance(account balance
+         * will go to negative as no deposits are there prior to this
+         * transaction)
+         */
+        Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
+                ACTIVATION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
+        balance -= new Float(WITHDRAW_AMOUNT);
+        assertEquals("Verifying Withdrawal Amount", new Float(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
+        assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
+
+        /***
+         * Perform Deposit transaction on last day of month and verify account
+         * balance.
+         * 
+         * @param transactionDate
+         *            this value is every time last day of previous month
+         */
+        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
+                TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
+        balance += new Float(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+        assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
+
+        /***
+         * Perform Post interest transaction and verify the posted amount
+         */
+        this.savingsAccountHelper.postInterestForSavings(savingsId);
+        HashMap accountDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
+        summary = (HashMap) accountDetails.get("summary");
+        Float actualInterestPosted = Float.valueOf(summary.get("totalInterestPosted").toString());
+
+        /***
+         * Calculate expected interest to be posted, interest should be posted
+         * for one day only because deposit transaction happened on last day of
+         * month before this account balance is negative.
+         */
+        final Float nominalAnnualInterest = Float.valueOf(accountDetails.get("nominalAnnualInterestRate").toString());
+        final HashMap interestCalculationDaysInYearType = (HashMap) accountDetails.get("interestCalculationDaysInYearType");
+        final Integer daysInYear = Integer.valueOf(interestCalculationDaysInYearType.get("id").toString());
+        double interestRateInFraction = (nominalAnnualInterest / 100);
+        double perDay = (double) 1 / (daysInYear);
+        double interestPerDay = interestRateInFraction * perDay;
+        Float interestPosted = (float) (interestPerDay * balance * 1);
+
+        /***
+         * Apply rounding on interestPosted, actualInterestPosted and verify
+         * both are same
+         */
+        DecimalFormat decimalFormat = new DecimalFormat();
+        decimalFormat.applyPattern("#.###");
+        interestPosted = new Float(decimalFormat.format(interestPosted));
+        actualInterestPosted = new Float(decimalFormat.format(actualInterestPosted));
+        assertEquals("Verifying interest posted", interestPosted, actualInterestPosted);
+    }
+
+    private HashMap activateSavingsAccount(final Integer savingsId, final String activationDate) {
+        final HashMap status = this.savingsAccountHelper.activateSavingsAccount(savingsId, activationDate);
+        return status;
+    }
+
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String minOpenningBalance, String minBalanceForInterestCalculation) {
         System.out.println("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
+        final String overDraftLimit = "2000.0";
         final String savingsProductJSON = savingsProductHelper //
                 .withInterestCompoundingPeriodTypeAsDaily() //
                 .withInterestPostingPeriodTypeAsMonthly() //
                 .withInterestCalculationPeriodTypeAsDailyBalance() //
                 .withMinBalanceForInterestCalculation(minBalanceForInterestCalculation)//
+                .withOverDraft(overDraftLimit)
                 .withMinimumOpenningBalance(minOpenningBalance).build();
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
     }
