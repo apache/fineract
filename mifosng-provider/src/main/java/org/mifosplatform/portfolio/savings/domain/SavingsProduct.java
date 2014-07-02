@@ -7,12 +7,12 @@ package org.mifosplatform.portfolio.savings.domain;
 
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftMinBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.descriptionParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.enforceMinRequiredBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.inMultiplesOfParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationTypeParamName;
@@ -150,8 +150,8 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     @Column(name = "overdraft_limit", scale = 6, precision = 19, nullable = true)
     private BigDecimal overdraftLimit;
 
-    @Column(name = "allow_overdraft_min_balance")
-    private boolean allowOverdraftMinBalance;
+    @Column(name = "enforce_min_required_balance")
+    private boolean enforceMinRequiredBalance;
 
     @Column(name = "min_required_balance", scale = 6, precision = 19, nullable = true)
     private BigDecimal minRequiredBalance;
@@ -166,13 +166,13 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final AccountingRuleType accountingRuleType, final Set<Charge> charges,
-            final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean allowOverdraftMinBalance,
+            final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean enforceMinRequiredBalance,
             final BigDecimal minRequiredBalance, final BigDecimal minBalanceForInterestCalculation) {
 
         return new SavingsProduct(name, shortName, description, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, accountingRuleType, charges,
-                allowOverdraft, overdraftLimit, allowOverdraftMinBalance, minRequiredBalance, minBalanceForInterestCalculation);
+                allowOverdraft, overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, minBalanceForInterestCalculation);
     }
 
     protected SavingsProduct() {
@@ -199,7 +199,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final AccountingRuleType accountingRuleType, final Set<Charge> charges,
-            final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean allowOverdraftMinBalance,
+            final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean enforceMinRequiredBalance,
             final BigDecimal minRequiredBalance, BigDecimal minBalanceForInterestCalculation) {
 
         this.name = name;
@@ -236,7 +236,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         this.allowOverdraft = allowOverdraft;
         this.overdraftLimit = overdraftLimit;
 
-        this.allowOverdraftMinBalance = allowOverdraftMinBalance;
+        this.enforceMinRequiredBalance = enforceMinRequiredBalance;
         this.minRequiredBalance = minRequiredBalance;
         this.minBalanceForInterestCalculation = minBalanceForInterestCalculation;
     }
@@ -425,10 +425,10 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             this.overdraftLimit = null;
         }
 
-        if (command.isChangeInBooleanParameterNamed(allowOverdraftMinBalanceParamName, this.allowOverdraftMinBalance)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(allowOverdraftMinBalanceParamName);
-            actualChanges.put(allowOverdraftMinBalanceParamName, newValue);
-            this.allowOverdraftMinBalance = newValue;
+        if (command.isChangeInBooleanParameterNamed(enforceMinRequiredBalanceParamName, this.enforceMinRequiredBalance)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(enforceMinRequiredBalanceParamName);
+            actualChanges.put(enforceMinRequiredBalanceParamName, newValue);
+            this.enforceMinRequiredBalance = newValue;
         }
 
         if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(minRequiredBalanceParamName, this.minRequiredBalance)) {
@@ -445,10 +445,6 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             actualChanges.put(minBalanceForInterestCalculationParamName, newValue);
             actualChanges.put(localeParamName, localeAsInput);
             this.minBalanceForInterestCalculation = newValue;
-        }
-
-        if (!this.allowOverdraftMinBalance) {
-            this.minRequiredBalance = null;
         }
 
         validateLockinDetails();
@@ -537,8 +533,8 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         return this.minRequiredBalance;
     }
 
-    public boolean isAllowOverdraftMinBalance() {
-        return this.allowOverdraftMinBalance;
+    public boolean isMinRequiredBalanceEnforced() {
+        return this.enforceMinRequiredBalance;
     }
 
     public Set<Charge> charges() {
