@@ -252,7 +252,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.total_penalty_charge_derived as totalPenaltyCharge, ");
             sqlBuilder.append("sa.min_balance_for_interest_calculation as minBalanceForInterestCalculation,");
             sqlBuilder.append("sa.min_required_balance as minRequiredBalance, ");
-            sqlBuilder.append("sa.allow_overdraft_min_balance as allowOverdraftMinBalance ");
+            sqlBuilder.append("sa.enforce_min_required_balance as enforceMinRequiredBalance ");
             sqlBuilder.append("from m_savings_account sa ");
             sqlBuilder.append("join m_savings_product sp ON sa.product_id = sp.id ");
             sqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
@@ -385,7 +385,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final BigDecimal overdraftLimit = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "overdraftLimit");
 
             final BigDecimal minRequiredBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "minRequiredBalance");
-            final boolean allowOverdraftMinBalance = rs.getBoolean("allowOverdraftMinBalance");
+            final boolean enforceMinRequiredBalance = rs.getBoolean("enforceMinRequiredBalance");
 
             /*
              * final BigDecimal annualFeeAmount =
@@ -423,7 +423,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     productName, fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate,
                     interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,
-                    allowOverdraft, overdraftLimit, minRequiredBalance, allowOverdraftMinBalance, minBalanceForInterestCalculation);
+                    allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance, minBalanceForInterestCalculation);
         }
     }
 
@@ -821,7 +821,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             // sqlBuilder.append("sp.annual_fee_on_month as annualFeeOnMonth, ");
             // sqlBuilder.append("sp.annual_fee_on_day as annualFeeOnDay ");
             sqlBuilder.append("sp.min_required_balance as minRequiredBalance, ");
-            sqlBuilder.append("sp.allow_overdraft_min_balance as allowOverdraftMinBalance ");
+            sqlBuilder.append("sp.enforce_min_required_balance as enforceMinRequiredBalance ");
             sqlBuilder.append("from m_savings_product sp ");
             sqlBuilder.append("join m_currency curr on curr.code = sp.currency_code ");
 
@@ -889,7 +889,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final BigDecimal overdraftLimit = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "overdraftLimit");
 
             final BigDecimal minRequiredBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "minRequiredBalance");
-            final boolean allowOverdraftMinBalance = rs.getBoolean("allowOverdraftMinBalance");
+            final boolean enforceMinRequiredBalance = rs.getBoolean("enforceMinRequiredBalance");
             final BigDecimal minBalanceForInterestCalculation = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,
                     "minBalanceForInterestCalculation");
 
@@ -932,7 +932,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     productName, fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualIterestRate,
                     interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,
-                    allowOverdraft, overdraftLimit, minRequiredBalance, allowOverdraftMinBalance, minBalanceForInterestCalculation);
+                    allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance, minBalanceForInterestCalculation);
         }
     }
 

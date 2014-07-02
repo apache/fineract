@@ -9,6 +9,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_AC
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountNoParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.clientIdParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.enforceMinRequiredBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.externalIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.fieldOfficerIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.groupIdParamName;
@@ -18,14 +19,13 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCo
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestPostingPeriodTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.productIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredBalanceParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftMinBalanceParamName;
 
 import java.math.BigDecimal;
 import java.util.Set;
@@ -216,9 +216,9 @@ public class SavingsAccountAssembler {
 
         final BigDecimal overdraftLimit = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(overdraftLimitParamName);
 
-        boolean allowOverdraftMinBalance = false;
-        if (command.parameterExists(allowOverdraftMinBalanceParamName)) {
-            allowOverdraft = command.booleanPrimitiveValueOfParameterNamed(allowOverdraftMinBalanceParamName);
+        boolean enforceMinRequiredBalance = false;
+        if (command.parameterExists(enforceMinRequiredBalanceParamName)) {
+            enforceMinRequiredBalance = command.booleanPrimitiveValueOfParameterNamed(enforceMinRequiredBalanceParamName);
         }
 
         final BigDecimal minRequiredBalance = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(minRequiredBalanceParamName);
@@ -227,7 +227,7 @@ public class SavingsAccountAssembler {
                 externalId, accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, charges, allowOverdraft,
-                overdraftLimit, allowOverdraftMinBalance, minRequiredBalance);
+                overdraftLimit, enforceMinRequiredBalance, minRequiredBalance);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
         account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), SAVINGS_ACCOUNT_RESOURCE_NAME);
@@ -281,7 +281,7 @@ public class SavingsAccountAssembler {
                 product.interestPostingPeriodType(), product.interestCalculationType(), product.interestCalculationDaysInYearType(),
                 product.minRequiredOpeningBalance(), product.lockinPeriodFrequency(), product.lockinPeriodFrequencyType(),
                 product.isWithdrawalFeeApplicableForTransfer(), charges, product.isAllowOverdraft(), product.overdraftLimit(),
-                product.isAllowOverdraftMinBalance(), product.minRequiredBalance());
+                product.isMinRequiredBalanceEnforced(), product.minRequiredBalance());
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
         account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), SAVINGS_ACCOUNT_RESOURCE_NAME);

@@ -6,9 +6,9 @@
 package org.mifosplatform.portfolio.savings.domain;
 
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftMinBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.enforceMinRequiredBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.localeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
@@ -241,8 +241,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "overdraft_limit", scale = 6, precision = 19, nullable = true)
     private BigDecimal overdraftLimit;
 
-    @Column(name = "allow_overdraft_min_balance")
-    private boolean allowOverdraftMinBalance;
+    @Column(name = "enforce_min_required_balance")
+    private boolean enforceMinRequiredBalance;
 
     @Column(name = "min_required_balance", scale = 6, precision = 19, nullable = true)
     private BigDecimal minRequiredBalance;
@@ -284,14 +284,14 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
-            final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean allowOverdraftMinBalance,
+            final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean enforceMinRequiredBalance,
             final BigDecimal minRequiredBalance) {
 
         final SavingsAccountStatusType status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
         return new SavingsAccount(client, group, product, fieldOfficer, accountNo, externalId, status, accountType, submittedOnDate,
                 submittedBy, interestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
                 interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
-                withdrawalFeeApplicableForTransfer, savingsAccountCharges, allowOverdraft, overdraftLimit, allowOverdraftMinBalance,
+                withdrawalFeeApplicableForTransfer, savingsAccountCharges, allowOverdraft, overdraftLimit, enforceMinRequiredBalance,
                 minRequiredBalance);
     }
 
@@ -318,7 +318,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
-            final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean allowOverdraftMinBalance,
+            final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean enforceMinRequiredBalance,
             final BigDecimal minRequiredBalance) {
         this.client = client;
         this.group = group;
@@ -357,7 +357,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.allowOverdraft = allowOverdraft;
         this.overdraftLimit = overdraftLimit;
 
-        this.allowOverdraftMinBalance = allowOverdraftMinBalance;
+        this.enforceMinRequiredBalance = enforceMinRequiredBalance;
         this.minRequiredBalance = minRequiredBalance;
         this.minBalanceForInterestCalculation = product.minBalanceForInterestCalculation();
     }
@@ -521,13 +521,13 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final BigDecimal interestRateAsFraction = getEffectiveInterestRateAsFraction(mc, upToInterestCalculationDate);
         final Collection<Long> interestPostTransactions = this.savingsHelper.fetchPostInterestTransactionIds(getId());
         final Money minBalanceForInterestCalculation = Money.of(getCurrency(), minBalanceForInterestCalculation());
-        
+
         for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
 
             final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance,
                     retreiveOrderedNonInterestPostingTransactions(), this.currency, compoundingPeriodType, interestCalculationType,
                     interestRateAsFraction, daysInYearType.getValue(), upToInterestCalculationDate, interestPostTransactions,
-                    isInterestTransfer,minBalanceForInterestCalculation);
+                    isInterestTransfer, minBalanceForInterestCalculation);
 
             periodStartingBalance = postingPeriod.closingBalance();
 
@@ -803,8 +803,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
             final BigDecimal withdrawalFee = null;
             // deal with potential minRequiredBalance and
-            // allowOverdraftMinBalance
-            if (this.minRequiredBalance != null && !this.allowOverdraftMinBalance) {
+            // enforceMinRequiredBalance
+            if (this.minRequiredBalance != null && this.enforceMinRequiredBalance) {
                 if (runningBalance.minus(this.minRequiredBalance).isLessThanZero()) { throw new InsufficientAccountBalanceException(
                         "transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount); }
             }
@@ -1040,10 +1040,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             this.overdraftLimit = null;
         }
 
-        if (command.isChangeInBooleanParameterNamed(allowOverdraftMinBalanceParamName, this.allowOverdraftMinBalance)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(allowOverdraftMinBalanceParamName);
-            actualChanges.put(allowOverdraftMinBalanceParamName, newValue);
-            this.allowOverdraftMinBalance = newValue;
+        if (command.isChangeInBooleanParameterNamed(enforceMinRequiredBalanceParamName, this.enforceMinRequiredBalance)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(enforceMinRequiredBalanceParamName);
+            actualChanges.put(enforceMinRequiredBalanceParamName, newValue);
+            this.enforceMinRequiredBalance = newValue;
         }
 
         if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(minRequiredBalanceParamName, this.minRequiredBalance)) {
@@ -1051,10 +1051,6 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             actualChanges.put(minRequiredBalanceParamName, newValue);
             actualChanges.put(localeParamName, localeAsInput);
             this.minRequiredBalance = newValue;
-        }
-
-        if (!this.allowOverdraftMinBalance) {
-            this.minRequiredBalance = null;
         }
 
         validateLockinDetails(baseDataValidator);

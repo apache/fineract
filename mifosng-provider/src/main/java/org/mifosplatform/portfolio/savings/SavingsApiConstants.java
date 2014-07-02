@@ -96,7 +96,7 @@ public class SavingsApiConstants {
     public static final String allowOverdraftParamName = "allowOverdraft";
     public static final String overdraftLimitParamName = "overdraftLimit";
     public static final String minRequiredBalanceParamName = "minRequiredBalance";
-    public static final String allowOverdraftMinBalanceParamName = "allowOverdraftMinBalance";
+    public static final String enforceMinRequiredBalanceParamName = "enforceMinRequiredBalance";
     public static final String minBalanceForInterestCalculationParamName = "minBalanceForInterestCalculation";
 
     // transaction parameters
@@ -153,7 +153,7 @@ public class SavingsApiConstants {
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(),
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(),
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue(), allowOverdraftParamName, overdraftLimitParamName,
-            minRequiredBalanceParamName, allowOverdraftMinBalanceParamName, minBalanceForInterestCalculationParamName));
+            minRequiredBalanceParamName, enforceMinRequiredBalanceParamName, minBalanceForInterestCalculationParamName));
 
     /**
      * These parameters will match the class level parameters of
@@ -177,7 +177,7 @@ public class SavingsApiConstants {
             lockinPeriodFrequencyTypeParamName,
             // withdrawalFeeAmountParamName, withdrawalFeeTypeParamName,
             withdrawalFeeForTransfersParamName, feeAmountParamName, feeOnMonthDayParamName, chargesParamName, allowOverdraftParamName,
-            overdraftLimitParamName, minRequiredBalanceParamName, allowOverdraftMinBalanceParamName));
+            overdraftLimitParamName, minRequiredBalanceParamName, enforceMinRequiredBalanceParamName));
 
     /**
      * These parameters will match the class level parameters of
