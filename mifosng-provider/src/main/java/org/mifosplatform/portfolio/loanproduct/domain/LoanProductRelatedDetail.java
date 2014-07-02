@@ -38,7 +38,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Embedded
     private MonetaryCurrency currency;
 
-    @Column(name = "principal_amount", scale = 6, precision = 19, nullable = false)
+    @Column(name = "principal_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal principal;
 
     @Column(name = "nominal_interest_rate_per_period", scale = 6, precision = 19, nullable = false)
