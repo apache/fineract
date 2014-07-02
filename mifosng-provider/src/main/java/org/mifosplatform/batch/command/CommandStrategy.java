@@ -1,5 +1,7 @@
 package org.mifosplatform.batch.command;
 
+import javax.ws.rs.core.UriInfo;
+
 import org.mifosplatform.batch.domain.BatchRequest;
 import org.mifosplatform.batch.domain.BatchResponse;
 
@@ -13,13 +15,15 @@ import org.mifosplatform.batch.domain.BatchResponse;
  */
 public interface CommandStrategy {
 
-	/**
-	 * Returns an object of type {@link org.mifosplatform.batch.domain.BatchResponse}.
-	 * This takes  {@link org.mifosplatform.batch.domain.BatchRequest} as it's single
-	 * argument and provides appropriate response.
-	 * 
-	 * @param batchRequest
-	 * @return BatchResponse
-	 */
-	public BatchResponse execute(BatchRequest batchRequest);
+    /**
+     * Returns an object of type
+     * {@link org.mifosplatform.batch.domain.BatchResponse}. This takes
+     * {@link org.mifosplatform.batch.domain.BatchRequest} as it's single
+     * argument and provides appropriate response.
+     * 
+     * @param batchRequest
+     * @param uriInfo
+     * @return BatchResponse
+     */
+    public BatchResponse execute(BatchRequest batchRequest, UriInfo uriInfo);
 }
