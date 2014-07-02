@@ -79,10 +79,19 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
 
             final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
             final Long entityId = guarantorCommand.getEntityId();
+            final Integer guarantorTypeId = guarantorCommand.getGuarantorTypeId();
 
             for (final Guarantor guarantor : existGuarantorList) {
-                if (guarantor.getLoanId() == loanId && entityId !=null && guarantor.getEntityId() == entityId) {
-                    String defaultUserMessage = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
+                if (guarantor.getLoanId() == loanId && entityId != null && guarantor.getEntityId() == entityId
+                        && guarantor.getGurantorType() == guarantorTypeId) {
+                    /** Get the right guarantor based on guarantorType **/
+                    String defaultUserMessage = null;
+                    if (guarantorTypeId == GuarantorType.STAFF.getValue()) {
+                        defaultUserMessage = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId).displayName();
+                    } else {
+                        defaultUserMessage = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
+                    }
+
                     defaultUserMessage = defaultUserMessage + " is already exist as a guarantor for this loan";
                     final String action = loan.client() != null ? "client.guarantor" : "group.guarantor";
                     throw new DuplicateGuarantorException(action, "is.already.exist.same.loan", defaultUserMessage, entityId, loanId);
