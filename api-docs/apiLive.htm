@@ -15071,6 +15071,13 @@ Content-Type: application/json
 				<tr class=alt><td>minBalanceForInterestCalculation</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, balance must be greater than provided value for calculation of interest  e.g. <b>5,000</b> </td></tr>
 
+	            <tr class=alt><td>enforceMinRequiredBalance</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If set to <span>true</span>, validates that the account balance does not 
+	            fall below <span>minRequiredBalance</span> </td></tr>
+
+				<tr class=alt><td>minRequiredBalance</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets an indicator of the minimum required balance of the  savings account e.g. <b>5,000</b> else set the limit as zero. Note that <span>enforceMinRequiredBalance</span> determines if the minimum required balance is enforced</td></tr>
+
 	        </table>
 	    </div>
 	</div>
@@ -15692,6 +15699,8 @@ Request Body:
   "allowOverdraft":true,
   "overdraftLimit":5000,
   "minBalanceForInterestCalculation":5000,
+  "minRequiredBalance":20,
+  "enforceMinRequiredBalance":true,
   "lockinPeriodFrequency": "4",
   "lockinPeriodFrequencyType": "1",
   "withdrawalFeeForTransfers":false,
