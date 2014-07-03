@@ -152,6 +152,9 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
                     .build();
         } catch (final DataIntegrityViolationException dve) {
             logger.error(dve.getMessage(), dve);
+            final Throwable realCause = dve.getMostSpecificCause();
+            if (realCause.getMessage().contains("code_value")) { throw new PlatformDataIntegrityException("error.msg.codeValue.in.use",
+                    "This code value is in use", codeValueId); }
             throw new PlatformDataIntegrityException("error.msg.code.value.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource: " + dve.getMostSpecificCause().getMessage());
         }
