@@ -865,7 +865,7 @@ public class ClientLoanIntegrationTest {
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
-    private Integer createLoanProduct(final String inMultiplesOf, final String digitsAfterDecimal) {
+    private Integer createLoanProduct(final String inMultiplesOf, final String digitsAfterDecimal, final String repaymentStrategy) {
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("10000000.00") //
@@ -874,6 +874,7 @@ public class ClientLoanIntegrationTest {
                 .withRepaymentTypeAsMonth() //
                 .withinterestRatePerPeriod("2") //
                 .withInterestRateFrequencyTypeAsMonths() //
+                .withRepaymentStrategy(repaymentStrategy) //
                 .withAmortizationTypeAsEqualPrincipalPayment() //
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails(digitsAfterDecimal, inMultiplesOf).build(null);
@@ -959,6 +960,28 @@ public class ClientLoanIntegrationTest {
                 .withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
         return loanApplicationJSON;
     }
+
+    private Integer applyForLoanApplicationWithPaymentStrategy(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
+            final String savingsId, String principal, final String repaymentStrategy) {
+        System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
+                .withPrincipal(principal) //
+                .withLoanTermFrequency("4") //
+                .withLoanTermFrequencyAsMonths() //
+                .withNumberOfRepayments("4") //
+                .withRepaymentEveryAfter("1") //
+                .withRepaymentFrequencyTypeAsMonths() //
+                .withInterestRatePerPeriod("2") //
+                .withAmortizationTypeAsEqualInstallments() //
+                .withInterestTypeAsDecliningBalance() //
+                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
+                .withExpectedDisbursementDate("20 September 2011") //
+                .withSubmittedOnDate("20 September 2011") //
+                .withwithRepaymentStrategy(repaymentStrategy) //
+                .withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
+        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+    }
+
 
     private void verifyLoanRepaymentSchedule(final ArrayList<HashMap> loanSchedule) {
         System.out.println("--------------------VERIFYING THE PRINCIPAL DUES,INTEREST DUE AND DUE DATE--------------------------");
@@ -2938,7 +2961,7 @@ public class ClientLoanIntegrationTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-        final Integer loanProductID = createLoanProduct("100", "0");
+        final Integer loanProductID = createLoanProduct("100", "0", LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY);
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, null);
         final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
                 loanID);
@@ -2952,11 +2975,132 @@ public class ClientLoanIntegrationTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-        final Integer loanProductID = createLoanProduct("100", "0");
+        final Integer loanProductID = createLoanProduct("100", "0", LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY);
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, "5");
         final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
                 loanID);
         verifyLoanRepaymentScheduleForEqualPrincipalWithGrace(loanSchedule);
+
+    }
+    
+    /***
+     * Test case to verify RBI payment strategy
+     */
+    @Test
+    public void testRBIPaymentStrategy() {
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        
+        /***
+         * Create loan product with RBI strategy
+         */
+        final Integer loanProductID = createLoanProduct("100", "0", LoanProductTestBuilder.RBI_INDIA_STRATEGY);
+        Assert.assertNotNull(loanProductID);
+        
+        /***
+         * Apply for loan application and verify loan status
+         */
+        final String savingsId = null;
+        final String principal = "12,000.00";
+        final Integer loanID = applyForLoanApplicationWithPaymentStrategy(clientID, loanProductID, null, savingsId, principal,
+                LoanApplicationTestBuilder.RBI_INDIA_STRATEGY);
+        Assert.assertNotNull(loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------");
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+        System.out.println("-------------------------------DISBURSE LOAN-------------------------------------------");
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID);
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        
+        ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        HashMap firstInstallment = loanSchedule.get(1);
+        validateNumberForEqual("3200", String.valueOf(firstInstallment.get("totalOutstandingForPeriod")));
+        
+        /***
+         * Make payment for installment #1
+         */
+        this.loanTransactionHelper.makeRepayment("20 October 2011", Float.valueOf("3200"), loanID);
+        loanSchedule.clear();
+        loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        firstInstallment = loanSchedule.get(1);
+        validateNumberForEqual("0.00", String.valueOf(firstInstallment.get("totalOutstandingForPeriod")));
+
+        /***
+         * Verify 2nd and 3rd repayments dues before making excess payment for
+         * installment no 2
+         */
+        HashMap secondInstallment = loanSchedule.get(2);
+        HashMap thirdInstallment = loanSchedule.get(3);
+        
+        validateNumberForEqual("3100", String.valueOf(secondInstallment.get("totalOutstandingForPeriod")));
+        validateNumberForEqual("3100", String.valueOf(thirdInstallment.get("totalOutstandingForPeriod")));
+        
+        validateNumberForEqual("2900", String.valueOf(secondInstallment.get("principalOutstanding")));
+        validateNumberForEqual("3000", String.valueOf(thirdInstallment.get("principalOutstanding")));
+
+        /***
+         * Make payment for installment #2
+         */
+        this.loanTransactionHelper.makeRepayment("20 November 2011", Float.valueOf("3300"), loanID);
+        loanSchedule.clear();
+        loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        /***
+         * Verify 2nd and 3rd repayments after making excess payment for
+         * installment no 2
+         */
+        secondInstallment = loanSchedule.get(2);
+        validateNumberForEqual("0.00", String.valueOf(secondInstallment.get("totalOutstandingForPeriod")));
+
+        /***
+         * According to RBI Excess payment should go to principal portion of
+         * next installment, but as interest recalculation is not implemented,
+         * it wont make any difference to schedule even though if we made excess
+         * payment, so excess payments will behave the same as regular payment
+         * with the excess amount
+         */
+        thirdInstallment = loanSchedule.get(3);
+        validateNumberForEqual("2900", String.valueOf(thirdInstallment.get("totalOutstandingForPeriod")));
+        validateNumberForEqual("2900", String.valueOf(thirdInstallment.get("principalOutstanding")));
+        validateNumberForEqual("100", String.valueOf(thirdInstallment.get("principalPaid")));
+        validateNumberForEqual("100", String.valueOf(thirdInstallment.get("interestPaid")));
+        validateNumberForEqual("0.00", String.valueOf(thirdInstallment.get("interestOutstanding")));
+
+        /***
+         * Make payment with due amount of 3rd installment on 4th installment
+         * date
+         */
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("2900"), loanID);
+        loanSchedule.clear();
+        loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+
+        /***
+         * Verify overdue interests are deducted first and then remaining amount
+         * for interest portion of due installment
+         */
+        thirdInstallment = loanSchedule.get(3);
+        HashMap fourthInstallment = loanSchedule.get(4);
+        
+        validateNumberForEqual("100", String.valueOf(thirdInstallment.get("totalOutstandingForPeriod")));
+        validateNumberForEqual("100", String.valueOf(thirdInstallment.get("principalOutstanding")));
+        
+        validateNumberForEqual("3100", String.valueOf(fourthInstallment.get("totalOutstandingForPeriod")));
+        validateNumberForEqual("100", String.valueOf(fourthInstallment.get("interestPaid")));
+        validateNumberForEqual("0.00", String.valueOf(fourthInstallment.get("interestOutstanding")));
+        
+        this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("3200"), loanID);
+
+        /***
+         * verify loan is closed as we paid full amount
+         */
+        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
 
     }
 

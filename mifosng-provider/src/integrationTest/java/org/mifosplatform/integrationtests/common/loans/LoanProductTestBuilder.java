@@ -23,10 +23,10 @@ public class LoanProductTestBuilder {
     private static final String EQUAL_INSTALLMENTS = "1";
     private static final String DECLINING_BALANCE = "0";
     private static final String FLAT_BALANCE = "1";
-    private static final String MIFOS_STANDARD_STRATEGY = "1";
+    public static final String MIFOS_STANDARD_STRATEGY = "1";
     // private static final String HEAVENS_FAMILY_STRATEGY ="2";
     // private static final String CREO_CORE_STRATEGY ="3";
-    // private static final String RBI_INDIA_STRATEGY ="4";
+    public static final String RBI_INDIA_STRATEGY ="4";
     private static final String NONE = "1";
     private static final String CASH_BASED = "2";
     private static final String ACCRUAL_PERIODIC = "3";
@@ -47,7 +47,7 @@ public class LoanProductTestBuilder {
     private String overdueDaysForNPA = "5";
     private String interestCalculationPeriodType = CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD;
     private String inArrearsTolerance = "0";
-    private final String transactionProcessingStrategy = MIFOS_STANDARD_STRATEGY;
+    private String transactionProcessingStrategy = MIFOS_STANDARD_STRATEGY;
     private String accountingRule = NONE;
     private final String currencyCode = USD;
     private String amortizationType = EQUAL_INSTALLMENTS;
@@ -302,6 +302,11 @@ public class LoanProductTestBuilder {
     public LoanProductTestBuilder currencyDetails(final String digitsAfterDecimal, final String inMultiplesOf) {
         this.digitsAfterDecimal = digitsAfterDecimal;
         this.inMultiplesOf = inMultiplesOf;
+        return this;
+    }
+
+    public LoanProductTestBuilder withRepaymentStrategy(final String transactionProcessingStrategy) {
+        this.transactionProcessingStrategy = transactionProcessingStrategy;
         return this;
     }
 
