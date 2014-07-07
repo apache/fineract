@@ -48,7 +48,7 @@ public class LoanStatusChecker {
 
     public static HashMap getStatusOfLoan(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer loanID) {
-        final String url = "/mifosng-provider/api/v1/loans/" + loanID + "?tenantIdentifier=default";
+        final String url = "/mifosng-provider/api/v1/loans/" + loanID + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "status");
     }
 

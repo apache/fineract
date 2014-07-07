@@ -28,7 +28,7 @@ import com.jayway.restassured.specification.ResponseSpecification;
  */
 public class BatchHelper {
 
-    private static final String BATCH_API_URL = "/mifosng-provider/api/v1/batches?tenantIdentifier=default";
+    private static final String BATCH_API_URL = "/mifosng-provider/api/v1/batches?" + Utils.TENANT_IDENTIFIER;
     private static final String BATCH_API_URL_EXT = BATCH_API_URL + "&enclosingTransaction=true";
 
     private BatchHelper() {
@@ -346,7 +346,7 @@ public class BatchHelper {
     public static void verifyClientCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String externalId) {
         System.out.println("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
-        final String CLIENT_URL = "/mifosng-provider/api/v1/clients?externalId=" + externalId + "&tenantIdentifier=default";
+        final String CLIENT_URL = "/mifosng-provider/api/v1/clients?externalId=" + externalId + "&" + Utils.TENANT_IDENTIFIER;
         final Integer responseRecords = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL, "totalFilteredRecords");
         Assert.assertEquals("No records found with given externalId", (long) responseRecords, (long) 0);
     }

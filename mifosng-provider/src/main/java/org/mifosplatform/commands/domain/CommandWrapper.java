@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.commands.domain;
 
+import org.mifosplatform.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
+
 public class CommandWrapper {
 
     private final Long commandId;
@@ -237,6 +239,29 @@ public class CommandWrapper {
 
     public boolean isSmsResource() {
         return this.entityName.equalsIgnoreCase("SMS");
+    }
+
+    public boolean isSmsCampaignResource(){
+        return this.entityName.equals("SMS_CAMPAIGN");
+    }
+    
+    public boolean isLoanRescheduleResource() {
+    	return this.entityName.equals(RescheduleLoansApiConstants.ENTITY_NAME);
+    }
+    
+    public boolean isApprove() {
+    	return this.actionName.equalsIgnoreCase("APPROVE");
+    }
+    
+    public boolean isReject() {
+    	return this.actionName.equalsIgnoreCase("REJECT");
+    }
+
+    public boolean isSmsCampaignActivation() {
+        return this.actionName.equalsIgnoreCase("ACTIVATE") && this.entityName.equalsIgnoreCase("SMS_CAMPAIGN");
+    }
+    public boolean isSmsCampaignClosure() {
+        return this.actionName.equalsIgnoreCase("CLOSE") && this.entityName.equalsIgnoreCase("SMS_CAMPAIGN");
     }
 
     public boolean isCodeResource() {

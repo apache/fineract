@@ -84,6 +84,10 @@ public class LoanDisbursementDetails extends AbstractPersistable<Long> {
     public BigDecimal principal() {
         return this.principal;
     }
+    
+    public BigDecimal approvedPrincipal() {
+    	return this.approvedPrincipal;
+    }
 
     public void updatePrincipal(BigDecimal principal) {
         this.principal = principal;

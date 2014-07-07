@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 
 public class SurveyHelper {
 
-    private static final String FULFIL_SURVEY_URL = "/mifosng-provider/api/v1/survey/ppi_kenya_2009/clientId?tenantIdentifier=default";
+    private static final String FULFIL_SURVEY_URL = "/mifosng-provider/api/v1/survey/ppi_kenya_2009/clientId?" + Utils.TENANT_IDENTIFIER;
 
     public static Integer fulfilSurvey(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return fulfilSurvey(requestSpec, responseSpec, "04 March 2011");
@@ -52,7 +52,7 @@ public class SurveyHelper {
     public static void verifySurveyCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedClientID) {
         System.out.println("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
-        final String SURVEY_URL = "/mifosng-provider/api/v1/Survey/ppi_kenya_2009/clientid/entryId" + generatedClientID + "?tenantIdentifier=default";
+        final String SURVEY_URL = "/mifosng-provider/api/v1/Survey/ppi_kenya_2009/clientid/entryId" + generatedClientID + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseClientID = Utils.performServerGet(requestSpec, responseSpec, SURVEY_URL, "id");
         assertEquals("ERROR IN CREATING THE CLIENT", generatedClientID, responseClientID);
     }

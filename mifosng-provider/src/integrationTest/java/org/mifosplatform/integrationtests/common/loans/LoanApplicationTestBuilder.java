@@ -43,6 +43,7 @@ public class LoanApplicationTestBuilder {
     private String fixedEmiAmount = "10000";
     private String maxOutstandingLoanBalance = "36000";
     private String graceOnPrincipalPayment = null;
+    private String graceOnInterestPayment = null;
     private List<HashMap> disbursementData = null;
     private List<HashMap> charges = new ArrayList<HashMap>();
 
@@ -80,6 +81,10 @@ public class LoanApplicationTestBuilder {
 
         if (graceOnPrincipalPayment != null) {
             map.put("graceOnPrincipalPayment", graceOnPrincipalPayment);
+        }
+        
+        if(graceOnInterestPayment != null) {
+        	map.put("graceOnInterestPayment", graceOnInterestPayment);
         }
 
         if (disbursementData != null) {
@@ -146,6 +151,11 @@ public class LoanApplicationTestBuilder {
         this.repaymentFrequencyType = WEEKS;
         return this;
     }
+    
+    public LoanApplicationTestBuilder withRepaymentFrequencyTypeAsYear() {
+    	this.repaymentFrequencyType = YEARS;
+        return this;
+    }
 
     public LoanApplicationTestBuilder withInterestRatePerPeriod(final String interestRate) {
         this.interestRate = interestRate;
@@ -205,6 +215,11 @@ public class LoanApplicationTestBuilder {
     public LoanApplicationTestBuilder withPrincipalGrace(final String graceOnPrincipalPayment) {
         this.graceOnPrincipalPayment = graceOnPrincipalPayment;
         return this;
+    }
+    
+    public LoanApplicationTestBuilder withInterestGrace(final String graceOnInterestPayment) {
+    	this.graceOnInterestPayment = graceOnInterestPayment;
+    	return this;
     }
 
     public LoanApplicationTestBuilder withTranches(final List<HashMap> disbursementData) {

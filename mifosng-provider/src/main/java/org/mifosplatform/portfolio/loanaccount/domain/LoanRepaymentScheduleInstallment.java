@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -31,7 +32,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     private Loan loan;
 
     @Column(name = "installment", nullable = false)
-    private final Integer installmentNumber;
+    private Integer installmentNumber;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "fromdate", nullable = true)
@@ -122,6 +123,14 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.penaltyCharges = defaultToNullIfZero(penaltyCharges);
         this.obligationsMet = false;
         this.recalculatedInterestComponent = recalculatedInterestComponent;
+    }
+    
+    public LoanRepaymentScheduleInstallment(final Loan loan) {
+    	this.loan = loan;
+    	this.installmentNumber = null;
+        this.fromDate = null;
+        this.dueDate = null;
+        this.obligationsMet = false;
     }
 
     private BigDecimal defaultToNullIfZero(final BigDecimal value) {
@@ -251,6 +260,11 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
     public void updateLoan(final Loan loan) {
         this.loan = loan;
+    }
+    
+    public boolean isPartlyPaid() {
+    	return !this.obligationsMet && (this.interestPaid != null || this.feeChargesPaid != null
+    			|| this.principalCompleted != null);
     }
 
     public boolean isObligationsMet() {
@@ -551,5 +565,60 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
     public void setRecalculatedInterestComponent(boolean recalculatedInterestComponent) {
         this.recalculatedInterestComponent = recalculatedInterestComponent;
+    }
+    
+    public void updateInstallmentNumber(final Integer installmentNumber) {
+    	if(installmentNumber != null) {
+    		this.installmentNumber = installmentNumber;
+    	}
+    }
+    
+    public void updateInterestCharged(final BigDecimal interestCharged) {
+    	this.interestCharged = interestCharged;
+    }
+    
+    public void updateObligationMet(final Boolean obligationMet) {
+    	this.obligationsMet = obligationMet;
+    }
+    
+    public void updateObligationMetOnDate(final LocalDate obligationsMetOnDate) {
+    	this.obligationsMetOnDate = (obligationsMetOnDate != null) ? obligationsMetOnDate.toDate() : null;
+    }
+    
+    public void updateInterestWrittenOff(final BigDecimal interestWrittenOff) {
+    	this.interestWrittenOff = interestWrittenOff;
+    }
+    
+    public void updatePrincipal(final BigDecimal principal) {
+    	this.principal = principal;
+    }
+    
+    public static Comparator<LoanRepaymentScheduleInstallment> installmentNumberComparator 
+    	= new Comparator<LoanRepaymentScheduleInstallment>() {
+
+		@Override
+		public int compare(LoanRepaymentScheduleInstallment arg0,
+				LoanRepaymentScheduleInstallment arg1) {
+			
+			return arg0.getInstallmentNumber().compareTo(arg1.getInstallmentNumber());
+		}
+    };
+    
+    public BigDecimal getTotalPaidInAdvance() {
+    	return this.totalPaidInAdvance;
+    }
+    
+    public BigDecimal getTotalPaidLate() {
+    	return this.totalPaidLate;
+    }
+    
+    public LocalDate getObligationsMetOnDate() {
+    	LocalDate obligationsMetOnDate = null;
+    	
+    	if(this.obligationsMetOnDate != null) {
+    		obligationsMetOnDate = new LocalDate(this.obligationsMetOnDate);
+    	}
+    	
+    	return obligationsMetOnDate;
     }
 }

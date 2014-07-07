@@ -19,8 +19,8 @@ public class XBRLIntegrationTestHelper {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
-    private static final String GET_TAXONOMY_LIST_URL = "/mifosng-provider/api/v1/mixtaxonomy?tenantIdentifier=default";
-    private static final String TAXONOMY_MAPPING_URL = "/mifosng-provider/api/v1/mixmapping?tenantIdentifier=default";
+    private static final String GET_TAXONOMY_LIST_URL = "/mifosng-provider/api/v1/mixtaxonomy?" + Utils.TENANT_IDENTIFIER;
+    private static final String TAXONOMY_MAPPING_URL = "/mifosng-provider/api/v1/mixmapping?" + Utils.TENANT_IDENTIFIER;
 
     public XBRLIntegrationTestHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
