@@ -329,6 +329,12 @@ public class SavingsAccountHelper {
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "summary");
         return response;
     }
+    
+    public HashMap getSavingsDetails(final Integer savingsID) {
+        final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "?associations=all&" + Utils.TENANT_IDENTIFIER;
+        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "");
+        return response;
+    }
 
     private HashMap performSavingApplicationActions(final String postURLForSavingsTransaction, final String jsonToBeSent) {
         HashMap status = null;
@@ -357,5 +363,18 @@ public class SavingsAccountHelper {
         map.put("dueDate", "10 January 2013");
         String json = new Gson().toJson(map);
         return json;
+    }
+
+    private String getAccountActivationJSON(final String activationDate) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("locale", CommonConstants.locale);
+        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("activatedOnDate", activationDate);
+        String savingsAccountActivateJson = new Gson().toJson(map);
+        return savingsAccountActivateJson;
+    }
+
+    public HashMap activateSavingsAccount(Integer savingsID, String activationDate) {
+        return performSavingApplicationActions(createSavingsOperationURL(ACTIVATE_SAVINGS_COMMAND, savingsID), getAccountActivationJSON(activationDate));
     }
 }

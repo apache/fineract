@@ -212,9 +212,16 @@ public class SavingsAccountAssembler {
         boolean allowOverdraft = false;
         if (command.parameterExists(allowOverdraftParamName)) {
             allowOverdraft = command.booleanPrimitiveValueOfParameterNamed(allowOverdraftParamName);
+        } else {
+            allowOverdraft = product.isAllowOverdraft();
         }
 
-        final BigDecimal overdraftLimit = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(overdraftLimitParamName);
+        BigDecimal overdraftLimit = null;
+        if (command.parameterExists(overdraftLimitParamName)) {
+            overdraftLimit = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(overdraftLimitParamName);
+        } else {
+            overdraftLimit = product.overdraftLimit();
+        }
 
         boolean enforceMinRequiredBalance = false;
         if (command.parameterExists(enforceMinRequiredBalanceParamName)) {
