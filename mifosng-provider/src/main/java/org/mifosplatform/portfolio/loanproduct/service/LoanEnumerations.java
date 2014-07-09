@@ -248,7 +248,7 @@ public class LoanEnumerations {
             break;
             case DISBURSEMENT:
                 optionData = new LoanTransactionEnumData(LoanTransactionType.DISBURSEMENT.getValue().longValue(),
-                        LoanTransactionType.DISBURSEMENT.getCode(), "Dibursement");
+                        LoanTransactionType.DISBURSEMENT.getCode(), "Disbursement");
             break;
             case REPAYMENT:
                 optionData = new LoanTransactionEnumData(LoanTransactionType.REPAYMENT.getValue().longValue(),

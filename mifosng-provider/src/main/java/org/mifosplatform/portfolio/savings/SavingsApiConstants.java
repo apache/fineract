@@ -98,6 +98,7 @@ public class SavingsApiConstants {
     public static final String minRequiredBalanceParamName = "minRequiredBalance";
     public static final String enforceMinRequiredBalanceParamName = "enforceMinRequiredBalance";
     public static final String minBalanceForInterestCalculationParamName = "minBalanceForInterestCalculation";
+    public static final String withdrawBalanceParamName = "withdrawBalance";
 
     // transaction parameters
     public static final String transactionDateParamName = "transactionDate";
@@ -206,7 +207,8 @@ public class SavingsApiConstants {
             dateFormatParamName, activatedOnDateParamName));
 
     public static final Set<String> SAVINGS_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
-            dateFormatParamName, closedOnDateParamName, noteParamName));
+            dateFormatParamName, closedOnDateParamName, noteParamName, paymentTypeIdParamName, withdrawBalanceParamName,
+            transactionAccountNumberParamName, checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
 
     public static final Set<String> SAVINGS_ACCOUNT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(chargeIdParamName,
             savingsAccountChargeIdParamName, chargeNameParamName, penaltyParamName, chargeTimeTypeParamName, dueAsOfDateParamName,

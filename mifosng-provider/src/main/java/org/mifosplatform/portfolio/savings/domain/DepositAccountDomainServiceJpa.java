@@ -37,6 +37,7 @@ import org.mifosplatform.portfolio.savings.DepositAccountOnClosureType;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.DepositsApiConstants;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
+import org.mifosplatform.portfolio.savings.SavingsTransactionBooleanValues;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -76,8 +77,12 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             final boolean applyWithdrawFee, final boolean isRegularTransaction) {
         boolean isAccountTransfer = false;
         boolean isInterestTransfer = false;
+        boolean isWithdrawBalance = false;
+
+        SavingsTransactionBooleanValues transactionBooleanValues = new SavingsTransactionBooleanValues(isAccountTransfer,
+                isRegularTransaction, applyWithdrawFee, isInterestTransfer, isWithdrawBalance);
         return this.savingsAccountDomainService.handleWithdrawal(account, fmt, transactionDate, transactionAmount, paymentDetail,
-                applyWithdrawFee, isInterestTransfer, isAccountTransfer, isRegularTransaction);
+                transactionBooleanValues);
     }
 
     @Transactional
@@ -164,6 +169,10 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             savingsTransactionId = withdrawal.getId();
         }
 
+        /***
+         * Update account transactionIds for post journal entries.
+         */
+        updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         account.close(user, command, tenantsTodayDate, changes);
         this.savingsAccountRepository.save(account);
 
@@ -230,6 +239,10 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             savingsTransactionId = withdrawal.getId();
         }
 
+        /***
+         * Update account transactionIds for post journal entries.
+         */
+        updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         account.close(user, command, tenantsTodayDate, changes);
 
         this.savingsAccountRepository.save(account);
@@ -286,6 +299,10 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             savingsTransactionId = withdrawal.getId();
         }
 
+        /***
+         * Update account transactionIds for post journal entries.
+         */
+        updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         account.prematureClosure(user, command, tenantsTodayDate, changes);
 
         this.savingsAccountRepository.save(account);
@@ -331,6 +348,10 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             savingsTransactionId = withdrawal.getId();
         }
 
+        /***
+         * Update account transactionIds for post journal entries.
+         */
+        updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         account.prematureClosure(user, command, tenantsTodayDate, changes);
         this.savingsAccountRepository.save(account);
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);

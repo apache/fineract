@@ -66,6 +66,8 @@ public class SavingsProductHelper {
     private String minBalanceForInterestCalculation = null;
     private String allowOverdraft = "false";
     private String overdraftLimit = null; 
+    private String minRequiredBalance = null;
+    private String enforceMinRequiredBalance = "false";
 
     public String build() {
         final HashMap<String, String> map = new HashMap<>();
@@ -99,6 +101,8 @@ public class SavingsProductHelper {
         map.put("minBalanceForInterestCalculation", minBalanceForInterestCalculation);
         map.put("allowOverdraft", this.allowOverdraft);
         map.put("overdraftLimit", this.overdraftLimit);
+        map.put("minRequiredBalance", this.minRequiredBalance);
+        map.put("enforceMinRequiredBalance", this.enforceMinRequiredBalance);
 
         if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());
@@ -166,6 +170,16 @@ public class SavingsProductHelper {
     public SavingsProductHelper withAccountingRuleAsCashBased(final Account[] account_list) {
         this.accountingRule = CASH_BASED;
         this.accountList = account_list;
+        return this;
+    }
+    
+    public SavingsProductHelper withMinRequiredBalance(String minBalance) {
+        this.minRequiredBalance = minBalance;
+        return this;
+    }
+    
+    public SavingsProductHelper withEnforceMinRequiredBalance(String enforceMinRequiredBalance) {
+        this.enforceMinRequiredBalance = enforceMinRequiredBalance;
         return this;
     }
 
