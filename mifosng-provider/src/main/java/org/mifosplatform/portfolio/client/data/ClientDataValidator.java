@@ -324,6 +324,7 @@ public final class ClientDataValidator {
 
         final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(ClientApiConstants.activeParamName, element);
         if (active != null) {
+            atLeastOneParameterPassedForUpdate = true;
             if (active.booleanValue()) {
                 final LocalDate joinedDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.activationDateParamName,
                         element);
@@ -341,6 +342,7 @@ public final class ClientDataValidator {
             baseDataValidator.reset().parameter(ClientApiConstants.savingsProductIdParamName).value(savingsProductId).ignoreIfNull()
                     .longGreaterThanZero();
         }
+
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.dateOfBirthParamName, element)) {
             final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.dateOfBirthParamName, element);
@@ -365,11 +367,20 @@ public final class ClientDataValidator {
             baseDataValidator.reset().parameter(ClientApiConstants.clientClassificationIdParamName).value(clientClassification)
                     .integerGreaterThanZero();
         }
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.submittedOnDateParamName, element)) {
+            atLeastOneParameterPassedForUpdate = true;
+            final LocalDate submittedDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.submittedOnDateParamName,
+                    element);
+            baseDataValidator.reset().parameter(ClientApiConstants.submittedOnDateParamName).value(submittedDate).notNull();
+
+        }
 
         if (!atLeastOneParameterPassedForUpdate) {
             final Object forceError = null;
             baseDataValidator.reset().anyOfNotNull(forceError);
         }
+
+
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
