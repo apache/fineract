@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 10 Jul 2014 - 1.24.0.RELEASE
 1. 16 Jun 2014 - 1.23.1.RELEASE
 1. 15 Jun 2014 - 1.23.0.RELEASE
 1. 30 Apr 2014 - 1.22.0.RELEASE
@@ -64,6 +65,66 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+
+1.23.0.RELEASE
+=============
+This feature release ships improvements to savings accounts including support for weekly fees and minimum balance for interest calculation along with a number of bug fixes and minor enhancements
+
+Also note that issue https://mifosforge.jira.com/browse/MIFOSX-1364 introduces an API breaking change.
+
+Platform & API
+
+New Features & Improvements
+
+ - [MIFOSX-1392] - Add minimum balance support for interest calculation
+ - [MIFOSX-1161] - Add minimum balance to savings product and accounts
+ - [MIFOSX-1235] - Saving charges with weekly frequency
+ - [MIFOSX-1324] - Support for server side Image resizing
+
+Bugs
+
+ - [MIFOSX-1364] - Checker permissions should have _CHECKER appended to the Action name
+ - [MIFOSX-1157] - API Document updates related to recurring deposit extensions
+ - [MIFOSX-1200] - In Fixed deposit on premature closure withdrawal amount is calculating incorrectly
+ - [MIFOSX-1204] - Missing documentation related to optional parameter "multiRow" while Creating Data tables
+ - [MIFOSX-1272] - Percentage of Fee amount on Loan disbursement should calculated with respect to actual disbursed amount than approved amount
+ - [MIFOSX-1302] - Organization currencies can be deleted even when they are associated with active loan/savings products or charges
+ - [MIFOSX-1339] - Reinvest of Term deposits should not be allowed on premature closure
+ - [MIFOSX-1340] - In Recurring deposits for Mandatory savings, activation of account and deposits not getting scheduled with meeting dates
+ - [MIFOSX-1341] - Withdrawal is not possible in active recurring deposit if "Allow withdrawal" checkbox is selected while submitting the application
+ - [MIFOSX-1351] - Charge on activation attached to a saving product is not creating journal entry while creating a client with active savings account
+ - [MIFOSX-1353] - Monthly charges attached to an active savings account is not getting collected on due date
+ - [MIFOSX-1357] - Repayment reschedule to next meeting date is falling on Non working day in Loan repayment schedule
+ - [MIFOSX-1358] - If repayment reschedule date is defined as holiday, then also repayment falls on that date
+ - [MIFOSX-1359] - Code Duplication in multiple classes: Re-factor and cleanup as necessary
+ - [MIFOSX-1365] - Not able to disburse Loan with backdated (borrower loan counter included) for the client who already having active Loans ( borrower loan counter not included)
+ - [MIFOSX-1366] - Incentive value defined for Gender in Fixed and Recurring deposit product is displaying improper value on submitting account for a client
+ - [MIFOSX-1369] - Undo disbursal of Loan is not getting updated in "Amount Disbursed for Today" home page
+ - [MIFOSX-1394] - For overdraft account interest is not posting properly for the +ve balance after repayment of dues
+ - [MIFOSX-1399] - Creating new Guarantor for loan account crash if the loan already has existing guarantor
+ - [MIFOSX-1401] - Allow value 0 for inArrearsTolerance when editing loanAccount
+ - [MIFOSX-1349] - In Client savings account -> Chages page - Monthly charges is not updating properly
+
+Community App
+
+ - [MIFOSX-1142] - Ability to zoom-in client's photo in the community-app
+ - [MIFOSX-1158] - Allow upload of a client's signature & preview of the same
+ - [MIFOSX-1348] - Implementation of sorting options for transaction preview tables for Fixed deposits and Recurring deposit accounts
+ - [MIFOSX-1333] - Usability related issue in Frequent posting and Add journal entry pages
+ - [MIFOSX-1396] - Improper error message is displayed on trying to delete the used code values.
+ - [MIFOSX-1404] - Not able to add Group to the Center
+ - [MIFOSX-1367] - Merge Landing Page and Dashboard for the Community App
+ - [MIFOSX-1371] - Improvements to Add Journal Entries screens
+ - [MIFOSX-1373] - Improvements to Search Journal Entries screens
+ - [MIFOSX-1375] - Improvements to Accounting Closure screens
+ - [MIFOSX-1376] - Improvements to Accounting Rules screens
+ - [MIFOSX-1414] - Add change password button in user profile screen
+ - [MIFOSX-1413] - Populate date for collection sheet with default date as current date
+ - [MIFOSX-1362] - After Loan disbursement for a client in Transaction page displaying "Accrual" in transaction type for interest
+ - [MIFOSX-1388] - UI related issues due to bootstrap upgradation
+ - [MIFOSX-1390] - Term deposits - UI related issues
+ - [MIFOSX-1391] - Duplicate Client Creation Forms
 
 1.23.1.RELEASE
 =============
