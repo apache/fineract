@@ -7,6 +7,7 @@ import java.util.List;
 
 import junit.framework.Assert;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mifosplatform.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
@@ -126,5 +127,20 @@ public class FinancialActivityAccountsTest {
         HashMap mappingDetails = financialActivityAccountHelper.getFinancialActivityAccount(financialActivityAccountId, responseSpec);
         Assert.assertEquals(financialActivityId, ((HashMap) mappingDetails.get("financialActivityData")).get("id"));
         Assert.assertEquals(glAccount.getAccountID(), ((HashMap) mappingDetails.get("glAccountData")).get("id"));
+    }
+
+    /**
+     * Delete the Financial activities
+     */
+    @After
+    public void tearDown() {
+        List<HashMap> financialActivities = this.financialActivityAccountHelper.getAllFinancialActivityAccounts(this.responseSpec);
+        for (HashMap financialActivity : financialActivities) {
+            Integer financialActivityAccountId = (Integer) financialActivity.get("id");
+            Integer deletedFinancialActivityAccountId = this.financialActivityAccountHelper.deleteFinancialActivityAccount(
+                    financialActivityAccountId, this.responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
+            Assert.assertNotNull(deletedFinancialActivityAccountId);
+            Assert.assertEquals(financialActivityAccountId, deletedFinancialActivityAccountId);
+        }
     }
 }
