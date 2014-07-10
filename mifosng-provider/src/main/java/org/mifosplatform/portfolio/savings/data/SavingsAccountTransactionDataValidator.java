@@ -15,6 +15,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.routingCod
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.transactionAccountNumberParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.transactionAmountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.transactionDateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawBalanceParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -71,17 +72,8 @@ public class SavingsAccountTransactionDataValidator {
 
         final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(transactionAmountParamName, element);
         baseDataValidator.reset().parameter(transactionAmountParamName).value(transactionAmount).notNull().positiveAmount();
-
-        // Validate all string payment detail fields for max length
-        final Integer paymentTypeId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
-        baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).ignoreIfNull().integerGreaterThanZero();
-        final Set<String> paymentDetailParameters = new HashSet<>(Arrays.asList(transactionAccountNumberParamName,
-                checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
-        for (final String paymentDetailParameterName : paymentDetailParameters) {
-            final String paymentDetailParameterValue = this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
-            baseDataValidator.reset().parameter(paymentDetailParameterName).value(paymentDetailParameterValue).ignoreIfNull()
-                    .notExceedingLengthOf(50);
-        }
+        
+        validatePaymentTypeDetails(baseDataValidator, element);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -122,10 +114,31 @@ public class SavingsAccountTransactionDataValidator {
 
         final JsonElement element = command.parsedJson();
 
-        final LocalDate activationDate = this.fromApiJsonHelper.extractLocalDateNamed(closedOnDateParamName, element);
-        baseDataValidator.reset().parameter(closedOnDateParamName).value(activationDate).notNull();
+        final LocalDate closedonDate = this.fromApiJsonHelper.extractLocalDateNamed(closedOnDateParamName, element);
+        baseDataValidator.reset().parameter(closedOnDateParamName).value(closedonDate).notNull();
+
+        if (this.fromApiJsonHelper.parameterExists(withdrawBalanceParamName, element)) {
+            final Boolean withdrawBalance = this.fromApiJsonHelper.extractBooleanNamed(withdrawBalanceParamName, element);
+            baseDataValidator.reset().parameter(withdrawBalanceParamName).value(withdrawBalance).isOneOfTheseValues(true, false);
+        }
+
+        validatePaymentTypeDetails(baseDataValidator, element);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validatePaymentTypeDetails(final DataValidatorBuilder baseDataValidator, JsonElement element) {
+        // Validate all string payment detail fields for max length
+        final Integer paymentTypeId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
+        baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).ignoreIfNull().integerGreaterThanZero();
+        final Set<String> paymentDetailParameters = new HashSet<>(Arrays.asList(transactionAccountNumberParamName, checkNumberParamName,
+                routingCodeParamName, receiptNumberParamName, bankNumberParamName));
+        for (final String paymentDetailParameterName : paymentDetailParameters) {
+            final String paymentDetailParameterValue = this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
+            baseDataValidator.reset().parameter(paymentDetailParameterName).value(paymentDetailParameterValue).ignoreIfNull()
+                    .notExceedingLengthOf(50);
+        }
+
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {

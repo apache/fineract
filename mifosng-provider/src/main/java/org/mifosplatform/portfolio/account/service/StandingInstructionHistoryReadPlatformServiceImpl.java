@@ -57,7 +57,9 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(this.standingInstructionHistoryMapper.schema());
         if (standingInstructionDTO.transferType() != null || standingInstructionDTO.clientId() != null
-                || standingInstructionDTO.clientName() != null) {
+                || standingInstructionDTO.clientName() != null
+                || (standingInstructionDTO.fromAccountType() != null && standingInstructionDTO.fromAccount() != null)
+                || standingInstructionDTO.startDateRange() != null || standingInstructionDTO.endDateRange() != null) {
             sqlBuilder.append(" where ");
         }
         boolean addAndCaluse = false;
@@ -108,11 +110,16 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
             final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
             sqlBuilder.append(" atsih.execution_time >= ? ");
             paramObj.add(df.format(standingInstructionDTO.startDateRange()));
-            if (standingInstructionDTO.endDateRange() != null) {
+            addAndCaluse = true;
+        }
+        
+        if (standingInstructionDTO.endDateRange() != null) {
+            if (addAndCaluse) {
                 sqlBuilder.append(" and ");
-                sqlBuilder.append(" atsih.execution_time < ? ");
-                paramObj.add(df.format(standingInstructionDTO.endDateRange()));
             }
+            final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+            sqlBuilder.append(" atsih.execution_time < ? ");
+            paramObj.add(df.format(standingInstructionDTO.endDateRange()));
             addAndCaluse = true;
         }
 

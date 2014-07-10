@@ -1,6 +1,7 @@
 package org.mifosplatform.integrationtests.common.accounting;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.mifosplatform.integrationtests.common.Utils;
 
@@ -36,7 +37,7 @@ public class FinancialActivityAccountHelper {
         return Utils.performServerGet(requestSpec, responseSpecification, url, "");
     }
 
-    public HashMap getAllFinancialActivityAccounts(final ResponseSpecification responseSpecification) {
+    public List<HashMap> getAllFinancialActivityAccounts(final ResponseSpecification responseSpecification) {
         final String url = FINANCIAL_ACTIVITY_ACCOUNT_MAPPING_URL + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(this.requestSpec, responseSpecification, url, "");
     }

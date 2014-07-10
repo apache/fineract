@@ -104,9 +104,9 @@ public class SavingsAccountHelper {
         return performSavingApplicationActions(createSavingsOperationURL(ACTIVATE_SAVINGS_COMMAND, savingsID), getActivatedSavingsAsJSON());
     }
 
-    public HashMap closeSavingsAccount(final Integer savingsID) {
+    public HashMap closeSavingsAccount(final Integer savingsID, String withdrawBalance) {
         System.out.println("---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
-        return performSavingApplicationActions(createSavingsOperationURL(CLOSE_SAVINGS_COMMAND, savingsID), getCloseAccountJSON());
+        return performSavingApplicationActions(createSavingsOperationURL(CLOSE_SAVINGS_COMMAND, savingsID), getCloseAccountJSON(withdrawBalance));
     }
 
     public Object deleteSavingsApplication(final Integer savingsId, final String jsonAttributeToGetBack) {
@@ -266,11 +266,12 @@ public class SavingsAccountHelper {
         return josn;
     }
 
-    private String getCloseAccountJSON() {
+    private String getCloseAccountJSON(String withdrawBalance) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
         map.put("closedOnDate", LAST_TRANSACTION_DATE);
+        map.put("withdrawBalance", withdrawBalance);
         map.put("note", "Close Test");
         String josn = new Gson().toJson(map);
         return josn;
@@ -349,6 +350,13 @@ public class SavingsAccountHelper {
     private Object performSavingActions(final String postURLForSavingsTransaction, final String jsonToBeSent,
             final String jsonAttributeToGetBack) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForSavingsTransaction, jsonToBeSent,
+                jsonAttributeToGetBack);
+    }
+
+    public Object closeSavingsAccountAndGetBackRequiredField(final Integer savingsID, String withdrawBalance,
+            final String jsonAttributeToGetBack) {
+        System.out.println("---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
+        return performSavingActions(createSavingsOperationURL(CLOSE_SAVINGS_COMMAND, savingsID), getCloseAccountJSON(withdrawBalance),
                 jsonAttributeToGetBack);
     }
 
