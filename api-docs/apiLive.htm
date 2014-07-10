@@ -17763,36 +17763,83 @@ Request Body:
 	        <code class="method-request">POST savingsaccount/5?command=close
 Content-Type: application/json
 Request Body:
-	{
-	"dateFormat":"dd MMMM yyyy",
-	"locale":"en",
-	"closedOnDate":"26 August 2013",
-	"note":"close note"
-	}
+{
+  "dateFormat":"dd MMMM yyyy",
+  "locale":"en",
+  "closedOnDate":"26 August 2013",
+  "note":"close note"
+}
 			</code>
 	        <code class="method-response">
 {
-"officeId":1,
-"clientId":1,
-"savingsId":5,
-"resourceId":5,
-"changes":{
-	"status":{
-		"id":600,
-		"code":"savingsAccountStatusType.closed",
-		"value":"Closed",
-		"submittedAndPendingApproval":false,
-		"approved":false,
-		"rejected":false,
-		"withdrawnByApplicant":false,
-		"active":false,
-		"closed":true
-		},
-	"locale":"en",
-	"dateFormat":"dd MMMM yyyy",
-	"closedOnDate":"26 August 2013",
-	"note":"close note"
-	}
+  "officeId":1,
+  "clientId":1,
+  "savingsId":5,
+  "resourceId":5,
+  "changes":{
+   "status":{
+    "id":600,
+    "code":"savingsAccountStatusType.closed",
+    "value":"Closed",
+    "submittedAndPendingApproval":false,
+    "approved":false,
+    "rejected":false,
+    "withdrawnByApplicant":false,
+    "active":false,
+    "closed":true
+    },
+  "locale":"en",
+  "dateFormat":"dd MMMM yyyy",
+  "closedOnDate":"26 August 2013",
+  "note":"close note"
+  }
+}
+	        </code>
+			<code class="method-request">POST savingsaccount/5?command=close
+Content-Type: application/json
+Request Body:
+{
+  "dateFormat":"dd MMMM yyyy",
+  "locale":"en",
+  "closedOnDate":"26 August 2013",
+  "note":"close note",
+  "withdrawBalance":true,
+  "paymentTypeId": "14",
+  "accountNumber": "acc123",
+  "checkNumber": "che123",
+  "routingCode": "rou123",
+  "receiptNumber": "rec123",
+  "bankNumber": "ban123"
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId":1,
+  "clientId":1,
+  "savingsId":5,
+  "resourceId":5,
+  "changes":{
+    "accountNumber": "acc123",
+    "checkNumber": "che123",
+    "routingCode": "rou123",
+    "receiptNumber": "rec123",
+    "bankNumber": "ban123",
+    "status":{
+     "id":600,
+     "code":"savingsAccountStatusType.closed",
+     "value":"Closed",
+     "submittedAndPendingApproval":false,
+     "approved":false,
+     "rejected":false,
+     "withdrawnByApplicant":false,
+     "active":false,
+     "closed":true
+    },
+   "locale":"en",
+   "dateFormat":"dd MMMM yyyy",
+   "closedOnDate":"26 August 2013",
+   "note":"close note"
+  }
 }
 	        </code>
 	    </div>

@@ -3,6 +3,7 @@ package org.mifosplatform.integrationtests;
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -17,6 +18,7 @@ import org.mifosplatform.integrationtests.common.accounting.AccountHelper;
 import org.mifosplatform.integrationtests.common.accounting.FinancialActivityAccountHelper;
 import org.mifosplatform.integrationtests.common.accounting.JournalEntry;
 import org.mifosplatform.integrationtests.common.accounting.JournalEntryHelper;
+import org.mifosplatform.integrationtests.common.accounting.Account.AccountType;
 import org.mifosplatform.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.mifosplatform.integrationtests.common.loans.LoanProductTestBuilder;
 import org.mifosplatform.integrationtests.common.loans.LoanStatusChecker;
@@ -76,16 +78,29 @@ public class AccountTransferTest {
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
         this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec);
 
-        /** Setup liability transfer account **/
-        /** Create a Liability and an Asset Transfer Account **/
-        liabilityTransferAccount = accountHelper.createLiabilityAccount();
-        Assert.assertNotNull(liabilityTransferAccount);
+        List<HashMap> financialActivities = this.financialActivityAccountHelper.getAllFinancialActivityAccounts(this.responseSpec);
+        if (financialActivities.isEmpty()) {
+            /** Setup liability transfer account **/
+            /** Create a Liability and an Asset Transfer Account **/
+            liabilityTransferAccount = accountHelper.createLiabilityAccount();
+            Assert.assertNotNull(liabilityTransferAccount);
 
-        /*** Create A Financial Activity to Account Mapping **/
-        financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
-                FinancialActivityAccountsTest.liabilityTransferFinancialActivityId, liabilityTransferAccount.getAccountID(), responseSpec,
-                CommonConstants.RESPONSE_RESOURCE_ID);
-        Assert.assertNotNull(financialActivityAccountId);
+            /*** Create A Financial Activity to Account Mapping **/
+            financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
+                    FinancialActivityAccountsTest.liabilityTransferFinancialActivityId, liabilityTransferAccount.getAccountID(),
+                    responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
+            Assert.assertNotNull(financialActivityAccountId);
+        } else {
+            for (HashMap financialActivity : financialActivities) {
+                HashMap financialActivityData = (HashMap) financialActivity.get("financialActivityData");
+                if (financialActivityData.get("id").equals(FinancialActivityAccountsTest.liabilityTransferFinancialActivityId)) {
+                    HashMap glAccountData = (HashMap) financialActivity.get("glAccountData");
+                    liabilityTransferAccount = new Account((Integer) glAccountData.get("id"), AccountType.LIABILITY);
+                    financialActivityAccountId = (Integer) financialActivity.get("id");
+                    break;
+                }
+            }
+        }
     }
 
     /**

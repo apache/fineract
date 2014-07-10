@@ -15,6 +15,7 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.Months;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,6 +89,7 @@ public class FixedDepositTest {
         this.requestSpec.header("X-Mifos-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
+        this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec);
     }
 
     /***
@@ -240,7 +242,6 @@ public class FixedDepositTest {
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
-        this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec);
         
         /***
          * Create GL Accounts for product account mapping
@@ -2039,5 +2040,20 @@ public class FixedDepositTest {
                 this.responseSpec);
         Assert.assertEquals(financialActivityId, ((HashMap) mappingDetails.get("financialActivityData")).get("id"));
         Assert.assertEquals(glAccount.getAccountID(), ((HashMap) mappingDetails.get("glAccountData")).get("id"));
+    }
+
+    /**
+     * Delete the Liability transfer account
+     */
+    @After
+    public void tearDown() {
+        List<HashMap> financialActivities = this.financialActivityAccountHelper.getAllFinancialActivityAccounts(this.responseSpec);
+        for (HashMap financialActivity : financialActivities) {
+            Integer financialActivityAccountId = (Integer) financialActivity.get("id");
+            Integer deletedFinancialActivityAccountId = this.financialActivityAccountHelper.deleteFinancialActivityAccount(
+                    financialActivityAccountId, this.responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
+            Assert.assertNotNull(deletedFinancialActivityAccountId);
+            Assert.assertEquals(financialActivityAccountId, deletedFinancialActivityAccountId);
+        }
     }
 }
