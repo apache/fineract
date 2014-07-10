@@ -80,6 +80,8 @@ New Features & Improvements
  - [MIFOSX-1392] - Add minimum balance support for interest calculation
  - [MIFOSX-1161] - Add minimum balance to savings product and accounts
  - [MIFOSX-1235] - Saving charges with weekly frequency
+ - [MIFOSX-1275] - Improve logging for Standing Instructions
+ - [MIFOSX-1398] - Add an option for balance withdrawal on closing of savings account
  - [MIFOSX-1324] - Support for server side Image resizing
 
 Bugs
@@ -105,6 +107,7 @@ Bugs
  - [MIFOSX-1399] - Creating new Guarantor for loan account crash if the loan already has existing guarantor
  - [MIFOSX-1401] - Allow value 0 for inArrearsTolerance when editing loanAccount
  - [MIFOSX-1349] - In Client savings account -> Chages page - Monthly charges is not updating properly
+ - [MIFOSX-1403] - Closing of Fixed deposit creates double journal entries
 
 Community App
 
@@ -125,6 +128,7 @@ Community App
  - [MIFOSX-1388] - UI related issues due to bootstrap upgradation
  - [MIFOSX-1390] - Term deposits - UI related issues
  - [MIFOSX-1391] - Duplicate Client Creation Forms
+ - [MIFOSX-1218] - Make view of action to be verified more readable for checker
 
 1.23.1.RELEASE
 =============
