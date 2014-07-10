@@ -106,7 +106,7 @@ public class SavingsAccountHelper {
 
     public HashMap closeSavingsAccount(final Integer savingsID, String withdrawBalance) {
         System.out.println("---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
-        return performSavingApplicationActions(createSavingsOperationURL(CLOSE_SAVINGS_COMMAND, savingsID), getCloseAccountJSON(withdrawBalance));
+        return performSavingApplicationActions(createSavingsOperationURL(CLOSE_SAVINGS_COMMAND, savingsID), getCloseAccountJSON(withdrawBalance, LAST_TRANSACTION_DATE));
     }
 
     public Object deleteSavingsApplication(final Integer savingsId, final String jsonAttributeToGetBack) {
@@ -266,11 +266,11 @@ public class SavingsAccountHelper {
         return josn;
     }
 
-    private String getCloseAccountJSON(String withdrawBalance) {
+    private String getCloseAccountJSON(String withdrawBalance, String closedOnDate) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
-        map.put("closedOnDate", LAST_TRANSACTION_DATE);
+        map.put("closedOnDate", closedOnDate);
         map.put("withdrawBalance", withdrawBalance);
         map.put("note", "Close Test");
         String josn = new Gson().toJson(map);
@@ -354,10 +354,10 @@ public class SavingsAccountHelper {
     }
 
     public Object closeSavingsAccountAndGetBackRequiredField(final Integer savingsID, String withdrawBalance,
-            final String jsonAttributeToGetBack) {
+            final String jsonAttributeToGetBack, final String closedOnDate) {
         System.out.println("---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
-        return performSavingActions(createSavingsOperationURL(CLOSE_SAVINGS_COMMAND, savingsID), getCloseAccountJSON(withdrawBalance),
-                jsonAttributeToGetBack);
+        return performSavingActions(createSavingsOperationURL(CLOSE_SAVINGS_COMMAND, savingsID),
+                getCloseAccountJSON(withdrawBalance, closedOnDate), jsonAttributeToGetBack);
     }
 
     private String getPeriodChargeRequestJSON(Integer chargeId) {
