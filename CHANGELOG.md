@@ -67,7 +67,7 @@ Releases
 1. 05 April 2013 - 0.11.0.beta
 
 
-1.23.0.RELEASE
+1.24.0.RELEASE
 =============
 This feature release ships improvements to savings accounts including support for weekly fees and minimum balance for interest calculation along with a number of bug fixes and minor enhancements
 
