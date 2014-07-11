@@ -280,7 +280,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         updateSqlBuilder.append("UPDATE m_loan as ml,");
         updateSqlBuilder.append(" (select loan.id from m_loan_repayment_schedule mr ");
         updateSqlBuilder
-                .append(" INNER JOIN  m_loan loan on mr.loan_id = loan.id INNER JOIN m_product_loan mpl on mpl.id = loan.product_id  ");
+                .append(" INNER JOIN  m_loan loan on mr.loan_id = loan.id INNER JOIN m_product_loan mpl on mpl.id = loan.product_id AND mpl.overdue_days_for_npa is not null ");
         updateSqlBuilder.append("WHERE loan.loan_status_id = 300 and mr.completed_derived is false ");
         updateSqlBuilder
                 .append(" and mr.duedate < SUBDATE(CURDATE(),INTERVAL  ifnull(mpl.overdue_days_for_npa,0) day) group by loan.id)  as sl ");
