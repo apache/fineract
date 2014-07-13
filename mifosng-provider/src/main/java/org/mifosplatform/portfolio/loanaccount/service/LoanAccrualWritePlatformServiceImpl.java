@@ -3,9 +3,11 @@ package org.mifosplatform.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -50,10 +52,14 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     public void addAccrualAccounting() throws JobExecutionException {
         Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas = this.loanReadPlatformService.retriveScheduleAccrualData();
         StringBuilder sb = new StringBuilder();
+        Set<Long> loansIds = new HashSet<>();
         for (final LoanScheduleAccrualData accrualData : loanScheduleAccrualDatas) {
             try {
-                addAccrualAccounting(accrualData);
+                if (!loansIds.contains(accrualData.getLoanId())) {
+                    addAccrualAccounting(accrualData);
+                }
             } catch (Exception e) {
+                loansIds.add(accrualData.getLoanId());
                 Throwable realCause = e;
                 if (e.getCause() != null) {
                     realCause = e.getCause();
@@ -127,6 +133,9 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
                     + "accrual_penalty_charges_derived=? WHERE  id=?";
             this.jdbcTemplate.update(repaymetUpdatesql, totalAccInterest, totalAccFee, totalAccPenalty,
                     scheduleAccrualData.getRepaymentScheduleId());
+
+            String updateLoan = "UPDATE m_loan  SET accrued_till=?  WHERE  id=?";
+            this.jdbcTemplate.update(updateLoan, scheduleAccrualData.getDueDate(), scheduleAccrualData.getLoanId());
             final Map<String, Object> accountingBridgeData = deriveAccountingBridgeData(scheduleAccrualData, transactionMap);
             this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
         } catch (Exception e) {
