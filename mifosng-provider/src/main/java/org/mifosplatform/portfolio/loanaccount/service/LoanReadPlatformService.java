@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.loanaccount.service;
 
 import java.util.Collection;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
@@ -84,4 +85,6 @@ public interface LoanReadPlatformService {
     LoanTransactionData retrieveRecoveryPaymentTemplate(Long loanId);
 
     LoanTransactionData retrieveLoanWriteoffTemplate(Long loanId);
+
+    Collection<LoanScheduleAccrualData> retrivePeriodicAccrualData(LocalDate tillDate);
 }

@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.junit.Assert;
@@ -645,6 +646,82 @@ public class AccountingScenarioIntegrationTest {
         System.out.println("Repayment 5 Done  ......");
     }
 
+    @Test
+    public void checkPeriodicAccrualAccountingTillCurrentDateFlow() {
+        final Account assetAccount = this.accountHelper.createAssetAccount();
+        final Account incomeAccount = this.accountHelper.createIncomeAccount();
+        final Account expenseAccount = this.accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+
+        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
+                overpaymentAccount);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, this.DATE_OF_JOINING);
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID);
+
+        final float FEE_PORTION = 50.0f;
+        final float PENALTY_PORTION = 100.0f;
+        Integer flat = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(FEE_PORTION), false));
+        Integer flatSpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getLoanSpecifiedDueDateJSON(
+                ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(PENALTY_PORTION), true));
+
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan(this.EXPECTED_DISBURSAL_DATE, loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+
+        Calendar todayDate = Calendar.getInstance();
+        final String currentDate = dateFormat.format(todayDate.getTime());
+
+        todayDate.add(Calendar.DATE, -4);
+
+        final String LOAN_DISBURSEMENT_DATE = dateFormat.format(todayDate.getTime());
+
+        todayDate.add(Calendar.MONTH, 2);
+        final String FIRST_REPAYMENT_DATE = dateFormat.format(todayDate.getTime());
+
+        todayDate = Calendar.getInstance();
+        todayDate.add(Calendar.DATE, -2);
+
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(LOAN_DISBURSEMENT_DATE, loanID);
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+        this.loanTransactionHelper.addChargesForLoan(
+                loanID,
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatSpecifiedDueDate),
+                        dateFormat.format(todayDate.getTime()), String.valueOf(PENALTY_PORTION)));
+        todayDate.add(Calendar.DATE, 1);
+        this.loanTransactionHelper.addChargesForLoan(loanID, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
+                String.valueOf(flat), dateFormat.format(todayDate.getTime()), String.valueOf(FEE_PORTION)));
+
+        // CHECK ACCOUNT ENTRIES
+        System.out.println("Entries ......");
+        final float PRINCIPAL_VALUE_FOR_EACH_PERIOD = 2000.0f;
+        final float TOTAL_INTEREST = 1000.0f;
+        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(this.LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(this.LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT), };
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, LOAN_DISBURSEMENT_DATE, assetAccountInitialEntry);
+
+        final String jobName = "Add Periodic Accrual Transactions";
+        try {
+            this.schedulerJobHelper.excuteJob(jobName);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // MAKE 1
+        final float FIRST_INTEREST = 200.0f;
+        final float INTEREST_4_DAYS = 13.33F;
+        this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(currentDate), INTEREST_4_DAYS, FEE_PORTION,
+                PENALTY_PORTION, loanID);
+
+    }
+
     private Integer createLoanProductWithPeriodicAccrualAccountingEnabled(final Account... accounts) {
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(this.LP_PRINCIPAL.toString()).withRepaymentTypeAsMonth()
@@ -774,4 +851,5 @@ public class AccountingScenarioIntegrationTest {
         }
         return date;
     }
+
 }
