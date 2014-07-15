@@ -13,6 +13,7 @@ import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.core.exception.PlatformInternalServerException;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.jobs.annotation.CronMethodParser;
+import org.mifosplatform.infrastructure.jobs.annotation.CronMethodParser.ClassMethodNamesPair;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.mifosplatform.infrastructure.jobs.domain.SchedulerDetail;
 import org.mifosplatform.infrastructure.jobs.exception.JobNotFoundException;
@@ -38,27 +39,55 @@ import org.springframework.stereotype.Service;
  * Service class to create and load batch jobs to Scheduler using
  * {@link SchedulerFactoryBean} ,{@link MethodInvokingJobDetailFactoryBean} and
  * {@link CronTriggerFactoryBean}
- * 
  */
 @Service
 public class JobRegisterServiceImpl implements JobRegisterService {
 
     private final static Logger logger = LoggerFactory.getLogger(JobRegisterServiceImpl.class);
 
-    private final ApplicationContext applicationContext;
+    // MIFOSX-1184: This class cannot use constructor injection, because one of
+    // its dependencies (SchedulerStopListener) has a circular dependency to
+    // itself. So, slightly differently from how it's done elsewhere in this
+    // code base, the following fields are not final, and there is no
+    // constructor, but setters.
 
-    private final SchedularWritePlatformService schedularWritePlatformService;
-
-    private final TenantDetailsService tenantDetailsService;
+    private ApplicationContext applicationContext;
+    private SchedularWritePlatformService schedularWritePlatformService;
+    private TenantDetailsService tenantDetailsService;
+    private SchedulerJobListener schedulerJobListener;
+    private SchedulerStopListener schedulerStopListener;
+    private SchedulerTriggerListener globalSchedulerTriggerListener;
 
     private final HashMap<String, Scheduler> schedulers = new HashMap<>(4);
 
     @Autowired
-    public JobRegisterServiceImpl(final ApplicationContext applicationContext, final SchedularWritePlatformService schedularService,
-            final TenantDetailsService tenantDetailsService) {
+    public void setApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
-        this.schedularWritePlatformService = schedularService;
+    }
+
+    @Autowired
+    public void setSchedularWritePlatformService(SchedularWritePlatformService schedularWritePlatformService) {
+        this.schedularWritePlatformService = schedularWritePlatformService;
+    }
+
+    @Autowired
+    public void setTenantDetailsService(TenantDetailsService tenantDetailsService) {
         this.tenantDetailsService = tenantDetailsService;
+    }
+
+    @Autowired
+    public void setSchedulerJobListener(SchedulerJobListener schedulerJobListener) {
+        this.schedulerJobListener = schedulerJobListener;
+    }
+
+    @Autowired
+    public void setSchedulerStopListener(SchedulerStopListener schedulerStopListener) {
+        this.schedulerStopListener = schedulerStopListener;
+    }
+
+    @Autowired
+    public void setGlobalTriggerListener(SchedulerTriggerListener globalTriggerListener) {
+        this.globalSchedulerTriggerListener = globalTriggerListener;
     }
 
     @PostConstruct
@@ -95,10 +124,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
             if (scheduler == null || !scheduler.checkExists(jobKey)) {
                 final JobDetail jobDetail = createJobDetail(scheduledJobDetail);
                 final String tempSchedulerName = "temp" + scheduledJobDetail.getId();
-                final List<Class<? extends JobListener>> listenerClasses = new ArrayList<>(2);
-                listenerClasses.add(SchedulerJobListener.class);
-                listenerClasses.add(SchedulerStopListener.class);
-                final Scheduler tempScheduler = createScheduler(tempSchedulerName, 1, listenerClasses);
+                final Scheduler tempScheduler = createScheduler(tempSchedulerName, 1, schedulerJobListener, schedulerStopListener);
                 tempScheduler.addJob(jobDetail, true);
                 jobDataMap.put(SchedulerServiceConstants.SCHEDULER_NAME, tempSchedulerName);
                 this.schedulers.put(tempSchedulerName, tempScheduler);
@@ -228,7 +254,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
             if (scheduledJobDetail.getSchedulerGroup() > 0) {
                 noOfThreads = SchedulerServiceConstants.GROUP_THREAD_COUNT;
             }
-            scheduler = createScheduler(schedulername, noOfThreads, null);
+            scheduler = createScheduler(schedulername, noOfThreads, schedulerJobListener);
             this.schedulers.put(schedulername, scheduler);
         }
         return scheduler;
@@ -254,17 +280,11 @@ public class JobRegisterServiceImpl implements JobRegisterService {
         return sb.toString();
     }
 
-    private Scheduler createScheduler(final String name, final int noOfThreads, List<Class<? extends JobListener>> listenerClasses)
-            throws Exception {
+    private Scheduler createScheduler(final String name, final int noOfThreads, JobListener... jobListeners) throws Exception {
         final SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
         schedulerFactoryBean.setSchedulerName(name);
-        if (listenerClasses == null) {
-            listenerClasses = new ArrayList<>(1);
-            listenerClasses.add(SchedulerJobListener.class);
-        }
-        schedulerFactoryBean.setGlobalJobListeners(getGlobalListener(listenerClasses));
-        final TriggerListener globalTriggerListener = this.applicationContext.getBean("schedulerTriggerListener", TriggerListener.class);
-        final TriggerListener[] globalTriggerListeners = { globalTriggerListener };
+        schedulerFactoryBean.setGlobalJobListeners(jobListeners);
+        final TriggerListener[] globalTriggerListeners = { globalSchedulerTriggerListener };
         schedulerFactoryBean.setGlobalTriggerListeners(globalTriggerListeners);
         final Properties quartzProperties = new Properties();
         quartzProperties.put(SchedulerFactoryBean.PROP_THREAD_COUNT, Integer.toString(noOfThreads));
@@ -274,35 +294,20 @@ public class JobRegisterServiceImpl implements JobRegisterService {
         return schedulerFactoryBean.getScheduler();
     }
 
-    private JobListener[] getGlobalListener(final List<Class<? extends JobListener>> listenerClasses) throws ClassNotFoundException {
-        final List<JobListener> listeners = new ArrayList<>(listenerClasses.size());
-        for (final Class<?> listenerClass : listenerClasses) {
-            final JobListener listener = (JobListener) getBeanObject(listenerClass);
-            listeners.add(listener);
-        }
-        final JobListener[] listenerArray = new JobListener[listeners.size()];
-        return listeners.toArray(listenerArray);
-    }
-
     private JobDetail createJobDetail(final ScheduledJobDetail scheduledJobDetail) throws Exception {
         final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
-        final String[] jobDetails = CronMethodParser.findTargetMethodDetails(scheduledJobDetail.getJobName());
-        final Object targetObject = getBeanObject(Class.forName(jobDetails[CronMethodParser.CLASS_INDEX]));
+        final ClassMethodNamesPair jobDetails = CronMethodParser.findTargetMethodDetails(scheduledJobDetail.getJobName());
+        final Object targetObject = getBeanObject(Class.forName(jobDetails.className));
         final MethodInvokingJobDetailFactoryBean jobDetailFactoryBean = new MethodInvokingJobDetailFactoryBean();
         jobDetailFactoryBean.setName(scheduledJobDetail.getJobName() + "JobDetail" + tenant.getId());
         jobDetailFactoryBean.setTargetObject(targetObject);
-        jobDetailFactoryBean.setTargetMethod(jobDetails[CronMethodParser.METHOD_INDEX]);
+        jobDetailFactoryBean.setTargetMethod(jobDetails.methodName);
         jobDetailFactoryBean.setGroup(scheduledJobDetail.getGroupName());
         jobDetailFactoryBean.setConcurrent(false);
         jobDetailFactoryBean.afterPropertiesSet();
         return jobDetailFactoryBean.getObject();
     }
 
-    /**
-     * @param jobDetails
-     * @return
-     * @throws ClassNotFoundException
-     */
     private Object getBeanObject(final Class<?> classType) throws ClassNotFoundException {
         final List<Class<?>> typesList = new ArrayList<>();
         final Class<?>[] interfaceType = classType.getInterfaces();
@@ -332,10 +337,6 @@ public class JobRegisterServiceImpl implements JobRegisterService {
         return targetObject;
     }
 
-    /**
-     * @param scheduledJobDetails
-     * @return
-     */
     private Trigger createTrigger(final ScheduledJobDetail scheduledJobDetails, final JobDetail jobDetail) {
         final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         final CronTriggerFactoryBean cronTriggerFactoryBean = new CronTriggerFactoryBean();
