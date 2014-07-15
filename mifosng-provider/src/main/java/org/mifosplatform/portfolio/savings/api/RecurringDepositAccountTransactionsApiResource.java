@@ -84,15 +84,25 @@ public class RecurringDepositAccountTransactionsApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME);
 
-        SavingsAccountTransactionData savingsAccount = null;
+        /***
+         * Check @Param commandParam value for deposit or withdrawal 
+         */
+        if (!(is(commandParam, "deposit") || is(commandParam, "withdrawal"))) { throw new UnrecognizedQueryParamException("command",
+                commandParam, new Object[] { "deposit", "withdrawal" }); }
 
-        if (is(commandParam, "deposit")) {
-            savingsAccount = this.depositAccountReadPlatformService
-                    .retrieveRecurringAccountDepositTransactionTemplate(recurringDepositAccountId);
-        } else if (is(commandParam, "withdrawal")) {
-            //
-        } else {
-            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "deposit", "withdrawal" });
+        /***
+         * By default get the deposit template for deposits and withdrawal
+         * transactions
+         */
+        SavingsAccountTransactionData savingsAccount = this.depositAccountReadPlatformService
+                .retrieveRecurringAccountDepositTransactionTemplate(recurringDepositAccountId);
+
+        /***
+         * Update transaction date and transaction type if transaction type is
+         * withdrawal
+         */
+        if (is(commandParam, "withdrawal")) {
+            savingsAccount = SavingsAccountTransactionData.withWithDrawalTransactionDetails(savingsAccount);
         }
 
         final Collection<CodeValueData> paymentTypeOptions = this.codeValueReadPlatformService

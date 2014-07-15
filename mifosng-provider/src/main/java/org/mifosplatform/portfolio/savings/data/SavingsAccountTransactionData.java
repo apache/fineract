@@ -10,9 +10,12 @@ import java.util.Collection;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.account.data.AccountTransferData;
 import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
+import org.mifosplatform.portfolio.savings.SavingsAccountTransactionType;
+import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 
 /**
  * Immutable data object representing a savings account transaction.
@@ -82,5 +85,19 @@ public class SavingsAccountTransactionData {
         this.reversed = reversed;
         this.transfer = transfer;
         this.paymentTypeOptions = paymentTypeOptions;
+    }
+
+    public static SavingsAccountTransactionData withWithDrawalTransactionDetails(final SavingsAccountTransactionData savingsAccountTransactionData) {
+
+        final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+        final SavingsAccountTransactionEnumData transactionType = SavingsEnumerations
+                .transactionType(SavingsAccountTransactionType.WITHDRAWAL.getValue());
+
+        return new SavingsAccountTransactionData(savingsAccountTransactionData.id, transactionType,
+                savingsAccountTransactionData.paymentDetailData, savingsAccountTransactionData.accountId,
+                savingsAccountTransactionData.accountNo, currentDate, savingsAccountTransactionData.currency,
+                savingsAccountTransactionData.runningBalance, savingsAccountTransactionData.runningBalance,
+                savingsAccountTransactionData.reversed, savingsAccountTransactionData.transfer,
+                savingsAccountTransactionData.paymentTypeOptions);
     }
 }

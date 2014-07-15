@@ -1333,6 +1333,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     .append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf, ");
             sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
             sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
+            sqlBuilder.append("sa.account_balance_derived as runningBalance, ");
             sqlBuilder
                     .append("mss.duedate as duedate, (mss.deposit_amount - ifnull(mss.deposit_amount_completed_derived,0)) as dueamount ");
             sqlBuilder.append("from m_savings_account sa ");
@@ -1365,7 +1366,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     .transactionType(SavingsAccountTransactionType.DEPOSIT.getValue());
             final PaymentDetailData paymentDetailData = null;
             final AccountTransferData transfer = null;
-            final BigDecimal runningBalance = null;
+            final BigDecimal runningBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "runningBalance");;
             return SavingsAccountTransactionData.create(savingsId, transactionType, paymentDetailData, savingsId, accountNo, duedate,
                     currency, dueamount, runningBalance, false, transfer);
         }
