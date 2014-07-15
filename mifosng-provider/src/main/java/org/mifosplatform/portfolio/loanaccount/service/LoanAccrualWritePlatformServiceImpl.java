@@ -122,6 +122,10 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             startDate = accrualData.getFromDateAsLocaldate();
         }
         int daysToBeAccrued = Days.daysBetween(startDate, tilldate).getDays();
+        if(daysToBeAccrued < 1){
+            return;
+        }
+        int daysInSchedule = Days.daysBetween(accrualData.getFromDateAsLocaldate(), tilldate).getDays();
         switch (accrualData.getRepaymentFrequency()) {
             case MONTHS:
                 totalNumberOfDays = calculateTotalNumberOfDaysForMonth(totalNumberOfDays, accrualData);
@@ -138,7 +142,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         BigDecimal interestportion = null;
         BigDecimal feeportion = accrualData.getDueDateFeeIncome();
         BigDecimal penaltyportion = accrualData.getDueDatePenaltyIncome();
-        if (daysToBeAccrued >= totalNumberOfDays) {
+        if (daysInSchedule >= totalNumberOfDays) {
             interestportion = accrualData.getInterestIncome();
         } else {
             double iterest = interestPerDay * daysToBeAccrued;
@@ -158,20 +162,29 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             if (totalAccFee == null) {
                 totalAccFee = BigDecimal.ZERO;
             }
+            feeportion = feeportion.subtract(totalAccFee);
             amount = amount.add(feeportion);
             totalAccFee = totalAccFee.add(feeportion);
+            if (feeportion.compareTo(BigDecimal.ZERO) == 0) {
+                feeportion = null;
+            }
         }
         BigDecimal totalAccPenalty = accrualData.getAccruedPenaltyIncome();
         if (penaltyportion != null) {
             if (totalAccPenalty == null) {
                 totalAccPenalty = BigDecimal.ZERO;
             }
+            penaltyportion = penaltyportion.subtract(totalAccPenalty);
             amount = amount.add(penaltyportion);
-            totalAccFee = totalAccFee.add(penaltyportion);
+            totalAccPenalty = totalAccFee.add(penaltyportion);
+            if (penaltyportion.compareTo(BigDecimal.ZERO) == 0) {
+                penaltyportion = null;
+            }
         }
-
-        addAccrualAccounting(accrualData, amount, interestportion, totalAccInterest, feeportion, totalAccFee, penaltyportion,
-                totalAccPenalty, tilldate);
+        if (amount.compareTo(BigDecimal.ZERO) != 0) {
+            addAccrualAccounting(accrualData, amount, interestportion, totalAccInterest, feeportion, totalAccFee, penaltyportion,
+                    totalAccPenalty, tilldate);
+        }
     }
 
     private int calculateTotalNumberOfDaysForMonth(final int totalNumberOfDays, final LoanScheduleAccrualData accrualData) {

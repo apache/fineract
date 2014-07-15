@@ -1418,7 +1418,14 @@
 								<td><a href="#financialactivityaccounts_delete">Delete a Financial Activity to Account Mapping</a></td>
 
 							</tr>
-							
+							<tr>
+								<td><a href="#periodicaccrualaccounting">Periodic Accrual Accounting</a></td>
+								<td>accrualaccounting</td>
+								<td><a href="#periodicaccrualaccounting_run">Execute Periodic Accrual Accounting</a><br> </td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -29474,6 +29481,71 @@ Content-Type: application/json
             </div>
 
 
+			<!-- start Periodic accrual API doc-->
+			
+			<a id="periodicaccrualaccounting" name="periodicaccrualaccounting" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h3>Periodic Accrual Accounting</h3>
+                    <p>
+                    	Periodic Accrual is to accrue the loan income till the specific date or till batch job scheduled time.
+                    </p>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG">
+                            <td><div class="mifosXHeading2">Field Descriptions</div></td>
+                        </tr>
+                        <tr class=alt>
+                            <td>accrueTill</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>which specifies periodic accruals should happen till the given Date 
+                            	</td>
+                        </tr>
+                        
+                    </table>
+                </div>
+            </div>
+
+
+			
+		<a id="periodicaccrualaccounting_run" name="periodicaccrualaccounting_run" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Executes Periodic Accrual Accounting</h4>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG">
+                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                        </tr>
+                        <tr class=alt>
+                            <td>accrueTill 
+                            </td>
+                        </tr>
+                       
+                    </table>
+                    <br />
+					
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+POST https://DomainName/api/v1/accrualaccounting
+                    </code>
+                    <code class="method-request">
+POST financialactivityaccounts
+Content-Type: application/json 
+Request Body:
+{
+	"locale": "en",
+	"dateFormat": "dd MMMM yyyy",
+	"accrueTill":"04 June 2014" 
+}
+                    </code>
+                    <code class="method-response">
+                    </code>
+                </div>
+            </div>
+
+			<!-- end Periodic accrual API doc-->
+			
 			<!-- start of Search API doc -->
 		<a id="search" name="search" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">

@@ -808,6 +808,14 @@ public class CommandWrapperBuilder {
         this.href = "/glclosures/" + glClosureId;
         return this;
     }
+    
+    public CommandWrapperBuilder excuteAccrualAccounting() {
+        this.actionName = "EXECUTE";
+        this.entityName = "PERIODICACCRUALACCOUNTING";
+        this.entityId = null;
+        this.href = "/accrualaccounting";
+        return this;
+    }
 
     public CommandWrapperBuilder createGLAccount() {
         this.actionName = "CREATE";
