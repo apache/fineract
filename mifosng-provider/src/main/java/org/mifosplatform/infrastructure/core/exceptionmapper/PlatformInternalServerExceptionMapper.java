@@ -31,7 +31,7 @@ public class PlatformInternalServerExceptionMapper implements ExceptionMapper<Pl
     @Override
     public Response toResponse(final PlatformInternalServerException exception) {
 
-        final ApiGlobalErrorResponse notFoundErrorResponse = ApiGlobalErrorResponse.notFound(exception.getGlobalisationMessageCode(),
+        final ApiGlobalErrorResponse notFoundErrorResponse = ApiGlobalErrorResponse.serverSideError(exception.getGlobalisationMessageCode(),
                 exception.getDefaultUserMessage(), exception.getDefaultUserMessageArgs());
         return Response.status(Status.INTERNAL_SERVER_ERROR).entity(notFoundErrorResponse).type(MediaType.APPLICATION_JSON).build();
     }

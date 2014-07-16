@@ -5,7 +5,7 @@ package org.mifosplatform.batch.exception;
  * commandStrategy classes.
  * 
  * @author Rishabh Shukla
- *
+ * 
  * @see ErrorHandler
  */
 public final class ErrorInfo {
@@ -26,15 +26,15 @@ public final class ErrorInfo {
         this.statusCode = statusCode;
         this.errorCode = errorCode;
         this.message = message;
-    }    
+    }
 
     /**
-     * Constructor so JSON serialization will work with out special Serialiazer 
+     * Constructor so JSON serialization will work with out special Serialiazer
      */
     ErrorInfo() {
         super();
-    }    
-    
+    }
+
     /**
      * Getter method to provide the statusCode for an object of this type.
      * 
@@ -43,7 +43,7 @@ public final class ErrorInfo {
     public Integer getStatusCode() {
         return this.statusCode;
     }
-    
+
     /**
      * Setter method to set the statusCode for an object of this type.
      * 
@@ -61,7 +61,7 @@ public final class ErrorInfo {
     public Integer getErrorCode() {
         return this.errorCode;
     }
-    
+
     /**
      * Setter method to set the errorCode for an object of this type.
      * 
@@ -72,8 +72,8 @@ public final class ErrorInfo {
     }
 
     /**
-     * Getter method to provide the message of the error for an object
-     * of this type.
+     * Getter method to provide the message of the error for an object of this
+     * type.
      * 
      * @return String
      */
@@ -82,12 +82,11 @@ public final class ErrorInfo {
     }
 
     /**
-     * Setter method to set the message of the error for an object
-     * of this type.
+     * Setter method to set the message of the error for an object of this type.
      * 
      * @param message
      */
     public void setMessage(final String message) {
         this.message = message;
     }
- }
+}
