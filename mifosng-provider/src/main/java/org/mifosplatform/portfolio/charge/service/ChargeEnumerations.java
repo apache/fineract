@@ -54,11 +54,11 @@ public class ChargeEnumerations {
             break;	
             case INSTALMENT_FEE:
                 optionData = new EnumOptionData(ChargeTimeType.INSTALMENT_FEE.getValue().longValue(),
-                        ChargeTimeType.INSTALMENT_FEE.getCode(), "Instalment Fee");
+                        ChargeTimeType.INSTALMENT_FEE.getCode(), "Installment Fee");
             break;
             case OVERDUE_INSTALLMENT:
                 optionData = new EnumOptionData(ChargeTimeType.OVERDUE_INSTALLMENT.getValue().longValue(),
-                        ChargeTimeType.OVERDUE_INSTALLMENT.getCode(), "overdue fees");
+                        ChargeTimeType.OVERDUE_INSTALLMENT.getCode(), "Overdue Fees");
             break;
             case OVERDRAFT_FEE:
                 optionData = new EnumOptionData(ChargeTimeType.OVERDRAFT_FEE.getValue().longValue(),
