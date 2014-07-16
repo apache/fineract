@@ -170,9 +170,12 @@ public class ClientSavingsIntegrationTest {
         savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        Calendar todaysDate = Calendar.getInstance();
+        final String CLOSEDON_DATE = dateFormat.format(todaysDate.getTime());
         String withdrawBalance = "false";
         ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper.closeSavingsAccountAndGetBackRequiredField(
-                savingsId, withdrawBalance, CommonConstants.RESPONSE_ERROR);
+                savingsId, withdrawBalance, CommonConstants.RESPONSE_ERROR, CLOSEDON_DATE);
         assertEquals("validation.msg.savingsaccount.close.results.in.balance.not.zero",
                 savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
@@ -521,9 +524,12 @@ public class ClientSavingsIntegrationTest {
      * balance, perform transactions then post interest and verify posted
      * interest
      */
+    @SuppressWarnings("unchecked")
     @Test
     public void testSavingsAccountWithOverdraft() {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
+        final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
 
         /***
          * Create a client to apply for savings account (overdraft account).
@@ -647,6 +653,14 @@ public class ClientSavingsIntegrationTest {
         interestPosted = new Float(decimalFormat.format(interestPosted));
         actualInterestPosted = new Float(decimalFormat.format(actualInterestPosted));
         assertEquals("Verifying interest posted", interestPosted, actualInterestPosted);
+        
+        todaysDate = Calendar.getInstance();
+        final String CLOSEDON_DATE = dateFormat.format(todaysDate.getTime());
+        String withdrawBalance = "false";
+        ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper.closeSavingsAccountAndGetBackRequiredField(
+                savingsId, withdrawBalance, CommonConstants.RESPONSE_ERROR, CLOSEDON_DATE);
+        assertEquals("validation.msg.savingsaccount.close.results.in.balance.not.zero",
+                savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
     }
 
     private HashMap activateSavingsAccount(final Integer savingsId, final String activationDate) {

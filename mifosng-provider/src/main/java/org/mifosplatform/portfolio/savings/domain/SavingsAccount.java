@@ -1707,7 +1707,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
             }
         }
-        if (getAccountBalance().doubleValue() > 0) {
+        if (getAccountBalance().doubleValue() != 0) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("results.in.balance.not.zero");
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }

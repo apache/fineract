@@ -17757,6 +17757,25 @@ Request Body:
 	    <div class="method-description">
 	        <h2>Close a savings account</h2>
 	        <p>Results in an Activated savings application being converted into an 'closed' savings account.</p>
+            <p><i>closedOnDate</i> is closure date of savings account</p>
+            <p><i>withdrawBalance</i> is a boolean value, true value of this field performs a withdrawal transaction with account's running balance.</p>
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG">
+                    <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                </tr>
+                <tr class=alt>
+                    <td>dateFormat,locale,closedOnDate</td>
+                </tr>
+            </table>
+            <br />
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG">
+                    <td><div class="mifosXHeading2">Optional Fields</div></td>
+                </tr>
+                <tr class=alt>
+                    <td>note, <i>withdrawBalance</i>, paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber</td>
+                </tr>
+            </table>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=close</code>
