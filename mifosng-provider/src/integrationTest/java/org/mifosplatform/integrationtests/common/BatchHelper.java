@@ -130,8 +130,7 @@ public class BatchHelper {
         }
 
         final String body = "{ \"officeId\": 1, \"firstname\": \"Petra\", \"lastname\": \"Yton\"," + "\"externalId\": " + extId
-                + ",  \"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en\","
-                + "\"active\": true, \"activationDate\": \"04 March 2009\", \"submittedOnDate\": \"04 March 2009\"}";
+                + ",  \"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en\"," + "\"active\": false, \"submittedOnDate\": \"04 March 2009\"}";
 
         br.setBody(body);
 
@@ -244,7 +243,7 @@ public class BatchHelper {
     /**
      * Creates and returns a
      * {@link org.mifosplatform.batch.command.internal.CollectChargesCommandStrategy}
-     * Request with given requestId and reference
+     * Request with given requestId and reference.
      * 
      * @param requestId
      * @param reference
@@ -259,6 +258,29 @@ public class BatchHelper {
         br.setReference(reference);
         br.setMethod("GET");
         br.setBody("{ }");
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a
+     * {@link org.mifosplatform.batch.command.internal.ActivateClientCommandStrategy}
+     * Request with given requestId and reference.
+     * 
+     * 
+     * @param requestId
+     * @param reference
+     * @return BatchRequest
+     */
+    public static BatchRequest activateClientRequest(final Long requestId, final Long reference) {
+
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setRelativeUrl("clients/$.clientId?command=activate");
+        br.setReference(reference);
+        br.setMethod("POST");
+        br.setBody("{ \"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"activationDate\": \"01 March 2011\"}");
 
         return br;
     }

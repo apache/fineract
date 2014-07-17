@@ -141,13 +141,19 @@ public class ResolutionHelper {
 
         if (relativeUrl.contains("$.")) {
 
+            String queryParams = "";
+            if(relativeUrl.contains("?")) {
+                queryParams = relativeUrl.substring(relativeUrl.indexOf("?"));
+                relativeUrl = relativeUrl.substring(0, relativeUrl.indexOf("?"));
+            }
+            
             final String[] parameters = relativeUrl.split("/");
-
+            
             for (String parameter : parameters) {
                 if (parameter.contains("$.")) {
                     final String resParamValue = responseJsonModel.get(parameter).toString();
                     relativeUrl = relativeUrl.replace(parameter, resParamValue);
-                    br.setRelativeUrl(relativeUrl);
+                    br.setRelativeUrl(relativeUrl+queryParams);
                 }
             }
         }
