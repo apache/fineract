@@ -266,6 +266,14 @@ public class CommandWrapper {
     public boolean isJournalEntryResource() {
         return this.entityName.equalsIgnoreCase("JOURNALENTRY");
     }
+    
+    public boolean isPeriodicAccrualResource() {
+        return this.entityName.equalsIgnoreCase("PERIODICACCRUALACCOUNTING");
+    }
+    
+    public boolean isExecute() {
+        return this.actionName.equalsIgnoreCase("EXECUTE");
+    }
 
     public boolean isRevertJournalEntry() {
         return this.actionName.equalsIgnoreCase("REVERSE") && this.entityName.equalsIgnoreCase("JOURNALENTRY");
