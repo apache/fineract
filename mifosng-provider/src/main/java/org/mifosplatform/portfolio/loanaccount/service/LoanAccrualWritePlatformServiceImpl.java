@@ -93,13 +93,18 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     private String addPeriodicAccruals(final LocalDate tilldate, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas) {
         StringBuilder sb = new StringBuilder();
         Set<Long> loansIds = new HashSet<>();
+        LocalDate accruredTill = null;
         for (final LoanScheduleAccrualData accrualData : loanScheduleAccrualDatas) {
             try {
                 if (!loansIds.contains(accrualData.getLoanId())) {
                     if (accrualData.getDueDateAsLocaldate().isAfter(tilldate)) {
-                        addAccrualTillSpecificDate(tilldate, accrualData);
+                        if (accruredTill == null) {
+                            accruredTill = accrualData.getAccruedTill();
+                        }
+                        addAccrualTillSpecificDate(tilldate, accrualData, accruredTill);
                     } else {
                         addAccrualAccounting(accrualData);
+                        accruredTill = accrualData.getDueDateAsLocaldate();
                     }
                 }
             } catch (Exception e) {
@@ -115,16 +120,15 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         return sb.toString();
     }
 
-    private void addAccrualTillSpecificDate(final LocalDate tilldate, final LoanScheduleAccrualData accrualData) throws Exception {
+    private void addAccrualTillSpecificDate(final LocalDate tilldate, final LoanScheduleAccrualData accrualData,
+            final LocalDate accruredTill) throws Exception {
         int totalNumberOfDays = Days.daysBetween(accrualData.getFromDateAsLocaldate(), accrualData.getDueDateAsLocaldate()).getDays();
-        LocalDate startDate = accrualData.getAccruedTill();
+        LocalDate startDate = accruredTill;
         if (startDate == null) {
             startDate = accrualData.getFromDateAsLocaldate();
         }
         int daysToBeAccrued = Days.daysBetween(startDate, tilldate).getDays();
-        if(daysToBeAccrued < 1){
-            return;
-        }
+        if (daysToBeAccrued < 1) { return; }
         int daysInSchedule = Days.daysBetween(accrualData.getFromDateAsLocaldate(), tilldate).getDays();
         switch (accrualData.getRepaymentFrequency()) {
             case MONTHS:
