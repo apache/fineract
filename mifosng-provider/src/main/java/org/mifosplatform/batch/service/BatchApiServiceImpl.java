@@ -140,7 +140,6 @@ public class BatchApiServiceImpl implements BatchApiService {
                     childResponse.setRequestId(childRequest.getRequestId());
                     childResponse.setStatusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
                     childResponse.setBody(ex.getMessage());
-
                 }
 
                 childResponses.add(childResponse);

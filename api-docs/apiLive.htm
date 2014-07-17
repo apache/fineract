@@ -103,8 +103,9 @@
 	<li><a href="#creates_and_updates">Creating and Updating</a></li>
 	<li><a href="#dates_and_numbers">Updating Dates and Numbers</a></li>
 	<li><a href="#field_descriptions">Field Descriptions</a></li>
-	<li><a href="#authentication_overview">Authentication Overview</a></li>
+	<li><a href="#authentication_overview">Authentication Overview</a></li>	
 	<li><a href="#errors">Errors</a></li>
+	<li><a href="#batch_api">Batch API</a></li>
 	<li><a href="#fullapi_matrix">Full API Matrix</a></li>
 	<li><a href="#betaapi_matrix">Beta API Matrix</a></li>
 	<li><a href="#paymentapplicationlogic">Payment Application Logic / Transaction Processing Strategies</a></li>
@@ -2654,6 +2655,340 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 					</div>
 			</div>
 
+			<a id="batch_api" name="batch_api" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Batch API</h3>
+
+					<p>
+						The Mifos X Batch API enables a consumer to access significant amounts of data in a single call or to make changes to several objects at once. 
+						Batching allows a consumer to pass instructions for several operations in a  single HTTP request. A consumer can also specify dependencies between related operations. Once all operations have been completed, a consolidated response will be  passed back and the HTTP connection will be closed.
+					</p>
+
+					<p>
+						The Batch API takes in an array of logical HTTP requests represented as JSON arrays - each request has a requestId (the id of a request used to specify the sequence and as a dependency between requests), a method (corresponding to HTTP method GET/PUT/POST/DELETE etc.), a relativeUrl (the portion of the URL after https://example.org/api/v2/), optional headers array (corresponding to HTTP headers), optional reference parameter if a request is dependent on another request and an optional body (for POST and PUT requests).
+						The Batch API returns an array of logical HTTP responses represented as JSON arrays - each response has a requestId, a status code, an optional headers array and an optional body (which is a JSON encoded string).
+					</p>
+
+					<p>
+						Batch API uses <a href=https://code.google.com/p/json-path/>Json Path</a> to handle dependent
+						parameters. For example, if request '2' is referencing request '1' and in the "body" or in "relativeUrl" of request '2', there is a dependent parameter (which will look like "$.parameter_name"), then Batch API will internally substitute this dependent parameter from the response body of request '1'.
+					</p>
+
+					<p>
+						Batch API is able to handle deeply nested dependent requests as well nested parameters. As shown in the example, requests are dependent on each other as, 1&lt--2&lt--6, i.e a nested dependency, where request '6' is not directly dependent on request '1' but still it is one of the nested child of request '1'. 
+						In the same way Batch API could handle a deeply nested dependent value, such as {..[..{..,$.parameter_name,..}..]}.
+					</p>
+
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/batches
+					</code>
+					<code class="method-request">
+POST batches
+Content-Type: application/json Request Body:
+[  
+   {  
+      "requestId":1,
+      "relativeUrl":"clients",
+      "method":"POST",
+      "headers":[  
+         {  
+            "name":"Content-type",
+            "value":"text/html"
+         }
+      ],
+      "body":"{  
+	    \"officeId\": 1, 
+	    \"firstname\": \"Petra\", 
+	    \"lastname\": \"Yton\", 
+	    \"externalId\": \"ex_externalId1\", 
+	    \"dateFormat\": \"dd MMMM yyyy\", 
+	    \"locale\": \"en\", 
+	    \"active\": true, 
+	    \"activationDate\": \"04 March 2009\", 
+	    \"submittedOnDate\": \"04 March 2009\" 
+   	 }"
+   },
+   {  
+      "requestId":2,
+      "relativeUrl":"loans",
+      "method":"POST",
+      "headers":[  
+         {  
+            "name":"Content-type",
+            "value":"text/html"
+         }
+      ],
+      "reference":1,
+      "body":"{ \"dateFormat\": \"dd MMMM yyyy\", 
+                \"locale\": \"en_GB\", 
+                \"clientId\": \"$.clientId\", 
+                \"productId\": 26, 
+                \"principal\": \"10,000.00\", 
+                \"loanTermFrequency\": 12, 
+                \"loanTermFrequencyType\": 2, 
+                \"loanType\": \"individual\", 
+                \"numberOfRepayments\": 10, 
+                \"repaymentEvery\": 1, 
+                \"repaymentFrequencyType\": 2, 
+                \"interestRatePerPeriod\": 10, 
+                \"amortizationType\": 1, 
+                \"interestType\": 0, 
+                \"interestCalculationPeriodType\": 1, 
+                \"transactionProcessingStrategyId\": 1, 
+                \"expectedDisbursementDate\": \"10 Jun 2013\", 
+                \"submittedOnDate\": \"10 Jun 2013\"   
+              }"
+   },
+   {  
+      "requestId":3,
+      "relativeUrl":"loans/$.loanId/charges",
+      "method":"POST",
+      "reference":2,
+      "headers":[  
+         {  
+            "name":"Content-type",
+            "value":"text/html"
+         }
+      ],
+      "body":"{  
+              \"chargeId\": \"2\", 
+              \"locale\": \"en\", 
+              \"amount\": \"100\", 
+              \"dateFormat\": \"dd MMMM yyyy\", 
+              \"dueDate\": \"29 April 2013\" 
+            }"
+   },
+   {  
+      "requestId":4,
+      "relativeUrl":"loans/$.loanId/charges",
+      "method":"GET",
+      "reference":2,
+      "headers":[  
+         {  
+            "name":"Content-type",
+            "value":"text/html"
+         }
+      ],
+      "body":"{}"
+   }
+]
+					</code>
+					<code class="method-response">
+[  
+   {  
+      "requestId":1,
+      "statusCode":200,
+      "headers":[  
+         {  
+            "name":"Content-type",
+            "value":"text/html"
+         },
+         {  
+            "name":"X-Mifos-Platform-TenantId",
+            "value":"text/html"
+         }
+      ],
+      "body":"{\"officeId\":1,\"clientId\":909,\"resourceId\":909}"
+   },
+   {  
+      "requestId":2,
+      "statusCode":200,
+      "headers":[  
+         {  
+            "name":"Content-type",
+            "value":"text/html"
+         }
+      ],
+      "body":"{\"officeId\":1,\"clientId\":909,\"loanId\":212,\"resourceId\":212}"
+   },
+   {  
+      "requestId":3,
+      "statusCode":200,
+      "headers":[  
+         {  
+            "name":"Content-type",
+            "value":"text/html"
+         }
+      ],
+      "body":"{\"officeId\":1,\"clientId\":909,\"loanId\":212,\"resourceId\":155}"
+   },
+   {  
+      "requestId":4,
+      "statusCode":200,
+      "headers":[  
+         {  
+            "name":"Content-type",
+            "value":"text/html"
+         }
+      ],
+      "body":"[   
+	   {   
+	      \"id\":155, 
+	      \"chargeId\":2, 
+	      \"name\":\"Charge_Loans_GEQJC5\", 
+	      \"chargeTimeType\":{   
+	         \"id\":1, 
+	         \"code\":\"chargeTimeType.disbursement\", 
+	         \"value\":\"Disbursement\" 
+	      }, 
+	      \"chargeCalculationType\":{   
+	         \"id\":2, 
+	         \"code\":\"chargeCalculationType.percent.of.amount\", 
+	         \"value\":\"% Amount\" 
+	      }, 
+	      \"percentage\":100.000000, 
+	      \"amountPercentageAppliedTo\":10000.000000, 
+	      \"currency\":{   
+	         \"code\":\"USD\", 
+	         \"name\":\"USDollar\", 
+	         \"decimalPlaces\":2, 
+	         \"displaySymbol\":\"$\", 
+	         \"nameCode\":\"currency.USD\", 
+	         \"displayLabel\":\"US Dollar ($)\" 
+	      }, 
+	      \"amount\":10000.000000, 
+	      \"amountPaid\":0, 
+	      \"amountWaived\":0, 
+	      \"amountWrittenOff\":0, 
+	      \"amountOutstanding\":10000.000000, 
+	      \"amountOrPercentage\":100.000000, 
+	      \"penalty\":false, 
+	      \"chargePaymentMode\":{   
+	         \"id\":0, 
+	         \"code\":\"chargepaymentmode.regular\", 
+	         \"value\":\"Regular\" 
+	      }, 
+	      \"paid\":false, 
+	      \"waived\":false, 
+	      \"chargePayable\":false 
+	   } 
+	]"
+   }
+]
+					</code>
+				</div>			
+			
+			</div>
+
+			<a id="batch_api" name="batch_api" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Batch requests in a single transaction</h4>
+
+					<p>
+						The Mifos X Batch API is also capable of executing all the requests in a single transaction, by setting a Query Parameter, "enclosingTransaction=true". So, if one or more of the requests in a batch returns an erroneous response all of the Data base transactions made by other successful requests will be rolled back.
+					</p>
+
+					<p>
+						If there has been a rollback in a transaction then a single response will be provided, with a '400' status code and a body consisting of the error details of the first failed request.
+					</p>
+
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/batches?enclosingTransaction=true
+					</code>
+					<code class="method-request">
+POST batches
+Content-Type: application/json Request Body:
+[  
+  {  
+    "requestId":1,
+    "relativeUrl":"clients",
+    "method":"POST",
+    "headers":[  
+      {  
+        "name":"Content-type",
+        "value":"text/html"
+      },
+      {  
+        "name":"X-Mifos-Platform-TenantId",
+        "value":"text/html"
+      }
+    ],
+    "body":"{ 
+    	 \"officeId\": 1, 
+    	 \"firstname\": \"Petra\", 
+    	 \"lastname\": \"Yton\", 
+    	 \"externalId\": \"externalId_4\", 
+    	 \"dateFormat\": \"dd MMMM yyyy\", 
+    	 \"locale\": \"en\", \"active\": true, 
+    	 \"activationDate\": \"04 March 2009\", 
+    	 \"submittedOnDate\": \"04 March 2009\" 
+    	 }"
+  },
+  {  
+    "requestId":2,
+    "relativeUrl":"savingsaccounts",
+    "method":"POST",
+    "reference":1,
+    "headers":[  
+      {  
+        "name":"Content-type",
+        "value":"text/html"
+      }
+    ],
+    "body":"{   
+              \"clientId\": \"$.clientId\",  
+              \"productId\": 1,  
+              \"locale\": \"en\",   
+              \"dateFormat\": \"dd MMMM yyyy\",   
+              \"submittedOnDate\": \"01 March 2011\"  
+            }"
+  }
+]
+					</code>
+					<code class="method-response">
+Successful transaction response:
+[  
+  {  
+    "requestId":1,
+    "statusCode":200,
+    "headers":[  
+      {  
+        "name":"Content-type",
+        "value":"text/html"
+      },
+      {  
+        "name":"X-Mifos-Platform-TenantId",
+        "value":"text/html"
+      }
+    ],
+    "body":"{\"officeId\":1,\"clientId\":922,\"resourceId\":922}"
+  },
+  {  
+    "requestId":2,
+    "statusCode":200,
+    "headers":[  
+      {  
+        "name":"Content-type",
+        "value":"text/html"
+      }
+    ],
+    "body":"{\"officeId\":1,\"clientId\":922,\"savingsId\":116,\"resourceId\":116}"
+  }
+]
+					</code>
+
+				</div>			
+			
+			</div>
+
+			<a id="batch_api" name="batch_api" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Batch API Errors</h4>
+
+					<p>
+						In Batch API without "enclosingTransaction=true", if one of the response is erroneous, then an appropriate status code will be set for that request and the error message will be returned in it's "body", while all other requests will return successful response with a status code of "200". 
+					</p>
+
+				</div>						
+			
+			</div>
 			<a id="errors" name="errors" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">

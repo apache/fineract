@@ -203,13 +203,17 @@ public class BatchApiTest {
         // Create a createClient Request
         final BatchRequest br1 = BatchHelper.createClientRequest(4718L, "");
 
+        // Create a activateClient Request
+        final BatchRequest br2 = BatchHelper.activateClientRequest(4719L, 4718L);
+
         // Create a ApplyLoan Request
-        final BatchRequest br2 = BatchHelper.applyLoanRequest(4719L, 4718L, productId);
+        final BatchRequest br3 = BatchHelper.applyLoanRequest(4720L, 4719L, productId);
 
         final List<BatchRequest> batchRequests = new ArrayList<>();
 
         batchRequests.add(br1);
         batchRequests.add(br2);
+        batchRequests.add(br3);
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
@@ -244,13 +248,17 @@ public class BatchApiTest {
         // Create a createClient Request
         final BatchRequest br1 = BatchHelper.createClientRequest(4720L, "");
 
+        // Create a activateClient Request
+        final BatchRequest br2 = BatchHelper.activateClientRequest(4721L, 4720L);
+
         // Create a applySavings Request
-        final BatchRequest br2 = BatchHelper.applySavingsRequest(4721L, 4720L, productId);
+        final BatchRequest br3 = BatchHelper.applySavingsRequest(4722L, 4721L, productId);
 
         final List<BatchRequest> batchRequests = new ArrayList<>();
 
         batchRequests.add(br1);
         batchRequests.add(br2);
+        batchRequests.add(br3);
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
@@ -288,14 +296,14 @@ public class BatchApiTest {
         // Create a createClient Request
         final BatchRequest br1 = BatchHelper.createClientRequest(4722L, "");
 
-        // Create a ApplyLoan Request
-        final BatchRequest br2 = BatchHelper.applyLoanRequest(4723L, 4722L, productId);
+        // Create a activateClient Request
+        final BatchRequest br2 = BatchHelper.activateClientRequest(4723L, 4722L);
 
-        // Create a createCharge Request
-        final BatchRequest br3 = BatchHelper.createChargeRequest(4724L, 4723L);
+        // Create a ApplyLoan Request
+        final BatchRequest br3 = BatchHelper.applyLoanRequest(4724L, 4723L, productId);
 
         // Create a Collect Charges Request
-        final BatchRequest br4 = BatchHelper.collectChargesRequest(4725L, 4723L);
+        final BatchRequest br4 = BatchHelper.collectChargesRequest(4725L, 4724L);
 
         final List<BatchRequest> batchRequests = new ArrayList<>();
 
@@ -309,7 +317,36 @@ public class BatchApiTest {
         final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
                 jsonifiedRequest);
 
-        Assert.assertEquals("Verify Status Code 200 for Create Charge", 200L, (long) response.get(2).getStatusCode());
-        Assert.assertEquals("Verify Status Code 200 for Collect Charges", 200L, (long) response.get(3).getStatusCode());
+        Assert.assertEquals("Verify Status Code 200 for Create Loan Charge", 200L, (long) response.get(3).getStatusCode());
+    }
+
+    /**
+     * Test for the successful activation of a pending client using
+     * 'ActivateClientCommandStrategy'. A '200' status code is expected on
+     * successful activation.
+     * 
+     * @see org.mifosplatform.batch.command.internal.ActivateClientCommandStrategy
+     */
+    @Test
+    public void shouldReturnOkStatusOnSuccessfulClientActivation() {
+
+        // Create a createClient Request
+        final BatchRequest br1 = BatchHelper.createClientRequest(4726L, "");
+
+        // Create a activateClient Request
+        final BatchRequest br2 = BatchHelper.activateClientRequest(4727L, 4726L);
+
+        final List<BatchRequest> batchRequests = new ArrayList<>();
+
+        batchRequests.add(br1);
+        batchRequests.add(br2);
+
+        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
+
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+                jsonifiedRequest);
+
+        Assert.assertEquals("Verify Status Code 200 for Create Charge", 200L, (long) response.get(0).getStatusCode());
+        Assert.assertEquals("Verify Status Code 200 for Collect Charges", 200L, (long) response.get(1).getStatusCode());
     }
 }
