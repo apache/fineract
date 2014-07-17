@@ -525,7 +525,7 @@
 								<td><a href="#savings_charges">Savings Account Charges</a></td>
 								<td>savingsaccounts/{accountId}/charges</td>
 								<td><a href="#savings_charges_create">Add a Savings Account Charge</a></td>
-								<td></td>
+								<td><a href="#savings_charges_list">List Savings Account Charges</a></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -549,6 +549,14 @@
 								<td></td>
 								<td>savingsaccounts/{accountId}/charges/{savingsAccountChargeId}?command=waive</td>
 								<td><a href="#savings_charges_waive">Waive a Savings Account Charge</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}/charges/{savingsAccountChargeId}?command=inactivate</td>
+								<td><a href="#savings_charges_inactivate">Inactivate a Savings Account Charge</a></td>
 								<td></td>
 								<td></td>
 								<td></td>
@@ -18833,6 +18841,11 @@ No Request Body:
 					<p>Example Requests:</p>
 					<div class=apiClick>savingsaccounts/1/charges</div>
 					<br>
+					<div class=apiClick>savingsaccounts/1/charges?chargeStatus=all</div>
+					<br>
+					<div class=apiClick>savingsaccounts/1/charges?chargeStatus=inactive</div>
+					<br>
+					<div class=apiClick>savingsaccounts/1/charges?chargeStatus=active</div>
 					<br>
 					<div class=apiClick>savingsaccounts/1/charges?fields=name,amountOrPercentage</div>
 				</div>
@@ -19318,7 +19331,7 @@ No Request Body:
 				<div class="method-description">
 					<h4>Pay a Savings account Charge</h4>
 					<p>
-						A charge will be paid when savings account is active and having sufficient balance.
+						An active charge will be paid when savings account is active and having sufficient balance.
 					</p>
 				</div>
 				<div class="method-example">
@@ -19363,6 +19376,34 @@ POST https://DomainName/api/v1/savingsaccounts/{accountId}/charges/{savingsAccou
 POST savingsaccounts/1/charges/2?command=waive
 Content-Type: application/json 
 No Request Body: 
+					</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "savingsId": 1,
+  "resourceId": 2
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="savings_charges_inactivate" name="savings_charges_inactivate" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Inactivate a Savings account Charge</h4>
+					<p>
+						A charge will be allowed to inactivate when savings account is active and not having any dues as of today. If charge is overpaid, corresponding charge payment transactions will be reversed.
+					</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/savingsaccounts/{accountId}/charges/{savingsAccountChargeId}?command=inactivate
+					</code>
+					<code class="method-request">
+POST savingsaccounts/1/charges/2?command=inactivate
+Content-Type: application/json 
+No Request Body:
 					</code>
 					<code class="method-response">
 {
@@ -32518,7 +32559,7 @@ No Request Body:
 					<td><a href="#savings_charges">Savings Account Charges</a></td>
 					<td>savingsaccounts/{accountId}/charges</td>
 					<td><a href="#savings_charges_create">Add a Savings Account Charge</a></td>
-					<td></td>
+					<td><a href="#savings_charges_list">List Savings Account Charges</a></td>
 					<td></td>
 					<td></td>
 				</tr>
@@ -32542,6 +32583,14 @@ No Request Body:
 					<td></td>
 					<td>savingsaccounts/{accountId}/charges/{savingsAccountChargeId}?command=waive</td>
 					<td><a href="#savings_charges_waive">Waive a Savings Account Charge</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}/charges/{savingsAccountChargeId}?command=inactivate</td>
+					<td><a href="#savings_charges_inactivate">Inactivate a Savings Account Charge</a></td>
 					<td></td>
 					<td></td>
 					<td></td>

@@ -18,63 +18,52 @@ import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
 /**
  * Immutable data object for Savings Account charge data.
  */
+@SuppressWarnings("unused")
 public class SavingsAccountChargeData {
 
-    @SuppressWarnings("unused")
     private final Long id;
 
-    @SuppressWarnings("unused")
     private final Long chargeId;
 
-    @SuppressWarnings("unused")
     private final Long accountId;
 
-    @SuppressWarnings("unused")
     private final String name;
 
     private final EnumOptionData chargeTimeType;
 
-    @SuppressWarnings("unused")
     private final LocalDate dueDate;
 
-    @SuppressWarnings("unused")
     private final MonthDay feeOnMonthDay;
 
-    @SuppressWarnings("unused")
     private final Integer feeInterval;
 
     private final EnumOptionData chargeCalculationType;
 
     private final BigDecimal percentage;
 
-    @SuppressWarnings("unused")
     private final BigDecimal amountPercentageAppliedTo;
 
-    @SuppressWarnings("unused")
     private final CurrencyData currency;
 
     private final BigDecimal amount;
 
-    @SuppressWarnings("unused")
     private final BigDecimal amountPaid;
 
-    @SuppressWarnings("unused")
     private final BigDecimal amountWaived;
 
-    @SuppressWarnings("unused")
     private final BigDecimal amountWrittenOff;
 
-    @SuppressWarnings("unused")
     private final BigDecimal amountOutstanding;
 
-    @SuppressWarnings("unused")
     private final BigDecimal amountOrPercentage;
 
-    @SuppressWarnings("unused")
-    private final Collection<ChargeData> chargeOptions;
-
-    @SuppressWarnings("unused")
     private final boolean penalty;
+
+    private final Boolean isActive;
+
+    private final LocalDate inactivationDate;
+
+    private final Collection<ChargeData> chargeOptions;
 
     public static SavingsAccountChargeData template(final Collection<ChargeData> chargeOptions) {
         final Long id = null;
@@ -95,10 +84,12 @@ public class SavingsAccountChargeData {
         final LocalDate dueAsOfDate = null;
         final MonthDay feeOnMonthDay = null;
         final Integer feeInterval = null;
+        final Boolean isActive = null;
+        final LocalDate inactivationDate = null;
 
         return new SavingsAccountChargeData(id, chargeId, accountId, name, chargeTimeType, dueAsOfDate, chargeCalculationType, percentage,
                 amountPercentageAppliedTo, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding, chargeOptions,
-                penalty, feeOnMonthDay, feeInterval);
+                penalty, feeOnMonthDay, feeInterval, isActive, inactivationDate);
     }
 
     public static SavingsAccountChargeData instance(final Long id, final Long chargeId, final Long accountId, final String name,
@@ -106,11 +97,11 @@ public class SavingsAccountChargeData {
             final BigDecimal amountWrittenOff, final BigDecimal amountOutstanding, final EnumOptionData chargeTimeType,
             final LocalDate dueAsOfDate, final EnumOptionData chargeCalculationType, final BigDecimal percentage,
             final BigDecimal amountPercentageAppliedTo, final Collection<ChargeData> chargeOptions, final boolean penalty,
-            final MonthDay feeOnMonthDay, final Integer feeInterval) {
+            final MonthDay feeOnMonthDay, final Integer feeInterval, final Boolean isActive, final LocalDate inactivationDate) {
 
         return new SavingsAccountChargeData(id, chargeId, accountId, name, chargeTimeType, dueAsOfDate, chargeCalculationType, percentage,
                 amountPercentageAppliedTo, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding, chargeOptions,
-                penalty, feeOnMonthDay, feeInterval);
+                penalty, feeOnMonthDay, feeInterval, isActive, inactivationDate);
     }
 
     private SavingsAccountChargeData(final Long id, final Long chargeId, final Long accountId, final String name,
@@ -118,7 +109,7 @@ public class SavingsAccountChargeData {
             final BigDecimal percentage, final BigDecimal amountPercentageAppliedTo, final CurrencyData currency, final BigDecimal amount,
             final BigDecimal amountPaid, final BigDecimal amountWaived, final BigDecimal amountWrittenOff,
             final BigDecimal amountOutstanding, final Collection<ChargeData> chargeOptions, final boolean penalty,
-            final MonthDay feeOnMonthDay, final Integer feeInterval) {
+            final MonthDay feeOnMonthDay, final Integer feeInterval, final Boolean isActive, final LocalDate inactivationDate) {
         this.id = id;
         this.chargeId = chargeId;
         this.accountId = accountId;
@@ -139,6 +130,8 @@ public class SavingsAccountChargeData {
         this.penalty = penalty;
         this.feeOnMonthDay = feeOnMonthDay;
         this.feeInterval = feeInterval;
+        this.isActive = isActive;
+        this.inactivationDate = inactivationDate;
     }
 
     private BigDecimal getAmountOrPercentage() {

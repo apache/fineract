@@ -15,7 +15,7 @@ public interface SavingsAccountChargeReadPlatformService {
 
     ChargeData retrieveSavingsAccountChargeTemplate();
 
-    Collection<SavingsAccountChargeData> retrieveSavingsAccountCharges(Long savingsAccountId);
+    Collection<SavingsAccountChargeData> retrieveSavingsAccountCharges(Long savingsAccountId, String status);
 
     SavingsAccountChargeData retrieveSavingsAccountChargeDetails(Long savingsAccountChargeId, Long savingsAccountId);
 

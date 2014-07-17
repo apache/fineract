@@ -383,6 +383,20 @@ public class SavingsAccountHelper {
     }
 
     public HashMap activateSavingsAccount(Integer savingsID, String activationDate) {
-        return performSavingApplicationActions(createSavingsOperationURL(ACTIVATE_SAVINGS_COMMAND, savingsID), getAccountActivationJSON(activationDate));
+        return performSavingApplicationActions(createSavingsOperationURL(ACTIVATE_SAVINGS_COMMAND, savingsID),
+                getAccountActivationJSON(activationDate));
+    }
+
+    public Object inactivateCharge(final Integer chargeId, final Integer savingsId, final String jsonAttributeToGetBack) {
+        return performSavingActions(createChargesURL("inactivate", savingsId, chargeId), getSavingsInactivateChargeJSON(),
+                jsonAttributeToGetBack);
+    }
+
+    private String getSavingsInactivateChargeJSON() {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("locale", CommonConstants.locale);
+        map.put("dateFormat", CommonConstants.dateFormat);
+        String josn = new Gson().toJson(map);
+        return josn;
     }
 }

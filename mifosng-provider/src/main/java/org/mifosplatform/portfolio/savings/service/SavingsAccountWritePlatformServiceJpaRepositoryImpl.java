@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.savings.service;
 
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.amountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeIdParamName;
@@ -81,6 +82,7 @@ import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements SavingsAccountWritePlatformService {
@@ -938,4 +940,73 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
         this.journalEntryWritePlatformService.createJournalEntriesForSavings(accountingBridgeData);
     }
+
+    @Override
+    public CommandProcessingResult inactivateCharge(final Long savingsAccountId, final Long savingsAccountChargeId) {
+
+        this.context.authenticatedUser();
+
+        final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository.findOneWithNotFoundDetection(
+                savingsAccountChargeId, savingsAccountId);
+
+        final SavingsAccount account = savingsAccountCharge.savingsAccount();
+        this.savingAccountAssembler.assignSavingAccountHelpers(account);
+
+        final LocalDate inactivationOnDate = DateUtils.getLocalDateOfTenant();
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
+
+        /***
+         * Only recurring fees are allowed to inactivate
+         */
+        if (!savingsAccountCharge.isRecurringFee()) {
+            baseDataValidator.reset().parameter(null).value(savingsAccountCharge.getId())
+                    .failWithCodeNoParameterAddedToErrorCode("charge.inactivation.allowed.only.for.recurring.charges");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+
+        } else {
+            final LocalDate nextDueDate = savingsAccountCharge.nextDuDate(inactivationOnDate);
+
+            if (savingsAccountCharge.isChargeIsDue(nextDueDate)) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("inactivation.of.charge.not.allowed.when.charge.is.due");
+                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            } else if (savingsAccountCharge.isChargeIsOverPaid(nextDueDate)) {
+
+                final List<SavingsAccountTransaction> chargePayments = new ArrayList<>();
+                SavingsAccountCharge updatedCharge = savingsAccountCharge;
+                do {
+                    chargePayments.clear();
+                    for (SavingsAccountTransaction transaction : account.getTransactions()) {
+                        if (transaction.isPayCharge() && transaction.isNotReversed()
+                                && transaction.isPaymentForCurrentCharge(savingsAccountCharge)) {
+                            chargePayments.add(transaction);
+                        }
+                    }
+                    /***
+                     * Reverse the excess payments of charge transactions
+                     */
+                    SavingsAccountTransaction lastChargePayment = getLastChargePayment(chargePayments);
+                    this.undoTransaction(savingsAccountCharge.savingsAccount().getId(), lastChargePayment.getId(), false);
+                    updatedCharge = account.getUpdatedChargeDetails(savingsAccountCharge);
+                } while (updatedCharge.isChargeIsOverPaid(nextDueDate));
+            }
+            account.inactivateCharge(savingsAccountCharge, inactivationOnDate);
+        }
+
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(savingsAccountCharge.getId()) //
+                .withOfficeId(savingsAccountCharge.savingsAccount().officeId()) //
+                .withClientId(savingsAccountCharge.savingsAccount().clientId()) //
+                .withGroupId(savingsAccountCharge.savingsAccount().groupId()) //
+                .withSavingsId(savingsAccountCharge.savingsAccount().getId()) //
+                .build();
+    }
+
+    private SavingsAccountTransaction getLastChargePayment(final List<SavingsAccountTransaction> chargePayments) {
+        if (!CollectionUtils.isEmpty(chargePayments)) { return chargePayments.get(chargePayments.size() - 1); }
+        return null;
+    }
+
 }

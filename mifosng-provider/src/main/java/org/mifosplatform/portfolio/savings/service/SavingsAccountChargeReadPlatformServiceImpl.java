@@ -71,6 +71,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
                     + "sc.fee_on_month as feeOnMonth, "
                     + "sc.fee_on_day as feeOnDay, sc.fee_interval as feeInterval, "
                     + "sc.charge_calculation_enum as chargeCalculation, "
+                    + "sc.is_active as isActive, sc.inactivated_on_date as inactivationDate, "
                     + "c.currency_code as currencyCode, oc.name as currencyName, "
                     + "oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
                     + "oc.internationalized_name_code as currencyNameCode from m_charge c "
@@ -119,12 +120,14 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
             final int chargeCalculation = rs.getInt("chargeCalculation");
             final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(chargeCalculation);
             final boolean penalty = rs.getBoolean("penalty");
+            final Boolean isActive = rs.getBoolean("isActive");
+            final LocalDate inactivationDate = JdbcSupport.getLocalDate(rs, "inactivationDate");
 
             final Collection<ChargeData> chargeOptions = null;
 
             return SavingsAccountChargeData.instance(id, chargeId, accountId, name, currency, amount, amountPaid, amountWaived,
                     amountWrittenOff, amountOutstanding, chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf,
-                    amountPercentageAppliedTo, chargeOptions, penalty, feeOnMonthDay, feeInterval);
+                    amountPercentageAppliedTo, chargeOptions, penalty, feeOnMonthDay, feeInterval, isActive, inactivationDate);
         }
     }
 
@@ -166,15 +169,20 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
     }
 
     @Override
-    public Collection<SavingsAccountChargeData> retrieveSavingsAccountCharges(final Long loanId) {
+    public Collection<SavingsAccountChargeData> retrieveSavingsAccountCharges(final Long loanId, final String status) {
         this.context.authenticatedUser();
 
         final SavingsAccountChargeMapper rm = new SavingsAccountChargeMapper();
+        final StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("select ").append(rm.schema()).append(" where sc.savings_account_id=? ");
+        if (status.equalsIgnoreCase("active")) {
+            sqlBuilder.append(" and sc.is_active = 1 ");
+        } else if (status.equalsIgnoreCase("inactive")) {
+            sqlBuilder.append(" and sc.is_active = 0 ");
+        }
+        sqlBuilder.append(" order by sc.charge_time_enum ASC, sc.charge_due_date ASC, sc.is_penalty ASC");
 
-        final String sql = "select " + rm.schema() + " where sc.savings_account_id=? "
-                + " order by sc.charge_time_enum ASC, sc.charge_due_date ASC, sc.is_penalty ASC";
-
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+        return this.jdbcTemplate.query(sqlBuilder.toString(), rm, new Object[] { loanId });
     }
 
     private static final class SavingsAccountChargeDueMapper implements RowMapper<SavingsAccountAnnualFeeData> {

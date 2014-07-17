@@ -872,4 +872,8 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("CREATE");
     }
 
+    public boolean isInactivateSavingsAccountCharge() {
+        return this.actionName.equalsIgnoreCase("INACTIVATE") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNTCHARGE");
+    }
+
 }

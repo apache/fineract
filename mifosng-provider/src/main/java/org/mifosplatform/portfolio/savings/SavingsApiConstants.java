@@ -42,6 +42,7 @@ public class SavingsApiConstants {
     public static String COMMAND_ADJUST_TRANSACTION = "modify";
     public static String COMMAND_WAIVE_CHARGE = "waive";
     public static String COMMAND_PAY_CHARGE = "paycharge";
+    public static String COMMAND_INACTIVATE_CHARGE = "inactivate";
 
     // general
     public static final String localeParamName = "locale";

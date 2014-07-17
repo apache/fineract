@@ -104,6 +104,10 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
     @Column(name = "is_active", nullable = false)
     private boolean status = true;
+    
+    @Temporal(TemporalType.DATE)
+    @Column(name = "inactivated_on_date")
+    private Date inactivationDate;
 
     public static SavingsAccountCharge createNewFromJson(final SavingsAccount savingsAccount, final Charge chargeDefinition,
             final JsonCommand command) {
@@ -302,6 +306,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         resetPropertiesForRecurringFees();
         updateToPreviousDueDate();// reset annual and monthly due date.
         this.paid = false;
+        this.status = true;
     }
 
     public Money waive(final MonetaryCurrency currency) {
@@ -323,6 +328,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         this.amountWaived = amountWaived.getAmount();
         this.amountOutstanding = calculateAmountOutstanding(currency);
         this.waived = false;
+        this.status = true;
 
         resetPropertiesForRecurringFees();
         updateToPreviousDueDate();
@@ -761,13 +767,14 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
             LocalDate nextDueLocalDate = new LocalDate(dueDate);
             if (isAnnualFee()) {
                 nextDueLocalDate = nextDueLocalDate.withMonthOfYear(this.feeOnMonth).minusYears(1);
+                nextDueLocalDate = setDayOfMonth(nextDueLocalDate);
             } else if (isMonthlyFee()) {
                 nextDueLocalDate = nextDueLocalDate.minusMonths(this.feeInterval);
+                nextDueLocalDate = setDayOfMonth(nextDueLocalDate);
             } else if (isWeeklyFee()) {
                 nextDueLocalDate = nextDueLocalDate.minusDays(7 * this.feeInterval);
+                nextDueLocalDate = setDayOfWeek(nextDueLocalDate);
             }
-
-            nextDueLocalDate = setDayOfMonth(nextDueLocalDate);
 
             this.dueDate = nextDueLocalDate.toDate();
         }
@@ -779,5 +786,41 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
     public boolean feeSettingsSet() {
         return this.feeOnDay != null && this.feeOnMonth != null;
+    }
+
+    public boolean isRecurringFee() {
+        return isWeeklyFee() || isMonthlyFee() || isAnnualFee();
+    }
+
+    public boolean isChargeIsDue(final LocalDate nextDueDate) {
+        return this.getDueLocalDate().isBefore(nextDueDate);
+    }
+
+    public boolean isChargeIsOverPaid(final LocalDate nextDueDate) {
+        final BigDecimal amountPaid = this.amountPaid == null ? BigDecimal.ZERO : amountPaid();
+        return this.getDueLocalDate().isAfter(nextDueDate) && amountPaid.compareTo(BigDecimal.ZERO) == 1;
+    }
+
+    private BigDecimal amountPaid() {
+        return this.amountPaid;
+    }
+
+    public LocalDate nextDuDate(final LocalDate date) {
+        return calculateNextDueDate(date);
+    }
+
+    public void inactiavateCharge(final LocalDate inactivationOnDate) {
+        this.inactivationDate = inactivationOnDate.toDate();
+        this.status = false;
+        this.amountOutstanding = BigDecimal.ZERO;
+        this.paid = true;
+    }
+
+    public boolean isActive() {
+        return this.status;
+    }
+
+    public boolean isNotActive() {
+        return !isActive();
     }
 }
