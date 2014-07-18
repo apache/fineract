@@ -23,6 +23,7 @@ public class SavingsAccountSummaryData {
     private final String externalId;
     private final Long productId;
     private final String productName;
+    private final String shortProductName;
     private final SavingsAccountStatusEnumData status;
     private final CurrencyData currency;
     private final BigDecimal accountBalance;
@@ -34,13 +35,14 @@ public class SavingsAccountSummaryData {
     private final EnumOptionData depositType;
 
     public SavingsAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
-            final String productName, final SavingsAccountStatusEnumData status, final CurrencyData currency,
+            final String productName, final String shortProductName, final SavingsAccountStatusEnumData status, final CurrencyData currency,
             final BigDecimal accountBalance, final EnumOptionData accountType, final SavingsAccountApplicationTimelineData timeline, final EnumOptionData depositType) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
         this.productId = productId;
         this.productName = productName;
+        this.shortProductName = shortProductName;
         this.status = status;
         this.currency = currency;
         this.accountBalance = accountBalance;
