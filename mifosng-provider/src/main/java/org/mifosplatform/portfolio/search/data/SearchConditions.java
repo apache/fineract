@@ -14,6 +14,7 @@ public class SearchConditions {
     private final Boolean clientSearch;
     private final Boolean groupSearch;
     private final Boolean loanSeach;
+	private final Boolean savingSeach;
     private final Boolean clientIdentifierSearch;
 
     public SearchConditions(final String searchQueryParam, final String searchResource) {
@@ -25,17 +26,20 @@ public class SearchConditions {
                 SEARCH_SUPPORTED_RESOURCES.GROUPS.name().toLowerCase())) ? true : false;
         this.loanSeach = (null == searchResource || searchResource.toLowerCase().contains(
                 SEARCH_SUPPORTED_RESOURCES.LOANS.name().toLowerCase())) ? true : false;
-        this.clientIdentifierSearch = (null == searchResource || searchResource.toLowerCase().contains(
+        this.savingSeach = (null == searchResource || searchResource.toLowerCase().contains(
+                SEARCH_SUPPORTED_RESOURCES.SAVINGS.name().toLowerCase())) ? true : false;
+  		this.clientIdentifierSearch = (null == searchResource || searchResource.toLowerCase().contains(
                 SEARCH_SUPPORTED_RESOURCES.CLIENTIDENTIFIERS.name().toLowerCase())) ? true : false;
     }
 
     public SearchConditions(final String searchQueryParam, final String searchResource, final Boolean clientSearch,
-            final Boolean groupSearch, final Boolean loanSeach, final Boolean clientIdentifierSearch) {
+            final Boolean groupSearch, final Boolean loanSeach, final Boolean savingSeach, final Boolean clientIdentifierSearch) {
         this.searchQuery = searchQueryParam;
         this.searchResource = searchResource;
         this.clientSearch = clientSearch;
         this.groupSearch = groupSearch;
         this.loanSeach = loanSeach;
+		this.savingSeach = savingSeach;
         this.clientIdentifierSearch = clientIdentifierSearch;
     }
 
@@ -59,7 +63,11 @@ public class SearchConditions {
         return this.loanSeach;
     }
 
-    public Boolean isClientIdentifierSearch() {
+    public Boolean isSavingSeach() {
+        return this.savingSeach;
+    }
+
+	public Boolean isClientIdentifierSearch() {
         return this.clientIdentifierSearch;
     }
 

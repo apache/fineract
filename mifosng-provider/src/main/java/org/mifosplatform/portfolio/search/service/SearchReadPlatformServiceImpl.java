@@ -85,13 +85,25 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
 
             final String loanExactMatchSql = " (select 'LOAN' as entityType, l.id as entityId, pl.name as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
                     + " , c.id as parentId, c.display_name as parentName, l.loan_status_id as entityStatusEnum "
-                    + " from m_loan l join m_client c on l.client_id = c.id join m_office o on o.id = c.office_id join m_product_loan pl on pl.id=l.product_id where o.hierarchy like :hierarchy and l.account_no like :search) ";
+                    + " from m_loan l join m_client c on l.client_id = c.id join m_office o on o.id = c.office_id join m_product_loan pl on pl.id=l.product_id where o.hierarchy like :hierarchy and (l.account_no like :search or l.external_id like :search)) ";
 
             final String loanMatchSql = " (select 'LOAN' as entityType, l.id as entityId, pl.name as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
                     + " , c.id as parentId, c.display_name as parentName, l.loan_status_id as entityStatusEnum "
-                    + " from m_loan l join m_client c on l.client_id = c.id join m_office o on o.id = c.office_id join m_product_loan pl on pl.id=l.product_id where o.hierarchy like :hierarchy and l.account_no like :partialSearch and l.account_no not like :search) ";
+                    + " from m_loan l join m_client c on l.client_id = c.id join m_office o on o.id = c.office_id join m_product_loan pl on pl.id=l.product_id where o.hierarchy like :hierarchy and "
+					+ " ((l.account_no like :partialSearch and l.account_no not like :search) or (l.external_id like :partialSearch and l.external_id not like :search))) ";
 
-            final String clientIdentifierExactMatchSql = " (select 'CLIENTIDENTIFIER' as entityType, ci.id as entityId, ci.document_key as entityName, "
+			final String savingExactMatchSql = " (select 'SAVING' as entityType, s.id as entityId, sp.name as entityName, s.external_id as entityExternalId, s.account_no as entityAccountNo " 
+					+ " , c.id as parentId, c.display_name as parentName, s.status_enum as entityStatusEnum "
+					+ " from m_savings_account s join m_client c on s.client_id = c.id join m_office o on o.id = c.office_id join m_savings_product sp on sp.id=s.product_id "
+					+ " where o.hierarchy like :hierarchy and (s.account_no like :search or s.external_id like :search)) ";
+			
+			final String savingMatchSql = " (select 'SAVING' as entityType, s.id as entityId, sp.name as entityName, s.external_id as entityExternalId, s.account_no as entityAccountNo " 
+					+ " , c.id as parentId, c.display_name as parentName, s.status_enum as entityStatusEnum "
+					+ " from m_savings_account s join m_client c on s.client_id = c.id join m_office o on o.id = c.office_id join m_savings_product sp on sp.id=s.product_id "
+					+ " where o.hierarchy like :hierarchy and (s.account_no like :partialSearch and s.account_no not like :search) or "
+					+ "(s.external_id like :partialSearch and s.external_id not like :search)) ";
+
+			final String clientIdentifierExactMatchSql = " (select 'CLIENTIDENTIFIER' as entityType, ci.id as entityId, ci.document_key as entityName, "
                     + " null as entityExternalId, null as entityAccountNo, c.id as parentId, c.display_name as parentName, c.status_enum as entityStatusEnum "
                     + " from m_client_identifier ci join m_client c on ci.client_id=c.id join m_office o on o.id = c.office_id "
                     + " where o.hierarchy like :hierarchy and ci.document_key like :search) ";
@@ -120,7 +132,11 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                 sql.append(loanExactMatchSql).append(union);
             }
 
-            if (searchConditions.isClientIdentifierSearch()) {
+            if (searchConditions.isSavingSeach()) {
+                sql.append(savingExactMatchSql).append(union);
+            }
+
+			if (searchConditions.isClientIdentifierSearch()) {
                 sql.append(clientIdentifierExactMatchSql).append(union);
             }
 
@@ -135,6 +151,10 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
 
             if (searchConditions.isLoanSeach()) {
                 sql.append(loanMatchSql).append(union);
+            }
+
+            if (searchConditions.isSavingSeach()) {
+                sql.append(savingMatchSql).append(union);
             }
 
             if (searchConditions.isClientIdentifierSearch()) {
