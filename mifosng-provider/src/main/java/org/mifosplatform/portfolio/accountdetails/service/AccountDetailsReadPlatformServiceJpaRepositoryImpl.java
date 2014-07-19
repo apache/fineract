@@ -141,7 +141,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     .append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf, ");
             accountsSummary.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
             accountsSummary.append("curr.display_symbol as currencyDisplaySymbol, ");
-            accountsSummary.append("sa.product_id as productId, p.name as productName, ");
+            accountsSummary.append("sa.product_id as productId, p.name as productName, p.short_name as shortProductName, ");
             accountsSummary.append("sa.deposit_type_enum as depositType ");
             accountsSummary.append("from m_savings_account sa ");
             accountsSummary.append("join m_savings_product as p on p.id = sa.product_id ");
@@ -168,6 +168,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             final String externalId = rs.getString("externalId");
             final Long productId = JdbcSupport.getLong(rs, "productId");
             final String productName = rs.getString("productName");
+            final String shortProductName = rs.getString("shortProductName");
             final Integer statusId = JdbcSupport.getInteger(rs, "statusEnum");
             final BigDecimal accountBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "accountBalance");
             final SavingsAccountStatusEnumData status = SavingsEnumerations.status(statusId);
@@ -222,7 +223,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate, closedByUsername, closedByFirstname,
                     closedByLastname);
 
-            return new SavingsAccountSummaryData(id, accountNo, externalId, productId, productName, status, currency, accountBalance,
+            return new SavingsAccountSummaryData(id, accountNo, externalId, productId, productName, shortProductName, status, currency, accountBalance,
                     accountTypeData, timeline, depositTypeData);
         }
     }
@@ -233,7 +234,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
 
             final StringBuilder accountsSummary = new StringBuilder("l.id as id, l.account_no as accountNo, l.external_id as externalId,");
             accountsSummary
-                    .append(" l.product_id as productId, lp.name as productName,")
+                    .append(" l.product_id as productId, lp.name as productName, lp.short_name as shortProductName,")
                     .append(" l.loan_status_id as statusId, l.loan_type_enum as loanType,")
                     .append(" l.loan_product_counter as loanCycle,")
 
@@ -277,6 +278,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             final String externalId = rs.getString("externalId");
             final Long productId = JdbcSupport.getLong(rs, "productId");
             final String loanProductName = rs.getString("productName");
+            final String shortLoanProductName = rs.getString("shortProductName");
             final Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
             final LoanStatusEnumData loanStatus = LoanEnumerations.status(loanStatusId);
             final Integer loanTypeId = JdbcSupport.getInteger(rs, "loanType");
@@ -331,7 +333,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     disbursedByFirstname, disbursedByLastname, closedOnDate, closedByUsername, closedByFirstname, closedByLastname,
                     expectedMaturityDate, writtenOffOnDate, closedByUsername, closedByFirstname, closedByLastname);
 
-            return new LoanAccountSummaryData(id, accountNo, externalId, productId, loanProductName, loanStatus, loanType, loanCycle,
+            return new LoanAccountSummaryData(id, accountNo, externalId, productId, loanProductName, shortLoanProductName, loanStatus, loanType, loanCycle,
                     timeline, inArrears);
         }
     }
