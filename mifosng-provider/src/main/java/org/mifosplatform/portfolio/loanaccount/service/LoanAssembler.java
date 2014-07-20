@@ -232,13 +232,13 @@ public class LoanAssembler {
 
             loanApplication = Loan.newIndividualLoanApplicationFromGroup(accountNo, client, group, loanType.getId().intValue(),
                     loanProduct, fund, loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges,
-                    syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance);
+                    collateral, syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance);
 
         } else if (group != null) {
 
             loanApplication = Loan.newGroupLoanApplication(accountNo, group, loanType.getId().intValue(), loanProduct, fund, loanOfficer,
-                    loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, syncDisbursementWithMeeting,
-                    fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance);
+                    loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral,
+                    syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance);
 
         } else if (client != null) {
 
