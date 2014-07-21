@@ -18,7 +18,7 @@
 
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>classpath*:META-INF/spring/appContext.xml</param-value>
+		<param-value>classpath*:META-INF/spring/jndi.xml classpath*:META-INF/spring/appContext.xml</param-value>
 	</context-param>
 
 	<filter>
@@ -36,7 +36,7 @@
 	</listener>
 
 	<servlet>
-		<servlet-name>jersey-serlvet</servlet-name>
+		<servlet-name>jersey-servlet</servlet-name>
 		<servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
 		<init-param>
 			<param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
@@ -54,7 +54,7 @@
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>jersey-serlvet</servlet-name>
+		<servlet-name>jersey-servlet</servlet-name>
 		<url-pattern>/api/v1/*</url-pattern>
 	</servlet-mapping>
 </web-app>

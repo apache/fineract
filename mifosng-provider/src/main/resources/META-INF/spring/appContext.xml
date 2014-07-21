@@ -56,6 +56,11 @@
 	
 	<import resource="infrastructure.xml" />
 
+	<!-- do NOT <import resource="jndi.xml" />  here;
+	     because we want the TestDataSourceConfiguration to not have that;
+	     we'll manually list jndi.xml in web.xml
+	-->
+
 	<import resource="securityContext.xml" />
 
 	<import resource="cache.xml" />
