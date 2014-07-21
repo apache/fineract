@@ -1407,7 +1407,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LoanTransaction newTransferAcceptanceTransaction = LoanTransaction.approveTransfer(acceptedInOffice, loan, transferDate);
         loan.getLoanTransactions().add(newTransferAcceptanceTransaction);
-        loan.setLoanStatus(LoanStatus.ACTIVE.getValue());
+        if(loan.getTotalOverpaid() !=null){
+            loan.setLoanStatus(LoanStatus.OVERPAID.getValue());
+        }else{
+            loan.setLoanStatus(LoanStatus.ACTIVE.getValue());
+        }
         if (loanOfficer != null) {
             loan.reassignLoanOfficer(loanOfficer, transferDate);
         }

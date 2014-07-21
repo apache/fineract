@@ -3851,4 +3851,7 @@ public class Loan extends AbstractPersistable<Long> {
         return this.approvedPrincipal;
     }
 
+    public BigDecimal getTotalOverpaid() {
+        return this.totalOverpaid;
+    }
 }
