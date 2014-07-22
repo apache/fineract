@@ -134,10 +134,10 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
             final List<LoanRepaymentScheduleInstallment> installments) {
 
         LoanRepaymentScheduleInstallment nearest = installments.get(0);
-
         for (final LoanRepaymentScheduleInstallment installment : installments) {
-            if (installment.getDueDate().isAfter(transactionDate) || installment.getDueDate().isEqual(transactionDate)) {
+            if (installment.getDueDate().isBefore(transactionDate) || installment.getDueDate().isEqual(transactionDate)) {
                 nearest = installment;
+            } else if (installment.getDueDate().isAfter(transactionDate)) {
                 break;
             }
         }

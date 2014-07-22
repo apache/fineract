@@ -18,6 +18,7 @@ public class LoanApplicationTestBuilder {
     private static final String EQUAL_INSTALLMENTS = "1";
     private static final String CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD = "1";
     private static final String MIFOS_STANDARD_STRATEGY = "1";
+    public static final String RBI_INDIA_STRATEGY ="4";
 
     private String principal = "10,000";
     private String loanTermFrequency = "";
@@ -30,7 +31,7 @@ public class LoanApplicationTestBuilder {
     private String interestType = FLAT_BALANCE;
     private String amortizationType = EQUAL_PRINCIPAL_PAYMENTS;
     private String interestCalculationPeriodType = CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD;
-    private final String transactionProcessingID = MIFOS_STANDARD_STRATEGY;
+    private String transactionProcessingID = MIFOS_STANDARD_STRATEGY;
     private String expectedDisbursmentDate = "";
     private String submittedOnDate = "";
     private String loanType = "individual";
@@ -203,6 +204,11 @@ public class LoanApplicationTestBuilder {
 
     public LoanApplicationTestBuilder withTranches(final List<HashMap> disbursementData) {
         this.disbursementData = disbursementData;
+        return this;
+    }
+    
+    public LoanApplicationTestBuilder withwithRepaymentStrategy(final String transactionProcessingStrategy) {
+        this.transactionProcessingID = transactionProcessingStrategy;
         return this;
     }
 }
