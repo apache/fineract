@@ -12,7 +12,9 @@ import java.util.List;
  * <ul>
  * People typically use either of the following settings when calculating there
  * interest using the daily method:
- * <li>360 and</li>
+ * <li>Actual or</li>
+ * <li>360 or</li>
+ * <li>364 or</li>
  * <li>365</li>
  * </ul>
  */
@@ -70,5 +72,9 @@ public enum DaysInYearType {
             }
         }
         return repaymentFrequencyType;
+    }
+
+    public boolean isActual() {
+        return DaysInYearType.ACTUAL.getValue().equals(this.value);
     }
 }

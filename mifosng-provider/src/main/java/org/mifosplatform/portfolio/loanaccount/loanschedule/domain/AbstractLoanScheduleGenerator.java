@@ -66,8 +66,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         final Collection<LoanScheduleModelPeriod> periods = createNewLoanScheduleListWithDisbursementDetails(numberOfRepayments,
                 loanApplicationTerms, chargesDueAtTimeOfDisbursement);
 
-        // 4. Determine the total interest owed over the full loan.
-        final Money totalInterestChargedForFullLoanTerm = loanApplicationTerms.calculateTotalInterestCharged(
+        // 4. Determine the total interest owed over the full loan for FLAT interest method .
+        Money totalInterestChargedForFullLoanTerm = loanApplicationTerms.calculateTotalInterestCharged(
                 this.paymentPeriodsInOneYearCalculator, mc);
 
         LocalDate periodStartDate = loanApplicationTerms.getExpectedDisbursementDate();
@@ -150,13 +150,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             Money feeChargesForInstallment = principalDisbursed.zero();
             Money penaltyChargesForInstallment = principalDisbursed.zero();
-            if (!(loanApplicationTerms.isMultiDisburseLoan() && loanApplicationTerms.getFixedEmiAmount() != null)) {
-                // 7. determine fees and penalties
-                feeChargesForInstallment = cumulativeFeeChargesDueWithin(periodStartDate, scheduledDueDate, loanCharges, currency,
-                        principalInterestForThisPeriod, principalDisbursed, totalInterestChargedForFullLoanTerm, numberOfRepayments);
-                penaltyChargesForInstallment = cumulativePenaltyChargesDueWithin(periodStartDate, scheduledDueDate, loanCharges, currency,
-                        principalInterestForThisPeriod, principalDisbursed, totalInterestChargedForFullLoanTerm, numberOfRepayments);
-            }
+
             // 8. sum up real totalInstallmentDue from components
             final Money totalInstallmentDue = principalInterestForThisPeriod.principal() //
                     .plus(principalInterestForThisPeriod.interest()) //
@@ -187,22 +181,20 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             throw new MultiDisbursementDisbursementDateException(errorMsg);
         }
 
-        if (loanApplicationTerms.isMultiDisburseLoan() && loanApplicationTerms.getFixedEmiAmount() != null && !loanCharges.isEmpty()) {
-            // 7. determine fees and penalties
-            for (LoanScheduleModelPeriod loanScheduleModelPeriod : periods) {
-                if (loanScheduleModelPeriod.isRepaymentPeriod()) {
-                    PrincipalInterest principalInterest = new PrincipalInterest(Money.of(currency, loanScheduleModelPeriod.principalDue()),
-                            Money.of(currency, loanScheduleModelPeriod.interestDue()), null);
-                    Money feeChargesForInstallment = cumulativeFeeChargesDueWithin(loanScheduleModelPeriod.periodFromDate(),
-                            loanScheduleModelPeriod.periodDueDate(), loanCharges, currency, principalInterest, principalDisbursed,
-                            totalCumulativeInterest, numberOfRepayments);
-                    Money penaltyChargesForInstallment = cumulativePenaltyChargesDueWithin(loanScheduleModelPeriod.periodFromDate(),
-                            loanScheduleModelPeriod.periodDueDate(), loanCharges, currency, principalInterest, principalDisbursed,
-                            totalCumulativeInterest, numberOfRepayments);
-                    totalFeeChargesCharged = totalFeeChargesCharged.add(feeChargesForInstallment.getAmount());
-                    totalPenaltyChargesCharged = totalPenaltyChargesCharged.add(penaltyChargesForInstallment.getAmount());
-                    loanScheduleModelPeriod.addLoanCharges(feeChargesForInstallment.getAmount(), penaltyChargesForInstallment.getAmount());
-                }
+        // 7. determine fees and penalties
+        for (LoanScheduleModelPeriod loanScheduleModelPeriod : periods) {
+            if (loanScheduleModelPeriod.isRepaymentPeriod()) {
+                PrincipalInterest principalInterest = new PrincipalInterest(Money.of(currency, loanScheduleModelPeriod.principalDue()),
+                        Money.of(currency, loanScheduleModelPeriod.interestDue()), null);
+                Money feeChargesForInstallment = cumulativeFeeChargesDueWithin(loanScheduleModelPeriod.periodFromDate(),
+                        loanScheduleModelPeriod.periodDueDate(), loanCharges, currency, principalInterest, principalDisbursed,
+                        totalCumulativeInterest, numberOfRepayments);
+                Money penaltyChargesForInstallment = cumulativePenaltyChargesDueWithin(loanScheduleModelPeriod.periodFromDate(),
+                        loanScheduleModelPeriod.periodDueDate(), loanCharges, currency, principalInterest, principalDisbursed,
+                        totalCumulativeInterest, numberOfRepayments);
+                totalFeeChargesCharged = totalFeeChargesCharged.add(feeChargesForInstallment.getAmount());
+                totalPenaltyChargesCharged = totalPenaltyChargesCharged.add(penaltyChargesForInstallment.getAmount());
+                loanScheduleModelPeriod.addLoanCharges(feeChargesForInstallment.getAmount(), penaltyChargesForInstallment.getAmount());
             }
         }
 

@@ -12,8 +12,8 @@ import java.util.List;
  * <ul>
  * People typically use either of the following settings when calculating there
  * interest using the daily method:
- * <li>360 and</li>
- * <li>365</li>
+ * <li>Actual or</li>
+ * <li>30</li>
  * </ul>
  */
 public enum DaysInMonthType {
@@ -63,5 +63,9 @@ public enum DaysInMonthType {
             }
         }
         return repaymentFrequencyType;
+    }
+
+    public boolean isDaysInMonth_30() {
+        return DaysInMonthType.DAYS_30.getValue().equals(this.value);
     }
 }
