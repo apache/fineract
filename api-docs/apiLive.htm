@@ -1261,6 +1261,22 @@
                                 <td></td>
                                 <td></td>
                             </tr>
+							<tr>
+								<td></td>
+								<td>centers/{centerId}?command=associateGroups</td>
+								<td><a href="#centers_associate_groups">Associate Groups</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>centers/{centerId}?command=disassociateGroups</td>
+								<td><a href="#centers_disassociate_groups">Disassociate Groups</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
                             <tr>
 															<td></td>
 															<td>centers/{centerId}/accounts</td>
@@ -4753,6 +4769,62 @@ Request Body:
 	    </div>
 	</div>
 
+	<a id="centers_associate_groups" name="centers_associate_groups" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Associate Groups</h2>
+	        <p>This API allows to associate existing groups to a center.</p>
+	        <p>The groups are listed from the office to which the center is associated.</p>
+	        <p>If group(s) is already associated with center then API will result in an error.</p>
+	    </div>
+
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/centers/{centerId}?command=associateGroups</code>
+	        <code class="method-request">POST centers/1?command=associateGroups
+Content-Type: application/json
+Request Body:
+{
+  "grouptMembers":[1,2]
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "resourceId": 1,
+  "grouptMembers": [1,2]
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="centers_disassociate_groups" name="centers_disassociate_groups" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Disassociate Groups</h2>
+	        <p>This API allows to disassociate groups from a center.</p>
+	    </div>
+
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/centers/{centerId}?command=disassociateGroups</code>
+	        <code class="method-request">POST center/1?command=disassociateGroups
+Content-Type: application/json
+Request Body:
+{
+  "grouptMembers":[1,2]
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "resourceId": 1,
+  "grouptMembers": [1,2]
+}
+	        </code>
+	    </div>
+	</div>
+
 			<a id="centers_accounts" name="centers_accounts" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -5542,34 +5614,6 @@ Request Body:
 	    </div>
 	</div>
 
-	<a id="groups_associate_clients" name="groups_associate_clients" class="old-syle-anchor">&nbsp;</a>
-	<div class="method-section">
-	    <div class="method-description">
-	        <h2>Associate Clients</h2>
-	        <p>This API allows to associate existing clients to a group.</p>
-	        <p>The clients are listed from the office to which the group is associated.</p>
-	        <p>If client(s) is already associated with group then API will result in an error.</p>
-	    </div>
-
-	    <div class="method-example">
-	        <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=associateClients</code>
-	        <code class="method-request">POST groups/1?command=associateClients
-Content-Type: application/json
-Request Body:
-{
-  "clientMembers":[1,2]
-}
-			</code>
-	        <code class="method-response">
-{
-  "officeId": 1,
-  "groupId": 1,
-  "resourceId": 1,
-  "clientMembers": [1,2]
-}
-	        </code>
-	    </div>
-	</div>
 			<a id="groups_transfer_clients" name="groups_transfer_clients" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 			    <div class="method-description">
@@ -31848,6 +31892,22 @@ No Request Body:
             <td></td>
             <td></td>
         </tr>
+		<tr>
+			<td></td>
+			<td>centers/{centerId}?command=associateGroups</td>
+			<td><a href="#centers_associate_groups">Associate Groups</a></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>centers/{centerId}?command=disassociateGroups</td>
+			<td><a href="#centers_disassociate_groups">Disassociate Groups</a></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
         <tr>
 					<td></td>
 					<td>centers/{centerId}/accounts</td>

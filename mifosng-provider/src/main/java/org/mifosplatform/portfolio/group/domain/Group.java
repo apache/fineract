@@ -35,6 +35,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.office.domain.Office;
@@ -44,6 +45,8 @@ import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.group.api.GroupingTypesApiConstants;
 import org.mifosplatform.portfolio.group.exception.ClientExistInGroupException;
 import org.mifosplatform.portfolio.group.exception.ClientNotInGroupException;
+import org.mifosplatform.portfolio.group.exception.GroupExistsInCenterException;
+import org.mifosplatform.portfolio.group.exception.GroupNotExistsInCenterException;
 import org.mifosplatform.portfolio.group.exception.InvalidGroupStateTransitionException;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -517,5 +520,50 @@ public final class Group extends AbstractPersistable<Long> {
             if (!group.isClosed()) { return true; }
         }
         return false;
+    }
+
+    public boolean hasGroupAsMember(final Group group) {
+        return this.groupMembers.contains(group);
+    }
+
+    public List<String> associateGroups(final Set<Group> groupMembersSet) {
+
+        final List<String> differences = new ArrayList<>();
+        for (final Group group : groupMembersSet) {
+
+            if (group.isCenter()) {
+                final String defaultUserMessage = "Center can not assigned as a child";
+                throw new GeneralPlatformDomainRuleException("error.msg.center.cannot.be.assigned.as.child", defaultUserMessage,
+                        group.getId());
+            }
+
+            if (group.isChildGroup()) {
+                final String defaultUserMessage = "Group is already associated with a center";
+                throw new GeneralPlatformDomainRuleException("error.msg.group.already.associated.with.center", defaultUserMessage, group
+                        .getParent().getId(), group.getId());
+            }
+
+            if (hasGroupAsMember(group)) { throw new GroupExistsInCenterException(getId(), group.getId()); }
+
+            this.groupMembers.add(group);
+            differences.add(group.getId().toString());
+        }
+
+        return differences;
+    }
+
+    public List<String> disassociateGroups(Set<Group> groupMembersSet) {
+
+        final List<String> differences = new ArrayList<>();
+        for (final Group group : groupMembersSet) {
+            if (hasGroupAsMember(group)) {
+                this.groupMembers.remove(group);
+                differences.add(group.getId().toString());
+            } else {
+                throw new GroupNotExistsInCenterException(group.getId(), getId());
+            }
+        }
+
+        return differences;
     }
 }

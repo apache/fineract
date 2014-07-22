@@ -279,9 +279,17 @@ public class CentersApiResource {
             final CommandWrapper commandRequest = builder.closeCenter(centerId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return this.toApiJsonSerializer.serialize(result);
+        } else if (is(commandParam, "associateGroups")) {
+            final CommandWrapper commandRequest = builder.associateGroupsToCenter(centerId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
+        } else if (is(commandParam, "disassociateGroups")) {
+            final CommandWrapper commandRequest = builder.disassociateGroupsFromCenter(centerId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "generateCollectionSheet",
-                    "createRole" });
+                    "saveCollectionSheet", "close", "associateGroups", "disassociateGroups" });
         }
 
     }

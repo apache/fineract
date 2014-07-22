@@ -476,4 +476,44 @@ public final class GroupingTypesDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
     }
+
+    public void validateForAssociateGroups(final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+
+        final Set<String> supportedParameters = new HashSet<>(Arrays.asList(GroupingTypesApiConstants.groupMembersParamName));
+
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("group");
+        final String[] groups = this.fromApiJsonHelper.extractArrayNamed(GroupingTypesApiConstants.groupMembersParamName, element);
+        baseDataValidator.reset().parameter(GroupingTypesApiConstants.groupMembersParamName).value(groups).arrayNotEmpty();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+
+    }
+
+    public void validateForDisassociateGroups(final String json) {
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+
+        final Set<String> supportedParameters = new HashSet<>(Arrays.asList(GroupingTypesApiConstants.groupMembersParamName));
+
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("group");
+        final String[] groups = this.fromApiJsonHelper.extractArrayNamed(GroupingTypesApiConstants.groupMembersParamName, element);
+        baseDataValidator.reset().parameter(GroupingTypesApiConstants.groupMembersParamName).value(groups).arrayNotEmpty();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
 }

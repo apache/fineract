@@ -25,6 +25,7 @@ import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.domain.Office;
@@ -33,6 +34,11 @@ import org.mifosplatform.organisation.office.exception.InvalidOfficeException;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
+import org.mifosplatform.portfolio.calendar.domain.Calendar;
+import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
+import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
+import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
+import org.mifosplatform.portfolio.calendar.domain.CalendarType;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.service.LoanStatusMapper;
@@ -81,6 +87,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     private final CodeValueRepositoryWrapper codeValueRepository;
     private final SavingsAccountRepository savingsRepository;
     private final CommandProcessingService commandProcessingService;
+    private final CalendarInstanceRepository calendarInstanceRepository;
 
     @Autowired
     public GroupingTypesWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -88,7 +95,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final OfficeRepository officeRepository, final StaffRepositoryWrapper staffRepository, final NoteRepository noteRepository,
             final GroupLevelRepository groupLevelRepository, final GroupingTypesDataValidator fromApiJsonDeserializer,
             final LoanRepository loanRepository, final SavingsAccountRepository savingsRepository,
-            final CodeValueRepositoryWrapper codeValueRepository, final CommandProcessingService commandProcessingService) {
+            final CodeValueRepositoryWrapper codeValueRepository, final CommandProcessingService commandProcessingService,
+            final CalendarInstanceRepository calendarInstanceRepository) {
         this.context = context;
         this.groupRepository = groupRepository;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
@@ -101,6 +109,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         this.savingsRepository = savingsRepository;
         this.codeValueRepository = codeValueRepository;
         this.commandProcessingService = commandProcessingService;
+        this.calendarInstanceRepository = calendarInstanceRepository;
     }
 
     private CommandProcessingResult createGroupingType(final JsonCommand command, final GroupTypes groupingType, final Long centerId) {
@@ -579,6 +588,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     final String errorMessage = "Group and child groups must have the same office.";
                     throw new InvalidOfficeException("group", "attach.to.parent.group", errorMessage);
                 }
+
                 childGroups.add(group);
             }
         }
@@ -685,6 +695,60 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     }
 
     @Transactional
+    @Override
+    public CommandProcessingResult associateGroupsToCenter(final Long centerId, final JsonCommand command) {
+
+        this.fromApiJsonDeserializer.validateForAssociateGroups(command.json());
+
+        final Group centerForUpdate = this.groupRepository.findOneWithNotFoundDetection(centerId);
+        final Set<Group> groupMembers = assembleSetOfChildGroups(centerForUpdate.officeId(), command);
+        checkGroupMembersMeetingSyncWithCenterMeeting(centerId, groupMembers);
+
+        final Map<String, Object> actualChanges = new HashMap<>();
+        final List<String> changes = centerForUpdate.associateGroups(groupMembers);
+        if (!changes.isEmpty()) {
+            actualChanges.put(GroupingTypesApiConstants.groupMembersParamName, changes);
+        }
+
+        this.groupRepository.saveAndFlush(centerForUpdate);
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withOfficeId(centerForUpdate.officeId()) //
+                .withGroupId(centerForUpdate.getId()) //
+                .withEntityId(centerForUpdate.getId()) //
+                .with(actualChanges) //
+                .build();
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult disassociateGroupsToCenter(final Long centerId, final JsonCommand command) {
+        this.fromApiJsonDeserializer.validateForDisassociateGroups(command.json());
+
+        final Group centerForUpdate = this.groupRepository.findOneWithNotFoundDetection(centerId);
+        final Set<Group> groupMembers = assembleSetOfChildGroups(centerForUpdate.officeId(), command);
+
+        final Map<String, Object> actualChanges = new HashMap<>();
+
+        final List<String> changes = centerForUpdate.disassociateGroups(groupMembers);
+        if (!changes.isEmpty()) {
+            actualChanges.put(GroupingTypesApiConstants.clientMembersParamName, changes);
+        }
+
+        this.groupRepository.saveAndFlush(centerForUpdate);
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withOfficeId(centerForUpdate.officeId()) //
+                .withGroupId(centerForUpdate.getId()) //
+                .withEntityId(centerForUpdate.getId()) //
+                .with(actualChanges) //
+                .build();
+
+    }
+
+    @Transactional
     private void validateForJLGLoan(final Long groupId, final Set<Client> clientMembers) {
         for (final Client client : clientMembers) {
             final Collection<Loan> loans = this.loanRepository.findByClientIdAndGroupId(client.getId(), groupId);
@@ -720,4 +784,48 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         }
     }
 
+    private void checkGroupMembersMeetingSyncWithCenterMeeting(final Long centerId, final Set<Group> groupMembers) {
+
+        /**
+         * Get parent(center) calendar
+         */
+        Calendar ceneterCalendar = null;
+        final CalendarInstance parentCalendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
+                centerId, CalendarEntityType.CENTERS.getValue(), CalendarType.COLLECTION.getValue());
+        if (parentCalendarInstance != null) {
+            ceneterCalendar = parentCalendarInstance.getCalendar();
+        }
+
+        for (final Group group : groupMembers) {
+            /**
+             * Get child(group) calendar
+             */
+            Calendar groupCalendar = null;
+            final CalendarInstance groupCalendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
+                    group.getId(), CalendarEntityType.GROUPS.getValue(), CalendarType.COLLECTION.getValue());
+            if (groupCalendarInstance != null) {
+                groupCalendar = groupCalendarInstance.getCalendar();
+            }
+
+            /**
+             * Group shouldn't have a meeting when no meeting attached for
+             * center
+             */
+            if (ceneterCalendar == null && groupCalendar != null) {
+                throw new GeneralPlatformDomainRuleException(
+                        "error.msg.center.associating.group.not.allowed.with.meeting.attached.to.group", "Group with id " + group.getId()
+                                + " is already associated with meeting", group.getId());
+            }
+            /**
+             * Group meeting recurrence should match with center meeting
+             * recurrence
+             */
+            else if (ceneterCalendar != null && groupCalendar != null) {
+
+                if (!ceneterCalendar.getRecurrence().equalsIgnoreCase(groupCalendar.getRecurrence())) { throw new GeneralPlatformDomainRuleException(
+                        "error.msg.center.associating.group.not.allowed.with.different.meeting", "Group with id " + group.getId()
+                                + " meeting recurrence doesnot matched with center meeting recurrence", group.getId()); }
+            }
+        }
+    }
 }
