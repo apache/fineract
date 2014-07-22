@@ -38,6 +38,8 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.charge.domain.Charge;
+import org.mifosplatform.portfolio.common.domain.DaysInMonthType;
+import org.mifosplatform.portfolio.common.domain.DaysInYearType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
@@ -839,4 +841,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
         }
         return borrowerCycleVariations;
     }
+
+    public DaysInMonthType fetchDaysInMonthType() {
+        return this.loanProductRelatedDetail.fetchDaysInMonthType();
+    }
+
+    public DaysInYearType fetchDaysInYearType() {
+        return this.loanProductRelatedDetail.fetchDaysInYearType();
+    }
+
 }

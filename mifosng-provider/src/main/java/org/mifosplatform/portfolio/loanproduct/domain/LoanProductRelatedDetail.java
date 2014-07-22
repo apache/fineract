@@ -23,6 +23,8 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.portfolio.common.domain.DaysInMonthType;
+import org.mifosplatform.portfolio.common.domain.DaysInYearType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
@@ -164,15 +166,15 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public void setPrincipal(BigDecimal principal) {
         this.principal = principal;
     }
-    
+
     public Integer graceOnInterestCharged() {
         return this.graceOnInterestCharged;
     }
-    
+
     public Integer graceOnInterestPayment() {
         return this.graceOnInterestPayment;
     }
-    
+
     public Integer graceOnPrincipalPayment() {
         return this.graceOnPrincipalPayment;
     }
@@ -430,5 +432,13 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
     public Integer getGraceOnDueDate() {
         return this.graceOnArrearsAgeing;
+    }
+
+    public DaysInMonthType fetchDaysInMonthType() {
+        return DaysInMonthType.ACTUAL;
+    }
+
+    public DaysInYearType fetchDaysInYearType() {
+        return DaysInYearType.ACTUAL;
     }
 }
