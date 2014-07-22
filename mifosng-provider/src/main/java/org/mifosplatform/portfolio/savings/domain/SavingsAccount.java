@@ -769,7 +769,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     private void payWithdrawalFee(final BigDecimal transactionAmoount, final LocalDate transactionDate) {
         for (SavingsAccountCharge charge : this.charges()) {
-            if (charge.isWithdrawalFee()) {
+            if (charge.isWithdrawalFee() && charge.isActive()) {
                 charge.updateWithdralFeeAmount(transactionAmoount);
                 this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate);
             }
@@ -1854,6 +1854,11 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final SavingsAccountCharge savingsAccountCharge = getCharge(savingsAccountChargeId);
 
+        if (savingsAccountCharge.isNotActive()) {
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("charge.is.not.active");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+
         if (savingsAccountCharge.isWithdrawalFee()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.waiver.of.withdrawal.fee.not.supported");
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
@@ -1974,6 +1979,11 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         if (isNotActive()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.not.active");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+
+        if (savingsAccountCharge.isNotActive()) {
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("charge.is.not.active");
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
@@ -2181,5 +2191,32 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     public BigDecimal minBalanceForInterestCalculation() {
         return this.minBalanceForInterestCalculation;
+    }
+
+    public void inactivateCharge(SavingsAccountCharge savingsAccountCharge, LocalDate inactivationOnDate) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
+
+        if (isClosed()) {
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.closed");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+
+        if (isNotActive()) {
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.account.is.not.active");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+        savingsAccountCharge.inactiavateCharge(inactivationOnDate);
+    }
+
+    public SavingsAccountCharge getUpdatedChargeDetails(SavingsAccountCharge savingsAccountCharge) {
+        for (final SavingsAccountCharge charge : this.charges) {
+            if (charge.equals(savingsAccountCharge)) {
+                savingsAccountCharge = charge;
+                break;
+            }
+        }
+        return savingsAccountCharge;
     }
 }

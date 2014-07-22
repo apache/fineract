@@ -1104,6 +1104,16 @@ public class CommandWrapperBuilder {
 
     }
 
+    public CommandWrapperBuilder inactivateSavingsAccountCharge(final Long savingsAccountId, final Long savingsAccountChargeId) {
+        this.actionName = "INACTIVATE";
+        this.entityName = "SAVINGSACCOUNTCHARGE";
+        this.entityId = savingsAccountChargeId;
+        this.savingsId = savingsAccountId;
+        this.href = "/savingsaccounts/" + savingsAccountId + "/charges/" + savingsAccountChargeId;
+        return this;
+
+    }
+
     public CommandWrapperBuilder deleteSavingsAccountCharge(final Long savingsAccountId, final Long savingsAccountChargeId) {
         this.actionName = "DELETE";
         this.entityName = "SAVINGSACCOUNTCHARGE";

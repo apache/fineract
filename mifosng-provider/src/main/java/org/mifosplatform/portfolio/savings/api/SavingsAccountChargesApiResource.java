@@ -9,11 +9,13 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.COMMAND_PA
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.COMMAND_WAIVE_CHARGE;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_CHARGES_RESPONSE_DATA_PARAMETERS;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.COMMAND_INACTIVATE_CHARGE;
 
 import java.util.Collection;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -79,12 +81,15 @@ public class SavingsAccountChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllSavingsAccountCharges(@PathParam("savingsAccountId") final Long savingsAccountId,
-            @Context final UriInfo uriInfo) {
+            @DefaultValue("all") @QueryParam("chargeStatus") final String chargeStatus, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
 
+        if (!(is(chargeStatus, "all") || is(chargeStatus, "active") || is(chargeStatus, "inactive"))) { throw new UnrecognizedQueryParamException(
+                "status", chargeStatus, new Object[] { "all", "active", "inactive" }); }
+
         final Collection<SavingsAccountChargeData> savingsAccountCharges = this.savingsAccountChargeReadPlatformService
-                .retrieveSavingsAccountCharges(savingsAccountId);
+                .retrieveSavingsAccountCharges(savingsAccountId, chargeStatus);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, savingsAccountCharges,
@@ -174,8 +179,16 @@ public class SavingsAccountChargesApiResource {
             final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
             json = this.toApiJsonSerializer.serialize(result);
+        } else if (is(commandParam, COMMAND_INACTIVATE_CHARGE)) {
+            final CommandWrapper commandRequest = new CommandWrapperBuilder()
+                    .inactivateSavingsAccountCharge(savingsAccountId, savingsAccountChargeId).withJson(apiRequestBodyAsJson).build();
+
+            final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+            json = this.toApiJsonSerializer.serialize(result);
         } else {
-            throw new UnrecognizedQueryParamException("command", commandParam, COMMAND_PAY_CHARGE, COMMAND_WAIVE_CHARGE);
+            throw new UnrecognizedQueryParamException("command", commandParam, COMMAND_PAY_CHARGE, COMMAND_WAIVE_CHARGE,
+                    COMMAND_INACTIVATE_CHARGE);
         }
 
         return json;

@@ -206,14 +206,15 @@ public class ChargeData implements Comparable<ChargeData>, Serializable {
         final BigDecimal amountPercentageAppliedTo = BigDecimal.ZERO;
         final Collection<ChargeData> chargeOptions = null;
         final LocalDate dueAsOfDate = null;
+        final Boolean isActive = null;
+        final LocalDate inactivationDate = null;
 
         return SavingsAccountChargeData.instance(savingsChargeId, this.id, savingsAccountId, this.name, this.currency, this.amount,
                 amountPaid, amountWaived, amountWrittenOff, amountOutstanding, this.chargeTimeType, dueAsOfDate,
                 this.chargeCalculationType, percentage, amountPercentageAppliedTo, chargeOptions, this.penalty, this.feeOnMonthDay,
-                this.feeInterval);
+                this.feeInterval, isActive, inactivationDate);
     }
 
-    
     public boolean isPenalty() {
         return this.penalty;
     }

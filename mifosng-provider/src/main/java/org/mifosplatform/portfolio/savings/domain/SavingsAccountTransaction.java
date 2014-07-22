@@ -567,4 +567,22 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         return this.createdDate;
     }
 
+    public boolean isPaymentForCurrentCharge(final SavingsAccountCharge savingsAccountCharge) {
+
+        final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
+        final boolean isChargePaidForCurrentCharge;
+        if (chargePaidBy == null) {
+            isChargePaidForCurrentCharge = false;
+        } else if (chargePaidBy.getSavingsAccountCharge().equals(savingsAccountCharge)) {
+            isChargePaidForCurrentCharge = true;
+        } else {
+            isChargePaidForCurrentCharge = false;
+        }
+
+        return isChargePaidForCurrentCharge;
+    }
+
+    public BigDecimal getAmount() {
+        return this.amount;
+    }
 }
