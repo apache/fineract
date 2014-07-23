@@ -33,15 +33,15 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
     /**
      * The parameters supported for this command.
      */
-    final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "clientId", "groupId", "loanType", "calendarId",
-            "productId", "accountNo", "externalId", "fundId", "loanOfficerId", "loanPurposeId", "transactionProcessingStrategyId",
-            "principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", "loanTermFrequency",
-            "loanTermFrequencyType", "repaymentFrequencyType", "amortizationType", "interestType",
-            "interestCalculationPeriodType", "expectedDisbursementDate", "repaymentsStartingFromDate", "graceOnPrincipalPayment",
-            "graceOnInterestPayment", "graceOnInterestCharged", "interestChargedFromDate", "submittedOnDate", "submittedOnNote", "locale",
-            "dateFormat", "charges", "collateral", "syncDisbursementWithMeeting", "linkAccountId",
-            LoanApiConstants.disbursementDataParameterName, LoanApiConstants.emiAmountParameterName,
-            LoanApiConstants.maxOutstandingBalanceParameterName, LoanProductConstants.graceOnArrearsAgeingParameterName));
+    final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "clientId", "groupId", "loanType", "calendarId", "productId",
+            "accountNo", "externalId", "fundId", "loanOfficerId", "loanPurposeId", "transactionProcessingStrategyId", "principal",
+            "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", "loanTermFrequency",
+            "loanTermFrequencyType", "repaymentFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
+            "expectedDisbursementDate", "repaymentsStartingFromDate", "graceOnPrincipalPayment", "graceOnInterestPayment",
+            "graceOnInterestCharged", "interestChargedFromDate", "submittedOnDate", "submittedOnNote", "locale", "dateFormat", "charges",
+            "collateral", "syncDisbursementWithMeeting", "linkAccountId", LoanApiConstants.disbursementDataParameterName,
+            LoanApiConstants.emiAmountParameterName, LoanApiConstants.maxOutstandingBalanceParameterName,
+            LoanProductConstants.graceOnArrearsAgeingParameterName, LoanApiConstants.recalculationFrequencyTypeParameterName));
 
     private final FromJsonHelper fromApiJsonHelper;
 

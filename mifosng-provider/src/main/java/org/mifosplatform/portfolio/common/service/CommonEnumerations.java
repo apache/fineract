@@ -5,9 +5,24 @@ import java.util.List;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.common.domain.ConditionType;
+import org.mifosplatform.portfolio.common.domain.DaysInMonthType;
+import org.mifosplatform.portfolio.common.domain.DaysInYearType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 
 public class CommonEnumerations {
+    
+    public static final String DAYS_IN_MONTH_TYPE = "daysInMonthType";
+    public static final String DAYS_IN_YEAR_TYPE = "daysInYearType";
+
+    public static EnumOptionData commonEnumueration(final String typeName, final int id) {
+        EnumOptionData enumData = null;
+        if (typeName.equals(DAYS_IN_MONTH_TYPE)) {
+            enumData = daysInMonthType(id);
+        } else if (typeName.equals(DAYS_IN_YEAR_TYPE)) {
+            enumData = daysInYearType(id);
+        }
+        return enumData;
+    }
 
     public static EnumOptionData termFrequencyType(final int id, final String codePrefix) {
         return termFrequencyType(PeriodFrequencyType.fromInt(id), codePrefix);
@@ -78,6 +93,57 @@ public class CommonEnumerations {
             }
         }
         return optionDatas;
+    }
+
+    public static EnumOptionData daysInMonthType(final int id) {
+        return daysInMonthType(DaysInMonthType.fromInt(id));
+    }
+
+    public static EnumOptionData daysInMonthType(final DaysInMonthType type) {
+        EnumOptionData optionData = null;
+        switch (type) {
+            case ACTUAL:
+                optionData = new EnumOptionData(DaysInMonthType.ACTUAL.getValue().longValue(), DaysInMonthType.ACTUAL.getCode(), "Actual");
+            break;
+            case DAYS_30:
+                optionData = new EnumOptionData(DaysInMonthType.DAYS_30.getValue().longValue(), DaysInMonthType.DAYS_30.getCode(),
+                        "30 Days");
+            break;
+            default:
+                optionData = new EnumOptionData(DaysInMonthType.INVALID.getValue().longValue(), DaysInMonthType.INVALID.getCode(),
+                        "Invalid");
+            break;
+        }
+        return optionData;
+    }
+
+    public static EnumOptionData daysInYearType(final int id) {
+        return daysInYearType(DaysInYearType.fromInt(id));
+    }
+
+    public static EnumOptionData daysInYearType(final DaysInYearType type) {
+        EnumOptionData optionData = null;
+        switch (type) {
+            case ACTUAL:
+                optionData = new EnumOptionData(DaysInYearType.ACTUAL.getValue().longValue(), DaysInYearType.ACTUAL.getCode(), "Actual");
+            break;
+            case DAYS_360:
+                optionData = new EnumOptionData(DaysInYearType.DAYS_360.getValue().longValue(), DaysInYearType.DAYS_360.getCode(),
+                        "360 Days");
+            break;
+            case DAYS_364:
+                optionData = new EnumOptionData(DaysInYearType.DAYS_364.getValue().longValue(), DaysInYearType.DAYS_364.getCode(),
+                        "364 Days");
+            break;
+            case DAYS_365:
+                optionData = new EnumOptionData(DaysInYearType.DAYS_365.getValue().longValue(), DaysInYearType.DAYS_365.getCode(),
+                        "365 Days");
+            break;
+            default:
+                optionData = new EnumOptionData(DaysInYearType.INVALID.getValue().longValue(), DaysInYearType.INVALID.getCode(), "Invalid");
+            break;
+        }
+        return optionData;
     }
 
 }

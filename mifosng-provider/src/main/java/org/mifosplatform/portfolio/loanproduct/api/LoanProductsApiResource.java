@@ -45,6 +45,7 @@ import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
+import org.mifosplatform.portfolio.common.service.DropdownReadPlatformService;
 import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.fund.service.FundReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
@@ -94,6 +95,7 @@ public class LoanProductsApiResource {
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
     private final DefaultToApiJsonSerializer<ProductMixData> productMixDataApiJsonSerializer;
     private final ProductMixReadPlatformService productMixReadPlatformService;
+    private final DropdownReadPlatformService commonDropdownReadPlatformService;
 
     @Autowired
     public LoanProductsApiResource(final PlatformSecurityContext context, final LoanProductReadPlatformService readPlatformService,
@@ -106,7 +108,8 @@ public class LoanProductsApiResource {
             final CodeValueReadPlatformService codeValueReadPlatformService,
             final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
             final DefaultToApiJsonSerializer<ProductMixData> productMixDataApiJsonSerializer,
-            final ProductMixReadPlatformService productMixReadPlatformService) {
+            final ProductMixReadPlatformService productMixReadPlatformService,
+            final DropdownReadPlatformService commonDropdownReadPlatformService) {
         this.context = context;
         this.loanProductReadPlatformService = readPlatformService;
         this.chargeReadPlatformService = chargeReadPlatformService;
@@ -121,6 +124,7 @@ public class LoanProductsApiResource {
         this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
         this.productMixDataApiJsonSerializer = productMixDataApiJsonSerializer;
         this.productMixReadPlatformService = productMixReadPlatformService;
+        this.commonDropdownReadPlatformService = commonDropdownReadPlatformService;
     }
 
     @POST
@@ -268,10 +272,17 @@ public class LoanProductsApiResource {
         final List<EnumOptionData> loanCycleValueConditionTypeOptions = this.dropdownReadPlatformService
                 .retrieveLoanCycleValueConditionTypeOptions();
 
+        final List<EnumOptionData> daysInMonthTypeOptions = commonDropdownReadPlatformService.retrieveDaysInMonthTypeOptions();
+        final List<EnumOptionData> daysInYearTypeOptions = commonDropdownReadPlatformService.retrieveDaysInYearTypeOptions();
+        final List<EnumOptionData> interestRecalculationCompoundingTypeOptions = dropdownReadPlatformService
+                .retrieveInterestRecalculationCompoundingTypeOptions();
+        final List<EnumOptionData> rescheduleStrategyTypeOptions = dropdownReadPlatformService.retrieveRescheduleStrategyTypeOptions();
+
         return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions,
                 amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions,
                 interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions, accountOptions,
-                accountingRuleTypeOptions, loanCycleValueConditionTypeOptions);
+                accountingRuleTypeOptions, loanCycleValueConditionTypeOptions, daysInMonthTypeOptions, daysInYearTypeOptions,
+                interestRecalculationCompoundingTypeOptions, rescheduleStrategyTypeOptions);
     }
 
 }

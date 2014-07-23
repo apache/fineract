@@ -12,13 +12,16 @@ import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTermVariationType;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
+import org.mifosplatform.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductParamType;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductValueConditionType;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
+import org.mifosplatform.portfolio.loanproduct.domain.RecalculationFrequencyType;
 
 public class LoanEnumerations {
 
@@ -32,6 +35,8 @@ public class LoanEnumerations {
     public static final String PAYMENT_TYPE = "paymentType";
     public static final String ACCOUNTING_RULE_TYPE = "accountingRule";
     public static final String LOAN_TYPE = "loanType";
+    public static final String INTEREST_RECALCULATION_COMPOUNDING_TYPE = "interestRecalculationCompoundingType";
+    public static final String RESCHEDULE_STRATEGY_TYPE = "rescheduleStrategyType";
 
     public static EnumOptionData loanEnumueration(final String typeName, final int id) {
         if (typeName.equals(LOAN_TERM_FREQUENCY_TYPE)) {
@@ -50,8 +55,12 @@ public class LoanEnumerations {
             return interestCalculationPeriodType(id);
         } else if (typeName.equals(ACCOUNTING_RULE_TYPE)) { 
             return AccountingEnumerations.accountingRuleType(id);
-        }  else if (typeName.equals(LOAN_TYPE)) { 
-            return AccountEnumerations.loanType(id); 
+        } else if (typeName.equals(LOAN_TYPE)) {
+            return AccountEnumerations.loanType(id);
+        } else if (typeName.equals(INTEREST_RECALCULATION_COMPOUNDING_TYPE)) {
+            return interestRecalculationCompoundingType(id);
+        } else if (typeName.equals(RESCHEDULE_STRATEGY_TYPE)) {
+            return rescheduleStrategyType(id);
         }
         return null;
     }
@@ -452,4 +461,93 @@ public class LoanEnumerations {
         return optionData;
     }
 
+    public static EnumOptionData interestRecalculationCompoundingType(final int id) {
+        return interestRecalculationCompoundingType(InterestRecalculationCompoundingMethod.fromInt(id));
+    }
+
+    public static EnumOptionData interestRecalculationCompoundingType(final InterestRecalculationCompoundingMethod type) {
+        EnumOptionData optionData = null;
+        switch (type) {
+            case FEE:
+                optionData = new EnumOptionData(InterestRecalculationCompoundingMethod.FEE.getValue().longValue(),
+                        InterestRecalculationCompoundingMethod.FEE.getCode(), "Fee");
+            break;
+            case INTEREST:
+                optionData = new EnumOptionData(InterestRecalculationCompoundingMethod.INTEREST.getValue().longValue(),
+                        InterestRecalculationCompoundingMethod.INTEREST.getCode(), "Interest");
+            break;
+            case INTEREST_AND_FEE:
+                optionData = new EnumOptionData(InterestRecalculationCompoundingMethod.INTEREST_AND_FEE.getValue().longValue(),
+                        InterestRecalculationCompoundingMethod.INTEREST_AND_FEE.getCode(), "Fee and Interest");
+            break;
+            default:
+                optionData = new EnumOptionData(InterestRecalculationCompoundingMethod.NONE.getValue().longValue(),
+                        InterestRecalculationCompoundingMethod.NONE.getCode(), "None");
+            break;
+        }
+        return optionData;
+    }
+
+    public static EnumOptionData rescheduleStrategyType(final int id) {
+        return rescheduleStrategyType(LoanRescheduleStrategyMethod.fromInt(id));
+    }
+
+    public static EnumOptionData rescheduleStrategyType(final LoanRescheduleStrategyMethod type) {
+        EnumOptionData optionData = null;
+        switch (type) {
+            case REDUCE_EMI_AMOUNT:
+                optionData = new EnumOptionData(LoanRescheduleStrategyMethod.REDUCE_EMI_AMOUNT.getValue().longValue(),
+                        LoanRescheduleStrategyMethod.REDUCE_EMI_AMOUNT.getCode(), "Reduce EMI amount");
+            break;
+            case REDUCE_NUMBER_OF_INSTALLMENTS:
+                optionData = new EnumOptionData(LoanRescheduleStrategyMethod.REDUCE_NUMBER_OF_INSTALLMENTS.getValue().longValue(),
+                        LoanRescheduleStrategyMethod.REDUCE_NUMBER_OF_INSTALLMENTS.getCode(), "Reduce number of installments");
+            break;
+            case RESCHEDULE_NEXT_REPAYMENTS:
+                optionData = new EnumOptionData(LoanRescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS.getValue().longValue(),
+                        LoanRescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS.getCode(), "Reschedule next repayments");
+            break;
+            default:
+                optionData = new EnumOptionData(LoanRescheduleStrategyMethod.INVALID.getValue().longValue(),
+                        LoanRescheduleStrategyMethod.INVALID.getCode(), "Invalid");
+            break;
+        }
+        return optionData;
+    }
+
+    public static EnumOptionData interestRecalculationFrequencyType(final int id) {
+        return interestRecalculationFrequencyType(RecalculationFrequencyType.fromInt(id));
+    }
+
+    public static EnumOptionData interestRecalculationFrequencyType(final RecalculationFrequencyType type) {
+        EnumOptionData optionData = null;
+        switch (type) {
+            case DAILY:
+                optionData = new EnumOptionData(RecalculationFrequencyType.DAILY.getValue().longValue(),
+                        RecalculationFrequencyType.DAILY.getCode(), "Daily");
+            break;
+            case FORTNIGHTLY:
+                optionData = new EnumOptionData(RecalculationFrequencyType.FORTNIGHTLY.getValue().longValue(),
+                        RecalculationFrequencyType.FORTNIGHTLY.getCode(), "Fortnightly");
+            break;
+            case MONTHLY:
+                optionData = new EnumOptionData(RecalculationFrequencyType.MONTHLY.getValue().longValue(),
+                        RecalculationFrequencyType.MONTHLY.getCode(), "Monthly");
+            break;
+            case SAME_AS_REPAYMENT_PERIOD:
+                optionData = new EnumOptionData(RecalculationFrequencyType.SAME_AS_REPAYMENT_PERIOD.getValue().longValue(),
+                        RecalculationFrequencyType.SAME_AS_REPAYMENT_PERIOD.getCode(), "Same as repayment period");
+            break;
+            case WEEKLY:
+                optionData = new EnumOptionData(RecalculationFrequencyType.WEEKLY.getValue().longValue(),
+                        RecalculationFrequencyType.WEEKLY.getCode(), "Weekly");
+            break;
+            default:
+                optionData = new EnumOptionData(RecalculationFrequencyType.INVALID.getValue().longValue(),
+                        RecalculationFrequencyType.INVALID.getCode(), "Invalid");
+            break;
+
+        }
+        return optionData;
+    }
 }

@@ -37,6 +37,7 @@ public class LoanApplicationTestBuilder {
     private String loanType = "individual";
     private String fixedEmiAmount = "10000";
     private String maxOutstandingLoanBalance = "36000";
+    private String recalculationFrequencyType = "1";
     private String graceOnPrincipalPayment = null;
     private List<HashMap> disbursementData = null;
     private List<HashMap> charges = new ArrayList<HashMap>();
@@ -66,6 +67,7 @@ public class LoanApplicationTestBuilder {
         map.put("expectedDisbursementDate", this.expectedDisbursmentDate);
         map.put("submittedOnDate", this.submittedOnDate);
         map.put("loanType", this.loanType);
+        map.put("recalculationFrequencyType", this.recalculationFrequencyType);
         if (charges != null) {
             map.put("charges", charges);
         }

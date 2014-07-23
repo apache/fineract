@@ -23,5 +23,13 @@ public interface LoanApiConstants {
     public static final String principalDisbursedParameterName = "transactionAmount";
 
     public static final String ALREADY_DISBURSED = "can.not.change.disbursement.date";
-    
+
+    // Interest recalculation related
+    public static final String isInterestRecalculationEnabledParameterName = "isInterestRecalculationEnabled";
+    public static final String daysInYearTypeParameterName = "daysInYearType";
+    public static final String daysInMonthTypeParameterName = "daysInMonthType";
+    public static final String recalculationFrequencyTypeParameterName = "recalculationFrequencyType";
+    public static final String interestRecalculationCompoundingMethodParameterName = "interestRecalculationCompoundingMethod";
+    public static final String rescheduleStrategyMethodParameterName = "rescheduleStrategyMethod";
+
 }

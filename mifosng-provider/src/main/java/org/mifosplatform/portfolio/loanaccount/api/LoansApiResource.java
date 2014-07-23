@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,6 +51,7 @@ import org.mifosplatform.portfolio.account.data.PortfolioAccountData;
 import org.mifosplatform.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.mifosplatform.portfolio.account.service.PortfolioAccountReadPlatformService;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
+import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.service.CalendarReadPlatformService;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
@@ -290,7 +292,16 @@ public class LoansApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveOne(loanId);
+        LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveOne(loanId);
+        if (loanBasicDetails.isInterestRecalculationEnabled()) {
+            Collection<CalendarData> interestRecalculationCalendarDatas = this.calendarReadPlatformService.retrieveCalendarsByEntity(
+                    loanBasicDetails.getInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_DETAIL.getValue(), null);
+            CalendarData calendarData = null;
+            if (!CollectionUtils.isEmpty(interestRecalculationCalendarDatas)) {
+                calendarData = interestRecalculationCalendarDatas.iterator().next();
+            }
+            loanBasicDetails = LoanAccountData.withInterestRecalculationCalendarData(loanBasicDetails, calendarData);
+        }
 
         Collection<LoanTransactionData> loanRepayments = null;
         LoanScheduleData repaymentSchedule = null;
@@ -399,6 +410,7 @@ public class LoansApiResource {
         Collection<CodeValueData> loanCollateralOptions = null;
         Collection<CalendarData> calendarOptions = null;
         Collection<PortfolioAccountData> accountLinkingOptions = null;
+        List<EnumOptionData> interestRecalculationFrequencyTypeOptions = null;
 
         final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
         if (template) {
@@ -440,6 +452,9 @@ public class LoansApiResource {
                 calendarOptions = this.loanReadPlatformService.retrieveCalendars(loanBasicDetails.groupId());
             }
 
+            interestRecalculationFrequencyTypeOptions = this.dropdownReadPlatformService
+                    .retrieveInterestRecalculationFrequencyTypeOptions();
+
         }
 
         Collection<ChargeData> overdueCharges = this.chargeReadPlatformService.retrieveLoanProductCharges(loanBasicDetails.loanProductId(),
@@ -450,7 +465,7 @@ public class LoansApiResource {
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers, loanPurposeOptions,
                 loanCollateralOptions, calendarOptions, notes, accountLinkingOptions, linkedAccount, disbursementData, emiAmountVariations,
-                overdueCharges);
+                overdueCharges, interestRecalculationFrequencyTypeOptions);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);

@@ -92,6 +92,9 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
             final LoanProduct loanproduct = LoanProduct.assembleFromJson(fund, loanTransactionProcessingStrategy, charges, command,
                     this.aprCalculator);
+            if (loanproduct.isInterestRecalculationEnabled()) {
+                loanproduct.updateLoanProductForInterestRecalculationDetails();
+            }
 
             this.loanProductRepository.save(loanproduct);
 

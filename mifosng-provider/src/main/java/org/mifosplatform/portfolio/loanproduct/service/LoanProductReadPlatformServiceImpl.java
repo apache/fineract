@@ -21,8 +21,10 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
+import org.mifosplatform.portfolio.common.service.CommonEnumerations;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductBorrowerCycleVariationData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
+import org.mifosplatform.portfolio.loanproduct.data.LoanProductInterestRecalculationData;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductParamType;
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,9 +123,12 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.amortization_method_enum as amortizationMethod, lp.arrearstolerance_amount as tolerance, "
                     + "lp.accounting_type as accountingType, lp.include_in_borrower_cycle as includeInBorrowerCycle,lp.use_borrower_cycle as useBorrowerCycle, lp.start_date as startDate, lp.close_date as closeDate,  "
                     + "lp.allow_multiple_disbursals as multiDisburseLoan, lp.max_disbursals as maxTrancheCount, lp.max_outstanding_loan_balance as outstandingLoanBalance, "
+                    + "lp.days_in_month_enum as daysInMonth, lp.days_in_year_enum as daysInYear, lp.interest_recalculation_enabled as isInterestRecalculationEnabled, "
+                    + "lpr.id as lprId, lpr.product_id as productId, lpr.compound_type_enum as compoundType, lpr.reschedule_strategy_enum as rescheduleStrategy, "
                     + "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol, lp.external_id as externalId "
                     + " from m_product_loan lp "
-                    + " left join m_fund f on f.id = lp.fund_id"
+                    + " left join m_fund f on f.id = lp.fund_id "
+                    + " left join m_product_loan_recalculation_details lpr on lpr.product_id=lp.id "
                     + " left join ref_loan_transaction_processing_strategy ltps on ltps.id = lp.loan_transaction_strategy_id"
                     + " join m_currency curr on curr.code = lp.currency_code";
         }
@@ -131,7 +136,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         @Override
         public LoanProductData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            final Long id = rs.getLong("id");
+            final Long id = JdbcSupport.getLong(rs, "id");
             final String name = rs.getString("name");
             final String shortName = rs.getString("shortName");
             final String description = rs.getString("description");
@@ -221,6 +226,27 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final Integer maxTrancheCount = rs.getInt("maxTrancheCount");
             final BigDecimal outstandingLoanBalance = rs.getBigDecimal("outstandingLoanBalance");
 
+            final int daysInMonth = JdbcSupport.getInteger(rs, "daysInMonth");
+            final EnumOptionData daysInMonthType = CommonEnumerations.daysInMonthType(daysInMonth);
+            final int daysInYear = JdbcSupport.getInteger(rs, "daysInYear");
+            final EnumOptionData daysInYearType = CommonEnumerations.daysInYearType(daysInYear);
+            final boolean isInterestRecalculationEnabled = rs.getBoolean("isInterestRecalculationEnabled");
+
+            LoanProductInterestRecalculationData interestRecalculationData = null;
+            if (isInterestRecalculationEnabled) {
+
+                final Long lprId = JdbcSupport.getLong(rs, "lprId");
+                final Long productId = JdbcSupport.getLong(rs, "productId");
+                final int compoundTypeEnumValue = JdbcSupport.getInteger(rs, "compoundType");
+                final EnumOptionData interestRecalculationCompoundingType = LoanEnumerations
+                        .interestRecalculationCompoundingType(compoundTypeEnumValue);
+                final int rescheduleStrategyEnumValue = JdbcSupport.getInteger(rs, "rescheduleStrategy");
+                final EnumOptionData rescheduleStrategyType = LoanEnumerations.rescheduleStrategyType(rescheduleStrategyEnumValue);
+
+                interestRecalculationData = new LoanProductInterestRecalculationData(lprId, productId,
+                        interestRecalculationCompoundingType, rescheduleStrategyType);
+            }
+
             return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                     minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType,
@@ -229,7 +255,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     graceOnInterestCharged, this.charges, accountingRuleType, includeInBorrowerCycle, useBorrowerCycle, startDate,
                     closeDate, status, externalId, principalVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle,
                     numberOfRepaymentVariationsForBorrowerCycle, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
-                    graceOnArrearsAgeing, overdueDaysForNPA);
+                    graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
+                    interestRecalculationData);
         }
 
     }

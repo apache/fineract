@@ -50,6 +50,7 @@ import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.domain.ClientEnumerations;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
+import org.mifosplatform.portfolio.common.service.CommonEnumerations;
 import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.fund.service.FundReadPlatformService;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
@@ -59,6 +60,7 @@ import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanApplicationTimelineData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanInterestRecalculationData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanSummaryData;
@@ -499,9 +501,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " la.overdue_since_date_derived as overdueSinceDate,"
                     + " l.sync_disbursement_with_meeting as syncDisbursementWithMeeting,"
                     + " l.loan_counter as loanCounter, l.loan_product_counter as loanProductCounter,"
-                    + " l.is_npa as isNPA "
+                    + " l.is_npa as isNPA, l.days_in_month_enum as daysInMonth, l.days_in_year_enum as daysInYear, "
+                    + " l.interest_recalculation_enabled as isInterestRecalculationEnabled, "
+                    + " lir.id as lirId, lir.loan_id as loanId, lir.compound_type_enum as compoundType, lir.reschedule_strategy_enum as rescheduleStrategy "
                     + " from m_loan l" //
                     + " join m_product_loan lp on lp.id = l.product_id" //
+                    + " left join m_loan_recalculation_details lir on lir.loan_id = l.id "
                     + " join m_currency rc on rc.`code` = l.currency_code" //
                     + " left join m_client c on c.id = l.client_id" //
                     + " left join m_group g on g.id = l.group_id" //
@@ -723,6 +728,28 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal fixedEmiAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "fixedEmiAmount");
             final Boolean isNPA = rs.getBoolean("isNPA");
 
+            final int daysInMonth = JdbcSupport.getInteger(rs, "daysInMonth");
+            final EnumOptionData daysInMonthType = CommonEnumerations.daysInMonthType(daysInMonth);
+            final int daysInYear = JdbcSupport.getInteger(rs, "daysInYear");
+            final EnumOptionData daysInYearType = CommonEnumerations.daysInYearType(daysInYear);
+            final boolean isInterestRecalculationEnabled = rs.getBoolean("isInterestRecalculationEnabled");
+
+            LoanInterestRecalculationData interestRecalculationData = null;
+            if (isInterestRecalculationEnabled) {
+
+                final Long lprId = JdbcSupport.getLong(rs, "lirId");
+                final Long productId = JdbcSupport.getLong(rs, "loanId");
+                final int compoundTypeEnumValue = JdbcSupport.getInteger(rs, "compoundType");
+                final EnumOptionData interestRecalculationCompoundingType = LoanEnumerations
+                        .interestRecalculationCompoundingType(compoundTypeEnumValue);
+                final int rescheduleStrategyEnumValue = JdbcSupport.getInteger(rs, "rescheduleStrategy");
+                final EnumOptionData rescheduleStrategyType = LoanEnumerations.rescheduleStrategyType(rescheduleStrategyEnumValue);
+                final CalendarData calendarData = null;
+
+                interestRecalculationData = new LoanInterestRecalculationData(lprId, productId, interestRecalculationCompoundingType,
+                        rescheduleStrategyType, calendarData);
+            }
+
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupData,
                     loanType, loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
                     loanOfficerId, loanOfficerName, currencyData, principal, approvedPrincipal, totalOverpaid, inArrearsTolerance,
@@ -731,7 +758,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     annualInterestRate, interestType, interestCalculationPeriodType, expectedFirstRepaymentOnDate, graceOnPrincipalPayment,
                     graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, timeline, loanSummary,
                     feeChargesDueAtDisbursementCharged, syncDisbursementWithMeeting, loanCounter, loanProductCounter, multiDisburseLoan,
-                    fixedEmiAmount, outstandingLoanBalance, inArrears, graceOnArrearsAgeing, isNPA);
+                    fixedEmiAmount, outstandingLoanBalance, inArrears, graceOnArrearsAgeing, isNPA, daysInMonthType, daysInYearType,
+                    isInterestRecalculationEnabled, interestRecalculationData);
         }
     }
 
@@ -1161,10 +1189,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 loanCycleCounter = retriveLoanCounter(clientId, loanProduct.getId());
             }
         }
+
+        final List<EnumOptionData> interestRecalculationFrequencyTypeOptions = this.loanDropdownReadPlatformService
+                .retrieveInterestRecalculationFrequencyTypeOptions();
+
         return LoanAccountData.loanProductWithTemplateDefaults(loanProduct, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, loanPurposeOptions, loanCollateralOptions,
-                loanCycleCounter);
+                loanCycleCounter, interestRecalculationFrequencyTypeOptions);
     }
 
     @Override

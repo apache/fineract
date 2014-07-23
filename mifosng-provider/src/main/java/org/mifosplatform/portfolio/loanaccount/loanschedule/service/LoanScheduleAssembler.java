@@ -35,6 +35,8 @@ import org.mifosplatform.portfolio.calendar.exception.MeetingFrequencyMismatchEx
 import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
+import org.mifosplatform.portfolio.common.domain.DaysInMonthType;
+import org.mifosplatform.portfolio.common.domain.DaysInYearType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
@@ -215,13 +217,22 @@ public class LoanScheduleAssembler {
                 LoanEnumerations.loanvariationType(LoanTermVariationType.EMI_AMOUNT), expectedDisbursementDate, emiAmount);
         loanVariationTermsData.add(data);
 
+        /**
+         * Interest recalculation settings copy from product definition
+         */
+        final DaysInMonthType daysInMonthType = loanProduct.fetchDaysInMonthType();
+
+        final DaysInYearType daysInYearType = loanProduct.fetchDaysInYearType();
+
+        final boolean isInterestRecalculationEnabled = loanProduct.isInterestRecalculationEnabled();
+
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, amortizationMethod, interestMethod, interestRatePerPeriod,
                 interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod, principalMoney,
                 expectedDisbursementDate, repaymentsStartingFromDate, calculatedRepaymentsStartingFromDate, graceOnPrincipalPayment,
                 graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, inArrearsToleranceMoney,
                 loanProduct.isMultiDisburseLoan(), emiAmount, disbursementDatas, maxOutstandingBalance, loanVariationTermsData,
-                graceOnArrearsAgeing, loanProduct.fetchDaysInMonthType(), loanProduct.fetchDaysInYearType());
+                graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled);
     }
 
     private List<DisbursementData> fetchDisbursementData(final JsonObject command) {
