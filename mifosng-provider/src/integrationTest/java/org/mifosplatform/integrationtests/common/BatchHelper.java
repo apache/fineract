@@ -280,11 +280,56 @@ public class BatchHelper {
         br.setRelativeUrl("clients/$.clientId?command=activate");
         br.setReference(reference);
         br.setMethod("POST");
-        br.setBody("{ \"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"activationDate\": \"01 March 2011\"}");
+        br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"activationDate\": \"01 March 2011\"}");
+
+        return br;
+    }
+    
+    /**
+     * Creates and returns a
+     * {@link org.mifosplatform.batch.command.internal.ApproveLoanCommandStrategy}
+     * Request with given requestId and reference.
+     * 
+     * 
+     * @param requestId
+     * @param reference
+     * @return BatchRequest
+     */
+    public static BatchRequest approveLoanRequest(final Long requestId, final Long reference) {
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setRelativeUrl("loans/$.loanId?command=approve");
+        br.setReference(reference);
+        br.setMethod("POST");
+        br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"approvedOnDate\": \"12 September 2013\"," 
+                + "\"note\": \"Loan approval note\"}");
 
         return br;
     }
 
+    /**
+     * Creates and returns a
+     * {@link org.mifosplatform.batch.command.internal.DisburseLoanCommandStrategy}
+     * Request with given requestId and reference.
+     * 
+     * 
+     * @param requestId
+     * @param reference
+     * @return BatchRequest
+     */
+    public static BatchRequest disburseLoanRequest(final Long requestId, final Long reference) {
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setRelativeUrl("loans/$.loanId?command=disburse");
+        br.setReference(reference);
+        br.setMethod("POST");
+        br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"actualDisbursementDate\": \"15 September 2013\"}");
+
+        return br;
+    }
+    
     /**
      * Checks that the client with given externalId is not created on the
      * server.
