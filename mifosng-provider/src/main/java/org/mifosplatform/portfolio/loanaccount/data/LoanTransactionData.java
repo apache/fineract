@@ -12,6 +12,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.account.data.AccountTransferData;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
 
 /**
@@ -26,6 +27,7 @@ public class LoanTransactionData {
     private final LoanTransactionEnumData type;
 
     private final LocalDate date;
+    private final LocalDate submittedOnDate;
 
     private final CurrencyData currency;
     private final PaymentDetailData paymentDetailData;
@@ -62,11 +64,22 @@ public class LoanTransactionData {
     }
 
     public LoanTransactionData(final Long id, final Long officeId, final String officeName, final LoanTransactionEnumData transactionType,
-            final PaymentDetailData paymentDetailData, final CurrencyData currency, final LocalDate date, final BigDecimal amount,
-            final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
-            final BigDecimal penaltyChargesPortion, final BigDecimal overpaymentPortion,
-            final Collection<CodeValueData> paymentTypeOptions, final String externalId, final AccountTransferData transfer,
-            final BigDecimal fixedEmiAmount) {
+                                 final PaymentDetailData paymentDetailData, final CurrencyData currency, final LocalDate date, final BigDecimal amount,
+                                 final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
+                                 final BigDecimal penaltyChargesPortion, final BigDecimal overpaymentPortion,
+                                 final Collection<CodeValueData> paymentTypeOptions, final String externalId, final AccountTransferData transfer,
+                                 final BigDecimal fixedEmiAmount) {
+
+        this(id, officeId, officeName, transactionType, paymentDetailData, currency, date, amount, principalPortion, interestPortion,
+                feeChargesPortion, penaltyChargesPortion, overpaymentPortion, null, externalId, transfer, fixedEmiAmount,null);
+    }
+
+    public LoanTransactionData(final Long id, final Long officeId, final String officeName, final LoanTransactionEnumData transactionType,
+                               final PaymentDetailData paymentDetailData, final CurrencyData currency, final LocalDate date, final BigDecimal amount,
+                               final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
+                               final BigDecimal penaltyChargesPortion, final BigDecimal overpaymentPortion,
+                               final Collection<CodeValueData> paymentTypeOptions, final String externalId, final AccountTransferData transfer,
+                               final BigDecimal fixedEmiAmount,final LocalDate submittedOnDate) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -84,6 +97,16 @@ public class LoanTransactionData {
         this.transfer = transfer;
         this.overpaymentPortion = overpaymentPortion;
         this.fixedEmiAmount = fixedEmiAmount;
+        this.submittedOnDate = submittedOnDate;
+    }
+
+    public LoanTransactionData(final Long id, final Long officeId, final String officeName, final LoanTransactionEnumData transactionType,
+                               final PaymentDetailData paymentDetailData, final CurrencyData currency, final LocalDate date, final BigDecimal amount,
+                               final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
+                               final BigDecimal penaltyChargesPortion, final BigDecimal overpaymentPortion, final String externalId,
+                               final AccountTransferData transfer, BigDecimal fixedEmiAmount,LocalDate submittedOnDate) {
+        this(id, officeId, officeName, transactionType, paymentDetailData, currency, date, amount, principalPortion, interestPortion,
+                feeChargesPortion, penaltyChargesPortion, overpaymentPortion, null, externalId, transfer, fixedEmiAmount,submittedOnDate);
     }
 
     public LocalDate dateOf() {

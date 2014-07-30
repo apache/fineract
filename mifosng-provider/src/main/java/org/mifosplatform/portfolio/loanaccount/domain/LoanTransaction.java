@@ -28,6 +28,7 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
@@ -67,6 +68,10 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     @Column(name = "transaction_date", nullable = false)
     private final Date dateOf;
 
+    @Temporal(TemporalType.DATE)
+    @Column(name = "submitted_on_date", nullable = false)
+    private final Date submittedOnDate;
+
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
 
@@ -99,6 +104,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         this.loan = null;
         this.dateOf = null;
         this.typeOf = null;
+        this.submittedOnDate = DateUtils.getDateOfTenant();
     }
 
     public static LoanTransaction disbursement(final Office office, final Money amount, final PaymentDetail paymentDetail,
@@ -218,6 +224,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         this.paymentDetail = paymentDetail;
         this.office = office;
         this.externalId = externalId;
+        this.submittedOnDate = DateUtils.getDateOfTenant();
     }
 
     public static LoanTransaction waiveLoanCharge(final Loan loan, final Office office, final Money waived, final LocalDate waiveDate,
@@ -241,6 +248,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         this.dateOf = date.toDateTimeAtStartOfDay().toDate();
         this.externalId = externalId;
         this.office = office;
+        this.submittedOnDate = DateUtils.getDateOfTenant();
     }
 
     private LoanTransaction(final Loan loan, final Office office, final LoanTransactionType type, final PaymentDetail paymentDetail,
@@ -252,6 +260,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         this.dateOf = date.toDateTimeAtStartOfDay().toDate();
         this.externalId = externalId;
         this.office = office;
+        this.submittedOnDate = DateUtils.getDateOfTenant();
     }
 
     public void reverse() {
