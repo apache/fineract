@@ -76,6 +76,10 @@ public class CommandStrategyProvider {
                 .put(CommandContext.resource("loans\\/\\d+\\/charges").method("GET").build(), "collectChargesCommandStrategy");
         this.commandStrategies.put(CommandContext.resource("clients\\/\\d+\\?command=activate").method("POST").build(),
                 "activateClientCommandStrategy");
+        this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\?command=approve").method("POST").build(),
+                "approveLoanCommandStrategy");
+        this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\?command=disburse").method("POST").build(),
+                "disburseLoanCommandStrategy");
     }
 
 }

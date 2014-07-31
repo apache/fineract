@@ -7,17 +7,17 @@ import org.mifosplatform.batch.domain.BatchRequest;
 import org.mifosplatform.batch.domain.BatchResponse;
 import org.mifosplatform.batch.exception.ErrorHandler;
 import org.mifosplatform.batch.exception.ErrorInfo;
-import org.mifosplatform.portfolio.client.api.ClientsApiResource;
+import org.mifosplatform.portfolio.loanaccount.api.LoansApiResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
  * Implements {@link org.mifosplatform.batch.command.CommandStrategy} to handle
- * activation of a pending client. It passes the contents of the body from the
+ * approval of a pending loan. It passes the contents of the body from the
  * BatchRequest to
- * {@link org.mifosplatform.portfolio.client.api.ClientsApiResource} and gets
+ * {@link org.mifosplatform.portfolio.client.api.LoansApiResource} and gets
  * back the response. This class will also catch any errors raised by
- * {@link org.mifosplatform.portfolio.client.api.ClientsApiResource} and map
+ * {@link org.mifosplatform.portfolio.client.api.LoansApiResource} and map
  * those errors to appropriate status codes in BatchResponse.
  * 
  * @author Rishabh Shukla
@@ -27,13 +27,13 @@ import org.springframework.stereotype.Component;
  * @see org.mifosplatform.batch.domain.BatchResponse
  */
 @Component
-public class ActivateClientCommandStrategy implements CommandStrategy {
+public class ApproveLoanCommandStrategy implements CommandStrategy {
 
-    private final ClientsApiResource clientsApiResource;
+    private final LoansApiResource loansApiResource;
 
     @Autowired
-    public ActivateClientCommandStrategy(final ClientsApiResource clientsApiResource) {
-        this.clientsApiResource = clientsApiResource;
+    public ApproveLoanCommandStrategy(final LoansApiResource loansApiResource) {
+        this.loansApiResource = loansApiResource;
     }
 
     @Override
@@ -46,17 +46,16 @@ public class ActivateClientCommandStrategy implements CommandStrategy {
         response.setHeaders(request.getHeaders());
         
         final String[] pathParameters = request.getRelativeUrl().split("/");
-        Long clientId = Long.parseLong(pathParameters[1].substring(0, pathParameters[1].indexOf("?")));
+        Long loanId = Long.parseLong(pathParameters[1].substring(0, pathParameters[1].indexOf("?")));
 
         // Try-catch blocks to map exceptions to appropriate status codes
         try {
 
-            // Calls 'activate' function from 'ClientsApiResource' to activate a client
-            responseBody = clientsApiResource.activate(clientId, "activate", request.getBody());
+            // Calls 'approve' function from 'LoansApiResource' to approve a loan          
+            responseBody = loansApiResource.stateTransitions(loanId, "approve", request.getBody());
 
             response.setStatusCode(200);
-            // Sets the body of the response after the successful activation of
-            // the client
+            // Sets the body of the response after the successful approval of a loan
             response.setBody(responseBody);
 
         } catch (RuntimeException e) {

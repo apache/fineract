@@ -346,7 +346,65 @@ public class BatchApiTest {
         final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
                 jsonifiedRequest);
 
-        Assert.assertEquals("Verify Status Code 200 for Create Charge", 200L, (long) response.get(0).getStatusCode());
-        Assert.assertEquals("Verify Status Code 200 for Collect Charges", 200L, (long) response.get(1).getStatusCode());
+        Assert.assertEquals("Verify Status Code 200 for Create Client", 200L, (long) response.get(0).getStatusCode());
+        Assert.assertEquals("Verify Status Code 200 for Activate Client", 200L, (long) response.get(1).getStatusCode());
+    }
+
+    /**
+     * Test for the successful approval and disbursal of a loan using
+     * 'ApproveLoanCommandStrategy' and 'DisburseLoanCommandStrategy'. A '200'
+     * status code is expected on successful activation.
+     * 
+     * @see org.mifosplatform.batch.command.internal.ApproveLoanCommandStrategy
+     * @see org.mifosplatform.batch.command.internal.DisburseLoanCommandStrategy
+     */
+    @Test
+    public void shouldReturnOkStatusOnSuccessfulLoanApprovalAndDisburse() {
+        final String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("10000000.00") //
+                .withNumberOfRepayments("24") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("2") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualPrincipalPayment() //
+                .withInterestTypeAsDecliningBalance() //
+                .currencyDetails("0", "100").build(null);
+
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+
+        // Create a createClient Request
+        final BatchRequest br1 = BatchHelper.createClientRequest(4730L, "");
+
+        // Create a activateClient Request
+        final BatchRequest br2 = BatchHelper.activateClientRequest(4731L, 4730L);
+
+        // Create a ApplyLoan Request
+        final BatchRequest br3 = BatchHelper.applyLoanRequest(4732L, 4731L, productId);
+
+        // Create a approveLoan Request
+        final BatchRequest br4 = BatchHelper.approveLoanRequest(4733L, 4732L);
+
+        // Create a disburseLoan Request
+        final BatchRequest br5 = BatchHelper.disburseLoanRequest(4734L, 4733L);
+
+        final List<BatchRequest> batchRequests = new ArrayList<>();
+
+        batchRequests.add(br1);
+        batchRequests.add(br2);
+        batchRequests.add(br3);
+        batchRequests.add(br4);
+        batchRequests.add(br5);
+
+        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
+
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+                jsonifiedRequest);
+
+        System.out.println(response.get(3));
+        System.out.println(response.get(4));
+
+        Assert.assertEquals("Verify Status Code 200 for Approve Loan", 200L, (long) response.get(3).getStatusCode());
+        Assert.assertEquals("Verify Status Code 200 for Disburse Loan", 200L, (long) response.get(4).getStatusCode());
     }
 }
