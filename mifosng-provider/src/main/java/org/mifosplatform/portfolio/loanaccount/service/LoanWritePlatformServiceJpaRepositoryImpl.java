@@ -646,7 +646,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     singleLoanRepaymentCommand.getTransactionAmount(), paymentDetail, bulkRepaymentCommand.getNote(), null,
                     isRecoveryRepayment, isAccountTransfer);
 
-            changes.put("bulkTransations", singleLoanRepaymentCommand);
+            changes.put("bulkTransactions", singleLoanRepaymentCommand);
         }
         return changes;
     }
