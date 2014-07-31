@@ -2,12 +2,16 @@ package org.mifosplatform.portfolio.common.service;
 
 import static org.mifosplatform.portfolio.common.service.CommonEnumerations.conditionType;
 import static org.mifosplatform.portfolio.common.service.CommonEnumerations.termFrequencyType;
+import static org.mifosplatform.portfolio.common.service.CommonEnumerations.daysInMonthType;
+import static org.mifosplatform.portfolio.common.service.CommonEnumerations.daysInYearType;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.common.domain.ConditionType;
+import org.mifosplatform.portfolio.common.domain.DaysInMonthType;
+import org.mifosplatform.portfolio.common.domain.DaysInYearType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +32,22 @@ public class DropdownReadPlatformServiceImpl implements DropdownReadPlatformServ
                 conditionType(ConditionType.NOT_EQUAL, "condition"), conditionType(ConditionType.GRETERTHAN, "condition"),
                 conditionType(ConditionType.LESSTHAN, "condition"));
         return loanTermFrequencyOptions;
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveDaysInMonthTypeOptions() {
+
+        final List<EnumOptionData> daysInMonthTypeOptions = Arrays.asList(daysInMonthType(DaysInMonthType.ACTUAL),
+                daysInMonthType(DaysInMonthType.DAYS_30));
+        return daysInMonthTypeOptions;
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveDaysInYearTypeOptions() {
+
+        final List<EnumOptionData> daysInYearTypeOptions = Arrays.asList(daysInYearType(DaysInYearType.ACTUAL),
+                daysInYearType(DaysInYearType.DAYS_360), daysInYearType(DaysInYearType.DAYS_364), daysInYearType(DaysInYearType.DAYS_365));
+        return daysInYearTypeOptions;
     }
 
 }

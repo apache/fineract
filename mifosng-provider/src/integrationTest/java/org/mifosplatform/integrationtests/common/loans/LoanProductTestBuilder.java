@@ -58,12 +58,18 @@ public class LoanProductTestBuilder {
     private Boolean multiDisburseLoan = false;
     private String outstandingLoanBalance = "35000";
     private String maxTrancheCount = "35000";
+    
+    private Boolean isInterestRecalculationEnabled = false;
+    private String daysInYearType = "1";
+    private String daysInMonthType = "1";
+    private String interestRecalculationCompoundingMethod = "0";
+    private String rescheduleStrategyMethod = "1";
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<>();
 
         if (chargeId != null) {
-            List<HashMap<String, String>> charges = new ArrayList<HashMap<String, String>>();
+            List<HashMap<String, String>> charges = new ArrayList<>();
             HashMap<String, String> chargeMap = new HashMap<>();
             chargeMap.put("id", chargeId);
             charges.add(chargeMap);
@@ -100,6 +106,13 @@ public class LoanProductTestBuilder {
             map.putAll(getAccountMappingForAccrualBased());
         } else if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());
+        }
+        map.put("daysInMonthType", this.daysInMonthType);
+        map.put("daysInYearType", this.daysInYearType);
+        map.put("isInterestRecalculationEnabled", this.isInterestRecalculationEnabled);
+        if (this.isInterestRecalculationEnabled) {
+            map.put("interestRecalculationCompoundingMethod", this.interestRecalculationCompoundingMethod);
+            map.put("rescheduleStrategyMethod", this.rescheduleStrategyMethod);
         }
         return new Gson().toJson(map);
     }

@@ -61,7 +61,10 @@ public final class LoanProductDataValidator {
             LoanProductConstants.numberOfRepaymentVariationsForBorrowerCycleParameterName, LoanProductConstants.shortName,
             LoanProductConstants.multiDisburseLoanParameterName, LoanProductConstants.outstandingLoanBalanceParameterName,
             LoanProductConstants.maxTrancheCountParameterName, LoanProductConstants.graceOnArrearsAgeingParameterName,
-            LoanProductConstants.overdueDaysForNPAParameterName));
+            LoanProductConstants.overdueDaysForNPAParameterName, LoanProductConstants.isInterestRecalculationEnabledParameterName,
+            LoanProductConstants.daysInYearTypeParameterName, LoanProductConstants.daysInMonthTypeParameterName,
+            LoanProductConstants.rescheduleStrategyMethodParameterName,
+            LoanProductConstants.interestRecalculationCompoundingMethodParameterName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -264,6 +267,34 @@ public final class LoanProductDataValidator {
         baseDataValidator.reset().parameter(LoanProductConstants.overdueDaysForNPAParameterName).value(overdueDaysForNPA)
                 .integerZeroOrGreater();
 
+        /**
+         * { @link DaysInYearType }
+         */
+        final Integer daysInYearType = this.fromApiJsonHelper.extractIntegerNamed(LoanProductConstants.daysInYearTypeParameterName,
+                element, Locale.getDefault());
+        baseDataValidator.reset().parameter(LoanProductConstants.daysInYearTypeParameterName).value(daysInYearType).notNull()
+                .isOneOfTheseValues(1, 360, 364, 365);
+
+        /**
+         * { @link DaysInMonthType }
+         */
+        final Integer daysInMonthType = this.fromApiJsonHelper.extractIntegerNamed(LoanProductConstants.daysInMonthTypeParameterName,
+                element, Locale.getDefault());
+        baseDataValidator.reset().parameter(LoanProductConstants.daysInMonthTypeParameterName).value(daysInMonthType).notNull()
+                .isOneOfTheseValues(1, 30);
+
+        // Interest recalculation settings
+        final Boolean isInterestRecalculationEnabled = this.fromApiJsonHelper.extractBooleanNamed(
+                LoanProductConstants.isInterestRecalculationEnabledParameterName, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.isInterestRecalculationEnabledParameterName)
+                .value(isInterestRecalculationEnabled).notNull().isOneOfTheseValues(true, false);
+
+        if (isInterestRecalculationEnabled != null) {
+            if (isInterestRecalculationEnabled.booleanValue()) {
+                validateInterestRecalculationParams(element, baseDataValidator);
+            }
+        }
+
         // accounting related data validation
         final Integer accountingRuleType = this.fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());
         baseDataValidator.reset().parameter("accountingRule").value(accountingRuleType).notNull().inMinMaxRange(1, 4);
@@ -378,6 +409,26 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter("interestType").value(interestType).ignoreIfNull()
                     .integerSameAsNumber(InterestMethod.DECLINING_BALANCE.getValue());
         }
+    }
+
+    private void validateInterestRecalculationParams(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
+
+        /**
+         * { @link InterestRecalculationCompoundingMethod }
+         */
+        final Integer interestRecalculationCompoundingMethod = this.fromApiJsonHelper.extractIntegerNamed(
+                LoanProductConstants.interestRecalculationCompoundingMethodParameterName, element, Locale.getDefault());
+        baseDataValidator.reset().parameter(LoanProductConstants.interestRecalculationCompoundingMethodParameterName)
+                .value(interestRecalculationCompoundingMethod).notNull().inMinMaxRange(0, 3);
+
+        /**
+         * { @link LoanRescheduleStrategyMethod }
+         */
+        final Integer rescheduleStrategyMethod = this.fromApiJsonHelper.extractIntegerNamed(
+                LoanProductConstants.rescheduleStrategyMethodParameterName, element, Locale.getDefault());
+        baseDataValidator.reset().parameter(LoanProductConstants.rescheduleStrategyMethodParameterName).value(rescheduleStrategyMethod)
+                .notNull().inMinMaxRange(1, 3);
+
     }
 
     public void validateForUpdate(final String json, final LoanProduct loanProduct) {
@@ -572,6 +623,40 @@ public final class LoanProductDataValidator {
                     element, Locale.getDefault());
             baseDataValidator.reset().parameter("interestCalculationPeriodType").value(interestCalculationPeriodType).notNull()
                     .inMinMaxRange(0, 1);
+        }
+
+        /**
+         * { @link DaysInYearType }
+         */
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.daysInYearTypeParameterName, element)) {
+            final Integer daysInYearType = this.fromApiJsonHelper.extractIntegerNamed(LoanProductConstants.daysInYearTypeParameterName,
+                    element, Locale.getDefault());
+            baseDataValidator.reset().parameter(LoanProductConstants.daysInYearTypeParameterName).value(daysInYearType).notNull()
+                    .isOneOfTheseValues(1, 360, 364, 365);
+        }
+
+        /**
+         * { @link DaysInMonthType }
+         */
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.daysInMonthTypeParameterName, element)) {
+            final Integer daysInMonthType = this.fromApiJsonHelper.extractIntegerNamed(LoanProductConstants.daysInMonthTypeParameterName,
+                    element, Locale.getDefault());
+            baseDataValidator.reset().parameter(LoanProductConstants.daysInMonthTypeParameterName).value(daysInMonthType).notNull()
+                    .isOneOfTheseValues(1, 30);
+        }
+
+        // Interest recalculation settings
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.isInterestRecalculationEnabledParameterName, element)) {
+            final Boolean isInterestRecalculationEnabled = this.fromApiJsonHelper.extractBooleanNamed(
+                    LoanProductConstants.isInterestRecalculationEnabledParameterName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.isInterestRecalculationEnabledParameterName)
+                    .value(isInterestRecalculationEnabled).notNull().isOneOfTheseValues(true, false);
+
+            if (isInterestRecalculationEnabled != null) {
+                if (isInterestRecalculationEnabled.booleanValue()) {
+                    validateInterestRecalculationParams(element, baseDataValidator);
+                }
+            }
         }
 
         final Integer accountingRuleType = this.fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());

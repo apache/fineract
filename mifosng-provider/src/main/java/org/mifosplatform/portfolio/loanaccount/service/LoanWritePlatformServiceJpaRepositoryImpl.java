@@ -59,6 +59,8 @@ import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
+import org.mifosplatform.portfolio.calendar.domain.CalendarRepository;
+import org.mifosplatform.portfolio.calendar.domain.CalendarType;
 import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargePaymentMode;
@@ -165,6 +167,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanReadPlatformService loanReadPlatformService;
     private final FromJsonHelper fromApiJsonHelper;
     private final AccountTransferRepository accountTransferRepository;
+    private final CalendarRepository calendarRepository;
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -183,7 +186,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final AccountTransfersReadPlatformService accountTransfersReadPlatformService,
             final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
             final LoanChargeReadPlatformService loanChargeReadPlatformService, final LoanReadPlatformService loanReadPlatformService,
-            final FromJsonHelper fromApiJsonHelper, final AccountTransferRepository accountTransferRepository) {
+            final FromJsonHelper fromApiJsonHelper, final AccountTransferRepository accountTransferRepository,
+            final CalendarRepository calendarRepository) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
@@ -210,6 +214,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanReadPlatformService = loanReadPlatformService;
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.accountTransferRepository = accountTransferRepository;
+        this.calendarRepository = calendarRepository;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -328,6 +333,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, null, null, null, fromSavingsAccount, isRegularTransaction);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
         }
+        
+        updateRecurringCalendarDatesForInterestRecalculation(loan);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -338,6 +345,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withLoanId(loanId) //
                 .with(changes) //
                 .build();
+    }
+
+    private void updateRecurringCalendarDatesForInterestRecalculation(final Loan loan) {
+
+        if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+            final CalendarInstance calendarInstanceForInterestRecalculation = this.calendarInstanceRepository
+                    .findByEntityIdAndEntityTypeIdAndCalendarTypeId(loan.loanInterestRecalculationDetailId(),
+                            CalendarEntityType.LOAN_RECALCULATION_DETAIL.getValue(), CalendarType.COLLECTION.getValue());
+
+            Calendar calendarForInterestRecalculation = calendarInstanceForInterestRecalculation.getCalendar();
+            calendarForInterestRecalculation.updateStartAndEndDate(loan.getDisbursementDate(), loan.getMaturityDate());
+            this.calendarRepository.save(calendarForInterestRecalculation);
+        }
+
     }
 
     private void saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {
@@ -503,6 +524,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                         fromSavingsAccount, isRegularTransaction);
                 this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             }
+            updateRecurringCalendarDatesForInterestRecalculation(loan);
         }
         return changes;
     }

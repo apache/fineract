@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.portfolio.loanaccount.serialization;
 
+import static org.mifosplatform.portfolio.loanaccount.api.LoanApiConstants.recalculationFrequencyTypeParameterName;
+
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -59,7 +61,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             "calendarId", // optional
             "syncDisbursementWithMeeting",// optional
             "linkAccountId", LoanApiConstants.disbursementDataParameterName, LoanApiConstants.emiAmountParameterName,
-            LoanApiConstants.maxOutstandingBalanceParameterName, LoanProductConstants.graceOnArrearsAgeingParameterName));
+            LoanApiConstants.maxOutstandingBalanceParameterName, LoanProductConstants.graceOnArrearsAgeingParameterName,
+            LoanApiConstants.recalculationFrequencyTypeParameterName));
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
@@ -356,6 +359,13 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     .ignoreIfNull().positiveAmount();
         }
         validateLoanMultiDisbursementdate(element, baseDataValidator, expectedDisbursementDate, principal);
+
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.recalculationFrequencyTypeParameterName, element)) {
+            final Integer recalculationFrequencyType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+                    LoanApiConstants.recalculationFrequencyTypeParameterName, element);
+            baseDataValidator.reset().parameter(LoanApiConstants.recalculationFrequencyTypeParameterName).value(recalculationFrequencyType)
+                    .notNull().inMinMaxRange(1, 5);
+        }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
@@ -827,6 +837,14 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
         }
 
+    }
+
+    public void validateRecalcuationFrequencyType(final Integer recalculationFrequencyTypeValue) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
+        baseDataValidator.reset().parameter(recalculationFrequencyTypeParameterName).value(recalculationFrequencyTypeValue).notNull()
+                .inMinMaxRange(1, 5);
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
 }

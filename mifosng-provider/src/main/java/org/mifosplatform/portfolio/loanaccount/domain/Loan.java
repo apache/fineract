@@ -306,6 +306,10 @@ public class Loan extends AbstractPersistable<Long> {
     @Column(name = "total_recovered_derived", scale = 6, precision = 19)
     private BigDecimal totalRecovered;
 
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loan", optional = true, orphanRemoval = true)
+    private LoanInterestRecalculationDetails loanInterestRecalculationDetails;
+
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy,
@@ -1261,6 +1265,28 @@ public class Loan extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
+    private boolean isInterestRecalculationEnabledForProduct() {
+        return this.loanProduct.isInterestRecalculationEnabled();
+    }
+
+    /**
+     * Update interest recalculation settings if product configuration changes
+     */
+    public void updateLoanInterestRecalculationSettings() {
+
+        if (isInterestRecalculationEnabledForProduct()) {
+            if (this.loanInterestRecalculationDetails == null) {
+                this.loanInterestRecalculationDetails = this.loanProduct.copyInterestRecalculationSettings();
+                this.loanInterestRecalculationDetails.updateLoan(this);
+            } else {
+                this.loanInterestRecalculationDetails = this.loanProduct
+                        .updateLoanInterestRecalculationDetails(this.loanInterestRecalculationDetails);
+            }
+        } else {
+            this.loanInterestRecalculationDetails = null;
+        }
+    }
+
     private void recalculateLoanCharge(final LoanCharge loanCharge) {
         final BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
         BigDecimal chargeAmt = BigDecimal.ZERO;
@@ -1483,6 +1509,15 @@ public class Loan extends AbstractPersistable<Long> {
         // validate if disbursement date is a holiday or a non-working day
         validateDisbursementDateIsOnNonWorkingDay(workingDays, allowTransactionsOnNonWorkingDay);
         validateDisbursementDateIsOnHoliday(allowTransactionsOnHoliday, holidays);
+
+        /**
+         * Copy interest recalculation settings if interest recalculation is enabled
+         */
+        if (this.loanRepaymentScheduleDetail.isInterestRecalculationEnabled()) {
+            this.loanInterestRecalculationDetails = this.loanProduct.copyInterestRecalculationSettings();
+            this.loanInterestRecalculationDetails.updateLoan(this);
+        }
+
     }
 
     private LocalDate determineExpectedMaturityDate() {
@@ -3851,5 +3886,34 @@ public class Loan extends AbstractPersistable<Long> {
 
     public BigDecimal getTotalOverpaid() {
         return this.totalOverpaid;
+    }
+
+    public void updateIsInterestRecalculationEnabled() {
+        this.loanRepaymentScheduleDetail.updateIsInterestRecalculationEnabled(isInterestRecalculationEnabledForProduct());
+    }
+
+    public LoanInterestRecalculationDetails loanInterestRecalculationDetails() {
+        return this.loanInterestRecalculationDetails;
+    }
+
+    public Long loanInterestRecalculationDetailId() {
+        if (loanInterestRecalculationDetails() != null) { return this.loanInterestRecalculationDetails.getId(); }
+        return null;
+    }
+
+    public LocalDate getExpectedMaturityDate() {
+        LocalDate expectedMaturityDate = null;
+        if (this.expectedMaturityDate != null) {
+            expectedMaturityDate = new LocalDate(this.expectedMaturityDate);
+        }
+        return expectedMaturityDate;
+    }
+
+    public LocalDate getMaturityDate() {
+        LocalDate maturityDate = getExpectedMaturityDate();
+        if (this.actualMaturityDate != null) {
+            maturityDate = new LocalDate(this.actualMaturityDate);
+        }
+        return maturityDate;
     }
 }

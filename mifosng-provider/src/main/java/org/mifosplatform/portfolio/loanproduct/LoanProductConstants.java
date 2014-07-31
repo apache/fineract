@@ -52,9 +52,16 @@ public interface LoanProductConstants {
     public static final String multiDisburseLoanParameterName = "multiDisburseLoan";
     public static final String maxTrancheCountParameterName = "maxTrancheCount";
     public static final String outstandingLoanBalanceParameterName = "outstandingLoanBalance";
-    
+
     public static final String graceOnArrearsAgeingParameterName = "graceOnArrearsAgeing";
-    
+
     public static final String overdueDaysForNPAParameterName = "overdueDaysForNPA";
+
+    // Interest recalculation related
+    public static final String isInterestRecalculationEnabledParameterName = "isInterestRecalculationEnabled";
+    public static final String daysInYearTypeParameterName = "daysInYearType";
+    public static final String daysInMonthTypeParameterName = "daysInMonthType";
+    public static final String interestRecalculationCompoundingMethodParameterName = "interestRecalculationCompoundingMethod";
+    public static final String rescheduleStrategyMethodParameterName = "rescheduleStrategyMethod";
 
 }

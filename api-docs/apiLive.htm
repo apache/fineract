@@ -6676,6 +6676,21 @@ An enumeration that indicates the type of transaction processing strategy to be 
 								</ol>
 							</td>
 						</tr>
+						<tr class=alt>
+							<td>recalculationFrequencyType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Frequency at which Outstanding Principal is recalculated. This field is mandatory when interest interest recalculation is enabled for product.
+								<br>Available calculation types:
+								<ol>
+									<li>1 = Same as repayment period</li>
+									<li>2 = Daily</li>
+									<li>3 = Weekly</li>
+									<li>4 = Fortnightly</li>
+									<li>5 = Monthly</li>
+								</ol>
+							</td>
+						</tr>
 					</table>
 				</div>
 			</div>
@@ -6826,6 +6841,29 @@ GET https://DomainName/api/v1/loans/template?templateType=individual&clientId=1&
       8
     ]
   },
+  "daysInMonthType": {
+    "id": 30,
+    "code": "DaysInMonthType.days360",
+    "value": "30 Days"
+  },
+  "daysInYearType": {
+	"id": 360,
+	"code": "DaysInYearType.days360",
+	"value": "360 Days"
+  },
+  "isInterestRecalculationEnabled": true,
+  "interestRecalculationData": {
+    "interestRecalculationCompoundingType": {
+      "id": 2,
+      "code": "interestRecalculationCompoundingMethod.fee",
+      "value": "Fee"
+    },
+    "rescheduleStrategyType": {
+      "id": 2,
+      "code": "loanRescheduleStrategyMethod.reduce.number.of.installments",
+      "value": "Reduce number of installments"
+    }
+  }
   "charges": [],
   "productOptions": [
     {
@@ -7015,7 +7053,32 @@ GET https://DomainName/api/v1/loans/template?templateType=individual&clientId=1&
   		"fieldOfficerId":0,
   		"currency":{"code":"USD","name":"US Dollar","decimalPlaces":2,"displaySymbol":"$","nameCode":"currency.USD","displayLabel":"US Dollar ($)"}
   	}
-  ]
+  ],
+  "interestRecalculationFrequencyTypeOptions": [{
+        "id": 1,
+        "code": "interestRecalculationFrequencyType.same.as.repayment.period",
+        "value": "Same as repayment period"
+    },
+    {
+        "id": 2,
+        "code": "interestRecalculationFrequencyType.daily",
+        "value": "Daily"
+    },
+    {
+        "id": 3,
+        "code": "interestRecalculationFrequencyType.weekly",
+        "value": "Weekly"
+    },
+    {
+        "id": 4,
+        "code": "interestRecalculationFrequencyType.fortnightly",
+        "value": "Fortnightly"
+    },
+    {
+        "id": 5,
+        "code": "interestRecalculationFrequencyType.monthly",
+        "value": "Monthly"
+    }],
 }
 					</code>
 				</div>
@@ -7755,6 +7818,15 @@ Request Body:
 					<br/>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Additional Mandatory Fields if interest recalculation is enabled for product</div></td>
+						</tr>
+						<tr class=alt>
+							<td>recalculationFrequencyType</td>
+						</tr>
+					</table>
+					<br/>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
@@ -7793,6 +7865,7 @@ Request Body:
     "submittedOnDate": "10 Jun 2013",
     "linkAccountId" : "1",
     "fixedEmiAmount":1100,
+	"recalculationFrequencyType":"1",
     "maxOutstandingLoanBalance":"35000",
     "disbursementData":[{"expectedDisbursementDate":"01 November 2013",
     					"principal":22000,"approvedPrincipal":22000}]
@@ -10171,8 +10244,39 @@ An enumeration that indicates the type of transaction processing strategy to be 
 								product and the type of the accounting rule to be used
 								<span>Example Values:</span>1=NONE, 2=CASH_BASED, 3=ACCRUAL_PERIODIC, 4=ACCRUAL_UPFRONT</td>
 						</tr>
-						</td>
+						<tr class=alt>
+							<td>isInterestRecalculationEnabled</td>
 						</tr>
+						<tr>
+							<td class=fielddesc>It is a flag, Used to denote whether interest recalculation is enabled or disabled for the particular product</td>
+						</tr>
+						<tr class=alt>
+							<td>daysInYearType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies the number of days in a year. <br>
+							<span>Example Values:</span>1=ACTUAL(Actual number of days in year), 360=360 DAYS, 364=364 DAYS(52 WEEKS), 365=365 DAYS</td>
+						</tr>
+						<tr class=alt>
+							<td>daysInMonthType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies the number of days in a month. <br>
+							<span>Example Values:</span>1=ACTUAL(Actual number of days in month), 30=30 DAYS</td>
+						</tr>
+						<tr class=alt>
+							<td>interestRecalculationCompoundingMethod</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies which amount portion should be added to principal for interest recalculation. <br>
+							<span>Example Values:</span>0=NONE(Only on principal), 1=INTEREST(Principal+Interest), 2=FEE(Principal+Fee), 3=FEE And INTEREST (Principal+Fee+Interest)</td>
+						</tr>
+						<tr class=alt>
+							<td>rescheduleStrategyMethod</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies what action should perform on loan repayment schedule for advance payments. <br>
+							<span>Example Values:</span>1=Reschedule next repayments, 2=Reduce number of installments, 3=Reduce EMI amount</td>
 						</tr>
 					</table>
 				</div>
@@ -10260,6 +10364,31 @@ GET https://DomainName/api/v1/loanproducts
     "principalVariationsForBorrowerCycle": [],
     "interestRateVariationsForBorrowerCycle": [],
     "numberOfRepaymentVariationsForBorrowerCycle": [],
+    "daysInMonthType": {
+        "id": 30,
+        "code": "DaysInMonthType.days360",
+        "value": "30 Days"
+    },
+    "daysInYearType": {
+        "id": 360,
+        "code": "DaysInYearType.days360",
+        "value": "360 Days"
+    },
+    "isInterestRecalculationEnabled": true,
+    "interestRecalculationData": {
+        "id": 3,
+        "productId": 1,
+        "interestRecalculationCompoundingType": {
+            "id": 2,
+            "code": "interestRecalculationCompoundingMethod.fee",
+            "value": "Fee"
+        },
+        "rescheduleStrategyType": {
+            "id": 2,
+            "code": "loanRescheduleStrategyMethod.reduce.number.of.installments",
+            "value": "Reduce number of installments"
+        }
+    },
     "accountingRule": {
       "id": 2,
       "code": "accountingRuleType.cash",
@@ -10338,6 +10467,29 @@ GET https://DomainName/api/v1/loanproducts/template
     "code": "accountingRuleType.none",
     "value": "NONE"
   },
+  "daysInMonthType": {
+        "id": 1,
+        "code": "DaysInMonthType.actual",
+        "value": "Actual"
+    },
+    "daysInYearType": {
+        "id": 1,
+        "code": "DaysInYearType.actual",
+        "value": "Actual"
+    },
+    "isInterestRecalculationEnabled": false,
+    "interestRecalculationData": {
+        "interestRecalculationCompoundingType": {
+            "id": 0,
+            "code": "interestRecalculationCompoundingMethod.none",
+            "value": "None"
+        },
+        "rescheduleStrategyType": {
+            "id": 3,
+            "code": "loanRescheduleStrategyMethod.reduce.emi.amount",
+            "value": "Reduce EMI amount"
+        }
+    },
   "paymentTypeOptions": [
     {
       "id": 10,
@@ -11018,7 +11170,72 @@ GET https://DomainName/api/v1/loanproducts/template
       "code": "LoanProductValueConditionType.greterthan",
       "value": "greter than"
     }
-  ]
+  ],
+  "daysInMonthTypeOptions": [{
+        "id": 1,
+        "code": "DaysInMonthType.actual",
+        "value": "Actual"
+    },
+    {
+        "id": 30,
+        "code": "DaysInMonthType.days360",
+        "value": "30 Days"
+    }],
+    "daysInYearTypeOptions": [{
+        "id": 1,
+        "code": "DaysInYearType.actual",
+        "value": "Actual"
+    },
+    {
+        "id": 360,
+        "code": "DaysInYearType.days360",
+        "value": "360 Days"
+    },
+    {
+        "id": 364,
+        "code": "DaysInYearType.days364",
+        "value": "364 Days"
+    },
+    {
+        "id": 365,
+        "code": "DaysInYearType.days365",
+        "value": "365 Days"
+    }],
+    "interestRecalculationCompoundingTypeOptions": [{
+        "id": 0,
+        "code": "interestRecalculationCompoundingMethod.none",
+        "value": "None"
+    },
+    {
+        "id": 2,
+        "code": "interestRecalculationCompoundingMethod.fee",
+        "value": "Fee"
+    },
+    {
+        "id": 1,
+        "code": "interestRecalculationCompoundingMethod.interest",
+        "value": "Interest"
+    },
+    {
+        "id": 3,
+        "code": "interestRecalculationCompoundingMethod.interest.and.fee",
+        "value": "Fee and Interest"
+    }],
+    "rescheduleStrategyTypeOptions": [{
+        "id": 3,
+        "code": "loanRescheduleStrategyMethod.reduce.emi.amount",
+        "value": "Reduce EMI amount"
+    },
+    {
+        "id": 2,
+        "code": "loanRescheduleStrategyMethod.reduce.number.of.installments",
+        "value": "Reduce number of installments"
+    },
+    {
+        "id": 1,
+        "code": "loanRescheduleStrategyMethod.reschedule.next.repayments",
+        "value": "Reschedule next repayments"
+    }]
 }
 					</code>
 				</div>
@@ -11264,8 +11481,10 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 								numberOfRepayments, repaymentEvery, repaymentFrequencyType, 
 								interestRatePerPeriod, interestRateFrequencyType, amortizationType, interestType,
 								interestCalculationPeriodType, transactionProcessingStrategyId,
-								accountingRule</td>
+								accountingRule, isInterestRecalculationEnabled, daysInYearType, daysInMonthType</td>
 						</tr>
+					</table>
+					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
@@ -11278,7 +11497,8 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							outstandingLoanBalance,overdueDaysForNPA
 							</td>
 						</tr>
-
+					</table>
+					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Additional Mandatory Fields for Cash(2) based accounting</div></td>
 						</tr>
@@ -11287,6 +11507,8 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 								incomeFromFeeAccountId, incomeFromPenaltyAccountId, 
 								writeOffAccountId, transfersInSuspenseAccountId, overpaymentLiabilityAccountId</td>
 						</tr>
+					</table>
+					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Additional Mandatory Fields for periodic (3) and upfront (4)accrual accounting</div></td>
 						</tr>
@@ -11295,6 +11517,14 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 								incomeFromFeeAccountId, incomeFromPenaltyAccountId, 
 								writeOffAccountId, receivableInterestAccountId, receivableFeeAccountId,
 								receivablePenaltyAccountId, transfersInSuspenseAccountId, overpaymentLiabilityAccountId</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>						
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Additional Mandatory Fields if interest recalculation is enabled(true)</div></td>
+						</tr>
+						<tr class=alt>
+							<td>interestRecalculationCompoundingMethod,rescheduleStrategyMethod</td>
 						</tr>
 					</table>
 				</div>
@@ -11356,7 +11586,10 @@ Request Body:
 "incomeFromFeeAccountId":8,
 "incomeFromPenaltyAccountId":9,
 "writeOffAccountId":10,
-"overpaymentLiabilityAccountId":11
+"overpaymentLiabilityAccountId":11,
+"daysInMonthType":1,
+"daysInYearType":1,
+"isInterestRecalculationEnabled":"false"
 }
 					</code>
 					<code class="method-response">
@@ -11385,6 +11618,11 @@ Request Body:
     "amortizationType": 1,
     "interestType": 0,
     "interestCalculationPeriodType": 1,
+    "daysInMonthType":1,
+    "daysInYearType":1,
+    "isInterestRecalculationEnabled":"true",
+    "interestRecalculationCompoundingMethod":"0",
+    "rescheduleStrategyMethod":"3",
     "accountingRule":"2",
     "fundSourceAccountId":"4",
     "loanPortfolioAccountId":"8",
@@ -11445,6 +11683,9 @@ Request Body:
     "amortizationType": 1,
     "interestType": 0,
     "interestCalculationPeriodType": 1,
+    "daysInMonthType":1,
+    "daysInYearType":1,
+    "isInterestRecalculationEnabled":"false",
     "accountingRule":"3",
     "fundSourceAccountId":"4",
     "loanPortfolioAccountId":"8",
@@ -11492,6 +11733,28 @@ Request Body:
     "changes": {
         "principal": 70000,
         "locale": "en_GB"
+    }
+}
+					</code>
+					<code class="method-request">
+PUT loanproducts/3
+Content-Type: application/json 
+Request Body: 
+{
+    "locale": "en",
+    "isInterestRecalculationEnabled":"true",
+    "interestRecalculationCompoundingMethod":"0",
+    "rescheduleStrategyMethod":"3",
+}
+					</code>
+					<code class="method-response">
+{
+    "resourceId": 1,
+    "changes": {
+        "locale": "en",
+        "isInterestRecalculationEnabled":"true",
+        "interestRecalculationCompoundingMethod":"0",
+        "rescheduleStrategyMethod":"3",
     }
 }
 					</code>

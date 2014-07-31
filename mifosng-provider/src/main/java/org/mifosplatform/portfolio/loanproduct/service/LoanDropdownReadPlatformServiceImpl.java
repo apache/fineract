@@ -8,10 +8,13 @@ package org.mifosplatform.portfolio.loanproduct.service;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.amortizationType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestCalculationPeriodType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestRateFrequencyType;
+import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestRecalculationCompoundingType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.loanCycleValueConditionType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.loanTermFrequencyType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyType;
+import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.rescheduleStrategyType;
+import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestRecalculationFrequencyType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,8 +28,11 @@ import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrateg
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
+import org.mifosplatform.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductValueConditionType;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
+import org.mifosplatform.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -110,6 +116,39 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
                 loanCycleValueConditionType(LoanProductValueConditionType.EQUAL),
                 loanCycleValueConditionType(LoanProductValueConditionType.GRETERTHAN));
         return repaymentFrequencyOptions;
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveInterestRecalculationCompoundingTypeOptions() {
+
+        final List<EnumOptionData> interestRecalculationCompoundingTypeOptions = Arrays.asList(
+                interestRecalculationCompoundingType(InterestRecalculationCompoundingMethod.NONE),
+                interestRecalculationCompoundingType(InterestRecalculationCompoundingMethod.FEE),
+                interestRecalculationCompoundingType(InterestRecalculationCompoundingMethod.INTEREST),
+                interestRecalculationCompoundingType(InterestRecalculationCompoundingMethod.INTEREST_AND_FEE));
+        return interestRecalculationCompoundingTypeOptions;
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveRescheduleStrategyTypeOptions() {
+
+        final List<EnumOptionData> rescheduleStrategyTypeOptions = Arrays.asList(
+                rescheduleStrategyType(LoanRescheduleStrategyMethod.REDUCE_EMI_AMOUNT),
+                rescheduleStrategyType(LoanRescheduleStrategyMethod.REDUCE_NUMBER_OF_INSTALLMENTS),
+                rescheduleStrategyType(LoanRescheduleStrategyMethod.RESCHEDULE_NEXT_REPAYMENTS));
+        return rescheduleStrategyTypeOptions;
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveInterestRecalculationFrequencyTypeOptions() {
+        
+        final List<EnumOptionData> interestRecalculationFrequencyTypeOptions = Arrays.asList(
+                interestRecalculationFrequencyType(RecalculationFrequencyType.SAME_AS_REPAYMENT_PERIOD),
+                interestRecalculationFrequencyType(RecalculationFrequencyType.DAILY),
+                interestRecalculationFrequencyType(RecalculationFrequencyType.WEEKLY),
+                interestRecalculationFrequencyType(RecalculationFrequencyType.FORTNIGHTLY),
+                interestRecalculationFrequencyType(RecalculationFrequencyType.MONTHLY));
+        return interestRecalculationFrequencyTypeOptions;
     }
 
 }
