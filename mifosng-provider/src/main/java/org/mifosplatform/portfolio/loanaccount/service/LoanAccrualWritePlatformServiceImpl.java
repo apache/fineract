@@ -98,9 +98,9 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             try {
                 if (!loansIds.contains(accrualData.getLoanId())) {
                     if (accrualData.getDueDateAsLocaldate().isAfter(tilldate)) {
-                        if (accruredTill == null) {
+                        //if (accruredTill == null) {
                             accruredTill = accrualData.getAccruedTill();
-                        }
+                        //}
                         addAccrualTillSpecificDate(tilldate, accrualData, accruredTill);
                     } else {
                         addAccrualAccounting(accrualData);

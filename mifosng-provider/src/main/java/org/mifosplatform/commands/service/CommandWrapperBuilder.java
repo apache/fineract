@@ -1479,6 +1479,24 @@ public class CommandWrapperBuilder {
         this.href = "/centers/" + centerId + "?command=close";
         return this;
     }
+    
+    public CommandWrapperBuilder associateGroupsToCenter(final Long centerId) {
+        this.actionName = "ASSOCIATEGROUPS";
+        this.entityName = "CENTER";
+        this.entityId = centerId;
+        this.groupId = centerId;
+        this.href = "/groups/" + centerId + "?command=associateGroups";
+        return this;
+    }
+
+    public CommandWrapperBuilder disassociateGroupsFromCenter(final Long centerId) {
+        this.actionName = "DISASSOCIATEGROUPS";
+        this.entityName = "CENTER";
+        this.entityId = centerId;
+        this.groupId = centerId;
+        this.href = "/groups/" + centerId + "?command=disassociateGroups";
+        return this;
+    }
 
     public CommandWrapperBuilder createAccountingRule() {
         this.actionName = "CREATE";

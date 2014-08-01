@@ -679,6 +679,10 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = this.applicationContext.getBean("saveCenterCollectionSheetCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isCenterClose()) {
                 handler = this.applicationContext.getBean("closeCenterCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isCenterDisassociateGroups()) {
+                handler = this.applicationContext.getBean("disassociateGroupsFromCenterCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isCenterAssociateGroups()) {
+                handler = this.applicationContext.getBean("associateGroupsToCenterCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }

@@ -668,7 +668,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
             } else {
                 this.productInterestRecalculationDetails = null;
             }
-        } else {
+        }
+
+        if (!isInterestRecalculationEnabledChanged && this.isInterestRecalculationEnabled()) {
             this.productInterestRecalculationDetails.update(command, actualChanges, localeAsInput);
         }
 

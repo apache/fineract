@@ -327,6 +327,14 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("CLOSE") && this.entityName.equalsIgnoreCase("CENTER");
     }
 
+    public boolean isCenterAssociateGroups() {
+        return this.actionName.equalsIgnoreCase("ASSOCIATEGROUPS") && this.entityName.equalsIgnoreCase("CENTER");
+    }
+
+    public boolean isCenterDisassociateGroups() {
+        return this.actionName.equalsIgnoreCase("DISASSOCIATEGROUPS") && this.entityName.equalsIgnoreCase("CENTER");
+    }
+
     public boolean isClientIdentifierResource() {
         return this.entityName.equals("CLIENTIDENTIFIER");
     }
