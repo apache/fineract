@@ -527,4 +527,8 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         this.externalId = externalId;
     }
 
+    public boolean isAccrual() {
+        return LoanTransactionType.ACCRUAL.equals(getTypeOf()) && isNotReversed();
+    }
+
 }

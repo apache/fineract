@@ -8,10 +8,12 @@ package org.mifosplatform.portfolio.loanaccount.domain;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,6 +43,7 @@ import org.mifosplatform.portfolio.charge.domain.ChargePaymentMode;
 import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeWithoutMandatoryFieldException;
 import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
+import org.mifosplatform.portfolio.loanaccount.data.LoanChargePaidDetail;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -695,7 +698,12 @@ public class LoanCharge extends AbstractPersistable<Long> {
             amountPaidToDate = amountPaidToDate.plus(amountOutstanding);
             this.amountPaid = amountPaidToDate.getAmount();
             this.amountOutstanding = BigDecimal.ZERO;
-            this.paid = true;
+            Money waivedAmount = Money.of(processAmount.getCurrency(), this.amountWaived);
+            if (waivedAmount.isGreaterThanZero()) {
+                this.waived = true;
+            } else {
+                this.paid = true;
+            }
 
         } else {
             amountPaidOnThisCharge = processAmount;
@@ -800,14 +808,18 @@ public class LoanCharge extends AbstractPersistable<Long> {
         return this.loanInstallmentCharge;
     }
 
-    public LoanRepaymentScheduleInstallment fetchRepaymentInstallment(final Money trasferedAmount) {
+    public List<LoanChargePaidDetail> fetchRepaymentInstallment(final MonetaryCurrency currency) {
+        List<LoanChargePaidDetail> chargePaidDetails = new ArrayList<>();
         for (final LoanInstallmentCharge loanChargePerInstallment : this.loanInstallmentCharge) {
             if (loanChargePerInstallment.isPending()
-                    && trasferedAmount.getAmount().equals(
-                            loanChargePerInstallment.getAmountThroughChargePayment(trasferedAmount.getCurrency()).getAmount())) { return loanChargePerInstallment
-                    .getRepaymentInstallment(); }
+                    && loanChargePerInstallment.getAmountThroughChargePayment(currency).isGreaterThanZero()) {
+                LoanChargePaidDetail chargePaidDetail = new LoanChargePaidDetail(
+                        loanChargePerInstallment.getAmountThroughChargePayment(currency),
+                        loanChargePerInstallment.getRepaymentInstallment(), isFeeCharge());
+                chargePaidDetails.add(chargePaidDetail);
+            }
         }
-        return null;
+        return chargePaidDetails;
     }
 
     public boolean isActive() {
@@ -841,5 +853,38 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     public void updateOverdueInstallmentCharge(LoanOverdueInstallmentCharge overdueInstallmentCharge) {
         this.overdueInstallmentCharge = overdueInstallmentCharge;
+    }
+
+    public void updateWaivedAmount(MonetaryCurrency currency) {
+        if (isInstalmentFee()) {
+            for (final LoanInstallmentCharge chargePerInstallment : this.loanInstallmentCharge) {
+                final Money amountWaived = chargePerInstallment.updateWaivedAmount(currency);
+                if (this.amountWaived == null) {
+                    this.amountWaived = BigDecimal.ZERO;
+                }
+                this.amountWaived = this.amountWaived.add(amountWaived.getAmount());
+                this.amountOutstanding = this.amountOutstanding.subtract(amountWaived.getAmount());
+                if (determineIfFullyPaid()) {
+                    this.paid = false;
+                    this.waived = true;
+                }
+                return;
+            }
+        }
+
+        Money waivedAmount = Money.of(currency, this.amountWaived);
+        if (waivedAmount.isGreaterThanZero()) {
+
+            if (waivedAmount.isGreaterThan(this.getAmount(currency))) {
+                this.amountWaived = this.getAmount(currency).getAmount();
+                this.amountOutstanding = BigDecimal.ZERO;
+                this.paid = false;
+                this.waived = true;
+            } else if (waivedAmount.isLessThan(this.getAmount(currency))) {
+                this.paid = false;
+                this.waived = false;
+            }
+        }
+
     }
 }

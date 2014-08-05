@@ -153,7 +153,7 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
 
         Money amountPaidToDate = Money.of(incrementBy.getCurrency(), this.amountPaid);
         final Money amountOutstanding = Money.of(incrementBy.getCurrency(), this.amountOutstanding);
-
+        Money amountPaidPreviously = amountPaidToDate;
         Money amountPaidOnThisCharge = Money.zero(incrementBy.getCurrency());
         if (incrementBy.isGreaterThanOrEqualTo(amountOutstanding)) {
             amountPaidOnThisCharge = amountOutstanding;
@@ -166,8 +166,20 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
             this.amountPaid = amountPaidToDate.getAmount();
             this.amountOutstanding = calculateAmountOutstanding(incrementBy.getCurrency());
         }
-        this.amountThroughChargePayment = feeAmount.getAmount();
-        this.paid = determineIfFullyPaid();
+        Money amountFromChargePayment = Money.of(incrementBy.getCurrency(), this.amountThroughChargePayment);
+        if (amountPaidPreviously.isGreaterThanZero()) {
+            amountFromChargePayment = amountFromChargePayment.plus(feeAmount);
+        } else {
+            amountFromChargePayment = feeAmount;
+        }
+        this.amountThroughChargePayment = amountFromChargePayment.getAmount();
+        if (determineIfFullyPaid()) {
+            if (this.amountWaived.compareTo(BigDecimal.ZERO) == 1) {
+                this.waived = true;
+            } else {
+                this.paid = true;
+            }
+        }
 
         return amountPaidOnThisCharge;
     }
@@ -193,6 +205,22 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
 
     public Money getAmountThroughChargePayment(final MonetaryCurrency currency) {
         return Money.of(currency, this.amountThroughChargePayment);
+    }
+
+    public Money updateWaivedAmount(final MonetaryCurrency currency) {
+        if (this.amountWaived.compareTo(BigDecimal.ZERO) == 1) {
+            int comparedValue = this.amountWaived.compareTo(this.getAmount());
+            if (comparedValue == 1) {
+                this.amountWaived = this.getAmount();
+                this.amountOutstanding = BigDecimal.ZERO;
+                this.paid = false;
+                this.waived = true;
+            } else if (comparedValue == -1) {
+                this.paid = false;
+                this.waived = false;
+            }
+        }
+        return getAmountWaived(currency);
     }
 
 }

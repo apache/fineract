@@ -6,10 +6,12 @@
 package org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -25,5 +27,11 @@ public interface LoanRepaymentScheduleTransactionProcessor {
 
     void handleWriteOff(LoanTransaction loanTransaction, MonetaryCurrency loanCurrency,
             List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments);
+
+    Map<LocalDate, Money> handleRecalculation(LocalDate disbursementDate, List<LoanTransaction> transactionsPostDisbursement,
+            MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments, LoanRepaymentScheduleInstallment currentinstallment, Map<LocalDate, LocalDate> recalculationDates);
+
+    Map<LocalDate, Money> handleRepaymentSchedule(List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments, LoanRepaymentScheduleInstallment currentInstallment, Map<LocalDate, LocalDate> recalculationDates);
 
 }

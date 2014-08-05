@@ -60,6 +60,7 @@ import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.organisation.workingdays.service.WorkingDaysUtil;
 import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
+import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeAddedException;
@@ -310,6 +311,9 @@ public class Loan extends AbstractPersistable<Long> {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loan", optional = true, orphanRemoval = true)
     private LoanInterestRecalculationDetails loanInterestRecalculationDetails;
 
+    @Column(name = "is_npa", nullable = false)
+    private boolean isNpa;
+
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy,
@@ -496,8 +500,8 @@ public class Loan extends AbstractPersistable<Long> {
 
         // NOTE: must add new loan charge to set of loan charges before
         // reporcessing the repayment schedule.
-        if(this.charges == null) {
-        	this.charges = new HashSet<>();
+        if (this.charges == null) {
+            this.charges = new HashSet<>();
         }
         this.charges.add(loanCharge);
         this.summary = updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
@@ -1511,7 +1515,8 @@ public class Loan extends AbstractPersistable<Long> {
         validateDisbursementDateIsOnHoliday(allowTransactionsOnHoliday, holidays);
 
         /**
-         * Copy interest recalculation settings if interest recalculation is enabled
+         * Copy interest recalculation settings if interest recalculation is
+         * enabled
          */
         if (this.loanRepaymentScheduleDetail.isInterestRecalculationEnabled()) {
             this.loanInterestRecalculationDetails = this.loanProduct.copyInterestRecalculationSettings();
@@ -1722,7 +1727,8 @@ public class Loan extends AbstractPersistable<Long> {
             final ApplicationCurrency currency, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
             final Map<String, Object> actualChanges, final LocalDate calculatedRepaymentsStartingFromDate, final boolean isHolidayEnabled,
             final List<Holiday> holidays, final WorkingDays workingDays, final boolean allowTransactionsOnHoliday,
-            final boolean allowTransactionsOnNonWorkingDay, final boolean recalculateSchedule) {
+            final boolean allowTransactionsOnNonWorkingDay, final boolean recalculateSchedule,
+            final CalendarInstance calendarInstanceForInterestRecalculation) {
 
         final LoanStatus statusEnum = this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED,
                 LoanStatus.fromInt(this.loanStatus));
@@ -1764,6 +1770,11 @@ public class Loan extends AbstractPersistable<Long> {
                 }
                 updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
             }
+        }
+        if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()
+                && fetchRepaymentScheduleInstallment(1).getDueDate().isBefore(LocalDate.now())) {
+            regenerateRepaymentScheduleWithInterestRecalculation(loanScheduleFactory, currency, calculatedRepaymentsStartingFromDate,
+                    isHolidayEnabled, holidays, workingDays, calendarInstanceForInterestRecalculation);
         }
         updateLoanRepaymentPeriodsDerivedFields(actualDisbursementDate);
         updateLoanSummaryDerivedFields();
@@ -2127,7 +2138,8 @@ public class Loan extends AbstractPersistable<Long> {
             }
             boolean isEmiAmountChanged = this.loanTermVariations.size() > 0;
             updateLoanToPreDisbursalState();
-            if (isScheduleRegenerateRequired || isDisbueseAmtChanged || isEmiAmountChanged) {
+            if (isScheduleRegenerateRequired || isDisbueseAmtChanged || isEmiAmountChanged
+                    || this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
                 // clear off actual disbusrement date so schedule regeneration
                 // uses expected date.
 
@@ -2186,7 +2198,9 @@ public class Loan extends AbstractPersistable<Long> {
 
     public ChangedTransactionDetail waiveInterest(final LoanTransaction waiveInterestTransaction,
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds) {
+            final List<Long> existingReversedTransactionIds, final List<Holiday> holidays, final WorkingDays workingDays,
+            final boolean isHolidayEnabled, final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency currency,
+            final LocalDate calculatedRepaymentsStartingFromDate, final CalendarInstance calendarInstanceForInterestRecalculation) {
 
         validateAccountStatus(LoanEvent.LOAN_REPAYMENT_OR_WAIVER);
 
@@ -2197,7 +2211,8 @@ public class Loan extends AbstractPersistable<Long> {
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         final ChangedTransactionDetail changedTransactionDetail = handleRepaymentOrRecoveryOrWaiverTransaction(waiveInterestTransaction,
-                loanLifecycleStateMachine, null);
+                loanLifecycleStateMachine, null, loanScheduleFactory, currency, calculatedRepaymentsStartingFromDate, isHolidayEnabled,
+                holidays, workingDays, calendarInstanceForInterestRecalculation);
 
         return changedTransactionDetail;
     }
@@ -2205,7 +2220,9 @@ public class Loan extends AbstractPersistable<Long> {
     public ChangedTransactionDetail makeRepayment(final LoanTransaction repaymentTransaction,
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds, final boolean allowTransactionsOnHoliday, final List<Holiday> holidays,
-            final WorkingDays workingDays, final boolean allowTransactionsOnNonWorkingDay, boolean isRecoveryRepayment) {
+            final WorkingDays workingDays, final boolean allowTransactionsOnNonWorkingDay, final boolean isHolidayEnabled,
+            boolean isRecoveryRepayment, final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency currency,
+            final LocalDate calculatedRepaymentsStartingFromDate, final CalendarInstance calendarInstanceForInterestRecalculation) {
 
         LoanEvent event = null;
         if (isRecoveryRepayment) {
@@ -2224,7 +2241,8 @@ public class Loan extends AbstractPersistable<Long> {
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         final ChangedTransactionDetail changedTransactionDetail = handleRepaymentOrRecoveryOrWaiverTransaction(repaymentTransaction,
-                loanLifecycleStateMachine, null);
+                loanLifecycleStateMachine, null, loanScheduleFactory, currency, calculatedRepaymentsStartingFromDate, isHolidayEnabled,
+                holidays, workingDays, calendarInstanceForInterestRecalculation);
 
         return changedTransactionDetail;
     }
@@ -2289,7 +2307,10 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     private ChangedTransactionDetail handleRepaymentOrRecoveryOrWaiverTransaction(final LoanTransaction loanTransaction,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransaction adjustedTransaction) {
+            final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransaction adjustedTransaction,
+            final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency currency,
+            final LocalDate calculatedRepaymentsStartingFromDate, final boolean isHolidayEnabled, final List<Holiday> holidays,
+            final WorkingDays workingDays, final CalendarInstance calendarInstanceForInterestRecalculation) {
 
         ChangedTransactionDetail changedTransactionDetail = null;
 
@@ -2353,10 +2374,36 @@ public class Loan extends AbstractPersistable<Long> {
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategy);
-        if (isTransactionChronologicallyLatest && adjustedTransaction == null) {
+
+        final LoanRepaymentScheduleInstallment currentInstallment = fetchLoanRepaymentScheduleInstallment(loanTransaction
+                .getTransactionDate());
+        boolean reprocess = true;
+
+        if (adjustedTransaction == null && loanTransaction.getTransactionDate().isEqual(LocalDate.now()) && currentInstallment != null) {
+            reprocess = false;
+        }
+
+        if (isTransactionChronologicallyLatest && adjustedTransaction == null
+                && (!reprocess || !this.repaymentScheduleDetail().isInterestRecalculationEnabled())) {
             loanRepaymentScheduleTransactionProcessor.handleTransaction(loanTransaction, getCurrency(), this.repaymentScheduleInstallments,
                     charges());
-        } else {
+            if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+                if (currentInstallment == null || currentInstallment.isNotFullyPaidOff()) {
+                    reprocess = true;
+                } else {
+                    final LoanRepaymentScheduleInstallment nextInstallment = fetchRepaymentScheduleInstallment(currentInstallment
+                            .getInstallmentNumber() + 1);
+                    if (nextInstallment != null && nextInstallment.getTotalPaidInAdvance(getCurrency()).isGreaterThanZero()) {
+                        reprocess = true;
+                    }
+                }
+            }
+        }
+        if (reprocess) {
+            if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+                regenerateRepaymentScheduleWithInterestRecalculation(loanScheduleFactory, currency, calculatedRepaymentsStartingFromDate,
+                        isHolidayEnabled, holidays, workingDays, calendarInstanceForInterestRecalculation);
+            }
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(),
                     allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, charges());
@@ -2382,6 +2429,17 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         return changedTransactionDetail;
+    }
+
+    private LoanRepaymentScheduleInstallment fetchLoanRepaymentScheduleInstallment(LocalDate dueDate) {
+        LoanRepaymentScheduleInstallment installment = null;
+        for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : this.repaymentScheduleInstallments) {
+            if (dueDate.equals(loanRepaymentScheduleInstallment.getDueDate())) {
+                installment = loanRepaymentScheduleInstallment;
+                break;
+            }
+        }
+        return installment;
     }
 
     private List<LoanTransaction> retreiveListOfTransactionsPostDisbursement() {
@@ -2556,7 +2614,9 @@ public class Loan extends AbstractPersistable<Long> {
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransaction transactionForAdjustment,
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
             final boolean allowTransactionsOnHoliday, final List<Holiday> holidays, final WorkingDays workingDays,
-            final boolean allowTransactionsOnNonWorkingDay) {
+            final boolean isHolidayEnabled, final boolean allowTransactionsOnNonWorkingDay,
+            final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency currency,
+            final LocalDate calculatedRepaymentsStartingFromDate, final CalendarInstance calendarInstanceForInterestRecalculation) {
 
         validateRepaymentDateIsOnHoliday(newTransactionDetail.getTransactionDate(), allowTransactionsOnHoliday, holidays);
         validateRepaymentDateIsOnNonWorkingDay(newTransactionDetail.getTransactionDate(), workingDays, allowTransactionsOnNonWorkingDay);
@@ -2589,13 +2649,17 @@ public class Loan extends AbstractPersistable<Long> {
 
         if (newTransactionDetail.isRepayment() || newTransactionDetail.isInterestWaiver()) {
             changedTransactionDetail = handleRepaymentOrRecoveryOrWaiverTransaction(newTransactionDetail, loanLifecycleStateMachine,
-                    transactionForAdjustment);
+                    transactionForAdjustment, loanScheduleFactory, currency, calculatedRepaymentsStartingFromDate, isHolidayEnabled,
+                    holidays, workingDays, calendarInstanceForInterestRecalculation);
         }
 
         return changedTransactionDetail;
     }
 
-    public ChangedTransactionDetail undoWrittenOff(final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
+    public ChangedTransactionDetail undoWrittenOff(final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds, final boolean isHolidayEnabled, final List<Holiday> holidays,
+            final WorkingDays workingDays, final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency currency,
+            final LocalDate calculatedRepaymentsStartingFromDate, final CalendarInstance calendarInstanceForInterestRecalculation) {
 
         validateAccountStatus(LoanEvent.WRITE_OFF_OUTSTANDING_UNDO);
         existingTransactionIds.addAll(findExistingTransactionIds());
@@ -2606,6 +2670,10 @@ public class Loan extends AbstractPersistable<Long> {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategy);
         final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
+        if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+            regenerateRepaymentScheduleWithInterestRecalculation(loanScheduleFactory, currency, calculatedRepaymentsStartingFromDate,
+                    isHolidayEnabled, holidays, workingDays, calendarInstanceForInterestRecalculation);
+        }
         ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(
                 getDisbursementDate(), allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments,
                 charges());
@@ -2672,12 +2740,13 @@ public class Loan extends AbstractPersistable<Long> {
             final Map<String, Object> changes, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
             final AppUser currentUser, final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency currency,
             final LocalDate calculatedRepaymentsStartingFromDate, final boolean isHolidayEnabled, final List<Holiday> holidays,
-            final WorkingDays workingDays) {
+            final WorkingDays workingDays, final CalendarInstance calendarInstanceForInterestRecalculation) {
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategy);
         ChangedTransactionDetail changedTransactionDetail = closeDisbursements(loanScheduleFactory, currency,
-                calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays, loanRepaymentScheduleTransactionProcessor);
+                calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays, loanRepaymentScheduleTransactionProcessor,
+                calendarInstanceForInterestRecalculation);
 
         validateAccountStatus(LoanEvent.WRITE_OFF_OUTSTANDING);
 
@@ -2739,14 +2808,18 @@ public class Loan extends AbstractPersistable<Long> {
     private ChangedTransactionDetail closeDisbursements(final LoanScheduleGeneratorFactory loanScheduleFactory,
             final ApplicationCurrency currency, final LocalDate calculatedRepaymentsStartingFromDate, final boolean isHolidayEnabled,
             final List<Holiday> holidays, final WorkingDays workingDays,
-            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor) {
+            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
+            final CalendarInstance calendarInstanceForInterestRecalculation) {
         ChangedTransactionDetail changedTransactionDetail = null;
         if (isDisbursementAllowed() && atleastOnceDisbursed()) {
             this.loanRepaymentScheduleDetail.setPrincipal(getDisbursedAmount());
             removeDisbursementDetail();
             regenerateRepaymentSchedule(loanScheduleFactory, currency, calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays,
                     workingDays);
-
+            if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+                regenerateRepaymentScheduleWithInterestRecalculation(loanScheduleFactory, currency, calculatedRepaymentsStartingFromDate,
+                        isHolidayEnabled, holidays, workingDays, calendarInstanceForInterestRecalculation);
+            }
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(),
                     allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, charges());
@@ -2776,7 +2849,7 @@ public class Loan extends AbstractPersistable<Long> {
             final Map<String, Object> changes, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
             final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency currency,
             final LocalDate calculatedRepaymentsStartingFromDate, final boolean isHolidayEnabled, final List<Holiday> holidays,
-            final WorkingDays workingDays) {
+            final WorkingDays workingDays, final CalendarInstance calendarInstanceForInterestRecalculation) {
 
         validateAccountStatus(LoanEvent.LOAN_CLOSED);
 
@@ -2804,7 +2877,8 @@ public class Loan extends AbstractPersistable<Long> {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategy);
         ChangedTransactionDetail changedTransactionDetail = closeDisbursements(loanScheduleFactory, currency,
-                calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays, loanRepaymentScheduleTransactionProcessor);
+                calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays, loanRepaymentScheduleTransactionProcessor,
+                calendarInstanceForInterestRecalculation);
 
         LoanTransaction loanTransaction = null;
         if (isOpen()) {
@@ -3829,7 +3903,7 @@ public class Loan extends AbstractPersistable<Long> {
             final JsonCommand command, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
             final Map<String, Object> actualChanges, final LoanScheduleGeneratorFactory loanScheduleFactory,
             final ApplicationCurrency currency, final LocalDate calculatedRepaymentsStartingFromDate, final boolean isHolidayEnabled,
-            final List<Holiday> holidays, final WorkingDays workingDays) {
+            final List<Holiday> holidays, final WorkingDays workingDays, final CalendarInstance calendarInstanceForInterestRecalculation) {
         validateAccountStatus(LoanEvent.LOAN_EDIT_MULTI_DISBURSE_DATE);
         final LocalDate expectedDisbursementDate = command.localDateValueOfParameterNamed(LoanApiConstants.disbursementDateParameterName);
         disbursementDetails.updateExpectedDisbursementDate(expectedDisbursementDate.toDate());
@@ -3841,6 +3915,11 @@ public class Loan extends AbstractPersistable<Long> {
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
         regenerateRepaymentSchedule(loanScheduleFactory, currency, calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays,
                 workingDays);
+
+        if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+            regenerateRepaymentScheduleWithInterestRecalculation(loanScheduleFactory, currency, calculatedRepaymentsStartingFromDate,
+                    isHolidayEnabled, holidays, workingDays, calendarInstanceForInterestRecalculation);
+        }
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategy);
@@ -3915,5 +3994,158 @@ public class Loan extends AbstractPersistable<Long> {
             maturityDate = new LocalDate(this.actualMaturityDate);
         }
         return maturityDate;
+    }
+
+    public ChangedTransactionDetail recalculateSchedule(final LoanScheduleGeneratorFactory loanScheduleFactory,
+            final ApplicationCurrency applicationCurrency, final LocalDate calculatedRepaymentsStartingFromDate,
+            final boolean isHolidayEnabled, final List<Holiday> holidays, final WorkingDays workingDays,
+            final CalendarInstance calendarInstanceForInterestRecalculation, final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds) {
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
+
+        if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+            regenerateRepaymentScheduleWithInterestRecalculation(loanScheduleFactory, applicationCurrency,
+                    calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays, calendarInstanceForInterestRecalculation);
+        }
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
+                .determineProcessor(this.transactionProcessingStrategy);
+        final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
+        ChangedTransactionDetail changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(
+                getDisbursementDate(), allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments,
+                charges());
+        for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+            mapEntry.getValue().updateLoan(this);
+        }
+        /***
+         * Commented since throwing exception if external id present for one of
+         * the transactions. for this need to save the reversed transactions
+         * first and then new transactions.
+         */
+        // this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
+
+        updateLoanSummaryDerivedFields();
+
+        return changedTransactionDetail;
+
+    }
+
+    private void regenerateRepaymentScheduleWithInterestRecalculation(final LoanScheduleGeneratorFactory loanScheduleFactory,
+            final ApplicationCurrency applicationCurrency, final LocalDate calculatedRepaymentsStartingFromDate,
+            final boolean isHolidayEnabled, final List<Holiday> holidays, final WorkingDays workingDays,
+            final CalendarInstance calendarInstanceForInterestRecalculation) {
+
+        if (!this.repaymentScheduleDetail().isInterestRecalculationEnabled() || isNpa) { return; }
+
+        final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
+        final LoanScheduleGenerator loanScheduleGenerator = loanScheduleFactory.create(interestMethod);
+
+        final RoundingMode roundingMode = RoundingMode.HALF_EVEN;
+        final MathContext mc = new MathContext(8, roundingMode);
+
+        final Integer loanTermFrequency = this.termFrequency;
+        final PeriodFrequencyType loanTermPeriodFrequencyType = PeriodFrequencyType.fromInt(this.termPeriodFrequencyType);
+        final List<DisbursementData> disbursementData = new ArrayList<>();
+        for (LoanDisbursementDetails disbursementDetails : this.disbursementDetails) {
+            disbursementData.add(disbursementDetails.toData());
+        }
+        final List<LoanTermVariationsData> loanVariationTermsData = new ArrayList<>();
+        boolean isDefaultEmiAmountReq = true;
+        for (LoanTermVariations variationTerms : this.loanTermVariations) {
+            if (variationTerms.getTermType().isEMIAmountVariation()) {
+                if (variationTerms.getTermApplicableFrom().equals(this.getDisbursementDate().toDate())) {
+                    isDefaultEmiAmountReq = false;
+                }
+                loanVariationTermsData.add(variationTerms.toData());
+            }
+        }
+        if (isDefaultEmiAmountReq) {
+            LoanTermVariationsData data = new LoanTermVariationsData(null,
+                    LoanEnumerations.loanvariationType(LoanTermVariationType.EMI_AMOUNT), this.getDisbursementDate(), this.fixedEmiAmount);
+            loanVariationTermsData.add(data);
+        }
+
+        final LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency,
+                loanTermPeriodFrequencyType, getDisbursementDate(), getExpectedFirstRepaymentOnDate(),
+                calculatedRepaymentsStartingFromDate, getInArrearsTolerance(), this.loanRepaymentScheduleDetail,
+                this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount, disbursementData, this.maxOutstandingLoanBalance,
+                loanVariationTermsData, getInterestChargedFromDate(), this.loanInterestRecalculationDetails,
+                calendarInstanceForInterestRecalculation);
+
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
+                .determineProcessor(this.transactionProcessingStrategy);
+
+        final LoanScheduleModel loanSchedule = loanScheduleGenerator.rescheduleNextInstallments(mc, applicationCurrency,
+                loanApplicationTerms, charges(), isHolidayEnabled, holidays, workingDays, retreiveListOfTransactionsPostDisbursement(),
+                loanRepaymentScheduleTransactionProcessor);
+
+        updateLoanSchedule(loanSchedule);
+        LocalDate lastRepaymentDate = this.getLastRepaymentPeriodDueDate();
+        Set<LoanCharge> charges = this.charges();
+        for (LoanCharge loanCharge : charges) {
+            if (!loanCharge.isDueAtDisbursement()) {
+                if (loanCharge.getDueLocalDate() == null || !lastRepaymentDate.isBefore(loanCharge.getDueLocalDate())) {
+                    recalculateLoanCharge(loanCharge);
+                    loanCharge.updateWaivedAmount(getCurrency());
+                } else {
+                    loanCharge.setActive(false);
+                }
+            }
+        }
+        updateLoanSummaryDerivedFields();
+    }
+
+    public Money fetchPrepaymentDetail(final LoanScheduleGeneratorFactory loanScheduleFactory) {
+        Money amount = Money.zero(getCurrency());
+
+        if (this.loanRepaymentScheduleDetail.isInterestRecalculationEnabled()) {
+            final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
+            final LoanScheduleGenerator loanScheduleGenerator = loanScheduleFactory.create(interestMethod);
+
+            final RoundingMode roundingMode = RoundingMode.HALF_EVEN;
+            final MathContext mc = new MathContext(8, roundingMode);
+
+            final Integer loanTermFrequency = this.termFrequency;
+            final PeriodFrequencyType loanTermPeriodFrequencyType = PeriodFrequencyType.fromInt(this.termPeriodFrequencyType);
+            final List<DisbursementData> disbursementData = new ArrayList<>();
+            for (LoanDisbursementDetails disbursementDetails : this.disbursementDetails) {
+                disbursementData.add(disbursementDetails.toData());
+            }
+            final List<LoanTermVariationsData> loanVariationTermsData = new ArrayList<>();
+            boolean isDefaultEmiAmountReq = true;
+            for (LoanTermVariations variationTerms : this.loanTermVariations) {
+                if (variationTerms.getTermType().isEMIAmountVariation()) {
+                    if (variationTerms.getTermApplicableFrom().equals(this.getDisbursementDate().toDate())) {
+                        isDefaultEmiAmountReq = false;
+                    }
+                    loanVariationTermsData.add(variationTerms.toData());
+                }
+            }
+            if (isDefaultEmiAmountReq) {
+                LoanTermVariationsData data = new LoanTermVariationsData(null,
+                        LoanEnumerations.loanvariationType(LoanTermVariationType.EMI_AMOUNT), this.getDisbursementDate(),
+                        this.fixedEmiAmount);
+                loanVariationTermsData.add(data);
+            }
+
+            final LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms.assembleFrom(null, loanTermFrequency,
+                    loanTermPeriodFrequencyType, getDisbursementDate(), getExpectedFirstRepaymentOnDate(), null, getInArrearsTolerance(),
+                    this.loanRepaymentScheduleDetail, this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount, disbursementData,
+                    this.maxOutstandingLoanBalance, loanVariationTermsData, getInterestChargedFromDate());
+            amount = loanScheduleGenerator.fetchPrepaymentAmount(this.repaymentScheduleInstallments, getCurrency(), loanApplicationTerms,
+                    mc);
+        } else {
+            amount = this.getTotalOutstandingOnLoan();
+        }
+        return amount;
+    }
+
+    private Money getTotalOutstandingOnLoan() {
+        Money cumulativeOurstanding = Money.zero(loanCurrency());
+
+        for (final LoanRepaymentScheduleInstallment scheduledRepayment : this.repaymentScheduleInstallments) {
+            cumulativeOurstanding = cumulativeOurstanding.plus(scheduledRepayment.getTotalOutstanding(getCurrency()));
+        }
+        return cumulativeOurstanding;
     }
 }
