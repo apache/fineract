@@ -698,7 +698,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
             amountPaidToDate = amountPaidToDate.plus(amountOutstanding);
             this.amountPaid = amountPaidToDate.getAmount();
             this.amountOutstanding = BigDecimal.ZERO;
-            Money waivedAmount = Money.of(processAmount.getCurrency(), this.amountWaived);
+            Money waivedAmount = getAmountWaived(processAmount.getCurrency());
             if (waivedAmount.isGreaterThanZero()) {
                 this.waived = true;
             } else {
@@ -868,13 +868,12 @@ public class LoanCharge extends AbstractPersistable<Long> {
                     this.paid = false;
                     this.waived = true;
                 }
-                return;
             }
+            return;
         }
 
         Money waivedAmount = Money.of(currency, this.amountWaived);
         if (waivedAmount.isGreaterThanZero()) {
-
             if (waivedAmount.isGreaterThan(this.getAmount(currency))) {
                 this.amountWaived = this.getAmount(currency).getAmount();
                 this.amountOutstanding = BigDecimal.ZERO;

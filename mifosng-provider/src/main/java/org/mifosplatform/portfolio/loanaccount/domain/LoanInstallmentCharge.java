@@ -174,7 +174,8 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
         }
         this.amountThroughChargePayment = amountFromChargePayment.getAmount();
         if (determineIfFullyPaid()) {
-            if (this.amountWaived.compareTo(BigDecimal.ZERO) == 1) {
+            Money waivedAmount = getAmountWaived(incrementBy.getCurrency());
+            if (waivedAmount.isGreaterThanZero()) {
                 this.waived = true;
             } else {
                 this.paid = true;
@@ -208,14 +209,14 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
     }
 
     public Money updateWaivedAmount(final MonetaryCurrency currency) {
-        if (this.amountWaived.compareTo(BigDecimal.ZERO) == 1) {
-            int comparedValue = this.amountWaived.compareTo(this.getAmount());
-            if (comparedValue == 1) {
+        Money waivedAmount = getAmountWaived(currency);
+        if (waivedAmount.isGreaterThanZero()) {
+            if (waivedAmount.isGreaterThan(this.getAmount(currency))) {
                 this.amountWaived = this.getAmount();
                 this.amountOutstanding = BigDecimal.ZERO;
                 this.paid = false;
                 this.waived = true;
-            } else if (comparedValue == -1) {
+            } else if (waivedAmount.isLessThan(this.getAmount(currency))) {
                 this.paid = false;
                 this.waived = false;
             }
