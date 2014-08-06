@@ -406,9 +406,6 @@ public class BatchApiTest {
         final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
                 jsonifiedRequest);
 
-        System.out.println(response.get(3));
-        System.out.println(response.get(4));
-
         Assert.assertEquals("Verify Status Code 200 for Approve Loan", 200L, (long) response.get(3).getStatusCode());
         Assert.assertEquals("Verify Status Code 200 for Disburse Loan", 200L, (long) response.get(4).getStatusCode());
     }

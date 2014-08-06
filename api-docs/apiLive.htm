@@ -2897,7 +2897,7 @@ Content-Type: application/json Request Body:
 			
 			</div>
 
-			<a id="batch_api" name="batch_api" class="old-syle-anchor">&nbsp;</a>
+			<a class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Batch requests in a single transaction</h4>
@@ -3001,7 +3001,7 @@ Successful transaction response:
 			
 			</div>
 
-			<a id="batch_api" name="batch_api" class="old-syle-anchor">&nbsp;</a>
+			<a class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Batch API Errors</h4>
@@ -3010,9 +3010,35 @@ Successful transaction response:
 						In Batch API without "enclosingTransaction=true", if one of the response is erroneous, then an appropriate status code will be set for that request and the error message will be returned in it's "body", while all other requests will return successful response with a status code of "200". 
 					</p>
 
-				</div>						
-			
+				</div>
 			</div>
+
+			<a class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Available Command Strategies</h4>
+
+					<p>
+						These are the currently available command strategies within the Mifos Batch API. So, these listed operations can be executed using a Batch Request.
+					</p>
+
+				</div>
+				<div class="method-example">
+					<h6>Batch API - available commands</h6>
+					<ul>
+						<li><a href="#clients_create">Create a new Client</a>
+						<li><a href="#clients_update">Update an existing Client</a>
+						<li><a href="#loans_create">Apply a Loan to a Client</a>
+						<li><a href="#savingsaccounts_create">Apply Savings to a Client</a>
+						<li><a href="#loans_charges_create">Add a new Loan Charge</a>
+						<li><a href="#loans_charges_retrieve">Collect an existing Loan Charge</a>
+						<li><a href="#clients_activate">Activate a Pending Client</a>
+						<li><a href="#loans_approve">Approve a Pending Loan</a>
+						<li><a href="#loans_disburse">Disburse a Loan</a>
+					</ul>
+				</div>
+			</div>
+
 			<a id="errors" name="errors" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">

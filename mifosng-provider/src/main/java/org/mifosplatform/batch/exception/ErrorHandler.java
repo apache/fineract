@@ -12,9 +12,12 @@ import org.mifosplatform.infrastructure.core.exception.PlatformInternalServerExc
 import org.mifosplatform.infrastructure.core.exception.UnsupportedParameterException;
 import org.mifosplatform.infrastructure.core.exceptionmapper.PlatformApiDataValidationExceptionMapper;
 import org.mifosplatform.infrastructure.core.exceptionmapper.PlatformDataIntegrityExceptionMapper;
+import org.mifosplatform.infrastructure.core.exceptionmapper.PlatformDomainRuleExceptionMapper;
 import org.mifosplatform.infrastructure.core.exceptionmapper.PlatformInternalServerExceptionMapper;
 import org.mifosplatform.infrastructure.core.exceptionmapper.PlatformResourceNotFoundExceptionMapper;
 import org.mifosplatform.infrastructure.core.exceptionmapper.UnsupportedParameterExceptionMapper;
+import org.mifosplatform.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
+import org.mifosplatform.portfolio.loanproduct.exception.LinkedAccountRequiredException;
 import org.springframework.transaction.TransactionException;
 
 import com.google.gson.Gson;
@@ -81,8 +84,22 @@ public class ErrorHandler extends RuntimeException {
 
             return new ErrorInfo(403, 3001, errorBody);
 
+        } else if (exception instanceof LinkedAccountRequiredException) {
+
+            final PlatformDomainRuleExceptionMapper mapper = new PlatformDomainRuleExceptionMapper();
+            final String errorBody = jsonHelper.toJson(mapper.toResponse((LinkedAccountRequiredException) exception).getEntity());
+
+            return new ErrorInfo(403, 3002, errorBody);
+            
+        } else if (exception instanceof MultiDisbursementDataRequiredException) {
+
+            final PlatformDomainRuleExceptionMapper mapper = new PlatformDomainRuleExceptionMapper();
+            final String errorBody = jsonHelper.toJson(mapper.toResponse((MultiDisbursementDataRequiredException) exception).getEntity());
+
+            return new ErrorInfo(403, 3003, errorBody);
+            
         } else if (exception instanceof TransactionException) {
-            return new ErrorInfo(400, 4001, "Exception " + exception.getCause() + " " + exception.getMessage());
+            return new ErrorInfo(400, 4001, "{\"Exception\": " + exception.getMessage()+"}");
 
         } else if (exception instanceof PlatformInternalServerException) {
 
@@ -92,6 +109,6 @@ public class ErrorHandler extends RuntimeException {
             return new ErrorInfo(500, 5001, errorBody);
         }
 
-        return new ErrorInfo(500, 9999, exception.toString() + " " + exception.getStackTrace());
+        return new ErrorInfo(500, 9999, "{\"Exception\": " + exception.toString() + "}");
     }
 }
