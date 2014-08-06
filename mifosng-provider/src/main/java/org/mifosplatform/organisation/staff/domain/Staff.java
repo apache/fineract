@@ -23,7 +23,6 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.office.domain.Office;
-import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -87,9 +86,9 @@ public class Staff extends AbstractPersistable<Long> {
 
         final String isActiveParamName = "isActive";
         final Boolean isActive = command.booleanObjectValueOfParameterNamed(isActiveParamName);
-        
+
         LocalDate joiningDate = null;
-        
+
         final String joiningDateParamName = "joiningDate";
         if (command.hasParameter(joiningDateParamName)) {
             joiningDate = command.localDateValueOfParameterNamed(joiningDateParamName);
@@ -103,8 +102,7 @@ public class Staff extends AbstractPersistable<Long> {
     }
 
     private Staff(final Office staffOffice, final String firstname, final String lastname, final String externalId, final String mobileNo,
-            final boolean isLoanOfficer, final Boolean isActive,
-            final LocalDate joiningDate) {
+            final boolean isLoanOfficer, final Boolean isActive, final LocalDate joiningDate) {
         this.office = staffOffice;
         this.firstname = StringUtils.defaultIfEmpty(firstname, null);
         this.lastname = StringUtils.defaultIfEmpty(lastname, null);
@@ -189,10 +187,10 @@ public class Staff extends AbstractPersistable<Long> {
             actualChanges.put(isActiveParamName, newValue);
             this.active = newValue;
         }
-        
+
         final String joiningDateParamName = "joiningDate";
         if (command.isChangeInDateParameterNamed(joiningDateParamName, this.joiningDate)) {
-        	final String valueAsInput = command.stringValueOfParameterNamed(joiningDateParamName);
+            final String valueAsInput = command.stringValueOfParameterNamed(joiningDateParamName);
             actualChanges.put(joiningDateParamName, valueAsInput);
             final LocalDate newValue = command.localDateValueOfParameterNamed(joiningDateParamName);
             this.joiningDate = newValue.toDate();
