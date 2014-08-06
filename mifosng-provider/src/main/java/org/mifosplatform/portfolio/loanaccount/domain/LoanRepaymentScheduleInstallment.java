@@ -532,4 +532,12 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
             this.fromDate = newFromDate.toDate();
         }
     }
+
+    public Money getTotalPaidInAdvance(final MonetaryCurrency currency) {
+        return Money.of(currency, this.totalPaidInAdvance);
+    }
+
+    public Money getTotalPaidLate(final MonetaryCurrency currency) {
+        return Money.of(currency, this.totalPaidLate);
+    }
 }

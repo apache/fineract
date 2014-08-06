@@ -90,12 +90,13 @@ public class LoanTransactionsApiResource {
             transactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
         } else if (is(commandParam, "disburse")) {
             transactionData = this.loanReadPlatformService.retrieveDisbursalTemplate(loanId, true);
-        } else if(is(commandParam, "disburseToSavings")){
+        } else if (is(commandParam, "disburseToSavings")) {
             transactionData = this.loanReadPlatformService.retrieveDisbursalTemplate(loanId, false);
-        } else if(is(commandParam, "recoverypayment")){
+        } else if (is(commandParam, "recoverypayment")) {
             transactionData = this.loanReadPlatformService.retrieveRecoveryPaymentTemplate(loanId);
-        }
-        else {
+        } else if (is(commandParam, "prepayLoan")) {
+            transactionData = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(loanId);
+        } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
 
@@ -150,7 +151,7 @@ public class LoanTransactionsApiResource {
         } else if (is(commandParam, "undowriteoff")) {
             final CommandWrapper commandRequest = builder.undoWriteOffLoanTransaction(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }else if(is(commandParam,"recoverypayment")){
+        } else if (is(commandParam, "recoverypayment")) {
             final CommandWrapper commandRequest = builder.loanRecoveryPaymentTransaction(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }

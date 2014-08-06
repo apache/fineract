@@ -26,6 +26,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_loan_recalculation_details")
 public class LoanInterestRecalculationDetails extends AbstractPersistable<Long> {
 
+    @SuppressWarnings("unused")
     @OneToOne
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;
@@ -63,6 +64,14 @@ public class LoanInterestRecalculationDetails extends AbstractPersistable<Long> 
     public void update(final Integer interestRecalculationCompoundingMethod, final Integer rescheduleStrategyMethod) {
         this.interestRecalculationCompoundingMethod = interestRecalculationCompoundingMethod;
         this.rescheduleStrategyMethod = rescheduleStrategyMethod;
+    }
+
+    public InterestRecalculationCompoundingMethod getInterestRecalculationCompoundingMethod() {
+        return InterestRecalculationCompoundingMethod.fromInt(this.interestRecalculationCompoundingMethod);
+    }
+
+    public LoanRescheduleStrategyMethod getRescheduleStrategyMethod() {
+        return LoanRescheduleStrategyMethod.fromInt(this.rescheduleStrategyMethod);
     }
 
 }

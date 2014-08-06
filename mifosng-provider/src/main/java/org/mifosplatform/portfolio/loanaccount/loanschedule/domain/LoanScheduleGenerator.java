@@ -11,11 +11,24 @@ import java.util.Set;
 
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
+import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
+import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 
 public interface LoanScheduleGenerator {
 
     LoanScheduleModel generate(MathContext mc, ApplicationCurrency applicationCurrency, LoanApplicationTerms loanApplicationTerms,
             Set<LoanCharge> loanCharges, boolean isHolidayEnabled, List<Holiday> holidays, final WorkingDays workingDays);
+
+    LoanScheduleModel rescheduleNextInstallments(MathContext mc, ApplicationCurrency applicationCurrency,
+            LoanApplicationTerms loanApplicationTerms, Set<LoanCharge> loanCharges, boolean isHolidayEnabled, List<Holiday> holidays,
+            WorkingDays workingDays, List<LoanTransaction> transactions,
+            LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor);
+
+    Money fetchPrepaymentAmount(List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency,
+            LoanApplicationTerms applicationTerms, MathContext mc);
 }

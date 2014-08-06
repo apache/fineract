@@ -22,7 +22,8 @@ public enum JobName {
     UPDATE_NPA("Update Non Performing Assets"),
     UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS("Update Deposit Accounts Maturity details"),
     TRANSFER_INTEREST_TO_SAVINGS("Transfer Interest To Savings"),
-    ADD_PERIODIC_ACCRUAL_ENTRIES("Add Periodic Accrual Transactions");
+    ADD_PERIODIC_ACCRUAL_ENTRIES("Add Periodic Accrual Transactions"),
+    RECALCULATE_INTEREST_FOR_LOAN("Recalculate Interest For Loans");
 
     private final String name;
 
