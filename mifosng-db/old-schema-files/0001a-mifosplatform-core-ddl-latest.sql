@@ -346,6 +346,7 @@ CREATE TABLE `m_staff` (
   `firstname` varchar(50) DEFAULT NULL,
   `lastname` varchar(50) DEFAULT NULL,
   `display_name` varchar(100) NOT NULL,
+  `joining_date` date,
   PRIMARY KEY (`id`),
   UNIQUE KEY `display_name` (`display_name`),
   KEY `FK_m_staff_m_office` (`office_id`),
