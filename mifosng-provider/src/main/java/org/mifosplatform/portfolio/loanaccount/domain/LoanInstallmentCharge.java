@@ -145,6 +145,12 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
         return !(isPaid() || isWaived());
     }
 
+    public boolean isChargeAmountpaid(MonetaryCurrency currency) {
+        Money amounPaidThroughChargePayment = Money.of(currency, this.amountThroughChargePayment);
+        Money paid = Money.of(currency, this.amountPaid);
+        return amounPaidThroughChargePayment.isEqualTo(paid);
+    }
+
     public LoanRepaymentScheduleInstallment getRepaymentInstallment() {
         return this.installment;
     }
@@ -199,16 +205,35 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
         this.amountPaid = BigDecimal.ZERO;
         this.amountWaived = BigDecimal.ZERO;
         this.amountWrittenOff = BigDecimal.ZERO;
+        this.amountThroughChargePayment = BigDecimal.ZERO;
         this.amountOutstanding = calculateAmountOutstanding(currency);
         this.paid = false;
         this.waived = false;
+
     }
 
     public Money getAmountThroughChargePayment(final MonetaryCurrency currency) {
         return Money.of(currency, this.amountThroughChargePayment);
     }
 
-    public Money updateWaivedAmount(final MonetaryCurrency currency) {
+    public Money getUnpaidAmountThroughChargePayment(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amountThroughChargePayment).minus(this.amountPaid);
+    }
+
+    private void updateAmountThroughChargePayment(final MonetaryCurrency currency) {
+        Money amountThroughChargePayment = getAmountThroughChargePayment(currency);
+        if (amountThroughChargePayment.isGreaterThanZero() && amountThroughChargePayment.isGreaterThan(this.getAmount(currency))) {
+            this.amountThroughChargePayment = this.getAmount();
+        }
+    }
+
+    public Money updateWaivedAndAmountPaidThroughChargePaymentAmount(final MonetaryCurrency currency) {
+        updateWaivedAmount(currency);
+        updateAmountThroughChargePayment(currency);
+        return getAmountWaived(currency);
+    }
+
+    private void updateWaivedAmount(final MonetaryCurrency currency) {
         Money waivedAmount = getAmountWaived(currency);
         if (waivedAmount.isGreaterThanZero()) {
             if (waivedAmount.isGreaterThan(this.getAmount(currency))) {
@@ -221,7 +246,11 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
                 this.waived = false;
             }
         }
-        return getAmountWaived(currency);
+    }
+
+    
+    public void updateInstallment(LoanRepaymentScheduleInstallment installment) {
+        this.installment = installment;
     }
 
 }

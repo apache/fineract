@@ -231,15 +231,14 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                 principalForThisPeriod = principalForThisPeriod.plus(actualOutstanding);
                             }
                         }
-
                         interestReducedDueToEarlyPayment = interestReducedDueToEarlyPayment.plus(loanApplicationTerms.interestRateFor(
-                                this.paymentPeriodsInOneYearCalculator, mc, diffDays, detail.getAmount()));
+                                this.paymentPeriodsInOneYearCalculator, mc, detail.getAmount(), detail.getStartDate(), scheduledDueDate));
 
                     } else if (detail.isLatePayment() && detail.isOverlapping(periodStartDate, scheduledDueDate)
                             && periodStartDate.isBefore(LocalDate.now())) {
                         LocalDate fromDate = periodStartDate;
                         LocalDate toDate = scheduledDueDate;
-                        if (!detail.getStartDate().isAfter(periodStartDate)) {
+                        if (!detail.getStartDate().isBefore(periodStartDate)) {
                             fromDate = detail.getStartDate();
                         }
                         if (!detail.getToDate().isAfter(scheduledDueDate)) {
@@ -248,9 +247,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         if (toDate.isAfter(LocalDate.now())) {
                             toDate = LocalDate.now();
                         }
-                        int diffDays = Days.daysBetween(fromDate, toDate).getDays();
                         interestDueToLatePayment = interestDueToLatePayment.plus(loanApplicationTerms.interestRateFor(
-                                this.paymentPeriodsInOneYearCalculator, mc, diffDays, detail.getAmount()));
+                                this.paymentPeriodsInOneYearCalculator, mc, detail.getAmount(), fromDate, toDate));
                     }
                 }
 
@@ -333,18 +331,19 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             for (RecalculationDetail detail : processDetails.values()) {
                 LocalDate fromDate = detail.getStartDate();
                 LocalDate toDate = detail.getToDate();
-                int diffDays = Days.daysBetween(fromDate, toDate).getDays();
-                Money interestDueToLatePayment = loanApplicationTerms.interestRateFor(this.paymentPeriodsInOneYearCalculator, mc, diffDays,
-                        detail.getAmount());
+                if (!toDate.isAfter(LocalDate.now())) {
+                    Money interestDueToLatePayment = loanApplicationTerms.interestRateFor(this.paymentPeriodsInOneYearCalculator, mc,
+                            detail.getAmount(), fromDate, toDate);
 
-                totalInterestCharged = totalInterestCharged.add(interestDueToLatePayment.getAmount());
-                totalRepaymentExpected = totalRepaymentExpected.add(interestDueToLatePayment.getAmount());
+                    totalInterestCharged = totalInterestCharged.add(interestDueToLatePayment.getAmount());
+                    totalRepaymentExpected = totalRepaymentExpected.add(interestDueToLatePayment.getAmount());
 
-                final LoanScheduleModelPeriod installment = LoanScheduleModelRepaymentPeriod.repayment(periodNumber, fromDate, toDate,
-                        interestDueToLatePayment.zero(), interestDueToLatePayment.zero(), interestDueToLatePayment,
-                        interestDueToLatePayment.zero(), interestDueToLatePayment.zero(), interestDueToLatePayment);
-                periods.add(installment);
-                periodNumber++;
+                    final LoanScheduleModelPeriod installment = LoanScheduleModelRepaymentPeriod.repayment(periodNumber, fromDate, toDate,
+                            interestDueToLatePayment.zero(), interestDueToLatePayment.zero(), interestDueToLatePayment,
+                            interestDueToLatePayment.zero(), interestDueToLatePayment.zero(), interestDueToLatePayment);
+                    periods.add(installment);
+                    periodNumber++;
+                }
             }
         }
 
@@ -711,8 +710,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             }
         }
 
-        int days = Days.daysBetween(calculateInterestFrom, LocalDate.now()).getDays();
-        Money interest = applicationTerms.interestRateFor(this.paymentPeriodsInOneYearCalculator, mc, days, prepaymentAmount);
+        Money interest = applicationTerms.interestRateFor(this.paymentPeriodsInOneYearCalculator, mc, prepaymentAmount,
+                calculateInterestFrom, LocalDate.now());
         prepaymentAmount = prepaymentAmount.plus(interest).plus(amount);
         return prepaymentAmount;
     }

@@ -263,6 +263,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         this.interestPortion = null;
         this.feeChargesPortion = null;
         this.penaltyChargesPortion = null;
+        this.overPaymentPortion = null;
     }
 
     public void updateLoan(final Loan loan) {

@@ -13,6 +13,8 @@ import java.util.List;
 
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
+import org.joda.time.Period;
+import org.joda.time.PeriodType;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
@@ -661,15 +663,21 @@ public final class LoanApplicationTerms {
         return periodicInterestRate;
     }
 
-    public Money interestRateFor(final PaymentPeriodsInOneYearCalculator calculator, final MathContext mc, int days,
-            final Money outstandingBalance) {
-        final long loanTermPeriodsInOneYear = calculatePeriodsInOneYear(calculator);
+    public Money interestRateFor(final PaymentPeriodsInOneYearCalculator calculator, final MathContext mc, final Money outstandingBalance,
+            final LocalDate fromDate, final LocalDate toDate) {
+
+        long loanTermPeriodsInOneYear = calculator.calculate(PeriodFrequencyType.DAYS).longValue();
+        int repaymentEvery = Days.daysBetween(fromDate, toDate).getDays();
+        if (isFallingInRepaymentPeriod(fromDate, toDate)) {
+            loanTermPeriodsInOneYear = calculatePeriodsInOneYear(calculator);
+            repaymentEvery = getPeriodsBetween(fromDate, toDate);
+        }
 
         final BigDecimal divisor = BigDecimal.valueOf(Double.valueOf("100.0"));
         final BigDecimal loanTermPeriodsInYearBigDecimal = BigDecimal.valueOf(loanTermPeriodsInOneYear);
         final BigDecimal oneDayOfYearInterestRate = this.annualNominalInterestRate.divide(loanTermPeriodsInYearBigDecimal, mc).divide(
                 divisor, mc);
-        BigDecimal interestRate = oneDayOfYearInterestRate.multiply(BigDecimal.valueOf(days), mc);
+        BigDecimal interestRate = oneDayOfYearInterestRate.multiply(BigDecimal.valueOf(repaymentEvery), mc);
         return outstandingBalance.multiplyRetainScale(interestRate, mc.getRoundingMode());
     }
 
@@ -966,5 +974,60 @@ public final class LoanApplicationTerms {
 
     public CalendarInstance getRestCalendarInstance() {
         return this.restCalendarInstance;
+    }
+
+    private boolean isFallingInRepaymentPeriod(LocalDate fromDate, LocalDate toDate) {
+        boolean isSameAsRepaymentPeriod = false;
+        if (this.interestCalculationPeriodMethod.getValue().equals(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD.getValue())) {
+            switch (this.repaymentPeriodFrequencyType) {
+                case WEEKS:
+                    int days = getPeriodsBetween(fromDate, toDate);
+                    isSameAsRepaymentPeriod = (days % 7) == 0;
+                break;
+                case MONTHS:
+                    boolean isFromDateOnEndDate = false;
+                    if (fromDate.getDayOfMonth() > fromDate.plusDays(1).getDayOfMonth()) {
+                        isFromDateOnEndDate = true;
+                    }
+                    boolean isToDateOnEndDate = false;
+                    if (toDate.getDayOfMonth() > toDate.plusDays(1).getDayOfMonth()) {
+                        isToDateOnEndDate = true;
+                    }
+
+                    if (isFromDateOnEndDate && isToDateOnEndDate) {
+                        isSameAsRepaymentPeriod = true;
+                    } else {
+
+                        int months = getPeriodsBetween(fromDate, toDate);
+                        fromDate = fromDate.plusMonths(months);
+                        isSameAsRepaymentPeriod = fromDate.isEqual(toDate);
+                    }
+
+                break;
+                default:
+                break;
+            }
+        }
+        return isSameAsRepaymentPeriod;
+    }
+
+    private Integer getPeriodsBetween(LocalDate fromDate, LocalDate toDate) {
+        Integer numberOfPeriods = 0;
+        PeriodType periodType = PeriodType.yearMonthDay();
+        Period difference = new Period(fromDate, toDate, periodType);
+        switch (this.repaymentPeriodFrequencyType) {
+            case WEEKS:
+                numberOfPeriods = difference.getDays();
+            break;
+            case MONTHS:
+                numberOfPeriods = difference.getMonths();
+            break;
+            case YEARS:
+                numberOfPeriods = difference.getYears();
+            break;
+            default:
+            break;
+        }
+        return numberOfPeriods;
     }
 }

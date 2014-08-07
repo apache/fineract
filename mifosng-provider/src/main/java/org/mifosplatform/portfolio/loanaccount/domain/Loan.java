@@ -964,7 +964,6 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public void updateLoanSchedule(final LoanScheduleModel modifiedLoanSchedule) {
-        clearInstallmentLoanCharge();
         this.repaymentScheduleInstallments.clear();
 
         for (final LoanScheduleModelPeriod scheduledLoanInstallment : modifiedLoanSchedule.getPeriods()) {
@@ -982,14 +981,6 @@ public class Loan extends AbstractPersistable<Long> {
         updateLoanScheduleDependentDerivedFields();
         updateLoanSummaryDerivedFields();
 
-    }
-
-    private void clearInstallmentLoanCharge() {
-        for (final LoanCharge loanCharge : charges()) {
-            if (loanCharge.isInstalmentFee()) {
-                loanCharge.clearLoanInstallmentCharges();
-            }
-        }
     }
 
     private void updateLoanScheduleDependentDerivedFields() {
@@ -1204,13 +1195,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         if (isChargesModified) {
             actualChanges.put(chargesParamName, getLoanCharges(possiblyModifedLoanCharges));
-
-            actualChanges.put(chargesParamName, getLoanCharges(possiblyModifedLoanCharges));
             actualChanges.put("recalculateLoanSchedule", true);
-
-            for (final LoanCharge loanCharge : possiblyModifedLoanCharges) {
-                recalculateLoanCharge(loanCharge);
-            }
         }
 
         final String collateralParamName = "collateral";
@@ -1267,6 +1252,13 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         return actualChanges;
+    }
+
+    public void recalculateAllCharges() {
+        Set<LoanCharge> charges = this.charges();
+        for (final LoanCharge loanCharge : charges) {
+            recalculateLoanCharge(loanCharge);
+        }
     }
 
     private boolean isInterestRecalculationEnabledForProduct() {
@@ -1723,12 +1715,12 @@ public class Loan extends AbstractPersistable<Long> {
         return ids;
     }
 
-    public void disburse(final LoanScheduleGeneratorFactory loanScheduleFactory, final AppUser currentUser, final JsonCommand command,
-            final ApplicationCurrency currency, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
-            final Map<String, Object> actualChanges, final LocalDate calculatedRepaymentsStartingFromDate, final boolean isHolidayEnabled,
-            final List<Holiday> holidays, final WorkingDays workingDays, final boolean allowTransactionsOnHoliday,
-            final boolean allowTransactionsOnNonWorkingDay, final boolean recalculateSchedule,
-            final CalendarInstance calendarInstanceForInterestRecalculation) {
+    public ChangedTransactionDetail disburse(final LoanScheduleGeneratorFactory loanScheduleFactory, final AppUser currentUser,
+            final JsonCommand command, final ApplicationCurrency currency, final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds, final Map<String, Object> actualChanges,
+            final LocalDate calculatedRepaymentsStartingFromDate, final boolean isHolidayEnabled, final List<Holiday> holidays,
+            final WorkingDays workingDays, final boolean allowTransactionsOnHoliday, final boolean allowTransactionsOnNonWorkingDay,
+            final boolean recalculateSchedule, final CalendarInstance calendarInstanceForInterestRecalculation) {
 
         final LoanStatus statusEnum = this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED,
                 LoanStatus.fromInt(this.loanStatus));
@@ -1763,13 +1755,7 @@ public class Loan extends AbstractPersistable<Long> {
         if (isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate) || recalculateSchedule || isEmiAmountChanged) {
             regenerateRepaymentSchedule(loanScheduleFactory, currency, calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays,
                     workingDays);
-            if (recalculateSchedule) {
-                Set<LoanCharge> charges = this.charges();
-                for (LoanCharge loanCharge : charges) {
-                    recalculateLoanCharge(loanCharge);
-                }
-                updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
-            }
+            updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
         }
         if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()
                 && fetchRepaymentScheduleInstallment(1).getDueDate().isBefore(LocalDate.now())) {
@@ -1794,8 +1780,7 @@ public class Loan extends AbstractPersistable<Long> {
             this.loanTransactions.add(interestAppliedTransaction);
         }
 
-        // changedTransactionDetail =
-        // reprocessTransactionForDisbursement(changedTransactionDetail);
+        return reprocessTransactionForDisbursement();
 
     }
 
@@ -1860,14 +1845,8 @@ public class Loan extends AbstractPersistable<Long> {
         return disburseAmount;
     }
 
-    public ChangedTransactionDetail reprocessTransactionForDisbursement() {
+    private ChangedTransactionDetail reprocessTransactionForDisbursement() {
         ChangedTransactionDetail changedTransactionDetail = null;
-        for (LoanCharge loanCharge : this.charges) {
-            if (loanCharge.isInstalmentFee() && loanCharge.hasNoLoanInstallmentCharges()) {
-                final Set<LoanInstallmentCharge> chargePerInstallments = generateInstallmentLoanCharges(loanCharge);
-                loanCharge.addLoanInstallmentCharges(chargePerInstallments);
-            }
-        }
 
         if (this.loanProduct.isMultiDisburseLoan()) {
             if (!this.actualDisbursementDate.equals(fetchLastDisburseDetail().getDisbursementDate())) {
@@ -2015,6 +1994,10 @@ public class Loan extends AbstractPersistable<Long> {
                 isHolidayEnabled, holidays, workingDays);
 
         updateLoanSchedule(loanSchedule);
+        Set<LoanCharge> charges = this.charges();
+        for (LoanCharge loanCharge : charges) {
+            recalculateLoanCharge(loanCharge);
+        }
     }
 
     private void handleDisbursementTransaction(final LocalDate disbursedOn) {
@@ -2146,10 +2129,6 @@ public class Loan extends AbstractPersistable<Long> {
                 regenerateRepaymentSchedule(loanScheduleFactory, applicationCurrency, calculatedRepaymentsStartingFromDate,
                         isHolidayEnabled, holidays, workingDays);
                 if (isDisbueseAmtChanged) {
-                    Set<LoanCharge> charges = charges();
-                    for (LoanCharge loanCharge : charges) {
-                        recalculateLoanCharge(loanCharge);
-                    }
                     updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
                 }
             }
@@ -4148,5 +4127,9 @@ public class Loan extends AbstractPersistable<Long> {
             cumulativeOurstanding = cumulativeOurstanding.plus(scheduledRepayment.getTotalOutstanding(getCurrency()));
         }
         return cumulativeOurstanding;
+    }
+
+    public List<LoanRepaymentScheduleInstallment> fetchRepaymentScheduleInstallments() {
+        return this.repaymentScheduleInstallments;
     }
 }

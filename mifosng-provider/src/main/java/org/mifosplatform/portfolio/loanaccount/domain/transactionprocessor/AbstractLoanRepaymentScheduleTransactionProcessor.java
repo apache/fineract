@@ -86,8 +86,12 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 for (final LoanRepaymentScheduleInstallment installment : installments) {
                     for (final LoanCharge loanCharge : transferCharges) {
                         if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())) {
-                            LoanChargePaidDetail chargePaidDetail = new LoanChargePaidDetail(
-                                    installment.getFeeChargesOutstanding(currency), installment, loanCharge.isFeeCharge());
+                            Money amountForProcess = loanCharge.getAmount(currency);
+                            if (amountForProcess.isGreaterThan(loanTransaction.getAmount(currency))) {
+                                amountForProcess = loanTransaction.getAmount(currency);
+                            }
+                            LoanChargePaidDetail chargePaidDetail = new LoanChargePaidDetail(amountForProcess, installment,
+                                    loanCharge.isFeeCharge());
                             chargePaidDetails.add(chargePaidDetail);
                             break;
                         }
@@ -98,11 +102,13 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 Money unprocessed = loanTransaction.getAmount(currency);
                 for (LoanChargePaidDetail chargePaidDetail : chargePaidDetails) {
                     final List<LoanRepaymentScheduleInstallment> processInstallments = new ArrayList<>(1);
-                    unprocessed = unprocessed.minus(chargePaidDetail.getAmount());
                     processInstallments.add(chargePaidDetail.getInstallment());
-                    Money unprocessedAfterProcess = handleTransactionAndCharges(loanTransaction, currency, processInstallments,
-                            transferCharges, chargePaidDetail.getAmount(), chargePaidDetail.isFeeCharge());
-                    unprocessed = unprocessed.plus(unprocessedAfterProcess);
+                    Money processAmt = chargePaidDetail.getAmount();
+                    if(processAmt.isGreaterThan(unprocessed)){
+                        processAmt = unprocessed;
+                    }
+                    unprocessed = handleTransactionAndCharges(loanTransaction, currency, processInstallments,
+                            transferCharges, processAmt, chargePaidDetail.isFeeCharge());
                     if (!unprocessed.isGreaterThanZero()) {
                         break;
                     }
@@ -206,7 +212,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         if (loanTransaction.isNotWaiver()) {
             Money feeCharges = loanTransaction.getFeeChargesPortion(currency);
             Money penaltyCharges = loanTransaction.getPenaltyChargesPortion(currency);
-            if (chargeAmountToProcess != null) {
+            if (chargeAmountToProcess != null && feeCharges.isGreaterThan(chargeAmountToProcess)) {
                 if (isFeeCharge) {
                     feeCharges = chargeAmountToProcess;
                 } else {
@@ -235,23 +241,26 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
 
         for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
+            if (transactionAmountUnprocessed.isGreaterThanZero()) {
+                if (currentInstallment.isNotFullyPaidOff()) {
 
-            if (currentInstallment.isNotFullyPaidOff()) {
-
-                // is this transaction early/late/on-time with respect to the
-                // current installment?
-                if (isTransactionInAdvanceOfInstallment(installmentIndex, installments, transactionDate, transactionAmountUnprocessed)) {
-                    transactionAmountUnprocessed = handleTransactionThatIsPaymentInAdvanceOfInstallment(currentInstallment, installments,
-                            loanTransaction, transactionDate, transactionAmountUnprocessed);
-                } else if (isTransactionALateRepaymentOnInstallment(installmentIndex, installments, loanTransaction.getTransactionDate())) {
-                    // does this result in a late payment of existing
-                    // installment?
-                    transactionAmountUnprocessed = handleTransactionThatIsALateRepaymentOfInstallment(currentInstallment, installments,
-                            loanTransaction, transactionAmountUnprocessed);
-                } else {
-                    // standard transaction
-                    transactionAmountUnprocessed = handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction,
-                            transactionAmountUnprocessed);
+                    // is this transaction early/late/on-time with respect to
+                    // the
+                    // current installment?
+                    if (isTransactionInAdvanceOfInstallment(installmentIndex, installments, transactionDate, transactionAmountUnprocessed)) {
+                        transactionAmountUnprocessed = handleTransactionThatIsPaymentInAdvanceOfInstallment(currentInstallment,
+                                installments, loanTransaction, transactionDate, transactionAmountUnprocessed);
+                    } else if (isTransactionALateRepaymentOnInstallment(installmentIndex, installments,
+                            loanTransaction.getTransactionDate())) {
+                        // does this result in a late payment of existing
+                        // installment?
+                        transactionAmountUnprocessed = handleTransactionThatIsALateRepaymentOfInstallment(currentInstallment, installments,
+                                loanTransaction, transactionAmountUnprocessed);
+                    } else {
+                        // standard transaction
+                        transactionAmountUnprocessed = handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment,
+                                loanTransaction, transactionAmountUnprocessed);
+                    }
                 }
             }
 
@@ -292,10 +301,18 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             }
             final Money amountPaidTowardsCharge = unpaidCharge.updatePaidAmountBy(amountRemaining, installmentNumber, feeAmount);
             if (!amountPaidTowardsCharge.isZero()) {
-                if (!loanTransaction.isChargePayment()) {
+                Set<LoanChargePaidBy> chargesPaidBies = loanTransaction.getLoanChargesPaid();
+                if (loanTransaction.isChargePayment()) {
+                    for (final LoanChargePaidBy chargePaidBy : chargesPaidBies) {
+                        LoanCharge loanCharge = chargePaidBy.getLoanCharge();
+                        if (loanCharge.getId().equals(unpaidCharge.getId())) {
+                            chargePaidBy.setAmount(amountPaidTowardsCharge.getAmount());
+                        }
+                    }
+                } else {
                     final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(loanTransaction, unpaidCharge,
                             amountPaidTowardsCharge.getAmount());
-                    loanTransaction.getLoanChargesPaid().add(loanChargePaidBy);
+                    chargesPaidBies.add(loanChargePaidBy);
                 }
                 amountRemaining = amountRemaining.minus(amountPaidTowardsCharge);
             }
