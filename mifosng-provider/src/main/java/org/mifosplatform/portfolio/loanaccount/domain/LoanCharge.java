@@ -280,17 +280,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
         }
         this.amountOrPercentage = chargeAmount;
         if (this.loan != null && isInstalmentFee()) {
-            final Set<LoanInstallmentCharge> chargePerInstallments = this.loan.generateInstallmentLoanCharges(this);
-            if (this.loanInstallmentCharge.isEmpty()) {
-                this.loanInstallmentCharge.addAll(chargePerInstallments);
-            } else {
-                int index = 0;
-                final LoanInstallmentCharge[] loanChargePerInstallments = new LoanInstallmentCharge[chargePerInstallments.size()];
-                final LoanInstallmentCharge[] loanChargePerInstallmentArray = chargePerInstallments.toArray(loanChargePerInstallments);
-                for (final LoanInstallmentCharge chargePerInstallment : this.loanInstallmentCharge) {
-                    chargePerInstallment.copyFrom(loanChargePerInstallmentArray[index++]);
-                }
-            }
+            updateInstallmentCharges();
         }
     }
 
@@ -386,17 +376,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
             this.amountOrPercentage = amount;
             this.amountOutstanding = calculateOutstanding();
             if (this.loan != null && isInstalmentFee()) {
-                final Set<LoanInstallmentCharge> chargePerInstallments = this.loan.generateInstallmentLoanCharges(this);
-                if (this.loanInstallmentCharge.isEmpty()) {
-                    this.loanInstallmentCharge.addAll(chargePerInstallments);
-                } else {
-                    int index = 0;
-                    final LoanInstallmentCharge[] loanChargePerInstallments = new LoanInstallmentCharge[chargePerInstallments.size()];
-                    final LoanInstallmentCharge[] loanChargePerInstallmentArray = chargePerInstallments.toArray(loanChargePerInstallments);
-                    for (final LoanInstallmentCharge chargePerInstallment : this.loanInstallmentCharge) {
-                        chargePerInstallment.copyFrom(loanChargePerInstallmentArray[index++]);
-                    }
-                }
+                updateInstallmentCharges();
             }
         }
     }
@@ -474,20 +454,34 @@ public class LoanCharge extends AbstractPersistable<Long> {
             }
             this.amountOrPercentage = newValue;
             if (isInstalmentFee()) {
-                final Set<LoanInstallmentCharge> chargePerInstallments = this.loan.generateInstallmentLoanCharges(this);
-                if (this.loanInstallmentCharge.isEmpty()) {
-                    this.loanInstallmentCharge.addAll(chargePerInstallments);
-                } else {
-                    int index = 0;
-                    final LoanInstallmentCharge[] loanChargePerInstallments = new LoanInstallmentCharge[chargePerInstallments.size()];
-                    final LoanInstallmentCharge[] loanChargePerInstallmentArray = chargePerInstallments.toArray(loanChargePerInstallments);
-                    for (final LoanInstallmentCharge chargePerInstallment : this.loanInstallmentCharge) {
-                        chargePerInstallment.copyFrom(loanChargePerInstallmentArray[index++]);
-                    }
-                }
+                updateInstallmentCharges();
             }
         }
         return actualChanges;
+    }
+
+    private void updateInstallmentCharges() {
+        final Collection<LoanInstallmentCharge> remove = new HashSet<>();
+        final Set<LoanInstallmentCharge> chargePerInstallments = this.loan.generateInstallmentLoanCharges(this);
+        if (this.loanInstallmentCharge.isEmpty()) {
+            this.loanInstallmentCharge.addAll(chargePerInstallments);
+        } else {
+            int index = 0;
+            final LoanInstallmentCharge[] loanChargePerInstallments = new LoanInstallmentCharge[chargePerInstallments.size()];
+            final LoanInstallmentCharge[] loanChargePerInstallmentArray = chargePerInstallments.toArray(loanChargePerInstallments);
+            for (final LoanInstallmentCharge chargePerInstallment : this.loanInstallmentCharge) {
+                if (index == loanChargePerInstallmentArray.length) {
+                    remove.add(chargePerInstallment);
+                    chargePerInstallment.updateInstallment(null);
+                } else {
+                    chargePerInstallment.copyFrom(loanChargePerInstallmentArray[index++]);
+                }
+            }
+            this.loanInstallmentCharge.removeAll(remove);
+            /*while (index < loanChargePerInstallmentArray.length - 1) {
+                chargePerInstallments.add(loanChargePerInstallmentArray[index++]);
+            }*/
+        }
     }
 
     public boolean isDueAtDisbursement() {
@@ -811,7 +805,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
     public List<LoanChargePaidDetail> fetchRepaymentInstallment(final MonetaryCurrency currency) {
         List<LoanChargePaidDetail> chargePaidDetails = new ArrayList<>();
         for (final LoanInstallmentCharge loanChargePerInstallment : this.loanInstallmentCharge) {
-            if (loanChargePerInstallment.isPending()
+            if (!loanChargePerInstallment.isChargeAmountpaid(currency)
                     && loanChargePerInstallment.getAmountThroughChargePayment(currency).isGreaterThanZero()) {
                 LoanChargePaidDetail chargePaidDetail = new LoanChargePaidDetail(
                         loanChargePerInstallment.getAmountThroughChargePayment(currency),
@@ -857,11 +851,9 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     public void updateWaivedAmount(MonetaryCurrency currency) {
         if (isInstalmentFee()) {
+            this.amountWaived = BigDecimal.ZERO;
             for (final LoanInstallmentCharge chargePerInstallment : this.loanInstallmentCharge) {
-                final Money amountWaived = chargePerInstallment.updateWaivedAmount(currency);
-                if (this.amountWaived == null) {
-                    this.amountWaived = BigDecimal.ZERO;
-                }
+                final Money amountWaived = chargePerInstallment.updateWaivedAndAmountPaidThroughChargePaymentAmount(currency);
                 this.amountWaived = this.amountWaived.add(amountWaived.getAmount());
                 this.amountOutstanding = this.amountOutstanding.subtract(amountWaived.getAmount());
                 if (determineIfFullyPaid()) {
