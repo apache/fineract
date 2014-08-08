@@ -622,7 +622,7 @@ public class Loan extends AbstractPersistable<Long> {
             final LocalDate lastRepaymentPeriodDueDate) {
         if (loanCharge.isSpecifiedDueDate()
                 && !loanCharge.isDueForCollectionFromAndUpToAndIncluding(disbursementDate, lastRepaymentPeriodDueDate)) {
-            final String defaultUserMessage = "This charge which is due at disbursement cannot be added as the loan is already disbursed.";
+            final String defaultUserMessage = "This charge with specified due date cannot be added as the it is not in schedule range.";
             throw new LoanChargeCannotBeAddedException("loanCharge", "specified.due.date.outside.range", defaultUserMessage,
                     getDisbursementDate(), getLastRepaymentPeriodDueDate(), loanCharge.name());
         }
