@@ -214,7 +214,7 @@ public class SchedulerJobsTestResults {
         Assert.assertNotNull(specifiedDueDateChargeId);
 
         this.loanTransactionHelper.addChargesForLoan(loanID,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(specifiedDueDateChargeId.toString()));
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(specifiedDueDateChargeId.toString(), "12 March 2013", "100"));
         ArrayList<HashMap> chargesPendingState = this.loanTransactionHelper.getLoanCharges(loanID);
         Assert.assertEquals(1, chargesPendingState.size());
 
