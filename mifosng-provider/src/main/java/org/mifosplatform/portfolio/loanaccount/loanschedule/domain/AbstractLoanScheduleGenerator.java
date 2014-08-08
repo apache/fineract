@@ -315,7 +315,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         if (diffAmt != null && !diffAmt.isEmpty() && !periodStartDate.isAfter(LocalDate.now())) {
             Map<LocalDate, RecalculationDetail> processDetails = new TreeMap<>();
             for (RecalculationDetail detail : diffAmt) {
-                if (periodStartDate.isBefore(detail.getStartDate()) && detail.isLatePayment()) {
+                if (!periodStartDate.isAfter(detail.getStartDate()) && detail.isLatePayment()) {
                     if (processDetails.containsKey(detail.getToDate())) {
                         RecalculationDetail recalculationDetail = processDetails.get(detail.getToDate());
                         RecalculationDetail updatedDetail = new RecalculationDetail(recalculationDetail.isLatePayment(),
@@ -604,14 +604,18 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             if (installment.getDueDate().isBefore(LocalDate.now())) {
                 LocalDate startDate = installment.getDueDate();
                 Money totalOutstanding = installment.getTotalOutstanding(currency);
+                boolean reduceStartDate = false;
 
                 while (totalOutstanding.isGreaterThanZero() && startDate.isBefore(LocalDate.now())) {
                     LocalDate recalculateFrom = getNextRestScheduleDate(startDate.minusDays(1), loanApplicationTerms, isHolidayEnabled,
                             holidays, workingDays);
                     LocalDate recalcualteTill = getNextRestScheduleDate(recalculateFrom, loanApplicationTerms, isHolidayEnabled, holidays,
                             workingDays);
+                    if (reduceStartDate) {
+                        startDate = startDate.minusDays(1);
+                    }
                     applyRest(transactions, startDate, recalculateFrom, installment, loanRepaymentScheduleTransactionProcessor, currency,
-                            loanApplicationTerms, isHolidayEnabled, holidays, workingDays);
+                            loanApplicationTerms, isHolidayEnabled, holidays, workingDays, installments);
                     totalOutstanding = installment.getTotalOutstanding(currency);
                     if (totalOutstanding.isGreaterThanZero()) {
                         Money latepaymentoutstanding = installment.getPrincipalOutstanding(currency);
@@ -636,14 +640,15 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                 latepaymentoutstanding);
                         diffAmt.add(recalculationDetail);
                     }
-                    startDate = recalcualteTill;
+                    startDate = recalculateFrom.plusDays(1);
+                    reduceStartDate = true;
                 }
             }
 
             if (!diffAmt.isEmpty()) {
                 processRecalculate = true;
-                break;
             }
+            break;
 
         }
         if (processRecalculate) {
@@ -658,7 +663,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             LoanRepaymentScheduleInstallment installment,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, MonetaryCurrency currency,
             final LoanApplicationTerms loanApplicationTerms, final boolean isHolidayEnabled, final List<Holiday> holidays,
-            final WorkingDays workingDays) {
+            final WorkingDays workingDays, final List<LoanRepaymentScheduleInstallment> installments) {
         List<LoanTransaction> transactions = new ArrayList<>();
         Map<LocalDate, LocalDate> recalculationDates = new HashMap<>();
         for (LoanTransaction transaction : loanTransactions) {
@@ -671,8 +676,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                 workingDays));
             }
         }
-        List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>(1);
-        installments.add(installment);
+
         loanRepaymentScheduleTransactionProcessor.handleRepaymentSchedule(transactions, currency, installments, installment,
                 recalculationDates);
     }

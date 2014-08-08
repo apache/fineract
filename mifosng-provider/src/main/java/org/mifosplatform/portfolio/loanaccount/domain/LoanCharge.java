@@ -478,9 +478,9 @@ public class LoanCharge extends AbstractPersistable<Long> {
                 }
             }
             this.loanInstallmentCharge.removeAll(remove);
-            /*while (index < loanChargePerInstallmentArray.length - 1) {
-                chargePerInstallments.add(loanChargePerInstallmentArray[index++]);
-            }*/
+            while (index < loanChargePerInstallmentArray.length - 1) {
+                this.loanInstallmentCharge.add(loanChargePerInstallmentArray[index++]);
+            }
         }
     }
 
