@@ -4,3 +4,8 @@ jdk:
 script: ./travis_build.sh
 notifications:
   email: true
+# This is so that the Gradle output is readable on the Travis web console
+# @see http://stackoverflow.com/questions/17942819/how-can-i-get-clean-gradle-output-on-travis-ci
+# @see http://gradle.1045684.n5.nabble.com/Plain-console-output-td5710237.html
+env:
+  - TERM=dumb
