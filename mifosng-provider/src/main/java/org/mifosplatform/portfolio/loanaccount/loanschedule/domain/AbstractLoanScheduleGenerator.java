@@ -212,8 +212,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             }
 
             if (diffAmt != null && !diffAmt.isEmpty()) {
-                Money interestDueToLatePayment = totalCumulativeInterest.zero();
-                Money interestReducedDueToEarlyPayment = totalCumulativeInterest.zero();
+                BigDecimal interestDueToLatePayment = BigDecimal.ZERO;
+                BigDecimal interestReducedDueToEarlyPayment = BigDecimal.ZERO;
                 for (RecalculationDetail detail : diffAmt) {
                     if (!detail.isLatePayment() && detail.getStartDate().isAfter(periodStartDate)
                             && !detail.getStartDate().isAfter(scheduledDueDate)) {
@@ -231,7 +231,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                 principalForThisPeriod = principalForThisPeriod.plus(actualOutstanding);
                             }
                         }
-                        interestReducedDueToEarlyPayment = interestReducedDueToEarlyPayment.plus(loanApplicationTerms.interestRateFor(
+                        interestReducedDueToEarlyPayment = interestReducedDueToEarlyPayment.add(loanApplicationTerms.interestRateFor(
                                 this.paymentPeriodsInOneYearCalculator, mc, detail.getAmount(), detail.getStartDate(), scheduledDueDate));
 
                     } else if (detail.isLatePayment() && detail.isOverlapping(periodStartDate, scheduledDueDate)
@@ -247,7 +247,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         if (toDate.isAfter(LocalDate.now())) {
                             toDate = LocalDate.now();
                         }
-                        interestDueToLatePayment = interestDueToLatePayment.plus(loanApplicationTerms.interestRateFor(
+                        interestDueToLatePayment = interestDueToLatePayment.add(loanApplicationTerms.interestRateFor(
                                 this.paymentPeriodsInOneYearCalculator, mc, detail.getAmount(), fromDate, toDate));
                     }
                 }
@@ -332,17 +332,19 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 LocalDate fromDate = detail.getStartDate();
                 LocalDate toDate = detail.getToDate();
                 if (!toDate.isAfter(LocalDate.now())) {
-                    Money interestDueToLatePayment = loanApplicationTerms.interestRateFor(this.paymentPeriodsInOneYearCalculator, mc,
+                    BigDecimal interestForLatePayment = loanApplicationTerms.interestRateFor(this.paymentPeriodsInOneYearCalculator, mc,
                             detail.getAmount(), fromDate, toDate);
+                    Money interestDueToLatePayment = Money.of(detail.getAmount().getCurrency(), interestForLatePayment);
+                    if (interestDueToLatePayment.isGreaterThanZero()) {
+                        totalInterestCharged = totalInterestCharged.add(interestDueToLatePayment.getAmount());
+                        totalRepaymentExpected = totalRepaymentExpected.add(interestDueToLatePayment.getAmount());
 
-                    totalInterestCharged = totalInterestCharged.add(interestDueToLatePayment.getAmount());
-                    totalRepaymentExpected = totalRepaymentExpected.add(interestDueToLatePayment.getAmount());
-
-                    final LoanScheduleModelPeriod installment = LoanScheduleModelRepaymentPeriod.repayment(periodNumber, fromDate, toDate,
-                            interestDueToLatePayment.zero(), interestDueToLatePayment.zero(), interestDueToLatePayment,
-                            interestDueToLatePayment.zero(), interestDueToLatePayment.zero(), interestDueToLatePayment);
-                    periods.add(installment);
-                    periodNumber++;
+                        final LoanScheduleModelPeriod installment = LoanScheduleModelRepaymentPeriod.repayment(periodNumber, fromDate,
+                                toDate, interestDueToLatePayment.zero(), interestDueToLatePayment.zero(), interestDueToLatePayment,
+                                interestDueToLatePayment.zero(), interestDueToLatePayment.zero(), interestDueToLatePayment);
+                        periods.add(installment);
+                        periodNumber++;
+                    }
                 }
             }
         }
@@ -520,47 +522,95 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     public LoanScheduleModel rescheduleNextInstallments(final MathContext mc, final ApplicationCurrency applicationCurrency,
             final LoanApplicationTerms loanApplicationTerms, final Set<LoanCharge> loanCharges, final boolean isHolidayEnabled,
             final List<Holiday> holidays, final WorkingDays workingDays, final List<LoanTransaction> transactions,
-            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor) {
+            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
+            final List<LoanRepaymentScheduleInstallment> previousSchedule, LocalDate recalculateFrom) {
 
-        int installmentNumber = 0;
-        final List<RecalculationDetail> recalculationDetails = new ArrayList<>();
-        LoanScheduleModel loanScheduleModel = generate(mc, applicationCurrency, loanApplicationTerms, loanCharges, isHolidayEnabled,
-                holidays, workingDays);
+        LoanScheduleModel loanScheduleModel = null;
+        List<LoanRepaymentScheduleInstallment> installments = previousSchedule;
+        List<LoanRepaymentScheduleInstallment> removeInstallments = new ArrayList<>();
+        for (LoanRepaymentScheduleInstallment installment : installments) {
+            if (!loanApplicationTerms.isPrincipalGraceApplicableForThisPeriod(installment.getInstallmentNumber())
+                    && installment.getPrincipal(loanApplicationTerms.getCurrency()).isZero()) {
+                removeInstallments.add(installment);
+            }
+        }
+        installments.removeAll(removeInstallments);
+        if (previousSchedule == null) {
+            loanScheduleModel = generate(mc, applicationCurrency, loanApplicationTerms, loanCharges, isHolidayEnabled, holidays,
+                    workingDays);
+            installments = retrieveRepaymentSchedule(loanScheduleModel);
+        }
+        if (recalculateFrom == null) {
+            recalculateFrom = loanApplicationTerms.getExpectedDisbursementDate();
+        }
+        while (!recalculateFrom.isAfter(LocalDate.now())) {
+            int installmentNumber = findLastProcessedInstallmentNumber(installments, recalculateFrom);
+            List<LoanTransaction> processTransactions = processTransactions(transactions, recalculateFrom);
+            loanScheduleModel = recalculateInstallment(mc, applicationCurrency, loanApplicationTerms, loanCharges, isHolidayEnabled,
+                    holidays, workingDays, loanRepaymentScheduleTransactionProcessor, previousSchedule, loanScheduleModel, installments,
+                    processTransactions, installmentNumber);
 
-        while (installmentNumber < loanScheduleModel.getPeriods().size() - 1) {
-            RecalculatedSchedule recalculatedSchedule = recalculateInterest(mc, applicationCurrency, loanApplicationTerms, loanCharges,
-                    isHolidayEnabled, holidays, workingDays, transactions, loanRepaymentScheduleTransactionProcessor, installmentNumber,
-                    loanScheduleModel, recalculationDetails);
-            installmentNumber = recalculatedSchedule.getInstallmentNumber();
-            loanScheduleModel = recalculatedSchedule.getLoanScheduleModel();
+            recalculateFrom = getNextRecalculateFromDate(transactions, recalculateFrom);
         }
         return loanScheduleModel;
 
+    }
+
+    private LocalDate getNextRecalculateFromDate(List<LoanTransaction> processTransactions, LocalDate preCalculationDate) {
+        LocalDate recalculateFrom = null;
+        for (LoanTransaction loanTransaction : processTransactions) {
+            if (preCalculationDate.isBefore(loanTransaction.getTransactionDate())
+                    && (recalculateFrom == null || recalculateFrom.isAfter(loanTransaction.getTransactionDate()))) {
+                recalculateFrom = loanTransaction.getTransactionDate();
+            }
+        }
+        if (recalculateFrom == null) {
+            recalculateFrom = LocalDate.now().plusDays(1);
+        }
+        return recalculateFrom;
+    }
+
+    private LoanScheduleModel recalculateInstallment(final MathContext mc, final ApplicationCurrency applicationCurrency,
+            final LoanApplicationTerms loanApplicationTerms, final Set<LoanCharge> loanCharges, final boolean isHolidayEnabled,
+            final List<Holiday> holidays, final WorkingDays workingDays,
+            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
+            final List<LoanRepaymentScheduleInstallment> previousSchedule, LoanScheduleModel loanScheduleModel,
+            List<LoanRepaymentScheduleInstallment> installments, List<LoanTransaction> processTransactions, final int skipRecalculation) {
+        int processInstallmentsFrom = 0;
+        Integer numberOfInstallments = previousSchedule.size() - 1;
+        final List<RecalculationDetail> recalculationDetails = new ArrayList<>();
+        while (processInstallmentsFrom < numberOfInstallments) {
+            RecalculatedSchedule recalculatedSchedule = recalculateInterest(mc, applicationCurrency, loanApplicationTerms, loanCharges,
+                    isHolidayEnabled, holidays, workingDays, processTransactions, loanRepaymentScheduleTransactionProcessor,
+                    processInstallmentsFrom, installments, recalculationDetails, skipRecalculation);
+            processInstallmentsFrom = recalculatedSchedule.getInstallmentNumber();
+            if (recalculatedSchedule.getLoanScheduleModel() != null) {
+                loanScheduleModel = recalculatedSchedule.getLoanScheduleModel();
+                installments = retrieveRepaymentSchedule(loanScheduleModel);
+                numberOfInstallments = installments.size() - 1;
+            }
+        }
+        return loanScheduleModel;
     }
 
     private RecalculatedSchedule recalculateInterest(final MathContext mc, final ApplicationCurrency applicationCurrency,
             final LoanApplicationTerms loanApplicationTerms, final Set<LoanCharge> loanCharges, final boolean isHolidayEnabled,
             final List<Holiday> holidays, final WorkingDays workingDays, final List<LoanTransaction> transactions,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final int installmentNumber,
-            LoanScheduleModel model, final List<RecalculationDetail> recalculationDetails) {
+            final List<LoanRepaymentScheduleInstallment> installments, final List<RecalculationDetail> recalculationDetails,
+            final int skipRecalculation) {
         boolean processRecalculate = false;
         int processedInstallmentNumber = installmentNumber;
-        final List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>();
+
         final List<RecalculationDetail> diffAmt = new ArrayList<>();
         Money unpaidPricipal = loanApplicationTerms.getPrincipal();
-        for (final LoanScheduleModelPeriod scheduledLoanInstallment : model.getPeriods()) {
-            if (scheduledLoanInstallment.isRepaymentPeriod()) {
-                final LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(null,
-                        scheduledLoanInstallment.periodNumber(), scheduledLoanInstallment.periodFromDate(),
-                        scheduledLoanInstallment.periodDueDate(), scheduledLoanInstallment.principalDue(),
-                        scheduledLoanInstallment.interestDue(), scheduledLoanInstallment.feeChargesDue(),
-                        scheduledLoanInstallment.penaltyChargesDue());
-                installments.add(installment);
-            }
-        }
+
         MonetaryCurrency currency = loanApplicationTerms.getPrincipal().getCurrency();
         final List<LoanRepaymentScheduleInstallment> processinstallmets = new ArrayList<>();
-
+        for (LoanRepaymentScheduleInstallment installment : installments) {
+            installment.resetDerivedComponents();
+            installment.updateDerivedFields(currency, loanApplicationTerms.getExpectedDisbursementDate());
+        }
         for (LoanRepaymentScheduleInstallment installment : installments) {
             processinstallmets.add(installment);
             unpaidPricipal = unpaidPricipal.minus(installment.getPrincipal(currency));
@@ -577,7 +627,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     isHolidayEnabled, holidays, workingDays);
             for (LoanTransaction loanTransaction : transactions) {
                 LocalDate loantransactionDate = loanTransaction.getTransactionDate();
-                if (!loantransactionDate.isAfter(transactionsDate) && !loanTransaction.isAccrual()) {
+                if (!loantransactionDate.isAfter(transactionsDate)) {
                     transactionsForInstallment.add(loanTransaction);
                     recalculationDates.put(
                             loantransactionDate,
@@ -585,9 +635,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                     workingDays));
                 }
             }
-            Map<LocalDate, Money> earlyPaymentMap = loanRepaymentScheduleTransactionProcessor.handleRecalculation(
-                    loanApplicationTerms.getExpectedDisbursementDate(), transactionsForInstallment, currency, processinstallmets,
-                    installment, recalculationDates);
+            Map<LocalDate, Money> earlyPaymentMap = loanRepaymentScheduleTransactionProcessor.handleRepaymentSchedule(
+                    transactionsForInstallment, currency, processinstallmets, installment, recalculationDates);
 
             for (Map.Entry<LocalDate, Money> entry : earlyPaymentMap.entrySet()) {
                 LocalDate startDate = entry.getKey();
@@ -645,18 +694,35 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 }
             }
 
-            if (!diffAmt.isEmpty()) {
+            if ((!diffAmt.isEmpty() && skipRecalculation <= installment.getInstallmentNumber())
+                    || installment.getInstallmentNumber() == installments.size() - 1) {
                 processRecalculate = true;
             }
             break;
 
         }
+        LoanScheduleModel model = null;
+        recalculationDetails.addAll(diffAmt);
         if (processRecalculate) {
-            recalculationDetails.addAll(diffAmt);
             model = generate(mc, applicationCurrency, loanApplicationTerms, loanCharges, isHolidayEnabled, holidays, workingDays,
                     recalculationDetails);
         }
         return new RecalculatedSchedule(model, processedInstallmentNumber);
+    }
+
+    private List<LoanRepaymentScheduleInstallment> retrieveRepaymentSchedule(LoanScheduleModel model) {
+        final List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>();
+        for (final LoanScheduleModelPeriod scheduledLoanInstallment : model.getPeriods()) {
+            if (scheduledLoanInstallment.isRepaymentPeriod()) {
+                final LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(null,
+                        scheduledLoanInstallment.periodNumber(), scheduledLoanInstallment.periodFromDate(),
+                        scheduledLoanInstallment.periodDueDate(), scheduledLoanInstallment.principalDue(),
+                        scheduledLoanInstallment.interestDue(), scheduledLoanInstallment.feeChargesDue(),
+                        scheduledLoanInstallment.penaltyChargesDue());
+                installments.add(installment);
+            }
+        }
+        return installments;
     }
 
     private void applyRest(List<LoanTransaction> loanTransactions, LocalDate from, LocalDate to,
@@ -668,7 +734,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         Map<LocalDate, LocalDate> recalculationDates = new HashMap<>();
         for (LoanTransaction transaction : loanTransactions) {
             LocalDate loantransactionDate = transaction.getTransactionDate();
-            if (loantransactionDate.isAfter(from) && !transaction.getTransactionDate().isAfter(to) && !transaction.isAccrual()) {
+            if (loantransactionDate.isAfter(from) && !transaction.getTransactionDate().isAfter(to)) {
                 transactions.add(transaction);
                 recalculationDates.put(
                         loantransactionDate,
@@ -714,10 +780,31 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             }
         }
 
-        Money interest = applicationTerms.interestRateFor(this.paymentPeriodsInOneYearCalculator, mc, prepaymentAmount,
+        BigDecimal interest = applicationTerms.interestRateFor(this.paymentPeriodsInOneYearCalculator, mc, prepaymentAmount,
                 calculateInterestFrom, LocalDate.now());
         prepaymentAmount = prepaymentAmount.plus(interest).plus(amount);
         return prepaymentAmount;
+    }
+
+    private Integer findLastProcessedInstallmentNumber(final List<LoanRepaymentScheduleInstallment> installments, LocalDate date) {
+        int installmentNumber = 0;
+        for (LoanRepaymentScheduleInstallment installment : installments) {
+            if (!installment.getDueDate().isAfter(date) && installmentNumber < installment.getInstallmentNumber()) {
+                installmentNumber = installment.getInstallmentNumber();
+            }
+        }
+
+        return installmentNumber;
+    }
+
+    private List<LoanTransaction> processTransactions(final List<LoanTransaction> transactions, final LocalDate tillDate) {
+        List<LoanTransaction> toProcess = new ArrayList<>();
+        for (LoanTransaction loanTransaction : transactions) {
+            if (!loanTransaction.getTransactionDate().isAfter(tillDate)) {
+                toProcess.add(loanTransaction);
+            }
+        }
+        return toProcess;
     }
 
 }

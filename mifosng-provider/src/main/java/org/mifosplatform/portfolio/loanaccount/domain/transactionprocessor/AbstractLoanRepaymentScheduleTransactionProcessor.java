@@ -104,11 +104,11 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     final List<LoanRepaymentScheduleInstallment> processInstallments = new ArrayList<>(1);
                     processInstallments.add(chargePaidDetail.getInstallment());
                     Money processAmt = chargePaidDetail.getAmount();
-                    if(processAmt.isGreaterThan(unprocessed)){
+                    if (processAmt.isGreaterThan(unprocessed)) {
                         processAmt = unprocessed;
                     }
-                    unprocessed = handleTransactionAndCharges(loanTransaction, currency, processInstallments,
-                            transferCharges, processAmt, chargePaidDetail.isFeeCharge());
+                    unprocessed = handleTransactionAndCharges(loanTransaction, currency, processInstallments, transferCharges, processAmt,
+                            chargePaidDetail.isFeeCharge());
                     if (!unprocessed.isGreaterThanZero()) {
                         break;
                     }
@@ -438,19 +438,6 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     }
 
     @Override
-    public Map<LocalDate, Money> handleRecalculation(final LocalDate disbursementDate,
-            final List<LoanTransaction> transactionsPostDisbursement, final MonetaryCurrency currency,
-            final List<LoanRepaymentScheduleInstallment> installments, LoanRepaymentScheduleInstallment currentinstallment,
-            final Map<LocalDate, LocalDate> recalculationDates) {
-
-        for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
-            currentInstallment.resetDerivedComponents();
-            currentInstallment.updateDerivedFields(currency, disbursementDate);
-        }
-        return handleRepaymentSchedule(transactionsPostDisbursement, currency, installments, currentinstallment, recalculationDates);
-    }
-
-    @Override
     public Map<LocalDate, Money> handleRepaymentSchedule(final List<LoanTransaction> transactionsPostDisbursement,
             final MonetaryCurrency currency, final List<LoanRepaymentScheduleInstallment> installments,
             final LoanRepaymentScheduleInstallment installment, final Map<LocalDate, LocalDate> recalculationDates) {
@@ -458,7 +445,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         Money currentInstallmentOutstanding = installment.getTotalOutstanding(currency);
         for (final LoanTransaction loanTransaction : transactionsPostDisbursement) {
             Money amountToProcess = null;
-            Money unProcessed = processTransaction(loanTransaction, currency, installments, amountToProcess);
+            final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
+            newLoanTransaction.resetDerivedComponents();
+            Money unProcessed = processTransaction(newLoanTransaction, currency, installments, amountToProcess);
             if (loanTransaction.getTransactionDate().isAfter(installment.getFromDate())
                     && recalculationDates.get(loanTransaction.getTransactionDate()).isBefore(installment.getDueDate())) {
                 Money earlyPayment = currentInstallmentOutstanding.minus(installment.getTotalOutstanding(currency));
