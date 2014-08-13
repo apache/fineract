@@ -2205,7 +2205,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan.getDisbursementDate().toDate());
             workingDays = this.workingDaysRepository.findOne();
         }
-        ChangedTransactionDetail changedTransactionDetail = loan.recalculateSchedule(loanScheduleFactory, applicationCurrency,
+        ChangedTransactionDetail changedTransactionDetail = loan.recalculateScheduleFromLastTransaction(loanScheduleFactory, applicationCurrency,
                 calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays, restCalendarInstance,
                 existingTransactionIds, existingReversedTransactionIds);
 

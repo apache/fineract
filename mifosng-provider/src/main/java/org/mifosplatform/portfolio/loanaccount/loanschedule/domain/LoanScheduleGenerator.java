@@ -9,6 +9,7 @@ import java.math.MathContext;
 import java.util.List;
 import java.util.Set;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
@@ -27,7 +28,8 @@ public interface LoanScheduleGenerator {
     LoanScheduleModel rescheduleNextInstallments(MathContext mc, ApplicationCurrency applicationCurrency,
             LoanApplicationTerms loanApplicationTerms, Set<LoanCharge> loanCharges, boolean isHolidayEnabled, List<Holiday> holidays,
             WorkingDays workingDays, List<LoanTransaction> transactions,
-            LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor);
+            LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
+            List<LoanRepaymentScheduleInstallment> previousSchedule, LocalDate recalculateFrom);
 
     Money fetchPrepaymentAmount(List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency,
             LoanApplicationTerms applicationTerms, MathContext mc);

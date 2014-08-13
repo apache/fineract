@@ -28,10 +28,8 @@ public interface LoanRepaymentScheduleTransactionProcessor {
     void handleWriteOff(LoanTransaction loanTransaction, MonetaryCurrency loanCurrency,
             List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments);
 
-    Map<LocalDate, Money> handleRecalculation(LocalDate disbursementDate, List<LoanTransaction> transactionsPostDisbursement,
-            MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments, LoanRepaymentScheduleInstallment currentinstallment, Map<LocalDate, LocalDate> recalculationDates);
-
     Map<LocalDate, Money> handleRepaymentSchedule(List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments, LoanRepaymentScheduleInstallment currentInstallment, Map<LocalDate, LocalDate> recalculationDates);
+            List<LoanRepaymentScheduleInstallment> installments, LoanRepaymentScheduleInstallment currentInstallment,
+            Map<LocalDate, LocalDate> recalculationDates);
 
 }
