@@ -126,7 +126,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             throw new PlatformDataIntegrityException(errorCodeBuilder.toString(), "Savings account with accountNo " + accountNo
                     + " already exists", "accountNo", accountNo);
 
-        } else if (realCause.getMessage().contains("sa_external_id_UNIQUE")) {
+        } else if (realCause.getMessage().contains("sa_externalid_UNIQUE")) {
 
             final String externalId = command.stringValueOfParameterNamed("externalId");
             errorCodeBuilder.append(".duplicate.externalId");
