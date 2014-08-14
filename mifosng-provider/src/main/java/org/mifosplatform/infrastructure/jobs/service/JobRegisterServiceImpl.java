@@ -302,6 +302,9 @@ public class JobRegisterServiceImpl implements JobRegisterService {
     private JobDetail createJobDetail(final ScheduledJobDetail scheduledJobDetail) throws Exception {
         final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         final ClassMethodNamesPair jobDetails = CronMethodParser.findTargetMethodDetails(scheduledJobDetail.getJobName());
+        if (jobDetails == null) { throw new IllegalArgumentException(
+                "Code has no @CronTarget with this job name (@see JobName); seems like DB/code are not in line: "
+                        + scheduledJobDetail.getJobName()); }
         final Object targetObject = getBeanObject(Class.forName(jobDetails.className));
         final MethodInvokingJobDetailFactoryBean jobDetailFactoryBean = new MethodInvokingJobDetailFactoryBean();
         jobDetailFactoryBean.setName(scheduledJobDetail.getJobName() + "JobDetail" + tenant.getId());
