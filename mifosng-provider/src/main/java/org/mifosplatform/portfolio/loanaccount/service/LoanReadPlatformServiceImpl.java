@@ -1422,8 +1422,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder
                     .append("loan.id as loanId ,if(loan.client_id is null,mg.office_id,mc.office_id) as officeId,")
-                    .append("ifnull(loan.accrued_till, ifnull(loan.interest_calculated_from_date, loan.disbursedon_date)) as accruedTill, ")
-                    .append("loan.repayment_period_frequency_enum as frequencyEnum, ")
+                    .append("loan.accrued_till as accruedTill, loan.repayment_period_frequency_enum as frequencyEnum, ")
+                    .append("loan.interest_calculated_from_date as interestCalculatedFrom, ")
                     .append("loan.repay_every as repayEvery,")
                     .append("(select sum(lc.amount) as dueamount from m_loan_charge lc where lc.loan_id = loan.id and lc.is_active = 1 and lc.waived = 0 and lc.is_penalty = 0 and lc.due_for_collection_as_of_date > ls.fromdate and lc.due_for_collection_as_of_date<= if(:tilldate < ls.duedate, :tilldate , ls.duedate)) as feedueIn,")
                     .append("(select sum(lc.amount) as dueamount from m_loan_charge lc where lc.loan_id = loan.id and lc.is_active = 1 and lc.waived = 0 and lc.is_penalty = 1 and lc.due_for_collection_as_of_date > ls.fromdate and lc.due_for_collection_as_of_date<= if(:tilldate < ls.duedate, :tilldate , ls.duedate)) as penalitydueIn,")
@@ -1447,6 +1447,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Long loanId = rs.getLong("loanId");
             final Long officeId = rs.getLong("officeId");
             final LocalDate accruedTill = JdbcSupport.getLocalDate(rs, "accruedTill");
+            final LocalDate interestCalculatedFrom = JdbcSupport.getLocalDate(rs, "interestCalculatedFrom");
             final Integer numberOfDaysInMonth = 30;
             final Integer numberOfDaysInYear = 360;
             final Integer frequencyEnum = JdbcSupport.getInteger(rs, "frequencyEnum");
@@ -1476,7 +1477,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal dueDatePenaltyIncome = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "penalitydueIn");
             return new LoanScheduleAccrualData(loanId, officeId, accruedTill, numberOfDaysInMonth, numberOfDaysInYear, frequency,
                     repayEvery, dueDate, fromDate, repaymentScheduleId, loanProductId, interestIncome, feeIncome, penaltyIncome,
-                    accruedInterestIncome, accruedFeeIncome, accruedPenaltyIncome, currencyData, dueDateFeeIncome, dueDatePenaltyIncome);
+                    accruedInterestIncome, accruedFeeIncome, accruedPenaltyIncome, currencyData, dueDateFeeIncome, dueDatePenaltyIncome,
+                    interestCalculatedFrom);
         }
 
     }
@@ -1532,9 +1534,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final LocalDate fromDate = null;
             final BigDecimal dueDateFeeincome = null;
             final BigDecimal dueDatePenaltyIncome = null;
+            final LocalDate interestCalculatedFrom = null;
             return new LoanScheduleAccrualData(loanId, officeId, accruedTill, numberOfDaysInMonth, numberOfDaysInYear, frequency,
                     repayEvery, dueDate, fromDate, repaymentScheduleId, loanProductId, interestIncome, feeIncome, penaltyIncome,
-                    accruedInterestIncome, accruedFeeIncome, accruedPenaltyIncome, currencyData, dueDateFeeincome, dueDatePenaltyIncome);
+                    accruedInterestIncome, accruedFeeIncome, accruedPenaltyIncome, currencyData, dueDateFeeincome, dueDatePenaltyIncome,
+                    interestCalculatedFrom);
         }
     }
 
@@ -1572,7 +1576,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         sqlBuilder.append(" and mr.duedate < ? ");
         sqlBuilder.append(" group by ml.id");
         try {
-            return this.jdbcTemplate.queryForList(sqlBuilder.toString(), Long.class, new Object[] { LoanStatus.ACTIVE.getValue(), formatter.print(LocalDate.now()) });
+            return this.jdbcTemplate.queryForList(sqlBuilder.toString(), Long.class,
+                    new Object[] { LoanStatus.ACTIVE.getValue(), formatter.print(LocalDate.now()) });
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }

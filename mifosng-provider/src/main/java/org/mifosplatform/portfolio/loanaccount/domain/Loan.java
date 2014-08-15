@@ -314,6 +314,10 @@ public class Loan extends AbstractPersistable<Long> {
     @Column(name = "is_npa", nullable = false)
     private boolean isNpa;
 
+    @Temporal(TemporalType.DATE)
+    @Column(name = "accrued_till")
+    private Date accruedTill;
+
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy,
@@ -2138,7 +2142,7 @@ public class Loan extends AbstractPersistable<Long> {
 
             existingTransactionIds.addAll(findExistingTransactionIds());
             existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
-
+            this.accruedTill = null;
             reverseExistingTransactions();
             updateLoanSummaryDerivedFields();
 
