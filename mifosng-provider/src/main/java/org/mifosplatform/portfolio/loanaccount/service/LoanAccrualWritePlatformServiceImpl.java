@@ -129,7 +129,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
 
     private void addAccrualTillSpecificDate(final LocalDate tilldate, final LoanScheduleAccrualData accrualData,
             final LocalDate accruredTill) throws Exception {
-        LocalDate interestStartDate = accrualData.getFromDateAsLocaldate();
+       LocalDate interestStartDate = accrualData.getFromDateAsLocaldate();
         if (accrualData.getInterestCalculatedFrom() != null
                 && accrualData.getFromDateAsLocaldate().isBefore(accrualData.getInterestCalculatedFrom())) {
             if (accrualData.getInterestCalculatedFrom().isBefore(accrualData.getDueDateAsLocaldate())) {
@@ -138,7 +138,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
                 interestStartDate = accrualData.getDueDateAsLocaldate();
             }
         }
-
+        
         int totalNumberOfDays = Days.daysBetween(interestStartDate, accrualData.getDueDateAsLocaldate()).getDays();
         LocalDate startDate = accruredTill;
         if (startDate == null) {
@@ -316,7 +316,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             final Long transactonId = this.jdbcTemplate.queryForLong("SELECT LAST_INSERT_ID()");
 
             Map<String, Object> transactionMap = toMapData(transactonId, amount, interestportion, feeportion, penaltyportion,
-                    scheduleAccrualData);
+                    scheduleAccrualData, accruredTill);
 
             String repaymetUpdatesql = "UPDATE m_loan_repayment_schedule SET accrual_interest_derived=?, accrual_fee_charges_derived=?, "
                     + "accrual_penalty_charges_derived=? WHERE  id=?";
@@ -355,7 +355,8 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     }
 
     public Map<String, Object> toMapData(final Long id, final BigDecimal amount, final BigDecimal interestportion,
-            final BigDecimal feeportion, final BigDecimal penaltyportion, final LoanScheduleAccrualData loanScheduleAccrualData) {
+            final BigDecimal feeportion, final BigDecimal penaltyportion, final LoanScheduleAccrualData loanScheduleAccrualData,
+            final LocalDate accruredTill) {
         final Map<String, Object> thisTransactionData = new LinkedHashMap<>();
 
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.ACCRUAL);
@@ -364,7 +365,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         thisTransactionData.put("officeId", loanScheduleAccrualData.getOfficeId());
         thisTransactionData.put("type", transactionType);
         thisTransactionData.put("reversed", false);
-        thisTransactionData.put("date", loanScheduleAccrualData.getDueDateAsLocaldate());
+        thisTransactionData.put("date", accruredTill);
         thisTransactionData.put("currency", loanScheduleAccrualData.getCurrencyData());
         thisTransactionData.put("amount", amount);
         thisTransactionData.put("principalPortion", null);
