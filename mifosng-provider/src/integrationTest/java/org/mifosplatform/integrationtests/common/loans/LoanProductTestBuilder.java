@@ -31,7 +31,7 @@ public class LoanProductTestBuilder {
     public static final String MIFOS_STANDARD_STRATEGY = "1";
     // private static final String HEAVENS_FAMILY_STRATEGY ="2";
     // private static final String CREO_CORE_STRATEGY ="3";
-    public static final String RBI_INDIA_STRATEGY ="4";
+    public static final String RBI_INDIA_STRATEGY = "4";
     private static final String NONE = "1";
     private static final String CASH_BASED = "2";
     private static final String ACCRUAL_PERIODIC = "3";
@@ -63,7 +63,7 @@ public class LoanProductTestBuilder {
     private Boolean multiDisburseLoan = false;
     private String outstandingLoanBalance = "35000";
     private String maxTrancheCount = "35000";
-    
+
     private Boolean isInterestRecalculationEnabled = false;
     private String daysInYearType = "1";
     private String daysInMonthType = "1";
@@ -328,4 +328,13 @@ public class LoanProductTestBuilder {
         return this;
     }
 
+    public LoanProductTestBuilder withDaysInMonth(final String daysInMonthType) {
+        this.daysInMonthType = daysInMonthType;
+        return this;
+    }
+
+    public LoanProductTestBuilder withDaysInYear(final String daysInYearType) {
+        this.daysInYearType = daysInYearType;
+        return this;
+    }
 }

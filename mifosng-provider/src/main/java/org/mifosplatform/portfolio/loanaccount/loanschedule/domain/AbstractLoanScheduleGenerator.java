@@ -146,6 +146,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                             loanApplicationTerms.getInterestChargedFromLocalDate(), loanApplicationTerms.getLoanTermPeriodFrequencyType(),
                             loanApplicationTerms.getRepaymentEvery());
             Money balanceForcalculation = outstandingBalance;
+            // reduce principal is the early payment, will processed as per the
+            // reschedule strategy
             if (reducePrincipal.isGreaterThanZero()) {
                 switch (loanApplicationTerms.getRescheduleStrategyMethod()) {
                     case REDUCE_EMI_AMOUNT:
@@ -211,10 +213,14 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 fixedEmiAmount = principalForThisPeriod.plus(interestForThisinstallment);
             }
 
+            // this block is to identify interest based on late/early payment
             if (diffAmt != null && !diffAmt.isEmpty()) {
                 BigDecimal interestDueToLatePayment = BigDecimal.ZERO;
                 BigDecimal interestReducedDueToEarlyPayment = BigDecimal.ZERO;
                 for (RecalculationDetail detail : diffAmt) {
+                    // will increase the principal portion and reduces interest
+                    // as per the number of days. and also identifies reduce
+                    // principal for reschedule strategy
                     if (!detail.isLatePayment() && detail.getStartDate().isAfter(periodStartDate)
                             && !detail.getStartDate().isAfter(scheduledDueDate)) {
                         reducePrincipal = reducePrincipal.plus(detail.getAmount());
@@ -234,7 +240,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         interestReducedDueToEarlyPayment = interestReducedDueToEarlyPayment.add(loanApplicationTerms.interestRateFor(
                                 this.paymentPeriodsInOneYearCalculator, mc, detail.getAmount(), detail.getStartDate(), scheduledDueDate));
 
-                    } else if (detail.isLatePayment() && detail.isOverlapping(periodStartDate, scheduledDueDate)
+                    }
+                    // calculates the interest for late payment and increase
+                    // the interest for the installment
+                    else if (detail.isLatePayment() && detail.isOverlapping(periodStartDate, scheduledDueDate)
                             && periodStartDate.isBefore(LocalDate.now())) {
                         LocalDate fromDate = periodStartDate;
                         LocalDate toDate = scheduledDueDate;
@@ -312,6 +321,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             }
         }
 
+        // this block is to add extra re-payment schedules with interest portion
+        // if the last payment is missed
         if (diffAmt != null && !diffAmt.isEmpty() && !periodStartDate.isAfter(LocalDate.now())) {
             Map<LocalDate, RecalculationDetail> processDetails = new TreeMap<>();
             for (RecalculationDetail detail : diffAmt) {
@@ -518,6 +529,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         return cumulative;
     }
 
+    /**
+     * Method calls schedule regeneration by passing transactions one after
+     * another(this is done mainly to handle the scenario where interest or fee
+     * of over due installment should be collected before collecting principal )
+     */
     @Override
     public LoanScheduleModel rescheduleNextInstallments(final MathContext mc, final ApplicationCurrency applicationCurrency,
             final LoanApplicationTerms loanApplicationTerms, final Set<LoanCharge> loanCharges, final boolean isHolidayEnabled,
@@ -570,6 +586,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         return recalculateFrom;
     }
 
+    /**
+     * Method calls regenerate schedule for a particular set of transactions
+     * till all the installments are processed to identify early or late
+     * payments and will be used in regeneration of schedule
+     */
     private LoanScheduleModel recalculateInstallment(final MathContext mc, final ApplicationCurrency applicationCurrency,
             final LoanApplicationTerms loanApplicationTerms, final Set<LoanCharge> loanCharges, final boolean isHolidayEnabled,
             final List<Holiday> holidays, final WorkingDays workingDays,
@@ -593,6 +614,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         return loanScheduleModel;
     }
 
+    /**
+     * Method identifies late or early payments for schedule recalculation.
+     */
     private RecalculatedSchedule recalculateInterest(final MathContext mc, final ApplicationCurrency applicationCurrency,
             final LoanApplicationTerms loanApplicationTerms, final Set<LoanCharge> loanCharges, final boolean isHolidayEnabled,
             final List<Holiday> holidays, final WorkingDays workingDays, final List<LoanTransaction> transactions,
@@ -638,6 +662,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             Map<LocalDate, Money> earlyPaymentMap = loanRepaymentScheduleTransactionProcessor.handleRepaymentSchedule(
                     transactionsForInstallment, currency, processinstallmets, installment, recalculationDates);
 
+            // this block is to create early payment entries for schedule
+            // generation
             for (Map.Entry<LocalDate, Money> entry : earlyPaymentMap.entrySet()) {
                 LocalDate startDate = entry.getKey();
                 if (unpaidPricipal.isGreaterThan(entry.getValue())) {
@@ -655,6 +681,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 Money totalOutstanding = installment.getTotalOutstanding(currency);
                 boolean reduceStartDate = false;
 
+                // this block is to identify late payment based on the rest
+                // calculation date
                 while (totalOutstanding.isGreaterThanZero() && startDate.isBefore(LocalDate.now())) {
                     LocalDate recalculateFrom = getNextRestScheduleDate(startDate.minusDays(1), loanApplicationTerms, isHolidayEnabled,
                             holidays, workingDays);
@@ -725,6 +753,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         return installments;
     }
 
+    /**
+     * Method to identify which transaction did the payment for current
+     * installment
+     */
     private void applyRest(List<LoanTransaction> loanTransactions, LocalDate from, LocalDate to,
             LoanRepaymentScheduleInstallment installment,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, MonetaryCurrency currency,
@@ -760,6 +792,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         return nextScheduleDate;
     }
 
+    /**
+     * Method returns the amount payable to close the loan account as of today.
+     */
     @Override
     public Money fetchPrepaymentAmount(final List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency,
             final LoanApplicationTerms applicationTerms, final MathContext mc) {

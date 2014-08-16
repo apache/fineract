@@ -984,7 +984,34 @@ public class Loan extends AbstractPersistable<Long> {
 
         updateLoanScheduleDependentDerivedFields();
         updateLoanSummaryDerivedFields();
+        resetAccruals();
 
+    }
+
+    /**
+     * method to reverse all the accrual entries
+     */
+    private void resetAccruals() {
+        if (!this.repaymentScheduleDetail().isInterestRecalculationEnabled()) { return; }
+        List<LoanTransaction> transactions = this.getLoanTransactions();
+        for (final LoanTransaction transaction : transactions) {
+            if (transaction.isAccrual()) {
+                transaction.reverse();
+            }
+        }
+    }
+
+    public boolean isAccrualsPresent() {
+        boolean isAccrualsPresent = false;
+        if (!this.repaymentScheduleDetail().isInterestRecalculationEnabled()) { return isAccrualsPresent; }
+        List<LoanTransaction> transactions = this.getLoanTransactions();
+        for (final LoanTransaction transaction : transactions) {
+            if (transaction.isAccrual() && transaction.isNotReversed()) {
+                isAccrualsPresent = true;
+                break;
+            }
+        }
+        return isAccrualsPresent;
     }
 
     private void updateLoanScheduleDependentDerivedFields() {
@@ -3218,7 +3245,7 @@ public class Loan extends AbstractPersistable<Long> {
         return matchesCurrentLoanOfficer;
     }
 
-    private LocalDate getInterestChargedFromDate() {
+    public LocalDate getInterestChargedFromDate() {
         LocalDate interestChargedFrom = null;
         if (this.interestChargedFromDate != null) {
             interestChargedFrom = new LocalDate(this.interestChargedFromDate);
@@ -3415,7 +3442,7 @@ public class Loan extends AbstractPersistable<Long> {
         return this.loanProduct.isPeriodicAccrualAccountingEnabled();
     }
 
-    private Long productId() {
+    public Long productId() {
         return this.loanProduct.getId();
     }
 
@@ -4169,5 +4196,13 @@ public class Loan extends AbstractPersistable<Long> {
 
     public List<LoanRepaymentScheduleInstallment> fetchRepaymentScheduleInstallments() {
         return this.repaymentScheduleInstallments;
+    }
+
+    public LocalDate getAccruedTill() {
+        LocalDate accruedTill = null;
+        if (this.accruedTill != null) {
+            accruedTill = new LocalDate(this.accruedTill);
+        }
+        return accruedTill;
     }
 }

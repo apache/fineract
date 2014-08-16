@@ -8,8 +8,10 @@ package org.mifosplatform.portfolio.loanaccount.domain;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
@@ -22,6 +24,7 @@ import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidation
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.holiday.domain.HolidayRepository;
 import org.mifosplatform.organisation.holiday.domain.HolidayStatusType;
+import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
@@ -37,9 +40,14 @@ import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
+import org.mifosplatform.portfolio.common.domain.DaysInMonthType;
+import org.mifosplatform.portfolio.common.domain.DaysInYearType;
+import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
+import org.mifosplatform.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
+import org.mifosplatform.portfolio.loanaccount.service.LoanAccrualWritePlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanAssembler;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.mifosplatform.portfolio.note.domain.Note;
@@ -68,6 +76,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
+    private final LoanAccrualWritePlatformService accrualWritePlatformService;
 
     @Autowired
     public LoanAccountDomainServiceJpa(final LoanAssembler loanAccountAssembler, final LoanRepository loanRepository,
@@ -79,7 +88,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final AccountTransferRepository accountTransferRepository, final LoanScheduleGeneratorFactory loanScheduleFactory,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
             final CalendarInstanceRepository calendarInstanceRepository,
-            final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository) {
+            final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository,
+            final LoanAccrualWritePlatformService accrualWritePlatformService) {
         this.loanAccountAssembler = loanAccountAssembler;
         this.loanRepository = loanRepository;
         this.loanTransactionRepository = loanTransactionRepository;
@@ -94,6 +104,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.applicationCurrencyRepository = applicationCurrencyRepository;
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
+        this.accrualWritePlatformService = accrualWritePlatformService;
     }
 
     @Transactional
@@ -187,6 +198,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
 
+        recalculateAccruals(loan);
         builderResult.withEntityId(newRepaymentTransaction.getId()) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
@@ -210,7 +222,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                     "Validation errors exist.", dataValidationErrors); }
         }
     }
-    
+
     private void saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {
         try {
             List<LoanRepaymentScheduleInstallment> installments = loan.fetchRepaymentScheduleInstallments();
@@ -270,6 +282,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
+        recalculateAccruals(loan);
         return newPaymentTransaction;
     }
 
@@ -364,7 +377,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
-
         return disbursementTransaction;
     }
 
@@ -400,6 +412,67 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             }
         }
         return calculatedRepaymentsStartingFromDate;
+    }
+
+    /* (non-Javadoc)
+     * @see org.mifosplatform.portfolio.loanaccount.domain.LoanAccountDomainService#recalculateAccruals(org.mifosplatform.portfolio.loanaccount.domain.Loan)
+     */
+    @Override
+    public void recalculateAccruals(Loan loan) {
+        LocalDate accruedTill = loan.getAccruedTill();
+        if (!loan.repaymentScheduleDetail().isInterestRecalculationEnabled() || accruedTill == null || loan.isAccrualsPresent()) { return; }
+        Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas = new ArrayList<>();
+        List<LoanRepaymentScheduleInstallment> installments = loan.fetchRepaymentScheduleInstallments();
+        Long loanId = loan.getId();
+        DaysInMonthType daysInMonth = loan.repaymentScheduleDetail().fetchDaysInMonthType();
+        DaysInYearType daysInYear = loan.repaymentScheduleDetail().fetchDaysInYearType();
+        Long officeId = loan.getOfficeId();
+        LocalDate accrualStartDate = null;
+        PeriodFrequencyType repaymentFrequency = loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType();
+        Integer repayEvery = loan.repaymentScheduleDetail().getRepayEvery();
+        LocalDate interestCalculatedFrom = loan.getInterestChargedFromDate();
+        Long loanProductId = loan.productId();
+        MonetaryCurrency currency = loan.getCurrency();
+        ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
+        CurrencyData currencyData = applicationCurrency.toData();
+        Set<LoanCharge> loanCharges = loan.charges();
+        BigDecimal accruedInterestIncome = null;
+        BigDecimal accruedFeeIncome = null;
+        BigDecimal accruedPenaltyIncome = null;
+
+        for (LoanRepaymentScheduleInstallment installment : installments) {
+            if (!accruedTill.isBefore(installment.getDueDate())
+                    || (accruedTill.isAfter(installment.getFromDate()) && !accruedTill.isAfter(installment.getDueDate()))) {
+                BigDecimal dueDateFeeIncome = BigDecimal.ZERO;
+                BigDecimal dueDatePenaltyIncome = BigDecimal.ZERO;
+                LocalDate chargesTillDate = installment.getDueDate();
+                if (!accruedTill.isAfter(installment.getDueDate())) {
+                    chargesTillDate = accruedTill;
+                }
+
+                for (final LoanCharge loanCharge : loanCharges) {
+                    if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), chargesTillDate)) {
+                        if (loanCharge.isFeeCharge()) {
+                            dueDateFeeIncome = dueDateFeeIncome.add(loanCharge.amount());
+                        } else if (loanCharge.isPenaltyCharge()) {
+                            dueDatePenaltyIncome = dueDatePenaltyIncome.add(loanCharge.amount());
+                        }
+                    }
+                }
+                LoanScheduleAccrualData accrualData = new LoanScheduleAccrualData(loanId, officeId, accrualStartDate,
+                        daysInMonth.getValue(), daysInYear.getValue(), repaymentFrequency, repayEvery, installment.getDueDate(),
+                        installment.getFromDate(), installment.getId(), loanProductId,
+                        installment.getInterestCharged(currency).getAmount(), installment.getFeeChargesCharged(currency).getAmount(),
+                        installment.getPenaltyChargesCharged(currency).getAmount(), accruedInterestIncome, accruedFeeIncome,
+                        accruedPenaltyIncome, currencyData, dueDateFeeIncome, dueDatePenaltyIncome, interestCalculatedFrom);
+                loanScheduleAccrualDatas.add(accrualData);
+
+            }
+        }
+
+        if (!loanScheduleAccrualDatas.isEmpty()) {
+            this.accrualWritePlatformService.addPeriodicAccruals(accruedTill, loanScheduleAccrualDatas);
+        }
     }
 
     private void updateLoanTransaction(final Long loanTransactionId, final LoanTransaction newLoanTransaction) {
