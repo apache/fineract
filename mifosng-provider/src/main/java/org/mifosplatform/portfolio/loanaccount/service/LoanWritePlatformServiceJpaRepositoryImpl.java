@@ -315,6 +315,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
 
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+
         }
 
         final Set<LoanCharge> loanCharges = loan.charges();
@@ -340,7 +341,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         updateRecurringCalendarDatesForInterestRecalculation(loan);
-
+        this.loanAccountDomainService.recalculateAccruals(loan);
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loan.getId()) //
@@ -526,7 +527,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             }
             updateRecurringCalendarDatesForInterestRecalculation(loan);
+            this.loanAccountDomainService.recalculateAccruals(loan);
         }
+
         return changes;
     }
 
@@ -766,6 +769,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
+        this.loanAccountDomainService.recalculateAccruals(loan);
+
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(transactionId) //
@@ -857,7 +862,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
-
+        this.loanAccountDomainService.recalculateAccruals(loan);
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(waiveInterestTransaction.getId()) //
@@ -925,7 +930,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
-
+        this.loanAccountDomainService.recalculateAccruals(loan);
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(writeoff.getId()) //
@@ -998,7 +1003,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (possibleClosingTransaction != null) {
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         }
-
+        this.loanAccountDomainService.recalculateAccruals(loan);
         CommandProcessingResult result = null;
         if (possibleClosingTransaction != null) {
 
@@ -2043,6 +2048,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         saveLoanWithDataIntegrityViolationChecks(loan);
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+        this.loanAccountDomainService.recalculateAccruals(loan);
         return new CommandProcessingResultBuilder() //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
@@ -2091,7 +2097,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
-
+        this.loanAccountDomainService.recalculateAccruals(loan);
         return new CommandProcessingResultBuilder() //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
@@ -2205,8 +2211,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan.getDisbursementDate().toDate());
             workingDays = this.workingDaysRepository.findOne();
         }
-        ChangedTransactionDetail changedTransactionDetail = loan.recalculateScheduleFromLastTransaction(loanScheduleFactory, applicationCurrency,
-                calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays, restCalendarInstance,
+        ChangedTransactionDetail changedTransactionDetail = loan.recalculateScheduleFromLastTransaction(loanScheduleFactory,
+                applicationCurrency, calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays, restCalendarInstance,
                 existingTransactionIds, existingReversedTransactionIds);
 
         saveLoanWithDataIntegrityViolationChecks(loan);
@@ -2218,6 +2224,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
         }
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+        this.loanAccountDomainService.recalculateAccruals(loan);
     }
 
     private void updateLoanTransaction(final Long loanTransactionId, final LoanTransaction newLoanTransaction) {

@@ -810,7 +810,7 @@ public class AccountingScenarioIntegrationTest {
                 .withRepaymentAfterEvery(this.LP_REPAYMENT_PERIOD).withNumberOfRepayments(this.LP_REPAYMENTS).withRepaymentTypeAsMonth()
                 .withinterestRatePerPeriod(this.LP_INTEREST_RATE).withInterestRateFrequencyTypeAsMonths()
                 .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRulePeriodicAccrual(accounts)
-                .build(null);
+                .withDaysInMonth("30").withDaysInYear("365").build(null);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 

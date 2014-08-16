@@ -95,7 +95,8 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         return addPeriodicAccruals(tilldate, loanScheduleAccrualDatas);
     }
 
-    private String addPeriodicAccruals(final LocalDate tilldate, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas) {
+    @Override
+    public String addPeriodicAccruals(final LocalDate tilldate, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas) {
         StringBuilder sb = new StringBuilder();
         Set<Long> loansIds = new HashSet<>();
         LocalDate accruredTill = null;
@@ -129,16 +130,18 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
 
     private void addAccrualTillSpecificDate(final LocalDate tilldate, final LoanScheduleAccrualData accrualData,
             final LocalDate accruredTill) throws Exception {
-       LocalDate interestStartDate = accrualData.getFromDateAsLocaldate();
+        LocalDate interestStartDate = accrualData.getFromDateAsLocaldate();
+        boolean isInterestStartDateEqulsInstallmentStartdate = true;
         if (accrualData.getInterestCalculatedFrom() != null
                 && accrualData.getFromDateAsLocaldate().isBefore(accrualData.getInterestCalculatedFrom())) {
+            isInterestStartDateEqulsInstallmentStartdate = false;
             if (accrualData.getInterestCalculatedFrom().isBefore(accrualData.getDueDateAsLocaldate())) {
                 interestStartDate = accrualData.getInterestCalculatedFrom();
             } else {
                 interestStartDate = accrualData.getDueDateAsLocaldate();
             }
         }
-        
+
         int totalNumberOfDays = Days.daysBetween(interestStartDate, accrualData.getDueDateAsLocaldate()).getDays();
         LocalDate startDate = accruredTill;
         if (startDate == null) {
@@ -156,10 +159,16 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         int daysInSchedule = Days.daysBetween(interestStartDate, tilldate).getDays();
         switch (accrualData.getRepaymentFrequency()) {
             case MONTHS:
-                totalNumberOfDays = calculateTotalNumberOfDaysForMonth(totalNumberOfDays, accrualData);
+                int numberOfDaysInMonth = calculateTotalNumberOfDaysForMonth(totalNumberOfDays, accrualData);
+                if (!(!isInterestStartDateEqulsInstallmentStartdate && totalNumberOfDays < numberOfDaysInMonth)) {
+                    totalNumberOfDays = numberOfDaysInMonth;
+                }
             break;
             case YEARS:
-                totalNumberOfDays = calculateTotalNumberOfDaysForYear(totalNumberOfDays, accrualData);
+                int numberOfDaysinYear = calculateTotalNumberOfDaysForYear(totalNumberOfDays, accrualData);
+                if (!(!isInterestStartDateEqulsInstallmentStartdate && totalNumberOfDays < numberOfDaysinYear)) {
+                    totalNumberOfDays = numberOfDaysinYear;
+                }
             break;
             default:
             break;

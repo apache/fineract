@@ -1424,6 +1424,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     .append("loan.id as loanId ,if(loan.client_id is null,mg.office_id,mc.office_id) as officeId,")
                     .append("loan.accrued_till as accruedTill, loan.repayment_period_frequency_enum as frequencyEnum, ")
                     .append("loan.interest_calculated_from_date as interestCalculatedFrom, ")
+                    .append("loan.days_in_month_enum as daysInMonth, ")
+                    .append("loan.days_in_year_enum as daysInYear, ")
                     .append("loan.repay_every as repayEvery,")
                     .append("(select sum(lc.amount) as dueamount from m_loan_charge lc where lc.loan_id = loan.id and lc.is_active = 1 and lc.waived = 0 and lc.is_penalty = 0 and lc.due_for_collection_as_of_date > ls.fromdate and lc.due_for_collection_as_of_date<= if(:tilldate < ls.duedate, :tilldate , ls.duedate)) as feedueIn,")
                     .append("(select sum(lc.amount) as dueamount from m_loan_charge lc where lc.loan_id = loan.id and lc.is_active = 1 and lc.waived = 0 and lc.is_penalty = 1 and lc.due_for_collection_as_of_date > ls.fromdate and lc.due_for_collection_as_of_date<= if(:tilldate < ls.duedate, :tilldate , ls.duedate)) as penalitydueIn,")
@@ -1448,8 +1450,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Long officeId = rs.getLong("officeId");
             final LocalDate accruedTill = JdbcSupport.getLocalDate(rs, "accruedTill");
             final LocalDate interestCalculatedFrom = JdbcSupport.getLocalDate(rs, "interestCalculatedFrom");
-            final Integer numberOfDaysInMonth = 30;
-            final Integer numberOfDaysInYear = 360;
+            final Integer numberOfDaysInMonth = JdbcSupport.getInteger(rs, "daysInMonth");;
+            final Integer numberOfDaysInYear = JdbcSupport.getInteger(rs, "daysInYear");;
             final Integer frequencyEnum = JdbcSupport.getInteger(rs, "frequencyEnum");
             final Integer repayEvery = JdbcSupport.getInteger(rs, "repayEvery");
             final PeriodFrequencyType frequency = PeriodFrequencyType.fromInt(frequencyEnum);
