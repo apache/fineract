@@ -35,6 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextStoppedEvent;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
@@ -46,7 +48,7 @@ import org.springframework.stereotype.Service;
  * {@link CronTriggerFactoryBean}
  */
 @Service
-public class JobRegisterServiceImpl implements JobRegisterService {
+public class JobRegisterServiceImpl implements JobRegisterService, ApplicationListener<ContextStoppedEvent> {
 
     private final static Logger logger = LoggerFactory.getLogger(JobRegisterServiceImpl.class);
 
@@ -228,6 +230,11 @@ public class JobRegisterServiceImpl implements JobRegisterService {
         return !this.schedularWritePlatformService.retriveSchedulerDetail().isSuspended();
     }
 
+    @Override
+    public void onApplicationEvent(ContextStoppedEvent event) {
+        this.stopAllSchedulers();
+    }
+
     private void scheduleJob(final ScheduledJobDetail scheduledJobDetails) {
         if (!scheduledJobDetails.isActiveSchedular()) {
             scheduledJobDetails.updateNextRunTime(null);
@@ -249,6 +256,17 @@ public class JobRegisterServiceImpl implements JobRegisterService {
             logger.error("Could not schedule job: " + scheduledJobDetails.getJobName(), throwable);
         }
         scheduledJobDetails.updateCurrentlyRunningStatus(false);
+    }
+
+    @Override
+    public void stopAllSchedulers() {
+        for (Scheduler scheduler : this.schedulers.values()) {
+            try {
+                scheduler.shutdown();
+            } catch (final SchedulerException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
     }
 
     private Scheduler getScheduler(final ScheduledJobDetail scheduledJobDetail) throws Exception {

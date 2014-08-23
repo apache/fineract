@@ -19,4 +19,6 @@ public interface JobRegisterService {
 
     public void stopScheduler(String name);
 
+    public void stopAllSchedulers();
+
 }
