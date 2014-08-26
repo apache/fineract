@@ -228,6 +228,9 @@ tomcatRunWar {
     configFile = file('src/test/resources/META-INF/context.xml')
 }
 
+/* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
+sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
+sourceSets.test.output.resourcesDir = sourceSets.test.output.classesDir
 
 sourceSets {
     integrationTest {

@@ -40,6 +40,4 @@
 		<property name="transactionManager" ref="transactionManager"></property>
 	</bean>	
 
-	<jee:jndi-lookup jndi-name="java:comp/env/jdbc/mifosplatform-tenants"
-		id="tenantDataSourceJndi" />
 </beans>
