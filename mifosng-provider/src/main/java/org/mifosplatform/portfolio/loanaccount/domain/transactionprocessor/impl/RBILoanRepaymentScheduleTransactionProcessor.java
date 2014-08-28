@@ -204,4 +204,9 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
     protected void onLoanOverpayment(final LoanTransaction loanTransaction, final Money loanOverPaymentAmount) {
         // dont do anything for with loan over-payment
     }
+
+    @Override
+    public boolean isInterestFirstRepaymentScheduleTransactionProcessor() {
+        return true;
+    }
 }

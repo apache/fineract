@@ -99,6 +99,9 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     @Column(name = "obligations_met_on_date")
     private Date obligationsMetOnDate;
 
+    @Column(name = "recalculated_interest_component", nullable = false)
+    private boolean recalculatedInterestComponent;
+
     protected LoanRepaymentScheduleInstallment() {
         this.installmentNumber = null;
         this.fromDate = null;
@@ -108,7 +111,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
     public LoanRepaymentScheduleInstallment(final Loan loan, final Integer installmentNumber, final LocalDate fromDate,
             final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
-            final BigDecimal penaltyCharges) {
+            final BigDecimal penaltyCharges, boolean recalculatedInterestComponent) {
         this.loan = loan;
         this.installmentNumber = installmentNumber;
         this.fromDate = fromDate.toDateTimeAtStartOfDay().toDate();
@@ -118,6 +121,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.feeChargesCharged = defaultToNullIfZero(feeCharges);
         this.penaltyCharges = defaultToNullIfZero(penaltyCharges);
         this.obligationsMet = false;
+        this.recalculatedInterestComponent = recalculatedInterestComponent;
     }
 
     private BigDecimal defaultToNullIfZero(final BigDecimal value) {
@@ -539,5 +543,13 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
     public Money getTotalPaidLate(final MonetaryCurrency currency) {
         return Money.of(currency, this.totalPaidLate);
+    }
+
+    public boolean isRecalculatedInterestComponent() {
+        return this.recalculatedInterestComponent;
+    }
+
+    public void setRecalculatedInterestComponent(boolean recalculatedInterestComponent) {
+        this.recalculatedInterestComponent = recalculatedInterestComponent;
     }
 }

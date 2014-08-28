@@ -24,8 +24,6 @@ import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.exception.JobExecutionException;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
-import org.mifosplatform.portfolio.common.domain.DaysInMonthType;
-import org.mifosplatform.portfolio.common.domain.DaysInYearType;
 import org.mifosplatform.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
@@ -108,7 +106,9 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
                         if (accruredTill == null || lastLoanId == null || !lastLoanId.equals(accrualData.getLoanId())) {
                             accruredTill = accrualData.getAccruedTill();
                         }
-                        addAccrualTillSpecificDate(tilldate, accrualData, accruredTill);
+                        if (accruredTill == null  || accruredTill.isBefore(tilldate)) {
+                            addAccrualTillSpecificDate(tilldate, accrualData, accruredTill);
+                        }
                     } else {
                         addAccrualAccounting(accrualData);
                         accruredTill = accrualData.getDueDateAsLocaldate();
@@ -131,10 +131,10 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     private void addAccrualTillSpecificDate(final LocalDate tilldate, final LoanScheduleAccrualData accrualData,
             final LocalDate accruredTill) throws Exception {
         LocalDate interestStartDate = accrualData.getFromDateAsLocaldate();
-        boolean isInterestStartDateEqulsInstallmentStartdate = true;
+        // boolean isInterestStartDateEqulsInstallmentStartdate = true;
         if (accrualData.getInterestCalculatedFrom() != null
                 && accrualData.getFromDateAsLocaldate().isBefore(accrualData.getInterestCalculatedFrom())) {
-            isInterestStartDateEqulsInstallmentStartdate = false;
+            // isInterestStartDateEqulsInstallmentStartdate = false;
             if (accrualData.getInterestCalculatedFrom().isBefore(accrualData.getDueDateAsLocaldate())) {
                 interestStartDate = accrualData.getInterestCalculatedFrom();
             } else {
@@ -157,22 +157,18 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         int daysToBeAccrued = Days.daysBetween(startDate, tilldate).getDays();
         // if (daysToBeAccrued < 1) { return; }
         int daysInSchedule = Days.daysBetween(interestStartDate, tilldate).getDays();
-        switch (accrualData.getRepaymentFrequency()) {
-            case MONTHS:
-                int numberOfDaysInMonth = calculateTotalNumberOfDaysForMonth(totalNumberOfDays, accrualData);
-                if (!(!isInterestStartDateEqulsInstallmentStartdate && totalNumberOfDays < numberOfDaysInMonth)) {
-                    totalNumberOfDays = numberOfDaysInMonth;
-                }
-            break;
-            case YEARS:
-                int numberOfDaysinYear = calculateTotalNumberOfDaysForYear(totalNumberOfDays, accrualData);
-                if (!(!isInterestStartDateEqulsInstallmentStartdate && totalNumberOfDays < numberOfDaysinYear)) {
-                    totalNumberOfDays = numberOfDaysinYear;
-                }
-            break;
-            default:
-            break;
-        }
+        /*
+         * switch (accrualData.getRepaymentFrequency()) { case MONTHS: int
+         * numberOfDaysInMonth =
+         * calculateTotalNumberOfDaysForMonth(totalNumberOfDays, accrualData);
+         * if (!(!isInterestStartDateEqulsInstallmentStartdate &&
+         * totalNumberOfDays < numberOfDaysInMonth)) { totalNumberOfDays =
+         * numberOfDaysInMonth; } break; case YEARS: int numberOfDaysinYear =
+         * calculateTotalNumberOfDaysForYear(totalNumberOfDays, accrualData); if
+         * (!(!isInterestStartDateEqulsInstallmentStartdate && totalNumberOfDays
+         * < numberOfDaysinYear)) { totalNumberOfDays = numberOfDaysinYear; }
+         * break; default: break; }
+         */
 
         double interestPerDay = accrualData.getInterestIncome().doubleValue() / totalNumberOfDays;
         BigDecimal amount = BigDecimal.ZERO;
@@ -232,37 +228,23 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         }
     }
 
-    private int calculateTotalNumberOfDaysForMonth(final int totalNumberOfDays, final LoanScheduleAccrualData accrualData) {
-        int numberOfDays = totalNumberOfDays;
-        DaysInMonthType type = DaysInMonthType.fromInt(accrualData.getNumberOfDaysInMonth());
-        switch (type) {
-            case DAYS_30:
-                numberOfDays = 30 * accrualData.getRepayEvery();
-            break;
-            default:
-            break;
-        }
-        return numberOfDays;
-    }
-
-    private int calculateTotalNumberOfDaysForYear(final int totalNumberOfDays, final LoanScheduleAccrualData accrualData) {
-        int numberOfDays = totalNumberOfDays;
-        DaysInYearType type = DaysInYearType.fromInt(accrualData.getNumberOfDaysInMonth());
-        switch (type) {
-            case DAYS_360:
-                numberOfDays = 360 * accrualData.getRepayEvery();
-            break;
-            case DAYS_364:
-                numberOfDays = 364 * accrualData.getRepayEvery();
-            break;
-            case DAYS_365:
-                numberOfDays = 365 * accrualData.getRepayEvery();
-            break;
-            default:
-            break;
-        }
-        return numberOfDays;
-    }
+    /*
+     * private int calculateTotalNumberOfDaysForMonth(final int
+     * totalNumberOfDays, final LoanScheduleAccrualData accrualData) { int
+     * numberOfDays = totalNumberOfDays; DaysInMonthType type =
+     * DaysInMonthType.fromInt(accrualData.getNumberOfDaysInMonth()); switch
+     * (type) { case DAYS_30: numberOfDays = 30 * accrualData.getRepayEvery();
+     * break; default: break; } return numberOfDays; }
+     * 
+     * private int calculateTotalNumberOfDaysForYear(final int
+     * totalNumberOfDays, final LoanScheduleAccrualData accrualData) { int
+     * numberOfDays = totalNumberOfDays; DaysInYearType type =
+     * DaysInYearType.fromInt(accrualData.getNumberOfDaysInMonth()); switch
+     * (type) { case DAYS_360: numberOfDays = 360 * accrualData.getRepayEvery();
+     * break; case DAYS_364: numberOfDays = 364 * accrualData.getRepayEvery();
+     * break; case DAYS_365: numberOfDays = 365 * accrualData.getRepayEvery();
+     * break; default: break; } return numberOfDays; }
+     */
 
     @Transactional
     public void addAccrualAccounting(LoanScheduleAccrualData scheduleAccrualData) throws Exception {

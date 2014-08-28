@@ -11,15 +11,18 @@ import org.mifosplatform.organisation.monetary.domain.Money;
 public class RecalculationDetail {
 
     private boolean isLatePayment;
+    private boolean isInterestompound;
     private LocalDate startDate;
     private LocalDate toDate;
     private Money amount;
 
-    public RecalculationDetail(final boolean isLatePayment, final LocalDate startDate, final LocalDate toDate, final Money amount) {
+    public RecalculationDetail(final boolean isLatePayment, final LocalDate startDate, final LocalDate toDate, final Money amount,
+            final boolean isInterestompound) {
         this.isLatePayment = isLatePayment;
         this.startDate = startDate;
         this.toDate = toDate;
         this.amount = amount;
+        this.isInterestompound = isInterestompound;
     }
 
     public boolean isLatePayment() {
@@ -42,8 +45,11 @@ public class RecalculationDetail {
         return !this.startDate.isAfter(endDate) && !startDate.isAfter(this.toDate);
     }
 
-    
     public void updateAmount(Money amount) {
         this.amount = amount;
+    }
+
+    public boolean isInterestompound() {
+        return this.isInterestompound;
     }
 }
