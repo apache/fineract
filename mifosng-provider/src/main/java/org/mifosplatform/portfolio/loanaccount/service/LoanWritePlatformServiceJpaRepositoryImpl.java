@@ -278,7 +278,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
             if (isAccountTransfer) {
                 disburseLoanToSavings(loan, command, disburseAmount, paymentDetail);
+                existingTransactionIds.addAll(loan.findExistingTransactionIds());
+                existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
             } else {
+                existingTransactionIds.addAll(loan.findExistingTransactionIds());
+                existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
                 LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan.getOffice(), disburseAmount, paymentDetail,
                         actualDisbursementDate, txnExternalId);
                 disbursementTransaction.updateLoan(loan);
@@ -291,10 +295,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                         CalendarEntityType.LOAN_RECALCULATION_DETAIL.getValue());
             }
 
-            changedTransactionDetail = loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency,
-                    existingTransactionIds, existingReversedTransactionIds, changes, calculatedRepaymentsStartingFromDate,
-                    isHolidayEnabled, holidays, workingDays, allowTransactionsOnHoliday, allowTransactionsOnNonWorkingDay,
-                    recalcualteSchedule, restCalendarInstance);
+            changedTransactionDetail = loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, changes,
+                    calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays, allowTransactionsOnHoliday,
+                    allowTransactionsOnNonWorkingDay, recalcualteSchedule, restCalendarInstance);
         }
         if (!changes.isEmpty()) {
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
@@ -467,7 +470,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
                 if (isAccountTransfer) {
                     disburseLoanToSavings(loan, command, disburseAmount, paymentDetail);
+                    existingTransactionIds.addAll(loan.findExistingTransactionIds());
+                    existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
+
                 } else {
+                    existingTransactionIds.addAll(loan.findExistingTransactionIds());
+                    existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
                     LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan.getOffice(), disburseAmount, paymentDetail,
                             actualDisbursementDate, txnExternalId);
                     disbursementTransaction.updateLoan(loan);
@@ -479,10 +487,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                             loan.loanInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_DETAIL.getValue());
                 }
 
-                changedTransactionDetail = loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency,
-                        existingTransactionIds, existingReversedTransactionIds, changes, firstRepaymentOnDate, isHolidayEnabled, holidays,
-                        workingDays, allowTransactionsOnHoliday, allowTransactionsOnNonWorkingDay, recalcualteSchedule,
-                        restCalendarInstance);
+                changedTransactionDetail = loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, changes,
+                        firstRepaymentOnDate, isHolidayEnabled, holidays, workingDays, allowTransactionsOnHoliday,
+                        allowTransactionsOnNonWorkingDay, recalcualteSchedule, restCalendarInstance);
             }
             if (!changes.isEmpty()) {
 

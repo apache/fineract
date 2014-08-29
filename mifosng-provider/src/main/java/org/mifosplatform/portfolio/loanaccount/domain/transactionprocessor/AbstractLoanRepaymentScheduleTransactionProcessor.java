@@ -6,7 +6,6 @@
 package org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +25,7 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.CreocoreLoanRepaymentScheduleTransactionProcessor;
 import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.HeavensFamilyLoanRepaymentScheduleTransactionProcessor;
 import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.RecalculationDetail;
 
 /**
  * Abstract implementation of {@link LoanRepaymentScheduleTransactionProcessor}
@@ -438,29 +438,51 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     }
 
     @Override
-    public Map<LocalDate, Money> handleRepaymentSchedule(final List<LoanTransaction> transactionsPostDisbursement,
+    public List<RecalculationDetail> handleRepaymentSchedule(final List<LoanTransaction> transactionsPostDisbursement,
             final MonetaryCurrency currency, final List<LoanRepaymentScheduleInstallment> installments,
-            final LoanRepaymentScheduleInstallment installment, final Map<LocalDate, LocalDate> recalculationDates) {
-        Map<LocalDate, Money> unprocessedMap = new HashMap<>();
+            final LoanRepaymentScheduleInstallment installment, final Map<LocalDate, LocalDate> recalculationDates,
+            final LoanTransaction preCloseTransaction) {
+        List<RecalculationDetail> earlypaymentDetail = new ArrayList<>();
         Money currentInstallmentOutstanding = installment.getTotalOutstanding(currency);
         for (final LoanTransaction loanTransaction : transactionsPostDisbursement) {
             Money amountToProcess = null;
+            LocalDate transactionDate = loanTransaction.getTransactionDate();
+            if (loanTransaction != preCloseTransaction) {
+                transactionDate = recalculationDates.get(transactionDate);
+            }
             final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
             newLoanTransaction.resetDerivedComponents();
             Money unProcessed = processTransaction(newLoanTransaction, currency, installments, amountToProcess);
-            if (loanTransaction.getTransactionDate().isAfter(installment.getFromDate())
-                    && recalculationDates.get(loanTransaction.getTransactionDate()).isBefore(installment.getDueDate())) {
+            if (transactionDate.isAfter(installment.getFromDate()) && transactionDate.isBefore(installment.getDueDate())) {
                 Money earlyPayment = currentInstallmentOutstanding.minus(installment.getTotalOutstanding(currency));
                 if (earlyPayment.isGreaterThanZero()) {
-                    unprocessedMap.put(loanTransaction.getTransactionDate(), earlyPayment);
+                    earlypaymentDetail.add(new RecalculationDetail(false, transactionDate, null, earlyPayment, false));
                 }
                 currentInstallmentOutstanding = installment.getTotalOutstanding(currency);
             }
 
             if (unProcessed.isGreaterThanZero()) {
-                unprocessedMap.put(loanTransaction.getTransactionDate(), unProcessed);
+                earlypaymentDetail.add(new RecalculationDetail(false, transactionDate, null, unProcessed, false));
             }
         }
-        return unprocessedMap;
+        return earlypaymentDetail;
     }
+
+    @Override
+    public boolean isInterestFirstRepaymentScheduleTransactionProcessor() {
+        return false;
+    }
+
+    @Override
+    public void applyTransaction(List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments) {
+        for (final LoanTransaction loanTransaction : transactionsPostDisbursement) {
+            Money amountToProcess = null;
+            final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
+            newLoanTransaction.resetDerivedComponents();
+            processTransaction(newLoanTransaction, currency, installments, amountToProcess);
+
+        }
+    }
+
 }

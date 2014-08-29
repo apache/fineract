@@ -13,7 +13,6 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
-import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -31,6 +30,6 @@ public interface LoanScheduleGenerator {
             LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
             List<LoanRepaymentScheduleInstallment> previousSchedule, LocalDate recalculateFrom);
 
-    Money fetchPrepaymentAmount(List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency,
-            LoanApplicationTerms applicationTerms, MathContext mc);
+    LoanRepaymentScheduleInstallment calculatePrepaymentAmount(List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency,
+            LoanApplicationTerms applicationTerms, LocalDate onDate);
 }

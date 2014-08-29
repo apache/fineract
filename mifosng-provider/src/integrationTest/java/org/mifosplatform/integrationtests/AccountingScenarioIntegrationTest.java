@@ -8,6 +8,7 @@ package org.mifosplatform.integrationtests;
 import static org.junit.Assert.assertEquals;
 
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
@@ -722,9 +724,28 @@ public class AccountingScenarioIntegrationTest {
             e.printStackTrace();
         }
 
+        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
+                loanID);
         // MAKE 1
-        final float FIRST_INTEREST = 200.0f;
-        final float INTEREST_4_DAYS = 13.33F;
+        List fromDateList = (List) loanSchedule.get(1).get("fromDate");
+        LocalDate fromDateLocal = LocalDate.now();
+        fromDateLocal = fromDateLocal.withYear((int) fromDateList.get(0));
+        fromDateLocal = fromDateLocal.withMonthOfYear((int) fromDateList.get(1));
+        fromDateLocal = fromDateLocal.withDayOfMonth((int) fromDateList.get(2));
+
+        List dueDateList = (List) loanSchedule.get(1).get("dueDate");
+        LocalDate dueDateLocal = LocalDate.now();
+        dueDateLocal = dueDateLocal.withYear((int) dueDateList.get(0));
+        dueDateLocal = dueDateLocal.withMonthOfYear((int) dueDateList.get(1));
+        dueDateLocal = dueDateLocal.withDayOfMonth((int) dueDateList.get(2));
+
+        int totalDaysInPeriod = Days.daysBetween(fromDateLocal, dueDateLocal).getDays();
+
+        float totalInterest = (float) loanSchedule.get(1).get("interestOriginalDue");
+        DecimalFormat numberFormat = new DecimalFormat("#.00");
+        float INTEREST_4_DAYS = totalInterest / totalDaysInPeriod * 4;
+        INTEREST_4_DAYS = new Float(numberFormat.format(INTEREST_4_DAYS));
+
         this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(currentDate), INTEREST_4_DAYS, FEE_PORTION,
                 PENALTY_PORTION, loanID);
 
@@ -797,8 +818,27 @@ public class AccountingScenarioIntegrationTest {
 
         this.periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(runOndate);
 
+        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
+                loanID);
         // MAKE 1
-        final float INTEREST_3_DAYS = 10.0F;
+        List fromDateList = (List) loanSchedule.get(1).get("fromDate");
+        LocalDate fromDateLocal = LocalDate.now();
+        fromDateLocal = fromDateLocal.withYear((int) fromDateList.get(0));
+        fromDateLocal = fromDateLocal.withMonthOfYear((int) fromDateList.get(1));
+        fromDateLocal = fromDateLocal.withDayOfMonth((int) fromDateList.get(2));
+
+        List dueDateList = (List) loanSchedule.get(1).get("dueDate");
+        LocalDate dueDateLocal = LocalDate.now();
+        dueDateLocal = dueDateLocal.withYear((int) dueDateList.get(0));
+        dueDateLocal = dueDateLocal.withMonthOfYear((int) dueDateList.get(1));
+        dueDateLocal = dueDateLocal.withDayOfMonth((int) dueDateList.get(2));
+
+        int totalDaysInPeriod = Days.daysBetween(fromDateLocal, dueDateLocal).getDays();
+
+        float totalInterest = (float) loanSchedule.get(1).get("interestOriginalDue");
+        DecimalFormat numberFormat = new DecimalFormat("#.00");
+        float INTEREST_3_DAYS = totalInterest / totalDaysInPeriod * 3;
+        INTEREST_3_DAYS = new Float(numberFormat.format(INTEREST_3_DAYS));
         this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(runOndate), INTEREST_3_DAYS, FEE_PORTION,
                 PENALTY_PORTION, loanID);
 

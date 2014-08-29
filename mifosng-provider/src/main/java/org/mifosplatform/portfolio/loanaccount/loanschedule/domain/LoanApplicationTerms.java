@@ -236,6 +236,23 @@ public final class LoanApplicationTerms {
                 interestRecalculationCompoundingMethod, restCalendarInstance);
     }
 
+    public static LoanApplicationTerms assembleFrom(final Integer repaymentEvery, final PeriodFrequencyType repaymentPeriodFrequencyType,
+            final LoanApplicationTerms applicationTerms) {
+        return new LoanApplicationTerms(applicationTerms.currency, applicationTerms.loanTermFrequency,
+                applicationTerms.loanTermPeriodFrequencyType, applicationTerms.numberOfRepayments, repaymentEvery,
+                repaymentPeriodFrequencyType, applicationTerms.amortizationMethod, applicationTerms.interestMethod,
+                applicationTerms.interestRatePerPeriod, applicationTerms.interestRatePeriodFrequencyType,
+                applicationTerms.annualNominalInterestRate, applicationTerms.interestCalculationPeriodMethod, applicationTerms.principal,
+                applicationTerms.expectedDisbursementDate, applicationTerms.repaymentsStartingFromDate,
+                applicationTerms.calculatedRepaymentsStartingFromDate, applicationTerms.principalGrace,
+                applicationTerms.interestPaymentGrace, applicationTerms.interestChargingGrace, applicationTerms.interestChargedFromDate,
+                applicationTerms.inArrearsTolerance, applicationTerms.multiDisburseLoan, applicationTerms.fixedEmiAmount,
+                applicationTerms.disbursementDatas, applicationTerms.maxOutstandingBalance, applicationTerms.emiAmountVariations,
+                applicationTerms.graceOnArrearsAgeing, applicationTerms.daysInMonthType, applicationTerms.daysInYearType,
+                applicationTerms.interestRecalculationEnabled, applicationTerms.rescheduleStrategyMethod,
+                applicationTerms.interestRecalculationCompoundingMethod, applicationTerms.restCalendarInstance);
+    }
+
     private LoanApplicationTerms(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
             final PeriodFrequencyType repaymentPeriodFrequencyType, final AmortizationMethod amortizationMethod,

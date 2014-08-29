@@ -977,7 +977,7 @@ public class Loan extends AbstractPersistable<Long> {
                         scheduledLoanInstallment.periodNumber(), scheduledLoanInstallment.periodFromDate(),
                         scheduledLoanInstallment.periodDueDate(), scheduledLoanInstallment.principalDue(),
                         scheduledLoanInstallment.interestDue(), scheduledLoanInstallment.feeChargesDue(),
-                        scheduledLoanInstallment.penaltyChargesDue());
+                        scheduledLoanInstallment.penaltyChargesDue(), scheduledLoanInstallment.isRecalculatedInterestComponent());
                 addRepaymentScheduleInstallment(installment);
             }
         }
@@ -1747,8 +1747,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public ChangedTransactionDetail disburse(final LoanScheduleGeneratorFactory loanScheduleFactory, final AppUser currentUser,
-            final JsonCommand command, final ApplicationCurrency currency, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds, final Map<String, Object> actualChanges,
+            final JsonCommand command, final ApplicationCurrency currency, final Map<String, Object> actualChanges,
             final LocalDate calculatedRepaymentsStartingFromDate, final boolean isHolidayEnabled, final List<Holiday> holidays,
             final WorkingDays workingDays, final boolean allowTransactionsOnHoliday, final boolean allowTransactionsOnNonWorkingDay,
             final boolean recalculateSchedule, final CalendarInstance calendarInstanceForInterestRecalculation) {
@@ -1757,9 +1756,6 @@ public class Loan extends AbstractPersistable<Long> {
                 LoanStatus.fromInt(this.loanStatus));
 
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
-
-        existingTransactionIds.addAll(findExistingTransactionIds());
-        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         this.loanStatus = statusEnum.getValue();
         actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
@@ -3774,15 +3770,17 @@ public class Loan extends AbstractPersistable<Long> {
         final Set<LoanInstallmentCharge> loanChargePerInstallments = new HashSet<>();
         if (loanCharge.isInstalmentFee()) {
             for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
-                BigDecimal amount = BigDecimal.ZERO;
-                if (loanCharge.getChargeCalculation().isFlat()) {
-                    amount = loanCharge.amount().divide(BigDecimal.valueOf(repaymentScheduleDetail().getNumberOfRepayments()));
-                } else {
-                    amount = calculateInstallmentChargeAmount(loanCharge.getChargeCalculation(), loanCharge.getPercentage(), installment)
-                            .getAmount();
+                if (!installment.isRecalculatedInterestComponent()) {
+                    BigDecimal amount = BigDecimal.ZERO;
+                    if (loanCharge.getChargeCalculation().isFlat()) {
+                        amount = loanCharge.amount().divide(BigDecimal.valueOf(repaymentScheduleDetail().getNumberOfRepayments()));
+                    } else {
+                        amount = calculateInstallmentChargeAmount(loanCharge.getChargeCalculation(), loanCharge.getPercentage(),
+                                installment).getAmount();
+                    }
+                    final LoanInstallmentCharge loanInstallmentCharge = new LoanInstallmentCharge(amount, loanCharge, installment);
+                    loanChargePerInstallments.add(loanInstallmentCharge);
                 }
-                final LoanInstallmentCharge loanInstallmentCharge = new LoanInstallmentCharge(amount, loanCharge, installment);
-                loanChargePerInstallments.add(loanInstallmentCharge);
             }
         }
         return loanChargePerInstallments;
@@ -4140,8 +4138,8 @@ public class Loan extends AbstractPersistable<Long> {
         updateLoanSummaryDerivedFields();
     }
 
-    public Money fetchPrepaymentDetail(final LoanScheduleGeneratorFactory loanScheduleFactory) {
-        Money amount = Money.zero(getCurrency());
+    public LoanRepaymentScheduleInstallment fetchPrepaymentDetail(final LoanScheduleGeneratorFactory loanScheduleFactory) {
+        LoanRepaymentScheduleInstallment installment = null;
 
         if (this.loanRepaymentScheduleDetail.isInterestRecalculationEnabled()) {
             final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
@@ -4177,21 +4175,27 @@ public class Loan extends AbstractPersistable<Long> {
                     loanTermPeriodFrequencyType, getDisbursementDate(), getExpectedFirstRepaymentOnDate(), null, getInArrearsTolerance(),
                     this.loanRepaymentScheduleDetail, this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount, disbursementData,
                     this.maxOutstandingLoanBalance, loanVariationTermsData, getInterestChargedFromDate());
-            amount = loanScheduleGenerator.fetchPrepaymentAmount(this.repaymentScheduleInstallments, getCurrency(), loanApplicationTerms,
-                    mc);
+            installment = loanScheduleGenerator.calculatePrepaymentAmount(this.repaymentScheduleInstallments, getCurrency(),
+                    loanApplicationTerms, LocalDate.now());
         } else {
-            amount = this.getTotalOutstandingOnLoan();
+            installment = this.getTotalOutstandingOnLoan();
         }
-        return amount;
+        return installment;
     }
 
-    private Money getTotalOutstandingOnLoan() {
-        Money cumulativeOurstanding = Money.zero(loanCurrency());
-
+    private LoanRepaymentScheduleInstallment getTotalOutstandingOnLoan() {
+        Money feeCharges = Money.zero(loanCurrency());
+        Money penaltyCharges = Money.zero(loanCurrency());
+        Money totalPrincipal = Money.zero(loanCurrency());
+        Money totalInterest = Money.zero(loanCurrency());
         for (final LoanRepaymentScheduleInstallment scheduledRepayment : this.repaymentScheduleInstallments) {
-            cumulativeOurstanding = cumulativeOurstanding.plus(scheduledRepayment.getTotalOutstanding(getCurrency()));
+            totalPrincipal = totalPrincipal.plus(scheduledRepayment.getPrincipalOutstanding(loanCurrency()));
+            totalInterest = totalInterest.plus(scheduledRepayment.getInterestOutstanding(loanCurrency()));
+            feeCharges = feeCharges.plus(scheduledRepayment.getFeeChargesOutstanding(loanCurrency()));
+            penaltyCharges = penaltyCharges.plus(scheduledRepayment.getPenaltyChargesOutstanding(loanCurrency()));
         }
-        return cumulativeOurstanding;
+        return new LoanRepaymentScheduleInstallment(null, 0, LocalDate.now(), LocalDate.now(), totalPrincipal.getAmount(),
+                totalInterest.getAmount(), feeCharges.getAmount(), penaltyCharges.getAmount(), false);
     }
 
     public List<LoanRepaymentScheduleInstallment> fetchRepaymentScheduleInstallments() {

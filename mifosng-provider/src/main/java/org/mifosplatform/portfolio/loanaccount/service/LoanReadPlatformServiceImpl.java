@@ -383,12 +383,15 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final LocalDate earliestUnpaidInstallmentDate = LocalDate.now();
 
-        final Money precloseAmount = loan.fetchPrepaymentDetail(this.loanScheduleFactory);
+        final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loan.fetchPrepaymentDetail(this.loanScheduleFactory);
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.REPAYMENT);
         final Collection<CodeValueData> paymentOptions = this.codeValueReadPlatformService
                 .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
         return new LoanTransactionData(null, null, null, transactionType, null, currencyData, earliestUnpaidInstallmentDate,
-                precloseAmount.getAmount(), null, null, null, null, null, paymentOptions, null, null, null);
+                loanRepaymentScheduleInstallment.getTotalOutstanding(currency).getAmount(), loanRepaymentScheduleInstallment
+                        .getPrincipalOutstanding(currency).getAmount(), loanRepaymentScheduleInstallment.getInterestOutstanding(currency)
+                        .getAmount(), loanRepaymentScheduleInstallment.getFeeChargesOutstanding(currency).getAmount(),
+                loanRepaymentScheduleInstallment.getPenaltyChargesOutstanding(currency).getAmount(), null, paymentOptions, null, null, null);
     }
 
     @Override
@@ -1450,8 +1453,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Long officeId = rs.getLong("officeId");
             final LocalDate accruedTill = JdbcSupport.getLocalDate(rs, "accruedTill");
             final LocalDate interestCalculatedFrom = JdbcSupport.getLocalDate(rs, "interestCalculatedFrom");
-            final Integer numberOfDaysInMonth = JdbcSupport.getInteger(rs, "daysInMonth");;
-            final Integer numberOfDaysInYear = JdbcSupport.getInteger(rs, "daysInYear");;
+            final Integer numberOfDaysInMonth = JdbcSupport.getInteger(rs, "daysInMonth");
+            ;
+            final Integer numberOfDaysInYear = JdbcSupport.getInteger(rs, "daysInYear");
+            ;
             final Integer frequencyEnum = JdbcSupport.getInteger(rs, "frequencyEnum");
             final Integer repayEvery = JdbcSupport.getInteger(rs, "repayEvery");
             final PeriodFrequencyType frequency = PeriodFrequencyType.fromInt(frequencyEnum);
