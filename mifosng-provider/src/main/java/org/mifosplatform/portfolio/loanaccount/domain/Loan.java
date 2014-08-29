@@ -1747,8 +1747,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public ChangedTransactionDetail disburse(final LoanScheduleGeneratorFactory loanScheduleFactory, final AppUser currentUser,
-            final JsonCommand command, final ApplicationCurrency currency, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds, final Map<String, Object> actualChanges,
+            final JsonCommand command, final ApplicationCurrency currency, final Map<String, Object> actualChanges,
             final LocalDate calculatedRepaymentsStartingFromDate, final boolean isHolidayEnabled, final List<Holiday> holidays,
             final WorkingDays workingDays, final boolean allowTransactionsOnHoliday, final boolean allowTransactionsOnNonWorkingDay,
             final boolean recalculateSchedule, final CalendarInstance calendarInstanceForInterestRecalculation) {
@@ -1757,9 +1756,6 @@ public class Loan extends AbstractPersistable<Long> {
                 LoanStatus.fromInt(this.loanStatus));
 
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
-
-        existingTransactionIds.addAll(findExistingTransactionIds());
-        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         this.loanStatus = statusEnum.getValue();
         actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
