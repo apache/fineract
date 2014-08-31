@@ -16,5 +16,4 @@ Before sending out a pull request, please ensure that the following pre-requisit
 
 1. Your work is rebased on top of the latest code from develop branch to make life easier for our Committers
 
-1. "gradlew licenseFormatMain licenseFormatTest licenseFormatIntegrationTest" has been run to apply the Mozilla License on all newly added files
-
+1. "gradlew licenseFormatMain licenseFormatTest licenseFormatIntegrationTest" has been run to apply the Mozilla License on all newly added files (your pull requests are verified to ensure compliance with this since https://github.com/openMF/mifosx/pull/1053)
