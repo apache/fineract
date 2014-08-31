@@ -10,7 +10,7 @@ buildscript {
 
   dependencies {
      classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:1.0',
-               'nl.javadude.gradle.plugins:license-gradle-plugin:0.6.0',
+               'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0',
                'org.zeroturnaround:gradle-jrebel-plugin:1.1.2'
   }
 }
@@ -205,6 +205,7 @@ war {
 
 license {
     header rootProject.file('../LICENSE.md')
+    excludes(["**/*.mustache"])
     strictCheck true
 }
 
