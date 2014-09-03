@@ -8,13 +8,14 @@ package org.mifosplatform.portfolio.loanproduct.domain;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
+
 public enum RecalculationFrequencyType {
     INVALID(0, "interestRecalculationFrequencyType.invalid"), //
     SAME_AS_REPAYMENT_PERIOD(1, "interestRecalculationFrequencyType.same.as.repayment.period"), //
     DAILY(2, "interestRecalculationFrequencyType.daily"), //
     WEEKLY(3, "interestRecalculationFrequencyType.weekly"), //
-    FORTNIGHTLY(4, "interestRecalculationFrequencyType.fortnightly"), //
-    MONTHLY(5, "interestRecalculationFrequencyType.monthly");
+    MONTHLY(4, "interestRecalculationFrequencyType.monthly");
 
     private final Integer value;
     private final String code;
@@ -43,5 +44,21 @@ public enum RecalculationFrequencyType {
 
     public String getCode() {
         return this.code;
+    }
+
+    public boolean isSameAsRepayment() {
+        return this.value.equals(RecalculationFrequencyType.SAME_AS_REPAYMENT_PERIOD.getValue());
+    }
+
+    public boolean isDaily() {
+        return this.value.equals(RecalculationFrequencyType.DAILY.getValue());
+    }
+
+    public boolean isWeekly() {
+        return this.value.equals(RecalculationFrequencyType.WEEKLY.getValue());
+    }
+
+    public boolean isMonthly() {
+        return this.value.equals(RecalculationFrequencyType.MONTHLY.getValue());
     }
 }

@@ -141,12 +141,11 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
 
     @Override
     public List<EnumOptionData> retrieveInterestRecalculationFrequencyTypeOptions() {
-        
+
         final List<EnumOptionData> interestRecalculationFrequencyTypeOptions = Arrays.asList(
                 interestRecalculationFrequencyType(RecalculationFrequencyType.SAME_AS_REPAYMENT_PERIOD),
                 interestRecalculationFrequencyType(RecalculationFrequencyType.DAILY),
                 interestRecalculationFrequencyType(RecalculationFrequencyType.WEEKLY),
-                interestRecalculationFrequencyType(RecalculationFrequencyType.FORTNIGHTLY),
                 interestRecalculationFrequencyType(RecalculationFrequencyType.MONTHLY));
         return interestRecalculationFrequencyTypeOptions;
     }

@@ -1022,16 +1022,15 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 recalculationDates, preCloseTransaction);
     }
 
-    @SuppressWarnings("unused")
     private LocalDate getNextRestScheduleDate(LocalDate startDate, LoanApplicationTerms loanApplicationTerms,
             final boolean isHolidayEnabled, final List<Holiday> holidays, final WorkingDays workingDays) {
         CalendarInstance calendarInstance = loanApplicationTerms.getRestCalendarInstance();
         LocalDate nextScheduleDate = CalendarUtils.getNextScheduleDate(calendarInstance.getCalendar(), startDate);
-        /*
-         * nextScheduleDate =
-         * this.scheduledDateGenerator.adjustRepaymentDate(nextScheduleDate,
-         * loanApplicationTerms, isHolidayEnabled, holidays, workingDays);
-         */
+        if (loanApplicationTerms.getRecalculationFrequencyType().isSameAsRepayment()) {
+            nextScheduleDate = this.scheduledDateGenerator.adjustRepaymentDate(nextScheduleDate, loanApplicationTerms, isHolidayEnabled,
+                    holidays, workingDays);
+        }
+
         return nextScheduleDate;
     }
 

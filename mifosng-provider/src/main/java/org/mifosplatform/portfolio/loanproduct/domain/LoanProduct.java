@@ -43,7 +43,6 @@ import org.mifosplatform.portfolio.common.domain.DaysInMonthType;
 import org.mifosplatform.portfolio.common.domain.DaysInYearType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.fund.domain.Fund;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanInterestRecalculationDetails;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -906,21 +905,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return this.loanProductRelatedDetail.fetchDaysInYearType();
     }
 
-    public LoanInterestRecalculationDetails copyInterestRecalculationSettings() {
-        LoanInterestRecalculationDetails loanInterestRecalculationDetails = null;
-        if (this.isInterestRecalculationEnabled()) {
-            loanInterestRecalculationDetails = LoanInterestRecalculationDetails.createFrom(
-                    this.productInterestRecalculationDetails.getInterestRecalculationCompoundingMethod(),
-                    this.productInterestRecalculationDetails.getRescheduleStrategyMethod());
-        }
-        return loanInterestRecalculationDetails;
-    }
-
-    public LoanInterestRecalculationDetails updateLoanInterestRecalculationDetails(
-            LoanInterestRecalculationDetails loanInterestRecalculationDetails) {
-
-        loanInterestRecalculationDetails.update(this.productInterestRecalculationDetails.getInterestRecalculationCompoundingMethod(),
-                this.productInterestRecalculationDetails.getRescheduleStrategyMethod());
-        return loanInterestRecalculationDetails;
+    public LoanProductInterestRecalculationDetails getProductInterestRecalculationDetails() {
+        return this.productInterestRecalculationDetails;
     }
 }

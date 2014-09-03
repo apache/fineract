@@ -125,6 +125,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.allow_multiple_disbursals as multiDisburseLoan, lp.max_disbursals as maxTrancheCount, lp.max_outstanding_loan_balance as outstandingLoanBalance, "
                     + "lp.days_in_month_enum as daysInMonth, lp.days_in_year_enum as daysInYear, lp.interest_recalculation_enabled as isInterestRecalculationEnabled, "
                     + "lpr.id as lprId, lpr.product_id as productId, lpr.compound_type_enum as compoundType, lpr.reschedule_strategy_enum as rescheduleStrategy, "
+                    + "lpr.rest_frequency_type_enum as restFrequencyEnum, lpr.rest_frequency_interval as restFrequencyInterval, "
+                    + "lpr.rest_freqency_date as restFrequencyDate, "
                     + "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol, lp.external_id as externalId "
                     + " from m_product_loan lp "
                     + " left join m_fund f on f.id = lp.fund_id "
@@ -242,9 +244,14 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                         .interestRecalculationCompoundingType(compoundTypeEnumValue);
                 final int rescheduleStrategyEnumValue = JdbcSupport.getInteger(rs, "rescheduleStrategy");
                 final EnumOptionData rescheduleStrategyType = LoanEnumerations.rescheduleStrategyType(rescheduleStrategyEnumValue);
+                final int restFrequencyEnumValue = JdbcSupport.getInteger(rs, "restFrequencyEnum");
+                final EnumOptionData restFrequencyType = LoanEnumerations.interestRecalculationFrequencyType(restFrequencyEnumValue);
+                final int restFrequencyInterval = JdbcSupport.getInteger(rs, "restFrequencyInterval");
+                final LocalDate restFrequencyDate = JdbcSupport.getLocalDate(rs, "restFrequencyDate");
 
                 interestRecalculationData = new LoanProductInterestRecalculationData(lprId, productId,
-                        interestRecalculationCompoundingType, rescheduleStrategyType);
+                        interestRecalculationCompoundingType, rescheduleStrategyType, restFrequencyType, restFrequencyInterval,
+                        restFrequencyDate);
             }
 
             return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,

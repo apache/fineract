@@ -76,8 +76,8 @@ public class LoanProductsApiResource {
             "transactionProcessingStrategyOptions", "chargeOptions", "accountingOptions", "accountingRuleOptions",
             "accountingMappingOptions"));
 
-    private final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(Arrays.asList("productId", "productName",
-            "restrictedProducts", "allowedProducts", "productOptions"));
+    private final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(Arrays.asList("productId", "productName", "restrictedProducts",
+            "allowedProducts", "productOptions"));
 
     private final String resourceNameForPermissions = "LOANPRODUCT";
 
@@ -277,12 +277,14 @@ public class LoanProductsApiResource {
         final List<EnumOptionData> interestRecalculationCompoundingTypeOptions = dropdownReadPlatformService
                 .retrieveInterestRecalculationCompoundingTypeOptions();
         final List<EnumOptionData> rescheduleStrategyTypeOptions = dropdownReadPlatformService.retrieveRescheduleStrategyTypeOptions();
+        final List<EnumOptionData> interestRecalculationFrequencyTypeOptions = dropdownReadPlatformService
+                .retrieveInterestRecalculationFrequencyTypeOptions();
 
         return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions,
                 amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions,
                 interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions, accountOptions,
                 accountingRuleTypeOptions, loanCycleValueConditionTypeOptions, daysInMonthTypeOptions, daysInYearTypeOptions,
-                interestRecalculationCompoundingTypeOptions, rescheduleStrategyTypeOptions);
+                interestRecalculationCompoundingTypeOptions, rescheduleStrategyTypeOptions, interestRecalculationFrequencyTypeOptions);
     }
 
 }

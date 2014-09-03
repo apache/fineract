@@ -5,8 +5,6 @@
  */
 package org.mifosplatform.portfolio.loanaccount.service;
 
-import static org.mifosplatform.portfolio.loanaccount.api.LoanApiConstants.recalculationFrequencyTypeParameterName;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -70,6 +68,7 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleM
 import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanApplicationCommandFromApiJsonHelper;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanApplicationTransitionApiJsonValidator;
+import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
@@ -214,11 +213,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             if (loanProduct.isInterestRecalculationEnabled()) {
 
-                final Integer recalculationFrequencyTypeValue = command
-                        .integerValueOfParameterNamed(recalculationFrequencyTypeParameterName);
-                this.fromApiJsonDeserializer.validateRecalcuationFrequencyType(recalculationFrequencyTypeValue);
-
-                createAndPersistCalendarInstanceForInterestRecalculation(newLoanApplication, recalculationFrequencyTypeValue);
+                final LocalDate recalculationFrequencyDate = this.fromJsonHelper.extractLocalDateNamed(
+                        LoanProductConstants.recalculationRestFrequencyDateParamName, command.parsedJson());
+                if (!newLoanApplication.loanInterestRecalculationDetails().getRestFrequencyType().isSameAsRepayment()) {
+                    this.fromApiJsonDeserializer.validateRecalcuationFrequency(recalculationFrequencyDate,
+                            newLoanApplication.getExpectedDisbursedOnLocalDate());
+                }
+                createAndPersistCalendarInstanceForInterestRecalculation(newLoanApplication);
             }
 
             if (newLoanApplication.isAccountNumberRequiresAutoGeneration()) {
@@ -271,33 +272,30 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         }
     }
 
-    private void createAndPersistCalendarInstanceForInterestRecalculation(final Loan loan, final Integer recalculationFrequencyTypeValue) {
+    private void createAndPersistCalendarInstanceForInterestRecalculation(final Loan loan) {
 
-        final LocalDate calendarStartDate = loan.getDisbursementDate();
+        LocalDate calendarStartDate = loan.loanInterestRecalculationDetails().getRestFrequencyLocalDate();
+        if (calendarStartDate == null) {
+            calendarStartDate = loan.getExpectedDisbursedOnLocalDate();
+        }
         final Integer repeatsOnDay = calendarStartDate.getDayOfWeek();
-        final RecalculationFrequencyType recalculationFrequencyType = RecalculationFrequencyType.fromInt(recalculationFrequencyTypeValue);
+        final RecalculationFrequencyType recalculationFrequencyType = loan.loanInterestRecalculationDetails().getRestFrequencyType();
 
-        Integer frequency = 1;
+        Integer frequency = loan.loanInterestRecalculationDetails().getRestInterval();
         CalendarFrequencyType calendarFrequencyType = CalendarFrequencyType.INVALID;
         switch (recalculationFrequencyType) {
             case DAILY:
-                frequency = 1;
                 calendarFrequencyType = CalendarFrequencyType.DAILY;
             break;
-            case FORTNIGHTLY:
-                frequency = 2;
-                calendarFrequencyType = CalendarFrequencyType.WEEKLY;
-            break;
             case MONTHLY:
-                frequency = 1;
                 calendarFrequencyType = CalendarFrequencyType.MONTHLY;
             break;
             case SAME_AS_REPAYMENT_PERIOD:
                 frequency = loan.repaymentScheduleDetail().getRepayEvery();
                 calendarFrequencyType = CalendarFrequencyType.from(loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType());
+                calendarStartDate = loan.getExpectedDisbursedOnLocalDate();
             break;
             case WEEKLY:
-                frequency = 1;
                 calendarFrequencyType = CalendarFrequencyType.WEEKLY;
             break;
             default:
@@ -313,35 +311,32 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
     }
 
-    private void updateCalendarDetailsForInterestRecalculation(final CalendarInstance calendarInstance, final Loan loan,
-            final Integer recalculationFrequencyTypeValue) {
+    private void updateCalendarDetailsForInterestRecalculation(final CalendarInstance calendarInstance, final Loan loan) {
 
         Calendar interestRecalculationRecurrings = calendarInstance.getCalendar();
-        final LocalDate calendarStartDate = loan.getDisbursementDate();
+        LocalDate calendarStartDate = loan.loanInterestRecalculationDetails().getRestFrequencyLocalDate();
+        if (calendarStartDate == null) {
+            calendarStartDate = loan.getExpectedDisbursedOnLocalDate();
+        }
         final Integer repeatsOnDay = calendarStartDate.getDayOfWeek();
-        final RecalculationFrequencyType recalculationFrequencyType = RecalculationFrequencyType.fromInt(recalculationFrequencyTypeValue);
+        final RecalculationFrequencyType recalculationFrequencyType = loan.loanInterestRecalculationDetails().getRestFrequencyType();
 
-        Integer frequency = 1;
+        Integer frequency = loan.loanInterestRecalculationDetails().getRestInterval();
         CalendarFrequencyType calendarFrequencyType = CalendarFrequencyType.INVALID;
         switch (recalculationFrequencyType) {
             case DAILY:
-                frequency = 1;
                 calendarFrequencyType = CalendarFrequencyType.DAILY;
             break;
-            case FORTNIGHTLY:
-                frequency = 2;
-                calendarFrequencyType = CalendarFrequencyType.WEEKLY;
-            break;
+
             case MONTHLY:
-                frequency = 1;
                 calendarFrequencyType = CalendarFrequencyType.MONTHLY;
             break;
             case SAME_AS_REPAYMENT_PERIOD:
+                calendarStartDate = loan.getExpectedDisbursedOnLocalDate();
                 frequency = loan.repaymentScheduleDetail().getRepayEvery();
                 calendarFrequencyType = CalendarFrequencyType.from(loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType());
             break;
             case WEEKLY:
-                frequency = 1;
                 calendarFrequencyType = CalendarFrequencyType.WEEKLY;
             break;
             default:
@@ -616,26 +611,29 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             // updating loan interest recalculation details throwing null
             // pointer exception after saveAndFlush
             // http://stackoverflow.com/questions/17151757/hibernate-cascade-update-gives-null-pointer/17334374#17334374
-            existingLoanApplication.updateLoanInterestRecalculationSettings();
             this.loanRepository.save(existingLoanApplication);
 
             if (productRelatedDetail.isInterestRecalculationEnabled()) {
-
-                final Integer recalculationFrequencyTypeValue = command
-                        .integerValueOfParameterNamed(recalculationFrequencyTypeParameterName);
-
-                this.fromApiJsonDeserializer.validateRecalcuationFrequencyType(recalculationFrequencyTypeValue);
+                LocalDate recalculationFrequencyDate = existingLoanApplication.loanProduct().getProductInterestRecalculationDetails()
+                        .getRestFrequencyLocalDate();
+                if (this.fromJsonHelper.parameterExists(LoanProductConstants.recalculationRestFrequencyDateParamName, command.parsedJson())) {
+                    recalculationFrequencyDate = this.fromJsonHelper.extractLocalDateNamed(
+                            LoanProductConstants.recalculationRestFrequencyDateParamName, command.parsedJson());
+                    if (!existingLoanApplication.loanInterestRecalculationDetails().getRestFrequencyType().isSameAsRepayment()) {
+                        this.fromApiJsonDeserializer.validateRecalcuationFrequency(recalculationFrequencyDate,
+                                existingLoanApplication.getExpectedDisbursedOnLocalDate());
+                    }
+                }
 
                 CalendarInstance calendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
                         existingLoanApplication.loanInterestRecalculationDetailId(),
                         CalendarEntityType.LOAN_RECALCULATION_DETAIL.getValue(), CalendarType.COLLECTION.getValue());
 
                 if (calendarInstance == null) {
-                    createAndPersistCalendarInstanceForInterestRecalculation(existingLoanApplication, recalculationFrequencyTypeValue);
+                    createAndPersistCalendarInstanceForInterestRecalculation(existingLoanApplication);
 
                 } else {
-                    updateCalendarDetailsForInterestRecalculation(calendarInstance, existingLoanApplication,
-                            recalculationFrequencyTypeValue);
+                    updateCalendarDetailsForInterestRecalculation(calendarInstance, existingLoanApplication);
                 }
 
             }

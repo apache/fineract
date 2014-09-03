@@ -5,14 +5,23 @@
  */
 package org.mifosplatform.portfolio.loanaccount.domain;
 
+import java.util.Date;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
+import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
+import org.mifosplatform.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 /**
@@ -43,27 +52,53 @@ public class LoanInterestRecalculationDetails extends AbstractPersistable<Long> 
     @Column(name = "reschedule_strategy_enum", nullable = false)
     private Integer rescheduleStrategyMethod;
 
+    @Column(name = "rest_frequency_type_enum", nullable = false)
+    private Integer restFrequencyType;
+
+    @Column(name = "rest_frequency_interval", nullable = false)
+    private Integer restInterval;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "rest_freqency_date")
+    private Date restFrequencyDate;
+
     protected LoanInterestRecalculationDetails() {
         // Default constructor for jpa repository
     }
 
-    private LoanInterestRecalculationDetails(final Integer interestRecalculationCompoundingMethod, final Integer rescheduleStrategyMethod) {
+    private LoanInterestRecalculationDetails(final Integer interestRecalculationCompoundingMethod, final Integer rescheduleStrategyMethod,
+            final Integer restFrequencyType, final Integer restInterval, final Date restFrequencyDate) {
         this.interestRecalculationCompoundingMethod = interestRecalculationCompoundingMethod;
         this.rescheduleStrategyMethod = rescheduleStrategyMethod;
+        this.restFrequencyDate = restFrequencyDate;
+        this.restFrequencyType = restFrequencyType;
+        this.restInterval = restInterval;
     }
 
     public static LoanInterestRecalculationDetails createFrom(final Integer interestRecalculationCompoundingMethod,
-            final Integer rescheduleStrategyMethod) {
-        return new LoanInterestRecalculationDetails(interestRecalculationCompoundingMethod, rescheduleStrategyMethod);
+            final Integer rescheduleStrategyMethod, final Integer restFrequencyType, final Integer restInterval,
+            final Date restFrequencyDate) {
+        return new LoanInterestRecalculationDetails(interestRecalculationCompoundingMethod, rescheduleStrategyMethod, restFrequencyType,
+                restInterval, restFrequencyDate);
     }
 
     public void updateLoan(final Loan loan) {
         this.loan = loan;
     }
 
-    public void update(final Integer interestRecalculationCompoundingMethod, final Integer rescheduleStrategyMethod) {
-        this.interestRecalculationCompoundingMethod = interestRecalculationCompoundingMethod;
-        this.rescheduleStrategyMethod = rescheduleStrategyMethod;
+    public void update(final JsonCommand command, final Map<String, Object> actualChanges) {
+        if (command.isChangeInLocalDateParameterNamed(LoanProductConstants.recalculationRestFrequencyDateParamName,
+                getRestFrequencyLocalDate())) {
+            final String dateFormatAsInput = command.dateFormat();
+            final String localeAsInput = command.locale();
+            final String valueAsInput = command.stringValueOfParameterNamed(LoanProductConstants.recalculationRestFrequencyDateParamName);
+            actualChanges.put(LoanProductConstants.recalculationRestFrequencyDateParamName, valueAsInput);
+            actualChanges.put("dateFormat", dateFormatAsInput);
+            actualChanges.put("locale", localeAsInput);
+
+            final LocalDate newValue = command.localDateValueOfParameterNamed(LoanProductConstants.recalculationRestFrequencyDateParamName);
+            this.restFrequencyDate = newValue.toDate();
+        }
     }
 
     public InterestRecalculationCompoundingMethod getInterestRecalculationCompoundingMethod() {
@@ -74,4 +109,20 @@ public class LoanInterestRecalculationDetails extends AbstractPersistable<Long> 
         return LoanRescheduleStrategyMethod.fromInt(this.rescheduleStrategyMethod);
     }
 
+    public LocalDate getRestFrequencyLocalDate() {
+        LocalDate recurrenceOnLocalDate = null;
+        if (this.restFrequencyDate != null) {
+            recurrenceOnLocalDate = new LocalDate(this.restFrequencyDate);
+        }
+        return recurrenceOnLocalDate;
+    }
+    
+    public RecalculationFrequencyType getRestFrequencyType() {
+        return RecalculationFrequencyType.fromInt(this.restFrequencyType);
+    }
+
+    
+    public Integer getRestInterval() {
+        return this.restInterval;
+    }
 }
