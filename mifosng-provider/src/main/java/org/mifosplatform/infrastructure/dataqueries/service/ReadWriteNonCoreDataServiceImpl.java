@@ -769,6 +769,47 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
 
     }
+    
+    /** 
+     * Update data table, set column value to empty string where current value is NULL. 
+     * Run update SQL only if the "mandatory" property is set to true
+     * 
+     * @param datatableName Name of data table
+     * @param column JSON encoded array of column properties
+     * @see https://mifosforge.jira.com/browse/MIFOSX-1145
+     **/
+    private void removeNullValuesFromColumn(final String datatableName, final JsonObject column, 
+    		final Map<String, ResultsetColumnHeaderData> mapColumnNameDefinition) {
+        final Boolean mandatory = (column.has("mandatory")) ? column.get("mandatory").getAsBoolean() : false;
+        final String name = (column.has("name")) ? column.get("name").getAsString() : "";
+        final String type = (mapColumnNameDefinition.containsKey(name)) ? mapColumnNameDefinition.get(name).getColumnType() : "";
+        final List<String> stringDataTypes = new ArrayList<String>();
+        
+        // =========== STRING DATA TYPES  =============
+        // For string types other than ENUM, the default value is an empty string.
+        // No errors are thrown when the value is set to an empty string.
+        // For ENUM, the default is the first enumeration value.
+        stringDataTypes.add("char");
+        stringDataTypes.add("varchar");
+        stringDataTypes.add("blob");
+        stringDataTypes.add("text");
+        stringDataTypes.add("tinyblob");
+        stringDataTypes.add("tinytext");
+        stringDataTypes.add("mediumblob");
+        stringDataTypes.add("mediumtext");
+        stringDataTypes.add("longblob");
+        stringDataTypes.add("longtext");
+        // =============================================
+        
+        if(StringUtils.isNotEmpty(type)) {
+            if(mandatory && stringDataTypes.contains(type.toLowerCase())) {
+                StringBuilder sqlBuilder = new StringBuilder();
+                sqlBuilder.append("UPDATE `" + datatableName + "` SET `" + name + "` = '' WHERE `" + name + "` IS NULL");
+                
+                this.jdbcTemplate.update(sqlBuilder.toString());
+            }
+        }
+    }
 
     @Transactional
     @Override
@@ -874,6 +915,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 final Map<String, Long> codeMappings = new HashMap<>();
                 final List<String> removeMappings = new ArrayList<>();
                 for (final JsonElement column : changeColumns) {
+                	// remove NULL values from column where mandatory is true
+                    removeNullValuesFromColumn(datatableName, column.getAsJsonObject(), mapColumnNameDefinition);
+                    
                     parseDatatableColumnForUpdate(column.getAsJsonObject(), mapColumnNameDefinition, sqlBuilder, datatableName,
                             constrainBuilder, codeMappings, removeMappings, isConstraintApproach);
                 }
@@ -891,7 +935,15 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 } catch (final GenericJDBCException e) {
                     if (e.getMessage().contains("Error on rename")) { throw new PlatformServiceUnavailableException(
                             "error.msg.datatable.column.update.not.allowed", "One of the column name modification not allowed"); }
-                }
+                } catch (final Exception e) {
+	                // handle all other exceptions in here
+	                
+	                // check if exception message contains the "invalid use of null value" SQL exception message
+	                // throw a 503 HTTP error - PlatformServiceUnavailableException
+	                if (e.getMessage().toLowerCase().contains("invalid use of null value")) { throw new PlatformServiceUnavailableException(
+	                        "error.msg.datatable.column.update.not.allowed", "One of the data table columns contains null values"); 
+	                }
+	            }
             }
         } catch (final SQLGrammarException e) {
             final Throwable realCause = e.getCause();
@@ -1470,7 +1522,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         String paramValue = pValue;
         if (columnHeader.isDateDisplayType() || columnHeader.isIntegerDisplayType() || columnHeader.isDecimalDisplayType()) {
-            paramValue = paramValue.trim();
+        	// only trim if string is not empty and is not null.
+            // throws a NULL pointer exception if the check below is not applied
+            paramValue = StringUtils.isNotEmpty(paramValue) ? paramValue.trim() : paramValue;
         }
 
         if (StringUtils.isEmpty(paramValue) && columnHeader.isMandatory()) {
