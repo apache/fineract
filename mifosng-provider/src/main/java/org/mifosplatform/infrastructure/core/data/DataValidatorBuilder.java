@@ -821,5 +821,23 @@ public class DataValidatorBuilder {
         }
         return this;
     }
+    
+    public DataValidatorBuilder validateDateBeforeOrEqual(final LocalDate date) {
+        if (this.value == null && this.ignoreNullValue) { return this; }
+
+        if (this.value != null && date != null) {
+            final LocalDate dateVal = (LocalDate) this.value;
+            if (!date.isAfter(dateVal)) {
+                final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
+                        .append(this.parameter).append(".is.greater.than.date");
+                final StringBuilder defaultEnglishMessage = new StringBuilder("The ").append(this.parameter)
+                        .append(" must be less than or equal to provided date").append(date);
+                final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                        defaultEnglishMessage.toString(), this.parameter, dateVal, date);
+                this.dataValidationErrors.add(error);
+            }
+        }
+        return this;
+    }
 
 }

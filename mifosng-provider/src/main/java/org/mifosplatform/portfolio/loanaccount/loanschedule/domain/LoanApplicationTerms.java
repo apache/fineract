@@ -31,6 +31,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
+import org.mifosplatform.portfolio.loanproduct.domain.RecalculationFrequencyType;
 
 public final class LoanApplicationTerms {
 
@@ -122,6 +123,8 @@ public final class LoanApplicationTerms {
 
     private final CalendarInstance restCalendarInstance;
 
+    private final RecalculationFrequencyType recalculationFrequencyType;
+
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
             final PeriodFrequencyType repaymentPeriodFrequencyType, final AmortizationMethod amortizationMethod,
@@ -139,13 +142,15 @@ public final class LoanApplicationTerms {
         final LoanRescheduleStrategyMethod rescheduleStrategyMethod = null;
         final InterestRecalculationCompoundingMethod interestRecalculationCompoundingMethod = null;
         final CalendarInstance restCalendarInstance = null;
+        final RecalculationFrequencyType recalculationFrequencyType = null;
         return new LoanApplicationTerms(currency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments, repaymentEvery,
                 repaymentPeriodFrequencyType, amortizationMethod, interestMethod, interestRatePerPeriod, interestRatePeriodFrequencyType,
                 annualNominalInterestRate, interestCalculationPeriodMethod, principalMoney, expectedDisbursementDate,
                 repaymentsStartingFromDate, calculatedRepaymentsStartingFromDate, graceOnPrincipalPayment, graceOnInterestPayment,
                 graceOnInterestCharged, interestChargedFromDate, inArrearsTolerance, multiDisburseLoan, emiAmount, disbursementDatas,
                 maxOutstandingBalance, emiAmountVariations, graceOnArrearsAgeing, daysInMonthType, daysInYearType,
-                isInterestRecalculationEnabled, rescheduleStrategyMethod, interestRecalculationCompoundingMethod, restCalendarInstance);
+                isInterestRecalculationEnabled, rescheduleStrategyMethod, interestRecalculationCompoundingMethod, restCalendarInstance,
+                recalculationFrequencyType);
     }
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency applicationCurrency, final Integer loanTermFrequency,
@@ -179,6 +184,7 @@ public final class LoanApplicationTerms {
         final LoanRescheduleStrategyMethod rescheduleStrategyMethod = null;
         final InterestRecalculationCompoundingMethod interestRecalculationCompoundingMethod = null;
         final CalendarInstance restCalendarInstance = null;
+        final RecalculationFrequencyType recalculationFrequencyType = null;
 
         return new LoanApplicationTerms(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, amortizationMethod, interestMethod, interestRatePerPeriod,
@@ -187,7 +193,7 @@ public final class LoanApplicationTerms {
                 graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, inArrearsTolerance, multiDisburseLoan, emiAmount,
                 disbursementDatas, maxOutstandingBalance, emiAmountVariations, loanProductRelatedDetail.getGraceOnDueDate(),
                 daysInMonthType, daysInYearType, isInterestRecalculationEnabled, rescheduleStrategyMethod,
-                interestRecalculationCompoundingMethod, restCalendarInstance);
+                interestRecalculationCompoundingMethod, restCalendarInstance, recalculationFrequencyType);
     }
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency applicationCurrency, final Integer loanTermFrequency,
@@ -196,7 +202,8 @@ public final class LoanApplicationTerms {
             final Money inArrearsTolerance, final LoanProductRelatedDetail loanProductRelatedDetail, final boolean multiDisburseLoan,
             final BigDecimal emiAmount, final List<DisbursementData> disbursementDatas, final BigDecimal maxOutstandingBalance,
             final List<LoanTermVariationsData> emiAmountVariations, final LocalDate interestChargedFromDate,
-            final LoanInterestRecalculationDetails interestRecalculationDetails, final CalendarInstance restCalendarInstance) {
+            final LoanInterestRecalculationDetails interestRecalculationDetails, final CalendarInstance restCalendarInstance,
+            final RecalculationFrequencyType recalculationFrequencyType) {
 
         final Integer numberOfRepayments = loanProductRelatedDetail.getNumberOfRepayments();
         final Integer repaymentEvery = loanProductRelatedDetail.getRepayEvery();
@@ -233,7 +240,7 @@ public final class LoanApplicationTerms {
                 graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, inArrearsTolerance, multiDisburseLoan, emiAmount,
                 disbursementDatas, maxOutstandingBalance, emiAmountVariations, loanProductRelatedDetail.getGraceOnDueDate(),
                 daysInMonthType, daysInYearType, isInterestRecalculationEnabled, rescheduleStrategyMethod,
-                interestRecalculationCompoundingMethod, restCalendarInstance);
+                interestRecalculationCompoundingMethod, restCalendarInstance, recalculationFrequencyType);
     }
 
     public static LoanApplicationTerms assembleFrom(final Integer repaymentEvery, final PeriodFrequencyType repaymentPeriodFrequencyType,
@@ -250,7 +257,8 @@ public final class LoanApplicationTerms {
                 applicationTerms.disbursementDatas, applicationTerms.maxOutstandingBalance, applicationTerms.emiAmountVariations,
                 applicationTerms.graceOnArrearsAgeing, applicationTerms.daysInMonthType, applicationTerms.daysInYearType,
                 applicationTerms.interestRecalculationEnabled, applicationTerms.rescheduleStrategyMethod,
-                applicationTerms.interestRecalculationCompoundingMethod, applicationTerms.restCalendarInstance);
+                applicationTerms.interestRecalculationCompoundingMethod, applicationTerms.restCalendarInstance,
+                applicationTerms.recalculationFrequencyType);
     }
 
     private LoanApplicationTerms(final ApplicationCurrency currency, final Integer loanTermFrequency,
@@ -266,7 +274,8 @@ public final class LoanApplicationTerms {
             final BigDecimal maxOutstandingBalance, final List<LoanTermVariationsData> emiAmountVariations,
             final Integer graceOnArrearsAgeing, final DaysInMonthType daysInMonthType, final DaysInYearType daysInYearType,
             final boolean isInterestRecalculationEnabled, final LoanRescheduleStrategyMethod rescheduleStrategyMethod,
-            final InterestRecalculationCompoundingMethod interestRecalculationCompoundingMethod, final CalendarInstance restCalendarInstance) {
+            final InterestRecalculationCompoundingMethod interestRecalculationCompoundingMethod,
+            final CalendarInstance restCalendarInstance, final RecalculationFrequencyType recalculationFrequencyType) {
         this.currency = currency;
         this.loanTermFrequency = loanTermFrequency;
         this.loanTermPeriodFrequencyType = loanTermPeriodFrequencyType;
@@ -304,6 +313,7 @@ public final class LoanApplicationTerms {
         this.rescheduleStrategyMethod = rescheduleStrategyMethod;
         this.interestRecalculationCompoundingMethod = interestRecalculationCompoundingMethod;
         this.restCalendarInstance = restCalendarInstance;
+        this.recalculationFrequencyType = recalculationFrequencyType;
     }
 
     public Money adjustPrincipalIfLastRepaymentPeriod(final Money principalForPeriod, final Money totalCumulativePrincipalToDate,
@@ -1051,5 +1061,10 @@ public final class LoanApplicationTerms {
             break;
         }
         return numberOfPeriods;
+    }
+
+    
+    public RecalculationFrequencyType getRecalculationFrequencyType() {
+        return this.recalculationFrequencyType;
     }
 }

@@ -526,10 +526,6 @@ public class LoanEnumerations {
                 optionData = new EnumOptionData(RecalculationFrequencyType.DAILY.getValue().longValue(),
                         RecalculationFrequencyType.DAILY.getCode(), "Daily");
             break;
-            case FORTNIGHTLY:
-                optionData = new EnumOptionData(RecalculationFrequencyType.FORTNIGHTLY.getValue().longValue(),
-                        RecalculationFrequencyType.FORTNIGHTLY.getCode(), "Fortnightly");
-            break;
             case MONTHLY:
                 optionData = new EnumOptionData(RecalculationFrequencyType.MONTHLY.getValue().longValue(),
                         RecalculationFrequencyType.MONTHLY.getCode(), "Monthly");

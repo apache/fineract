@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.loanproduct.domain;
 
+import java.util.Date;
 import java.util.Map;
 
 import javax.persistence.Column;
@@ -12,7 +13,10 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -27,6 +31,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_product_loan_recalculation_details")
 public class LoanProductInterestRecalculationDetails extends AbstractPersistable<Long> {
 
+    @SuppressWarnings("unused")
     @OneToOne
     @JoinColumn(name = "product_id", nullable = false)
     private LoanProduct loanProduct;
@@ -43,6 +48,16 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
     @Column(name = "reschedule_strategy_enum", nullable = false)
     private Integer rescheduleStrategyMethod;
 
+    @Column(name = "rest_frequency_type_enum", nullable = false)
+    private Integer restFrequencyType;
+
+    @Column(name = "rest_frequency_interval", nullable = false)
+    private Integer restInterval;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "rest_freqency_date")
+    private Date restFrequencyDate;
+
     protected LoanProductInterestRecalculationDetails() {
         //
     }
@@ -55,13 +70,34 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
         final Integer loanRescheduleStrategyMethod = LoanRescheduleStrategyMethod.fromInt(
                 command.integerValueOfParameterNamed(LoanProductConstants.rescheduleStrategyMethodParameterName)).getValue();
 
-        return new LoanProductInterestRecalculationDetails(interestRecalculationCompoundingMethod, loanRescheduleStrategyMethod);
+        final Integer recurrenceFrequency = command
+                .integerValueOfParameterNamed(LoanProductConstants.recalculationRestFrequencyTypeParameterName);
+        final LocalDate recurrenceOnLocalDate = command
+                .localDateValueOfParameterNamed(LoanProductConstants.recalculationRestFrequencyDateParamName);
+        Integer recurrenceInterval = command
+                .integerValueOfParameterNamed(LoanProductConstants.recalculationRestFrequencyIntervalParameterName);
+        RecalculationFrequencyType frequencyType = RecalculationFrequencyType.fromInt(recurrenceFrequency);
+        Date recurrenceOnDate = null;
+        if (recurrenceOnLocalDate != null) {
+            if (frequencyType.isSameAsRepayment()) {
+                recurrenceInterval = 0;
+            } else {
+                recurrenceOnDate = recurrenceOnLocalDate.toDate();
+            }
+        }
+
+        return new LoanProductInterestRecalculationDetails(interestRecalculationCompoundingMethod, loanRescheduleStrategyMethod,
+                recurrenceFrequency, recurrenceInterval, recurrenceOnDate);
     }
 
     private LoanProductInterestRecalculationDetails(final Integer interestRecalculationCompoundingMethod,
-            final Integer rescheduleStrategyMethod) {
+            final Integer rescheduleStrategyMethod, final Integer restFrequencyType, final Integer restInterval,
+            final Date restFrequencyDate) {
         this.interestRecalculationCompoundingMethod = interestRecalculationCompoundingMethod;
         this.rescheduleStrategyMethod = rescheduleStrategyMethod;
+        this.restFrequencyType = restFrequencyType;
+        this.restInterval = restInterval;
+        this.restFrequencyDate = restFrequencyDate;
     }
 
     public void updateProduct(final LoanProduct loanProduct) {
@@ -94,5 +130,60 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
             actualChanges.put("locale", localeAsInput);
             this.rescheduleStrategyMethod = LoanRescheduleStrategyMethod.fromInt(newValue).getValue();
         }
+
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.recalculationRestFrequencyTypeParameterName,
+                this.restFrequencyType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.recalculationRestFrequencyTypeParameterName);
+            actualChanges.put(LoanProductConstants.recalculationRestFrequencyTypeParameterName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.restFrequencyType = RecalculationFrequencyType.fromInt(newValue).getValue();
+        }
+        RecalculationFrequencyType frequencyType = RecalculationFrequencyType.fromInt(this.restFrequencyType);
+        if (frequencyType.isSameAsRepayment()) {
+            this.restInterval = 0;
+            this.restFrequencyDate = null;
+        } else {
+            if (command.isChangeInIntegerParameterNamed(LoanProductConstants.recalculationRestFrequencyIntervalParameterName,
+                    this.restInterval)) {
+                Integer newValue = command
+                        .integerValueOfParameterNamed(LoanProductConstants.recalculationRestFrequencyIntervalParameterName);
+                if (frequencyType.isSameAsRepayment()) {
+                    newValue = 0;
+                }
+                actualChanges.put(LoanProductConstants.recalculationRestFrequencyIntervalParameterName, newValue);
+                actualChanges.put("locale", localeAsInput);
+                this.restInterval = newValue;
+            }
+
+            if (command.isChangeInLocalDateParameterNamed(LoanProductConstants.recalculationRestFrequencyDateParamName,
+                    getRestFrequencyLocalDate())) {
+                final LocalDate newValue = command
+                        .localDateValueOfParameterNamed(LoanProductConstants.recalculationRestFrequencyDateParamName);
+                Date recurrenceOnDate = null;
+                if (newValue != null) {
+                    if (!frequencyType.isSameAsRepayment()) {
+                        recurrenceOnDate = newValue.toDate();
+                    }
+                }
+                actualChanges.put(LoanProductConstants.recalculationRestFrequencyDateParamName, newValue);
+                this.restFrequencyDate = recurrenceOnDate;
+            }
+        }
+    }
+
+    public LocalDate getRestFrequencyLocalDate() {
+        LocalDate recurrenceOnLocalDate = null;
+        if (this.restFrequencyDate != null) {
+            recurrenceOnLocalDate = new LocalDate(this.restFrequencyDate);
+        }
+        return recurrenceOnLocalDate;
+    }
+
+    public RecalculationFrequencyType getRestFrequencyType() {
+        return RecalculationFrequencyType.fromInt(this.restFrequencyType);
+    }
+
+    public Integer getRestInterval() {
+        return this.restInterval;
     }
 }

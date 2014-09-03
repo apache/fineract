@@ -32,6 +32,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Immutable data object to represent loan products.
@@ -125,6 +126,8 @@ public class LoanProductData {
     private final List<EnumOptionData> interestRecalculationCompoundingTypeOptions;
     @SuppressWarnings("unused")
     private final List<EnumOptionData> rescheduleStrategyTypeOptions;
+
+    private final List<EnumOptionData> interestRecalculationFrequencyTypeOptions;
 
     private final Boolean multiDisburseLoan;
     private final Integer maxTrancheCount;
@@ -427,6 +430,7 @@ public class LoanProductData {
         this.daysInYearTypeOptions = null;
         this.interestRecalculationCompoundingTypeOptions = null;
         this.rescheduleStrategyTypeOptions = null;
+        this.interestRecalculationFrequencyTypeOptions = null;
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
@@ -438,7 +442,7 @@ public class LoanProductData {
             final Map<String, List<GLAccountData>> accountingMappingOptions, final List<EnumOptionData> accountingRuleOptions,
             final List<EnumOptionData> valueConditionTypeOptions, final List<EnumOptionData> daysInMonthTypeOptions,
             final List<EnumOptionData> daysInYearTypeOptions, final List<EnumOptionData> interestRecalculationCompoundingTypeOptions,
-            final List<EnumOptionData> rescheduleStrategyTypeOptions) {
+            final List<EnumOptionData> rescheduleStrategyTypeOptions, final List<EnumOptionData> interestRecalculationFrequencyTypeOptions) {
         this.id = productData.id;
         this.name = productData.name;
         this.shortName = productData.shortName;
@@ -525,6 +529,12 @@ public class LoanProductData {
         this.daysInYearTypeOptions = daysInYearTypeOptions;
         this.interestRecalculationCompoundingTypeOptions = interestRecalculationCompoundingTypeOptions;
         this.rescheduleStrategyTypeOptions = rescheduleStrategyTypeOptions;
+
+        if (CollectionUtils.isEmpty(interestRecalculationFrequencyTypeOptions)) {
+            this.interestRecalculationFrequencyTypeOptions = null;
+        } else {
+            this.interestRecalculationFrequencyTypeOptions = interestRecalculationFrequencyTypeOptions;
+        }
 
     }
 
@@ -747,7 +757,8 @@ public class LoanProductData {
         final Long loanId = null;
         final CalendarData calendarData = null;
         return new LoanInterestRecalculationData(id, loanId, getInterestRecalculationCompoundingType(), getRescheduleStrategyType(),
-                calendarData);
+                calendarData, getRecalculationRestFrequencyType(), getRecalculationRestFrequencyInterval(),
+                getRecalculationRestFrequencyDate());
     }
 
     private EnumOptionData getRescheduleStrategyType() {
@@ -757,6 +768,21 @@ public class LoanProductData {
 
     private EnumOptionData getInterestRecalculationCompoundingType() {
         if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getInterestRecalculationCompoundingType(); }
+        return null;
+    }
+
+    private LocalDate getRecalculationRestFrequencyDate() {
+        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationRestFrequencyDate(); }
+        return null;
+    }
+
+    public EnumOptionData getRecalculationRestFrequencyType() {
+        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationRestFrequencyType(); }
+        return null;
+    }
+
+    public Integer getRecalculationRestFrequencyInterval() {
+        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationRestFrequencyInterval(); }
         return null;
     }
 }

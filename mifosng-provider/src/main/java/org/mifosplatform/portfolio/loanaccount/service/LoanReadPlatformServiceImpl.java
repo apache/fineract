@@ -533,7 +533,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.loan_counter as loanCounter, l.loan_product_counter as loanProductCounter,"
                     + " l.is_npa as isNPA, l.days_in_month_enum as daysInMonth, l.days_in_year_enum as daysInYear, "
                     + " l.interest_recalculation_enabled as isInterestRecalculationEnabled, "
-                    + " lir.id as lirId, lir.loan_id as loanId, lir.compound_type_enum as compoundType, lir.reschedule_strategy_enum as rescheduleStrategy "
+                    + " lir.id as lirId, lir.loan_id as loanId, lir.compound_type_enum as compoundType, lir.reschedule_strategy_enum as rescheduleStrategy, "
+                    + " lir.rest_frequency_type_enum as restFrequencyEnum, lir.rest_frequency_interval as restFrequencyInterval, "
+                    + " lir.rest_freqency_date as restFrequencyDate "
                     + " from m_loan l" //
                     + " join m_product_loan lp on lp.id = l.product_id" //
                     + " left join m_loan_recalculation_details lir on lir.loan_id = l.id "
@@ -775,9 +777,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 final int rescheduleStrategyEnumValue = JdbcSupport.getInteger(rs, "rescheduleStrategy");
                 final EnumOptionData rescheduleStrategyType = LoanEnumerations.rescheduleStrategyType(rescheduleStrategyEnumValue);
                 final CalendarData calendarData = null;
+                final int restFrequencyEnumValue = JdbcSupport.getInteger(rs, "restFrequencyEnum");
+                final EnumOptionData restFrequencyType = LoanEnumerations.interestRecalculationFrequencyType(restFrequencyEnumValue);
+                final int restFrequencyInterval = JdbcSupport.getInteger(rs, "restFrequencyInterval");
+                final LocalDate restFrequencyDate = JdbcSupport.getLocalDate(rs, "restFrequencyDate");
 
                 interestRecalculationData = new LoanInterestRecalculationData(lprId, productId, interestRecalculationCompoundingType,
-                        rescheduleStrategyType, calendarData);
+                        rescheduleStrategyType, calendarData, restFrequencyType, restFrequencyInterval, restFrequencyDate);
             }
 
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupData,
@@ -1220,13 +1226,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             }
         }
 
-        final List<EnumOptionData> interestRecalculationFrequencyTypeOptions = this.loanDropdownReadPlatformService
-                .retrieveInterestRecalculationFrequencyTypeOptions();
-
         return LoanAccountData.loanProductWithTemplateDefaults(loanProduct, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, loanPurposeOptions, loanCollateralOptions,
-                loanCycleCounter, interestRecalculationFrequencyTypeOptions);
+                loanCycleCounter);
     }
 
     @Override
