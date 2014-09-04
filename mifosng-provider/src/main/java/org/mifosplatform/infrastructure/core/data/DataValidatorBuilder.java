@@ -827,7 +827,7 @@ public class DataValidatorBuilder {
 
         if (this.value != null && date != null) {
             final LocalDate dateVal = (LocalDate) this.value;
-            if (!date.isAfter(dateVal)) {
+            if (dateVal.isAfter(date)) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".is.greater.than.date");
                 final StringBuilder defaultEnglishMessage = new StringBuilder("The ").append(this.parameter)
