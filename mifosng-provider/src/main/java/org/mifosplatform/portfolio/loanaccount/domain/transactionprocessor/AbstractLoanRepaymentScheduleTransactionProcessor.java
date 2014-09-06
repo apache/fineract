@@ -123,7 +123,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 transactionstoBeProcessed.add(loanTransaction);
             }
         }
-
+        
         for (final LoanTransaction loanTransaction : transactionstoBeProcessed) {
 
             if (loanTransaction.isRepayment() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {

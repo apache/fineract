@@ -1044,6 +1044,7 @@ public class Loan extends AbstractPersistable<Long> {
             if (this.summaryArrearsAging.isNotInArrears(loanCurrency())) {
                 this.summaryArrearsAging = null;
             }
+            updateLoanOutstandingBalaces();
         }
     }
 
@@ -2496,6 +2497,18 @@ public class Loan extends AbstractPersistable<Long> {
         final List<LoanTransaction> repaymentsOrWaivers = new ArrayList<>();
         for (final LoanTransaction transaction : this.loanTransactions) {
             if (!transaction.isDisbursement() && transaction.isNotReversed() && !transaction.isAccrual()) {
+                repaymentsOrWaivers.add(transaction);
+            }
+        }
+        final LoanTransactionComparator transactionComparator = new LoanTransactionComparator();
+        Collections.sort(repaymentsOrWaivers, transactionComparator);
+        return repaymentsOrWaivers;
+    }
+
+    private List<LoanTransaction> retreiveListOfTransactionsExcludeAccruals() {
+        final List<LoanTransaction> repaymentsOrWaivers = new ArrayList<>();
+        for (final LoanTransaction transaction : this.loanTransactions) {
+            if (transaction.isNotReversed() && !transaction.isAccrual()) {
                 repaymentsOrWaivers.add(transaction);
             }
         }
@@ -4169,9 +4182,6 @@ public class Loan extends AbstractPersistable<Long> {
             final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
             final LoanScheduleGenerator loanScheduleGenerator = loanScheduleFactory.create(interestMethod);
 
-            final RoundingMode roundingMode = RoundingMode.HALF_EVEN;
-            final MathContext mc = new MathContext(8, roundingMode);
-
             final Integer loanTermFrequency = this.termFrequency;
             final PeriodFrequencyType loanTermPeriodFrequencyType = PeriodFrequencyType.fromInt(this.termPeriodFrequencyType);
             final List<DisbursementData> disbursementData = new ArrayList<>();
@@ -4233,4 +4243,19 @@ public class Loan extends AbstractPersistable<Long> {
         }
         return accruedTill;
     }
+
+    private void updateLoanOutstandingBalaces() {
+        Money outstanding = Money.zero(getCurrency());
+        List<LoanTransaction> loanTransactions = retreiveListOfTransactionsExcludeAccruals();
+        for (LoanTransaction loanTransaction : loanTransactions) {
+            if (loanTransaction.isDisbursement()) {
+                outstanding = outstanding.plus(loanTransaction.getAmount(getCurrency()));
+                loanTransaction.updateOutstandingLoanBalance(outstanding.getAmount());
+            } else {
+                outstanding = outstanding.minus(loanTransaction.getPrincipalPortion(getCurrency()));
+                loanTransaction.updateOutstandingLoanBalance(outstanding.getAmount());
+            }
+        }
+    }
+
 }
