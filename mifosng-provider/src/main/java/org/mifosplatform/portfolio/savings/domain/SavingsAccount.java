@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
+
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
@@ -15,6 +16,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeri
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredBalanceParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
+import org.mifosplatform.organisation.staff.domain.Staff;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -1188,6 +1190,17 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return office;
     }
 
+    public Staff getFieldOfficer() {
+        return this.fieldOfficer;
+    }
+    
+    public void unassignFieldOfficer() {
+        this.fieldOfficer = null;
+    }
+
+    public void assignFieldOfficer(final Staff fieldOfficer) {
+        this.fieldOfficer = fieldOfficer;
+    }
     public Long clientId() {
         Long id = null;
         if (this.client != null) {

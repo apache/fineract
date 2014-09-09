@@ -32,9 +32,12 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawal
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
@@ -387,4 +390,51 @@ public class SavingsAccountDataValidator {
         }
 
     }
+    public void validateForAssignFieldOfficer(final String json) {
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+
+        final Set<String> supportedParametersUnassignStaff = new HashSet<>(Arrays.asList(SavingsApiConstants.staffIdParamName));
+
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParametersUnassignStaff);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+
+        final String staffIdParameterName = SavingsApiConstants.staffIdParamName;
+        final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
+        baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().longGreaterThanZero();
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+
+    }
+
+	public void validateForUnAssignFieldOfficer(final String json) {
+		if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+
+        final Set<String> supportedParametersUnassignStaff = new HashSet<>(Arrays.asList(SavingsApiConstants.staffIdParamName));
+
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParametersUnassignStaff);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+
+        final String staffIdParameterName = SavingsApiConstants.staffIdParamName;
+        final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
+        baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().longGreaterThanZero();
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+
+		
+	}
 }

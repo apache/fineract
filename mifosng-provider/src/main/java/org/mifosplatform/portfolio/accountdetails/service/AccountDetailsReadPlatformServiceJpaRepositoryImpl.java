@@ -241,6 +241,11 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             accountsSummary
                     .append(" l.product_id as productId, lp.name as productName, lp.short_name as shortProductName,")
                     .append(" l.loan_status_id as statusId, l.loan_type_enum as loanType,")
+                    
+                    .append("l.principal_disbursed_derived as originalLoan,")
+                    .append("l.total_outstanding_derived as loanBalance,")
+                    .append("l.total_repayment_derived as amountPaid,")
+                    
                     .append(" l.loan_product_counter as loanCycle,")
 
                     .append(" l.submittedon_date as submittedOnDate,")
@@ -320,6 +325,10 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             final String closedByUsername = rs.getString("closedByUsername");
             final String closedByFirstname = rs.getString("closedByFirstname");
             final String closedByLastname = rs.getString("closedByLastname");
+            
+            final BigDecimal originalLoan = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,"originalLoan");
+            final BigDecimal loanBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,"loanBalance");
+            final BigDecimal amountPaid = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,"amountPaid");
 
             final LocalDate writtenOffOnDate = JdbcSupport.getLocalDate(rs, "writtenOffOnDate");
 
@@ -339,7 +348,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     expectedMaturityDate, writtenOffOnDate, closedByUsername, closedByFirstname, closedByLastname);
 
             return new LoanAccountSummaryData(id, accountNo, externalId, productId, loanProductName, shortLoanProductName, loanStatus, loanType, loanCycle,
-                    timeline, inArrears);
+                    timeline, inArrears,originalLoan,loanBalance,amountPaid);
         }
     }
 
