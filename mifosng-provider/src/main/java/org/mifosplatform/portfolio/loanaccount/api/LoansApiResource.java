@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -319,8 +318,8 @@ public class LoansApiResource {
         if (!associationParameters.isEmpty()) {
 
             if (associationParameters.contains("all")) {
-                associationParameters.addAll(Arrays.asList("repaymentSchedule", "transactions", "charges", "guarantors", "collateral",
-                        "notes", "linkedAccount", "multiDisburseDetails"));
+                associationParameters.addAll(Arrays.asList("repaymentSchedule", "futureSchedule", "transactions", "charges", "guarantors",
+                        "collateral", "notes", "linkedAccount", "multiDisburseDetails"));
             }
 
             if (associationParameters.contains("guarantors")) {
@@ -356,6 +355,11 @@ public class LoansApiResource {
                 final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData = loanBasicDetails.repaymentScheduleRelatedData();
                 repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, repaymentScheduleRelatedData,
                         disbursementData);
+
+                if (associationParameters.contains("futureSchedule")) {
+                    mandatoryResponseParameters.add("futureSchedule");
+                    this.calculationPlatformService.updateFutureSchedule(repaymentSchedule, loanId);
+                }
             }
 
             if (associationParameters.contains("charges")) {

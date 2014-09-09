@@ -49,6 +49,8 @@ public class LoanScheduleData {
      */
     private final Collection<LoanSchedulePeriodData> periods;
 
+    private Collection<LoanSchedulePeriodData> futurePeriods;
+
     public LoanScheduleData(final CurrencyData currency, final Collection<LoanSchedulePeriodData> periods, final Integer loanTermInDays,
             final BigDecimal totalPrincipalDisbursed, final BigDecimal totalPrincipalExpected, final BigDecimal totalPrincipalPaid,
             final BigDecimal totalInterestCharged, final BigDecimal totalFeeChargesCharged, final BigDecimal totalPenaltyChargesCharged,
@@ -75,5 +77,9 @@ public class LoanScheduleData {
 
     public Collection<LoanSchedulePeriodData> getPeriods() {
         return this.periods;
+    }
+
+    public void updateFuturePeriods(Collection<LoanSchedulePeriodData> futurePeriods) {
+        this.futurePeriods = futurePeriods;
     }
 }

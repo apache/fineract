@@ -29,6 +29,7 @@ import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.mifosplatform.organisation.workingdays.service.WorkingDaysUtil;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
+import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.calendar.domain.CalendarRepository;
 import org.mifosplatform.portfolio.calendar.exception.CalendarNotFoundException;
 import org.mifosplatform.portfolio.calendar.exception.MeetingFrequencyMismatchException;
@@ -44,13 +45,18 @@ import org.mifosplatform.portfolio.loanaccount.api.LoanApiConstants;
 import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTermVariationType;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
+import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.ScheduledDateGenerator;
 import org.mifosplatform.portfolio.loanaccount.service.LoanChargeAssembler;
 import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
@@ -356,6 +362,49 @@ public class LoanScheduleAssembler {
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
         return loanScheduleGenerator.generate(mc, applicationCurrency, loanApplicationTerms, loanCharges, isHolidayEnabled, holidays,
                 workingDays);
+    }
+
+    public LoanScheduleModel assembleForInterestRecalculation(final LoanApplicationTerms loanApplicationTerms, final Long officeId,
+            List<LoanTransaction> transactions, final Set<LoanCharge> loanCharges,
+            final List<LoanRepaymentScheduleInstallment> previousSchedule,
+            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, LocalDate recalculateFrom) {
+        final RoundingMode roundingMode = RoundingMode.HALF_EVEN;
+        final MathContext mc = new MathContext(8, roundingMode);
+        final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository
+                .findOneWithNotFoundDetection(loanApplicationTerms.getCurrency());
+
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId, loanApplicationTerms
+                .getExpectedDisbursementDate().toDate(), HolidayStatusType.ACTIVE.getValue());
+        final WorkingDays workingDays = this.workingDaysRepository.findOne();
+
+        final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
+        return loanScheduleGenerator.rescheduleNextInstallments(mc, applicationCurrency, loanApplicationTerms, loanCharges,
+                isHolidayEnabled, holidays, workingDays, transactions, loanRepaymentScheduleTransactionProcessor, previousSchedule,
+                recalculateFrom);
+    }
+
+    public LoanRepaymentScheduleInstallment calculatePrepaymentAmount(List<LoanRepaymentScheduleInstallment> installments,
+            MonetaryCurrency currency, LocalDate onDate, LoanApplicationTerms loanApplicationTerms,final Long officeId) {
+        final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
+        final RoundingMode roundingMode = RoundingMode.HALF_EVEN;
+        final MathContext mc = new MathContext(8, roundingMode);
+        final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
+        final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId, loanApplicationTerms
+                .getExpectedDisbursementDate().toDate(), HolidayStatusType.ACTIVE.getValue());
+        final WorkingDays workingDays = this.workingDaysRepository.findOne();
+
+        CalendarInstance calendarInstance = loanApplicationTerms.getRestCalendarInstance();
+        LocalDate nextScheduleDate = CalendarUtils.getNextScheduleDate(calendarInstance.getCalendar(), onDate);
+        if (loanApplicationTerms.getRecalculationFrequencyType().isSameAsRepayment()) {
+            nextScheduleDate = scheduledDateGenerator.adjustRepaymentDate(nextScheduleDate, loanApplicationTerms, isHolidayEnabled,
+                    holidays, workingDays);
+        }
+
+        return loanScheduleGenerator.calculatePrepaymentAmount(installments, currency, nextScheduleDate,
+                loanApplicationTerms.getInterestChargedFromLocalDate(), loanApplicationTerms, mc);
     }
 
     private void validateDisbursementDateIsOnNonWorkingDay(final LocalDate disbursementDate, final WorkingDays workingDays) {

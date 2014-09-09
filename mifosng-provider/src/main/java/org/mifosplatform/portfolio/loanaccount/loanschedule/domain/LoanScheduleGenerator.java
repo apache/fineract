@@ -31,5 +31,5 @@ public interface LoanScheduleGenerator {
             List<LoanRepaymentScheduleInstallment> previousSchedule, LocalDate recalculateFrom);
 
     LoanRepaymentScheduleInstallment calculatePrepaymentAmount(List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency,
-            LoanApplicationTerms applicationTerms, LocalDate onDate);
+            LocalDate onDate, LocalDate interestChargedFromLocalDate, LoanApplicationTerms loanApplicationTerms, MathContext mc);
 }
