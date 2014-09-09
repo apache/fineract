@@ -358,7 +358,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     private void updateRecurringCalendarDatesForInterestRecalculation(final Loan loan) {
 
-        if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+        if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()
+                && loan.loanInterestRecalculationDetails().getRestFrequencyType().isSameAsRepayment() && !loan.isDisbursed()) {
             final CalendarInstance calendarInstanceForInterestRecalculation = this.calendarInstanceRepository
                     .findByEntityIdAndEntityTypeIdAndCalendarTypeId(loan.loanInterestRecalculationDetailId(),
                             CalendarEntityType.LOAN_RECALCULATION_DETAIL.getValue(), CalendarType.COLLECTION.getValue());

@@ -614,8 +614,12 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             this.loanRepository.save(existingLoanApplication);
 
             if (productRelatedDetail.isInterestRecalculationEnabled()) {
-                LocalDate recalculationFrequencyDate = existingLoanApplication.loanProduct().getProductInterestRecalculationDetails()
+                LocalDate recalculationFrequencyDate = existingLoanApplication.loanInterestRecalculationDetails()
                         .getRestFrequencyLocalDate();
+                if (recalculationFrequencyDate == null) {
+                    recalculationFrequencyDate = existingLoanApplication.loanProduct().getProductInterestRecalculationDetails()
+                            .getRestFrequencyLocalDate();
+                }
                 if (this.fromJsonHelper.parameterExists(LoanProductConstants.recalculationRestFrequencyDateParamName, command.parsedJson())) {
                     recalculationFrequencyDate = this.fromJsonHelper.extractLocalDateNamed(
                             LoanProductConstants.recalculationRestFrequencyDateParamName, command.parsedJson());
