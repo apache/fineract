@@ -8,8 +8,6 @@ package org.mifosplatform.portfolio.loanproduct.domain;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
-
 public enum RecalculationFrequencyType {
     INVALID(0, "interestRecalculationFrequencyType.invalid"), //
     SAME_AS_REPAYMENT_PERIOD(1, "interestRecalculationFrequencyType.same.as.repayment.period"), //
