@@ -46,6 +46,7 @@ import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
+import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
 import org.mifosplatform.organisation.workingdays.service.WorkingDaysWritePlatformService;
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.mifosplatform.portfolio.account.service.AccountAssociationsReadPlatformService;
@@ -53,6 +54,7 @@ import org.mifosplatform.portfolio.account.service.AccountTransfersReadPlatformS
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.exception.ClientHasNoStaffException;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
@@ -64,6 +66,7 @@ import org.mifosplatform.portfolio.savings.SavingsAccountTransactionType;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.SavingsTransactionBooleanValues;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountChargeDataValidator;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountDataValidator;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDataValidator;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
@@ -72,6 +75,7 @@ import org.mifosplatform.portfolio.savings.domain.SavingsAccountCharge;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountChargeRepositoryWrapper;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountDomainService;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepository;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountStatusType;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransaction;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransactionRepository;
@@ -89,6 +93,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     private final PlatformSecurityContext context;
     private final SavingsAccountRepository savingAccountRepository;
+    private final SavingsAccountDataValidator fromApiJsonDeserializer;
+    private final SavingsAccountRepositoryWrapper savingsRepository;
+    private final StaffRepositoryWrapper staffRepository;
     private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
     private final SavingsAccountAssembler savingAccountAssembler;
     private final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator;
@@ -120,7 +127,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
             final ChargeRepositoryWrapper chargeRepository, final SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepository,
             final HolidayWritePlatformService holidayWritePlatformService,
-            final WorkingDaysWritePlatformService workingDaysWritePlatformService) {
+            final WorkingDaysWritePlatformService workingDaysWritePlatformService,
+            final SavingsAccountDataValidator fromApiJsonDeserializer,
+            final SavingsAccountRepositoryWrapper savingsRepository,
+            final StaffRepositoryWrapper staffRepository) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
@@ -138,6 +148,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.savingsAccountChargeRepository = savingsAccountChargeRepository;
         this.holidayWritePlatformService = holidayWritePlatformService;
         this.workingDaysWritePlatformService = workingDaysWritePlatformService;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.savingsRepository = savingsRepository;
+        this.staffRepository = staffRepository;
     }
 
     @Transactional
@@ -1008,5 +1021,69 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         if (!CollectionUtils.isEmpty(chargePayments)) { return chargePayments.get(chargePayments.size() - 1); }
         return null;
     }
+
+	@Override
+	public CommandProcessingResult assignFieldOfficer(Long savingsAccountId,
+			JsonCommand command) {
+		this.context.authenticatedUser();
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
+
+        this.fromApiJsonDeserializer.validateForAssignFieldOfficer(command.json());
+
+        final SavingsAccount savingsForUpdate = this.savingsRepository.findOneWithNotFoundDetection(savingsAccountId);
+
+        Staff staff = null;
+        final Long staffId = command.longValueOfParameterNamed(SavingsApiConstants.staffIdParamName);
+        if (staffId != null) {
+            staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, savingsForUpdate.office().getHierarchy());
+            
+            savingsForUpdate.assignFieldOfficer(staff);
+        }
+
+        this.savingsRepository.saveAndFlush(savingsForUpdate);
+
+        actualChanges.put(SavingsApiConstants.staffIdParamName, staffId);
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withOfficeId(savingsForUpdate.officeId()) //
+                .withEntityId(savingsForUpdate.getId()) //
+                .withClientId(savingsAccountId) //
+                .with(actualChanges) //
+                .build();
+	}
+
+	@Override
+	public CommandProcessingResult unassignFieldOfficer(Long savingsAccountId,
+			JsonCommand command) {
+		this.context.authenticatedUser();
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
+
+        this.fromApiJsonDeserializer.validateForUnAssignFieldOfficer(command.json());
+
+        final SavingsAccount savingsForUpdate = this.savingsRepository.findOneWithNotFoundDetection(savingsAccountId);
+
+        final Staff presentStaff = savingsForUpdate.getFieldOfficer();
+        Long presentStaffId = null;
+        if (presentStaff == null) { throw new ClientHasNoStaffException(savingsAccountId); }
+        presentStaffId = presentStaff.getId();
+        final String staffIdParamName = SavingsApiConstants.staffIdParamName;
+        if (!command.isChangeInLongParameterNamed(staffIdParamName, presentStaffId)) {
+        	savingsForUpdate.unassignFieldOfficer();
+        }
+        this.savingsRepository.saveAndFlush(savingsForUpdate);
+
+        actualChanges.put(staffIdParamName, presentStaffId);
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withOfficeId(savingsForUpdate.officeId()) //
+                .withEntityId(savingsForUpdate.getId()) //
+                .withClientId(savingsAccountId) //
+                .with(actualChanges) //
+                .build();
+	}
 
 }

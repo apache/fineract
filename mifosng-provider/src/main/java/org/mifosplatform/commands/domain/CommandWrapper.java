@@ -559,7 +559,15 @@ public class CommandWrapper {
     public boolean isAdjustSavingsAccountTransaction() {
         return this.actionName.equalsIgnoreCase("ADJUSTTRANSACTION") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
     }
+    
+    public boolean isAssignStaffSavingsAccount(){
+    	return this.actionName.equalsIgnoreCase("ASSIGNFIELDOFFICER") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+    }
 
+    public boolean isUnAssignStaffSavingsAccount(){
+    	return this.actionName.equalsIgnoreCase("UNASSIGNFIELDOFFICER") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+    }
+    
     public boolean isSavingsAccountChargeResource() {
         return this.entityName.equalsIgnoreCase("SAVINGSACCOUNTCHARGE");
     }

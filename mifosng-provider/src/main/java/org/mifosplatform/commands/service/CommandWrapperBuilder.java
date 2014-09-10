@@ -2049,5 +2049,20 @@ public class CommandWrapperBuilder {
         this.entityId = entityId;
         return this;
     }
+    public CommandWrapperBuilder assignFieldOfficer(final Long accountId) {
+    	this.actionName = "ASSIGNFIELDOFFICER";
+        this.entityName = "SAVINGSACCOUNT";
+        this.entityId = accountId;
+        this.href = "/savingsaccounts/" + accountId + "?command=assignFieldOfficer";
+        return this;
+    }
+
+    public CommandWrapperBuilder unassignFieldOfficer(final Long accountId) {
+        this.actionName = "UNASSIGNFIELDOFFICER";
+        this.entityName = "SAVINGSACCOUNT";
+        this.entityId = accountId;
+        this.href = "/savingsaccounts/" + accountId + "?command=unassignFieldOfficer";
+        return this;
+    }
 
 }
