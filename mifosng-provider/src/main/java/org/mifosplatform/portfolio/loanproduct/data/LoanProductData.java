@@ -127,6 +127,7 @@ public class LoanProductData {
     @SuppressWarnings("unused")
     private final List<EnumOptionData> rescheduleStrategyTypeOptions;
 
+    @SuppressWarnings("unused")
     private final List<EnumOptionData> interestRecalculationFrequencyTypeOptions;
 
     private final Boolean multiDisburseLoan;

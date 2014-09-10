@@ -23,7 +23,7 @@ public class AbandonedConnectionCleanupShutdownListener implements ApplicationLi
     private final static Logger logger = LoggerFactory.getLogger(AbandonedConnectionCleanupShutdownListener.class);
 
     @Override
-    public void onApplicationEvent(ContextStoppedEvent event) {
+    public void onApplicationEvent(@SuppressWarnings("unused") ContextStoppedEvent event) {
         shutDowncleanUpThreadAndDeregisterJDBCDriver();
     }
 

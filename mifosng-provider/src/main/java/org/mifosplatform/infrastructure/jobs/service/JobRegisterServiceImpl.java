@@ -231,7 +231,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     }
 
     @Override
-    public void onApplicationEvent(ContextStoppedEvent event) {
+    public void onApplicationEvent(@SuppressWarnings("unused") ContextStoppedEvent event) {
         this.stopAllSchedulers();
     }
 

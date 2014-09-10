@@ -31,7 +31,6 @@ public class LoanSchedulePeriodData {
     private final BigDecimal principalPaid;
     private final BigDecimal principalWrittenOff;
     private final BigDecimal principalOutstanding;
-    @SuppressWarnings("unused")
     private final BigDecimal principalLoanBalanceOutstanding;
     @SuppressWarnings("unused")
     private final BigDecimal interestOriginalDue;
