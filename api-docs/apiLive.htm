@@ -1041,6 +1041,46 @@
 								<td><a href="#collaterals_update">Update a Collateral</a></td>
 								<td><a href="#collaterals_delete">Delete a Collateral</a></td>
 							</tr>
+							<tr>
+								<td><a href="#loan_rescheduling">Loan Rescheduling</a></td>
+								<td>rescheduleloans</td>
+								<td><a href="#loan_reschedule_request_create">Create new loan reschedule request</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>rescheduleloans/{requestId}</td>
+								<td></td>
+								<td><a href="#loan_reschedule_request_retrieve">Retrieve a Loan Reschedule Request</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>rescheduleloans/{requestId}?command=previewLoanReschedule</td>
+								<td></td>
+								<td><a href="#loan_reschedule_preview_retrieve">Retrieve a Preview of The New Loan Repayment Schedule</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>rescheduleloans/{requestId}?command=reject</td>
+								<td><a href="#loan_reschedule_request_reject">Reject Loan Reschedule Request</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>rescheduleloans/{requestId}?command=approve</td>
+								<td><a href="#loan_reschedule_request_approve">Approve Loan Reschedule Request</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -9856,6 +9896,382 @@ No Request Body:
   "clientId": 1,
   "loanId": 1,
   "resourceId": 2
+}
+					</code>
+				</div>
+			</div>
+			
+<!-- Loan Rescheduling content -->
+<a id="loan_rescheduling" name="loan_rescheduling" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+				<div class="method-description">
+					<h3>Loan Rescheduling</h3>
+					<p>Loan rescheduling provides the ability to give a client extra grace periods, extend loan term by adding extra installments and adjust the interest rate of a loan.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>loanId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The ID of the loan to be rescheduled.</td>
+						</tr>
+						<tr class=alt>
+							<td>rescheduleFromDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Due date of the start point (installment) of the rescheduling.</td>
+						</tr>
+						<tr class=alt>
+							<td>graceOnPrincipal</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Number of installments to be added with zero principal.</td>
+						</tr>
+						<tr class=alt>
+							<td>graceOnInterest</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Number of installments to be added with zero interest.</td>
+						</tr>
+						<tr class=alt>
+							<td>extraTerms</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Number of installments to be added after the last loan repayment schedule installment.</td>
+						</tr>
+						<tr class=alt>
+							<td>recalculateInterest</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>If recalculateInterest="true", the total interest amount of the loan is recalculated. If recalculateInterest="false", the total interest amount remains the same.</td>
+						</tr>
+						<tr class=alt>
+							<td>newInterestRate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>New interest rate to be used in calculating the interest amount for each rescheduled period/installment.</td>
+						</tr>
+						<tr class=alt>
+							<td>adjustedDueDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>New due date for the start point (installment) of the rescheduling.</td>
+						</tr>
+						<tr class=alt>
+							<td>rescheduleReasonId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The ID of the code value that indicates the reason for rescheduling the loan.</td>
+						</tr>
+						<tr class=alt>
+							<td>rescheduleReasonComment</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Text provided as extra reason for the rescheduling of the loan.</td>
+						</tr>
+						<tr class=alt>
+							<td>submittedOnDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The date on which the loan reschedule request was made.</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			
+			<a id="loan_reschedule_request_create" name="loan_reschedule_request_create" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create a Loan Reschedule Request</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>loanId, rescheduleFromDate, rescheduleReasonId, submittedOnDate,<br />
+							graceOnPrincipal OR graceOnInterest OR extraTerms OR newInterestRate OR adjustedDueDate
+							</td>
+						</tr>
+					</table>
+						<br />
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>recalculateInterest, rescheduleReasonComment</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/rescheduleloans
+					</code>
+					<code class="method-request">
+POST rescheduleloans
+Content-Type: application/json Request Body:
+{ 
+	"loanId": 1, 
+	"graceOnPrincipal": 2, 
+	"graceOnInterest": 3, 
+	"extraTerms": 2,
+	"rescheduleFromDate": "04 December 2014", 
+	"dateFormat": "dd MMMM yyyy", 
+	"locale": "en", 
+	"recalculateInterest": true,
+	"submittedOnDate": "04 September 2014",
+	"newInterestRate" : 28,
+	"rescheduleReasonId": 1
+} 
+					</code>
+					<code class="method-response">
+{
+    "loanId": 1,
+    "resourceId": 1
+}
+					</code>
+				</div>
+				<div class="method-example">
+					<code class="method-request">
+POST rescheduleloans
+Content-Type: application/json Request Body:
+{ 
+	"loanId": 1, 
+	"graceOnPrincipal": 2, 
+	"rescheduleFromDate": "04 December 2014", 
+	"adjustedDueDate": "20 December 2014",
+	"dateFormat": "dd MMMM yyyy", 
+	"locale": "en", 
+	"submittedOnDate": "04 September 2014",
+	"rescheduleReasonComment" : "Client has gone AWOL",
+	"rescheduleReasonId": 1
+} 
+					</code>
+					<code class="method-response">
+{
+    "loanId": 1,
+    "resourceId": 1
+}
+					</code>
+				</div>
+			</div>
+			<a id="loan_reschedule_request_retrieve" name="loan_reschedule_request_retrieve" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Loan Reschedule Request</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>rescheduleloans/1</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/rescheduleloans/{requestId}
+					</code>
+					<code class="method-response">
+{
+  "id": 2,
+  "loanId": 17,
+  "clientId": 4,
+  "clientName": "Fernando Michael Torres",
+  "loanAccountNumber": "000000017",
+  "statusEnum": {
+    "id": 500,
+    "code": "loanStatusType.rejected",
+    "value": "Rejected",
+    "pendingApproval": false,
+    "approved": false,
+    "rejected": true
+  },
+  "rescheduleFromInstallment": 5,
+  "graceOnPrincipal": 3,
+  "rescheduleFromDate": [
+    2013,
+    12,
+    6
+  ],
+  "recalculateInterest": false,
+  "rescheduleReasonCodeValue": {
+    "id": 239,
+    "name": "client cannot pay on time"
+  },
+  "timeline": {
+    "submittedOnDate": [
+      2014,
+      8,
+      4
+    ],
+    "submittedByUsername": "mifos",
+    "submittedByFirstname": "App",
+    "submittedByLastname": "Administrator",
+    "rejectedOnDate": [
+      2014,
+      8,
+      5
+    ],
+    "rejectedByUsername": "mifos",
+    "rejectedByFirstname": "App",
+    "rejectedByLastname": "Administrator"
+  },
+  "rescheduleReasonComment": ""
+}
+					</code>
+				</div>
+			</div>
+			<a id="loan_reschedule_preview_retrieve" name="loan_reschedule_preview_retrieve" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Preview of The New Loan Repayment Schedule</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>rescheduleloans/1?command=previewLoanReschedule</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/rescheduleloans/{requestId}?command=previewLoanReschedule
+					</code>
+					<code class="method-response">
+						
+  "currency": {
+    "code": "KES",
+    "name": "Kenyan Shilling",
+    "decimalPlaces": 0,
+    "inMultiplesOf": 10,
+    "displaySymbol": "KSh",
+    "nameCode": "currency.KES",
+    "displayLabel": "Kenyan Shilling (KSh)"
+  },
+  "loanTermInDays": 182,
+  "totalPrincipalDisbursed": 10000,
+  "totalPrincipalExpected": 10000,
+  "totalPrincipalPaid": 900.000000,
+  "totalInterestCharged": 960,
+  "totalFeeChargesCharged": 0.000000,
+  "totalPenaltyChargesCharged": 2500.000000,
+  "totalRepaymentExpected": 13460,
+  "totalOutstanding": 12060.000000,
+  "periods": [
+    {
+      "period": 1,
+      "fromDate": [
+        2013,
+        11,
+        8
+      ],
+      "dueDate": [
+        2013,
+        11,
+        8
+      ],
+      "daysInPeriod": 0,
+      "principalOriginalDue": 0,
+      "principalDue": 0,
+      "principalOutstanding": 0,
+      "principalLoanBalanceOutstanding": 10000,
+      "interestOriginalDue": 0,
+      "interestDue": 0,
+      "interestOutstanding": 0,
+      "feeChargesDue": 0,
+      "penaltyChargesDue": 0,
+      "totalOriginalDueForPeriod": 0,
+      "totalDueForPeriod": 0,
+      "totalPaidForPeriod": 0,
+      "totalOutstandingForPeriod": 0,
+      "totalOverdue": 0,
+      "totalActualCostOfLoanForPeriod": 0
+    },
+    ...
+    ...
+    {
+      "period": 30,
+      "fromDate": [
+        2014,
+        5,
+        23
+      ],
+      "dueDate": [
+        2014,
+        5,
+        30
+      ],
+      "daysInPeriod": 7,
+      "principalOriginalDue": 300,
+      "principalDue": 300,
+      "principalOutstanding": 300,
+      "principalLoanBalanceOutstanding": 0,
+      "interestOriginalDue": 130,
+      "interestDue": 130,
+      "interestOutstanding": 130,
+      "feeChargesDue": 0,
+      "penaltyChargesDue": 0,
+      "totalOriginalDueForPeriod": 430,
+      "totalDueForPeriod": 430,
+      "totalPaidForPeriod": 0,
+      "totalOutstandingForPeriod": 430,
+      "totalOverdue": 430,
+      "totalActualCostOfLoanForPeriod": 130
+    }
+  ]
+}
+					</code>
+				</div>
+			</div>
+			<a id="loan_reschedule_request_reject" name="loan_reschedule_request_reject" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Reject a Loan Reschedule Request</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">POST https://DomainName/api/v1/rescheduleloans/{requestId}?command=reject</code>
+					<code class="method-request">POST rescheduleloans/1?command=reject
+Content-Type: application/json
+Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "rejectedOnDate": "11 September 2014"
+}
+			</code>
+			<code class="method-response">
+{
+  "loanId": 1,
+  "resourceId": 1,
+  "changes": {
+	"locale": "en",
+	"dateFormat": "dd MMMM yyyy",
+	"rejectedOnDate": "11 September 2014",
+	"rejectedByUserId": 1
+  }
+}
+					</code>
+				</div>
+			</div>
+			<a id="loan_reschedule_request_approve" name="loan_reschedule_request_approve" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Approve a Loan Reschedule Request</h4>
+					<p>Rescheduling of a loan happens once a loan reschedule request is approved.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">POST https://DomainName/api/v1/rescheduleloans/{requestId}?command=approve</code>
+					<code class="method-request">POST rescheduleloans/1?command=approve
+Content-Type: application/json
+Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "approvedOnDate": "11 September 2014"
+}
+			</code>
+			<code class="method-response">
+{
+  "loanId": 1,
+  "resourceId": 1,
+  "changes": {
+	"locale": "en",
+	"dateFormat": "dd MMMM yyyy",
+	"approvedOnDate": "11 September 2014",
+	"approvedByUserId": 1
+  }
 }
 					</code>
 				</div>
@@ -32214,6 +32630,46 @@ No Request Body:
 					<td><a href="#collaterals_retrieve">Retrieve a Collateral</a></td>
 					<td><a href="#collaterals_update">Update a Collateral</a></td>
 					<td><a href="#collaterals_delete">Delete a Collateral</a></td>
+				</tr>
+				<tr>
+					<td><a href="#loan_rescheduling">Loan Rescheduling</a></td>
+					<td>rescheduleloans</td>
+					<td><a href="#loan_reschedule_request_create">Create a Loan Reschedule Request</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>rescheduleloans/{requestId}</td>
+					<td></td>
+					<td><a href="#loan_reschedule_request_retrieve">Retrieve a Loan Reschedule Request</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>rescheduleloans/{requestId}?command=previewLoanReschedule</td>
+					<td></td>
+					<td><a href="#loan_reschedule_preview_retrieve">Retrieve a Preview of The New Loan Repayment Schedule</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>rescheduleloans/{requestId}?command=reject</td>
+					<td><a href="#loan_reschedule_request_reject">Reject Loan Reschedule Request</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>rescheduleloans/{requestId}?command=approve</td>
+					<td><a href="#loan_reschedule_request_approve">Approve Loan Reschedule Request</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
 				</tr>
 				<tr>
 					<td><a href="#glaccounts">General Ledger Account</a></td>

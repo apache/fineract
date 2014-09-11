@@ -28,7 +28,7 @@ public class SchedulerJobHelper {
     }
 
     public static ArrayList getAllSchedulerJobs(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        final String GET_ALL_SCHEDULER_JOBS_URL = "/mifosng-provider/api/v1/jobs?tenantIdentifier=default";
+        final String GET_ALL_SCHEDULER_JOBS_URL = "/mifosng-provider/api/v1/jobs?" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RETRIEVING ALL SCHEDULER JOBS -------------------------");
         final ArrayList response = Utils.performServerGet(requestSpec, responseSpec, GET_ALL_SCHEDULER_JOBS_URL, "");
         return response;
@@ -36,28 +36,28 @@ public class SchedulerJobHelper {
 
     public static HashMap getSchedulerJobById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String jobId) {
-        final String GET_SCHEDULER_JOB_BY_ID_URL = "/mifosng-provider/api/v1/jobs/" + jobId + "?tenantIdentifier=default";
+        final String GET_SCHEDULER_JOB_BY_ID_URL = "/mifosng-provider/api/v1/jobs/" + jobId + "?" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RETRIEVING SCHEDULER JOB BY ID -------------------------");
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_SCHEDULER_JOB_BY_ID_URL, "");
         return response;
     }
 
     public static HashMap getSchedulerStatus(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        final String GET_SCHEDULER_STATUS_URL = "/mifosng-provider/api/v1/scheduler?tenantIdentifier=default";
+        final String GET_SCHEDULER_STATUS_URL = "/mifosng-provider/api/v1/scheduler?" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RETRIEVING SCHEDULER STATUS -------------------------");
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_SCHEDULER_STATUS_URL, "");
         return response;
     }
     
     public static void updateSchedulerStatus(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String command) {
-        final String UPDATE_SCHEDULER_STATUS_URL = "/mifosng-provider/api/v1/scheduler?command=" + command +"&tenantIdentifier=default";
+        final String UPDATE_SCHEDULER_STATUS_URL = "/mifosng-provider/api/v1/scheduler?command=" + command +"&" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ UPDATING SCHEDULER STATUS -------------------------");
         Utils.performServerPost(requestSpec, responseSpec, UPDATE_SCHEDULER_STATUS_URL, runSchedulerJobAsJSON(), null);
     }
 
     public static HashMap updateSchedulerJob(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String jobId, final String active) {
-        final String UPDATE_SCHEDULER_JOB_URL = "/mifosng-provider/api/v1/jobs/" + jobId + "?tenantIdentifier=default";
+        final String UPDATE_SCHEDULER_JOB_URL = "/mifosng-provider/api/v1/jobs/" + jobId + "?" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ UPDATING SCHEDULER JOB -------------------------");
         final HashMap response = Utils.performServerPut(requestSpec, responseSpec, UPDATE_SCHEDULER_JOB_URL,
                 updateSchedulerJobAsJSON(active), "changes");
@@ -73,7 +73,7 @@ public class SchedulerJobHelper {
 
     public static ArrayList getSchedulerJobHistory(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String jobId) {
-        final String GET_SCHEDULER_STATUS_URL = "/mifosng-provider/api/v1/jobs/" + jobId + "/runhistory?tenantIdentifier=default";
+        final String GET_SCHEDULER_STATUS_URL = "/mifosng-provider/api/v1/jobs/" + jobId + "/runhistory?" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RETRIEVING SCHEDULER JOB HISTORY -------------------------");
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_SCHEDULER_STATUS_URL, "");
         return (ArrayList) response.get("pageItems");
@@ -81,7 +81,7 @@ public class SchedulerJobHelper {
 
     public static void runSchedulerJob(final RequestSpecification requestSpec, final String jobId) {
         final ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(202).build(); 
-        final String RUN_SCHEDULER_JOB_URL = "/mifosng-provider/api/v1/jobs/" + jobId + "?command=executeJob&tenantIdentifier=default";
+        final String RUN_SCHEDULER_JOB_URL = "/mifosng-provider/api/v1/jobs/" + jobId + "?command=executeJob&" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RUN SCHEDULER JOB -------------------------");
         Utils.performServerPost(requestSpec, responseSpec, RUN_SCHEDULER_JOB_URL, runSchedulerJobAsJSON(), null);
     }

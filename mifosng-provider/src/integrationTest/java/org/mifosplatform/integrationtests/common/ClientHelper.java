@@ -15,7 +15,7 @@ import com.jayway.restassured.specification.ResponseSpecification;
 
 public class ClientHelper {
 
-    private static final String CREATE_CLIENT_URL = "/mifosng-provider/api/v1/clients?tenantIdentifier=default";
+    private static final String CREATE_CLIENT_URL = "/mifosng-provider/api/v1/clients?" + Utils.TENANT_IDENTIFIER;
 
     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return createClient(requestSpec, responseSpec, "04 March 2011");
@@ -50,7 +50,7 @@ public class ClientHelper {
     public static void verifyClientCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedClientID) {
         System.out.println("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
-        final String CLIENT_URL = "/mifosng-provider/api/v1/clients/" + generatedClientID + "?tenantIdentifier=default";
+        final String CLIENT_URL = "/mifosng-provider/api/v1/clients/" + generatedClientID + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseClientID = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL, "id");
         assertEquals("ERROR IN CREATING THE CLIENT", generatedClientID, responseClientID);
     }

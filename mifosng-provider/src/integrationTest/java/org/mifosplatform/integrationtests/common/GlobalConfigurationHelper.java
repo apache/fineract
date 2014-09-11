@@ -25,7 +25,7 @@ public class GlobalConfigurationHelper {
     }
 
     public static ArrayList getAllGlobalConfigurations(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        final String GET_ALL_GLOBAL_CONFIG_URL = "/mifosng-provider/api/v1/configurations?tenantIdentifier=default";
+        final String GET_ALL_GLOBAL_CONFIG_URL = "/mifosng-provider/api/v1/configurations?" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RETRIEVING ALL GLOBAL CONFIGURATIONS -------------------------");
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_ALL_GLOBAL_CONFIG_URL, "");
         return (ArrayList) response.get("globalConfiguration");
@@ -33,14 +33,14 @@ public class GlobalConfigurationHelper {
 
     public static HashMap getGlobalConfigurationById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String configId) {
-        final String GET_GLOBAL_CONFIG_BY_ID_URL = "/mifosng-provider/api/v1/configurations/" + configId + "?tenantIdentifier=default";
+        final String GET_GLOBAL_CONFIG_BY_ID_URL = "/mifosng-provider/api/v1/configurations/" + configId + "?" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RETRIEVING GLOBAL CONFIGURATION BY ID -------------------------");
         return Utils.performServerGet(requestSpec, responseSpec, GET_GLOBAL_CONFIG_BY_ID_URL, "");
     }
 
     public static Integer updateValueForGlobalConfiguration(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String configId, final String value) {
-        final String GLOBAL_CONFIG_UPDATE_URL = "/mifosng-provider/api/v1/configurations/" + configId + "?tenantIdentifier=default";
+        final String GLOBAL_CONFIG_UPDATE_URL = "/mifosng-provider/api/v1/configurations/" + configId + "?" + Utils.TENANT_IDENTIFIER;
         System.out.println("---------------------------------UPDATE VALUE FOR GLOBAL CONFIG---------------------------------------------");
         return Utils.performServerPut(requestSpec, responseSpec, GLOBAL_CONFIG_UPDATE_URL, updateGlobalConfigUpdateValueAsJSON(value),
                 "resourceId");
@@ -48,7 +48,7 @@ public class GlobalConfigurationHelper {
 
     public static Integer updateEnabledFlagForGlobalConfiguration(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String configId, final Boolean enabled) {
-        final String GLOBAL_CONFIG_UPDATE_URL = "/mifosng-provider/api/v1/configurations/" + configId + "?tenantIdentifier=default";
+        final String GLOBAL_CONFIG_UPDATE_URL = "/mifosng-provider/api/v1/configurations/" + configId + "?" + Utils.TENANT_IDENTIFIER;
         System.out
                 .println("---------------------------------UPDATE GLOBAL CONFIG FOR ENABLED FLAG---------------------------------------------");
         return Utils.performServerPut(requestSpec, responseSpec, GLOBAL_CONFIG_UPDATE_URL,
@@ -57,7 +57,7 @@ public class GlobalConfigurationHelper {
 
     public static ArrayList getGlobalConfigurationIsCacheEnabled(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
-        final String GET_IS_CACHE_GLOBAL_CONFIG_URL = "/mifosng-provider/api/v1/caches?tenantIdentifier=default";
+        final String GET_IS_CACHE_GLOBAL_CONFIG_URL = "/mifosng-provider/api/v1/caches?" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RETRIEVING IS CACHE ENABLED GLOBAL CONFIGURATION -------------------------");
         final ArrayList<HashMap> response = Utils.performServerGet(requestSpec, responseSpec, GET_IS_CACHE_GLOBAL_CONFIG_URL, "");
         return response;
@@ -65,7 +65,7 @@ public class GlobalConfigurationHelper {
 
     public static HashMap updateIsCacheEnabledForGlobalConfiguration(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String cacheType) {
-        final String IS_CACHE_GLOBAL_CONFIG_UPDATE_URL = "/mifosng-provider/api/v1/caches?tenantIdentifier=default";
+        final String IS_CACHE_GLOBAL_CONFIG_UPDATE_URL = "/mifosng-provider/api/v1/caches?" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------UPDATE GLOBAL CONFIG FOR IS CACHE ENABLED----------------------");
         return Utils.performServerPut(requestSpec, responseSpec, IS_CACHE_GLOBAL_CONFIG_UPDATE_URL,
                 updateIsCacheEnabledGlobalConfigUpdateAsJSON(cacheType), "changes");

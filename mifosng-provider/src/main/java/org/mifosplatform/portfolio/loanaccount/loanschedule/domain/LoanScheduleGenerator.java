@@ -18,6 +18,8 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
+import org.mifosplatform.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleModel;
+import org.mifosplatform.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
 
 public interface LoanScheduleGenerator {
 
@@ -32,4 +34,8 @@ public interface LoanScheduleGenerator {
 
     LoanRepaymentScheduleInstallment calculatePrepaymentAmount(List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency,
             LocalDate onDate, LocalDate interestChargedFromLocalDate, LoanApplicationTerms loanApplicationTerms, MathContext mc);
+    
+    LoanRescheduleModel reschedule(final MathContext mathContext, final LoanRescheduleRequest loanRescheduleRequest, 
+			final ApplicationCurrency applicationCurrency, final boolean isHolidayEnabled, 
+			final List<Holiday> holidays, final WorkingDays workingDays);
 }

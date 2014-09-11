@@ -16,7 +16,7 @@ import com.jayway.restassured.specification.ResponseSpecification;
 @SuppressWarnings("rawtypes")
 public class AccountHelper {
 
-    private final String CREATE_GL_ACCOUNT_URL = "/mifosng-provider/api/v1/glaccounts?tenantIdentifier=default";
+    private final String CREATE_GL_ACCOUNT_URL = "/mifosng-provider/api/v1/glaccounts?" + Utils.TENANT_IDENTIFIER;
     private final String GL_ACCOUNT_ID_RESPONSE = "resourceId";
 
     private final RequestSpecification requestSpec;

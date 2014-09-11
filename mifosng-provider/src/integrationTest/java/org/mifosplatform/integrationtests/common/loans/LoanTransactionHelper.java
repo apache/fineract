@@ -24,8 +24,8 @@ public class LoanTransactionHelper {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
-    private static final String CREATE_LOAN_PRODUCT_URL = "/mifosng-provider/api/v1/loanproducts?tenantIdentifier=default";
-    private static final String APPLY_LOAN_URL = "/mifosng-provider/api/v1/loans?tenantIdentifier=default";
+    private static final String CREATE_LOAN_PRODUCT_URL = "/mifosng-provider/api/v1/loanproducts?" + Utils.TENANT_IDENTIFIER;
+    private static final String APPLY_LOAN_URL = "/mifosng-provider/api/v1/loans?" + Utils.TENANT_IDENTIFIER;
     private static final String APPROVE_LOAN_COMMAND = "approve";
     private static final String UNDO_APPROVAL_LOAN_COMMAND = "undoApproval";
     private static final String DISBURSE_LOAN_COMMAND = "disburse";
@@ -51,25 +51,25 @@ public class LoanTransactionHelper {
 
     public Integer updateLoan(final Integer id, final String loanApplicationJSON) {
         return Utils.performServerPut(this.requestSpec, this.responseSpec, "/mifosng-provider/api/v1/loans/" + id
-                + "?tenantIdentifier=default", loanApplicationJSON, "loanId");
+                + "?" + Utils.TENANT_IDENTIFIER, loanApplicationJSON, "loanId");
     }
 
     public ArrayList getLoanRepaymentSchedule(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer loanID) {
-        final String URL = "/mifosng-provider/api/v1/loans/" + loanID + "?associations=repaymentSchedule&tenantIdentifier=default";
+        final String URL = "/mifosng-provider/api/v1/loans/" + loanID + "?associations=repaymentSchedule&" + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "repaymentSchedule");
         return (ArrayList) response.get("periods");
     }
 
     public HashMap getLoanSummary(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer loanID) {
-        final String URL = "/mifosng-provider/api/v1/loans/" + loanID + "?associations=all&tenantIdentifier=default";
+        final String URL = "/mifosng-provider/api/v1/loans/" + loanID + "?associations=all&" + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "summary");
         return response;
     }
 
     public Object getLoanDetail(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer loanID,
             final String param) {
-        final String URL = "/mifosng-provider/api/v1/loans/" + loanID + "?associations=all&tenantIdentifier=default";
+        final String URL = "/mifosng-provider/api/v1/loans/" + loanID + "?associations=all&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, URL, param);
     }
 
@@ -133,7 +133,7 @@ public class LoanTransactionHelper {
 
     public Integer addChargesForLoan(final Integer loanId, final String request) {
         System.out.println("--------------------------------- ADD CHARGES FOR LOAN --------------------------------");
-        final String ADD_CHARGES_URL = "/mifosng-provider/api/v1/loans/" + loanId + "/charges?tenantIdentifier=default";
+        final String ADD_CHARGES_URL = "/mifosng-provider/api/v1/loans/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerPost(requestSpec, responseSpec, ADD_CHARGES_URL, request, "");
         return (Integer) response.get("resourceId");
     }
@@ -141,7 +141,7 @@ public class LoanTransactionHelper {
     public Integer updateChargesForLoan(final Integer loanId, final Integer loanchargeId, final String request) {
         System.out.println("--------------------------------- ADD CHARGES FOR LOAN --------------------------------");
         final String UPDATE_CHARGES_URL = "/mifosng-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId
-                + "?tenantIdentifier=default";
+                + "?" + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerPut(requestSpec, responseSpec, UPDATE_CHARGES_URL, request, "");
         return (Integer) response.get("resourceId");
     }
@@ -149,7 +149,7 @@ public class LoanTransactionHelper {
     public Integer deleteChargesForLoan(final Integer loanId, final Integer loanchargeId) {
         System.out.println("--------------------------------- DELETE CHARGES FOR LOAN --------------------------------");
         final String DELETE_CHARGES_URL = "/mifosng-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId
-                + "?tenantIdentifier=default";
+                + "?" + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerDelete(requestSpec, responseSpec, DELETE_CHARGES_URL, "");
         return (Integer) response.get("resourceId");
     }
@@ -157,7 +157,7 @@ public class LoanTransactionHelper {
     public Integer waiveChargesForLoan(final Integer loanId, final Integer loanchargeId, final String json) {
         System.out.println("--------------------------------- WAIVE CHARGES FOR LOAN --------------------------------");
         final String CHARGES_URL = "/mifosng-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId
-                + "?command=waive&tenantIdentifier=default";
+                + "?command=waive&" + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, json, "");
         return (Integer) response.get("resourceId");
     }
@@ -165,7 +165,7 @@ public class LoanTransactionHelper {
     public Integer payChargesForLoan(final Integer loanId, final Integer loanchargeId, final String json) {
         System.out.println("--------------------------------- WAIVE CHARGES FOR LOAN --------------------------------");
         final String CHARGES_URL = "/mifosng-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId
-                + "?command=pay&tenantIdentifier=default";
+                + "?command=pay&" + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, json, "");
         return (Integer) response.get("resourceId");
     }
@@ -326,11 +326,11 @@ public class LoanTransactionHelper {
     }
 
     private String createLoanOperationURL(final String command, final Integer loanID) {
-        return "/mifosng-provider/api/v1/loans/" + loanID + "?command=" + command + "&tenantIdentifier=default";
+        return "/mifosng-provider/api/v1/loans/" + loanID + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
     }
 
     private String createLoanTransactionURL(final String command, final Integer loanID) {
-        return "/mifosng-provider/api/v1/loans/" + loanID + "/transactions?command=" + command + "&tenantIdentifier=default";
+        return "/mifosng-provider/api/v1/loans/" + loanID + "/transactions?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
     }
 
     private HashMap performLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent) {
