@@ -26,7 +26,7 @@ public interface LoanReadPlatformService {
     LoanAccountData retrieveOne(Long loanId);
 
     LoanScheduleData retrieveRepaymentSchedule(Long loanId, RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData,
-            Collection<DisbursementData> disbursementData);
+            Collection<DisbursementData> disbursementData, boolean isInterestRecalculationEnabled);
 
     Collection<LoanTransactionData> retrieveLoanTransactions(Long loanId);
 

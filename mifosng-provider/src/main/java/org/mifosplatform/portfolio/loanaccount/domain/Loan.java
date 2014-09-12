@@ -1817,7 +1817,7 @@ public class Loan extends AbstractPersistable<Long> {
             updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
         }
         if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()
-                && fetchRepaymentScheduleInstallment(1).getDueDate().isBefore(LocalDate.now())) {
+                && (fetchRepaymentScheduleInstallment(1).getDueDate().isBefore(LocalDate.now()) || isDisbursementMissed())) {
             LocalDate recalculateFrom = null;
             regenerateRepaymentScheduleWithInterestRecalculation(loanScheduleFactory, currency, calculatedRepaymentsStartingFromDate,
                     isHolidayEnabled, holidays, workingDays, calendarInstanceForInterestRecalculation, recalculateFrom);
@@ -1958,6 +1958,18 @@ public class Loan extends AbstractPersistable<Long> {
             }
         }
         return details;
+    }
+
+    private boolean isDisbursementMissed() {
+        boolean isDisbursementMissed = false;
+        for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+            if (disbursementDetail.actualDisbursementDate() == null
+                    && LocalDate.now().isAfter(disbursementDetail.expectedDisbursementDateAsLocalDate())) {
+                isDisbursementMissed = true;
+                break;
+            }
+        }
+        return isDisbursementMissed;
     }
 
     private BigDecimal getDisbursedAmount() {
