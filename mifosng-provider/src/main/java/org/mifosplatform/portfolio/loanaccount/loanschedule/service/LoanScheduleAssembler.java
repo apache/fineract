@@ -397,7 +397,7 @@ public class LoanScheduleAssembler {
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
 
         CalendarInstance calendarInstance = loanApplicationTerms.getRestCalendarInstance();
-        LocalDate nextScheduleDate = CalendarUtils.getNextScheduleDate(calendarInstance.getCalendar(), onDate);
+        LocalDate nextScheduleDate = CalendarUtils.getNextScheduleDate(calendarInstance.getCalendar(), onDate.minusDays(1));
         if (loanApplicationTerms.getRecalculationFrequencyType().isSameAsRepayment()) {
             nextScheduleDate = scheduledDateGenerator.adjustRepaymentDate(nextScheduleDate, loanApplicationTerms, isHolidayEnabled,
                     holidays, workingDays);

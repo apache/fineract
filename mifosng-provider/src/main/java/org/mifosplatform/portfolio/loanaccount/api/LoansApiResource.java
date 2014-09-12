@@ -354,9 +354,9 @@ public class LoansApiResource {
 
                 final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData = loanBasicDetails.repaymentScheduleRelatedData();
                 repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, repaymentScheduleRelatedData,
-                        disbursementData);
+                        disbursementData, loanBasicDetails.isInterestRecalculationEnabled());
 
-                if (associationParameters.contains("futureSchedule")) {
+                if (associationParameters.contains("futureSchedule") && loanBasicDetails.isInterestRecalculationEnabled()) {
                     mandatoryResponseParameters.add("futureSchedule");
                     this.calculationPlatformService.updateFutureSchedule(repaymentSchedule, loanId);
                 }
