@@ -160,7 +160,7 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
     public LocalDate dueDate() {
         return (this.dueDate == null) ? null : new LocalDate(this.dueDate);
     }
-    
+
     public Money payInstallment(final LocalDate transactionDate, final Money transactionAmountRemaining) {
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
@@ -183,18 +183,18 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
 
         return depositAmountPortionOfTransaction;
     }
-    
+
     private void checkIfInstallmentObligationsAreMet(final LocalDate transactionDate, final MonetaryCurrency currency) {
         this.obligationsMet = getTotalOutstanding(currency).isZero();
         if (this.obligationsMet) {
             this.obligationsMetOnDate = transactionDate.toDate();
         }
     }
-    
+
     public Money getTotalOutstanding(final MonetaryCurrency currency) {
         return getDepositAmountOutstanding(currency);
     }
-    
+
     private void trackAdvanceAndLateTotalsForInstallment(final LocalDate transactionDate, final MonetaryCurrency currency,
             final Money amountPaidInInstallment) {
         if (isInAdvance(transactionDate)) {
@@ -203,7 +203,7 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
             this.totalPaidLate = asMoney(this.totalPaidLate, currency).plus(amountPaidInInstallment).getAmount();
         }
     }
-    
+
     private boolean isInAdvance(final LocalDate transactionDate) {
         return transactionDate.isBefore(dueDate());
     }
@@ -211,12 +211,12 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
     private boolean isLatePayment(final LocalDate transactionDate) {
         return transactionDate.isAfter(dueDate());
     }
-    
+
     private Money asMoney(final BigDecimal decimal, final MonetaryCurrency currency) {
         return Money.of(currency, decimal);
     }
-    
-    public void resetDerivedFields(){
+
+    public void resetDerivedFields() {
         this.depositAmountCompleted = null;
         this.totalPaidInAdvance = null;
         this.totalPaidLate = null;

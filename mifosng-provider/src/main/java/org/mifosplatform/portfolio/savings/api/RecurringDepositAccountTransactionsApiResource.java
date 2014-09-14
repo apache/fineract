@@ -85,7 +85,7 @@ public class RecurringDepositAccountTransactionsApiResource {
         this.context.authenticatedUser().validateHasReadPermission(DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME);
 
         /***
-         * Check @Param commandParam value for deposit or withdrawal 
+         * Check @Param commandParam value for deposit or withdrawal
          */
         if (!(is(commandParam, "deposit") || is(commandParam, "withdrawal"))) { throw new UnrecognizedQueryParamException("command",
                 commandParam, new Object[] { "deposit", "withdrawal" }); }
@@ -181,7 +181,8 @@ public class RecurringDepositAccountTransactionsApiResource {
             final CommandWrapper commandRequest = builder.undoRecurringAccountTransaction(recurringDepositAccountId, transactionId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, DepositsApiConstants.COMMAND_ADJUST_TRANSACTION)) {
-            final CommandWrapper commandRequest = builder.adjustRecurringAccountTransaction(recurringDepositAccountId, transactionId).build();
+            final CommandWrapper commandRequest = builder.adjustRecurringAccountTransaction(recurringDepositAccountId, transactionId)
+                    .build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 

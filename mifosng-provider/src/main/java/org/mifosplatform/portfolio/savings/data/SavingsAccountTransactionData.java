@@ -87,7 +87,8 @@ public class SavingsAccountTransactionData {
         this.paymentTypeOptions = paymentTypeOptions;
     }
 
-    public static SavingsAccountTransactionData withWithDrawalTransactionDetails(final SavingsAccountTransactionData savingsAccountTransactionData) {
+    public static SavingsAccountTransactionData withWithDrawalTransactionDetails(
+            final SavingsAccountTransactionData savingsAccountTransactionData) {
 
         final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
         final SavingsAccountTransactionEnumData transactionType = SavingsEnumerations

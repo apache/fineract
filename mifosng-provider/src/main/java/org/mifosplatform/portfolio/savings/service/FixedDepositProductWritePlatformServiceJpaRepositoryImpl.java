@@ -45,8 +45,7 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
 
     @Autowired
     public FixedDepositProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final FixedDepositProductRepository fixedDepositProductRepository,
-            final DepositProductDataValidator fromApiJsonDataValidator,
+            final FixedDepositProductRepository fixedDepositProductRepository, final DepositProductDataValidator fromApiJsonDataValidator,
             final DepositProductAssembler depositProductAssembler,
             final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
             final InterestRateChartAssembler chartAssembler) {
@@ -71,7 +70,8 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
             this.fixedDepositProductRepository.save(product);
 
             // save accounting mappings
-            this.accountMappingWritePlatformService.createSavingProductToGLAccountMapping(product.getId(), command, DepositAccountType.FIXED_DEPOSIT);
+            this.accountMappingWritePlatformService.createSavingProductToGLAccountMapping(product.getId(), command,
+                    DepositAccountType.FIXED_DEPOSIT);
 
             return new CommandProcessingResultBuilder() //
                     .withEntityId(product.getId()) //
@@ -93,12 +93,12 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
             final FixedDepositProduct product = this.fixedDepositProductRepository.findOne(productId);
             if (product == null) { throw new FixedDepositProductNotFoundException(productId); }
             product.setHelpers(this.chartAssembler);
-            
+
             final Map<String, Object> changes = product.update(command);
 
             if (changes.containsKey(chargesParamName)) {
-                final Set<Charge> savingsProductCharges = this.depositProductAssembler.assembleListOfSavingsProductCharges(command,
-                        product.currency().getCode());
+                final Set<Charge> savingsProductCharges = this.depositProductAssembler.assembleListOfSavingsProductCharges(command, product
+                        .currency().getCode());
                 final boolean updated = product.update(savingsProductCharges);
                 if (!updated) {
                     changes.remove(chargesParamName);
@@ -108,7 +108,8 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
             // accounting related changes
             final boolean accountingTypeChanged = changes.containsKey(accountingRuleParamName);
             final Map<String, Object> accountingMappingChanges = this.accountMappingWritePlatformService
-                    .updateSavingsProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingType(), DepositAccountType.FIXED_DEPOSIT);
+                    .updateSavingsProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingType(),
+                            DepositAccountType.FIXED_DEPOSIT);
             changes.putAll(accountingMappingChanges);
 
             if (!changes.isEmpty()) {

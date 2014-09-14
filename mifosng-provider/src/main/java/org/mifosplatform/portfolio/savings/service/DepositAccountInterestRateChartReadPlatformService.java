@@ -8,14 +8,14 @@ package org.mifosplatform.portfolio.savings.service;
 import org.mifosplatform.portfolio.savings.data.DepositAccountInterestRateChartData;
 
 public interface DepositAccountInterestRateChartReadPlatformService {
-    
+
     DepositAccountInterestRateChartData retrieveOne(Long interestChartId);
-    
+
     DepositAccountInterestRateChartData retrieveOneWithSlabs(Long interestChartId);
-    
+
     DepositAccountInterestRateChartData retrieveWithTemplate(DepositAccountInterestRateChartData DepositAccountInterestRateChartData);
-    
+
     DepositAccountInterestRateChartData retrieveOneWithSlabsOnAccountId(Long accountId);
-    
+
     DepositAccountInterestRateChartData template();
 }

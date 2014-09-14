@@ -15,10 +15,12 @@ public interface DepositsDropdownReadPlatformService {
 
     Collection<EnumOptionData> retrievePreClosurePenalInterestOnTypeOptions();
 
-    /*Collection<EnumOptionData> retrieveDepositTermTypeOptions();
-
-    Collection<EnumOptionData> retrieveInMultiplesOfDepositTermTypeOptions();
-    
-    Collection<EnumOptionData> retrieveDepositPeriodFrequencyOptions();*/
+    /*
+     * Collection<EnumOptionData> retrieveDepositTermTypeOptions();
+     * 
+     * Collection<EnumOptionData> retrieveInMultiplesOfDepositTermTypeOptions();
+     * 
+     * Collection<EnumOptionData> retrieveDepositPeriodFrequencyOptions();
+     */
 
 }

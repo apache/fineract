@@ -37,7 +37,7 @@ public class SavingsAccountRepositoryWrapper {
         if (account == null) { throw new SavingsAccountNotFoundException(savingsId); }
         return account;
     }
-    
+
     public SavingsAccount findOneWithNotFoundDetection(final Long savingsId, final DepositAccountType depositAccountType) {
         final SavingsAccount account = this.repository.findByIdAndDepositAccountType(savingsId, depositAccountType.getValue());
         if (account == null) { throw new SavingsAccountNotFoundException(savingsId); }

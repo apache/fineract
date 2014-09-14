@@ -390,6 +390,7 @@ public class SavingsAccountDataValidator {
         }
 
     }
+
     public void validateForAssignFieldOfficer(final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
@@ -414,8 +415,8 @@ public class SavingsAccountDataValidator {
 
     }
 
-	public void validateForUnAssignFieldOfficer(final String json) {
-		if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    public void validateForUnAssignFieldOfficer(final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
@@ -435,6 +436,5 @@ public class SavingsAccountDataValidator {
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
 
-		
-	}
+    }
 }

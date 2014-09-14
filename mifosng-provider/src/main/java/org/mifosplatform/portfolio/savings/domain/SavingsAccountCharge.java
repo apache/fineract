@@ -104,7 +104,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
     @Column(name = "is_active", nullable = false)
     private boolean status = true;
-    
+
     @Temporal(TemporalType.DATE)
     @Column(name = "inactivated_on_date")
     private Date inactivationDate;

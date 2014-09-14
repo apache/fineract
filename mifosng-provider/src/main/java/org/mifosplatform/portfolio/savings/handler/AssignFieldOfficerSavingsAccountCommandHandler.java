@@ -10,8 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AssignFieldOfficerSavingsAccountCommandHandler implements NewCommandSourceHandler {
-	
-	private final SavingsAccountWritePlatformService savingsWritePlatformService;
+
+    private final SavingsAccountWritePlatformService savingsWritePlatformService;
 
     @Autowired
     public AssignFieldOfficerSavingsAccountCommandHandler(final SavingsAccountWritePlatformService savingAccountWritePlatformService) {

@@ -18,7 +18,7 @@ public interface SavingsAccountReadPlatformService {
     Page<SavingsAccountData> retrieveAll(SearchParameters searchParameters);
 
     Collection<SavingsAccountData> retrieveAllForLookup(Long clientId);
-    
+
     Collection<SavingsAccountData> retrieveActiveForLookup(Long clientId, DepositAccountType depositAccountType);
 
     SavingsAccountData retrieveOne(Long savingsId);
@@ -33,6 +33,6 @@ public interface SavingsAccountReadPlatformService {
     // retrieveAccountsWithAnnualFeeDue();
 
     SavingsAccountTransactionData retrieveSavingsTransaction(Long savingsId, Long transactionId, DepositAccountType depositAccountType);
-    
-    Collection<SavingsAccountData> retrieveForLookup(Long clientId,Boolean overdraft);
+
+    Collection<SavingsAccountData> retrieveForLookup(Long clientId, Boolean overdraft);
 }

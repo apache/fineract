@@ -72,7 +72,7 @@ public enum DepositAccountOnClosureType {
     public boolean isInvalid() {
         return this.value.equals(DepositAccountOnClosureType.INVALID.getValue());
     }
-    
+
     public static Object[] integerValues() {
         final List<Integer> values = new ArrayList<>();
         for (final DepositAccountOnClosureType enumType : values()) {

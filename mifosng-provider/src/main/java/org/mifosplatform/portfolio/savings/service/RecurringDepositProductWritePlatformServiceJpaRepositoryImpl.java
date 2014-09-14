@@ -46,8 +46,7 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
     @Autowired
     public RecurringDepositProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final RecurringDepositProductRepository recurringDepositProductRepository,
-            final DepositProductDataValidator fromApiJsonDataValidator,
-            final DepositProductAssembler depositProductAssembler,
+            final DepositProductDataValidator fromApiJsonDataValidator, final DepositProductAssembler depositProductAssembler,
             final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
             final InterestRateChartAssembler chartAssembler) {
         this.context = context;
@@ -71,7 +70,8 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
             this.recurringDepositProductRepository.save(product);
 
             // save accounting mappings
-            this.accountMappingWritePlatformService.createSavingProductToGLAccountMapping(product.getId(), command, DepositAccountType.RECURRING_DEPOSIT);
+            this.accountMappingWritePlatformService.createSavingProductToGLAccountMapping(product.getId(), command,
+                    DepositAccountType.RECURRING_DEPOSIT);
 
             return new CommandProcessingResultBuilder() //
                     .withEntityId(product.getId()) //
@@ -93,12 +93,12 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
             final RecurringDepositProduct product = this.recurringDepositProductRepository.findOne(productId);
             if (product == null) { throw new RecurringDepositProductNotFoundException(productId); }
             product.setHelpers(this.chartAssembler);
-            
+
             final Map<String, Object> changes = product.update(command);
 
             if (changes.containsKey(chargesParamName)) {
-                final Set<Charge> savingsProductCharges = this.depositProductAssembler.assembleListOfSavingsProductCharges(command,
-                        product.currency().getCode());
+                final Set<Charge> savingsProductCharges = this.depositProductAssembler.assembleListOfSavingsProductCharges(command, product
+                        .currency().getCode());
                 final boolean updated = product.update(savingsProductCharges);
                 if (!updated) {
                     changes.remove(chargesParamName);
@@ -108,7 +108,8 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
             // accounting related changes
             final boolean accountingTypeChanged = changes.containsKey(accountingRuleParamName);
             final Map<String, Object> accountingMappingChanges = this.accountMappingWritePlatformService
-                    .updateSavingsProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingType(), DepositAccountType.RECURRING_DEPOSIT);
+                    .updateSavingsProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingType(),
+                            DepositAccountType.RECURRING_DEPOSIT);
             changes.putAll(accountingMappingChanges);
 
             if (!changes.isEmpty()) {
@@ -149,13 +150,13 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
         if (realCause.getMessage().contains("sp_unq_name")) {
 
             final String name = command.stringValueOfParameterNamed("name");
-            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.name", "Recurring Deposit product with name `" + name
-                    + "` already exists", "name", name);
+            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.name", "Recurring Deposit product with name `"
+                    + name + "` already exists", "name", name);
         } else if (realCause.getMessage().contains("sp_unq_short_name")) {
 
             final String shortName = command.stringValueOfParameterNamed("shortName");
-            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.short.name", "Recurring Deposit product with short name `"
-                    + shortName + "` already exists", "shortName", shortName);
+            throw new PlatformDataIntegrityException("error.msg.product.savings.duplicate.short.name",
+                    "Recurring Deposit product with short name `" + shortName + "` already exists", "shortName", shortName);
         }
 
         logAsErrorUnexpectedDataIntegrityException(dae);

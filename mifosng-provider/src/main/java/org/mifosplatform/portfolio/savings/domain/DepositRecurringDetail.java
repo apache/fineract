@@ -64,7 +64,7 @@ public class DepositRecurringDetail {
             actualChanges.put(allowWithdrawalParamName, newValue);
             this.allowWithdrawal = newValue;
         }
-        
+
         if (command.isChangeInBooleanParameterNamed(adjustAdvanceTowardsFuturePaymentsParamName, this.adjustAdvanceTowardsFuturePayments)) {
             final boolean newValue = command.booleanObjectValueOfParameterNamed(adjustAdvanceTowardsFuturePaymentsParamName);
             actualChanges.put(adjustAdvanceTowardsFuturePaymentsParamName, newValue);
@@ -73,15 +73,15 @@ public class DepositRecurringDetail {
 
         return actualChanges;
     }
-    
+
     public boolean isMandatoryDeposit() {
         return this.isMandatoryDeposit;
     }
-    
+
     public boolean allowWithdrawal() {
         return this.allowWithdrawal;
     }
-    
+
     public boolean adjustAdvanceTowardsFuturePayments() {
         return this.adjustAdvanceTowardsFuturePayments;
     }

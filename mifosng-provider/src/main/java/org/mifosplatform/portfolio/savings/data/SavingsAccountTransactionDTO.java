@@ -30,8 +30,10 @@ public class SavingsAccountTransactionDTO {
         this.createdDate = createdDate;
         this.savingsAccountId = null;
     }
-    
-    /** This constructor is used for bulk deposit transactions
+
+    /**
+     * This constructor is used for bulk deposit transactions
+     * 
      * @param formatter
      * @param transactionDate
      * @param transactionAmount
@@ -48,8 +50,6 @@ public class SavingsAccountTransactionDTO {
         this.createdDate = createdDate;
         this.savingsAccountId = savingsAccountId;
     }
-
-
 
     public DateTimeFormatter getFormatter() {
         return this.formatter;
@@ -70,9 +70,9 @@ public class SavingsAccountTransactionDTO {
     public Date getCreatedDate() {
         return this.createdDate;
     }
-    
+
     public Long getSavingsAccountId() {
         return this.savingsAccountId;
     }
-    
+
 }

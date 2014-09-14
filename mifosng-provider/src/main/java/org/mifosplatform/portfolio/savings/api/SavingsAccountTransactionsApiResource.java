@@ -82,7 +82,8 @@ public class SavingsAccountTransactionsApiResource {
 
         // FIXME - KW - for now just send back generic default information for
         // both deposit/withdrawal templates
-        SavingsAccountTransactionData savingsAccount = this.savingsAccountReadPlatformService.retrieveDepositTransactionTemplate(savingsId, DepositAccountType.SAVINGS_DEPOSIT);
+        SavingsAccountTransactionData savingsAccount = this.savingsAccountReadPlatformService.retrieveDepositTransactionTemplate(savingsId,
+                DepositAccountType.SAVINGS_DEPOSIT);
         final Collection<CodeValueData> paymentTypeOptions = this.codeValueReadPlatformService
                 .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
         savingsAccount = SavingsAccountTransactionData.templateOnTop(savingsAccount, paymentTypeOptions);

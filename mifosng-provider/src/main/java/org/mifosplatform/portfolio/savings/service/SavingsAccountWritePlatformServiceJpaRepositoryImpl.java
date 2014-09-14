@@ -128,8 +128,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final ChargeRepositoryWrapper chargeRepository, final SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepository,
             final HolidayWritePlatformService holidayWritePlatformService,
             final WorkingDaysWritePlatformService workingDaysWritePlatformService,
-            final SavingsAccountDataValidator fromApiJsonDeserializer,
-            final SavingsAccountRepositoryWrapper savingsRepository,
+            final SavingsAccountDataValidator fromApiJsonDeserializer, final SavingsAccountRepositoryWrapper savingsRepository,
             final StaffRepositoryWrapper staffRepository) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
@@ -195,8 +194,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         boolean isRegularTransaction = false;
         if (amountForDeposit.isGreaterThanZero()) {
             boolean isAccountTransfer = false;
-            this.savingsAccountDomainService.handleDeposit(account, fmt, account.getActivationLocalDate(),
-                    amountForDeposit.getAmount(), null, isAccountTransfer, isRegularTransaction);
+            this.savingsAccountDomainService.handleDeposit(account, fmt, account.getActivationLocalDate(), amountForDeposit.getAmount(),
+                    null, isAccountTransfer, isRegularTransaction);
             updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         }
         account.processAccountUponActivation();
@@ -1022,10 +1021,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         return null;
     }
 
-	@Override
-	public CommandProcessingResult assignFieldOfficer(Long savingsAccountId,
-			JsonCommand command) {
-		this.context.authenticatedUser();
+    @Override
+    public CommandProcessingResult assignFieldOfficer(Long savingsAccountId, JsonCommand command) {
+        this.context.authenticatedUser();
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
 
@@ -1037,7 +1035,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Long staffId = command.longValueOfParameterNamed(SavingsApiConstants.staffIdParamName);
         if (staffId != null) {
             staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, savingsForUpdate.office().getHierarchy());
-            
+
             savingsForUpdate.assignFieldOfficer(staff);
         }
 
@@ -1052,12 +1050,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withClientId(savingsAccountId) //
                 .with(actualChanges) //
                 .build();
-	}
+    }
 
-	@Override
-	public CommandProcessingResult unassignFieldOfficer(Long savingsAccountId,
-			JsonCommand command) {
-		this.context.authenticatedUser();
+    @Override
+    public CommandProcessingResult unassignFieldOfficer(Long savingsAccountId, JsonCommand command) {
+        this.context.authenticatedUser();
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
 
@@ -1071,7 +1068,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         presentStaffId = presentStaff.getId();
         final String staffIdParamName = SavingsApiConstants.staffIdParamName;
         if (!command.isChangeInLongParameterNamed(staffIdParamName, presentStaffId)) {
-        	savingsForUpdate.unassignFieldOfficer();
+            savingsForUpdate.unassignFieldOfficer();
         }
         this.savingsRepository.saveAndFlush(savingsForUpdate);
 
@@ -1084,6 +1081,6 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withClientId(savingsAccountId) //
                 .with(actualChanges) //
                 .build();
-	}
+    }
 
 }
