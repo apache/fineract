@@ -29,12 +29,12 @@ public final class SavingsHelper {
 
     private final CompoundInterestHelper compoundInterestHelper = new CompoundInterestHelper();
 
-    public List<LocalDateInterval> determineInterestPostingPeriods(final LocalDate activationLocalDate,
+    public List<LocalDateInterval> determineInterestPostingPeriods(final LocalDate startInterestCalculationLocalDate,
             final LocalDate interestPostingUpToDate, final SavingsPostingInterestPeriodType postingPeriodType) {
 
         final List<LocalDateInterval> postingPeriods = new ArrayList<>();
 
-        LocalDate periodStartDate = activationLocalDate;
+        LocalDate periodStartDate = startInterestCalculationLocalDate;
         LocalDate periodEndDate = periodStartDate;
 
         while (!periodStartDate.isAfter(interestPostingUpToDate) && !periodEndDate.isAfter(interestPostingUpToDate)) {

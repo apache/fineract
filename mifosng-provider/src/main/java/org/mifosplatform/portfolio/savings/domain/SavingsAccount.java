@@ -246,6 +246,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     @Column(name = "min_required_balance", scale = 6, precision = 19, nullable = true)
     private BigDecimal minRequiredBalance;
+    
+    @Temporal(TemporalType.DATE)
+    @Column(name = "start_interest_calculation_date")
+    protected Date startInterestCalculationDate;
 
     @Embedded
     protected SavingsAccountSummary summary;
@@ -468,6 +472,21 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         return postingTransation;
     }
+    
+    //Determine the last transaction for given day
+	protected SavingsAccountTransaction findLastTransaction(final LocalDate date) {
+
+		SavingsAccountTransaction savingsTransaction = null;
+
+		for (final SavingsAccountTransaction transaction : this.transactions) {
+			if (transaction.isNotReversed() && transaction.occursOn(date)) {
+				savingsTransaction = transaction;
+				break;
+			}
+		}
+
+		return savingsTransaction;
+	}
 
     /**
      * All interest calculation based on END-OF-DAY-BALANCE.
@@ -510,12 +529,42 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final SavingsInterestCalculationDaysInYearType daysInYearType = SavingsInterestCalculationDaysInYearType
                 .fromInt(this.interestCalculationDaysInYearType);
 
-        final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(getActivationLocalDate(),
+        final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(getStartInterestCalculationDate(),
                 upToInterestCalculationDate, postingPeriodType);
 
         final List<PostingPeriod> allPostingPeriods = new ArrayList<>();
+        
+		Money periodStartingBalance;
+		if (this.startInterestCalculationDate != null) {
+			LocalDate startInterestCalculationDate = new LocalDate(
+					this.startInterestCalculationDate);
+			final SavingsAccountTransaction transaction = findLastTransaction(startInterestCalculationDate);
 
-        Money periodStartingBalance = Money.zero(this.currency);
+			if (transaction == null) {
+				final String defaultUserMessage = "No transactions were found on the specified date "
+						+ getStartInterestCalculationDate().toString()
+						+ " for account number "
+						+ this.accountNumber.toString()
+						+ " and resource id "
+						+ getId();
+
+				final ApiParameterError error = ApiParameterError
+						.parameterError(
+								"error.msg.savingsaccount.transaction.incorrect.start.interest.calculation.date",
+								defaultUserMessage, "transactionDate",
+								getStartInterestCalculationDate().toString());
+
+				final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+				dataValidationErrors.add(error);
+
+				throw new PlatformApiDataValidationException(
+						dataValidationErrors);
+			}
+
+			periodStartingBalance = transaction
+					.getRunningBalance(this.currency);
+		} else
+			periodStartingBalance = Money.zero(this.currency);
 
         final SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType.fromInt(this.interestCalculationType);
         final BigDecimal interestRateAsFraction = getEffectiveInterestRateAsFraction(mc, upToInterestCalculationDate);
@@ -700,6 +749,18 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
         return activationLocalDate;
     }
+    
+    //startInterestCalculationDate is set during migration so that there is no
+    //interference with interest posting of previous system
+	public LocalDate getStartInterestCalculationDate() {
+		LocalDate startInterestCalculationLocalDate = null;
+		if (this.startInterestCalculationDate != null) {
+			startInterestCalculationLocalDate = new LocalDate(
+					this.startInterestCalculationDate);
+		} else
+			startInterestCalculationLocalDate = getActivationLocalDate();
+		return startInterestCalculationLocalDate;
+	}
 
     public SavingsAccountTransaction withdraw(final SavingsAccountTransactionDTO transactionDTO, final boolean applyWithdrawFee) {
 
