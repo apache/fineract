@@ -66,8 +66,8 @@ public class DepositAccountTransactionDataValidator {
                 DepositsApiConstants.DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(depositAccountType.resourceName());
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(depositAccountType
+                .resourceName());
 
         final JsonElement element = command.parsedJson();
 
@@ -80,8 +80,8 @@ public class DepositAccountTransactionDataValidator {
         // Validate all string payment detail fields for max length
         final Integer paymentTypeId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
         baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).ignoreIfNull().integerGreaterThanZero();
-        final Set<String> paymentDetailParameters = new HashSet<>(Arrays.asList(transactionAccountNumberParamName,
-                checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
+        final Set<String> paymentDetailParameters = new HashSet<>(Arrays.asList(transactionAccountNumberParamName, checkNumberParamName,
+                routingCodeParamName, receiptNumberParamName, bankNumberParamName));
         for (final String paymentDetailParameterName : paymentDetailParameters) {
             final String paymentDetailParameterValue = this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
             baseDataValidator.reset().parameter(paymentDetailParameterName).value(paymentDetailParameterValue).ignoreIfNull()
@@ -158,8 +158,12 @@ public class DepositAccountTransactionDataValidator {
             final DepositAccountOnClosureType accountOnClosureType = DepositAccountOnClosureType.fromInt(onAccountClosureId);
             if (accountOnClosureType.isTransferToSavings()) {
                 final Long toSavingsAccountId = this.fromApiJsonHelper.extractLongNamed(toSavingsAccountIdParamName, element);
-                baseDataValidator.reset().parameter(toSavingsAccountIdParamName).value(toSavingsAccountId)
-                        .cantBeBlankWhenParameterProvidedIs(onAccountClosureIdParamName, DepositAccountOnClosureType.fromInt(onAccountClosureId).getCode());
+                baseDataValidator
+                        .reset()
+                        .parameter(toSavingsAccountIdParamName)
+                        .value(toSavingsAccountId)
+                        .cantBeBlankWhenParameterProvidedIs(onAccountClosureIdParamName,
+                                DepositAccountOnClosureType.fromInt(onAccountClosureId).getCode());
             } else if (accountOnClosureType.isReinvest() && isPreMatureClose) {
                 baseDataValidator.reset().parameter(onAccountClosureIdParamName).value(onAccountClosureId)
                         .failWithCode("reinvest.not.allowed", "Re-Invest is not supported for account pre mature close");
@@ -169,8 +173,8 @@ public class DepositAccountTransactionDataValidator {
         // Validate all string payment detail fields for max length
         final Integer paymentTypeId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
         baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).ignoreIfNull().integerGreaterThanZero();
-        final Set<String> paymentDetailParameters = new HashSet<>(Arrays.asList(transactionAccountNumberParamName,
-                checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
+        final Set<String> paymentDetailParameters = new HashSet<>(Arrays.asList(transactionAccountNumberParamName, checkNumberParamName,
+                routingCodeParamName, receiptNumberParamName, bankNumberParamName));
         for (final String paymentDetailParameterName : paymentDetailParameters) {
             final String paymentDetailParameterValue = this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
             baseDataValidator.reset().parameter(paymentDetailParameterName).value(paymentDetailParameterValue).ignoreIfNull()

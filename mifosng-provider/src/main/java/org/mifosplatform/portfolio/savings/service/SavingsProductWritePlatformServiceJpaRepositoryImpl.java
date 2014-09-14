@@ -94,7 +94,8 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
             this.savingProductRepository.save(product);
 
             // save accounting mappings
-            this.accountMappingWritePlatformService.createSavingProductToGLAccountMapping(product.getId(), command, DepositAccountType.SAVINGS_DEPOSIT);
+            this.accountMappingWritePlatformService.createSavingProductToGLAccountMapping(product.getId(), command,
+                    DepositAccountType.SAVINGS_DEPOSIT);
 
             return new CommandProcessingResultBuilder() //
                     .withEntityId(product.getId()) //
@@ -130,7 +131,8 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
             // accounting related changes
             final boolean accountingTypeChanged = changes.containsKey(accountingRuleParamName);
             final Map<String, Object> accountingMappingChanges = this.accountMappingWritePlatformService
-                    .updateSavingsProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingType(), DepositAccountType.SAVINGS_DEPOSIT);
+                    .updateSavingsProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingType(),
+                            DepositAccountType.SAVINGS_DEPOSIT);
             changes.putAll(accountingMappingChanges);
 
             if (!changes.isEmpty()) {

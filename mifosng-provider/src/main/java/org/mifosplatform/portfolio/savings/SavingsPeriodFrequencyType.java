@@ -58,7 +58,7 @@ public enum SavingsPeriodFrequencyType {
     public boolean isInvalid() {
         return this.value.equals(SavingsPeriodFrequencyType.INVALID.value);
     }
-    
+
     public static Object[] integerValues() {
         final List<Integer> values = new ArrayList<>();
         for (final SavingsPeriodFrequencyType enumType : values()) {

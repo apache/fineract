@@ -8,15 +8,12 @@ package org.mifosplatform.portfolio.savings;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * An enumeration of supported calendar periods used in savings.
  */
 public enum PreClosurePenalInterestOnType {
-    INVALID(0, "preClosurePenalInterestOnType.invalid"),
-    WHOLE_TERM(1, "preClosurePenalInterestOnType.wholeTerm"), //
+    INVALID(0, "preClosurePenalInterestOnType.invalid"), WHOLE_TERM(1, "preClosurePenalInterestOnType.wholeTerm"), //
     TILL_PREMATURE_WITHDRAWAL(2, "preClosurePenalInterestOnType.tillPrematureWithdrawal"); //
-    
 
     private final Integer value;
     private final String code;
@@ -48,7 +45,7 @@ public enum PreClosurePenalInterestOnType {
         }
         return penalInterestType;
     }
-    
+
     public static Object[] integerValues() {
         final List<Integer> values = new ArrayList<>();
         for (final PreClosurePenalInterestOnType enumType : values()) {
@@ -59,15 +56,15 @@ public enum PreClosurePenalInterestOnType {
 
         return values.toArray();
     }
-    
-    public boolean isInvalid(){
+
+    public boolean isInvalid() {
         return this.value.equals(PreClosurePenalInterestOnType.INVALID.value);
     }
-    
+
     public boolean isWholeTerm() {
         return this.value.equals(PreClosurePenalInterestOnType.WHOLE_TERM.getValue());
     }
-    
+
     public boolean isTillPrematureWithdrawal() {
         return this.value.equals(PreClosurePenalInterestOnType.TILL_PREMATURE_WITHDRAWAL.getValue());
     }

@@ -174,7 +174,8 @@ public class FixedDepositAccountsApiResource {
     }
 
     private FixedDepositAccountData populateTemplateAndAssociations(final Long accountId, final FixedDepositAccountData savingsAccount,
-            final boolean staffInSelectedOfficeOnly, final String chargeStatus, final UriInfo uriInfo, final Set<String> mandatoryResponseParameters) {
+            final boolean staffInSelectedOfficeOnly, final String chargeStatus, final UriInfo uriInfo,
+            final Set<String> mandatoryResponseParameters) {
 
         Collection<SavingsAccountTransactionData> transactions = null;
         Collection<SavingsAccountChargeData> charges = null;

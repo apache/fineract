@@ -527,8 +527,10 @@ public class DepositAccountDataValidator {
 
     private void validateRecurringDetailForSubmit(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
 
-        final BigDecimal mandatoryRecommendedDepositAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(mandatoryRecommendedDepositAmountParamName, element);
-        baseDataValidator.reset().parameter(mandatoryRecommendedDepositAmountParamName).value(mandatoryRecommendedDepositAmount).notNull().positiveAmount();
+        final BigDecimal mandatoryRecommendedDepositAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                mandatoryRecommendedDepositAmountParamName, element);
+        baseDataValidator.reset().parameter(mandatoryRecommendedDepositAmountParamName).value(mandatoryRecommendedDepositAmount).notNull()
+                .positiveAmount();
 
         if (this.fromApiJsonHelper.parameterExists(isMandatoryDepositParamName, element)) {
             final Boolean isMandatoryDeposit = this.fromApiJsonHelper.extractBooleanNamed(isMandatoryDepositParamName, element);

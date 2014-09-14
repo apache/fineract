@@ -17,7 +17,7 @@ public interface DepositProductReadPlatformService {
     Collection<DepositProductData> retrieveAllForLookup(final DepositAccountType depositAccountType);
 
     DepositProductData retrieveOne(final DepositAccountType depositAccountType, Long productId);
-    
+
     DepositProductData retrieveOneWithChartSlabs(final DepositAccountType depositAccountType, Long productId);
 
 }

@@ -28,6 +28,7 @@ public class FixedDepositAccountApplicationApprovalUndoCommandHandler implements
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.depositAccountWritePlatformService.undoApplicationApproval(command.entityId(), command, DepositAccountType.FIXED_DEPOSIT);
+        return this.depositAccountWritePlatformService.undoApplicationApproval(command.entityId(), command,
+                DepositAccountType.FIXED_DEPOSIT);
     }
 }

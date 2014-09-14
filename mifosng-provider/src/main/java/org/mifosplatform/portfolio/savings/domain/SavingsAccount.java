@@ -246,7 +246,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     @Column(name = "min_required_balance", scale = 6, precision = 19, nullable = true)
     private BigDecimal minRequiredBalance;
-    
+
     @Temporal(TemporalType.DATE)
     @Column(name = "start_interest_calculation_date")
     protected Date startInterestCalculationDate;
@@ -472,21 +472,21 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         return postingTransation;
     }
-    
-    //Determine the last transaction for given day
-	protected SavingsAccountTransaction findLastTransaction(final LocalDate date) {
 
-		SavingsAccountTransaction savingsTransaction = null;
+    // Determine the last transaction for given day
+    protected SavingsAccountTransaction findLastTransaction(final LocalDate date) {
 
-		for (final SavingsAccountTransaction transaction : this.transactions) {
-			if (transaction.isNotReversed() && transaction.occursOn(date)) {
-				savingsTransaction = transaction;
-				break;
-			}
-		}
+        SavingsAccountTransaction savingsTransaction = null;
 
-		return savingsTransaction;
-	}
+        for (final SavingsAccountTransaction transaction : this.transactions) {
+            if (transaction.isNotReversed() && transaction.occursOn(date)) {
+                savingsTransaction = transaction;
+                break;
+            }
+        }
+
+        return savingsTransaction;
+    }
 
     /**
      * All interest calculation based on END-OF-DAY-BALANCE.
@@ -529,42 +529,34 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final SavingsInterestCalculationDaysInYearType daysInYearType = SavingsInterestCalculationDaysInYearType
                 .fromInt(this.interestCalculationDaysInYearType);
 
-        final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(getStartInterestCalculationDate(),
-                upToInterestCalculationDate, postingPeriodType);
+        final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(
+                getStartInterestCalculationDate(), upToInterestCalculationDate, postingPeriodType);
 
         final List<PostingPeriod> allPostingPeriods = new ArrayList<>();
-        
-		Money periodStartingBalance;
-		if (this.startInterestCalculationDate != null) {
-			LocalDate startInterestCalculationDate = new LocalDate(
-					this.startInterestCalculationDate);
-			final SavingsAccountTransaction transaction = findLastTransaction(startInterestCalculationDate);
 
-			if (transaction == null) {
-				final String defaultUserMessage = "No transactions were found on the specified date "
-						+ getStartInterestCalculationDate().toString()
-						+ " for account number "
-						+ this.accountNumber.toString()
-						+ " and resource id "
-						+ getId();
+        Money periodStartingBalance;
+        if (this.startInterestCalculationDate != null) {
+            LocalDate startInterestCalculationDate = new LocalDate(this.startInterestCalculationDate);
+            final SavingsAccountTransaction transaction = findLastTransaction(startInterestCalculationDate);
 
-				final ApiParameterError error = ApiParameterError
-						.parameterError(
-								"error.msg.savingsaccount.transaction.incorrect.start.interest.calculation.date",
-								defaultUserMessage, "transactionDate",
-								getStartInterestCalculationDate().toString());
+            if (transaction == null) {
+                final String defaultUserMessage = "No transactions were found on the specified date "
+                        + getStartInterestCalculationDate().toString() + " for account number " + this.accountNumber.toString()
+                        + " and resource id " + getId();
 
-				final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-				dataValidationErrors.add(error);
+                final ApiParameterError error = ApiParameterError.parameterError(
+                        "error.msg.savingsaccount.transaction.incorrect.start.interest.calculation.date", defaultUserMessage,
+                        "transactionDate", getStartInterestCalculationDate().toString());
 
-				throw new PlatformApiDataValidationException(
-						dataValidationErrors);
-			}
+                final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                dataValidationErrors.add(error);
 
-			periodStartingBalance = transaction
-					.getRunningBalance(this.currency);
-		} else
-			periodStartingBalance = Money.zero(this.currency);
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+
+            periodStartingBalance = transaction.getRunningBalance(this.currency);
+        } else
+            periodStartingBalance = Money.zero(this.currency);
 
         final SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType.fromInt(this.interestCalculationType);
         final BigDecimal interestRateAsFraction = getEffectiveInterestRateAsFraction(mc, upToInterestCalculationDate);
@@ -749,18 +741,17 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
         return activationLocalDate;
     }
-    
-    //startInterestCalculationDate is set during migration so that there is no
-    //interference with interest posting of previous system
-	public LocalDate getStartInterestCalculationDate() {
-		LocalDate startInterestCalculationLocalDate = null;
-		if (this.startInterestCalculationDate != null) {
-			startInterestCalculationLocalDate = new LocalDate(
-					this.startInterestCalculationDate);
-		} else
-			startInterestCalculationLocalDate = getActivationLocalDate();
-		return startInterestCalculationLocalDate;
-	}
+
+    // startInterestCalculationDate is set during migration so that there is no
+    // interference with interest posting of previous system
+    public LocalDate getStartInterestCalculationDate() {
+        LocalDate startInterestCalculationLocalDate = null;
+        if (this.startInterestCalculationDate != null) {
+            startInterestCalculationLocalDate = new LocalDate(this.startInterestCalculationDate);
+        } else
+            startInterestCalculationLocalDate = getActivationLocalDate();
+        return startInterestCalculationLocalDate;
+    }
 
     public SavingsAccountTransaction withdraw(final SavingsAccountTransactionDTO transactionDTO, final boolean applyWithdrawFee) {
 
