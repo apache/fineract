@@ -19,6 +19,8 @@ import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistory;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleHistoryWritePlatformService;
 import org.mifosplatform.portfolio.loanaccount.rescheduleloan.domain.DefaultLoanReschedulerFactory;
 import org.mifosplatform.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleModel;
 import org.mifosplatform.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
@@ -31,52 +33,54 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class LoanReschedulePreviewPlatformServiceImpl implements LoanReschedulePreviewPlatformService {
-	
-	private final LoanRescheduleRequestRepository loanRescheduleRequestRepository;
-	private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
-	private final ConfigurationDomainService configurationDomainService;
-	private final HolidayRepository holidayRepository;
-	private final WorkingDaysRepositoryWrapper workingDaysRepository;
-	
-	@Autowired
-	public LoanReschedulePreviewPlatformServiceImpl(final LoanRescheduleRequestRepository loanRescheduleRequestRepository, 
-			final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository, 
-			final ConfigurationDomainService configurationDomainService, 
-			final HolidayRepository holidayRepository, 
-			final WorkingDaysRepositoryWrapper workingDaysRepository) {
-		this.loanRescheduleRequestRepository = loanRescheduleRequestRepository;
-		this.applicationCurrencyRepository = applicationCurrencyRepository;
-		this.configurationDomainService = configurationDomainService;
-		this.holidayRepository = holidayRepository;
-		this.workingDaysRepository = workingDaysRepository;
-	}
 
-	@Override
-	public LoanRescheduleModel previewLoanReschedule(Long requestId) {
-		final LoanRescheduleRequest loanRescheduleRequest = this.loanRescheduleRequestRepository.findOne(requestId);
-		
-		if(loanRescheduleRequest == null) {
-			throw new LoanRescheduleRequestNotFoundException(requestId);
-		}
-		
-		Loan loan = loanRescheduleRequest.getLoan();
-		
-		final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
-        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
-                loan.getDisbursementDate().toDate(), HolidayStatusType.ACTIVE.getValue());
+    private final LoanRescheduleRequestRepository loanRescheduleRequestRepository;
+    private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
+    private final ConfigurationDomainService configurationDomainService;
+    private final HolidayRepository holidayRepository;
+    private final WorkingDaysRepositoryWrapper workingDaysRepository;
+    private final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService;
+
+    @Autowired
+    public LoanReschedulePreviewPlatformServiceImpl(final LoanRescheduleRequestRepository loanRescheduleRequestRepository,
+            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
+            final ConfigurationDomainService configurationDomainService, final HolidayRepository holidayRepository,
+            final WorkingDaysRepositoryWrapper workingDaysRepository,
+            final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService) {
+        this.loanRescheduleRequestRepository = loanRescheduleRequestRepository;
+        this.applicationCurrencyRepository = applicationCurrencyRepository;
+        this.configurationDomainService = configurationDomainService;
+        this.holidayRepository = holidayRepository;
+        this.workingDaysRepository = workingDaysRepository;
+        this.loanScheduleHistoryWritePlatformService = loanScheduleHistoryWritePlatformService;
+    }
+
+    @Override
+    public LoanRescheduleModel previewLoanReschedule(Long requestId) {
+        final LoanRescheduleRequest loanRescheduleRequest = this.loanRescheduleRequestRepository.findOne(requestId);
+
+        if (loanRescheduleRequest == null) { throw new LoanRescheduleRequestNotFoundException(requestId); }
+
+        Loan loan = loanRescheduleRequest.getLoan();
+
+        final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan
+                .getDisbursementDate().toDate(), HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail = loan.getLoanRepaymentScheduleDetail();
-		final MonetaryCurrency currency = loanProductRelatedDetail.getCurrency();
+        final MonetaryCurrency currency = loanProductRelatedDetail.getCurrency();
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
-        
+
         final InterestMethod interestMethod = loan.getLoanRepaymentScheduleDetail().getInterestMethod();
         final RoundingMode roundingMode = RoundingMode.HALF_EVEN;
         final MathContext mathContext = new MathContext(8, roundingMode);
-        
-        LoanRescheduleModel loanRescheduleModel = new DefaultLoanReschedulerFactory().reschedule(mathContext, interestMethod, 
-        		loanRescheduleRequest, applicationCurrency, isHolidayEnabled, holidays, workingDays);
-		
-		return loanRescheduleModel;
-	}
+        List<LoanRepaymentScheduleHistory> oldPeriods = this.loanScheduleHistoryWritePlatformService.createLoanScheduleArchive(
+                loan.getRepaymentScheduleInstallments(), loan, loanRescheduleRequest);
+        LoanRescheduleModel loanRescheduleModel = new DefaultLoanReschedulerFactory().reschedule(mathContext, interestMethod,
+                loanRescheduleRequest, applicationCurrency, isHolidayEnabled, holidays, workingDays);
+        LoanRescheduleModel loanRescheduleModelWithOldPeriods = LoanRescheduleModel.createWithSchedulehistory(loanRescheduleModel,
+                oldPeriods);
+        return loanRescheduleModelWithOldPeriods;
+    }
 
 }

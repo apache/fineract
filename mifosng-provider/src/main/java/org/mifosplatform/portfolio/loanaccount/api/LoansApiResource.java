@@ -77,6 +77,7 @@ import org.mifosplatform.portfolio.loanaccount.guarantor.service.GuarantorReadPl
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleHistoryReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
@@ -137,6 +138,7 @@ public class LoansApiResource {
     private final NoteReadPlatformServiceImpl noteReadPlatformService;
     private final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService;
     private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
+    private final LoanScheduleHistoryReadPlatformService loanScheduleHistoryReadPlatformService;
 
     @Autowired
     public LoansApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
@@ -153,7 +155,8 @@ public class LoansApiResource {
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final CalendarReadPlatformService calendarReadPlatformService, final NoteReadPlatformServiceImpl noteReadPlatformService,
             final PortfolioAccountReadPlatformService portfolioAccountReadPlatformServiceImpl,
-            final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService) {
+            final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
+            final LoanScheduleHistoryReadPlatformService loanScheduleHistoryReadPlatformService) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
@@ -175,6 +178,7 @@ public class LoansApiResource {
         this.noteReadPlatformService = noteReadPlatformService;
         this.portfolioAccountReadPlatformService = portfolioAccountReadPlatformServiceImpl;
         this.accountAssociationsReadPlatformService = accountAssociationsReadPlatformService;
+        this.loanScheduleHistoryReadPlatformService = loanScheduleHistoryReadPlatformService;
     }
 
     @GET
@@ -318,8 +322,8 @@ public class LoansApiResource {
         if (!associationParameters.isEmpty()) {
 
             if (associationParameters.contains("all")) {
-                associationParameters.addAll(Arrays.asList("repaymentSchedule", "futureSchedule", "transactions", "charges", "guarantors",
-                        "collateral", "notes", "linkedAccount", "multiDisburseDetails"));
+                associationParameters.addAll(Arrays.asList("repaymentSchedule", "futureSchedule", "originalSchedule", "transactions",
+                        "charges", "guarantors", "collateral", "notes", "linkedAccount", "multiDisburseDetails"));
             }
 
             if (associationParameters.contains("guarantors")) {
@@ -359,6 +363,14 @@ public class LoansApiResource {
                 if (associationParameters.contains("futureSchedule") && loanBasicDetails.isInterestRecalculationEnabled()) {
                     mandatoryResponseParameters.add("futureSchedule");
                     this.calculationPlatformService.updateFutureSchedule(repaymentSchedule, loanId);
+                }
+
+                if (associationParameters.contains("originalSchedule") && loanBasicDetails.isInterestRecalculationEnabled()
+                        && loanBasicDetails.isInterestRecalculationEnabled()) {
+                    mandatoryResponseParameters.add("originalSchedule");
+                    LoanScheduleData loanScheduleData = this.loanScheduleHistoryReadPlatformService.retrieveRepaymentArchiveSchedule(
+                            loanId, repaymentScheduleRelatedData, disbursementData);
+                    loanBasicDetails = LoanAccountData.withOriginalSchedule(loanBasicDetails, loanScheduleData);
                 }
             }
 
