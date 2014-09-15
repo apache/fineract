@@ -427,6 +427,22 @@
 							</tr>
 							<tr>
 								<td></td>
+								<td>savingsaccounts/{accountId}?command=assignFieldOfficer</td>
+								<td><a href="#savingsaccounts_assignSavingsOfficer">Assign Savings Officer</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}?command=unassignFieldOfficer</td>
+								<td><a href="#savingsaccounts_unassignSavingsOfficer">Unassign Savings Officer</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
 								<td>savingsaccounts/{accountId}?command=reject</td>
 								<td><a href="#savingsaccounts_reject">Reject a savings application</a></td>
 								<td></td>
@@ -889,6 +905,22 @@
 								<td></td>
 								<td>loans/{loanId}?command=undoApproval</td>
 								<td><a href="#loans_approve_undo">Undo Loan Application Approval</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>loans/{loanId}?command=assignLoanOfficer</td>
+								<td><a href="#loans_assignLoanOfficer">Assign a Loan Officer</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+								<tr>
+								<td></td>
+								<td>loans/{loanId}?command=unassignLoanOfficer</td>
+								<td><a href="#loans_unassignLoanOfficer">Unassign a Loan Officer</a></td>
 								<td></td>
 								<td></td>
 								<td></td>
@@ -8093,6 +8125,64 @@ Request Body:
 					</code>
 				</div>
 			</div>
+
+        <a id="loans_assignLoanOfficer" name="loans_assignLoanOfficer" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Assign a Loan Officer</h4>
+	        <p>Allows you to assign <i>Loan Officer</i> for existing Loan.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/loans/{loanId}?command=assignLoanOfficer</code>
+	        <code class="method-request">POST loans/1?command=assignLoanOfficer
+Content-Type: application/json
+Request Body:
+{
+	"toLoanOfficerId":2,
+	"assignmentDate":"02 September 2014",
+	"locale":"en",
+	"dateFormat":"dd MMMM yyyy",
+	"fromLoanOfficerId":""
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 2,
+  "clientId": 6,
+  "loanId"	: 3,
+  "resourceId": 3
+}
+	        </code>
+	    </div>
+	</div>
+	
+	<a id="loans_unassignLoanOfficer" name="loans_unassignLoanOfficer" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Unassign a Loan Officer</h4>
+	        <p>Allows you to unassign the <i>Loan Officer</i>.</p>
+	    </div>
+		<div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/loans/{loanId}?command=unassignLoanOfficer</code>
+	        <code class="method-request">POST clients/1?command=unassignLoanOfficer
+Content-Type: application/json
+Request Body:
+{
+	"unassignedDate":"15 September 2014",
+	"locale":"en",
+	"dateFormat":"dd MMMM yyyy"
+}				
+			</code>
+	        <code class="method-response">
+{
+	"officeId":2,
+	"clientId":6,
+	"loanId":3,
+	"resourceId":3
+}
+	        </code>
+	    </div>
+	</div>
 
 			<a id="loans_reject" name="loans_reject" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -18718,6 +18808,58 @@ Request Body:
     },
     "approvedOnDate": ""
   }
+}
+	        </code>
+	    </div>
+	</div>
+
+<a id="savingsaccounts_assignSavingsOfficer" name="savingsaccounts_assignSavingsOfficer" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Assign Savings Officer</h4>
+	        <p>Allows you to assign <i>Savings Officer</i> for existing Savings Account.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=assignFieldOfficer</code>
+	        <code class="method-request">POST savingsaccounts/1?command=assignFieldOfficer
+Content-Type: application/json
+Request Body:
+{
+	"staffId":1
+}
+			</code>
+	        <code class="method-response">
+{
+	"officeId":2,
+	"clientId":8,
+	"resourceId":8,
+	"changes":{"staffId":1}
+}
+	        </code>
+	    </div>
+	</div>
+	
+	<a id="savingsaccounts_unassignSavingsOfficer" name="savingsaccounts_unassignSavingsOfficer" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Unassign Savings Officer</h4>
+	        <p>Allows you to unassign the <i>Savings Officer</i>.</p>
+	    </div>
+		<div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=unassignFieldOfficer</code>
+	        <code class="method-request">POST savingsaccounts/1?command=unassignFieldOfficer
+Content-Type: application/json
+Request Body:
+{
+	"staffId":1
+}				
+			</code>
+	        <code class="method-response">
+{
+	"officeId":2,
+	"clientId":8,
+	"resourceId":8,
+	"changes":{"staffId":1}
 }
 	        </code>
 	    </div>
@@ -32478,6 +32620,22 @@ No Request Body:
 				</tr>
 				<tr>
 					<td></td>
+					<td>loans/{loanId}?command=assignLoanOfficer</td>
+					<td><a href="#loans_assignLoanOfficer">Assign a Loan Officer</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>loans/{loanId}?command=unassignLoanOfficer</td>
+					<td><a href="#loans_unassignLoanOfficer">Unassign a Loan Officer</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
 					<td>loans/{loanId}?command=reject</td>
 					<td><a href="#loans_reject">Reject Loan Application</a></td>
 					<td></td>
@@ -33266,6 +33424,22 @@ No Request Body:
 					<td></td>
 					<td>savingsaccounts/{accountId}?command=undoApproval</td>
 					<td><a href="#savingsaccounts_undoapproval">Undo savings application approval</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>			
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=assignFieldOfficer</td>
+					<td><a href="#savingsaccounts_assignSavingsOfficer">Assign Savings Officer</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=unassignFieldOfficer</td>
+					<td><a href="#savingsaccounts_unassignSavingsOfficer">Unassign Savings Officer</a></td>
 					<td></td>
 					<td></td>
 					<td></td>
