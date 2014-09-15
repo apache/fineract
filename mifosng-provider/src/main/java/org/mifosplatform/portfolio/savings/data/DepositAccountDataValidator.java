@@ -62,7 +62,6 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.portfolio.calendar.domain.CalendarFrequencyType;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.DepositsApiConstants;
 import org.mifosplatform.portfolio.savings.PreClosurePenalInterestOnType;
@@ -562,7 +561,8 @@ public class DepositAccountDataValidator {
             if (!isCalendarInherited) {
                 final Integer frequencyType = this.fromApiJsonHelper
                         .extractIntegerSansLocaleNamed(recurringFrequencyTypeParamName, element);
-                baseDataValidator.reset().parameter(recurringFrequencyTypeParamName).value(frequencyType).notBlank().integerZeroOrGreater();
+                baseDataValidator.reset().parameter(recurringFrequencyTypeParamName).value(frequencyType).notBlank()
+                        .isOneOfTheseValues(SavingsPeriodFrequencyType.integerValues());
 
                 final Integer frequency = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(recurringFrequencyParamName, element);
                 baseDataValidator.reset().parameter(recurringFrequencyParamName).value(frequency).notNull().integerGreaterThanZero();
@@ -609,7 +609,7 @@ public class DepositAccountDataValidator {
         if (this.fromApiJsonHelper.parameterExists(recurringFrequencyTypeParamName, element)) {
             final Integer frequencyType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(recurringFrequencyTypeParamName, element);
             baseDataValidator.reset().parameter(recurringFrequencyTypeParamName).value(frequencyType).notBlank()
-                    .inMinMaxRange(CalendarFrequencyType.getMinValue(), CalendarFrequencyType.getMaxValue());
+                    .isOneOfTheseValues(SavingsPeriodFrequencyType.integerValues());
         }
 
         if (this.fromApiJsonHelper.parameterExists(recurringFrequencyParamName, element)) {
