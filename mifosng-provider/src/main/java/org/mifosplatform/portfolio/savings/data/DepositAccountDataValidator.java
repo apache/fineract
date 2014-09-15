@@ -25,6 +25,7 @@ import static org.mifosplatform.portfolio.savings.DepositsApiConstants.preClosur
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.preClosurePenalInterestParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.recurringFrequencyTypeParamName;
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountNoParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.amountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeIdParamName;
@@ -45,7 +46,6 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequire
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.productIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
-import static org.mifosplatform.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -562,8 +562,7 @@ public class DepositAccountDataValidator {
             if (!isCalendarInherited) {
                 final Integer frequencyType = this.fromApiJsonHelper
                         .extractIntegerSansLocaleNamed(recurringFrequencyTypeParamName, element);
-                baseDataValidator.reset().parameter(recurringFrequencyTypeParamName).value(frequencyType).notBlank()
-                        .inMinMaxRange(CalendarFrequencyType.getMinValue(), CalendarFrequencyType.getMaxValue());
+                baseDataValidator.reset().parameter(recurringFrequencyTypeParamName).value(frequencyType).notBlank().integerZeroOrGreater();
 
                 final Integer frequency = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(recurringFrequencyParamName, element);
                 baseDataValidator.reset().parameter(recurringFrequencyParamName).value(frequency).notNull().integerGreaterThanZero();
