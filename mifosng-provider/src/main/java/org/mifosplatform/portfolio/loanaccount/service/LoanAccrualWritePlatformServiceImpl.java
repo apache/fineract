@@ -156,7 +156,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         }
         int daysToBeAccrued = Days.daysBetween(startDate, tilldate).getDays();
         // if (daysToBeAccrued < 1) { return; }
-        int daysInSchedule = Days.daysBetween(interestStartDate, tilldate).getDays();
+//        int daysInSchedule = Days.daysBetween(interestStartDate, tilldate).getDays();
         /*
          * switch (accrualData.getRepaymentFrequency()) { case MONTHS: int
          * numberOfDaysInMonth =
@@ -175,7 +175,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         BigDecimal interestportion = null;
         BigDecimal feeportion = accrualData.getDueDateFeeIncome();
         BigDecimal penaltyportion = accrualData.getDueDatePenaltyIncome();
-        if (daysInSchedule >= totalNumberOfDays) {
+        if (daysToBeAccrued >= totalNumberOfDays) {
             interestportion = accrualData.getInterestIncome();
         } else {
             double iterest = interestPerDay * daysToBeAccrued;
