@@ -23,8 +23,10 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.portfolio.common.domain.DayOfWeekType;
 import org.mifosplatform.portfolio.common.domain.DaysInMonthType;
 import org.mifosplatform.portfolio.common.domain.DaysInYearType;
+import org.mifosplatform.portfolio.common.domain.NthDayType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
@@ -75,7 +77,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "repayment_period_frequency_enum", nullable = false)
     private PeriodFrequencyType repaymentPeriodFrequencyType;
-
+    
     @Column(name = "number_of_repayments", nullable = false)
     private Integer numberOfRepayments;
 
@@ -237,8 +239,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public PeriodFrequencyType getRepaymentPeriodFrequencyType() {
         return this.repaymentPeriodFrequencyType;
     }
-
-    @Override
+    
+	@Override
     public Integer getNumberOfRepayments() {
         return this.numberOfRepayments;
     }
@@ -313,10 +315,22 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
         final String repaymentFrequencyTypeParamName = "repaymentFrequencyType";
         if (command.isChangeInIntegerParameterNamed(repaymentFrequencyTypeParamName, this.repaymentPeriodFrequencyType.getValue())) {
-            final Integer newValue = command.integerValueOfParameterNamed(repaymentFrequencyTypeParamName);
+            Integer newValue = command.integerValueOfParameterNamed(repaymentFrequencyTypeParamName);
             actualChanges.put(repaymentFrequencyTypeParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(newValue);
+            
+            if(this.repaymentPeriodFrequencyType == PeriodFrequencyType.MONTHS) {
+            	final String repaymentFrequencyNthDayTypeParamName = "repaymentFrequencyNthDayType";
+            	newValue = command.integerValueOfParameterNamed(repaymentFrequencyNthDayTypeParamName);
+            	actualChanges.put(repaymentFrequencyNthDayTypeParamName, newValue);
+            	
+            	final String repaymentFrequencyDayOfWeekTypeParamName = "repaymentFrequencyDayOfWeekType";
+            	newValue = command.integerValueOfParameterNamed(repaymentFrequencyDayOfWeekTypeParamName);
+            	actualChanges.put(repaymentFrequencyDayOfWeekTypeParamName, newValue);
+            	
+                actualChanges.put("locale", localeAsInput);
+            }
         }
 
         final String numberOfRepaymentsParamName = "numberOfRepayments";

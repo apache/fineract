@@ -11,6 +11,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
+import org.mifosplatform.portfolio.common.domain.DayOfWeekType;
 
 public interface ScheduledDateGenerator {
 
@@ -25,7 +26,7 @@ public interface ScheduledDateGenerator {
     LocalDate adjustRepaymentDate(LocalDate dueRepaymentPeriodDate, LoanApplicationTerms loanApplicationTerms, boolean isHolidayEnabled,
             List<Holiday> holidays, WorkingDays workingDays);
 
-    LocalDate getRepaymentPeriodDate(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate);
+    LocalDate getRepaymentPeriodDate(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate, Integer nthDay, DayOfWeekType dayOfWeek);
 
     Boolean isDateFallsInSchedule(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate, LocalDate date);
 

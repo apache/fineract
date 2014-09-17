@@ -2042,7 +2042,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             while (new LocalDate().isAfter(startDate)) {
                 scheduleDates.put(frequencyNunber++, startDate.minusDays(diff.intValue()));
                 LocalDate scheduleDate = scheduledDateGenerator.getRepaymentPeriodDate(PeriodFrequencyType.fromInt(feeFrequency),
-                        chargeDefinition.feeInterval(), startDate);
+                        chargeDefinition.feeInterval(), startDate, null, null);
 
                 startDate = scheduleDate;
             }

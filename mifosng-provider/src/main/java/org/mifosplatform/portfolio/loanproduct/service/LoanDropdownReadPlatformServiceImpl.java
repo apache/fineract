@@ -9,12 +9,14 @@ import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.a
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestCalculationPeriodType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestRateFrequencyType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestRecalculationCompoundingType;
+import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestRecalculationFrequencyType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.loanCycleValueConditionType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.loanTermFrequencyType;
+import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyDayOfWeekType;
+import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyNthDayType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.rescheduleStrategyType;
-import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestRecalculationFrequencyType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +24,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.portfolio.common.domain.NthDayType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
+import org.mifosplatform.portfolio.common.domain.DayOfWeekType;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionProcessingStrategyRepository;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
@@ -89,6 +93,23 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
     }
 
     @Override
+	public List<EnumOptionData> retrieveRepaymentFrequencyOptionsForNthDayOfMonth() {
+       final List<EnumOptionData> repaymentFrequencyOptions = Arrays.asList(repaymentFrequencyNthDayType(NthDayType.ONE),
+    		   repaymentFrequencyNthDayType(NthDayType.TWO), repaymentFrequencyNthDayType(NthDayType.THREE),
+    		   repaymentFrequencyNthDayType(NthDayType.FOUR));
+       return repaymentFrequencyOptions;
+    }
+
+	@Override
+	public List<EnumOptionData> retrieveRepaymentFrequencyOptionsForDaysOfWeek() {
+		
+		final List<EnumOptionData> repaymentFrequencyOptions = Arrays.asList(repaymentFrequencyDayOfWeekType(DayOfWeekType.SUNDAY),
+				repaymentFrequencyDayOfWeekType(DayOfWeekType.MONDAY),repaymentFrequencyDayOfWeekType(DayOfWeekType.TUESDAY),repaymentFrequencyDayOfWeekType(DayOfWeekType.WEDNESDAY),
+				repaymentFrequencyDayOfWeekType(DayOfWeekType.THURSDAY),repaymentFrequencyDayOfWeekType(DayOfWeekType.FRIDAY), repaymentFrequencyDayOfWeekType(DayOfWeekType.SATURDAY));
+	    return repaymentFrequencyOptions;
+	}
+
+    @Override
     public List<EnumOptionData> retrieveInterestRateFrequencyTypeOptions() {
         // support for monthly and annual percentage rate (MPR) and (APR)
         final List<EnumOptionData> interestRateFrequencyTypeOptions = Arrays.asList(interestRateFrequencyType(PeriodFrequencyType.MONTHS),
@@ -149,5 +170,4 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
                 interestRecalculationFrequencyType(RecalculationFrequencyType.MONTHLY));
         return interestRecalculationFrequencyTypeOptions;
     }
-
 }

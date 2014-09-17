@@ -24,6 +24,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -69,6 +71,8 @@ import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeAddedExcep
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.collateral.data.CollateralData;
 import org.mifosplatform.portfolio.collateral.domain.LoanCollateral;
+import org.mifosplatform.portfolio.common.domain.DayOfWeekType;
+import org.mifosplatform.portfolio.common.domain.NthDayType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.group.domain.Group;
@@ -152,6 +156,12 @@ public class Loan extends AbstractPersistable<Long> {
 
     @Embedded
     private LoanProductRelatedDetail loanRepaymentScheduleDetail;
+    
+    @Column(name = "repayment_frequency_nth_day_enum", nullable = false)
+    private Integer repaymentFrequencyNthDayType;
+    
+    @Column(name = "repayment_frequency_day_of_week_enum", nullable = false)
+    private Integer repaymentFrequencyDayOfWeekType;
 
     @Column(name = "term_frequency", nullable = false)
     private Integer termFrequency;
@@ -1540,6 +1550,15 @@ public class Loan extends AbstractPersistable<Long> {
         this.expectedDisbursementDate = loanApplicationTerms.getExpectedDisbursementDate().toDate();
         this.expectedFirstRepaymentOnDate = loanApplicationTerms.getRepaymentStartFromDate();
         this.interestChargedFromDate = loanApplicationTerms.getInterestChargedFromDate();
+        
+        if(loanApplicationTerms.getRepaymentPeriodFrequencyType() == PeriodFrequencyType.MONTHS) {
+        	this.repaymentFrequencyNthDayType = loanApplicationTerms.getNthDay();
+            this.repaymentFrequencyDayOfWeekType = loanApplicationTerms.getWeekDayType().getValue();
+        } else {
+        	this.repaymentFrequencyNthDayType = NthDayType.INVALID.getValue();
+            this.repaymentFrequencyDayOfWeekType = DayOfWeekType.INVALID.getValue();
+        }
+        
 
         updateLoanScheduleDependentDerivedFields();
 
@@ -2068,6 +2087,8 @@ public class Loan extends AbstractPersistable<Long> {
 
         final Integer loanTermFrequency = this.termFrequency;
         final PeriodFrequencyType loanTermPeriodFrequencyType = PeriodFrequencyType.fromInt(this.termPeriodFrequencyType);
+        final NthDayType nthDayType = NthDayType.fromInt(this.repaymentFrequencyNthDayType);
+        final DayOfWeekType dayOfWeekType = DayOfWeekType.fromInt(this.repaymentFrequencyDayOfWeekType);
         final List<DisbursementData> disbursementData = new ArrayList<>();
         for (LoanDisbursementDetails disbursementDetails : this.disbursementDetails) {
             disbursementData.add(disbursementDetails.toData());
@@ -2089,10 +2110,10 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         final LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency,
-                loanTermPeriodFrequencyType, getDisbursementDate(), getExpectedFirstRepaymentOnDate(),
-                calculatedRepaymentsStartingFromDate, getInArrearsTolerance(), this.loanRepaymentScheduleDetail,
-                this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount, disbursementData, this.maxOutstandingLoanBalance,
-                loanVariationTermsData, getInterestChargedFromDate());
+                loanTermPeriodFrequencyType, nthDayType, dayOfWeekType,
+                getDisbursementDate(), getExpectedFirstRepaymentOnDate(), calculatedRepaymentsStartingFromDate,
+                getInArrearsTolerance(), this.loanRepaymentScheduleDetail, this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount,
+                disbursementData, this.maxOutstandingLoanBalance, loanVariationTermsData, getInterestChargedFromDate());
 
         final LoanScheduleModel loanSchedule = loanScheduleGenerator.generate(mc, applicationCurrency, loanApplicationTerms, charges(),
                 isHolidayEnabled, holidays, workingDays);
@@ -4255,6 +4276,9 @@ public class Loan extends AbstractPersistable<Long> {
 
             final Integer loanTermFrequency = this.termFrequency;
             final PeriodFrequencyType loanTermPeriodFrequencyType = PeriodFrequencyType.fromInt(this.termPeriodFrequencyType);
+            final NthDayType nthDayType = NthDayType.fromInt(this.repaymentFrequencyNthDayType);
+            final DayOfWeekType dayOfWeekType = DayOfWeekType.fromInt(this.repaymentFrequencyDayOfWeekType);
+
             final List<DisbursementData> disbursementData = new ArrayList<>();
             for (LoanDisbursementDetails disbursementDetails : this.disbursementDetails) {
                 disbursementData.add(disbursementDetails.toData());
@@ -4277,9 +4301,9 @@ public class Loan extends AbstractPersistable<Long> {
             }
 
             final LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms.assembleFrom(null, loanTermFrequency,
-                    loanTermPeriodFrequencyType, getDisbursementDate(), getExpectedFirstRepaymentOnDate(), null, getInArrearsTolerance(),
-                    this.loanRepaymentScheduleDetail, this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount, disbursementData,
-                    this.maxOutstandingLoanBalance, loanVariationTermsData, getInterestChargedFromDate());
+                    loanTermPeriodFrequencyType, nthDayType, dayOfWeekType, getDisbursementDate(), getExpectedFirstRepaymentOnDate(),
+                    null, getInArrearsTolerance(), this.loanRepaymentScheduleDetail, this.loanProduct.isMultiDisburseLoan(),
+                    this.fixedEmiAmount, disbursementData, this.maxOutstandingLoanBalance, loanVariationTermsData, getInterestChargedFromDate());
 
             installment = loanScheduleGenerator.calculatePrepaymentAmount(this.repaymentScheduleInstallments, getCurrency(),
                     LocalDate.now(), getInterestChargedFromDate(), loanApplicationTerms, mc);
@@ -4432,10 +4456,14 @@ public class Loan extends AbstractPersistable<Long> {
 
         final Integer loanTermFrequency = getTermFrequency();
         final PeriodFrequencyType loanTermPeriodFrequencyType = this.loanRepaymentScheduleDetail.getInterestPeriodFrequencyType();
+        final NthDayType nthDayType = NthDayType.fromInt(this.repaymentFrequencyNthDayType);
+        final DayOfWeekType dayOfWeekType = DayOfWeekType.fromInt(this.repaymentFrequencyDayOfWeekType);
+
 
         final Integer numberOfRepayments = this.loanRepaymentScheduleDetail.getNumberOfRepayments();
         final Integer repaymentEvery = this.loanRepaymentScheduleDetail.getRepayEvery();
         final PeriodFrequencyType repaymentPeriodFrequencyType = this.loanRepaymentScheduleDetail.getRepaymentPeriodFrequencyType();
+        
 
         final AmortizationMethod amortizationMethod = this.loanRepaymentScheduleDetail.getAmortizationMethod();
 
@@ -4476,9 +4504,9 @@ public class Loan extends AbstractPersistable<Long> {
         loanVariationTermsData.add(data);
 
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType,
-                expectedDisbursementDate, repaymentsStartingFromDate, calculatedRepaymentsStartingFromDate, inArrearsToleranceMoney,
-                this.loanRepaymentScheduleDetail, loanProduct.isMultiDisburseLoan(), emiAmount, disbursementData, maxOutstandingBalance,
-                loanVariationTermsData, interestChargedFromDate);
+                nthDayType, dayOfWeekType, expectedDisbursementDate, repaymentsStartingFromDate,
+                calculatedRepaymentsStartingFromDate, inArrearsToleranceMoney, this.loanRepaymentScheduleDetail, loanProduct.isMultiDisburseLoan(), emiAmount,
+                disbursementData, maxOutstandingBalance, loanVariationTermsData, interestChargedFromDate);
     }
 
     /**
@@ -4513,4 +4541,23 @@ public class Loan extends AbstractPersistable<Long> {
             this.termFrequency = termFrequency;
         }
     }
+
+	public Integer getRepaymentFrequencyNthDayType() {
+		return this.repaymentFrequencyNthDayType;
+	}
+
+	public void setRepaymentFrequencyNthDayType(
+			Integer repaymentFrequencyNthDayType) {
+		this.repaymentFrequencyNthDayType = repaymentFrequencyNthDayType;
+	}
+
+	public Integer getRepaymentFrequencyDayOfWeekType() {
+		return this.repaymentFrequencyDayOfWeekType;
+	}
+
+	public void setRepaymentFrequencyDayOfWeekType(
+			Integer repaymentFrequencyDayOfWeekType) {
+		this.repaymentFrequencyDayOfWeekType = repaymentFrequencyDayOfWeekType;
+	}
+    
 }

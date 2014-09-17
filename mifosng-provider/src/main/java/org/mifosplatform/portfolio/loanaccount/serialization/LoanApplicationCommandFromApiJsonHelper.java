@@ -45,7 +45,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
      */
     final Set<String> supportedParameters = new HashSet<>(Arrays.asList("dateFormat", "locale", "id", "clientId", "groupId", "loanType",
             "productId", "principal", "loanTermFrequency", "loanTermFrequencyType", "numberOfRepayments", "repaymentEvery",
-            "repaymentFrequencyType", "interestRatePerPeriod", "amortizationType", "interestType", "interestCalculationPeriodType",
+            "repaymentFrequencyType","repaymentFrequencyNthDayType", "repaymentFrequencyDayOfWeekType", "interestRatePerPeriod", "amortizationType", "interestType", "interestCalculationPeriodType",
             "expectedDisbursementDate", "repaymentsStartingFromDate", "graceOnPrincipalPayment",
             "graceOnInterestPayment",
             "graceOnInterestCharged",
