@@ -123,7 +123,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 transactionstoBeProcessed.add(loanTransaction);
             }
         }
-        
+
         for (final LoanTransaction loanTransaction : transactionstoBeProcessed) {
 
             if (loanTransaction.isRepayment() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
@@ -451,11 +451,13 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 transactionDate = recalculationDates.get(transactionDate);
             }
             final LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
-            newLoanTransaction.resetDerivedComponents();
+            if (newLoanTransaction.isRepayment() || newLoanTransaction.isInterestWaiver() || newLoanTransaction.isRecoveryRepayment()) {
+                newLoanTransaction.resetDerivedComponents();
+            }
             Money unProcessed = processTransaction(newLoanTransaction, currency, installments, amountToProcess);
             if (transactionDate.isAfter(installment.getFromDate()) && transactionDate.isBefore(installment.getDueDate())) {
                 Money earlyPayment = currentInstallmentOutstanding.minus(installment.getTotalOutstanding(currency));
-                if (earlyPayment.isGreaterThanZero()) {
+                if (earlyPayment.isGreaterThanZero() && (newLoanTransaction.isRepayment() || newLoanTransaction.isInterestWaiver() || newLoanTransaction.isRecoveryRepayment())) {
                     earlypaymentDetail.add(new RecalculationDetail(false, transactionDate, null, earlyPayment, false));
                 }
                 currentInstallmentOutstanding = installment.getTotalOutstanding(currency);

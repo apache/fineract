@@ -385,7 +385,8 @@ public class LoanScheduleAssembler {
     }
 
     public LoanRepaymentScheduleInstallment calculatePrepaymentAmount(List<LoanRepaymentScheduleInstallment> installments,
-            MonetaryCurrency currency, LocalDate onDate, LoanApplicationTerms loanApplicationTerms,final Long officeId) {
+            MonetaryCurrency currency, LocalDate onDate, LoanApplicationTerms loanApplicationTerms, final Long officeId,
+            final Set<LoanCharge> loanCharges) {
         final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
         final RoundingMode roundingMode = RoundingMode.HALF_EVEN;
         final MathContext mc = new MathContext(8, roundingMode);
@@ -404,7 +405,7 @@ public class LoanScheduleAssembler {
         }
 
         return loanScheduleGenerator.calculatePrepaymentAmount(installments, currency, nextScheduleDate,
-                loanApplicationTerms.getInterestChargedFromLocalDate(), loanApplicationTerms, mc);
+                loanApplicationTerms.getInterestChargedFromLocalDate(), loanApplicationTerms, mc, loanCharges);
     }
 
     private void validateDisbursementDateIsOnNonWorkingDay(final LocalDate disbursementDate, final WorkingDays workingDays) {

@@ -1991,7 +1991,7 @@ public class Loan extends AbstractPersistable<Long> {
         return isDisbursementMissed;
     }
 
-    private BigDecimal getDisbursedAmount() {
+    public BigDecimal getDisbursedAmount() {
         BigDecimal principal = BigDecimal.ZERO;
         for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
             if (disbursementDetail.actualDisbursementDate() != null) {
@@ -4282,7 +4282,7 @@ public class Loan extends AbstractPersistable<Long> {
                     this.maxOutstandingLoanBalance, loanVariationTermsData, getInterestChargedFromDate());
 
             installment = loanScheduleGenerator.calculatePrepaymentAmount(this.repaymentScheduleInstallments, getCurrency(),
-                    LocalDate.now(), getInterestChargedFromDate(), loanApplicationTerms, mc);
+                    LocalDate.now(), getInterestChargedFromDate(), loanApplicationTerms, mc, charges());
         } else {
             installment = this.getTotalOutstandingOnLoan();
         }

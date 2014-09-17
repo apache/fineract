@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.loanaccount.loanschedule.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -127,6 +128,12 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         if (!loan.repaymentScheduleDetail().isInterestRecalculationEnabled() || loan.isNpa() || !loan.status().isActive()
                 || !loanRepaymentScheduleTransactionProcessor.isInterestFirstRepaymentScheduleTransactionProcessor()) { return; }
 
+        if (loan.loanProduct().isMultiDisburseLoan()) {
+            BigDecimal disbursedAmount = loan.getDisbursedAmount();
+            BigDecimal principalRepaid = loan.getLoanSummary().getTotalPrincipalRepaid();
+            BigDecimal principalWrittenOff = loan.getLoanSummary().getTotalPrincipalWrittenOff();
+            if (disbursedAmount.subtract(principalWrittenOff).subtract(principalRepaid).compareTo(BigDecimal.ZERO) != 1) { return; }
+        }
         MonetaryCurrency currency = loan.getCurrency();
         Money totalPrincipal = Money.zero(currency);
         final List<LoanSchedulePeriodData> futureInstallments = new ArrayList<>();
@@ -147,7 +154,8 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         LoanApplicationTerms loanApplicationTerms = loan.constructLoanApplicationTerms(applicationCurrency,
                 calculatedRepaymentsStartingFromDate, restCalendarInstance);
         LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = this.loanScheduleAssembler.calculatePrepaymentAmount(
-                loan.fetchRepaymentScheduleInstallments(), currency, LocalDate.now(), loanApplicationTerms, loan.getOfficeId());
+                loan.fetchRepaymentScheduleInstallments(), currency, LocalDate.now(), loanApplicationTerms, loan.getOfficeId(),
+                loan.charges());
         Money totalAmount = totalPrincipal.plus(loanRepaymentScheduleInstallment.getFeeChargesOutstanding(currency)).plus(
                 loanRepaymentScheduleInstallment.getPenaltyChargesOutstanding(currency));
         Money interestDue = Money.zero(currency);
