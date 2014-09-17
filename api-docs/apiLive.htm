@@ -1992,6 +1992,22 @@
 								<td></td>
 							</tr>
 							<tr>
+								<td><a href="#configs_hooks">Hooks</a></td>
+								<td>hooks</td>
+								<td><a href="#configs_hooks_create">Create a Hook</a></td>
+								<td><a href="#configs_hooks_retrieve">List Hooks</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>hooks/{hookId}</td>
+								<td></td>
+								<td><a href="#configs_hook_retrieve">Retrieve a Hook</a></td>
+								<td><a href="#configs_hook_update">Update a Hook</a></td>
+								<td><a href="#configs_hook_delete">Delete a Hook</a></td>
+							</tr>
+							<tr>
 								<td><a href="#configs_codes">Codes</a></td>
 								<td>codes</td>
 								<td><a href="#configs_codes_create">Create a Code</a></td>
@@ -2445,6 +2461,10 @@
 							<tr>
 								<td>users/template</td>
 								<td><a href="#users_template">Retrieve User Template</a></td>
+							</tr>
+							<tr>
+								<td>hooks/template</td>
+								<td><a href="#hooks_template">Retrieve Hooks Template</a></td>
 							</tr>
 	                        <tr>
 	                                <td>audits/searchtemplate</td>
@@ -13335,6 +13355,300 @@ Request Body:
 			</code>
 		</div>
 	</div>
+			<a id="configs_hooks" name="configs_hooks" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Hooks</h3>
+					<p>Hooks are a mechanism to trigger custom code on the occurence of events.</p>
+					<p>Each template during hook creation represents custom behaviour on what actions should be taken on the triggering of a registered event for a hook. The action taken might be firing a HTTP request to another server or execute internal code.
+					<p />
+					<p>In order for MifosX to send webhook payloads, your server needs to be accessible from the Internet. MifosX will send along a few HTTP headers to differentiate between event types.</p>
+					<p>X-Mifos-Entity - The entity type that was triggered. <br/>
+					X-Mifos-Action - The action triggered on the entity type. <br/>
+				    X-Mifos-Platform-TenantId - The tenant which experienced the event.</p>
+				</div>
+			</div>
+
+			<a id="configs_hooks_create" name="configs_hooks_create"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create a Hook</h4>
+					<p>The following parameters can be passed for the creation of a hook :- 
+						<ul>
+							<li> name - string - Required. The name of the template that is being called. (See /hooks/template for the list of valid hook names.)</li>
+							<li> isActive - boolean - Determines whether the hook is actually triggered.</li>
+							<li> events - array - Determines what events the hook is triggered for.
+</li>
+							<li> config - hash - Required. Key/value pairs to provide settings for this hook. These settings vary between the templates.</li>
+						<ul></p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/hooks
+					</code>
+					<code class="method-request">
+POST hooks 
+Content-Type: application/json 
+Request Body: 
+{
+  "name": "Web",
+  "isActive": true,
+  "displayName": "Kremlin",
+  "events": [
+      {
+        "actionName": "DISBURSE",
+        "entityName": "LOAN"
+      },
+      {
+        "actionName": "REPAYMENT",
+        "entityName": "LOAN"
+      }
+  ],
+  "config": {
+    "Payload URL": "http://example.com/webhook",
+    "Content Type": "json"
+  }
+}
+					</code>
+					<code class="method-response">
+{ 
+	"resourceId": 4 
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="configs_hooks_retrieve" name="configs_hooks_retrieve"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Hooks</h4>
+					<p>Returns the list of hooks.</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>hooks</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/hooks
+					</code>
+					<code class="method-response">
+[
+  {
+    "id": 1,
+    "name": "Web",
+    "displayName": "Kremlin",
+    "isActive": true,
+    "createdAt": [2014, 9, 16],
+    "updatedAt": [2014, 9, 16],
+    "events": [
+      {
+        "actionName": "DISBURSE",
+        "entityName": "LOAN"
+      },
+      {
+        "actionName": "REPAYMENT",
+        "entityName": "LOAN"
+      }
+    ],
+    "config": [
+      {
+      "fieldName": "Content Type",
+      "fieldValue": "json"
+      },
+      {
+      "fieldName": "Payload URL",
+      "fieldValue": "https://abc.com/api"
+      }
+    ]
+  }
+]
+					</code>
+				</div>
+			</div>
+
+			<a id="configs_hook_retrieve" name="configs_hook_retrieve"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Hook</h4>
+					<p>Returns the details of a Hook.</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>hooks/1</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/hooks/{hookId}
+					</code>
+					<code class="method-response">
+{
+    "id": 1,
+    "name": "Web",
+    "displayName": "Kremlin",
+    "isActive": true,
+    "createdAt": [2014, 9, 16],
+    "updatedAt": [2014, 9, 16],
+    "events": [
+      {
+        "actionName": "DISBURSE",
+        "entityName": "LOAN"
+      },
+      {
+        "actionName": "REPAYMENT",
+        "entityName": "LOAN"
+      }
+    ],
+    "config": [
+      {
+      "fieldName": "Content Type",
+      "fieldValue": "json"
+      },
+      {
+      "fieldName": "Payload URL",
+      "fieldValue": "https://abc.com/api"
+      }
+    ]
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="configs_hook_update" name="configs_hook_update"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Hook</h4>
+					<p>Updates the details of a hook.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/hooks/{hookId}
+					</code>
+					<code class="method-request">
+PUT hooks/4
+Content-Type: application/json 
+Request Body: 
+{
+  "name": "Web",
+  "isActive": true,
+  "displayName": "Local SMS Provider",
+  "events": [
+      {
+        "actionName": "DISBURSE",
+        "entityName": "LOAN"
+      }
+  ],
+  "config": {
+    "Payload URL": "http://changed.com/sms",
+    "Content Type": "json"
+  }
+}
+					</code>
+					<code class="method-response">
+{
+	"resourceId": 4,
+	"changes": {
+		"displayName": "Local SMS Provider",
+		"events": [
+			{
+				"actionName": "DISBURSE",
+				"entityName": "LOAN"
+			}
+		],
+		"config": {
+			"Payload URL": "http://changed.com/sms",
+			"Content Type": "json"
+		}
+	}
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="configs_hook_delete" name="configs_hook_delete"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete a Hook</h4>
+					<p>Deletes a hook.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/hooks/{hookId}
+					</code>
+					<code class="method-request">
+DELETE hooks/4 
+Content-Type: application/json
+					</code>
+					<code class="method-response">
+{ 
+	"resourceId": 4 
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="hooks_template" name="hooks_template" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Hooks Template</h4>
+					<p>This is a convenience resource. It can be useful when
+						building maintenance user interface screens for client
+						applications. The template data returned consists of any or all
+						of:
+					<ul>
+						<li class=normalli>Field Defaults</li>
+						<li class=normalli>Allowed Value Lists</li>
+					</ul>
+					</p>
+					<p>Example Request:</p>
+					<div class=apiClick>hooks/template</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/hooks/template
+					</code>
+					<code class="method-response">
+{
+    "templates": [
+       {
+         "name": "Web",
+         "schema": [
+            {
+                "fieldName": "Content Type",
+                "fieldType": "string",
+                "optional": true,
+                "placeholder": "json / form"
+            },
+            {
+                "fieldName": "Payload URL",
+                "fieldType": "string",
+                "optional": false
+            }
+         ]
+       },
+       {
+       },...
+    ],
+    "groupings": [
+        {
+          "name": "jobs",
+          "entities": [
+             {
+                "name": "SCHEDULER",
+                "actions": ["EXECUTEJOB", "UPDATE"]
+             },
+             {
+             },...
+          ]
+        },
+        {
+        },...
+    ]
+}
+					</code>
+				</div>
+			</div>
 
 			<a id="configs_codes" name="configs_codes" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">

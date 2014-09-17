@@ -302,6 +302,30 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createHook() {
+        this.actionName = "CREATE";
+        this.entityName = "HOOK";
+        this.entityId = null;
+        this.href = "/hooks/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateHook(final Long hookId) {
+        this.actionName = "UPDATE";
+        this.entityName = "HOOK";
+        this.entityId = hookId;
+        this.href = "/hooks/" + hookId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteHook(final Long hookId) {
+        this.actionName = "DELETE";
+        this.entityName = "HOOK";
+        this.entityId = hookId;
+        this.href = "/hooks/" + hookId;
+        return this;
+    }
+
     public CommandWrapperBuilder createCharge() {
         this.actionName = "CREATE";
         this.entityName = "CHARGE";

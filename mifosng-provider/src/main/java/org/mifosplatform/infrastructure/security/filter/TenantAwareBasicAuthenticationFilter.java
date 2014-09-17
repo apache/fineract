@@ -53,7 +53,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
 
     private static boolean firstRequestProcessed = false;
     private final static Logger logger = LoggerFactory.getLogger(TenantAwareBasicAuthenticationFilter.class);
-
+    
     private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
     private final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;
     private final ConfigurationDomainService configurationDomainService;
@@ -103,8 +103,16 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                 final MifosPlatformTenant tenant = this.basicAuthTenantDetailsService.loadTenantById(tenantIdentifier);
 
                 ThreadLocalContextUtil.setTenant(tenant);
+                String authToken = request.getHeader("Authorization");
+
+                if (authToken != null && authToken.startsWith("Basic ")) {
+                    ThreadLocalContextUtil.setAuthToken(authToken.replaceFirst("Basic ", ""));
+                }
 
                 if (!firstRequestProcessed) {
+                	final String baseUrl = request.getRequestURL().toString().replace(request.getPathInfo(), "/");
+                	System.setProperty("baseUrl", baseUrl);
+                	
                     final boolean ehcacheEnabled = this.configurationDomainService.isEhcacheEnabled();
                     if (ehcacheEnabled) {
                         this.cacheWritePlatformService.switchToCache(CacheType.SINGLE_NODE);
@@ -114,7 +122,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                     TenantAwareBasicAuthenticationFilter.firstRequestProcessed = true;
                 }
             }
-
+            
             super.doFilter(req, res, chain);
         } catch (final InvalidTenantIdentiferException e) {
             // deal with exception at low level
