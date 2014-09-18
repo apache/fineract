@@ -122,7 +122,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         int daysCalcForInstallmentNumber = 0;
         LocalDate scheduleStartDateAsPerFrequency = periodStartDate;
         while (!outstandingBalance.isZero()) {
-            isFirstRepayment = false;
             // to insert a new schedule between actual schedule to collect
             // interest(till the transaction date) first on a payment
             boolean recalculatedInterestComponent = false;
@@ -143,6 +142,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             if (interestonlyPeriodDetail == null) {
                 actualRepaymentDate = this.scheduledDateGenerator.generateNextRepaymentDate(actualRepaymentDate, loanApplicationTerms,
                         isFirstRepayment);
+                isFirstRepayment = false;
                 scheduledDueDate = this.scheduledDateGenerator.adjustRepaymentDate(actualRepaymentDate, loanApplicationTerms,
                         isHolidayEnabled, holidays, workingDays);
                 scheduledDueDateAsPerFrequency = scheduledDueDate;
@@ -1135,9 +1135,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             if (scheduleInstallments.size() == 1) {
                 LoanRepaymentScheduleInstallment installment = scheduleInstallments.get(0);
                 if (installment.getInstallmentNumber() == 1
-                        && (installment.getDueDate().isAfter(loanTransaction.getTransactionDate()) || (installment
+                        && (installment.getDueDate().isAfter(processTransactionsForInterestCompound) || (installment
                                 .isRecalculatedInterestComponent() && installment.getDueDate()
-                                .isEqual(loanTransaction.getTransactionDate())))) {
+                                .isEqual(processTransactionsForInterestCompound)))) {
                     isBeforeFirstInstallment = true;
                 }
             }
@@ -1395,11 +1395,13 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
     private LocalDate getNextRestScheduleDate(LocalDate startDate, LoanApplicationTerms loanApplicationTerms,
             final boolean isHolidayEnabled, final List<Holiday> holidays, final WorkingDays workingDays) {
-        CalendarInstance calendarInstance = loanApplicationTerms.getRestCalendarInstance();
-        LocalDate nextScheduleDate = CalendarUtils.getNextScheduleDate(calendarInstance.getCalendar(), startDate);
+        LocalDate nextScheduleDate = null;
         if (loanApplicationTerms.getRecalculationFrequencyType().isSameAsRepayment()) {
-            nextScheduleDate = this.scheduledDateGenerator.adjustRepaymentDate(nextScheduleDate, loanApplicationTerms, isHolidayEnabled,
-                    holidays, workingDays);
+            nextScheduleDate = this.scheduledDateGenerator.generateNextScheduleDateStartingFromDisburseDate(startDate,
+                    loanApplicationTerms, isHolidayEnabled, holidays, workingDays);
+        } else {
+            CalendarInstance calendarInstance = loanApplicationTerms.getRestCalendarInstance();
+            nextScheduleDate = CalendarUtils.getNextScheduleDate(calendarInstance.getCalendar(), startDate);
         }
 
         return nextScheduleDate;

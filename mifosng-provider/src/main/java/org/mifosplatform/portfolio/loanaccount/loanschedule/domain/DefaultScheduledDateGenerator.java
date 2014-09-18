@@ -104,25 +104,25 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                 isScheduledDate = (diff % repaidEvery) == 0;
             break;
             case WEEKS:
-                int weekDiff =Weeks.weeksBetween(startDate, date).getWeeks();
+                int weekDiff = Weeks.weeksBetween(startDate, date).getWeeks();
                 isScheduledDate = (weekDiff % repaidEvery) == 0;
-                if(isScheduledDate){
+                if (isScheduledDate) {
                     LocalDate modifiedDate = startDate.plusWeeks(weekDiff);
                     isScheduledDate = modifiedDate.isEqual(date);
                 }
             break;
             case MONTHS:
-                int monthDiff =Months.monthsBetween(startDate, date).getMonths();
+                int monthDiff = Months.monthsBetween(startDate, date).getMonths();
                 isScheduledDate = (monthDiff % repaidEvery) == 0;
-                if(isScheduledDate){
+                if (isScheduledDate) {
                     LocalDate modifiedDate = startDate.plusMonths(monthDiff);
                     isScheduledDate = modifiedDate.isEqual(date);
                 }
             break;
             case YEARS:
-                int yearDiff =Years.yearsBetween(startDate, date).getYears();
+                int yearDiff = Years.yearsBetween(startDate, date).getYears();
                 isScheduledDate = (yearDiff % repaidEvery) == 0;
-                if(isScheduledDate){
+                if (isScheduledDate) {
                     LocalDate modifiedDate = startDate.plusYears(yearDiff);
                     isScheduledDate = modifiedDate.isEqual(date);
                 }
@@ -157,5 +157,19 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         }
 
         return idealDisbursementDate;
+    }
+
+    @Override
+    public LocalDate generateNextScheduleDateStartingFromDisburseDate(LocalDate lastRepaymentDate,
+            LoanApplicationTerms loanApplicationTerms, boolean isHolidayEnabled, List<Holiday> holidays, WorkingDays workingDays) {
+
+        LocalDate generatedDate = loanApplicationTerms.getExpectedDisbursementDate();
+        boolean isFirstRepayment = true;
+        while (!generatedDate.isAfter(lastRepaymentDate)) {
+            generatedDate = generateNextRepaymentDate(generatedDate, loanApplicationTerms, isFirstRepayment);
+            isFirstRepayment = false;
+        }
+        generatedDate = adjustRepaymentDate(generatedDate, loanApplicationTerms, isHolidayEnabled, holidays, workingDays);
+        return generatedDate;
     }
 }
