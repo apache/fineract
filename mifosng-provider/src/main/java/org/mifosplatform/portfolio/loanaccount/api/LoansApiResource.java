@@ -365,8 +365,7 @@ public class LoansApiResource {
                     this.calculationPlatformService.updateFutureSchedule(repaymentSchedule, loanId);
                 }
 
-                if (associationParameters.contains("originalSchedule") && loanBasicDetails.isInterestRecalculationEnabled()
-                        && loanBasicDetails.isInterestRecalculationEnabled()) {
+                if (associationParameters.contains("originalSchedule") && loanBasicDetails.isInterestRecalculationEnabled()) {
                     mandatoryResponseParameters.add("originalSchedule");
                     LoanScheduleData loanScheduleData = this.loanScheduleHistoryReadPlatformService.retrieveRepaymentArchiveSchedule(
                             loanId, repaymentScheduleRelatedData, disbursementData);

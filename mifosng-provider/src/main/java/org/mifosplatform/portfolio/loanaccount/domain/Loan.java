@@ -1820,24 +1820,11 @@ public class Loan extends AbstractPersistable<Long> {
         validateDisbursementDateIsOnNonWorkingDay(workingDays, allowTransactionsOnNonWorkingDay);
         validateDisbursementDateIsOnHoliday(allowTransactionsOnHoliday, holidays);
 
-        BigDecimal emiAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.emiAmountParameterName);
-        boolean isEmiAmountChanged = false;
-        if (this.loanProduct.isMultiDisburseLoan() && emiAmount != null && emiAmount.compareTo(retriveLastEmiAmount()) != 0) {
-            LoanTermVariations loanVariationTerms = new LoanTermVariations(LoanTermVariationType.EMI_AMOUNT.getValue(),
-                    actualDisbursementDate.toDate(), emiAmount, this);
-            this.loanTermVariations.add(loanVariationTerms);
-            isEmiAmountChanged = true;
-        }
-
         if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()
                 && (fetchRepaymentScheduleInstallment(1).getDueDate().isBefore(LocalDate.now()) || isDisbursementMissed())) {
             LocalDate recalculateFrom = null;
             regenerateRepaymentScheduleWithInterestRecalculation(loanScheduleFactory, currency, calculatedRepaymentsStartingFromDate,
                     isHolidayEnabled, holidays, workingDays, calendarInstanceForInterestRecalculation, recalculateFrom);
-        } else if (isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate) || recalculateSchedule
-                || isEmiAmountChanged) {
-            regenerateRepaymentSchedule(loanScheduleFactory, currency, calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays,
-                    workingDays);
         }
 
         updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
@@ -1861,6 +1848,24 @@ public class Loan extends AbstractPersistable<Long> {
 
         return reprocessTransactionForDisbursement();
 
+    }
+
+    public void regenerateScheduleOnDisbursement(final LoanScheduleGeneratorFactory loanScheduleFactory,
+            final ApplicationCurrency currency, final LocalDate calculatedRepaymentsStartingFromDate, final boolean isHolidayEnabled,
+            final List<Holiday> holidays, final WorkingDays workingDays, final boolean recalculateSchedule,
+            final LocalDate actualDisbursementDate, BigDecimal emiAmount) {
+        boolean isEmiAmountChanged = false;
+        if (this.loanProduct.isMultiDisburseLoan() && emiAmount != null && emiAmount.compareTo(retriveLastEmiAmount()) != 0) {
+            LoanTermVariations loanVariationTerms = new LoanTermVariations(LoanTermVariationType.EMI_AMOUNT.getValue(),
+                    actualDisbursementDate.toDate(), emiAmount, this);
+            this.loanTermVariations.add(loanVariationTerms);
+            isEmiAmountChanged = true;
+        }
+
+        if (isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate) || recalculateSchedule || isEmiAmountChanged) {
+            regenerateRepaymentSchedule(loanScheduleFactory, currency, calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays,
+                    workingDays);
+        }
     }
 
     public boolean canDisburse(final LocalDate actualDisbursementDate) {
@@ -1991,7 +1996,7 @@ public class Loan extends AbstractPersistable<Long> {
         return isDisbursementMissed;
     }
 
-    private BigDecimal getDisbursedAmount() {
+    public BigDecimal getDisbursedAmount() {
         BigDecimal principal = BigDecimal.ZERO;
         for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
             if (disbursementDetail.actualDisbursementDate() != null) {
@@ -4282,7 +4287,7 @@ public class Loan extends AbstractPersistable<Long> {
                     this.maxOutstandingLoanBalance, loanVariationTermsData, getInterestChargedFromDate());
 
             installment = loanScheduleGenerator.calculatePrepaymentAmount(this.repaymentScheduleInstallments, getCurrency(),
-                    LocalDate.now(), getInterestChargedFromDate(), loanApplicationTerms, mc);
+                    LocalDate.now(), getInterestChargedFromDate(), loanApplicationTerms, mc, charges());
         } else {
             installment = this.getTotalOutstandingOnLoan();
         }

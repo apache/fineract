@@ -78,11 +78,12 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
         RecalculationFrequencyType frequencyType = RecalculationFrequencyType.fromInt(recurrenceFrequency);
         Date recurrenceOnDate = null;
         if (recurrenceOnLocalDate != null) {
-            if (frequencyType.isSameAsRepayment()) {
-                recurrenceInterval = 0;
-            } else {
+            if (!frequencyType.isSameAsRepayment()) {
                 recurrenceOnDate = recurrenceOnLocalDate.toDate();
             }
+        }
+        if (frequencyType.isSameAsRepayment()) {
+            recurrenceInterval = 0;
         }
 
         return new LoanProductInterestRecalculationDetails(interestRecalculationCompoundingMethod, loanRescheduleStrategyMethod,

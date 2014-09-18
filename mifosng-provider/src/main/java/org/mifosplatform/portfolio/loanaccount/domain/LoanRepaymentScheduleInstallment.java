@@ -436,7 +436,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money waivedFeeChargesPortionOfTransaction = Money.zero(currency);
 
-        final Money feesDue = getPenaltyChargesOutstanding(currency);
+        final Money feesDue = getFeeChargesOutstanding(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(feesDue)) {
             this.feeChargesWaived = getFeeChargesWaived(currency).plus(feesDue).getAmount();
             waivedFeeChargesPortionOfTransaction = waivedFeeChargesPortionOfTransaction.plus(feesDue);

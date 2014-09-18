@@ -53,12 +53,14 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             final LoanApplicationTerms loanApplicationTerms, final Set<LoanCharge> loanCharges, final boolean isHolidayEnabled,
             final List<Holiday> holidays, final WorkingDays workingDays) {
         final List<RecalculationDetail> diffAmt = null;
-        return generate(mc, applicationCurrency, loanApplicationTerms, loanCharges, isHolidayEnabled, holidays, workingDays, diffAmt);
+        final LocalDate prepayDate = null;
+        return generate(mc, applicationCurrency, loanApplicationTerms, loanCharges, isHolidayEnabled, holidays, workingDays, diffAmt,
+                prepayDate);
     }
 
     private LoanScheduleModel generate(final MathContext mc, final ApplicationCurrency applicationCurrency,
             final LoanApplicationTerms loanApplicationTerms, final Set<LoanCharge> loanCharges, final boolean isHolidayEnabled,
-            final List<Holiday> holidays, final WorkingDays workingDays, List<RecalculationDetail> diffAmt) {
+            final List<Holiday> holidays, final WorkingDays workingDays, List<RecalculationDetail> diffAmt, LocalDate prepayDate) {
 
         // 1. generate list of proposed schedule due dates
         final LocalDate loanEndDate = this.scheduledDateGenerator.getLastRepaymentDate(loanApplicationTerms, isHolidayEnabled, holidays,
@@ -191,8 +193,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             if (loanApplicationTerms.isMultiDisburseLoan()) {
                 loanApplicationTerms.setFixedEmiAmountForPeriod(scheduledDueDate);
                 final Collection<DisbursementData> disbursementDatas = new ArrayList<>();
-                disburseAmt = disbursementForPeriod(loanApplicationTerms, periodStartDate, scheduledDueDate, disbursementDatas,
-                        diffAmt != null);
+                LocalDate tillDate = scheduledDueDate;
+                if (prepayDate != null && prepayDate.isBefore(tillDate)) {
+                    tillDate = prepayDate;
+                }
+                disburseAmt = disbursementForPeriod(loanApplicationTerms, periodStartDate, tillDate, disbursementDatas, diffAmt != null);
                 principalDisbursed = principalDisbursed.plus(disburseAmt);
                 loanApplicationTerms.setPrincipal(loanApplicationTerms.getPrincipal().plus(disburseAmt));
                 outstandingBalance = outstandingBalance.plus(disburseAmt);
@@ -207,11 +212,14 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     final LoanScheduleModelDisbursementPeriod disbursementPeriod = LoanScheduleModelDisbursementPeriod.disbursement(
                             disbursementData.disbursementDate(), disbursedAmt, chargesDueAtTimeOfDisbursement);
                     periods.add(disbursementPeriod);
-                    if (disbursementData.disbursementDate().isAfter(periodStartDateApplicableForInterest)) {
+
+                    if (disbursementData.disbursementDate().isAfter(periodStartDateApplicableForInterest)
+                            && (prepayDate == null || prepayDate.isAfter(disbursementData.disbursementDate()) || disbursementData
+                                    .isDisbursed())) {
                         interestToBeAdded = interestToBeAdded.add(calculateInterestForSpecificDays(mc, loanApplicationTerms, periodNumber,
                                 totalOutstandingInterestPaymentDueToGrace, daysInPeriodApplicableInFullInstallment,
                                 interestCalculationGraceOnRepaymentPeriodFraction, disbursedAmt, disbursementData.disbursementDate(),
-                                scheduledDueDate));
+                                tillDate));
                     }
                 }
             }
@@ -224,14 +232,14 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     case REDUCE_EMI_AMOUNT:
                         loanApplicationTerms.setFixedEmiAmount(null);
                         outstandingBalance = outstandingBalance.minus(reducePrincipal);
-                        balanceForcalculation = outstandingBalance;
+                        balanceForcalculation = balanceForcalculation.minus(reducePrincipal);
                         totalCumulativePrincipal = totalCumulativePrincipal.plus(reducePrincipal);
                         reducePrincipal = reducePrincipal.zero();
                     break;
                     case REDUCE_NUMBER_OF_INSTALLMENTS:
                         loanApplicationTerms.setFixedEmiAmount(fixedEmiAmount.getAmount());
                         outstandingBalance = outstandingBalance.minus(reducePrincipal);
-                        balanceForcalculation = outstandingBalance;
+                        balanceForcalculation = balanceForcalculation.minus(reducePrincipal);
                         totalCumulativePrincipal = totalCumulativePrincipal.plus(reducePrincipal);
                         reducePrincipal = reducePrincipal.zero();
                     break;
@@ -1022,11 +1030,15 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         List<LoanRepaymentScheduleInstallment> installments = previousSchedule;
         List<LoanRepaymentScheduleInstallment> removeInstallments = new ArrayList<>();
         MonetaryCurrency currency = loanApplicationTerms.getPrincipal().getCurrency();
-        LoanTransaction preCloseTransaction = getPreclosureTransaction(transactions, installments, currency, loanApplicationTerms, mc);
+        LoanTransaction preCloseTransaction = getPreclosureTransaction(transactions, installments, currency, loanApplicationTerms, mc,
+                loanCharges);
+        Integer updatedInstallmentNumber = 1;
         for (LoanRepaymentScheduleInstallment installment : installments) {
             if (installment.isRecalculatedInterestComponent() && recalculateFrom != null
                     && !recalculateFrom.isAfter(installment.getDueDate())) {
                 removeInstallments.add(installment);
+            } else {
+                installment.updateInstallmentNumber(updatedInstallmentNumber++);
             }
         }
         installments.removeAll(removeInstallments);
@@ -1097,12 +1109,15 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             final List<RecalculationDetail> recalculationDetails, final Map<LocalDate, RecalculationDetail> retainRecalculationDetails,
             boolean recalculate, int installmentNumber, List<LoanTransaction> processTransactions, LoanTransaction preCloseTransaction) {
         LoanTransaction loanTransaction = processTransactions.remove(processTransactions.size() - 1);
-        if (loanTransaction == preCloseTransaction) {
+        if (!(loanTransaction.isRepayment() || loanTransaction.isInterestWaiver())) {
             processTransactions.add(loanTransaction);
             return loanScheduleModel;
         }
-        LocalDate processTransactionsForInterestCompound = getNextRestScheduleDate(loanTransaction.getTransactionDate().minusDays(1),
-                loanApplicationTerms, isHolidayEnabled, holidays, workingDays);
+        LocalDate processTransactionsForInterestCompound = loanTransaction.getTransactionDate();
+        if (loanTransaction != preCloseTransaction) {
+            processTransactionsForInterestCompound = getNextRestScheduleDate(loanTransaction.getTransactionDate().minusDays(1),
+                    loanApplicationTerms, isHolidayEnabled, holidays, workingDays);
+        }
         List<LoanRepaymentScheduleInstallment> scheduleInstallments = getInstallmentsForInterestCompound(installments,
                 processTransactionsForInterestCompound, retainRecalculationDetails.keySet());
 
@@ -1214,7 +1229,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             final List<Holiday> holidays, final WorkingDays workingDays, final List<LoanTransaction> transactions,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final int installmentNumber,
             final List<LoanRepaymentScheduleInstallment> installments, final List<RecalculationDetail> recalculationDetails,
-            final int skipRecalculation, LoanTransaction preCloseTransaction) {
+            final int skipRecalculation, final LoanTransaction preCloseTransaction) {
         boolean processRecalculate = false;
         int processedInstallmentNumber = installmentNumber;
 
@@ -1324,8 +1339,12 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         LoanScheduleModel model = null;
         recalculationDetails.addAll(diffAmt);
         if (processRecalculate) {
+            LocalDate prepayDate = null;
+            if (preCloseTransaction != null) {
+                prepayDate = preCloseTransaction.getTransactionDate();
+            }
             model = generate(mc, applicationCurrency, loanApplicationTerms, loanCharges, isHolidayEnabled, holidays, workingDays,
-                    recalculationDetails);
+                    recalculationDetails, prepayDate);
         }
         return new RecalculatedSchedule(model, processedInstallmentNumber);
     }
@@ -1392,7 +1411,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     @Override
     public LoanRepaymentScheduleInstallment calculatePrepaymentAmount(final List<LoanRepaymentScheduleInstallment> installments,
             MonetaryCurrency currency, final LocalDate onDate, LocalDate interestChargedFromLocalDate,
-            LoanApplicationTerms loanApplicationTerms, MathContext mc) {
+            LoanApplicationTerms loanApplicationTerms, MathContext mc, Set<LoanCharge> charges) {
         Money feeCharges = Money.zero(currency);
         Money penaltyCharges = Money.zero(currency);
         Money totalPrincipal = Money.zero(currency);
@@ -1400,12 +1419,21 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         LocalDate calculateInterestFrom = onDate;
         LocalDate dueDate = onDate;
         LocalDate repaymentDueDate = null;
+        LocalDate periodStartDate = onDate;
         boolean isInterestRepayment = false;
         Money inerestForCurrentInstallment = Money.zero(currency);
         Money principalOutstanding = Money.zero(currency);
         Integer periodNumber = 0;
         LocalDate lastDueDate = loanApplicationTerms.getExpectedDisbursementDate();
         for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
+            if (!currentInstallment.getDueDate().isAfter(LocalDate.now())) {
+                calculateInterestFrom = currentInstallment.getFromDate();
+                if (currentInstallment.isRecalculatedInterestComponent()) {
+                    isInterestRepayment = true;
+                } else {
+                    isInterestRepayment = false;
+                }
+            }
             if (currentInstallment.isNotFullyPaidOff()) {
                 if (!currentInstallment.getDueDate().isAfter(onDate)) {
                     totalPrincipal = totalPrincipal.plus(currentInstallment.getPrincipalOutstanding(currency));
@@ -1417,8 +1445,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     totalPrincipal = totalPrincipal.minus(currentInstallment.getPrincipalCompleted(currency));
                     totalInterest = totalInterest.minus(currentInstallment.getInterestPaid(currency)).minus(
                             currentInstallment.getInterestWaived(currency));
-                    if (currentInstallment.getFromDate().isBefore(calculateInterestFrom)) {
-                        calculateInterestFrom = currentInstallment.getFromDate();
+                    if (currentInstallment.getFromDate().isBefore(periodStartDate)) {
+                        if (!isInterestRepayment) {
+                            calculateInterestFrom = currentInstallment.getFromDate();
+                        }
+                        periodStartDate = currentInstallment.getFromDate();
                         dueDate = currentInstallment.getDueDate();
                         inerestForCurrentInstallment = currentInstallment.getInterestCharged(currency);
                         if (currentInstallment.isRecalculatedInterestComponent()) {
@@ -1443,8 +1474,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             calculateInterestFrom = interestChargedFromLocalDate;
         }
         Money interest = Money.zero(currency);
-
-        if (calculateInterestFrom.isBefore(onDate)) {
+        LocalDate firstRepaymentdate = this.scheduledDateGenerator.generateNextRepaymentDate(
+                loanApplicationTerms.getExpectedDisbursementDate(), loanApplicationTerms, true);
+        final LocalDate idealDisbursementDate = this.scheduledDateGenerator.idealDisbursementDateBasedOnFirstRepaymentDate(
+                loanApplicationTerms.getLoanTermPeriodFrequencyType(), loanApplicationTerms.getRepaymentEvery(), firstRepaymentdate);
+        if (calculateInterestFrom.isBefore(onDate) && !periodStartDate.isBefore(idealDisbursementDate)) {
             boolean useDailyInterest = false;
             if (repaymentDueDate == null) {
                 if (isInterestRepayment) {
@@ -1453,7 +1487,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 repaymentDueDate = dueDate;
             }
             int daysInPeriodApplicableForInterest = Days.daysBetween(calculateInterestFrom, repaymentDueDate).getDays();
-            int days = Days.daysBetween(calculateInterestFrom, onDate).getDays();
+            int days = Days.daysBetween(periodStartDate, onDate).getDays();
+            int actualPeriodDays = Days.daysBetween(periodStartDate, repaymentDueDate).getDays();
             BigDecimal interestForInstallment = BigDecimal.ZERO;
             if (useDailyInterest) {
                 interestForInstallment = loanApplicationTerms.interestRateFor(this.paymentPeriodsInOneYearCalculator, mc,
@@ -1462,11 +1497,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 interest = interest.plus(calculateInterestForDays(daysInPeriodApplicableForInterest, interestForInstallment, days));
 
             } else {
-                LocalDate firstRepaymentdate = this.scheduledDateGenerator.generateNextRepaymentDate(
-                        loanApplicationTerms.getExpectedDisbursementDate(), loanApplicationTerms, true);
-                final LocalDate idealDisbursementDate = this.scheduledDateGenerator
-                        .idealDisbursementDateBasedOnFirstRepaymentDate(loanApplicationTerms.getLoanTermPeriodFrequencyType(),
-                                loanApplicationTerms.getRepaymentEvery(), firstRepaymentdate);
+
                 LocalDate periodStartDateApplicableForInterest = calculateInterestFrom;
                 if (calculateInterestFrom.isBefore(idealDisbursementDate)) {
                     if (loanApplicationTerms.getInterestChargedFromLocalDate() != null) {
@@ -1481,64 +1512,65 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         .calculatePortionOfRepaymentPeriodInterestChargingGrace(periodStartDateApplicableForInterest, repaymentDueDate,
                                 loanApplicationTerms.getInterestChargedFromLocalDate(),
                                 loanApplicationTerms.getLoanTermPeriodFrequencyType(), loanApplicationTerms.getRepaymentEvery());
-
+                Money calculateInterestOnPrincipal = principalOutstanding;
+                final Collection<DisbursementData> disbursementDatas = new ArrayList<>();
                 if (loanApplicationTerms.isMultiDisburseLoan()) {
                     BigDecimal reducePrincipal = disbursementAfterPeriod(loanApplicationTerms, repaymentDueDate, lastDueDate);
                     principalOutstanding = principalOutstanding.minus(reducePrincipal);
+                    calculateInterestOnPrincipal = principalOutstanding;
+                    BigDecimal currentPeriodDisbursal = disbursementForPeriod(loanApplicationTerms, periodStartDate, repaymentDueDate,
+                            disbursementDatas, true);
+                    calculateInterestOnPrincipal = calculateInterestOnPrincipal.minus(currentPeriodDisbursal);
                 }
 
                 PrincipalInterest principalInterest = loanApplicationTerms.calculateTotalInterestForPeriod(
                         this.paymentPeriodsInOneYearCalculator, interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc,
-                        totalOutstandingInterestPaymentDueToGrace.zero(), daysInPeriodApplicableForInterest, principalOutstanding);
-                interestForInstallment = principalInterest.interest().getAmount();
-                Money alteredPrincipal = principalOutstanding;
-                Money reducePricipal = principalOutstanding.zero();
+                        totalOutstandingInterestPaymentDueToGrace.zero(), daysInPeriodApplicableForInterest, calculateInterestOnPrincipal);
+                interestForInstallment = BigDecimal.valueOf(calculateInterestForDays(daysInPeriodApplicableForInterest, principalInterest
+                        .interest().getAmount(), actualPeriodDays));
+                BigDecimal interestToBeAdded = BigDecimal.ZERO;
                 BigDecimal interestToBeReduced = BigDecimal.ZERO;
-                BigDecimal interestForExtraPrincipal = BigDecimal.ZERO;
                 if (loanApplicationTerms.isMultiDisburseLoan()) {
-                    final Collection<DisbursementData> disbursementDatas = new ArrayList<>();
-                    BigDecimal addedPrincipal = disbursementForPeriod(loanApplicationTerms, calculateInterestFrom, repaymentDueDate,
-                            disbursementDatas, true);
-                    alteredPrincipal = alteredPrincipal.minus(addedPrincipal);
                     for (DisbursementData disbursementData : disbursementDatas) {
                         Money disbursedAmt = Money.of(currency, disbursementData.amount());
-                        if (disbursementData.disbursementDate().isAfter(calculateInterestFrom)) {
-                            LocalDate calculateTill = disbursementData.disbursementDate();
+                        LocalDate calculateTill = disbursementData.disbursementDate();
+                        if (!onDate.isAfter(calculateTill)) {
+                            principalOutstanding = principalOutstanding.minus(disbursedAmt);
+                        } else {
+                            interestToBeAdded = interestToBeAdded.add(calculateInterestForSpecificDays(mc, loanApplicationTerms,
+                                    periodNumber, totalOutstandingInterestPaymentDueToGrace, daysInPeriodApplicableForInterest,
+                                    interestCalculationGraceOnRepaymentPeriodFraction, disbursedAmt, calculateTill, onDate));
+                        }
+
+                        if (disbursementData.disbursementDate().isAfter(periodStartDateApplicableForInterest)) {
                             interestToBeReduced = interestToBeReduced.add(calculateInterestForSpecificDays(mc, loanApplicationTerms,
                                     periodNumber, totalOutstandingInterestPaymentDueToGrace, daysInPeriodApplicableForInterest,
-                                    interestCalculationGraceOnRepaymentPeriodFraction, disbursedAmt, calculateInterestFrom, calculateTill));
-
-                            if (onDate.isAfter(calculateTill)) {
-                                interestForExtraPrincipal = interestForExtraPrincipal.add(calculateInterestForSpecificDays(mc,
-                                        loanApplicationTerms, periodNumber, totalOutstandingInterestPaymentDueToGrace,
-                                        daysInPeriodApplicableForInterest, interestCalculationGraceOnRepaymentPeriodFraction, disbursedAmt,
-                                        calculateTill, onDate));
-                            } else {
-                                reducePricipal = reducePricipal.plus(disbursedAmt);
-                            }
+                                    interestCalculationGraceOnRepaymentPeriodFraction, disbursedAmt, calculateTill, repaymentDueDate));
                         }
-                    }
-                    interest = interest.plus(inerestForCurrentInstallment.minus(interestForInstallment).plus(interestToBeReduced));
-                    BigDecimal interestForCloseDate = BigDecimal.ZERO;
-                    if (alteredPrincipal.isNotEqualTo(principalOutstanding)) {
-                        interestForCloseDate = interestForExtraPrincipal;
-                        interestForCloseDate = interestForCloseDate.add(calculateInterestForSpecificDays(mc, loanApplicationTerms,
-                                periodNumber, totalOutstandingInterestPaymentDueToGrace, daysInPeriodApplicableForInterest,
-                                interestCalculationGraceOnRepaymentPeriodFraction, alteredPrincipal, calculateInterestFrom, onDate));
-                    } else {
-                        interestForCloseDate = interestForCloseDate.add(BigDecimal.valueOf(calculateInterestForDays(
-                                daysInPeriodApplicableForInterest, interestForInstallment, days)));
-                    }
-                    interest = interest.plus(interestForCloseDate);
-                    principalOutstanding = principalOutstanding.minus(reducePricipal);
-                }
 
+                    }
+                }
+                interest = interest.plus(inerestForCurrentInstallment.minus(interestForInstallment).minus(interestToBeReduced));
+                BigDecimal interestForCloseDate = BigDecimal.valueOf(calculateInterestForDays(actualPeriodDays, interestForInstallment,
+                        days));
+                interest = interest.plus(interestForCloseDate).plus(interestToBeAdded);
             }
 
         }
 
         totalInterest = totalInterest.plus(interest);
         totalPrincipal = totalPrincipal.plus(principalOutstanding);
+
+        for (LoanCharge loanCharge : charges) {
+            if (loanCharge.isActive() && loanCharge.isNotFullyPaid() && !loanCharge.isWaived()
+                    && loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStartDate, onDate)) {
+                if (loanCharge.isFeeCharge()) {
+                    feeCharges = feeCharges.plus(loanCharge.amountOutstanding());
+                } else {
+                    penaltyCharges = penaltyCharges.plus(loanCharge.amountOutstanding());
+                }
+            }
+        }
 
         return new LoanRepaymentScheduleInstallment(null, 0, onDate, onDate, totalPrincipal.getAmount(), totalInterest.getAmount(),
                 feeCharges.getAmount(), penaltyCharges.getAmount(), false);
@@ -1588,7 +1620,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
     private LoanTransaction getPreclosureTransaction(List<LoanTransaction> loanTransactions,
             List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency, final LoanApplicationTerms applicationTerms,
-            MathContext mc) {
+            MathContext mc, final Set<LoanCharge> loanCharges) {
         LoanTransaction precloseTransaction = null;
         for (LoanTransaction loanTransaction : loanTransactions) {
             if (precloseTransaction == null || precloseTransaction.getTransactionDate().isBefore(loanTransaction.getTransactionDate())) {
@@ -1597,7 +1629,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         }
         if (precloseTransaction != null) {
             LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = calculatePrepaymentAmount(installments, currency,
-                    precloseTransaction.getTransactionDate(), applicationTerms.getInterestChargedFromLocalDate(), applicationTerms, mc);
+                    precloseTransaction.getTransactionDate(), applicationTerms.getInterestChargedFromLocalDate(), applicationTerms, mc,
+                    loanCharges);
             if (precloseTransaction.getAmount(currency).isLessThan(loanRepaymentScheduleInstallment.getTotalOutstanding(currency))) {
                 precloseTransaction = null;
             }

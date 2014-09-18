@@ -33,7 +33,7 @@ public interface LoanScheduleGenerator {
             List<LoanRepaymentScheduleInstallment> previousSchedule, LocalDate recalculateFrom);
 
     LoanRepaymentScheduleInstallment calculatePrepaymentAmount(List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency,
-            LocalDate onDate, LocalDate interestChargedFromLocalDate, LoanApplicationTerms loanApplicationTerms, MathContext mc);
+            LocalDate onDate, LocalDate interestChargedFromLocalDate, LoanApplicationTerms loanApplicationTerms, MathContext mc, Set<LoanCharge> charges);
     
     LoanRescheduleModel reschedule(final MathContext mathContext, final LoanRescheduleRequest loanRescheduleRequest, 
 			final ApplicationCurrency applicationCurrency, final boolean isHolidayEnabled, 

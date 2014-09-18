@@ -301,4 +301,9 @@ public final class LoanSummary {
     public BigDecimal getTotalPenaltyChargesCharged() {
     	return this.totalPenaltyChargesCharged;
     }
+
+    
+    public BigDecimal getTotalPrincipalWrittenOff() {
+        return this.totalPrincipalWrittenOff;
+    }
 }
