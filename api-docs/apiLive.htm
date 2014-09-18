@@ -6819,18 +6819,10 @@ An enumeration that indicates the type of transaction processing strategy to be 
 							</td>
 						</tr>
 						<tr class=alt>
-							<td>recalculationFrequencyType</td>
+							<td>recalculationRestFrequencyDate</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>Frequency at which Outstanding Principal is recalculated. This field is mandatory when interest interest recalculation is enabled for product.
-								<br>Available calculation types:
-								<ol>
-									<li>1 = Same as repayment period</li>
-									<li>2 = Daily</li>
-									<li>3 = Weekly</li>
-									<li>4 = Fortnightly</li>
-									<li>5 = Monthly</li>
-								</ol>
+							<td class=fielddesc>Specifies rest frequency start date for interest recalculation. This date must be before or equal to disbursement date
 							</td>
 						</tr>
 					</table>
@@ -7004,7 +6996,12 @@ GET https://DomainName/api/v1/loans/template?templateType=individual&clientId=1&
       "id": 2,
       "code": "loanRescheduleStrategyMethod.reduce.number.of.installments",
       "value": "Reduce number of installments"
-    }
+    },
+	"recalculationRestFrequencyType": {
+		    "id":1,
+			"code":"interestRecalculationFrequencyType.same.as.repayment.period",
+			"value":"Same as repayment period"
+	}
   }
   "charges": [],
   "productOptions": [
@@ -7195,32 +7192,7 @@ GET https://DomainName/api/v1/loans/template?templateType=individual&clientId=1&
   		"fieldOfficerId":0,
   		"currency":{"code":"USD","name":"US Dollar","decimalPlaces":2,"displaySymbol":"$","nameCode":"currency.USD","displayLabel":"US Dollar ($)"}
   	}
-  ],
-  "interestRecalculationFrequencyTypeOptions": [{
-        "id": 1,
-        "code": "interestRecalculationFrequencyType.same.as.repayment.period",
-        "value": "Same as repayment period"
-    },
-    {
-        "id": 2,
-        "code": "interestRecalculationFrequencyType.daily",
-        "value": "Daily"
-    },
-    {
-        "id": 3,
-        "code": "interestRecalculationFrequencyType.weekly",
-        "value": "Weekly"
-    },
-    {
-        "id": 4,
-        "code": "interestRecalculationFrequencyType.fortnightly",
-        "value": "Fortnightly"
-    },
-    {
-        "id": 5,
-        "code": "interestRecalculationFrequencyType.monthly",
-        "value": "Monthly"
-    }],
+  ]
 }
 					</code>
 				</div>
@@ -7250,6 +7222,12 @@ GET https://DomainName/api/v1/loans/template?templateType=individual&clientId=1&
 						</dd>
 						<dd>
 							<b>'repaymentSchedule':</b> Loan schedule data.
+						</dd>
+						<dd>
+							<b>'originalSchedule':</b> Loan schedule data without interest recalculations.
+						</dd>
+						<dd>
+							<b>'futureSchedule':</b> Loan schedule data from today date(will be displayed only for interest first repayment strategy processors) 
 						</dd>
 						<dd>
 							<b>'transactions':</b> Loan transactions data.
@@ -7960,10 +7938,10 @@ Request Body:
 					<br/>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Additional Mandatory Fields if interest recalculation is enabled for product</div></td>
+							<td><div class="mifosXHeading2">Additional Mandatory Fields if interest recalculation is enabled for product and Rest frequency  not same as repayment period</div></td>
 						</tr>
 						<tr class=alt>
-							<td>recalculationFrequencyType</td>
+							<td>recalculationRestFrequencyDate</td>
 						</tr>
 					</table>
 					<br/>
@@ -8007,7 +7985,6 @@ Request Body:
     "submittedOnDate": "10 Jun 2013",
     "linkAccountId" : "1",
     "fixedEmiAmount":1100,
-	"recalculationFrequencyType":"1",
     "maxOutstandingLoanBalance":"35000",
     "disbursementData":[{"expectedDisbursementDate":"01 November 2013",
     					"principal":22000,"approvedPrincipal":22000}]
@@ -10854,6 +10831,25 @@ An enumeration that indicates the type of transaction processing strategy to be 
 							<td class=fielddesc>Specifies what action should perform on loan repayment schedule for advance payments. <br>
 							<span>Example Values:</span>1=Reschedule next repayments, 2=Reduce number of installments, 3=Reduce EMI amount</td>
 						</tr>
+						<tr class=alt>
+							<td>recalculationRestFrequencyType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies effective date from which the late or advanced payment amounts will be considered in recalculation.<br>
+							<span>Example Values:</span>1=Same as repayment period, 2=Daily, 3=Weekly, 4=Monthly</td>
+						</tr>
+						<tr class=alt>
+							<td>recalculationRestFrequencyInterval</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies rest frequency interval for interest recalculation.<br>
+						</tr>
+						<tr class=alt>
+							<td>recalculationRestFrequencyDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies rest frequency start date for interest recalculation.<br>
+						</tr>
 					</table>
 				</div>
 			</div>
@@ -10963,7 +10959,12 @@ GET https://DomainName/api/v1/loanproducts
             "id": 2,
             "code": "loanRescheduleStrategyMethod.reduce.number.of.installments",
             "value": "Reduce number of installments"
-        }
+        },
+		"recalculationRestFrequencyType": {
+		    "id":1,
+			"code":"interestRecalculationFrequencyType.same.as.repayment.period",
+			"value":"Same as repayment period"
+		}
     },
     "accountingRule": {
       "id": 2,
@@ -11811,7 +11812,28 @@ GET https://DomainName/api/v1/loanproducts/template
         "id": 1,
         "code": "loanRescheduleStrategyMethod.reschedule.next.repayments",
         "value": "Reschedule next repayments"
-    }]
+    }],
+	"interestRecalculationFrequencyTypeOptions": [
+		{
+			"id":1,
+			"code":"interestRecalculationFrequencyType.same.as.repayment.period",
+			"value":"Same as repayment period"
+		},
+		{
+			"id":2,
+			"code":"interestRecalculationFrequencyType.daily",
+			"value":"Daily"
+		},
+		{
+			"id":3,
+			"code":"interestRecalculationFrequencyType.weekly",
+			"value":"Weekly"
+		},
+		{
+			"id":4,
+			"code":"interestRecalculationFrequencyType.monthly",
+			"value":"Monthly"
+		}]
 }
 					</code>
 				</div>
@@ -12100,7 +12122,15 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td><div class="mifosXHeading2">Additional Mandatory Fields if interest recalculation is enabled(true)</div></td>
 						</tr>
 						<tr class=alt>
-							<td>interestRecalculationCompoundingMethod,rescheduleStrategyMethod</td>
+							<td>interestRecalculationCompoundingMethod, rescheduleStrategyMethod, recalculationRestFrequencyType</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>						
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Additional Optional Fields if interest recalculation is enabled(true) and recalculationRestFrequencyType is not same as repayment period</div></td>
+						</tr>
+						<tr class=alt>
+							<td>recalculationRestFrequencyInterval, recalculationRestFrequencyDate</td>
 						</tr>
 					</table>
 				</div>
@@ -12199,6 +12229,7 @@ Request Body:
     "isInterestRecalculationEnabled":"true",
     "interestRecalculationCompoundingMethod":"0",
     "rescheduleStrategyMethod":"3",
+	"recalculationRestFrequencyType":"1",
     "accountingRule":"2",
     "fundSourceAccountId":"4",
     "loanPortfolioAccountId":"8",
@@ -12321,6 +12352,7 @@ Request Body:
     "isInterestRecalculationEnabled":"true",
     "interestRecalculationCompoundingMethod":"0",
     "rescheduleStrategyMethod":"3",
+	"recalculationRestFrequencyType":"1"
 }
 					</code>
 					<code class="method-response">
@@ -12331,6 +12363,7 @@ Request Body:
         "isInterestRecalculationEnabled":"true",
         "interestRecalculationCompoundingMethod":"0",
         "rescheduleStrategyMethod":"3",
+		"recalculationRestFrequencyType":"1"
     }
 }
 					</code>
