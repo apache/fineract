@@ -29,4 +29,6 @@ public interface ScheduledDateGenerator {
 
     Boolean isDateFallsInSchedule(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate, LocalDate date);
 
+    LocalDate generateNextScheduleDateStartingFromDisburseDate(LocalDate lastRepaymentDate, LoanApplicationTerms loanApplicationTerms,
+            boolean isHolidayEnabled, List<Holiday> holidays, final WorkingDays workingDays);
 }
