@@ -233,6 +233,10 @@ public class CommandWrapper {
         return this.entityName.equalsIgnoreCase("USER");
     }
 
+    public boolean isHookResource() {
+        return this.entityName.equalsIgnoreCase("HOOK");
+    }
+
     public boolean isCurrencyResource() {
         return this.entityName.equalsIgnoreCase("CURRENCY");
     }

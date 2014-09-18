@@ -90,6 +90,11 @@ dependencies {
 	            [group: 'com.sun.jersey.contribs', name: 'jersey-spring', version: jerseyVersion],
 	            [group: 'com.sun.jersey.contribs', name: 'jersey-multipart', version: jerseyVersion],
 
+                [group: 'com.squareup.retrofit', name: 'retrofit', version: '1.6.1'],
+                [group: 'com.squareup.okhttp', name: 'okhttp', version: '2.0.0'],
+                [group: 'com.squareup.okhttp', name: 'okhttp-urlconnection', version: '2.0.0'],
+
+
 	            [group: 'com.google.code.gson', name: 'gson', version: '2.2.4'],
 	            [group: 'com.google.guava', name: 'guava', version: '15.0'],
 

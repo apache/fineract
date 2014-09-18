@@ -19,6 +19,9 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
+import org.mifosplatform.infrastructure.hooks.event.HookEvent;
+import org.mifosplatform.infrastructure.hooks.event.HookEventSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,17 +35,21 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private PlatformSecurityContext context;
     private final ApplicationContext applicationContext;
     private final ToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer;
+    private final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer;
     private CommandSourceRepository commandSourceRepository;
     private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public SynchronousCommandProcessingService(final PlatformSecurityContext context, final ApplicationContext applicationContext,
-            final ToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer, final CommandSourceRepository commandSourceRepository,
+            final ToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer,
+            final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer,
+            final CommandSourceRepository commandSourceRepository,
             final ConfigurationDomainService configurationDomainService) {
         this.context = context;
         this.context = context;
         this.applicationContext = applicationContext;
         this.toApiJsonSerializer = toApiJsonSerializer;
+        this.toApiResultJsonSerializer = toApiResultJsonSerializer;
         this.commandSourceRepository = commandSourceRepository;
         this.commandSourceRepository = commandSourceRepository;
         this.configurationDomainService = configurationDomainService;
@@ -52,7 +59,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     @Override
     public CommandProcessingResult processAndLogCommand(final CommandWrapper wrapper, final JsonCommand command,
             final boolean isApprovedByChecker) {
-
+    	
         final boolean rollbackTransaction = this.configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName());
 
         final NewCommandSourceHandler handler = findCommandHandler(wrapper);
@@ -101,6 +108,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(commandSourceResult);
         }
         result.setRollbackTransaction(null);
+        
+        publishEvent(wrapper.entityName(), wrapper.actionName(), result);
+        
         return result;
     }
 
@@ -220,6 +230,16 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = this.applicationContext.getBean("updateUserCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isDelete()) {
                 handler = this.applicationContext.getBean("deleteUserCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
+        } else if (wrapper.isHookResource()) {
+            if (wrapper.isCreate()) {
+                handler = this.applicationContext.getBean("createHookCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdate()) {
+                handler = this.applicationContext.getBean("updateHookCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDelete()) {
+                handler = this.applicationContext.getBean("deleteHookCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
@@ -850,5 +870,21 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         boolean rollbackTransaction = this.configurationDomainService.isMakerCheckerEnabledForTask(commandWrapper.taskPermissionName());
         user.validateHasPermissionTo(commandWrapper.getTaskPermissionName());
         return rollbackTransaction;
+    }
+    
+    private void publishEvent(final String entityName, final String actionName, final CommandProcessingResult result) {
+    	
+    	final String authToken = ThreadLocalContextUtil.getAuthToken();
+    	final String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+    	final AppUser appUser = this.context.authenticatedUser();
+    	
+    	final HookEventSource hookEventSource = new HookEventSource(entityName, actionName);
+    	
+    	final String serializedResult = this.toApiResultJsonSerializer.serialize(result);
+    	
+    	final HookEvent applicationEvent = 
+    			new HookEvent(hookEventSource, serializedResult, tenantIdentifier, appUser, authToken);
+    			
+    	applicationContext.publishEvent(applicationEvent); 
     }
 }
