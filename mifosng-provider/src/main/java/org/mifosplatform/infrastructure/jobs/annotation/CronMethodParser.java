@@ -60,7 +60,8 @@ public class CronMethodParser {
             throws IOException {
         final String basePackagePath = ClassUtils.convertClassNameToResourcePath(new StandardEnvironment()
                 .resolveRequiredPlaceholders(SEARCH_PACKAGE));
-        final String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + basePackagePath + "/" + RESOURCE_PATTERN;
+        String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + basePackagePath + "/" + RESOURCE_PATTERN;
+        packageSearchPath = packageSearchPath.replace("//", "/"); // else it doesn't work if *.class are in WAR!!
         final Resource[] resources = resourcePatternResolver.getResources(packageSearchPath);
         for (final Resource resource : resources) {
             if (resource.isReadable()) {
