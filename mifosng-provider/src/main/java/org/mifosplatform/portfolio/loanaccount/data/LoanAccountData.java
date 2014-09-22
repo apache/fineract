@@ -1257,4 +1257,8 @@ public class LoanAccountData {
         return null;
     }
 
+    public boolean isActive() {
+        return LoanStatus.fromInt(this.status.id().intValue()).isActive();
+    }
+
 }

@@ -32,6 +32,21 @@ public class LoanProductTestBuilder {
     // private static final String HEAVENS_FAMILY_STRATEGY ="2";
     // private static final String CREO_CORE_STRATEGY ="3";
     public static final String RBI_INDIA_STRATEGY = "4";
+
+    public static final String RECALCULATION_FREQUENCY_TYPE_SAME_AS_REPAYMENT_PERIOD = "1";
+    public static final String RECALCULATION_FREQUENCY_TYPE_DAILY = "2";
+    public static final String RECALCULATION_FREQUENCY_TYPE_WEEKLY = "3";
+    public static final String RECALCULATION_FREQUENCY_TYPE_MONTHLY = "4";
+
+    public static final String RECALCULATION_STRATEGY_RESCHEDULE_NEXT_REPAYMENTS = "1";
+    public static final String RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS = "2";
+    public static final String RECALCULATION_STRATEGY_REDUCE_EMI_AMOUN = "3";
+
+    public static final String RECALCULATION_COMPOUNDING_METHOD_NONE= "0";
+    public static final String RECALCULATION_COMPOUNDING_METHOD_INTEREST = "1";
+    public static final String RECALCULATION_COMPOUNDING_METHOD_FEE = "2";
+    public static final String RECALCULATION_COMPOUNDING_METHOD_INTEREST_AND_FEE = "3";
+
     private static final String NONE = "1";
     private static final String CASH_BASED = "2";
     private static final String ACCRUAL_PERIODIC = "3";
@@ -69,6 +84,9 @@ public class LoanProductTestBuilder {
     private String daysInMonthType = "1";
     private String interestRecalculationCompoundingMethod = "0";
     private String rescheduleStrategyMethod = "1";
+    private String recalculationRestFrequencyType = "1";
+    private String recalculationRestFrequencyInterval = "0";
+    private String recalculationRestFrequencyDate = null;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -84,6 +102,7 @@ public class LoanProductTestBuilder {
         map.put("shortName", this.shortName);
         map.put("currencyCode", this.currencyCode);
         map.put("locale", LOCALE);
+        map.put("dateFormat", "dd MMMM yyyy");
         map.put("digitsAfterDecimal", digitsAfterDecimal);
         map.put("inMultiplesOf", inMultiplesOf);
         map.put("principal", this.principal);
@@ -118,6 +137,9 @@ public class LoanProductTestBuilder {
         if (this.isInterestRecalculationEnabled) {
             map.put("interestRecalculationCompoundingMethod", this.interestRecalculationCompoundingMethod);
             map.put("rescheduleStrategyMethod", this.rescheduleStrategyMethod);
+            map.put("recalculationRestFrequencyType", recalculationRestFrequencyType);
+            map.put("recalculationRestFrequencyInterval", recalculationRestFrequencyInterval);
+            map.put("recalculationRestFrequencyDate", recalculationRestFrequencyDate);
         }
         return new Gson().toJson(map);
     }
@@ -337,4 +359,22 @@ public class LoanProductTestBuilder {
         this.daysInYearType = daysInYearType;
         return this;
     }
+
+    public LoanProductTestBuilder withInterestRecalculationDetails(final String interestRecalculationCompoundingMethod,
+            final String rescheduleStrategyMethod) {
+        this.isInterestRecalculationEnabled = true;
+        this.interestRecalculationCompoundingMethod = interestRecalculationCompoundingMethod;
+        this.rescheduleStrategyMethod = rescheduleStrategyMethod;
+        return this;
+    }
+
+    public LoanProductTestBuilder withInterestRecalculationRestFrequencyDetails(final String recalculationRestFrequencyType,
+            final String recalculationRestFrequencyInterval, final String recalculationRestFrequencyDate) {
+        this.isInterestRecalculationEnabled = true;
+        this.recalculationRestFrequencyType = recalculationRestFrequencyType;
+        this.recalculationRestFrequencyInterval = recalculationRestFrequencyInterval;
+        this.recalculationRestFrequencyDate = recalculationRestFrequencyDate;
+        return this;
+    }
+
 }

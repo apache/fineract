@@ -52,4 +52,9 @@ public class RecalculationDetail {
     public boolean isInterestompound() {
         return this.isInterestompound;
     }
+
+    
+    public void updateStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
 }

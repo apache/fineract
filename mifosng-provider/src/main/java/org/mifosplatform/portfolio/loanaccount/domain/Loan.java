@@ -2469,7 +2469,8 @@ public class Loan extends AbstractPersistable<Long> {
                 .getTransactionDate());
         boolean reprocess = true;
 
-        if (adjustedTransaction == null && loanTransaction.getTransactionDate().isEqual(LocalDate.now()) && currentInstallment != null) {
+        if (adjustedTransaction == null && loanTransaction.getTransactionDate().isEqual(LocalDate.now()) && currentInstallment != null
+                && currentInstallment.getTotalOutstanding(getCurrency()).isEqualTo(loanTransaction.getAmount(getCurrency()))) {
             reprocess = false;
         }
 

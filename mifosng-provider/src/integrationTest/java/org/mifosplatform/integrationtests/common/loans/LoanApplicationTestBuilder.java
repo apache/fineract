@@ -22,8 +22,8 @@ public class LoanApplicationTestBuilder {
     private static final String EQUAL_PRINCIPAL_PAYMENTS = "0";
     private static final String EQUAL_INSTALLMENTS = "1";
     private static final String CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD = "1";
-    private static final String MIFOS_STANDARD_STRATEGY = "1";
-    public static final String RBI_INDIA_STRATEGY ="4";
+    public static final String MIFOS_STANDARD_STRATEGY = "1";
+    public static final String RBI_INDIA_STRATEGY = "4";
 
     private String principal = "10,000";
     private String loanTermFrequency = "";
@@ -46,6 +46,7 @@ public class LoanApplicationTestBuilder {
     private String graceOnInterestPayment = null;
     private List<HashMap> disbursementData = null;
     private List<HashMap> charges = new ArrayList<HashMap>();
+    private String recalculationRestFrequencyDate = null;
 
     public String build(final String ID, final String loanProductId, final String savingsID) {
 
@@ -82,9 +83,9 @@ public class LoanApplicationTestBuilder {
         if (graceOnPrincipalPayment != null) {
             map.put("graceOnPrincipalPayment", graceOnPrincipalPayment);
         }
-        
-        if(graceOnInterestPayment != null) {
-        	map.put("graceOnInterestPayment", graceOnInterestPayment);
+
+        if (graceOnInterestPayment != null) {
+            map.put("graceOnInterestPayment", graceOnInterestPayment);
         }
 
         if (disbursementData != null) {
@@ -92,6 +93,9 @@ public class LoanApplicationTestBuilder {
             map.put("fixedEmiAmount", fixedEmiAmount);
             map.put("maxOutstandingLoanBalance", maxOutstandingLoanBalance);
 
+        }
+        if (recalculationRestFrequencyDate != null) {
+            map.put("recalculationRestFrequencyDate", recalculationRestFrequencyDate);
         }
 
         return new Gson().toJson(map);
@@ -151,9 +155,9 @@ public class LoanApplicationTestBuilder {
         this.repaymentFrequencyType = WEEKS;
         return this;
     }
-    
+
     public LoanApplicationTestBuilder withRepaymentFrequencyTypeAsYear() {
-    	this.repaymentFrequencyType = YEARS;
+        this.repaymentFrequencyType = YEARS;
         return this;
     }
 
@@ -216,19 +220,24 @@ public class LoanApplicationTestBuilder {
         this.graceOnPrincipalPayment = graceOnPrincipalPayment;
         return this;
     }
-    
+
     public LoanApplicationTestBuilder withInterestGrace(final String graceOnInterestPayment) {
-    	this.graceOnInterestPayment = graceOnInterestPayment;
-    	return this;
+        this.graceOnInterestPayment = graceOnInterestPayment;
+        return this;
     }
 
     public LoanApplicationTestBuilder withTranches(final List<HashMap> disbursementData) {
         this.disbursementData = disbursementData;
         return this;
     }
-    
+
     public LoanApplicationTestBuilder withwithRepaymentStrategy(final String transactionProcessingStrategy) {
         this.transactionProcessingID = transactionProcessingStrategy;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withRestFrequencyDate(final String recalculationRestFrequencyDate) {
+        this.recalculationRestFrequencyDate = recalculationRestFrequencyDate;
         return this;
     }
 }
