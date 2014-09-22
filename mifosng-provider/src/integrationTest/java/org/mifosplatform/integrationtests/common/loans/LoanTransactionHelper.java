@@ -60,6 +60,13 @@ public class LoanTransactionHelper {
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "repaymentSchedule");
         return (ArrayList) response.get("periods");
     }
+    
+    public ArrayList getLoanFutureRepaymentSchedule(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer loanID) {
+        final String URL = "/mifosng-provider/api/v1/loans/" + loanID + "?associations=repaymentSchedule&futureSchedule&" + Utils.TENANT_IDENTIFIER;
+        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "repaymentSchedule");
+        return (ArrayList) response.get("futurePeriods");
+    }
 
     public HashMap getLoanSummary(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer loanID) {
         final String URL = "/mifosng-provider/api/v1/loans/" + loanID + "?associations=all&" + Utils.TENANT_IDENTIFIER;
@@ -338,6 +345,12 @@ public class LoanTransactionHelper {
         final HashMap response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoanTransaction, jsonToBeSent,
                 "changes");
         return (HashMap) response.get("status");
+    }
+    
+    public HashMap getPrepayAmount(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer loanID) {
+        final String URL = "/mifosng-provider/api/v1/loans/" + loanID + "/transactions/template?command=prepayLoan&" + Utils.TENANT_IDENTIFIER;
+        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "");
+        return response;
     }
 
     public void verifyRepaymentScheduleEntryFor(final int repaymentNumber, final float expectedPrincipalOutstanding, final Integer loanID) {
