@@ -24,29 +24,35 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Random;
 
+/**
+ * Util for RestAssured tests. This class here in src/test is copy/pasted :(
+ * from and identical to the one in src/integrationTest; please keep it in sync.
+ * The cunning plan is that, now that we have Spring Boot + MariaDB4j, eventually
+ * do completely away with src/integrationTest and have only src/test.. can you help? ;)
+ */
 @SuppressWarnings("unchecked")
 public class Utils {
 
-    private static final String LOGIN_URL = "/mifosng-provider/api/v1/authentication?username=mifos&password=password&tenantIdentifier=default";
+    public static final String TENANT_IDENTIFIER = "tenantIdentifier=default";
 
+    private static final String LOGIN_URL = "/mifosng-provider/api/v1/authentication?username=mifos&password=password&" + TENANT_IDENTIFIER;
 
     public static void initializeRESTAssured() {
-        RestAssured.baseURI ="https://localhost";
+        RestAssured.baseURI = "https://localhost";
         RestAssured.port = 8443;
-        RestAssured.keystore("../keystore.jks", "openmf");
+        RestAssured.keystore("src/main/resources/keystore.jks", "openmf");
     }
 
     public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
         try {
             System.out.println("-----------------------------------LOGIN-----------------------------------------");
-            String json = RestAssured.post(LOGIN_URL).asString();
+            final String json = RestAssured.post(LOGIN_URL).asString();
             assertThat("Failed to login into mifosx platform", StringUtils.isBlank(json), is(false));
             return JsonPath.with(json).get("base64EncodedAuthenticationKey");
-        }
-        catch (Exception e) {
+        } catch (final Exception e) {
             if (e instanceof HttpHostConnectException) {
-                HttpHostConnectException hh = (HttpHostConnectException) e;
-                fail("Failed to connect to mifosx platform:"+hh.getMessage());
+                final HttpHostConnectException hh = (HttpHostConnectException) e;
+                fail("Failed to connect to mifosx platform:" + hh.getMessage());
             }
 
             throw new RuntimeException(e);
@@ -55,44 +61,60 @@ public class Utils {
 
     public static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String getURL, final String jsonAttributeToGetBack) {
-        String json = given().spec(requestSpec)
-                .expect().spec(responseSpec).log().ifError()
-                .when().get(getURL).andReturn().asString();
+        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
         return (T) from(json).get(jsonAttributeToGetBack);
     }
 
     public static <T> T performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String postURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
-        String json = given().spec(requestSpec).body(jsonBodyToSend)
-                .expect().spec(responseSpec).log().ifError()
-                .when().post(postURL)
+        final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().post(postURL)
+                .andReturn().asString();
+        if (jsonAttributeToGetBack == null) { return (T) json; }
+        return (T) from(json).get(jsonAttributeToGetBack);
+    }
+
+    public static <T> T performServerPut(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String putURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
+        final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().put(putURL)
                 .andReturn().asString();
         return (T) from(json).get(jsonAttributeToGetBack);
     }
 
+    public static <T> T performServerDelete(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String deleteURL, final String jsonAttributeToGetBack) {
+        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().delete(deleteURL).andReturn()
+                .asString();
+        return (T) from(json).get(jsonAttributeToGetBack);
+    }
 
-    public static String convertDateToURLFormat(String dateToBeConvert){
-        SimpleDateFormat oldFormat = new SimpleDateFormat("dd MMMMMM yyyy");
-        SimpleDateFormat newFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String reformattedStr="";
+    public static String convertDateToURLFormat(final String dateToBeConvert) {
+        final SimpleDateFormat oldFormat = new SimpleDateFormat("dd MMMMMM yyyy");
+        final SimpleDateFormat newFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String reformattedStr = "";
         try {
             reformattedStr = newFormat.format(oldFormat.parse(dateToBeConvert));
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             e.printStackTrace();
         }
         return reformattedStr;
     }
 
     public static String randomStringGenerator(final String prefix, final int len, final String sourceSetString) {
-        int lengthOfSource = sourceSetString.length();
-        Random rnd = new Random();
-        StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++)
+        final int lengthOfSource = sourceSetString.length();
+        final Random rnd = new Random();
+        final StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
             sb.append((sourceSetString).charAt(rnd.nextInt(lengthOfSource)));
+        }
         return (prefix + (sb.toString()));
     }
 
     public static String randomStringGenerator(final String prefix, final int len) {
         return randomStringGenerator(prefix, len, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     }
+
+    public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
+        return randomStringGenerator(prefix, lenOfRandomSuffix);
+    }
+
 }

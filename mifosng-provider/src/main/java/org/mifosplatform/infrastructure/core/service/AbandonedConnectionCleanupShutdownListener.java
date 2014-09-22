@@ -12,18 +12,22 @@ import java.util.Enumeration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextStoppedEvent;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Service;
 
 import com.mysql.jdbc.AbandonedConnectionCleanupThread;
 
 @Service
-public class AbandonedConnectionCleanupShutdownListener implements ApplicationListener<ContextStoppedEvent> {
+public class AbandonedConnectionCleanupShutdownListener implements ApplicationListener<ContextClosedEvent> {
 
     private final static Logger logger = LoggerFactory.getLogger(AbandonedConnectionCleanupShutdownListener.class);
 
+    /**
+     * @see JobRegisterServiceImpl#onApplicationEvent(ContextClosedEvent) doc
+     *      re. why we use ContextClosedEvent instead of ContextStoppedEvent
+     */
     @Override
-    public void onApplicationEvent(@SuppressWarnings("unused") ContextStoppedEvent event) {
+    public void onApplicationEvent(@SuppressWarnings("unused") ContextClosedEvent event) {
         shutDowncleanUpThreadAndDeregisterJDBCDriver();
     }
 

@@ -14,6 +14,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * This integration test ensure that the "production" Spring XML configuration
  * files (appContext.xml & Co.) are valid. It does not need any database for
  * that.
+ *
+ * Note: For a simple test like this, contrary to
+ * AbstractSpringBootWithMariaDB4jIntegrationTest, there is no need to use
+ * Boot's SpringApplicationConfiguration here, instead the simpler classic Sring
+ * core ContextConfiguration is sufficient (as long as the
+ * TestsWithoutDatabaseAndNoJobsConfiguration used extends
+ * AbstractApplicationConfiguration).
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = TestsWithoutDatabaseAndNoJobsConfiguration.class)

@@ -2,59 +2,30 @@
 <!-- This Source Code Form is subject to the terms of the Mozilla Public 
 	License, v. 2.0. If a copy of the MPL was not distributed with this file, 
 	You can obtain one at http://mozilla.org/MPL/2.0/. -->
-<web-app xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	id="mifosng-platform-provider" version="2.5">
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	id="mifosng-platform-provider" version="3.0">
 
 	<display-name>Mifos Platform</display-name>
 	<description>A provider of microfinance services which applications can
 		consume once authenticated and authorized.</description>
 
+
+    <!--  =========================================================================
+            web.xml is no longer used since the switch to Spring Boot.
+
+            org.mifosplatform.infrastructure.core.boot.war.WebApplicationInitializerConfiguration
+            and org.mifosplatform.infrastructure.core.boot.WebXmlConfiguration take its place now.
+          =========================================================================
+      -->
+
+
+<!-- OK to remove this? It's probably not working with Spring Boot anyway..
 	<context-param>
 		<param-name>webAppRootKey</param-name>
 		<param-value>mifosplatform.root</param-value>
 	</context-param>
+-->
 
-	<context-param>
-		<param-name>contextConfigLocation</param-name>
-		<param-value>classpath*:META-INF/spring/jndi.xml classpath*:META-INF/spring/appContext.xml</param-value>
-	</context-param>
-
-	<filter>
-		<filter-name>springSecurityFilterChain</filter-name>
-		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
-	</filter>
-
-	<filter-mapping>
-		<filter-name>springSecurityFilterChain</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-
-	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
-
-	<servlet>
-		<servlet-name>jersey-servlet</servlet-name>
-		<servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
-		<init-param>
-			<param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
-			<param-value>true</param-value>
-		</init-param>
-		<!-- debugging on for development -->
-		<!-- <init-param> <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name> 
-			<param-value>com.sun.jersey.api.container.filter.LoggingFilter</param-value> 
-			</init-param> -->
-		<init-param>
-			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-			<param-value>org.mifosplatform.infrastructure.core.filters.ResponseCorsFilter</param-value>
-		</init-param>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>jersey-servlet</servlet-name>
-		<url-pattern>/api/v1/*</url-pattern>
-	</servlet-mapping>
 </web-app>

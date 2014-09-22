@@ -1,0 +1,1 @@
+delete from acc_product_mapping  where financial_account_type=10 and payment_type is not null;

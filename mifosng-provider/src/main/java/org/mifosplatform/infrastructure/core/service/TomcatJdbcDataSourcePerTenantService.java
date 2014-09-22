@@ -64,6 +64,8 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         // see
         // http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency
 
+	// see also org.mifosplatform.DataSourceProperties.setMifosDefaults()
+
         final String jdbcUrl = tenant.databaseURL();
 
         final PoolConfiguration poolConfiguration = new PoolProperties();
