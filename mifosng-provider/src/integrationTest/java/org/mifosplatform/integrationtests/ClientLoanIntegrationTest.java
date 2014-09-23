@@ -29,6 +29,7 @@ import org.mifosplatform.integrationtests.common.accounting.Account;
 import org.mifosplatform.integrationtests.common.accounting.AccountHelper;
 import org.mifosplatform.integrationtests.common.accounting.JournalEntry;
 import org.mifosplatform.integrationtests.common.accounting.JournalEntryHelper;
+import org.mifosplatform.integrationtests.common.accounting.PeriodicAccrualAccountingHelper;
 import org.mifosplatform.integrationtests.common.charges.ChargesHelper;
 import org.mifosplatform.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.mifosplatform.integrationtests.common.loans.LoanProductTestBuilder;
@@ -66,6 +67,7 @@ public class ClientLoanIntegrationTest {
     private JournalEntryHelper journalEntryHelper;
     private AccountHelper accountHelper;
     private SchedulerJobHelper schedulerJobHelper;
+    private PeriodicAccrualAccountingHelper periodicAccrualAccountingHelper;
 
     @Before
     public void setup() {
@@ -3139,7 +3141,7 @@ public class ClientLoanIntegrationTest {
         final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY,
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_EMI_AMOUN,
-                LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_SAME_AS_REPAYMENT_PERIOD, "0", null);
+                LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_SAME_AS_REPAYMENT_PERIOD, "0", null,null);
 
         final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientID, loanProductID, LOAN_DISBURSEMENT_DATE, null,
                 LoanApplicationTestBuilder.MIFOS_STANDARD_STRATEGY, new ArrayList<HashMap>(0));
@@ -3204,6 +3206,7 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, 1, "1771.88", "16.39", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "1780.05", "8.22", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
+
         HashMap prepayDetail = this.loanTransactionHelper.getPrepayAmount(this.requestSpec, this.responseSpec, loanID);
         String prepayAmount = String.valueOf(prepayDetail.get("amount"));
         todaysDate = Calendar.getInstance();
@@ -3228,7 +3231,7 @@ public class ClientLoanIntegrationTest {
         final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.RBI_INDIA_STRATEGY,
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_INTEREST,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
-                LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "1", LOAN_DISBURSEMENT_DATE);
+                LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "1", LOAN_DISBURSEMENT_DATE,null);
 
         final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientID, loanProductID, LOAN_DISBURSEMENT_DATE,
                 LOAN_DISBURSEMENT_DATE, LoanApplicationTestBuilder.RBI_INDIA_STRATEGY, new ArrayList<HashMap>(0));
@@ -3266,6 +3269,15 @@ public class ClientLoanIntegrationTest {
 
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
+        loanSchedule = this.loanTransactionHelper.getLoanFutureRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        expectedvalues = new ArrayList<>();
+        todaysDate = Calendar.getInstance();
+        addRepaymentValues(expectedvalues, todaysDate, 0, "4965.31", "92.51", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2505.67", "23.24", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2529.02", "11.67", "0.0", "0.0");
+
+        verifyLoanRepaymentSchedule(loanSchedule, expectedvalues, 0);
+
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.DAY_OF_MONTH, -7);
         final String LOAN_FIRST_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
@@ -3302,6 +3314,14 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, 1, "1009.87", "4.66", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
+        HashMap prepayDetail = this.loanTransactionHelper.getPrepayAmount(this.requestSpec, this.responseSpec, loanID);
+        String prepayAmount = String.valueOf(prepayDetail.get("amount"));
+        todaysDate = Calendar.getInstance();
+        String LOAN_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
+        this.loanTransactionHelper.makeRepayment(LOAN_REPAYMENT_DATE, new Float(prepayAmount), loanID);
+        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
+
     }
 
     @Test
@@ -3313,6 +3333,7 @@ public class ClientLoanIntegrationTest {
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.DAY_OF_MONTH, -14);
         final String LOAN_DISBURSEMENT_DATE = dateFormat.format(todaysDate.getTime());
+        todaysDate.add(Calendar.DAY_OF_MONTH, -2);
         final String REST_START_DATE = dateFormat.format(todaysDate.getTime());
 
         todaysDate = Calendar.getInstance();
@@ -3335,7 +3356,7 @@ public class ClientLoanIntegrationTest {
         final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY,
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_INTEREST_AND_FEE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_RESCHEDULE_NEXT_REPAYMENTS,
-                LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_WEEKLY, "1", REST_START_DATE);
+                LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_WEEKLY, "1", REST_START_DATE,null);
 
         final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientID, loanProductID, LOAN_DISBURSEMENT_DATE,
                 REST_START_DATE, LoanApplicationTestBuilder.MIFOS_STANDARD_STRATEGY, charges);
@@ -3366,9 +3387,9 @@ public class ClientLoanIntegrationTest {
         expectedvalues = new ArrayList<>();
         todaysDate = Calendar.getInstance();
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "100.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2482.09", "46.82", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2505.67", "23.24", "12.79", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2529.48", "11.67", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2490.75", "38.16", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2505.71", "23.2", "11.91", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2520.78", "11.63", "0.0", "0.0");
 
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
@@ -3397,9 +3418,9 @@ public class ClientLoanIntegrationTest {
         expectedvalues = new ArrayList<>();
         todaysDate = Calendar.getInstance();
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "100.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "5065.31", "34.69", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "0", "11.32", "10.35", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2451.93", "11.32", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "5100", "27.96", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "0", "11.16", "9.64", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2417.24", "11.16", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
         HashMap prepayDetail = this.loanTransactionHelper.getPrepayAmount(this.requestSpec, this.responseSpec, loanID);
@@ -3412,7 +3433,107 @@ public class ClientLoanIntegrationTest {
 
     }
 
-    private void addRepaymentValues(List<Map<String, Object>> expectedvalues, Calendar todaysDate, int addMonths, String principalDue,
+    @Test
+    public void testLoanScheduleWithInterestRecalculation_WITH_PERIODIC_ACCOUNTING() {
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        this.periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(this.requestSpec, this.responseSpec);
+        this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
+
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+
+        final Account assetAccount = this.accountHelper.createAssetAccount();
+        final Account incomeAccount = this.accountHelper.createIncomeAccount();
+        final Account expenseAccount = this.accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+
+        Calendar todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.DAY_OF_MONTH, -14);
+        final String LOAN_DISBURSEMENT_DATE = dateFormat.format(todaysDate.getTime());
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        Account[] accounts = { assetAccount, incomeAccount, expenseAccount, overpaymentAccount };
+        final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY,
+                LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
+                LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_EMI_AMOUN,
+                LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_SAME_AS_REPAYMENT_PERIOD, "0", null, accounts);
+
+        final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientID, loanProductID, LOAN_DISBURSEMENT_DATE, null,
+                LoanApplicationTestBuilder.MIFOS_STANDARD_STRATEGY, new ArrayList<HashMap>(0));
+
+        Assert.assertNotNull(loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        List<Map<String, Object>> expectedvalues = new ArrayList<>();
+        todaysDate = Calendar.getInstance();
+        addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2494.22", "34.69", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2505.73", "23.18", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.29", "11.62", "0.0", "0.0");
+        verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
+
+        System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------");
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan(LOAN_DISBURSEMENT_DATE, loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+        System.out.println("-------------------------------DISBURSE LOAN-------------------------------------------");
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(LOAN_DISBURSEMENT_DATE, loanID);
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+        loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        expectedvalues = new ArrayList<>();
+        todaysDate = Calendar.getInstance();
+        addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2482.76", "46.15", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2505.67", "23.24", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2528.81", "11.67", "0.0", "0.0");
+
+        verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
+
+        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(10000.0f, JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(10000.0f, JournalEntry.TransactionType.DEBIT), };
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, LOAN_DISBURSEMENT_DATE, assetAccountInitialEntry);
+        todaysDate = Calendar.getInstance();
+        String runOndate = dateFormat.format(todaysDate.getTime());
+        this.periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(runOndate);
+        this.loanTransactionHelper.checkAccrualTransactionForRepayment(LocalDate.now().minusDays(7), 46.15f, 0f, 0f, loanID);
+        this.loanTransactionHelper.checkAccrualTransactionForRepayment(LocalDate.now(), 46.15f, 0f, 0f, loanID);
+
+        todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.DAY_OF_MONTH, -7);
+        final String LOAN_FIRST_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
+        Float totalDueForCurrentPeriod = (Float) loanSchedule.get(1).get("totalDueForPeriod");
+        this.loanTransactionHelper.makeRepayment(LOAN_FIRST_REPAYMENT_DATE, totalDueForCurrentPeriod, loanID);
+
+        loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        expectedvalues = new ArrayList<>();
+        todaysDate = Calendar.getInstance();
+        addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2494.22", "34.69", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2505.73", "23.18", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.29", "11.62", "0.0", "0.0");
+        verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
+
+        this.loanTransactionHelper.checkAccrualTransactionForRepayment(LocalDate.now().minusDays(7), 46.15f, 0f, 0f, loanID);
+        this.loanTransactionHelper.checkAccrualTransactionForRepayment(LocalDate.now(), 34.69f, 0f, 0f, loanID);
+
+        HashMap prepayDetail = this.loanTransactionHelper.getPrepayAmount(this.requestSpec, this.responseSpec, loanID);
+        String prepayAmount = String.valueOf(prepayDetail.get("amount"));
+        todaysDate = Calendar.getInstance();
+        String LOAN_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
+        this.loanTransactionHelper.makeRepayment(LOAN_REPAYMENT_DATE, new Float(prepayAmount), loanID);
+        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
+
+        this.loanTransactionHelper.checkAccrualTransactionForRepayment(LocalDate.now().minusDays(7), 46.15f, 0f, 0f, loanID);
+        this.loanTransactionHelper.checkAccrualTransactionForRepayment(LocalDate.now(), 34.69f, 0f, 0f, loanID);
+
+    }
+
+      private void addRepaymentValues(List<Map<String, Object>> expectedvalues, Calendar todaysDate, int addMonths, String principalDue,
             String interestDue, String feeChargesDue, String penaltyChargesDue) {
         Map<String, Object> values = new HashMap<>(3);
         values.put("dueDate", getDateAsArray(todaysDate, addMonths));
@@ -3438,22 +3559,26 @@ public class ClientLoanIntegrationTest {
     private Integer createLoanProductWithInterestRecalculation(final String repaymentStrategy,
             final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
             final String recalculationRestFrequencyType, final String recalculationRestFrequencyInterval,
-            final String recalculationRestFrequencyDate) {
+            final String recalculationRestFrequencyDate, final Account[] accounts) {
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsWeek() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withRepaymentStrategy(repaymentStrategy) //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .withInterestRecalculationDetails(interestRecalculationCompoundingMethod, rescheduleStrategyMethod)//
+        LoanProductTestBuilder builder = new LoanProductTestBuilder()
+                .withPrincipal("10000000.00")
+                .withNumberOfRepayments("24")
+                .withRepaymentAfterEvery("1")
+                .withRepaymentTypeAsWeek()
+                .withinterestRatePerPeriod("2")
+                .withInterestRateFrequencyTypeAsMonths()
+                .withRepaymentStrategy(repaymentStrategy)
+                .withAmortizationTypeAsEqualPrincipalPayment()
+                .withInterestTypeAsDecliningBalance()
+                .withInterestRecalculationDetails(interestRecalculationCompoundingMethod, rescheduleStrategyMethod)
                 .withInterestRecalculationRestFrequencyDetails(recalculationRestFrequencyType, recalculationRestFrequencyInterval,
-                        recalculationRestFrequencyDate)//
-                .build(null);
+                        recalculationRestFrequencyDate);
+        if (accounts != null) {
+            builder = builder.withAccountingRulePeriodicAccrual(accounts);
+        }
+
+        final String loanProductJSON = builder.build(null);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
@@ -3481,20 +3606,24 @@ public class ClientLoanIntegrationTest {
     }
 
     private void verifyLoanRepaymentSchedule(final ArrayList<HashMap> loanSchedule, List<Map<String, Object>> expectedvalues) {
-        System.out.println("--------------------VERIFYING THE PRINCIPAL DUES,INTEREST DUE AND DUE DATE--------------------------");
-        int i = 1;
-        for (Map<String, Object> values : expectedvalues) {
-            assertEquals("Checking for Due Date for  Month " + i, values.get("dueDate"), loanSchedule.get(i).get("dueDate"));
-            validateNumberForEqualWithMsg("Checking for Principal Due for Month " + i, String.valueOf(values.get("principalDue")),
-                    String.valueOf(loanSchedule.get(i).get("principalDue")));
-            validateNumberForEqualWithMsg("Checking for Interest Due for Month " + i, String.valueOf(values.get("interestDue")),
-                    String.valueOf(loanSchedule.get(i).get("interestDue")));
-            validateNumberForEqualWithMsg("Checking for Fee charge Due for Month " + i, String.valueOf(values.get("feeChargesDue")),
-                    String.valueOf(loanSchedule.get(i).get("feeChargesDue")));
-            validateNumberForEqualWithMsg("Checking for Penalty charge Due for Month " + i,
-                    String.valueOf(values.get("penaltyChargesDue")), String.valueOf(loanSchedule.get(i).get("penaltyChargesDue")));
-            i++;
-        }
+        int index = 1;
+        verifyLoanRepaymentSchedule(loanSchedule, expectedvalues, index);
 
+    }
+
+    private void verifyLoanRepaymentSchedule(final ArrayList<HashMap> loanSchedule, List<Map<String, Object>> expectedvalues, int index) {
+        System.out.println("--------------------VERIFYING THE PRINCIPAL DUES,INTEREST DUE AND DUE DATE--------------------------");
+        for (Map<String, Object> values : expectedvalues) {
+            assertEquals("Checking for Due Date for  installment " + index, values.get("dueDate"), loanSchedule.get(index).get("dueDate"));
+            validateNumberForEqualWithMsg("Checking for Principal Due for installment " + index,
+                    String.valueOf(values.get("principalDue")), String.valueOf(loanSchedule.get(index).get("principalDue")));
+            validateNumberForEqualWithMsg("Checking for Interest Due for installment " + index, String.valueOf(values.get("interestDue")),
+                    String.valueOf(loanSchedule.get(index).get("interestDue")));
+            validateNumberForEqualWithMsg("Checking for Fee charge Due for installment " + index,
+                    String.valueOf(values.get("feeChargesDue")), String.valueOf(loanSchedule.get(index).get("feeChargesDue")));
+            validateNumberForEqualWithMsg("Checking for Penalty charge Due for installment " + index,
+                    String.valueOf(values.get("penaltyChargesDue")), String.valueOf(loanSchedule.get(index).get("penaltyChargesDue")));
+            index++;
+        }
     }
 }

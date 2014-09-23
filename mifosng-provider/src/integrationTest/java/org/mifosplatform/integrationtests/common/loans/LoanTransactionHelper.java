@@ -63,7 +63,7 @@ public class LoanTransactionHelper {
     
     public ArrayList getLoanFutureRepaymentSchedule(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer loanID) {
-        final String URL = "/mifosng-provider/api/v1/loans/" + loanID + "?associations=repaymentSchedule&futureSchedule&" + Utils.TENANT_IDENTIFIER;
+        final String URL = "/mifosng-provider/api/v1/loans/" + loanID + "?associations=repaymentSchedule,futureSchedule&" + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "repaymentSchedule");
         return (ArrayList) response.get("futurePeriods");
     }
