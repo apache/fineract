@@ -3204,6 +3204,7 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, 1, "1771.88", "16.39", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "1780.05", "8.22", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
+
         HashMap prepayDetail = this.loanTransactionHelper.getPrepayAmount(this.requestSpec, this.responseSpec, loanID);
         String prepayAmount = String.valueOf(prepayDetail.get("amount"));
         todaysDate = Calendar.getInstance();
@@ -3266,6 +3267,15 @@ public class ClientLoanIntegrationTest {
 
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
+        loanSchedule = this.loanTransactionHelper.getLoanFutureRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        expectedvalues = new ArrayList<>();
+        todaysDate = Calendar.getInstance();
+        addRepaymentValues(expectedvalues, todaysDate, 0, "4965.31", "92.51", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2505.67", "23.24", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2529.02", "11.67", "0.0", "0.0");
+
+        verifyLoanRepaymentSchedule(loanSchedule, expectedvalues,0);
+
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.DAY_OF_MONTH, -7);
         final String LOAN_FIRST_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
@@ -3302,6 +3312,14 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, 1, "1009.87", "4.66", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
+        HashMap prepayDetail = this.loanTransactionHelper.getPrepayAmount(this.requestSpec, this.responseSpec, loanID);
+        String prepayAmount = String.valueOf(prepayDetail.get("amount"));
+        todaysDate = Calendar.getInstance();
+        String LOAN_REPAYMENT_DATE = dateFormat.format(todaysDate.getTime());
+        this.loanTransactionHelper.makeRepayment(LOAN_REPAYMENT_DATE, new Float(prepayAmount), loanID);
+        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
+
     }
 
     @Test
@@ -3313,6 +3331,7 @@ public class ClientLoanIntegrationTest {
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.DAY_OF_MONTH, -14);
         final String LOAN_DISBURSEMENT_DATE = dateFormat.format(todaysDate.getTime());
+        todaysDate.add(Calendar.DAY_OF_MONTH, -2);
         final String REST_START_DATE = dateFormat.format(todaysDate.getTime());
 
         todaysDate = Calendar.getInstance();
@@ -3366,9 +3385,9 @@ public class ClientLoanIntegrationTest {
         expectedvalues = new ArrayList<>();
         todaysDate = Calendar.getInstance();
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "100.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2482.09", "46.82", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2505.67", "23.24", "12.79", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2529.48", "11.67", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2490.75", "38.16", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2505.71", "23.2", "11.91", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2520.78", "11.63", "0.0", "0.0");
 
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
@@ -3397,9 +3416,9 @@ public class ClientLoanIntegrationTest {
         expectedvalues = new ArrayList<>();
         todaysDate = Calendar.getInstance();
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "100.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "5065.31", "34.69", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "0", "11.32", "10.35", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2451.93", "11.32", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "5100", "27.96", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "0", "11.16", "9.64", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2417.24", "11.16", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
         HashMap prepayDetail = this.loanTransactionHelper.getPrepayAmount(this.requestSpec, this.responseSpec, loanID);
@@ -3481,20 +3500,24 @@ public class ClientLoanIntegrationTest {
     }
 
     private void verifyLoanRepaymentSchedule(final ArrayList<HashMap> loanSchedule, List<Map<String, Object>> expectedvalues) {
-        System.out.println("--------------------VERIFYING THE PRINCIPAL DUES,INTEREST DUE AND DUE DATE--------------------------");
-        int i = 1;
-        for (Map<String, Object> values : expectedvalues) {
-            assertEquals("Checking for Due Date for  Month " + i, values.get("dueDate"), loanSchedule.get(i).get("dueDate"));
-            validateNumberForEqualWithMsg("Checking for Principal Due for Month " + i, String.valueOf(values.get("principalDue")),
-                    String.valueOf(loanSchedule.get(i).get("principalDue")));
-            validateNumberForEqualWithMsg("Checking for Interest Due for Month " + i, String.valueOf(values.get("interestDue")),
-                    String.valueOf(loanSchedule.get(i).get("interestDue")));
-            validateNumberForEqualWithMsg("Checking for Fee charge Due for Month " + i, String.valueOf(values.get("feeChargesDue")),
-                    String.valueOf(loanSchedule.get(i).get("feeChargesDue")));
-            validateNumberForEqualWithMsg("Checking for Penalty charge Due for Month " + i,
-                    String.valueOf(values.get("penaltyChargesDue")), String.valueOf(loanSchedule.get(i).get("penaltyChargesDue")));
-            i++;
-        }
+        int index = 1;
+        verifyLoanRepaymentSchedule(loanSchedule, expectedvalues, index);
 
+    }
+
+    private void verifyLoanRepaymentSchedule(final ArrayList<HashMap> loanSchedule, List<Map<String, Object>> expectedvalues, int index) {
+        System.out.println("--------------------VERIFYING THE PRINCIPAL DUES,INTEREST DUE AND DUE DATE--------------------------");
+        for (Map<String, Object> values : expectedvalues) {
+            assertEquals("Checking for Due Date for  installment " + index, values.get("dueDate"), loanSchedule.get(index).get("dueDate"));
+            validateNumberForEqualWithMsg("Checking for Principal Due for installment " + index,
+                    String.valueOf(values.get("principalDue")), String.valueOf(loanSchedule.get(index).get("principalDue")));
+            validateNumberForEqualWithMsg("Checking for Interest Due for installment " + index, String.valueOf(values.get("interestDue")),
+                    String.valueOf(loanSchedule.get(index).get("interestDue")));
+            validateNumberForEqualWithMsg("Checking for Fee charge Due for installment " + index,
+                    String.valueOf(values.get("feeChargesDue")), String.valueOf(loanSchedule.get(index).get("feeChargesDue")));
+            validateNumberForEqualWithMsg("Checking for Penalty charge Due for installment " + index,
+                    String.valueOf(values.get("penaltyChargesDue")), String.valueOf(loanSchedule.get(index).get("penaltyChargesDue")));
+            index++;
+        }
     }
 }

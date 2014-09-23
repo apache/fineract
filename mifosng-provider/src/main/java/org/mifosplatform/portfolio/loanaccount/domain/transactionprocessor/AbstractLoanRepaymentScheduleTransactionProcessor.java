@@ -444,6 +444,13 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             final LoanTransaction preCloseTransaction) {
         List<RecalculationDetail> earlypaymentDetail = new ArrayList<>();
         Money currentInstallmentOutstanding = installment.getTotalOutstanding(currency);
+        LocalDate maxTransactionDate = null;
+        Set<LocalDate> transaDates = recalculationDates.keySet();
+        for (LocalDate transactionDate : transaDates) {
+            if (maxTransactionDate == null || transactionDate.isAfter(maxTransactionDate)) {
+                maxTransactionDate = transactionDate;
+            }
+        }
         for (final LoanTransaction loanTransaction : transactionsPostDisbursement) {
             Money amountToProcess = null;
             LocalDate transactionDate = loanTransaction.getTransactionDate();
@@ -454,10 +461,14 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             if (newLoanTransaction.isRepayment() || newLoanTransaction.isInterestWaiver() || newLoanTransaction.isRecoveryRepayment()) {
                 newLoanTransaction.resetDerivedComponents();
             }
+
             Money unProcessed = processTransaction(newLoanTransaction, currency, installments, amountToProcess);
-            if (transactionDate.isAfter(installment.getFromDate()) && transactionDate.isBefore(installment.getDueDate())) {
+            if (loanTransaction.getTransactionDate().isEqual(maxTransactionDate) && transactionDate.isAfter(installment.getFromDate())
+                    && transactionDate.isBefore(installment.getDueDate())) {
                 Money earlyPayment = currentInstallmentOutstanding.minus(installment.getTotalOutstanding(currency));
-                if (earlyPayment.isGreaterThanZero() && (newLoanTransaction.isRepayment() || newLoanTransaction.isInterestWaiver() || newLoanTransaction.isRecoveryRepayment())) {
+                if (earlyPayment.isGreaterThanZero()
+                        && (newLoanTransaction.isRepayment() || newLoanTransaction.isInterestWaiver() || newLoanTransaction
+                                .isRecoveryRepayment())) {
                     earlypaymentDetail.add(new RecalculationDetail(false, transactionDate, null, earlyPayment, false));
                 }
                 currentInstallmentOutstanding = installment.getTotalOutstanding(currency);

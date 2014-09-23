@@ -405,6 +405,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     outstandingBalance = outstandingBalance.zero();
                 }
             }
+
+            if (fixedEmiAmount.isZero() && !recalculatedInterestComponent) {
+                fixedEmiAmount = principalForThisPeriod.plus(interestForThisinstallment);
+            }
             reducePrincipal = reducePrincipal.minus(reducePrincipalForCurrentInstallment);
 
             if (principalForThisPeriod.isGreaterThan(reducePrincipalForCurrentInstallment)) {
@@ -435,10 +439,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             }
 
             reducePrincipal = reducePrincipal.plus(reducePrincipalForCurrentInstallment);
-
-            if (fixedEmiAmount.isZero() && !recalculatedInterestComponent) {
-                fixedEmiAmount = principalForThisPeriod.plus(interestForThisinstallment);
-            }
 
             actualOutstandingbalance = actualOutstandingbalance.minus(reducePrincipal);
             if (actualOutstandingbalance.isLessThanZero()) {
@@ -1292,9 +1292,13 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 }
             }
 
-            if (installment.isRecalculatedInterestComponent() && installment.getPrincipal(currency).isGreaterThanZero()) {
-                diffAmt.add(new RecalculationDetail(false, installment.getDueDate(), null, installment.getPrincipal(currency), false));
-            }
+            /*
+             * if (installment.isRecalculatedInterestComponent() &&
+             * installment.getPrincipal(currency).isGreaterThanZero()) {
+             * diffAmt.add(new RecalculationDetail(false,
+             * installment.getDueDate(), null,
+             * installment.getPrincipal(currency), false)); }
+             */
             List<RecalculationDetail> earlypaymentDetail = loanRepaymentScheduleTransactionProcessor.handleRepaymentSchedule(
                     transactionsForInstallment, currency, processinstallmets, installment, recalculationDates, preCloseTransaction);
 
@@ -1648,18 +1652,22 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency, final LoanApplicationTerms applicationTerms,
             MathContext mc, final Set<LoanCharge> loanCharges) {
         LoanTransaction precloseTransaction = null;
+        Money collectedPrincipal = Money.zero(currency);
         for (LoanTransaction loanTransaction : loanTransactions) {
             if (precloseTransaction == null
                     || (!precloseTransaction.getTransactionDate().isAfter(loanTransaction.getTransactionDate()) && (loanTransaction.getId() == null || (precloseTransaction
                             .getId() != null && loanTransaction.getId().compareTo(precloseTransaction.getId()) == 1)))) {
                 precloseTransaction = loanTransaction;
             }
+            collectedPrincipal =  collectedPrincipal.plus(loanTransaction.getPrincipalPortion());
         }
         if (precloseTransaction != null) {
             LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = calculatePrepaymentAmount(installments, currency,
                     precloseTransaction.getTransactionDate(), applicationTerms.getInterestChargedFromLocalDate(), applicationTerms, mc,
                     loanCharges);
-            if (precloseTransaction.getAmount(currency).isLessThan(loanRepaymentScheduleInstallment.getTotalOutstanding(currency))) {
+            Money pendingPrinciapl = applicationTerms.getPrincipal().minus(collectedPrincipal).plus(precloseTransaction.getPrincipalPortion());
+            if (pendingPrinciapl.isGreaterThan(loanRepaymentScheduleInstallment.getPrincipal(currency))
+                    || precloseTransaction.getAmount(currency).isLessThan(loanRepaymentScheduleInstallment.getTotalOutstanding(currency))) {
                 precloseTransaction = null;
             }
         }
