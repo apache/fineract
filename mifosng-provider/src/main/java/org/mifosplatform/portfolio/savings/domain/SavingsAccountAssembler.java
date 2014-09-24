@@ -226,9 +226,16 @@ public class SavingsAccountAssembler {
         boolean enforceMinRequiredBalance = false;
         if (command.parameterExists(enforceMinRequiredBalanceParamName)) {
             enforceMinRequiredBalance = command.booleanPrimitiveValueOfParameterNamed(enforceMinRequiredBalanceParamName);
+        } else {
+            enforceMinRequiredBalance = product.isMinRequiredBalanceEnforced();
         }
-
-        final BigDecimal minRequiredBalance = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(minRequiredBalanceParamName);
+        
+        BigDecimal minRequiredBalance = null;
+        if (command.parameterExists(overdraftLimitParamName)) {
+            minRequiredBalance = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(minRequiredBalanceParamName);
+        } else {
+            minRequiredBalance = product.minRequiredBalance();
+        }
 
         final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer, accountNo,
                 externalId, accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType,
