@@ -728,7 +728,7 @@ public class FixedDepositAccount extends SavingsAccount {
         final boolean withdrawalFeeApplicableForTransfer = false;
         final String accountNumber = null;
         final FixedDepositAccount reInvestedAccount = FixedDepositAccount
-                .createNewApplicationForSubmittal(client, group, product, fieldOfficer, accountNumber, externalId, accountType,
+                .createNewApplicationForSubmittal(client, group, product, savingsOfficer, accountNumber, externalId, accountType,
                         getClosedOnDate(), closedBy, interestRate, compoundingPeriodType, postingPeriodType, interestCalculationType,
                         daysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
                         withdrawalFeeApplicableForTransfer, savingsAccountCharges, newAccountTermAndPreClosure, newChart);

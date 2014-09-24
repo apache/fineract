@@ -427,7 +427,7 @@
 							</tr>
 							<tr>
 								<td></td>
-								<td>savingsaccounts/{accountId}?command=assignFieldOfficer</td>
+								<td>savingsaccounts/{accountId}?command=assignSavingsOfficer</td>
 								<td><a href="#savingsaccounts_assignSavingsOfficer">Assign Savings Officer</a></td>
 								<td></td>
 								<td></td>
@@ -435,7 +435,7 @@
 							</tr>
 							<tr>
 								<td></td>
-								<td>savingsaccounts/{accountId}?command=unassignFieldOfficer</td>
+								<td>savingsaccounts/{accountId}?command=unassignSavingsOfficer</td>
 								<td><a href="#savingsaccounts_unassignSavingsOfficer">Unassign Savings Officer</a></td>
 								<td></td>
 								<td></td>
@@ -19167,20 +19167,24 @@ Request Body:
 	        <p>Allows you to assign <i>Savings Officer</i> for existing Savings Account.</p>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=assignFieldOfficer</code>
-	        <code class="method-request">POST savingsaccounts/1?command=assignFieldOfficer
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=assignSavingsOfficer</code>
+	        <code class="method-request">POST savingsaccounts/1?command=assignSavingsOfficer
 Content-Type: application/json
 Request Body:
 {
-	"staffId":1
+	assignmentDate : "04 September 2014"
+	dateFormat : "dd MMMM yyyy"
+	fromSavingsOfficerId : ""
+	locale : "en"
+	toSavingsOfficerId : 2
 }
 			</code>
 	        <code class="method-response">
 {
 	"officeId":2,
-	"clientId":8,
+	"savingsId":8,
 	"resourceId":8,
-	"changes":{"staffId":1}
+	"changes":{"savingsOfficerId":2}
 }
 	        </code>
 	    </div>
@@ -19193,12 +19197,14 @@ Request Body:
 	        <p>Allows you to unassign the <i>Savings Officer</i>.</p>
 	    </div>
 		<div class="method-example">
-	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=unassignFieldOfficer</code>
-	        <code class="method-request">POST savingsaccounts/1?command=unassignFieldOfficer
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=unassignSavingsOfficer</code>
+	        <code class="method-request">POST savingsaccounts/1?command=unassignSavingsOfficer
 Content-Type: application/json
 Request Body:
 {
-	"staffId":1
+	dateFormat : "dd MMMM yyyy"
+	locale : "en"
+	unassignedDate : "05 September 2014"
 }				
 			</code>
 	        <code class="method-response">
@@ -19206,7 +19212,7 @@ Request Body:
 	"officeId":2,
 	"clientId":8,
 	"resourceId":8,
-	"changes":{"staffId":1}
+	"changes":{}
 }
 	        </code>
 	    </div>
@@ -33777,7 +33783,7 @@ No Request Body:
 				</tr>			
 				<tr>
 					<td></td>
-					<td>savingsaccounts/{accountId}?command=assignFieldOfficer</td>
+					<td>savingsaccounts/{accountId}?command=assignSavingsOfficer</td>
 					<td><a href="#savingsaccounts_assignSavingsOfficer">Assign Savings Officer</a></td>
 					<td></td>
 					<td></td>
@@ -33785,7 +33791,7 @@ No Request Body:
 				</tr>
 				<tr>
 					<td></td>
-					<td>savingsaccounts/{accountId}?command=unassignFieldOfficer</td>
+					<td>savingsaccounts/{accountId}?command=unassignSavingsOfficer</td>
 					<td><a href="#savingsaccounts_unassignSavingsOfficer">Unassign Savings Officer</a></td>
 					<td></td>
 					<td></td>

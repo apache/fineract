@@ -14,12 +14,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class UnassignFieldOfficerSavingsAccountCommandHandler implements NewCommandSourceHandler {
+public class RemoveSavingsOfficerCommandHandler implements NewCommandSourceHandler {
 
     private final SavingsAccountWritePlatformService savingsWritePlatformService;
 
     @Autowired
-    public UnassignFieldOfficerSavingsAccountCommandHandler(final SavingsAccountWritePlatformService savingAccountWritePlatformService) {
+    public RemoveSavingsOfficerCommandHandler(final SavingsAccountWritePlatformService savingAccountWritePlatformService) {
         this.savingsWritePlatformService = savingAccountWritePlatformService;
     }
 

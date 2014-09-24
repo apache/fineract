@@ -391,50 +391,56 @@ public class SavingsAccountDataValidator {
 
     }
 
-    public void validateForAssignFieldOfficer(final String json) {
+    public void validateForAssignSavingsOfficer(final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        
+        final Set<String> supportedParameters = new HashSet<>(Arrays.asList("fromSavingsOfficerId","toSavingsOfficerId","assignmentDate","locale","dateFormat"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-
-        final Set<String> supportedParametersUnassignStaff = new HashSet<>(Arrays.asList(SavingsApiConstants.staffIdParamName));
-
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParametersUnassignStaff);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final String staffIdParameterName = SavingsApiConstants.staffIdParamName;
-        final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
-        baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().longGreaterThanZero();
+        final Long toSavingsOfficerId = this.fromApiJsonHelper.extractLongNamed("toSavingsOfficerId", element);
+        baseDataValidator.reset().parameter("toSavingsOfficerId").value(toSavingsOfficerId).notNull().integerGreaterThanZero();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        final String assignmentDateStr = this.fromApiJsonHelper.extractStringNamed("assignmentDate", element);
+        baseDataValidator.reset().parameter("assignmentDate").value(assignmentDateStr).notBlank();
+
+        if (!StringUtils.isBlank(assignmentDateStr)) {
+            final LocalDate assignmentDate = this.fromApiJsonHelper.extractLocalDateNamed("assignmentDate", element);
+            baseDataValidator.reset().parameter("assignmentDate").value(assignmentDate).notNull();
+        }
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }      
 
     }
 
-    public void validateForUnAssignFieldOfficer(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+    public void validateForUnAssignSavingsOfficer(final String json) {
+    	if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        
+        final Set<String> supportedParameters = new HashSet<>(Arrays.asList("unassignedDate","locale","dateFormat"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-
-        final Set<String> supportedParametersUnassignStaff = new HashSet<>(Arrays.asList(SavingsApiConstants.staffIdParamName));
-
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParametersUnassignStaff);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final String staffIdParameterName = SavingsApiConstants.staffIdParamName;
-        final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
-        baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().longGreaterThanZero();
+        final String unassignedDateStr = this.fromApiJsonHelper.extractStringNamed("unassignedDate", element);
+        baseDataValidator.reset().parameter("unassignedDate").value(unassignedDateStr).notBlank();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-
-    }
+        if (!StringUtils.isBlank(unassignedDateStr)) {
+            final LocalDate unassignedDate = this.fromApiJsonHelper.extractLocalDateNamed("unassignedDate", element);
+            baseDataValidator.reset().parameter("unassignedDate").value(unassignedDate).notNull();
+        }
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }     
+}
 }

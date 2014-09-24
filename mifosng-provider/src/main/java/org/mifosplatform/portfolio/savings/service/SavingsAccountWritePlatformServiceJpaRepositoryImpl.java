@@ -81,6 +81,8 @@ import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransaction;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransactionRepository;
 import org.mifosplatform.portfolio.savings.exception.SavingsAccountClosingNotAllowedException;
 import org.mifosplatform.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
+import org.mifosplatform.portfolio.savings.exception.SavingsOfficerAssignmentException;
+import org.mifosplatform.portfolio.savings.exception.SavingsOfficerUnassignmentException;
 import org.mifosplatform.portfolio.savings.exception.TransactionUpdateNotAllowedException;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1021,66 +1023,72 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         return null;
     }
 
+    @Transactional
     @Override
     public CommandProcessingResult assignFieldOfficer(Long savingsAccountId, JsonCommand command) {
         this.context.authenticatedUser();
-
         final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
 
-        this.fromApiJsonDeserializer.validateForAssignFieldOfficer(command.json());
+        Staff fromSavingsOfficer = null;
+        Staff toSavingsOfficer = null;
+        this.fromApiJsonDeserializer.validateForAssignSavingsOfficer(command.json());
 
         final SavingsAccount savingsForUpdate = this.savingsRepository.findOneWithNotFoundDetection(savingsAccountId);
-
-        Staff staff = null;
-        final Long staffId = command.longValueOfParameterNamed(SavingsApiConstants.staffIdParamName);
-        if (staffId != null) {
-            staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, savingsForUpdate.office().getHierarchy());
-
-            savingsForUpdate.assignFieldOfficer(staff);
+        final Long fromSavingsOfficerId = command.longValueOfParameterNamed("fromSavingsOfficerId");
+        final Long toSavingsOfficerId = command.longValueOfParameterNamed("toSavingsOfficerId");
+        final LocalDate dateOfSavingsOfficerAssignment = command.localDateValueOfParameterNamed("assignmentDate");
+        
+        if(fromSavingsOfficerId != null)
+        {
+        	fromSavingsOfficer = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(fromSavingsOfficerId, savingsForUpdate.office().getHierarchy());
         }
+        if(toSavingsOfficerId != null)
+        {
+        	toSavingsOfficer = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(toSavingsOfficerId, savingsForUpdate.office().getHierarchy());
+        }
+        if (!savingsForUpdate.hasSavingsOfficer(fromSavingsOfficer)) { throw new SavingsOfficerAssignmentException(savingsAccountId, fromSavingsOfficerId); }
+
+        savingsForUpdate.reassignSavingsOfficer(toSavingsOfficer,dateOfSavingsOfficerAssignment);
 
         this.savingsRepository.saveAndFlush(savingsForUpdate);
 
-        actualChanges.put(SavingsApiConstants.staffIdParamName, staffId);
+        actualChanges.put("toSavingsOfficerId", toSavingsOfficer.getId());
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withOfficeId(savingsForUpdate.officeId()) //
                 .withEntityId(savingsForUpdate.getId()) //
-                .withClientId(savingsAccountId) //
+                .withSavingsId(savingsAccountId) //
                 .with(actualChanges) //
                 .build();
     }
 
+    @Transactional
     @Override
     public CommandProcessingResult unassignFieldOfficer(Long savingsAccountId, JsonCommand command) {
-        this.context.authenticatedUser();
+        
+    	this.context.authenticatedUser();
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
+    	final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
+    	this.fromApiJsonDeserializer.validateForUnAssignSavingsOfficer(command.json());
+       
+    	final SavingsAccount savingsForUpdate = this.savingsRepository.findOneWithNotFoundDetection(savingsAccountId);
+        if (savingsForUpdate.getSavingsOfficer() == null) { throw new SavingsOfficerUnassignmentException(savingsAccountId); }
 
-        this.fromApiJsonDeserializer.validateForUnAssignFieldOfficer(command.json());
+        final LocalDate dateOfSavingsOfficerUnassigned = command.localDateValueOfParameterNamed("unassignedDate");
+        
+        savingsForUpdate.removeSavingsOfficer(dateOfSavingsOfficerUnassigned);
 
-        final SavingsAccount savingsForUpdate = this.savingsRepository.findOneWithNotFoundDetection(savingsAccountId);
-
-        final Staff presentStaff = savingsForUpdate.getFieldOfficer();
-        Long presentStaffId = null;
-        if (presentStaff == null) { throw new ClientHasNoStaffException(savingsAccountId); }
-        presentStaffId = presentStaff.getId();
-        final String staffIdParamName = SavingsApiConstants.staffIdParamName;
-        if (!command.isChangeInLongParameterNamed(staffIdParamName, presentStaffId)) {
-            savingsForUpdate.unassignFieldOfficer();
-        }
         this.savingsRepository.saveAndFlush(savingsForUpdate);
 
-        actualChanges.put(staffIdParamName, presentStaffId);
-
+        actualChanges.put("toSavingsOfficerId", null);
+        
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withOfficeId(savingsForUpdate.officeId()) //
                 .withEntityId(savingsForUpdate.getId()) //
-                .withClientId(savingsAccountId) //
+                .withSavingsId(savingsAccountId) //
                 .with(actualChanges) //
-                .build();
-    }
-
+                .build();	    	
+         }
 }
