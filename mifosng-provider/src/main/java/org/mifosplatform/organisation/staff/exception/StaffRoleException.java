@@ -13,7 +13,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
 public class StaffRoleException extends AbstractPlatformResourceNotFoundException {
 
     public static enum STAFF_ROLE {
-        LOAN_OFFICER, BRANCH_MANAGER;
+        LOAN_OFFICER, BRANCH_MANAGER,SAVINGS_OFFICER;
 
         @Override
         public String toString() {

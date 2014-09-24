@@ -48,7 +48,7 @@ public class SavingsApiConstants {
     public static final String localeParamName = "locale";
     public static final String dateFormatParamName = "dateFormat";
     public static final String monthDayFormatParamName = "monthDayFormat";
-    public static final String staffIdParamName = "staffId";
+    public static final String staffIdParamName = "savingsOfficerId";
 
     // savings product and account parameters
     public static final String idParamName = "id";
