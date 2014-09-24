@@ -185,8 +185,73 @@ public class ClientSavingsIntegrationTest {
                 savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         withdrawBalance = "true";
-        savingsStatusHashMap =  this.savingsAccountHelper.closeSavingsAccount(savingsId, withdrawBalance);
+        savingsStatusHashMap = this.savingsAccountHelper.closeSavingsAccount(savingsId, withdrawBalance);
         SavingsStatusChecker.verifySavingsAccountIsClosed(savingsStatusHashMap);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testSavingsAccount_WITH_ENFORCE_MIN_BALANCE() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
+        final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientID);
+        final String minBalanceForInterestCalculation = null;
+        final String minRequiredBalance = "1500.0";
+        final String enforceMinRequiredBalance = "true";
+        final boolean allowOverdraft = false;
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
+        Assert.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertNotNull(savingsProductID);
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        final Integer savingsActivationChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+                ChargesHelper.getSavingsActivationFeeJSON());
+        Assert.assertNotNull(savingsActivationChargeId);
+
+        this.savingsAccountHelper.addChargesForSavings(savingsId, savingsActivationChargeId);
+
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        Float balance = new Float(MINIMUM_OPENING_BALANCE);
+        Float chargeAmt = 100f;
+        balance -= chargeAmt;
+        assertEquals("Verifying opening Balance", balance, summary.get("accountBalance"));
+
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        Calendar todaysDate = Calendar.getInstance();
+        final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
+        final String withdrawAmt = "800";
+        ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper.withdrawalFromSavingsAccount(savingsId,
+                withdrawAmt, TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
+        assertEquals("error.msg.savingsaccount.transaction.insufficient.account.balance",
+                savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+
+        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
+                TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
+        balance += new Float(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+        assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
+
+        Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, withdrawAmt,
+                TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
+        balance -= new Float(withdrawAmt);
+        assertEquals("Verifying Withdrawal Amount", new Float(withdrawAmt), withdrawTransaction.get("amount"));
+        assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
     }
 
     @SuppressWarnings("unchecked")
@@ -521,7 +586,7 @@ public class ClientSavingsIntegrationTest {
         this.savingsAccountHelper.addChargesForSavings(savingsId, weeklyFeeId);
         charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertEquals(3, charges.size());
-        
+
         savingsChargeForPay = charges.get(2);
         final Integer weeklySavingsFeeId = (Integer) savingsChargeForPay.get("id");
 
@@ -529,7 +594,7 @@ public class ClientSavingsIntegrationTest {
                 CommonConstants.RESPONSE_ERROR);
         assertEquals("validation.msg.savingsaccountcharge.inactivation.of.charge.not.allowed.when.charge.is.due", savingsAccountErrorData
                 .get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
-        
+
         cal = Calendar.getInstance();
         dates = (List) savingsChargeForPay.get("dueDate");
         cal.set(Calendar.YEAR, (Integer) dates.get(0));
@@ -686,7 +751,7 @@ public class ClientSavingsIntegrationTest {
         interestPosted = new Float(decimalFormat.format(interestPosted));
         actualInterestPosted = new Float(decimalFormat.format(actualInterestPosted));
         assertEquals("Verifying interest posted", interestPosted, actualInterestPosted);
-        
+
         todaysDate = Calendar.getInstance();
         final String CLOSEDON_DATE = dateFormat.format(todaysDate.getTime());
         String withdrawBalance = "false";
@@ -710,14 +775,18 @@ public class ClientSavingsIntegrationTest {
             final String overDraftLimit = "2000.0";
             savingsProductHelper = savingsProductHelper.withOverDraft(overDraftLimit);
         }
-        
-        final String savingsProductJSON = savingsProductHelper //
-                .withInterestCompoundingPeriodTypeAsDaily() //
-                .withInterestPostingPeriodTypeAsMonthly() //
-                .withInterestCalculationPeriodTypeAsDailyBalance() //
-                .withMinBalanceForInterestCalculation(minBalanceForInterestCalculation)//
-                .withMinRequiredBalance(minRequiredBalance)
-                .withEnforceMinRequiredBalance(enforceMinRequiredBalance)
+
+        final String savingsProductJSON = savingsProductHelper
+                //
+                .withInterestCompoundingPeriodTypeAsDaily()
+                //
+                .withInterestPostingPeriodTypeAsMonthly()
+                //
+                .withInterestCalculationPeriodTypeAsDailyBalance()
+                //
+                .withMinBalanceForInterestCalculation(minBalanceForInterestCalculation)
+                //
+                .withMinRequiredBalance(minRequiredBalance).withEnforceMinRequiredBalance(enforceMinRequiredBalance)
                 .withMinimumOpenningBalance(minOpenningBalance).build();
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
     }

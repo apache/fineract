@@ -845,18 +845,19 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     public void validateAccountBalanceDoesNotBecomeNegative(final BigDecimal transactionAmount, final boolean isWithdrawBalance) {
         final List<SavingsAccountTransaction> transactionsSortedByDate = retreiveListOfTransactions();
         Money runningBalance = Money.zero(this.currency);
-
         for (final SavingsAccountTransaction transaction : transactionsSortedByDate) {
             if (transaction.isNotReversed() && transaction.isCredit()) {
                 runningBalance = runningBalance.plus(transaction.getAmount(this.currency));
             } else if (transaction.isNotReversed() && transaction.isDebit()) {
                 runningBalance = runningBalance.minus(transaction.getAmount(this.currency));
+            } else {
+                continue;
             }
 
             final BigDecimal withdrawalFee = null;
             // deal with potential minRequiredBalance and
             // enforceMinRequiredBalance
-            if (!isWithdrawBalance && this.minRequiredBalance != null && this.enforceMinRequiredBalance) {
+            if (!isWithdrawBalance && this.minRequiredBalance != null && this.enforceMinRequiredBalance && transaction.isWithdrawal()) {
                 if (runningBalance.minus(this.minRequiredBalance).isLessThanZero()) { throw new InsufficientAccountBalanceException(
                         "transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount); }
             }
