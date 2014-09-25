@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextStoppedEvent;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
@@ -48,7 +48,7 @@ import org.springframework.stereotype.Service;
  * {@link CronTriggerFactoryBean}
  */
 @Service
-public class JobRegisterServiceImpl implements JobRegisterService, ApplicationListener<ContextStoppedEvent> {
+public class JobRegisterServiceImpl implements JobRegisterService, ApplicationListener<ContextClosedEvent> {
 
     private final static Logger logger = LoggerFactory.getLogger(JobRegisterServiceImpl.class);
 
@@ -230,8 +230,14 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         return !this.schedularWritePlatformService.retriveSchedulerDetail().isSuspended();
     }
 
+    /**
+     * Need to use ContextClosedEvent instead of ContextStoppedEvent because in
+     * case Spring Boot fails to start-up (e.g. because Tomcat port is already
+     * in use) then org.springframework.boot.SpringApplication.run(String...)
+     * does a context.close(); and not a context.stop();
+     */
     @Override
-    public void onApplicationEvent(@SuppressWarnings("unused") ContextStoppedEvent event) {
+    public void onApplicationEvent(@SuppressWarnings("unused") ContextClosedEvent event) {
         this.stopAllSchedulers();
     }
 

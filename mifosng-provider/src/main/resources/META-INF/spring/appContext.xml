@@ -45,6 +45,13 @@
 										  org.mifosplatform.batch">
 		<context:exclude-filter expression="org.springframework.stereotype.Controller"
 			type="annotation" />
+
+		<!-- We do NOT want all @Configuration "beans" to be auto-detected by ComponentScan,
+			 but we want to use / import them explicitly in Tests & Spring Boot applications,
+			 or other import in other @Configuration, so that we could have mutually exclusive ones.
+		 -->
+		<context:exclude-filter expression="org.springframework.context.annotation.Configuration"
+			type="annotation" />
 	</context:component-scan>
 
 	<bean id="auditorAware"
@@ -63,9 +70,8 @@
 	
 	<import resource="infrastructure.xml" />
 
-	<!-- do NOT <import resource="jndi.xml" />  here;
-	     because we want the TestDataSourceConfiguration to not have that;
-	     we'll manually list jndi.xml in web.xml
+	<!-- do NOT <import resource="jndi.xml" />  here anymore;
+	     we'll manually import jndi.xml where we still need it (MifosServletWebApplicationInitializerConfiguration)
 	-->
 
 	<import resource="securityContext.xml" />

@@ -28,14 +28,12 @@ public class PlatformRequestLog {
     @SuppressWarnings("unused")
     private final String url;
     @SuppressWarnings("unused")
-    private final Map<String, String> parameters;
+    private final Map<String, String[]> parameters;
 
     public static PlatformRequestLog from(final StopWatch task, final HttpServletRequest request) throws IOException {
-
         final String requestUrl = request.getRequestURL().toString();
 
-        @SuppressWarnings("unchecked")
-        final Map<String, String> parameters = new HashMap<>(request.getParameterMap());
+        final Map<String, String[]> parameters = new HashMap<>(request.getParameterMap());
         parameters.remove("password");
         parameters.remove("_");
 
@@ -43,7 +41,7 @@ public class PlatformRequestLog {
     }
 
     private PlatformRequestLog(final long startTime, final long time, final String method, final String requestUrl,
-            final Map<String, String> parameters) {
+            final Map<String, String[]> parameters) {
         this.startTime = startTime;
         this.totalTime = time;
         this.method = method;
