@@ -57,12 +57,12 @@ public class EmbeddedTomcatWithSSLConfiguration {
         }
     }
 
-	protected int getHTTPSPort() {
-	// TODO This shouldn't be hard-coded here, but configurable
-		return 8443;
-	}
+    protected int getHTTPSPort() {
+        // TODO This shouldn't be hard-coded here, but configurable
+        return 8443;
+    }
 
-	protected String getKeystorePass() {
+    protected String getKeystorePass() {
         return "openmf";
     }
 
@@ -70,35 +70,38 @@ public class EmbeddedTomcatWithSSLConfiguration {
         return new ClassPathResource("/keystore.jks");
     }
 
-	public File getFile(Resource resource) throws IOException {
-		try {
-			return resource.getFile();
-		} catch (IOException e) {
-			// Uops.. OK, try again (below)
-		}
+    public File getFile(Resource resource) throws IOException {
+        try {
+            return resource.getFile();
+        } catch (IOException e) {
+            // Uops.. OK, try again (below)
+        }
 
-		try {
-			URL url = resource.getURL();
-			// If this creates filenames that are too long on Win,
-			// then could just use resource.getFilename(),
-			// even though not unique, real risk prob. min.bon
-			String tempDir = System.getProperty("java.io.tmpdir");
-			tempDir = tempDir + "/" + getClass().getSimpleName() + "/";
-			String path = url.getPath();
-			String uniqName = path.replace("file:/", "").replace('!', '_');
-			String tempFullPath = tempDir + uniqName;
-			// instead of File.createTempFile(prefix?, suffix?);
-			File targetFile = new File(tempFullPath);
-			long len = resource.contentLength();
-			if (!targetFile.exists() || targetFile.length() != len) { // Only copy new files
-				FileUtils.copyURLToFile(url, targetFile);
-			}
-			return targetFile;
-		} catch (IOException e) {
-			// Uops.. erm, give up:
-			throw new IOException("Cannot obtain a File for Resource: "
-					+ resource.toString(), e);
-		}
+        try {
+            URL url = resource.getURL();
+            /**
+             * // If this creates filenames that are too long on Win, // then
+             * could just use resource.getFilename(), // even though not unique,
+             * real risk prob. min.bon String tempDir =
+             * System.getProperty("java.io.tmpdir"); tempDir = tempDir + "/" +
+             * getClass().getSimpleName() + "/"; String path = url.getPath();
+             * String uniqName = path.replace("file:/", "").replace('!', '_');
+             * String tempFullPath = tempDir + uniqName;
+             **/
+            // instead of File.createTempFile(prefix?, suffix?);
+            File targetFile = new File(resource.getFilename());
+            long len = resource.contentLength();
+            if (!targetFile.exists() || targetFile.length() != len) { // Only
+                                                                      // copy
+                                                                      // new
+                                                                      // files
+                FileUtils.copyURLToFile(url, targetFile);
+            }
+            return targetFile;
+        } catch (IOException e) {
+            // Uops.. erm, give up:
+            throw new IOException("Cannot obtain a File for Resource: " + resource.toString(), e);
+        }
 
-	}
+    }
 }

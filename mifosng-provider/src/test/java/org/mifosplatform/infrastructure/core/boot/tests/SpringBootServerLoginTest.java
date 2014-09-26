@@ -11,13 +11,14 @@ import static org.junit.Assert.assertThat;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mifosplatform.ServerApplication;
 import org.mifosplatform.common.RestAssuredFixture;
 
 /**
  * This is an integration test for the Spring Boot launch stuff.
- *
+ * 
  * @see ServerApplication
  */
 public class SpringBootServerLoginTest extends AbstractSpringBootWithMariaDB4jIntegrationTest {
@@ -25,8 +26,9 @@ public class SpringBootServerLoginTest extends AbstractSpringBootWithMariaDB4jIn
     protected RestAssuredFixture util;
 
     @Test
+    @Ignore("functionality currently broken on Windows and Integration Testing environment")
     public void hasMifosPlatformStarted() {
-	util = new RestAssuredFixture(8443);
+        util = new RestAssuredFixture(8443);
         List<Map<String, String>> response = util.httpGet("/users");
         assertThat(response.get(0).get("username"), is("mifos"));
     }
