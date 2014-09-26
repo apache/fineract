@@ -140,8 +140,8 @@ dependencies {
 
 				// Although Mifos (at the time of writing) doesn't have any compile time dep. on this,
 				// it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
-				// Commenting out this dependency due to error observed in Cloudbees https://openmf.ci.cloudbees.com/job/MIFOSX%20INTEGRATION%20TEST/828/testReport/org.mifosplatform.integrationtests/AccountTransferTest/testFromLoanToSavingsAccountTransfer/ (Unsupported cookie spec..)
-               // [group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.2.3']
+                [group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.2.3'],
+                [group: 'commons-httpclient', name: 'commons-httpclient', version: '3.1']
      )
 	 testCompile 'junit:junit:4.11',
 				 'junit:junit-dep:4.11',
