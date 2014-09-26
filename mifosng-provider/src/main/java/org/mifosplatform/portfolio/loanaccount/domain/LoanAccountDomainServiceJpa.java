@@ -40,8 +40,6 @@ import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
-import org.mifosplatform.portfolio.common.domain.DaysInMonthType;
-import org.mifosplatform.portfolio.common.domain.DaysInYearType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
@@ -414,8 +412,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         return calculatedRepaymentsStartingFromDate;
     }
 
-    /* (non-Javadoc)
-     * @see org.mifosplatform.portfolio.loanaccount.domain.LoanAccountDomainService#recalculateAccruals(org.mifosplatform.portfolio.loanaccount.domain.Loan)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.mifosplatform.portfolio.loanaccount.domain.LoanAccountDomainService
+     * #recalculateAccruals(org.mifosplatform.portfolio.loanaccount.domain.Loan)
      */
     @Override
     public void recalculateAccruals(Loan loan) {
@@ -424,8 +426,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas = new ArrayList<>();
         List<LoanRepaymentScheduleInstallment> installments = loan.fetchRepaymentScheduleInstallments();
         Long loanId = loan.getId();
-        DaysInMonthType daysInMonth = loan.repaymentScheduleDetail().fetchDaysInMonthType();
-        DaysInYearType daysInYear = loan.repaymentScheduleDetail().fetchDaysInYearType();
         Long officeId = loan.getOfficeId();
         LocalDate accrualStartDate = null;
         PeriodFrequencyType repaymentFrequency = loan.repaymentScheduleDetail().getRepaymentPeriodFrequencyType();
@@ -459,12 +459,11 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                         }
                     }
                 }
-                LoanScheduleAccrualData accrualData = new LoanScheduleAccrualData(loanId, officeId, accrualStartDate,
-                        daysInMonth.getValue(), daysInYear.getValue(), repaymentFrequency, repayEvery, installment.getDueDate(),
-                        installment.getFromDate(), installment.getId(), loanProductId,
-                        installment.getInterestCharged(currency).getAmount(), installment.getFeeChargesCharged(currency).getAmount(),
-                        installment.getPenaltyChargesCharged(currency).getAmount(), accruedInterestIncome, accruedFeeIncome,
-                        accruedPenaltyIncome, currencyData, dueDateFeeIncome, dueDatePenaltyIncome, interestCalculatedFrom);
+                LoanScheduleAccrualData accrualData = new LoanScheduleAccrualData(loanId, officeId, installment.getInstallmentNumber(),
+                        accrualStartDate, repaymentFrequency, repayEvery, installment.getDueDate(), installment.getFromDate(),
+                        installment.getId(), loanProductId, installment.getInterestCharged(currency).getAmount(), installment
+                                .getFeeChargesCharged(currency).getAmount(), installment.getPenaltyChargesCharged(currency).getAmount(),
+                        accruedInterestIncome, accruedFeeIncome, accruedPenaltyIncome, currencyData, interestCalculatedFrom);
                 loanScheduleAccrualDatas.add(accrualData);
 
             }

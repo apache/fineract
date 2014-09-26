@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -23,6 +24,7 @@ import org.mifosplatform.portfolio.charge.service.ChargeEnumerations;
 import org.mifosplatform.portfolio.common.service.DropdownReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanInstallmentChargeData;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -208,7 +210,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
         public String schema() {
             return " lsi.installment as installmentNumber, lsi.duedate as dueAsOfDate, "
                     + "lic.amount_outstanding_derived as amountOutstanding," + "lic.amount as  amount, " + "lic.is_paid_derived as paid, "
-                    + "lic.waived as waied " + "from  m_loan_installment_charge lic "
+                    + "lic.amount_waived_derived as amountWaived, " + "lic.waived as waied " + "from  m_loan_installment_charge lic "
                     + "join m_loan_repayment_schedule lsi on lsi.id = lic.loan_schedule_id ";
         }
 
@@ -218,10 +220,11 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final LocalDate dueAsOfDate = JdbcSupport.getLocalDate(rs, "dueAsOfDate");
             final BigDecimal amountOutstanding = rs.getBigDecimal("amountOutstanding");
             final BigDecimal amount = rs.getBigDecimal("amount");
+            final BigDecimal amountWaived = rs.getBigDecimal("amountWaived");
             final boolean paid = rs.getBoolean("paid");
             final boolean waived = rs.getBoolean("waied");
 
-            return new LoanInstallmentChargeData(installmentNumber, dueAsOfDate, amount, amountOutstanding, paid, waived);
+            return new LoanInstallmentChargeData(installmentNumber, dueAsOfDate, amount, amountOutstanding, amountWaived, paid, waived);
         }
     }
 
@@ -237,4 +240,80 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
         }
         return this.jdbcTemplate.queryForList(sql, Integer.class, params);
     }
+
+    @Override
+    public Collection<LoanChargeData> retrieveLoanChargesForAccural(final Long loanId) {
+
+        final LoanChargeAccrualMapper rm = new LoanChargeAccrualMapper();
+
+        final String sql = "select " + rm.schema() + " where lc.loan_id=? AND lc.is_active = 1 group by  lc.id "
+                + " order by lc.charge_time_enum ASC, lc.due_for_collection_as_of_date ASC, lc.is_penalty ASC";
+
+        Collection<LoanChargeData> charges = this.jdbcTemplate.query(sql, rm,
+                new Object[] { LoanTransactionType.ACCRUAL.getValue(), loanId });
+
+        Collection<LoanChargeData> removeCharges = new ArrayList<>();
+        for (LoanChargeData loanChargeData : charges) {
+            if (loanChargeData.isInstallmentFee()) {
+                removeCharges.add(loanChargeData);
+            }
+        }
+        charges.removeAll(removeCharges);
+        for (LoanChargeData loanChargeData : removeCharges) {
+            if (loanChargeData.isInstallmentFee()) {
+                Collection<LoanInstallmentChargeData> installmentChargeDatas = retrieveInstallmentLoanCharges(loanChargeData.getId(), false);
+                LoanChargeData modifiedChargeData = new LoanChargeData(loanChargeData, installmentChargeDatas);
+                charges.add(modifiedChargeData);
+            }
+        }
+
+        return charges;
+    }
+
+    private static final class LoanChargeAccrualMapper implements RowMapper<LoanChargeData> {
+
+        private final String schemaSql;
+
+        public LoanChargeAccrualMapper() {
+            StringBuilder sb = new StringBuilder(50);
+            sb.append("lc.id as id, lc.charge_id as chargeId, ");
+            sb.append("lc.amount as amountDue, ");
+            sb.append("lc.amount_waived_derived as amountWaived, ");
+            sb.append("lc.charge_time_enum as chargeTime, ");
+            sb.append(" sum(cp.amount) as amountAccrued, ");
+            sb.append("lc.is_penalty as penalty, ");
+            sb.append("lc.due_for_collection_as_of_date as dueAsOfDate ");
+            sb.append(" from m_loan_charge lc ");
+            sb.append("left join (");
+            sb.append("select lcp.loan_charge_id, lcp.amount");
+            sb.append(" from m_loan_charge_paid_by lcp ");
+            sb.append("inner join m_loan_transaction lt on lt.id = lcp.loan_transaction_id and lt.is_reversed = 0 and lt.transaction_type_enum = ?");
+            sb.append(") cp on  cp.loan_charge_id= lc.id  ");
+
+            schemaSql = sb.toString();
+        }
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        @Override
+        public LoanChargeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = rs.getLong("id");
+            final Long chargeId = rs.getLong("chargeId");
+            final BigDecimal amount = rs.getBigDecimal("amountDue");
+            final BigDecimal amountAccrued = rs.getBigDecimal("amountAccrued");
+            final BigDecimal amountWaived = rs.getBigDecimal("amountWaived");
+
+            final int chargeTime = rs.getInt("chargeTime");
+            final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(chargeTime);
+
+            final LocalDate dueAsOfDate = JdbcSupport.getLocalDate(rs, "dueAsOfDate");
+            final boolean penalty = rs.getBoolean("penalty");
+
+            return new LoanChargeData(id, chargeId, dueAsOfDate, chargeTimeType, amount, amountAccrued, amountWaived, penalty);
+        }
+    }
+
 }

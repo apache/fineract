@@ -13,20 +13,21 @@ public class LoanInstallmentChargeData {
 
     private final Integer installmentNumber;
     private final LocalDate dueDate;
-    @SuppressWarnings("unused")
     private final BigDecimal amount;
     private final BigDecimal amountOutstanding;
+    private final BigDecimal amountWaived;
     private final boolean paid;
     private final boolean waived;
 
     public LoanInstallmentChargeData(final Integer installmentNumber, final LocalDate dueDate, final BigDecimal amount,
-            final BigDecimal amountOutstanding, final boolean paid, final boolean waived) {
+            final BigDecimal amountOutstanding, BigDecimal amountWaived, final boolean paid, final boolean waived) {
         this.installmentNumber = installmentNumber;
         this.dueDate = dueDate;
         this.amount = amount;
         this.amountOutstanding = amountOutstanding;
         this.paid = paid;
         this.waived = waived;
+        this.amountWaived = amountWaived;
     }
 
     public Integer getInstallmentNumber() {
@@ -43,6 +44,14 @@ public class LoanInstallmentChargeData {
 
     public BigDecimal getAmountOutstanding() {
         return this.amountOutstanding;
+    }
+
+    public BigDecimal getAmount() {
+        return this.amount;
+    }
+
+    public BigDecimal getAmountWaived() {
+        return this.amountWaived;
     }
 
 }
