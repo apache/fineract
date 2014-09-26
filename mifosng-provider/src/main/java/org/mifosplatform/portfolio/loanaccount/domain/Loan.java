@@ -2552,7 +2552,8 @@ public class Loan extends AbstractPersistable<Long> {
     public List<LoanTransaction> retreiveListOfTransactionsPostDisbursementExcludeAccruals() {
         final List<LoanTransaction> repaymentsOrWaivers = new ArrayList<>();
         for (final LoanTransaction transaction : this.loanTransactions) {
-            if (!transaction.isDisbursement() && transaction.isNotReversed() && !transaction.isAccrual()) {
+            if (!transaction.isDisbursement() && transaction.isNotReversed() && !transaction.isAccrual()
+                    && !transaction.isRepaymentAtDisbursement()) {
                 repaymentsOrWaivers.add(transaction);
             }
         }
