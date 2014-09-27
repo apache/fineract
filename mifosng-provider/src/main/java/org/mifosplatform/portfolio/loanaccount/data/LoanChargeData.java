@@ -63,8 +63,9 @@ public class LoanChargeData {
 
     private final BigDecimal maxCap;
 
-    @SuppressWarnings("unused")
     private final Collection<LoanInstallmentChargeData> installmentChargeData;
+
+    private BigDecimal amountAccrued;
 
     public static LoanChargeData template(final Collection<ChargeData> chargeOptions) {
         return new LoanChargeData(null, null, null, null, null, null, null, null, chargeOptions, false, null, false, false, null, null,
@@ -124,6 +125,7 @@ public class LoanChargeData {
         this.chargePayable = isChargePayable();
         this.loanId = loanId;
         this.installmentChargeData = installmentChargeData;
+        this.amountAccrued = null;
     }
 
     private LoanChargeData(final Long id, final Long chargeId, final String name, final CurrencyData currency, final BigDecimal amount,
@@ -166,6 +168,7 @@ public class LoanChargeData {
         this.minCap = minCap;
         this.maxCap = maxCap;
         this.installmentChargeData = installmentChargeData;
+        this.amountAccrued = null;
     }
 
     public LoanChargeData(final Long id, final LocalDate dueAsOfDate, final BigDecimal amountOutstanding, EnumOptionData chargeTimeType,
@@ -195,6 +198,37 @@ public class LoanChargeData {
         this.minCap = null;
         this.maxCap = null;
         this.installmentChargeData = installmentChargeData;
+        this.amountAccrued = null;
+    }
+
+    public LoanChargeData(final Long id, final Long chargeId, final LocalDate dueAsOfDate, EnumOptionData chargeTimeType,
+            final BigDecimal amount, final BigDecimal amountAccrued, final BigDecimal amountWaived, final boolean penalty) {
+        this.id = id;
+        this.chargeId = chargeId;
+        this.name = null;
+        this.currency = null;
+        this.amount = amount;
+        this.amountPaid = null;
+        this.amountWaived = amountWaived;
+        this.amountWrittenOff = null;
+        this.amountOutstanding = null;
+        this.chargeTimeType = chargeTimeType;
+        this.dueDate = dueAsOfDate;
+        this.chargeCalculationType = null;
+        this.percentage = null;
+        this.amountPercentageAppliedTo = null;
+        this.penalty = penalty;
+        this.chargePaymentMode = null;
+        this.paid = false;
+        this.waived = false;
+        this.amountOrPercentage = null;
+        this.chargeOptions = null;
+        this.chargePayable = false;
+        this.loanId = null;
+        this.minCap = null;
+        this.maxCap = null;
+        this.installmentChargeData = null;
+        this.amountAccrued = amountAccrued;
     }
 
     public LoanChargeData(LoanChargeData chargeData, Collection<LoanInstallmentChargeData> installmentChargeData) {
@@ -223,6 +257,7 @@ public class LoanChargeData {
         this.chargePayable = chargeData.chargePayable;
         this.loanId = chargeData.loanId;
         this.installmentChargeData = installmentChargeData;
+        this.amountAccrued = chargeData.amountAccrued;
     }
 
     public LoanChargeData(final Long id, final LocalDate dueAsOfDate, final BigDecimal amountOrPercentage) {
@@ -251,6 +286,7 @@ public class LoanChargeData {
         this.minCap = null;
         this.maxCap = null;
         this.installmentChargeData = null;
+        this.amountAccrued = null;
     }
 
     public boolean isChargePayable() {
@@ -287,5 +323,34 @@ public class LoanChargeData {
 
     public BigDecimal amountOrPercentage() {
         return this.amountOrPercentage;
+    }
+
+    public Collection<LoanInstallmentChargeData> getInstallmentChargeData() {
+        return this.installmentChargeData;
+    }
+
+    public boolean isPenalty() {
+        return this.penalty;
+    }
+
+    public BigDecimal getAmount() {
+        return this.amount;
+    }
+
+    public BigDecimal getAmountAccrued() {
+        return this.amountAccrued;
+    }
+
+    public void updateAmountAccrued(BigDecimal amountAccrued) {
+        this.amountAccrued = amountAccrued;
+    }
+
+    public Long getChargeId() {
+        return this.chargeId;
+    }
+
+    
+    public BigDecimal getAmountWaived() {
+        return this.amountWaived;
     }
 }

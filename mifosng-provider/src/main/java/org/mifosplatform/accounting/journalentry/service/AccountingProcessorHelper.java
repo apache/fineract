@@ -239,6 +239,67 @@ public class AccountingProcessorHelper {
 
     /**
      * Convenience method that creates a pair of related Debits and Credits for
+     * Accrual Based accounting.
+     * 
+     * The target accounts for debits and credits are switched in case of a
+     * reversal
+     * 
+     * @param office
+     * @param accountTypeToBeDebited
+     *            Enum of the placeholder GLAccount to be debited
+     * @param accountTypeToBeCredited
+     *            Enum of the placeholder of the GLAccount to be credited
+     * @param loanProductId
+     * @param paymentTypeId
+     * @param loanId
+     * @param transactionId
+     * @param transactionDate
+     * @param amount
+     * @param isReversal
+     */
+    public void createAccrualBasedJournalEntriesAndReversalsForLoanCharges(final Office office, final String currencyCode,
+            final Integer accountTypeToBeDebited, final Integer accountTypeToBeCredited, final Long loanProductId, final Long loanId,
+            final String transactionId, final Date transactionDate, final BigDecimal totalAmount, final Boolean isReversal,
+            final List<ChargePaymentDTO> chargePaymentDTOs) {
+
+        GLAccount receivableAccount = getLinkedGLAccountForLoanCharges(loanProductId, accountTypeToBeDebited, null);
+        final Map<GLAccount, BigDecimal> creditDetailsMap = new LinkedHashMap<>();
+        for (final ChargePaymentDTO chargePaymentDTO : chargePaymentDTOs) {
+            final Long chargeId = chargePaymentDTO.getChargeId();
+            final GLAccount chargeSpecificAccount = getLinkedGLAccountForLoanCharges(loanProductId, accountTypeToBeCredited, chargeId);
+            BigDecimal chargeSpecificAmount = chargePaymentDTO.getAmount();
+
+            // adjust net credit amount if the account is already present in the
+            // map
+            if (creditDetailsMap.containsKey(chargeSpecificAccount)) {
+                final BigDecimal existingAmount = creditDetailsMap.get(chargeSpecificAccount);
+                chargeSpecificAmount = chargeSpecificAmount.add(existingAmount);
+            }
+            creditDetailsMap.put(chargeSpecificAccount, chargeSpecificAmount);
+        }
+
+        BigDecimal totalCreditedAmount = BigDecimal.ZERO;
+        for (final Map.Entry<GLAccount, BigDecimal> entry : creditDetailsMap.entrySet()) {
+            final GLAccount account = entry.getKey();
+            final BigDecimal amount = entry.getValue();
+            totalCreditedAmount = totalCreditedAmount.add(amount);
+            if (isReversal) {
+                createDebitJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate, amount);
+                createCreditJournalEntryForLoan(office, currencyCode, receivableAccount, loanId, transactionId, transactionDate, amount);
+            } else {
+                createDebitJournalEntryForLoan(office, currencyCode, receivableAccount, loanId, transactionId, transactionDate, amount);
+                createCreditJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate, amount);
+            }
+        }
+
+        if (totalAmount.compareTo(totalCreditedAmount) != 0) { throw new PlatformDataIntegrityException(
+                "Meltdown in advanced accounting...sum of all charges is not equal to the fee charge for a transaction",
+                "Meltdown in advanced accounting...sum of all charges is not equal to the fee charge for a transaction",
+                totalCreditedAmount, totalAmount); }
+    }
+
+    /**
+     * Convenience method that creates a pair of related Debits and Credits for
      * Cash Based accounting.
      * 
      * The target accounts for debits and credits are switched in case of a

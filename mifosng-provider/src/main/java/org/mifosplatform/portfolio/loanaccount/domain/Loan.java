@@ -592,6 +592,9 @@ public class Loan extends AbstractPersistable<Long> {
 
         final LoanTransaction applyLoanChargeTransaction = LoanTransaction.accrueLoanCharge(this, getOffice(), chargeAmount,
                 transactionDate, feeCharges, penaltyCharges);
+        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(applyLoanChargeTransaction, loanCharge, loanCharge.getAmount(
+                getCurrency()).getAmount());
+        applyLoanChargeTransaction.getLoanChargesPaid().add(loanChargePaidBy);
         this.loanTransactions.add(applyLoanChargeTransaction);
         return applyLoanChargeTransaction;
     }
