@@ -9,12 +9,14 @@ import static org.junit.Assert.assertEquals;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -336,7 +338,7 @@ public class AccountingScenarioIntegrationTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         DateFormat currentDateFormat = new SimpleDateFormat("dd");
 
         Calendar todaysDate = Calendar.getInstance();
@@ -418,7 +420,7 @@ public class AccountingScenarioIntegrationTest {
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
         final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         DateFormat currentDateFormat = new SimpleDateFormat("dd");
 
         Calendar todaysDate = Calendar.getInstance();
@@ -683,7 +685,7 @@ public class AccountingScenarioIntegrationTest {
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
 
         Calendar todayDate = Calendar.getInstance();
         final String currentDate = dateFormat.format(todayDate.getTime());
@@ -742,7 +744,7 @@ public class AccountingScenarioIntegrationTest {
         int totalDaysInPeriod = Days.daysBetween(fromDateLocal, dueDateLocal).getDays();
 
         float totalInterest = (float) loanSchedule.get(1).get("interestOriginalDue");
-        DecimalFormat numberFormat = new DecimalFormat("#.00");
+        DecimalFormat numberFormat = new DecimalFormat("#.00", new DecimalFormatSymbols(Locale.US));
         float INTEREST_4_DAYS = totalInterest / totalDaysInPeriod * 4;
         INTEREST_4_DAYS = new Float(numberFormat.format(INTEREST_4_DAYS));
 
@@ -778,7 +780,7 @@ public class AccountingScenarioIntegrationTest {
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
 
         Calendar todayDate = Calendar.getInstance();
         final String currentDate = dateFormat.format(todayDate.getTime());
@@ -836,7 +838,7 @@ public class AccountingScenarioIntegrationTest {
         int totalDaysInPeriod = Days.daysBetween(fromDateLocal, dueDateLocal).getDays();
 
         float totalInterest = (float) loanSchedule.get(1).get("interestOriginalDue");
-        DecimalFormat numberFormat = new DecimalFormat("#.00");
+        DecimalFormat numberFormat = new DecimalFormat("#.00", new DecimalFormatSymbols(Locale.US));
         float INTEREST_3_DAYS = totalInterest / totalDaysInPeriod * 3;
         INTEREST_3_DAYS = new Float(numberFormat.format(INTEREST_3_DAYS));
         this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(runOndate), INTEREST_3_DAYS, FEE_PORTION,
@@ -966,7 +968,7 @@ public class AccountingScenarioIntegrationTest {
     private LocalDate getDateAsLocalDate(String dateAsString) {
         LocalDate date = null;
         try {
-            DateFormat df = new SimpleDateFormat("dd MMMM yyyy");
+            DateFormat df = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
             date = new LocalDate(df.parse(dateAsString));
         } catch (ParseException e) {
             e.printStackTrace();

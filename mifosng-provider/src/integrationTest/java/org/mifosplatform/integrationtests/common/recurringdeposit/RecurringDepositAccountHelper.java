@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.mifosplatform.integrationtests.common.CommonConstants;
 import org.mifosplatform.integrationtests.common.Utils;
@@ -252,7 +253,7 @@ public class RecurringDepositAccountHelper {
     public HashMap updateRecurringDepositAccount(final String clientID, final String productID, final String accountID,
             final String validFrom, final String validTo, final String penalInterestType, final String submittedOnDate) {
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
         todaysDate.add(Calendar.DATE, -1);
