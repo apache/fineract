@@ -2523,6 +2523,16 @@ public class Loan extends AbstractPersistable<Long> {
             doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
         }
 
+        if (this.loanProduct.isMultiDisburseLoan()) {
+            BigDecimal totalDisbursed = getDisbursedAmount();
+            if (totalDisbursed.compareTo(this.summary.getTotalPrincipalRepaid()) < 0
+                    && this.repaymentScheduleDetail().getPrincipal().minus(totalDisbursed).isGreaterThanZero()) {
+                final String errorMessage = "The transaction cannot be done before the loan disbursement: "
+                        + getApprovedOnDate().toString();
+                throw new InvalidLoanStateTransitionException("transaction", "cannot.be.done.before.disbursement", errorMessage);
+            }
+        }
+
         if (changedTransactionDetail != null) {
             this.loanTransactions.removeAll(changedTransactionDetail.getNewTransactionMappings().values());
         }
