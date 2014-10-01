@@ -201,6 +201,7 @@ task deployPentahoReports() {
 
 war {
     it.dependsOn deployPentahoReports
+    war.finalizedBy(bootRepackage)
 }
 
 license {
