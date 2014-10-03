@@ -5,12 +5,16 @@
  */
 package org.mifosplatform.common;
 
-
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.path.json.JsonPath.from;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.Random;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
@@ -20,15 +24,12 @@ import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Random;
-
 /**
  * Util for RestAssured tests. This class here in src/test is copy/pasted :(
  * from and identical to the one in src/integrationTest; please keep it in sync.
- * The cunning plan is that, now that we have Spring Boot + MariaDB4j, eventually
- * do completely away with src/integrationTest and have only src/test.. can you help? ;)
+ * The cunning plan is that, now that we have Spring Boot + MariaDB4j,
+ * eventually do completely away with src/integrationTest and have only
+ * src/test.. can you help? ;)
  */
 @SuppressWarnings("unchecked")
 public class Utils {
@@ -87,9 +88,9 @@ public class Utils {
         return (T) from(json).get(jsonAttributeToGetBack);
     }
 
-    public static String convertDateToURLFormat(final String dateToBeConvert) {
-        final SimpleDateFormat oldFormat = new SimpleDateFormat("dd MMMMMM yyyy");
-        final SimpleDateFormat newFormat = new SimpleDateFormat("yyyy-MM-dd");
+    public static String convertDateToURLFormat(String dateToBeConvert) {
+        SimpleDateFormat oldFormat = new SimpleDateFormat("dd MMMMMM yyyy", Locale.US);
+        SimpleDateFormat newFormat = new SimpleDateFormat("yyyy-MM-dd");
         String reformattedStr = "";
         try {
             reformattedStr = newFormat.format(oldFormat.parse(dateToBeConvert));

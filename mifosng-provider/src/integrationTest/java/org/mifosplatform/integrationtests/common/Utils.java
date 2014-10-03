@@ -13,6 +13,7 @@ import static org.junit.Assert.fail;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.Random;
 
 import org.apache.commons.lang.StringUtils;
@@ -86,7 +87,7 @@ public class Utils {
     }
 
     public static String convertDateToURLFormat(final String dateToBeConvert) {
-        final SimpleDateFormat oldFormat = new SimpleDateFormat("dd MMMMMM yyyy");
+        final SimpleDateFormat oldFormat = new SimpleDateFormat("dd MMMMMM yyyy", Locale.US);
         final SimpleDateFormat newFormat = new SimpleDateFormat("yyyy-MM-dd");
         String reformattedStr = "";
         try {

@@ -221,7 +221,7 @@ public class SystemCodeTest {
 
         // delete code value
         final Integer deletedCodeValueResponseId1 = (Integer) CodeHelper.deleteCodeValueById(this.requestSpec, this.generalResponseSpec,
-                createCodeResponseId, createCodeValueResponseId1, CodeHelper.RESPONSE_ID_ATTRIBUTE_NAME);
+                createCodeResponseId, createCodeValueResponseId1, CodeHelper.SUBRESPONSE_ID_ATTRIBUTE_NAME);
 
         // Verify code value deleted
 
