@@ -1065,6 +1065,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " tr.principal_portion_derived as principal, tr.interest_portion_derived as interest, "
                     + " tr.fee_charges_portion_derived as fees, tr.penalty_charges_portion_derived as penalties, "
                     + " tr.overpayment_portion_derived as overpayment, tr.outstanding_loan_balance_derived as outstandingLoanBalance, "
+                    + " tr.submitted_on_date as submittedOnDate, "
                     + " pd.payment_type_cv_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, "
                     + " pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode, "
                     + " l.currency_code as currencyCode, l.currency_digits as currencyDigits, l.currency_multiplesof as inMultiplesOf, rc.`name` as currencyName, "
@@ -1119,6 +1120,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 }
             }
             final LocalDate date = JdbcSupport.getLocalDate(rs, "date");
+            final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
             final BigDecimal totalAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "total");
             final BigDecimal principalPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principal");
             final BigDecimal interestPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interest");
@@ -1151,7 +1153,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             return new LoanTransactionData(id, officeId, officeName, transactionType, paymentDetailData, currencyData, date, totalAmount,
                     principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion, overPaymentPortion, externalId, transfer,
-                    null, outstandingLoanBalance);
+                    null, outstandingLoanBalance, submittedOnDate);
         }
     }
 
