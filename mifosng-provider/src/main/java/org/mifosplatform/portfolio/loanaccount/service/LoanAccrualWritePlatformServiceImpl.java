@@ -21,6 +21,7 @@ import javax.sql.DataSource;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.journalentry.service.JournalEntryWritePlatformService;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.exception.JobExecutionException;
@@ -285,13 +286,14 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
 
     private void addAccrualAccounting(LoanScheduleAccrualData scheduleAccrualData, BigDecimal amount, BigDecimal interestportion,
             BigDecimal totalAccInterest, BigDecimal feeportion, BigDecimal totalAccFee, BigDecimal penaltyportion,
-            BigDecimal totalAccPenalty, final LocalDate accruredTill) throws Exception {
+            BigDecimal totalAccPenalty, final LocalDate accruedTill) throws Exception {
         TransactionStatus transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
         try {
             String transactionSql = "INSERT INTO m_loan_transaction  (loan_id,office_id,is_reversed,transaction_type_enum,transaction_date,amount,interest_portion_derived,"
-                    + "fee_charges_portion_derived,penalty_charges_portion_derived) VALUES (?, ?, 0, ?, ?, ?, ?, ?, ?)";
+                    + "fee_charges_portion_derived,penalty_charges_portion_derived, submitted_on_date) VALUES (?, ?, 0, ?, ?, ?, ?, ?, ?, ?)";
             this.jdbcTemplate.update(transactionSql, scheduleAccrualData.getLoanId(), scheduleAccrualData.getOfficeId(),
-                    LoanTransactionType.ACCRUAL.getValue(), accruredTill.toDate(), amount, interestportion, feeportion, penaltyportion);
+                    LoanTransactionType.ACCRUAL.getValue(), accruedTill.toDate(), amount, interestportion, feeportion, penaltyportion,
+                    DateUtils.getDateOfTenant());
             final Long transactonId = this.jdbcTemplate.queryForLong("SELECT LAST_INSERT_ID()");
 
             Map<LoanChargeData, BigDecimal> applicableCharges = scheduleAccrualData.getApplicableCharges();
@@ -302,7 +304,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             }
 
             Map<String, Object> transactionMap = toMapData(transactonId, amount, interestportion, feeportion, penaltyportion,
-                    scheduleAccrualData, accruredTill);
+                    scheduleAccrualData, accruedTill);
 
             String repaymetUpdatesql = "UPDATE m_loan_repayment_schedule SET accrual_interest_derived=?, accrual_fee_charges_derived=?, "
                     + "accrual_penalty_charges_derived=? WHERE  id=?";
@@ -310,7 +312,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
                     scheduleAccrualData.getRepaymentScheduleId());
 
             String updateLoan = "UPDATE m_loan  SET accrued_till=?  WHERE  id=?";
-            this.jdbcTemplate.update(updateLoan, accruredTill.toDate(), scheduleAccrualData.getLoanId());
+            this.jdbcTemplate.update(updateLoan, accruedTill.toDate(), scheduleAccrualData.getLoanId());
             final Map<String, Object> accountingBridgeData = deriveAccountingBridgeData(scheduleAccrualData, transactionMap);
             this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
         } catch (Exception e) {
