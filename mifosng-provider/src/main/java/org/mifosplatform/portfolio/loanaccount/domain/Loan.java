@@ -1802,7 +1802,7 @@ public class Loan extends AbstractPersistable<Long> {
             final JsonCommand command, final ApplicationCurrency currency, final Map<String, Object> actualChanges,
             final LocalDate calculatedRepaymentsStartingFromDate, final boolean isHolidayEnabled, final List<Holiday> holidays,
             final WorkingDays workingDays, final boolean allowTransactionsOnHoliday, final boolean allowTransactionsOnNonWorkingDay,
-            final boolean recalculateSchedule, final CalendarInstance calendarInstanceForInterestRecalculation) {
+            final CalendarInstance calendarInstanceForInterestRecalculation) {
 
         final LoanStatus statusEnum = this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED,
                 LoanStatus.fromInt(this.loanStatus));
