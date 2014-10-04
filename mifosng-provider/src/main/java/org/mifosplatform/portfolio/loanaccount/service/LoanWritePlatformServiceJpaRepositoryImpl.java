@@ -310,7 +310,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
             changedTransactionDetail = loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, changes,
                     calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays, allowTransactionsOnHoliday,
-                    allowTransactionsOnNonWorkingDay, recalculateSchedule, restCalendarInstance);
+                    allowTransactionsOnNonWorkingDay, restCalendarInstance);
         }
         if (!changes.isEmpty()) {
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
@@ -320,8 +320,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 final Note note = Note.loanNote(loan, noteText);
                 this.noteRepository.save(note);
             }
-
-            saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
             if (changedTransactionDetail != null) {
                 for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
@@ -508,19 +506,17 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 }
                 changedTransactionDetail = loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, changes,
                         firstRepaymentOnDate, isHolidayEnabled, holidays, workingDays, allowTransactionsOnHoliday,
-                        allowTransactionsOnNonWorkingDay, recalculateSchedule, restCalendarInstance);
+                        allowTransactionsOnNonWorkingDay, restCalendarInstance);
             }
             if (!changes.isEmpty()) {
 
-                saveLoanWithDataIntegrityViolationChecks(loan);
+                saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
                 final String noteText = command.stringValueOfParameterNamed("note");
                 if (StringUtils.isNotBlank(noteText)) {
                     final Note note = Note.loanNote(loan, noteText);
                     this.noteRepository.save(note);
                 }
-
-                saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
                 if (changedTransactionDetail != null) {
                     for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                         this.loanTransactionRepository.save(mapEntry.getValue());
