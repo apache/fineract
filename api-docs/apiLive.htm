@@ -313,7 +313,7 @@
 								<td></td>
 								<td>standinginstructions/{standingInstructionId}</td>
                                 <td></td>
-								<td><a href="#standinginstructions_retrieve">Retrive a Standing Instruction</a></td>
+								<td><a href="#standinginstructions_retrieve">Retrieve a Standing Instruction</a></td>
                                 <td><a href="#standinginstruction_update">Update Standing Instruction</a></td>
 								<td><a href="#standinginstruction_delete">Delete Standing Instruction(status change)</a></td>
 							</tr>
@@ -321,7 +321,7 @@
                                 <td></td>
                                 <td>standinginstructionrunhistory</td>
                                 <td></td>
-                                <td><a href="#standinginstructions_history">Standinginstructions History</a></td>
+                                <td><a href="#standinginstructions_history">Standing Instructions Run History</a></td>
                                 <td></td>
                                 <td></td>
                             </tr>
@@ -337,7 +337,7 @@
 								<td></td>
 								<td>accounttransfers/{accountTransferId}</td>
 								<td></td>
-                                <td><a href="#accounttransfers_retrieve">Retrive a Account Transfer</a></td>
+                                <td><a href="#accounttransfers_retrieve">Retrieve a Account Transfer</a></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -1217,7 +1217,7 @@
 								<td></td>
 								<td>groups/{groupId}/accounts</td>
 								<td></td>
-								<td><a href="#groups_accounts">Retrive Group accounts summary</a></td>
+								<td><a href="#groups_accounts">Retrieve Group accounts summary</a></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -1353,7 +1353,7 @@
 															<td></td>
 															<td>centers/{centerId}/accounts</td>
 															<td></td>
-															<td><a href="#centers_accounts">Retrive Center accounts summary</a></td>
+															<td><a href="#centers_accounts">Retrieve Center accounts summary</a></td>
 															<td></td>
 															<td></td>
 														</tr>
@@ -2105,7 +2105,7 @@
 							</tr>
 							<tr>
 								<td></td>
-								<td>jobs/{jobid}/runhistory?offset=0&limit=200</td>
+								<td>jobs/{jobid}/runhistory</td>
 								<td></td>
 								<td><a href="#retrieve_job_runhistory">Retrieve job history</a></td>
 								<td></td>
@@ -2496,11 +2496,11 @@
 							</tr>
                             <tr>
                                 <td>standinginstructions/template</td>
-                                <td><a href="#standinginstruction_template">Retrive Standing Instruction Template</a></td>
+                                <td><a href="#standinginstruction_template">Retrieve Standing Instruction Template</a></td>
                             </tr>
                             <tr>
                                 <td>accounttransfers/template</td>
-                                <td><a href="#accounttransfers_template">Retrive Account Transfer Template</a></td>
+                                <td><a href="#accounttransfers_template">Retrieve Account Transfer Template</a></td>
                             </tr>
 						</table>
 					</div>
@@ -3257,7 +3257,7 @@ Successful transaction response:
 						</tr>
 						<tr>
 							<td class=fielddesc>Facility to set name of a client or
-								business that doesnt suit the firstname,middlename,lastname
+								business that doesn't suit the firstname,middlename,lastname
 								structure.</td>
 						</tr>
 						<tr class=alt>
@@ -3441,8 +3441,8 @@ Request Body:
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Activate a Client</h4>
-	        <p>Clients can be created in a <i>Pending</i> state. This API exists to enable client activation (for when a client becomes approved member of microfinance institue).</p>
-	        <p>If the client happens to be alrady active this API will result in an error.</p>
+	        <p>Clients can be created in a <i>Pending</i> state. This API exists to enable client activation (for when a client becomes an approved member of the financial Institution).</p>
+	        <p>If the client happens to be already active this API will result in an error.</p>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=activate</code>
@@ -3469,8 +3469,8 @@ Request Body:
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Close a Client</h4>
-	        <p>Clients can be closed if they dont have any non-closed loans/savingsAccount. This API exists to close a client .</p>
-	        <p>If the client have any corresponding active loans/savingsAccount this API will result in an error.</p>
+	        <p>Clients can be closed if they do not have any non-closed loans/savingsAccount. This API exists to close a client .</p>
+	        <p>If the client have any active loans/savingsAccount this API will result in an error.</p>
 	    </div>
 		<div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=close</code>
@@ -3497,8 +3497,9 @@ Request Body:
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Assign a Staff</h4>
-	        <p>Allows you to assign <i>Staff</i> for existed Client.</p>
-	        <p>The selected Staff member should be belongs to the client's office.</p>
+	        <p>Allows you to assign a <i>Staff</i> for existed Client.</p>
+	        <p>The selected Staff should belong to the same office (or an officer higher up in the hierarchy) 
+	        as the Client he manages.</p>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=assignStaff</code>
@@ -3524,7 +3525,7 @@ Request Body:
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Unassign a Staff</h4>
-	        <p>Allows you to unassign the <i>Staff</i>.</p>
+	        <p>Allows you to unassign the <i>Staff</i> assigned to a Client.</p>
 	    </div>
 		<div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=unassignStaff</code>
@@ -3550,8 +3551,8 @@ Request Body:
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Update Default Savings Account</h4>
-	        <p>Allows you to modify or assign default overdraft savings account for existed Client.</p>
-	        <p>The selected savings account should be belongs to the client's.</p>
+	        <p>Allows you to modify or assign a default savings account for an existing Client.</p>
+	        <p>The selected savings account should be one among the existing savings account for a particular customer.</p>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=updateSavingsAccount</code>
@@ -3579,7 +3580,7 @@ Request Body:
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Propose a Client Transfer</h4>
-	        <p>Allows you to propose the transfer of a <i>Client</i> to a different <i>Offices</i>.</p>
+	        <p>Allows you to propose the transfer of a <i>Client</i> to a different <i>Office</i>.</p>
 	    </div>
 		<div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=proposeTransfer</code>
@@ -3606,7 +3607,7 @@ Request Body:
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Withdraw a Client Transfer</h4>
-	        <p>Allows you to withdraw the proposed the transfer of a <i>Client</i> to a different <i>Offices</i>.</p>
+	        <p>Allows you to withdraw the proposed transfer of a <i>Client</i> to a different <i>Office</i>.</p>
 	        <p>Withdrawal can happen only if the destination Branch (to which the transfer was 
 	        <a href="#clients_propose_transfer">proposed</a>) has not already
 	         <a href="#clients_accept_transfer">accepted</a> the transfer proposal </p>
@@ -3793,7 +3794,7 @@ GET https://DomainName/api/v1/clients/{clientId}
 						<dd>
 							Integer <span>optional</span>, defaults to 0
 						</dd>
-						<dd>Indicates from what result to start from.</dd>
+						<dd>Indicates the result from which pagination starts</dd>
 						
 						<dt>limit</dt>
 						<dd>
@@ -3805,7 +3806,7 @@ GET https://DomainName/api/v1/clients/{clientId}
 						<dd>
 							String <span>optional</span>, one of <span>displayName, accountNo, officeId, officeName</span>
 						</dd>
-						<dd>Orders the results by the field indicated.</dd>
+						<dd>Orders results by the indicated field.</dd>
 
 						<dt>sortBy</dt>
 						<dd>
@@ -3817,7 +3818,7 @@ GET https://DomainName/api/v1/clients/{clientId}
 						<dd>
 							Integer <span>optional</span> 
 						</dd>
-						<dd>Provides ability to restrict list of clients returned based on the office there associated with.</dd>
+						<dd>Provides the ability to restrict list of clients returned based on the office they are associated with.</dd>
 						<dt>underHierarchy</dt>
 						<dd>
 							String <span>optional</span>
@@ -3914,8 +3915,8 @@ GET https://DomainName/api/v1/clients
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Update a Client</h4>
-					<p><b>Note:</b>You can update any of the basic attributes of a client using this API but not its associations.</p>
-					<p>Chaning the relationship between a client and its office is not supported through this API. An API specific to handling <b>transfers</b> of clients between offices will be introduced for this.</p>
+					<p><b>Note:</b>You can update any of the basic attributes of a client (but not its associations) using this API. </p>
+					<p>Changing the relationship between a client and its office is not supported through this API. An API specific to handling <b>transfers</b> of clients between offices is available for the same.</p>
 					<p>The relationship between a client and a group must be removed through the <b>Groups</b> API.</p>
 				</div>
 				<div class="method-example">
@@ -3947,7 +3948,7 @@ Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Delete a Client</h4>
-					<p>If a client is in <i>Pending</i> state you are allowed to <b>Delete</b> it. The delete is a 'hard delete' and cannot be recovered from. Once clients become active or have loans or savings associated with it, you cannot delete the client but you may <b>Close</b> the client if they have died or exited the program.</p>
+					<p>If a client is in <i>Pending</i> state, you are allowed to <b>Delete</b> it. The delete is a 'hard delete' and cannot be recovered from. Once clients become active or have loans or savings associated with them, you cannot delete the client but you may <b>Close</b> the client if they have left the program.</p>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -3976,7 +3977,7 @@ Request Body:
 					<h4>Retrieve client accounts overview</h4>
 					<p>
 						An example of how a loan portfolio summary can be provided. This
-						is requested in a specific use case of the reference application.<br> It is quite reasonable to add resources like this to simplify User Interface development.
+						is requested in a specific use case of the community application.<br> It is quite reasonable to add resources like this to simplify User Interface development.
 					</p>
 					<p>Example Requests:</p>
 					<div class=apiClick>clients/1/accounts</div>
@@ -4175,7 +4176,7 @@ GET https://DomainName/api/v1/clients/{clientId}/identifiers
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Retrieve Client Identifier Details Template</h4>
-					<p>This is a convenience resource. It can be useful when
+					<p>This is a convenience resource useful for
 						building maintenance user interface screens for client
 						applications. The template data returned consists of any or all
 						of:
@@ -4604,7 +4605,7 @@ No Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h3>Centers</h3>
-					<p><b>Centers</b> along with <b>Groups</b> are used to provided a distinctive banking distribution channel used in microfinance. Its common in areas such as India to use Centers and Group administrative units in <b>grameen style lending</b>. Typically groups will contain one to five people and centers themselves will be made of anywhere between 2-7 groups.
+					<p><b>Centers</b> along with <b>Groups</b> are used to provided a distinctive banking distribution channel used in microfinance. Its common in areas such as Southern Asia to use Centers and Group as administrative units in <b>grameen style lending</b>. Typically groups will contain one to five people and centers themselves will be made of anywhere between 2-10 groups.
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
@@ -4782,7 +4783,7 @@ GET https://DomainName/mifosng-provider/api/v1/centers/template?officeId=2
 					</table>
 				</div>
 				<div class="method-example">
-					<p>Creater a center as pending with no association to groupMembers.</p>
+					<p>Create a center as pending with no association to groupMembers.</p>
 					<code class="method-declaration">
 POST https://DomainName/mifosng-provider/api/v1/centers
 					</code>
@@ -4805,7 +4806,7 @@ Content-Type: application/json Request Body:
 				</div>
 
 				<div class="method-example">
-					<p>Creater a center as active with no association to groupMembers.</p>
+					<p>Create a center as active with no association to groupMembers.</p>
 					<code class="method-declaration">
 POST https://DomainName/mifosng-provider/api/v1/centers
 					</code>
@@ -4837,7 +4838,7 @@ Content-Type: application/json Request Body:
 	    <div class="method-description">
 	        <h2>Activate a Center</h2>
 	        <p>Centers can be created in a <i>Pending</i> state. This API exists to enable center activation.</p>
-	        <p>If the center happens to be already active this API will result in an error.</p>
+	        <p>If the center happens to be already active, this API will result in an error.</p>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/centers/{centerId}?command=activate</code>
@@ -4864,8 +4865,8 @@ Request Body:
 	<div class="method-section">
 	    <div class="method-description">
 	        <h2>Close a Center</h2>
-	        <p>Centers can be closed if they don't have any non-closed groups/savings.</p>
-	        <p>If the group have any corresponding active groups/savingsAccount this API will result in an error.</p>
+	        <p>Centers can be closed if they don't have any non-closed groups or saving accounts.</p>
+	        <p>If the Center has any active groups or savings accounts, this API will result in an error.</p>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/centers/{centerId}?command=close</code>
@@ -4891,9 +4892,9 @@ Request Body:
 	<div class="method-section">
 	    <div class="method-description">
 	        <h2>Associate Groups</h2>
-	        <p>This API allows to associate existing groups to a center.</p>
+	        <p>This API allows associating existing groups to a center.</p>
 	        <p>The groups are listed from the office to which the center is associated.</p>
-	        <p>If group(s) is already associated with center then API will result in an error.</p>
+	        <p>If group(s) is already associated with a center, this API will result in an error.</p>
 	    </div>
 
 	    <div class="method-example">
@@ -4948,7 +4949,7 @@ Request Body:
 				<div class="method-description">
 					<h4>Retrieve Center accounts overview</h4>
 					<p>
-						An example of how a savings summary can be provided. This
+						An example of how a savings summary for a Center can be provided. This
 						is requested in a specific use case of the reference application.<br> It is quite reasonable to add resources like this to simplify User Interface development.
 					</p>
 					<p>Example Requests:</p>
@@ -5014,7 +5015,7 @@ GET https://DomainName/api/v1/centers/{centerId}/accounts
         <div class="method-section">
             <div class="method-description">
               <h4>Generate Collection Sheet</h4>
-            <p>This api retrieves repayment details of all jlg loans under a center on a specified meeting date.</p>
+            <p>This Api retrieves repayment details of all jlg loans under a center as on a specified meeting date.</p>
         </div>
         <div class="method-example">
             <code class="method-declaration">POST https://Domain Name/api/v1/centers/{centerId}?command=generateCollectionSheet</code>
@@ -5121,7 +5122,7 @@ Request Body:
             <div class="method-section">
                 <div class="method-description">
                     <h4>Save Collection Sheet</h4>
-                    <p>This api allows the loan officer to perform bulk repayments of JLG loans for a center on its meeting date.</p>      
+                    <p>This Api allows the loan officer to perform bulk repayments of JLG loans for a center on a given meeting date.</p>      
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">POST https://Domain Name/api/v1/centers/{centerId}?command=saveCollectionSheet</code>
@@ -5192,7 +5193,7 @@ Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Delete a Center</h4>
-					<p>A center can be delete if it is in <i>pending</i> state and has nothing associated with it - groups, loans, savings etc</p>
+					<p>A Center can be deleted if it is in <i>pending</i> state and has no association - groups, loans or savings</p>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -5241,9 +5242,9 @@ GET https://DomainName/mifosng-provider/api/v1/centers/8
 					</code>
 				</div>
 				<div class="method-example">
-					<p>Retrieve an existing center with no groups information.</p>
+					<p>Retrieve an existing center without the details of group associations.</p>
 					<code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/centers/9?associations=groupMembers
+GET https://DomainName/mifosng-provider/api/v1/centers/9
 					</code>
 					<code class="method-response">
 {
@@ -5262,16 +5263,7 @@ GET https://DomainName/mifosng-provider/api/v1/centers/9?associations=groupMembe
   "name": "centerwithgroup",
   "officeId": 1,
   "officeName": "Head Office",
-  "hierarchy": ".9.",
-  "groupMembers": [
-    {
-      "id": 7,
-      "name": "Othergroup",
-      "officeId": 1,
-      "officeName": "Head Office",
-      "hierarchy": ".7."
-    }
-  ]
+  "hierarchy": ".9."
 }
 					</code>
 				</div>
@@ -5281,7 +5273,7 @@ GET https://DomainName/mifosng-provider/api/v1/centers/9?associations=groupMembe
 			<div class="method-section">
 				<div class="method-description">
 					<h4>List Centers</h4>
-					<p>The default implementation of <i>list</i> results into 200 entries with optional support for <b>pagination</b> and <b>sorting</b>. The parameter <b>limit</b> with value <b>-1</b> will return all entries.</p>
+					<p>The default implementation supports <b>pagination</b> and <b>sorting</b> with the default pagination size set to 200 records. The parameter <b>limit</b> with value <b>-1</b> will return all entries.</p>
 					<h5>Optional Arguments</h5>
 					<dl class="argument-list">
 						<dt>paged</dt>
@@ -5397,7 +5389,7 @@ GET https://DomainName/mifosng-provider/api/v1/centers?paged=true
 			<div class="method-section">
 				<div class="method-description">
 					<h3>Groups</h3>
-					<p><b>Groups</b> are used to provide a distinctive banking distribution channel used in microfinance throughout the world. The Group is an administrative unit. It can contain as few as 5 people or as many as 40 depending on how its used.</p>
+					<p><b>Groups</b> are used to provide a distinctive banking distribution channel used in microfinances throughout the world. The Group is an administrative unit. It can contain as few as 5 people or as many as 40 depending on how its used.</p>
 
 					<p>Different styles of group lending - Joint-Liability Group, Grameen Model (Center-Group), Self-Help Groups, Village/Communal Banks)</p>
 					<table class=matrixHeading>
@@ -5709,7 +5701,7 @@ Request Body:
 	    <div class="method-description">
 	        <h2>Disassociate Clients</h2>
 	        <p>This API allows to disassociate clients from a group.</p>
-	        <p>Disassociating a client with group loans results in an error.</p>
+	        <p>Disassociating a client with active joint liability group loans results in an error.</p>
 	    </div>
 
 	    <div class="method-example">
@@ -5985,8 +5977,8 @@ Request Body:
             <div class="method-section">
                 <div class="method-description">
                     <h4>Assign a Staff</h4>
-                    <p>Allows you to assign <i>Staff</i> for existed Group.</p>
-                    <p>The selected Staff member should be belongs to the group's office.</p>
+                    <p>Allows you to assign <i>Staff</i> to an existing Group.</p>
+                    <p>The selected Staff should be belong to the same office (or an office higher up in the hierarchy) as this group</p>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=assignStaff</code>
@@ -6012,8 +6004,8 @@ Request Body:
             <div class="method-section">
                 <div class="method-description">
                     <h4>Close a Group</h4>
-                    <p>Groups can be closed if they don't have any non-closed clients/loans/savingsAccounts and  This API exists to close a group.</p>
-                    <p>If the group have any corresponding active clients/loans/savingsAccount this API will result in an error.</p>
+                    <p>This API exists to close a group. Groups can be closed if they don't have any non-closed clients/loans/savingsAccounts.</p>
+                    <p>If the group has any active clients/loans/savingsAccount, this API will result in an error.</p>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=close</code>
@@ -6040,8 +6032,8 @@ Request Body:
             <div class="method-section">
                 <div class="method-description">
                     <h4>Assign a Role</h4>
-                    <p>Allows you to assign <i>Role</i> for existed member of group.</p>
-                    <p>We can define member roles by adding code values to <b>GROUPROLE</b> code. Example:Group leader etc.</p>
+                    <p>Allows you to assign a <i>Role</i> to an existing member of a group.</p>
+                    <p>We can define the different roles applicable to group members by adding code values to the pre-defined system code <b>GROUPROLE</b>. Example:Group leader etc.</p>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=assignRole</code>
@@ -6067,7 +6059,7 @@ Request Body:
             <div class="method-section">
                 <div class="method-description">
                     <h4>Unassign a Role</h4>
-                    <p>Allows you to unassign the member <i>Role</i>.</p>
+                    <p>Allows you to unassign <i>Roles</i> associated tp Group members.</p>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=unassignRole&roleId=1</code>
@@ -6111,33 +6103,6 @@ Request Body:
                 </div>
             </div>
 
-            <div class="method-section">
-                <div class="method-description">
-                    <h4>Close a Client</h4>
-                    <p>Clients can be closed if they dont have any non-closed loans/savingsAccount. This API exists to close a client .</p>
-                    <p>If the client have any corresponding active loans/savingsAccount this API will result in an error.</p>
-                </div>
-                <div class="method-example">
-                    <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=close</code>
-                    <code class="method-request">POST clients/1?command=close
-                        Content-Type: application/json
-                        Request Body:
-                        {
-                        "dateFormat":"dd MMMM yyyy",
-                        "locale":"en",
-                        "closureDate":"25 June 2013",
-                        "closureReasonId":"11"
-                        }
-                    </code>
-                    <code class="method-response">
-                        {
-                        "clientId":15,
-                        "resourceId":15
-                        }
-                    </code>
-                </div>
-            </div>
-
             <a id="groups_retrieve" name="groups_retrieve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -6148,7 +6113,7 @@ Request Body:
 					<div class=apiClick>groups/1?associations=clientMembers</div>
 				</div>
 				<div class="method-example">
-					<p>Group with no clientMembers information requested.</p>
+					<p>Group without details of Client associations.</p>
 					<code class="method-declaration">
 GET https://DomainName/mifosng-provider/api/v1/groups/1
 					</code>
@@ -6174,7 +6139,7 @@ GET https://DomainName/mifosng-provider/api/v1/groups/1
 					</code>
 				</div>
 				<div class="method-example">
-					<p>Group with clientMembers.</p>
+					<p>Group along with all its Clients.</p>
 					<code class="method-declaration">
 GET https://DomainName/mifosng-provider/api/v1/groups/1?associations=clientMembers
 					</code>
@@ -6224,8 +6189,7 @@ GET https://DomainName/mifosng-provider/api/v1/groups/1?associations=clientMembe
 				<div class="method-description">
 					<h4>Retrieve Group accounts overview</h4>
 					<p>
-						An example of how a loan portfolio summary can be provided. This
-						is requested in a specific use case of the reference application.<br> It is quite reasonable to add resources like this to simplify User Interface development.
+						Retrieves details of all Loan and Savings accounts associated with this group.
 					</p>
 					<p>Example Requests:</p>
 					<div class=apiClick>groups/1/accounts</div>
@@ -6479,7 +6443,7 @@ Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Delete a Group</h4>
-					<p>A group can be deleted if it is in <i>pending</i> state and has nothing associated with it - groups, loans, savings etc</p>
+					<p>A group can be deleted if it is in <i>pending</i> state and has no associations - clients, loans or savings</p>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -6502,7 +6466,7 @@ DELETE groups/2
 			<div class="method-section">
 				<div class="method-description">
 					<h4>List Groups</h4>
-					<p>The default implementation of <i>list</i> results into 200 entries with optional support for <b>pagination</b> and <b>sorting</b>. The parameter <b>limit</b> with value <b>-1</b> will return all entries.</p>
+					<p>The default implementation of <i>listing Groups</i> returns 200 entries with support for <b>pagination</b> and <b>sorting</b>. Using the parameter <b>limit</b> with value <b>-1</b> returns all entries.</p>
 					<h5>Optional Arguments</h5>
 					<dl class="argument-list">
 						<dt>paged</dt>
@@ -6806,13 +6770,13 @@ GET https://DomainName/mifosng-provider/api/v1/groups?paged=true
 	<td class=fielddesc>
 An enumeration that indicates the type of transaction processing strategy to be used. This relates to functionality that is also known as <b>Payment Application Logic</b>.
 	
-<p>A number of out of the box appraches exist, some are custom to specific MFIs, some are more general and indicate the order in which payments are processed.</p>
+<p>A number of out of the box approaches exist, some are custom to specific MFIs, some are more general and indicate the order in which payments are processed.</p>
 
 <p>Refer to the <a href="#paymentapplicationlogic">Payment Application Logic / Transaction Processing Strategy<a> section in the appendix for more detailed overview of each available <b>payment application logic</b> provided out of the box.</p>
 
 <i>List of current approaches</i>:<br/>
 <ul>
-	<li>1 = Mifos style (Similiar to Old Mifos)</li>
+	<li>1 = Mifos style (Similar to Old Mifos)</li>
 	<li>2 = Heavensfamily (Custom MFI approach)</li>
 	<li>3 = Creocore (Custom MFI approach)</li>
 	<li>4 = RBI (India)</li>
@@ -8522,7 +8486,7 @@ No Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h3>Loan Transactions</h3>
-					<p>Capabilities include loan repayment's, interest waivers and the ability to 'adjust' an existing transaction. An 'adjust'ment of a transaction is really a 'reversal' of existing transaction followed by creation of a new transaction with the provided details.</p>
+					<p>Capabilities include loan repayment's, interest waivers and the ability to 'adjust' an existing transaction. An 'adjustment' of a transaction is really a 'reversal' of existing transaction followed by creation of a new transaction with the provided details.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Field Descriptions</div></td>
@@ -8758,7 +8722,7 @@ Request Body:
 	    		<div class="method-section">
 				<div class="method-description">
 					<h4>Make Recovery Payment </h4>
-					<p>only applies to written-off loans</p>
+					<p>This API allows collecting recovery payments for written-off loans</p>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -9993,7 +9957,7 @@ No Request Body:
 <div class="method-section">
 				<div class="method-description">
 					<h3>Loan Rescheduling</h3>
-					<p>Loan rescheduling provides the ability to give a client extra grace periods, extend loan term by adding extra installments and adjust the interest rate of a loan.</p>
+					<p>Loan rescheduling provides the ability to give clients extra grace periods, extend loan term by adding extra installments and adjust the interest rate of a loan.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Field Descriptions</div></td>
@@ -10369,7 +10333,7 @@ Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h3>Offices</h3>
-					<p>Offices are used to model an MFIs structure. A hierarchial
+					<p>Offices are used to model an MFIs structure. A hierarchical
 						representation of offices is supported. There will always be at
 						least one office (which represents the MFI or an MFIs head
 						office). All subsequent offices added must have a parent office.</p>
@@ -10608,7 +10572,7 @@ Request Body:
 							<td>shortName</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>Shortname associated with a loan product. <br>
+							<td class=fielddesc>Short name associated with a loan product. <br>
 								An abbreviated version of the name, used in reports or menus where space is limited, such as Collection Sheets.
 							</td>
 						</tr>
