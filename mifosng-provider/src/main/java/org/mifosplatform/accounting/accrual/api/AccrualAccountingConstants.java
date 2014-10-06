@@ -11,7 +11,7 @@ import java.util.Set;
 
 public class AccrualAccountingConstants {
 
-    public static final String accrueTillParamName = "accrueTill";
+    public static final String accrueTillParamName = "tillDate";
     public static final String localeParamName = "locale";
     public static final String dateFormatParamName = "dateFormat";
     

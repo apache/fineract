@@ -15,7 +15,7 @@ import com.jayway.restassured.specification.ResponseSpecification;
 
 public class PeriodicAccrualAccountingHelper {
 
-    private static final String PERIODIC_ACCRUAL_URL = "/mifosng-provider/api/v1/accrualaccounting";
+    private static final String PERIODIC_ACCRUAL_URL = "/mifosng-provider/api/v1/runaccruals";
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
@@ -33,7 +33,7 @@ public class PeriodicAccrualAccountingHelper {
         final HashMap<String, String> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en_GB");
-        map.put("accrueTill", date);
+        map.put("tillDate", date);
         return new Gson().toJson(map);
     }
 

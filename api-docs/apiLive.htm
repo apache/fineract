@@ -31104,7 +31104,7 @@ Content-Type: application/json
                             <td><div class="mifosXHeading2">Field Descriptions</div></td>
                         </tr>
                         <tr class=alt>
-                            <td>accrueTill</td>
+                            <td>tillDate</td>
                         </tr>
                         <tr>
                             <td class=fielddesc>which specifies periodic accruals should happen till the given Date 
@@ -31126,7 +31126,7 @@ Content-Type: application/json
                             <td><div class="mifosXHeading2">Mandatory Fields</div></td>
                         </tr>
                         <tr class=alt>
-                            <td>accrueTill 
+                            <td>tillDate 
                             </td>
                         </tr>
                        
@@ -31136,7 +31136,7 @@ Content-Type: application/json
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
-POST https://DomainName/api/v1/accrualaccounting
+POST https://DomainName/api/v1/runaccruals
                     </code>
                     <code class="method-request">
 POST financialactivityaccounts
@@ -31145,7 +31145,7 @@ Request Body:
 {
 	"locale": "en",
 	"dateFormat": "dd MMMM yyyy",
-	"accrueTill":"04 June 2014" 
+	"tillDate":"04 June 2014" 
 }
                     </code>
                     <code class="method-response">
