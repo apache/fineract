@@ -61,6 +61,7 @@ import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.mifosplatform.portfolio.calendar.domain.CalendarRepository;
 import org.mifosplatform.portfolio.calendar.domain.CalendarType;
+import org.mifosplatform.portfolio.calendar.exception.CalendarParameterUpdateNotSupportedException;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargePaymentMode;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
@@ -1732,6 +1733,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         // loop through each loan to reschedule the repayment dates
         for (final Loan loan : loans) {
             if (loan != null) {
+                if(loan.repaymentScheduleDetail().isInterestRecalculationEnabled()){
+                    final String defaultUserMessage = "Meeting calendar type update is not supported";
+                    throw new CalendarParameterUpdateNotSupportedException("jlg.loan.recalculation", defaultUserMessage);
+                }
                 holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan.getDisbursementDate().toDate());
                 loan.updateLoanRepaymentScheduleDates(calendar.getStartDateLocalDate(), calendar.getRecurrence(), isHolidayEnabled,
                         holidays, workingDays);

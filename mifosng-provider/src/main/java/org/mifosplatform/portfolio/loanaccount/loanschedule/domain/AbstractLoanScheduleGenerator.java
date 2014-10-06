@@ -231,7 +231,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             if (reducePrincipal.isGreaterThanZero()) {
                 switch (loanApplicationTerms.getRescheduleStrategyMethod()) {
                     case REDUCE_EMI_AMOUNT:
-                        loanApplicationTerms.setFixedEmiAmount(null);
+                        if (!loanApplicationTerms.isMultiDisburseLoan()) {
+                            loanApplicationTerms.setFixedEmiAmount(null);
+                        }
                         fixedEmiAmount = fixedEmiAmount.zero();
                         outstandingBalance = outstandingBalance.minus(reducePrincipal);
                         balanceForcalculation = balanceForcalculation.minus(reducePrincipal);
@@ -1659,13 +1661,14 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                             .getId() != null && loanTransaction.getId().compareTo(precloseTransaction.getId()) == 1)))) {
                 precloseTransaction = loanTransaction;
             }
-            collectedPrincipal =  collectedPrincipal.plus(loanTransaction.getPrincipalPortion());
+            collectedPrincipal = collectedPrincipal.plus(loanTransaction.getPrincipalPortion());
         }
         if (precloseTransaction != null) {
             LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = calculatePrepaymentAmount(installments, currency,
                     precloseTransaction.getTransactionDate(), applicationTerms.getInterestChargedFromLocalDate(), applicationTerms, mc,
                     loanCharges);
-            Money pendingPrinciapl = applicationTerms.getPrincipal().minus(collectedPrincipal).plus(precloseTransaction.getPrincipalPortion());
+            Money pendingPrinciapl = applicationTerms.getPrincipal().minus(collectedPrincipal)
+                    .plus(precloseTransaction.getPrincipalPortion());
             if (pendingPrinciapl.isGreaterThan(loanRepaymentScheduleInstallment.getPrincipal(currency))
                     || precloseTransaction.getAmount(currency).isLessThan(loanRepaymentScheduleInstallment.getTotalOutstanding(currency))) {
                 precloseTransaction = null;
