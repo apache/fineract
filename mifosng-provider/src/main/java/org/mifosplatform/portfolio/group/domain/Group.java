@@ -537,13 +537,14 @@ public final class Group extends AbstractPersistable<Long> {
                         group.getId());
             }
 
+            if (hasGroupAsMember(group)) { throw new GroupExistsInCenterException(getId(), group.getId()); }
+
             if (group.isChildGroup()) {
                 final String defaultUserMessage = "Group is already associated with a center";
                 throw new GeneralPlatformDomainRuleException("error.msg.group.already.associated.with.center", defaultUserMessage, group
                         .getParent().getId(), group.getId());
             }
 
-            if (hasGroupAsMember(group)) { throw new GroupExistsInCenterException(getId(), group.getId()); }
 
             this.groupMembers.add(group);
             differences.add(group.getId().toString());
