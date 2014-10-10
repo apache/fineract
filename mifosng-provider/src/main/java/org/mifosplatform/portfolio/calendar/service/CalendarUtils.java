@@ -472,9 +472,10 @@ public class CalendarUtils {
         if (recur == null) { return null; }
         LocalDate date = startDate;
         final LocalDate seedDate = calendar.getStartDateLocalDate();
-        if (isValidRedurringDate(calendar.getRecurrence(), seedDate, date)) {
-            date = date.plusDays(1);
-        }
+        /**
+         * if (isValidRedurringDate(calendar.getRecurrence(), seedDate, date)) {
+         * date = date.plusDays(1); }
+         **/
 
         final LocalDate scheduleDate = getNextRecurringDate(recur, seedDate, date);
 
