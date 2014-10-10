@@ -75,6 +75,7 @@ New Features & Improvements
 
  - [MIFOSX-580] - Add support for 'pure' declining balance
  - [MIFOSX-1442] - Support for Webhooks
+ - [MIFOSX-1188] - GSOC Project: Batch API
  - [MIFOSX-1420] - Add pre-payment functionality
  - [MIFOSX-1537] - Add display of original Schedule for interest recalculation
  - [MIFOSX-1526] - Add future installments display for interest first repayment strategies
@@ -150,6 +151,7 @@ Community App
  - [MIFOSX-1256] - Filter charge and overdue charges drop-down lists to display only valid charges (matching currency)
  - [MIFOSX-1325] - Add ability to attach a group to a center
  - [MIFOSX-1482] - Improve work-flow for adding Clients to a Group during its Creation
+ - [MIFOSX-1574] - Unable to search for GL Accounts by GL Codes in "Add Journal Entries"
 
 
 
