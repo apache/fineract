@@ -12,12 +12,17 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
+import org.mifosplatform.portfolio.client.domain.ClientEnumerations;
+import org.mifosplatform.portfolio.group.domain.GroupingTypeEnumerations;
+import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
+import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosplatform.portfolio.search.SearchConstants;
 import org.mifosplatform.portfolio.search.data.AdHocQuerySearchConditions;
@@ -30,11 +35,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.mifosplatform.infrastructure.core.data.EnumOptionData;
-import org.mifosplatform.portfolio.client.domain.ClientEnumerations;
-import org.mifosplatform.portfolio.group.domain.GroupingTypeEnumerations;
-import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
-import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 
 @Service
 public class SearchReadPlatformServiceImpl implements SearchReadPlatformService {
@@ -90,20 +90,20 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
             final String loanMatchSql = " (select 'LOAN' as entityType, l.id as entityId, pl.name as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
                     + " , c.id as parentId, c.display_name as parentName, l.loan_status_id as entityStatusEnum "
                     + " from m_loan l join m_client c on l.client_id = c.id join m_office o on o.id = c.office_id join m_product_loan pl on pl.id=l.product_id where o.hierarchy like :hierarchy and "
-					+ " ((l.account_no like :partialSearch and l.account_no not like :search) or (l.external_id like :partialSearch and l.external_id not like :search))) ";
+                    + " ((l.account_no like :partialSearch and l.account_no not like :search) or (l.external_id like :partialSearch and l.external_id not like :search))) ";
 
-			final String savingExactMatchSql = " (select 'SAVING' as entityType, s.id as entityId, sp.name as entityName, s.external_id as entityExternalId, s.account_no as entityAccountNo " 
-					+ " , c.id as parentId, c.display_name as parentName, s.status_enum as entityStatusEnum "
-					+ " from m_savings_account s join m_client c on s.client_id = c.id join m_office o on o.id = c.office_id join m_savings_product sp on sp.id=s.product_id "
-					+ " where o.hierarchy like :hierarchy and (s.account_no like :search or s.external_id like :search)) ";
-			
-			final String savingMatchSql = " (select 'SAVING' as entityType, s.id as entityId, sp.name as entityName, s.external_id as entityExternalId, s.account_no as entityAccountNo " 
-					+ " , c.id as parentId, c.display_name as parentName, s.status_enum as entityStatusEnum "
-					+ " from m_savings_account s join m_client c on s.client_id = c.id join m_office o on o.id = c.office_id join m_savings_product sp on sp.id=s.product_id "
-					+ " where o.hierarchy like :hierarchy and (s.account_no like :partialSearch and s.account_no not like :search) or "
-					+ "(s.external_id like :partialSearch and s.external_id not like :search)) ";
+            final String savingExactMatchSql = " (select 'SAVING' as entityType, s.id as entityId, sp.name as entityName, s.external_id as entityExternalId, s.account_no as entityAccountNo "
+                    + " , c.id as parentId, c.display_name as parentName, s.status_enum as entityStatusEnum "
+                    + " from m_savings_account s join m_client c on s.client_id = c.id join m_office o on o.id = c.office_id join m_savings_product sp on sp.id=s.product_id "
+                    + " where o.hierarchy like :hierarchy and (s.account_no like :search or s.external_id like :search)) ";
 
-			final String clientIdentifierExactMatchSql = " (select 'CLIENTIDENTIFIER' as entityType, ci.id as entityId, ci.document_key as entityName, "
+            final String savingMatchSql = " (select 'SAVING' as entityType, s.id as entityId, sp.name as entityName, s.external_id as entityExternalId, s.account_no as entityAccountNo "
+                    + " , c.id as parentId, c.display_name as parentName, s.status_enum as entityStatusEnum "
+                    + " from m_savings_account s join m_client c on s.client_id = c.id join m_office o on o.id = c.office_id join m_savings_product sp on sp.id=s.product_id "
+                    + " where o.hierarchy like :hierarchy and (s.account_no like :partialSearch and s.account_no not like :search) or "
+                    + "(s.external_id like :partialSearch and s.external_id not like :search)) ";
+
+            final String clientIdentifierExactMatchSql = " (select 'CLIENTIDENTIFIER' as entityType, ci.id as entityId, ci.document_key as entityName, "
                     + " null as entityExternalId, null as entityAccountNo, c.id as parentId, c.display_name as parentName, c.status_enum as entityStatusEnum "
                     + " from m_client_identifier ci join m_client c on ci.client_id=c.id join m_office o on o.id = c.office_id "
                     + " where o.hierarchy like :hierarchy and ci.document_key like :search) ";
@@ -136,7 +136,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                 sql.append(savingExactMatchSql).append(union);
             }
 
-			if (searchConditions.isClientIdentifierSearch()) {
+            if (searchConditions.isClientIdentifierSearch()) {
                 sql.append(clientIdentifierExactMatchSql).append(union);
             }
 
