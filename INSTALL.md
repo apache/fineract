@@ -121,7 +121,7 @@ Those  updating an existing MifosX installation to version 1.21.*  or higher wou
 
 ##### 2.2.2.2 Special Instructions for upgrading to MifosX versions 1.25.* or higher
 
-Starting from version 1.25.*, updates to *mifosplatform-tenants* database are also managed by Flyway (http://flywaydb.org/). To ensure flyway works correctly, we would have to ensure that a table named *schema_version* table is present in *mifosplatform-tenants* database and has two records in it.
+Starting from version 1.25.* , updates to *mifosplatform-tenants* database are also managed by Flyway (http://flywaydb.org/). To ensure flyway works correctly, we would have to ensure that table *schema_version* is present along with two entries in *mifosplatform-tenants* database.
 
 Check the status of schema_version table using the following command
 
