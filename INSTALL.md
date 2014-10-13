@@ -108,15 +108,53 @@ The two ways to get up and running with mifos platform is:
 
 #### 2.2.2 Upgrade existing database(s)
 
-  Those  updating an existing MifosX installation to version 1.21.*  or higher would need to upgrade the *mifosplatform-tenants* database with patch ```database/migrations/list_db/V2__externalize-connection-properties.sql```
-  ```
-  mysql -uroot -pmysql mifosplatform-tenants < database/migrations/list_db/V2__externalize-connection-properties.sql
-  ```
-
   Any *tenant* databases will be upgraded automatically when the application starts if the *auto_update* field of the *tenants* database table is enabled(=1). This is the default setting.
   
   Upgrading your database in this way is the recommended way as it will upgrade any *tenants* setup in the *mifosplatform-tenants* database but can be disabled by setting the *auto_update* field of the tenant to zero.
   
+##### 2.2.2.1 Special Instructions for upgrading to MifosX versions 1.21.* to 1.24.*
+
+Those  updating an existing MifosX installation to version 1.21.*  or higher would need to upgrade the *mifosplatform-tenants* database with patch ```database/migrations/list_db/V2__externalize-connection-properties.sql```
+  ```
+  mysql -uroot -pmysql mifosplatform-tenants < database/migrations/list_db/V2__externalize-connection-properties.sql
+  ```
+
+##### 2.2.2.2 Special Instructions for upgrading to MifosX versions 1.25.* or higher
+
+Starting from version 1.25.* , updates to *mifosplatform-tenants* database are managed by Flyway (http://flywaydb.org/). To ensure that flyway works correctly, verify that table *schema_version* is present along with two entries in *mifosplatform-tenants* database.
+
+Check the status of *schema_version* table using the following command
+
+```
+mysql -uroot -pmysql
+ 
+use `mifosplatform-tenants`;
+select version_rank, installed_rank, version, description from schema_version;
+
+```
+
+The displayed result should be similar to 
+
+```
++--------------+----------------+---------+-----------------------------------+
+| version_rank | installed_rank | version | description                       |
++--------------+----------------+---------+-----------------------------------+
+|            1 |              1 | 1       | mifos-platform-shared-tenants     |
+|            2 |              2 | 2       | externalize-connection-properties |
++--------------+----------------+---------+-----------------------------------+
+
+```
+If *schema_version* does not contain the second row, insert the same using the following query
+
+```
+mysql -uroot -pmysql
+ 
+use `mifosplatform-tenants`;
+INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `description`, `type`, `script`, `checksum`, `installed_by`, `installed_on`, `execution_time`, `success`) VALUES
+  (2, 2, '2', 'externalize-connection-properties', 'SQL', 'V2__externalize-connection-properties.sql', 210473669, 'root', '2014-10-12 22:13:51', 661, 1);
+
+```
+ 
 #### 2.2.3 Load *mifostenant-default* schema with sample data (optional)
   Every release ships with sample data (offices, users, customers, loan products, savings products and a chart of accounts). The same can be restored by running the following command
   
