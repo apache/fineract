@@ -47,8 +47,9 @@ CREATE TABLE `schema_version` (
 
 LOCK TABLES `schema_version` WRITE;
 /*!40000 ALTER TABLE `schema_version` DISABLE KEYS */;
-INSERT INTO `schema_version` VALUES (1,1,'1','mifos-platform-shared-tenants','SQL','/V1__mifos-platform-shared-tenants.sql',-486745552,'root','2013-04-05 09:33:11',50,1);
-/*!40000 ALTER TABLE `schema_version` ENABLE KEYS */;
+INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `description`, `type`, `script`, `checksum`, `installed_by`, `installed_on`, `execution_time`, `success`) VALUES
+  (1, 1, '1', 'mifos-platform-shared-tenants', 'SQL', 'V1__mifos-platform-shared-tenants.sql', -486745552, 'root', '2014-10-12 22:13:50', 896, 1),
+  (2, 2, '2', 'externalize-connection-properties', 'SQL', 'V2__externalize-connection-properties.sql', 210473669, 'root', '2014-10-12 22:13:51', 661, 1);/*!40000 ALTER TABLE `schema_version` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
