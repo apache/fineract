@@ -144,7 +144,7 @@ The displayed result should be similar to
 +--------------+----------------+---------+-----------------------------------+
 
 ```
-In case, *schema_version* does not contain the second row, insert the same using the following query
+If *schema_version* does not contain the second row, insert the same using the following query
 
 ```
 mysql -uroot -pmysql
