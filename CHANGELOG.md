@@ -82,7 +82,6 @@ New Features & Improvements
  - [MIFOSX-1416] - Add batch jobs to run accruals with specific periodicity
  - [MIFOSX-1417] - Add API to add accrual transactions till specified date
  - [MIFOSX-1418] - Recalculate and adjust accruals for back dated entries
- - [MIFOSX-1480] - Create an API for associating and dissociating groups from centers
  - [MIFOSX-1252] - Add API's for assigning and unassigning Staff for savings account (along with tracking assignment history similar to loans)
  - [MIFOSX-1265] - Ability to capture "External ID" for Savings account
  - [MIFOSX-1315] - Global search should search for saving account number and external id fields
@@ -115,7 +114,6 @@ Bugs
  - [MIFOSX-1501] - Fixing Issues related to clean shutdown of Mifos Server: AbandonedCleanupThread and Quartz scheduler worker Threads.
  - [MIFOSX-1513] - If more than one repayment is done on today's date (i.e sysdate) loan got closed with overpaid status
  - [MIFOSX-1517] - For Tranche Loans interest is getting calculated with respect to the Approved amount than Disbursed amount
- - [MIFOSX-1525] - In demo version not able to withdraw amount in RD account even allow withdrawals checkbox is enabled, displays internal server error
  - [MIFOSX-1528] - Missing Documentation: For Assign and Unassign Loan Officer
  - [MIFOSX-1531] - Not Appearing Loan Approval and Loan Disbursal in Checker Inbox & Tasks
  - [MIFOSX-1539] - In Loan account "First repayment on" is not working as expected
@@ -144,11 +142,9 @@ Community App
  - [MIFOSX-1432] - Minor layout fixes to Organization Admin screens
  - [MIFOSX-1446] - In "Client savings transaction" page ( transaction page -> Export) different client name is displaying
  - [MIFOSX-1465] - UI and Label related issues
- - [MIFOSX-1551] - System -> Audit trails- search is not working as expected
  - [MIFOSX-1430] - Activities search bar on home page doesn't populate with available activities or actually search
  - [MIFOSX-1433] - Products Views layout changes.
  - [MIFOSX-1455] - In Centers -> View Centers -> Create Group page members added is not displaying properly in Group General page
- - [MIFOSX-1256] - Filter charge and overdue charges drop-down lists to display only valid charges (matching currency)
  - [MIFOSX-1325] - Add ability to attach a group to a center
  - [MIFOSX-1482] - Improve work-flow for adding Clients to a Group during its Creation
  - [MIFOSX-1574] - Unable to search for GL Accounts by GL Codes in "Add Journal Entries"
