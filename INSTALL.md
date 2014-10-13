@@ -121,9 +121,9 @@ Those  updating an existing MifosX installation to version 1.21.*  or higher wou
 
 ##### 2.2.2.2 Special Instructions for upgrading to MifosX versions 1.25.* or higher
 
-Starting from version 1.25.* , updates to *mifosplatform-tenants* database are also managed by Flyway (http://flywaydb.org/). To ensure flyway works correctly, we would have to ensure that table *schema_version* is present along with two entries in *mifosplatform-tenants* database.
+Starting from version 1.25.* , updates to *mifosplatform-tenants* database are managed by Flyway (http://flywaydb.org/). To ensure that flyway works correctly, verify that table *schema_version* is present along with two entries in *mifosplatform-tenants* database.
 
-Check the status of schema_version table using the following command
+Check the status of *schema_version* table using the following command
 
 ```
 mysql -uroot -pmysql
@@ -144,7 +144,7 @@ The displayed result should be similar to
 +--------------+----------------+---------+-----------------------------------+
 
 ```
-In case, the schema_version table dows not contain the second row, insert the same using the following query
+In case, *schema_version* does not contain the second row, insert the same using the following query
 
 ```
 mysql -uroot -pmysql
