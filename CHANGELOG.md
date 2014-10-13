@@ -6,7 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
-1. TBD Oct 2014 - 1.25.0.RELEASE
+1. 12 Oct 2014 - 1.25.0.RELEASE
 1. 10 Jul 2014 - 1.24.0.RELEASE
 1. 16 Jun 2014 - 1.23.1.RELEASE
 1. 15 Jun 2014 - 1.23.0.RELEASE
@@ -69,7 +69,7 @@ Releases
 
 1.25.0.RELEASE
 =============
-This feature release ships various enhancements like interest recalculation for loans with configurable rest definitions and compounding options, point in time accruals, improved pre-payment functionality  and support for Hooks along with a number of updates to the Community app and bug fixes.
+This feature release ships various enhancements like interest recalculation for loans with configurable rest definitions and compounding options, point in time accruals, improved pre-payment functionality, batching API calls  and support for Hooks along with a number of updates to the Community app and bug fixes.
 
 New Features & Improvements
 
