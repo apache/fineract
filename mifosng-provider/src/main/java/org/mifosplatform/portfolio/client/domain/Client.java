@@ -298,9 +298,12 @@ public final class Client extends AbstractPersistable<Long> {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         validateNameParts(dataValidationErrors);
         validateActivationDate(dataValidationErrors);
+        validateClientsGroupRules(dataValidationErrors);
+        
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        
     }
-
+    
     public boolean isAccountNumberRequiresAutoGeneration() {
         return this.accountNumberRequiresAutoGeneration;
     }
@@ -566,6 +569,18 @@ public final class Client extends AbstractPersistable<Long> {
                         ClientApiConstants.activationDateParamName, getActivationLocalDate());
                 dataValidationErrors.add(error);
             }
+        }
+    }
+    
+    /*
+     * To become a part of a group, group may have set of criteria to be met
+     * before client can become member of it. This method is placeholder for
+     * such validation.
+     */
+
+    private void validateClientsGroupRules(final List<ApiParameterError> dataValidationErrors) {
+        for (Group group : this.groups) {
+            group.validateGroupHasMoreThanRequiredNumberOfClientsAngLogError(dataValidationErrors);
         }
     }
 
