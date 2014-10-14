@@ -463,7 +463,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                         accrualStartDate, repaymentFrequency, repayEvery, installment.getDueDate(), installment.getFromDate(),
                         installment.getId(), loanProductId, installment.getInterestCharged(currency).getAmount(), installment
                                 .getFeeChargesCharged(currency).getAmount(), installment.getPenaltyChargesCharged(currency).getAmount(),
-                        accruedInterestIncome, accruedFeeIncome, accruedPenaltyIncome, currencyData, interestCalculatedFrom);
+                        accruedInterestIncome, accruedFeeIncome, accruedPenaltyIncome, currencyData, interestCalculatedFrom, installment
+                                .getInterestWaived(currency).getAmount());
                 loanScheduleAccrualDatas.add(accrualData);
 
             }

@@ -19,6 +19,9 @@ public class LoanInstallmentChargeData {
     private final boolean paid;
     private final boolean waived;
 
+    private BigDecimal amountAccrued;
+    private BigDecimal amountUnrecognized;
+
     public LoanInstallmentChargeData(final Integer installmentNumber, final LocalDate dueDate, final BigDecimal amount,
             final BigDecimal amountOutstanding, BigDecimal amountWaived, final boolean paid, final boolean waived) {
         this.installmentNumber = installmentNumber;
@@ -28,6 +31,31 @@ public class LoanInstallmentChargeData {
         this.paid = paid;
         this.waived = waived;
         this.amountWaived = amountWaived;
+    }
+
+    public LoanInstallmentChargeData(final Integer installmentNumber, final LocalDate dueDate, final BigDecimal amount,
+            final BigDecimal amountOutstanding, final BigDecimal amountWaived, final boolean paid, final boolean waived,
+            final BigDecimal amountAccrued) {
+        this.installmentNumber = installmentNumber;
+        this.dueDate = dueDate;
+        this.amount = amount;
+        this.amountOutstanding = amountOutstanding;
+        this.paid = paid;
+        this.waived = waived;
+        this.amountWaived = amountWaived;
+        this.amountAccrued = amountAccrued;
+    }
+
+    public LoanInstallmentChargeData(final LoanInstallmentChargeData installmentChargeData, final BigDecimal amountUnrecognized) {
+        this.installmentNumber = installmentChargeData.installmentNumber;
+        this.dueDate = installmentChargeData.dueDate;
+        this.amount = installmentChargeData.amount;
+        this.amountOutstanding = installmentChargeData.amountOutstanding;
+        this.paid = installmentChargeData.paid;
+        this.waived = installmentChargeData.waived;
+        this.amountWaived = installmentChargeData.amountWaived;
+        this.amountAccrued = installmentChargeData.amountAccrued;
+        this.amountUnrecognized = amountUnrecognized;
     }
 
     public Integer getInstallmentNumber() {
@@ -52,6 +80,14 @@ public class LoanInstallmentChargeData {
 
     public BigDecimal getAmountWaived() {
         return this.amountWaived;
+    }
+
+    public BigDecimal getAmountAccrued() {
+        return this.amountAccrued;
+    }
+
+    public BigDecimal getAmountUnrecognized() {
+        return this.amountUnrecognized;
     }
 
 }

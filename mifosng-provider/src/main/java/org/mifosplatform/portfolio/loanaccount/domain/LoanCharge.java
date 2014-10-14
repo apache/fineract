@@ -653,7 +653,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
         return Money.of(currency, this.amount);
     }
 
-    private Money getAmountPaid(final MonetaryCurrency currency) {
+    public Money getAmountPaid(final MonetaryCurrency currency) {
         return Money.of(currency, this.amountPaid);
     }
 

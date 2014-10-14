@@ -216,19 +216,21 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
          * Single DEBIT transaction for write-offs or Repayments (and their
          * reversals)
          ***/
-        if (writeOff) {
-            this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode,
-                    ACCRUAL_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
-                    transactionDate, totalDebitAmount, isReversal);
-        } else {
-            if (loanTransactionDTO.isAccountTransfer()) {
+        if (!(totalDebitAmount.compareTo(BigDecimal.ZERO) == 0)) {
+            if (writeOff) {
                 this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode,
-                        FINANCIAL_ACTIVITY.LIABILITY_TRANSFER.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
+                        ACCRUAL_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
                         transactionDate, totalDebitAmount, isReversal);
             } else {
-                this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode,
-                        ACCRUAL_ACCOUNTS_FOR_LOAN.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
-                        transactionDate, totalDebitAmount, isReversal);
+                if (loanTransactionDTO.isAccountTransfer()) {
+                    this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode,
+                            FINANCIAL_ACTIVITY.LIABILITY_TRANSFER.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
+                            transactionDate, totalDebitAmount, isReversal);
+                } else {
+                    this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode,
+                            ACCRUAL_ACCOUNTS_FOR_LOAN.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
+                            transactionDate, totalDebitAmount, isReversal);
+                }
             }
         }
     }

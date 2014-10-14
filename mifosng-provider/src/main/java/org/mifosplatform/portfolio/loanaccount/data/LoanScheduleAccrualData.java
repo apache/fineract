@@ -28,6 +28,7 @@ public class LoanScheduleAccrualData {
     private final BigDecimal interestIncome;
     private final BigDecimal feeIncome;
     private final BigDecimal penaltyIncome;
+    private final BigDecimal waivedInterestIncome;
     private final BigDecimal accruedInterestIncome;
     private final BigDecimal accruedFeeIncome;
     private final BigDecimal accruedPenaltyIncome;
@@ -37,12 +38,14 @@ public class LoanScheduleAccrualData {
     private Map<LoanChargeData, BigDecimal> applicableCharges;
     private BigDecimal dueDateFeeIncome;
     private BigDecimal dueDatePenaltyIncome;
+    private BigDecimal accruableIncome;
 
     public LoanScheduleAccrualData(final Long loanId, final Long officeId, final Integer installmentNumber, final LocalDate accruedTill,
             final PeriodFrequencyType repaymentFrequency, final Integer repayEvery, final LocalDate dueDate, final LocalDate fromDate,
             final Long repaymentScheduleId, final Long loanProductId, final BigDecimal interestIncome, final BigDecimal feeIncome,
             final BigDecimal penaltyIncome, final BigDecimal accruedInterestIncome, final BigDecimal accruedFeeIncome,
-            final BigDecimal accruedPenaltyIncome, final CurrencyData currencyData, final LocalDate interestCalculatedFrom) {
+            final BigDecimal accruedPenaltyIncome, final CurrencyData currencyData, final LocalDate interestCalculatedFrom,
+            final BigDecimal waivedInterestIncome) {
         this.loanId = loanId;
         this.installmentNumber = installmentNumber;
         this.officeId = officeId;
@@ -61,6 +64,7 @@ public class LoanScheduleAccrualData {
         this.repaymentFrequency = repaymentFrequency;
         this.repayEvery = repayEvery;
         this.interestCalculatedFrom = interestCalculatedFrom;
+        this.waivedInterestIncome = waivedInterestIncome;
     }
 
     public Long getLoanId() {
@@ -157,5 +161,21 @@ public class LoanScheduleAccrualData {
         this.dueDateFeeIncome = dueDateFeeIncome;
         this.dueDatePenaltyIncome = dueDatePenaltyIncome;
     }
+
+    
+    public BigDecimal getWaivedInterestIncome() {
+        return this.waivedInterestIncome;
+    }
+
+    
+    public BigDecimal getAccruableIncome () {
+        return this.accruableIncome;
+    }
+
+    
+    public void updateAccruableIncome (BigDecimal accruableIncome ) {
+        this.accruableIncome = accruableIncome ;
+    }
+
 
 }
