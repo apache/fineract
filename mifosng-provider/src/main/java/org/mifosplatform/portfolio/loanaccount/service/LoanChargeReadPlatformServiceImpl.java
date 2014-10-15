@@ -10,7 +10,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -23,6 +25,7 @@ import org.mifosplatform.portfolio.charge.service.ChargeDropdownReadPlatformServ
 import org.mifosplatform.portfolio.charge.service.ChargeEnumerations;
 import org.mifosplatform.portfolio.common.service.DropdownReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanChargePaidByData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanInstallmentChargeData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -251,6 +254,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
         Collection<LoanChargeData> charges = this.jdbcTemplate.query(sql, rm,
                 new Object[] { LoanTransactionType.ACCRUAL.getValue(), loanId });
+        charges = updateLoanChargesWithUnrecognizedIncome(loanId, charges);
 
         Collection<LoanChargeData> removeCharges = new ArrayList<>();
         for (LoanChargeData loanChargeData : charges) {
@@ -261,7 +265,8 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
         charges.removeAll(removeCharges);
         for (LoanChargeData loanChargeData : removeCharges) {
             if (loanChargeData.isInstallmentFee()) {
-                Collection<LoanInstallmentChargeData> installmentChargeDatas = retrieveInstallmentLoanCharges(loanChargeData.getId(), false);
+                Collection<LoanInstallmentChargeData> installmentChargeDatas = retrieveInstallmentLoanChargesForAccrual(loanChargeData
+                        .getId());
                 LoanChargeData modifiedChargeData = new LoanChargeData(loanChargeData, installmentChargeDatas);
                 charges.add(modifiedChargeData);
             }
@@ -313,6 +318,207 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final boolean penalty = rs.getBoolean("penalty");
 
             return new LoanChargeData(id, chargeId, dueAsOfDate, chargeTimeType, amount, amountAccrued, amountWaived, penalty);
+        }
+    }
+
+    private Collection<LoanChargeData> updateLoanChargesWithUnrecognizedIncome(final Long loanId, Collection<LoanChargeData> loanChargeDatas) {
+
+        final LoanChargeUnRecognizedIncomeMapper rm = new LoanChargeUnRecognizedIncomeMapper(loanChargeDatas);
+
+        final String sql = "select " + rm.schema() + " where lc.loan_id=? AND lc.is_active = 1 group by  lc.id "
+                + " order by lc.charge_time_enum ASC, lc.due_for_collection_as_of_date ASC, lc.is_penalty ASC";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { LoanTransactionType.WAIVE_CHARGES.getValue(), loanId });
+
+    }
+
+    private static final class LoanChargeUnRecognizedIncomeMapper implements RowMapper<LoanChargeData> {
+
+        private final String schemaSql;
+        private final Map<Long, LoanChargeData> chargeDataMap;
+
+        public LoanChargeUnRecognizedIncomeMapper(final Collection<LoanChargeData> datas) {
+            this.chargeDataMap = new HashMap<>();
+            for (LoanChargeData chargeData : datas) {
+                this.chargeDataMap.put(chargeData.getId(), chargeData);
+            }
+
+            StringBuilder sb = new StringBuilder(50);
+            sb.append("lc.id as id,  ");
+            sb.append(" sum(wt.unrecognized_income_portion) as amountUnrecognized ");
+            sb.append(" from m_loan_charge lc ");
+            sb.append("left join (");
+            sb.append("select cpb.loan_charge_id, lt.unrecognized_income_portion");
+            sb.append(" from m_loan_charge_paid_by cpb ");
+            sb.append("inner join m_loan_transaction lt on lt.id = cpb.loan_transaction_id and lt.is_reversed = 0 and lt.transaction_type_enum = ?");
+            sb.append(") wt on  wt.loan_charge_id= lc.id  ");
+
+            schemaSql = sb.toString();
+        }
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        @Override
+        public LoanChargeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = rs.getLong("id");
+            final BigDecimal amountUnrecognized = rs.getBigDecimal("amountUnrecognized");
+
+            LoanChargeData chargeData = this.chargeDataMap.get(id);
+            return new LoanChargeData(amountUnrecognized, chargeData);
+        }
+    }
+
+    private Collection<LoanInstallmentChargeData> retrieveInstallmentLoanChargesForAccrual(Long loanChargeId) {
+        final LoanInstallmentChargeAccrualMapper rm = new LoanInstallmentChargeAccrualMapper();
+        String sql = "select " + rm.schema() + " where lic.loan_charge_id= ?  group by lsi.installment";
+        Collection<LoanInstallmentChargeData> chargeDatas = this.jdbcTemplate.query(sql, rm,
+                new Object[] { LoanTransactionType.ACCRUAL.getValue(), loanChargeId });
+        final Map<Integer, LoanInstallmentChargeData> installmentChargeDatas = new HashMap<>();
+        for (LoanInstallmentChargeData installmentChargeData : chargeDatas) {
+            installmentChargeDatas.put(installmentChargeData.getInstallmentNumber(), installmentChargeData);
+        }
+        chargeDatas = updateInstallmentLoanChargesWithUnrecognizedIncome(loanChargeId, installmentChargeDatas);
+        for (LoanInstallmentChargeData installmentChargeData : chargeDatas) {
+            installmentChargeDatas.put(installmentChargeData.getInstallmentNumber(), installmentChargeData);
+        }
+        return installmentChargeDatas.values();
+
+    }
+
+    private static final class LoanInstallmentChargeAccrualMapper implements RowMapper<LoanInstallmentChargeData> {
+
+        private final String schemaSql;
+
+        public LoanInstallmentChargeAccrualMapper() {
+            StringBuilder sb = new StringBuilder(50);
+            sb.append(" lsi.installment as installmentNumber, lsi.duedate as dueAsOfDate, ");
+            sb.append("lic.amount_outstanding_derived as amountOutstanding,");
+            sb.append("lic.amount as  amount, ");
+            sb.append("lic.is_paid_derived as paid, ");
+            sb.append("lic.amount_waived_derived as amountWaived, ");
+            sb.append(" sum(cp.amount) as amountAccrued, ");
+            sb.append("lic.waived as waied ");
+            sb.append("from  m_loan_installment_charge lic ");
+            sb.append("join m_loan_repayment_schedule lsi on lsi.id = lic.loan_schedule_id ");
+            sb.append("left join (");
+            sb.append("select lcp.loan_charge_id, lcp.amount as amount, lcp.installment_number ");
+            sb.append(" from m_loan_charge_paid_by lcp ");
+            sb.append("inner join m_loan_transaction lt on lt.id = lcp.loan_transaction_id and lt.is_reversed = 0 and lt.transaction_type_enum = ?");
+            sb.append(") cp on  cp.loan_charge_id= lic.loan_charge_id and  cp.installment_number = lsi.installment ");
+            schemaSql = sb.toString();
+        }
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        @Override
+        public LoanInstallmentChargeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+            final Integer installmentNumber = rs.getInt("installmentNumber");
+            final LocalDate dueAsOfDate = JdbcSupport.getLocalDate(rs, "dueAsOfDate");
+            final BigDecimal amountOutstanding = rs.getBigDecimal("amountOutstanding");
+            final BigDecimal amount = rs.getBigDecimal("amount");
+            final BigDecimal amountWaived = rs.getBigDecimal("amountWaived");
+            final boolean paid = rs.getBoolean("paid");
+            final boolean waived = rs.getBoolean("waied");
+            final BigDecimal amountAccrued = rs.getBigDecimal("amountAccrued");
+
+            return new LoanInstallmentChargeData(installmentNumber, dueAsOfDate, amount, amountOutstanding, amountWaived, paid, waived,
+                    amountAccrued);
+        }
+    }
+
+    private Collection<LoanInstallmentChargeData> updateInstallmentLoanChargesWithUnrecognizedIncome(final Long loanChargeId,
+            final Map<Integer, LoanInstallmentChargeData> installmentChargeDatas) {
+        final LoanInstallmentChargeUnRecognizedIncomeMapper rm = new LoanInstallmentChargeUnRecognizedIncomeMapper(installmentChargeDatas);
+        String sql = "select " + rm.schema() + " where cpb.loan_charge_id = ? group by cpb.installment_number  ";
+        return this.jdbcTemplate.query(sql, rm, new Object[] { LoanTransactionType.WAIVE_CHARGES.getValue(), loanChargeId });
+    }
+
+    private static final class LoanInstallmentChargeUnRecognizedIncomeMapper implements RowMapper<LoanInstallmentChargeData> {
+
+        private final String schemaSql;
+        private final Map<Integer, LoanInstallmentChargeData> installmentChargeDatas;
+
+        public LoanInstallmentChargeUnRecognizedIncomeMapper(final Map<Integer, LoanInstallmentChargeData> installmentChargeDatas) {
+            this.installmentChargeDatas = installmentChargeDatas;
+            StringBuilder sb = new StringBuilder(50);
+            sb.append(" cpb.installment_number as installmentNumber, ");
+            sb.append("  sum(lt.unrecognized_income_portion) as amountUnrecognized ");
+            sb.append(" from m_loan_charge_paid_by cpb ");
+            sb.append("inner join m_loan_transaction lt on lt.id = cpb.loan_transaction_id and lt.is_reversed = 0 and lt.transaction_type_enum = ?");
+            schemaSql = sb.toString();
+        }
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        @Override
+        public LoanInstallmentChargeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+            final Integer installmentNumber = rs.getInt("installmentNumber");
+            final BigDecimal amountUnrecognized = rs.getBigDecimal("amountUnrecognized");
+            LoanInstallmentChargeData installmentChargeData = this.installmentChargeDatas.get(installmentNumber);
+            return new LoanInstallmentChargeData(installmentChargeData, amountUnrecognized);
+        }
+    }
+
+    @Override
+    public Collection<LoanChargePaidByData> retriveLoanChargesPaidBy(Long chargeId, final LoanTransactionType transactionType,
+            final Integer installmentNumber) {
+
+        LoanChargesPaidByMapper rm = new LoanChargesPaidByMapper();
+        StringBuilder sb = new StringBuilder(100);
+        sb.append("select ");
+        sb.append(rm.schema());
+        sb.append(" where lcp.loan_charge_id = ?");
+        List<Object> args = new ArrayList<>(3);
+        args.add(chargeId);
+        if (transactionType != null) {
+            sb.append(" and lt.transaction_type_enum = ?");
+            args.add(transactionType.getValue());
+        }
+        if (installmentNumber != null) {
+            sb.append(" and lcp.installment_number = ?");
+            args.add(installmentNumber);
+        }
+
+        return this.jdbcTemplate.query(sb.toString(), rm, args.toArray());
+    }
+
+    private static final class LoanChargesPaidByMapper implements RowMapper<LoanChargePaidByData> {
+
+        private final String schemaSql;
+
+        public LoanChargesPaidByMapper() {
+            StringBuilder sb = new StringBuilder(100);
+            sb.append("lcp.id as id, lcp.loan_charge_id as chargeId, ");
+            sb.append("lcp.amount as amount, ");
+            sb.append("lcp.loan_transaction_id as transactionId, ");
+            sb.append("lcp.installment_number as installmentNumber ");
+            sb.append(" from m_loan_charge_paid_by lcp ");
+            sb.append(" join m_loan_transaction lt on lt.id = lcp.loan_transaction_id and lt.is_reversed=0");
+
+            schemaSql = sb.toString();
+        }
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        @Override
+        public LoanChargePaidByData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = rs.getLong("id");
+            final Long chargeId = rs.getLong("chargeId");
+            final BigDecimal amount = rs.getBigDecimal("amount");
+            final Long transactionId = rs.getLong("transactionId");
+            final Integer installmentNumber = rs.getInt("installmentNumber");
+
+            return new LoanChargePaidByData(id, amount, installmentNumber, chargeId, transactionId);
         }
     }
 

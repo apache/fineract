@@ -129,8 +129,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             if (loanTransaction.isRepayment() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
                 // pass through for new transactions
                 if (loanTransaction.getId() == null) {
-                    loanTransaction.resetDerivedComponents();
                     handleTransaction(loanTransaction, currency, installments, charges);
+                    loanTransaction.adjustInterestComponent(currency);
                 } else {
                     /**
                      * For existing transactions, check if the re-payment
@@ -141,9 +141,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
                     // Reset derived component of new loan transaction and
                     // re-process transaction
-                    newLoanTransaction.resetDerivedComponents();
                     handleTransaction(newLoanTransaction, currency, installments, charges);
-
+                    newLoanTransaction.adjustInterestComponent(currency);
                     /**
                      * Check if the transaction amounts have changed. If so,
                      * reverse the original transaction and update
@@ -200,6 +199,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges, final Money chargeAmountToProcess,
             final boolean isFeeCharge) {
         // to.
+        if(loanTransaction.isRepayment() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()){
+            loanTransaction.resetDerivedComponents();
+        }
         Money transactionAmountUnprocessed = processTransaction(loanTransaction, currency, installments, chargeAmountToProcess);
 
         final Set<LoanCharge> loanFees = extractFeeCharges(charges);
@@ -311,7 +313,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     }
                 } else {
                     final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(loanTransaction, unpaidCharge,
-                            amountPaidTowardsCharge.getAmount());
+                            amountPaidTowardsCharge.getAmount(), installmentNumber);
                     chargesPaidBies.add(loanChargePaidBy);
                 }
                 amountRemaining = amountRemaining.minus(amountPaidTowardsCharge);

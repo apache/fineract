@@ -90,6 +90,9 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     @Column(name = "overpayment_portion_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal overPaymentPortion;
 
+    @Column(name = "unrecognized_income_portion", scale = 6, precision = 19, nullable = true)
+    private BigDecimal unrecognizedIncomePortion;
+
     @Column(name = "is_reversed", nullable = false)
     private boolean reversed;
 
@@ -138,8 +141,12 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
                 paymentDate, externalId);
     }
 
-    public static LoanTransaction waiver(final Office office, final Loan loan, final Money waived, final LocalDate waiveDate) {
-        return new LoanTransaction(loan, office, LoanTransactionType.WAIVE_INTEREST, waived.getAmount(), waiveDate, null);
+    public static LoanTransaction waiver(final Office office, final Loan loan, final Money amount, final LocalDate waiveDate,
+            final Money waived, final Money unrecognizedPortion) {
+        LoanTransaction loanTransaction = new LoanTransaction(loan, office, LoanTransactionType.WAIVE_INTEREST, amount.getAmount(),
+                waiveDate, null);
+        loanTransaction.updateInterestComponent(waived, unrecognizedPortion);
+        return loanTransaction;
     }
 
     public static LoanTransaction accrueInterest(final Office office, final Loan loan, final Money amount,
@@ -231,10 +238,10 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     }
 
     public static LoanTransaction waiveLoanCharge(final Loan loan, final Office office, final Money waived, final LocalDate waiveDate,
-            final Money feeChargesWaived, final Money penaltyChargesWaived) {
+            final Money feeChargesWaived, final Money penaltyChargesWaived, final Money unrecognizedCharge) {
         final LoanTransaction waiver = new LoanTransaction(loan, office, LoanTransactionType.WAIVE_CHARGES, waived.getAmount(), waiveDate,
                 null);
-        waiver.updateChargesComponents(feeChargesWaived, penaltyChargesWaived);
+        waiver.updateChargesComponents(feeChargesWaived, penaltyChargesWaived,unrecognizedCharge);
 
         return waiver;
     }
@@ -303,6 +310,23 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         this.penaltyChargesPortion = defaultToNullIfZero(getPenaltyChargesPortion(currency).plus(penaltyCharges).getAmount());
     }
 
+    private void updateChargesComponents(final Money feeCharges, final Money penaltyCharges, final Money unrecognizedCharges) {
+        final MonetaryCurrency currency = feeCharges.getCurrency();
+        this.feeChargesPortion = defaultToNullIfZero(getFeeChargesPortion(currency).plus(feeCharges).getAmount());
+        this.penaltyChargesPortion = defaultToNullIfZero(getPenaltyChargesPortion(currency).plus(penaltyCharges).getAmount());
+        this.unrecognizedIncomePortion = defaultToNullIfZero(getUnrecognizedIncomePortion(currency).plus(unrecognizedCharges).getAmount());
+    }
+
+    private void updateInterestComponent(final Money interest, final Money unrecognizedInterest) {
+        final MonetaryCurrency currency = interest.getCurrency();
+        this.interestPortion = defaultToNullIfZero(getInterestPortion(currency).plus(interest).getAmount());
+        this.unrecognizedIncomePortion = defaultToNullIfZero(getUnrecognizedIncomePortion(currency).plus(unrecognizedInterest).getAmount());
+    }
+    
+    public void adjustInterestComponent(final MonetaryCurrency currency) {
+        this.interestPortion = defaultToNullIfZero(getInterestPortion(currency).minus(getUnrecognizedIncomePortion(currency)).getAmount());
+    }
+
     public void updateComponentsAndTotal(final Money principal, final Money interest, final Money feeCharges, final Money penaltyCharges) {
         updateComponents(principal, interest, feeCharges, penaltyCharges);
 
@@ -326,6 +350,10 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     public Money getInterestPortion(final MonetaryCurrency currency) {
         return Money.of(currency, this.interestPortion);
+    }
+
+    public Money getUnrecognizedIncomePortion(final MonetaryCurrency currency) {
+        return Money.of(currency, this.unrecognizedIncomePortion);
     }
 
     public Money getFeeChargesPortion(final MonetaryCurrency currency) {
@@ -475,7 +503,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         }
         return new LoanTransactionData(getId(), this.office.getId(), this.office.getName(), transactionType, paymentDetailData,
                 currencyData, getTransactionDate(), this.amount, this.principalPortion, this.interestPortion, this.feeChargesPortion,
-                this.penaltyChargesPortion, this.overPaymentPortion, this.externalId, transfer, null, outstandingLoanBalance);
+                this.penaltyChargesPortion, this.overPaymentPortion, this.externalId, transfer, null, outstandingLoanBalance, unrecognizedIncomePortion);
     }
 
     public Map<String, Object> toMapData(final CurrencyData currencyData) {

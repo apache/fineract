@@ -592,8 +592,9 @@ public class Loan extends AbstractPersistable<Long> {
 
         final LoanTransaction applyLoanChargeTransaction = LoanTransaction.accrueLoanCharge(this, getOffice(), chargeAmount,
                 transactionDate, feeCharges, penaltyCharges);
+        Integer installmentNumber = null;
         final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(applyLoanChargeTransaction, loanCharge, loanCharge.getAmount(
-                getCurrency()).getAmount());
+                getCurrency()).getAmount(), installmentNumber);
         applyLoanChargeTransaction.getLoanChargesPaid().add(loanChargePaidBy);
         this.loanTransactions.add(applyLoanChargeTransaction);
         return applyLoanChargeTransaction;
@@ -603,7 +604,7 @@ public class Loan extends AbstractPersistable<Long> {
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final Integer installmentNumber) {
         chargesPayment.updateLoan(this);
         final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge, chargesPayment.getAmount(getCurrency())
-                .getAmount());
+                .getAmount(), installmentNumber);
         chargesPayment.getLoanChargesPaid().add(loanChargePaidBy);
         this.loanTransactions.add(chargesPayment);
         final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_CHARGE_PAYMENT,
@@ -839,7 +840,8 @@ public class Loan extends AbstractPersistable<Long> {
             final Map<String, Object> changes, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
             final Integer loanInstallmentNumber, final List<Holiday> holidays, final WorkingDays workingDays,
             final boolean isHolidayEnabled, final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency currency,
-            final LocalDate calculatedRepaymentsStartingFromDate, final CalendarInstance calendarInstanceForInterestRecalculation) {
+            final LocalDate calculatedRepaymentsStartingFromDate, final CalendarInstance calendarInstanceForInterestRecalculation,
+            final Money accruedCharge) {
 
         validateLoanIsNotClosed(loanCharge);
 
@@ -847,10 +849,22 @@ public class Loan extends AbstractPersistable<Long> {
 
         changes.put("amount", amountWaived.getAmount());
 
-        Money feeChargesWaived = amountWaived;
+        Money unrecognizedIncome = amountWaived.zero();
+        Money chargeComponent = amountWaived;
+        if (isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
+            Money receivableCharge = accruedCharge.minus(loanCharge.getAmountPaid(getCurrency()));
+            if (receivableCharge.isLessThanZero()) {
+                receivableCharge = amountWaived.zero();
+            }
+            if (amountWaived.isGreaterThan(receivableCharge)) {
+                chargeComponent = receivableCharge;
+                unrecognizedIncome = amountWaived.minus(receivableCharge);
+            }
+        }
+        Money feeChargesWaived = chargeComponent;
         Money penaltyChargesWaived = Money.zero(loanCurrency());
         if (loanCharge.isPenaltyCharge()) {
-            penaltyChargesWaived = amountWaived;
+            penaltyChargesWaived = chargeComponent;
             feeChargesWaived = Money.zero(loanCurrency());
         }
 
@@ -865,7 +879,10 @@ public class Loan extends AbstractPersistable<Long> {
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         final LoanTransaction waiveLoanChargeTransaction = LoanTransaction.waiveLoanCharge(this, getOffice(), amountWaived,
-                transactionDate, feeChargesWaived, penaltyChargesWaived);
+                transactionDate, feeChargesWaived, penaltyChargesWaived, unrecognizedIncome);
+        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(waiveLoanChargeTransaction, loanCharge, waiveLoanChargeTransaction
+                .getAmount(getCurrency()).getAmount(), loanInstallmentNumber);
+        waiveLoanChargeTransaction.getLoanChargesPaid().add(loanChargePaidBy);
         this.loanTransactions.add(waiveLoanChargeTransaction);
 
         if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()
@@ -2126,13 +2143,15 @@ public class Loan extends AbstractPersistable<Long> {
             Money disbursentMoney = Money.zero(getCurrency());
             final LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(getOffice(), disbursentMoney, null, disbursedOn,
                     null);
+            final Integer installmentNumber = null;
             for (final LoanCharge charge : charges()) {
                 if (charge.isDueAtDisbursement()) {
                     if (totalFeeChargesDueAtDisbursement.isGreaterThanZero()
                             && !charge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
                         charge.markAsFullyPaid();
                         // Add "Loan Charge Paid By" details to this transaction
-                        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge, charge.amount());
+                        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge, charge.amount(),
+                                installmentNumber);
                         chargesPayment.getLoanChargesPaid().add(loanChargePaidBy);
                         disbursentMoney = disbursentMoney.plus(charge.amount());
                     }
@@ -2190,7 +2209,7 @@ public class Loan extends AbstractPersistable<Long> {
             }
         }
         @SuppressWarnings("null")
-        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge, charge.amount());
+        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge, charge.amount(), null);
         chargesPayment.getLoanChargesPaid().add(loanChargePaidBy);
         final Money zero = Money.zero(getCurrency());
         chargesPayment.updateComponents(zero, zero, charge.getAmount(getCurrency()), zero);
@@ -2741,7 +2760,8 @@ public class Loan extends AbstractPersistable<Long> {
             }
         }
 
-        return LoanTransaction.waiver(getOffice(), this, possibleInterestToWaive, transactionDate);
+        return LoanTransaction.waiver(getOffice(), this, possibleInterestToWaive, transactionDate, possibleInterestToWaive,
+                possibleInterestToWaive.zero());
     }
 
     public ChangedTransactionDetail adjustExistingTransaction(final LoanTransaction newTransactionDetail,
@@ -3540,7 +3560,7 @@ public class Loan extends AbstractPersistable<Long> {
                 || isAccountingDisabledOnLoanProduct();
     }
 
-    private Boolean isPeriodicAccrualAccountingEnabledOnLoanProduct() {
+    public Boolean isPeriodicAccrualAccountingEnabledOnLoanProduct() {
         return this.loanProduct.isPeriodicAccrualAccountingEnabled();
     }
 
@@ -3585,6 +3605,28 @@ public class Loan extends AbstractPersistable<Long> {
 
         accountingBridgeData.put("newLoanTransactions", newLoanTransactions);
         return accountingBridgeData;
+    }
+
+    public Money getReceivableInterest(final LocalDate tillDate) {
+        Money receivableInterest = Money.zero(getCurrency());
+        for (final LoanTransaction transaction : this.loanTransactions) {
+            if (transaction.isNotReversed() && !transaction.isRepaymentAtDisbursement() && !transaction.isDisbursement()
+                    && !transaction.getTransactionDate().isAfter(tillDate)) {
+                if (transaction.isAccrual()) {
+                    receivableInterest = receivableInterest.plus(transaction.getInterestPortion(getCurrency()));
+                } else if (transaction.isRepayment() || transaction.isInterestWaiver()) {
+                    receivableInterest = receivableInterest.minus(transaction.getInterestPortion(getCurrency()));
+                }
+            }
+            if (receivableInterest.isLessThanZero()) {
+                receivableInterest = receivableInterest.zero();
+            }
+           /* if (transaction.getTransactionDate().isAfter(tillDate) && transaction.isAccrual()) {
+                final String errorMessage = "The date on which a loan is interest waived cannot be in after accrual transactions.";
+                throw new InvalidLoanStateTransitionException("waive", "cannot.be.after.accrual.date", errorMessage, tillDate);
+            }*/
+        }
+        return receivableInterest;
     }
 
     public void setHelpers(final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanSummaryWrapper loanSummaryWrapper,

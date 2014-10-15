@@ -67,6 +67,8 @@ public class LoanChargeData {
 
     private BigDecimal amountAccrued;
 
+    private BigDecimal amountUnrecognized;
+
     public static LoanChargeData template(final Collection<ChargeData> chargeOptions) {
         return new LoanChargeData(null, null, null, null, null, null, null, null, chargeOptions, false, null, false, false, null, null,
                 null, null, null);
@@ -126,6 +128,7 @@ public class LoanChargeData {
         this.loanId = loanId;
         this.installmentChargeData = installmentChargeData;
         this.amountAccrued = null;
+        this.amountUnrecognized = null;
     }
 
     private LoanChargeData(final Long id, final Long chargeId, final String name, final CurrencyData currency, final BigDecimal amount,
@@ -169,6 +172,7 @@ public class LoanChargeData {
         this.maxCap = maxCap;
         this.installmentChargeData = installmentChargeData;
         this.amountAccrued = null;
+        this.amountUnrecognized = null;
     }
 
     public LoanChargeData(final Long id, final LocalDate dueAsOfDate, final BigDecimal amountOutstanding, EnumOptionData chargeTimeType,
@@ -199,6 +203,7 @@ public class LoanChargeData {
         this.maxCap = null;
         this.installmentChargeData = installmentChargeData;
         this.amountAccrued = null;
+        this.amountUnrecognized = null;
     }
 
     public LoanChargeData(final Long id, final Long chargeId, final LocalDate dueAsOfDate, EnumOptionData chargeTimeType,
@@ -229,6 +234,37 @@ public class LoanChargeData {
         this.maxCap = null;
         this.installmentChargeData = null;
         this.amountAccrued = amountAccrued;
+        this.amountUnrecognized = null;
+    }
+
+    public LoanChargeData(final BigDecimal amountUnrecognized, final LoanChargeData chargeData) {
+        this.id = chargeData.id;
+        this.chargeId = chargeData.chargeId;
+        this.name = null;
+        this.currency = null;
+        this.amount = chargeData.amount;
+        this.amountPaid = null;
+        this.amountWaived = chargeData.amountWaived;
+        this.amountWrittenOff = null;
+        this.amountOutstanding = null;
+        this.chargeTimeType = chargeData.chargeTimeType;
+        this.dueDate = chargeData.dueDate;
+        this.chargeCalculationType = null;
+        this.percentage = null;
+        this.amountPercentageAppliedTo = null;
+        this.penalty = chargeData.penalty;
+        this.chargePaymentMode = null;
+        this.paid = false;
+        this.waived = false;
+        this.amountOrPercentage = null;
+        this.chargeOptions = null;
+        this.chargePayable = false;
+        this.loanId = null;
+        this.minCap = null;
+        this.maxCap = null;
+        this.installmentChargeData = null;
+        this.amountAccrued = chargeData.amountAccrued;
+        this.amountUnrecognized = amountUnrecognized;
     }
 
     public LoanChargeData(LoanChargeData chargeData, Collection<LoanInstallmentChargeData> installmentChargeData) {
@@ -258,6 +294,7 @@ public class LoanChargeData {
         this.loanId = chargeData.loanId;
         this.installmentChargeData = installmentChargeData;
         this.amountAccrued = chargeData.amountAccrued;
+        this.amountUnrecognized = chargeData.amountUnrecognized;
     }
 
     public LoanChargeData(final Long id, final LocalDate dueAsOfDate, final BigDecimal amountOrPercentage) {
@@ -287,6 +324,7 @@ public class LoanChargeData {
         this.maxCap = null;
         this.installmentChargeData = null;
         this.amountAccrued = null;
+        this.amountUnrecognized = null;
     }
 
     public boolean isChargePayable() {
@@ -349,8 +387,11 @@ public class LoanChargeData {
         return this.chargeId;
     }
 
-    
     public BigDecimal getAmountWaived() {
         return this.amountWaived;
+    }
+
+    public BigDecimal getAmountUnrecognized() {
+        return this.amountUnrecognized;
     }
 }

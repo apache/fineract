@@ -63,6 +63,9 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     @Column(name = "interest_writtenoff_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal interestWrittenOff;
 
+    @Column(name = "accrual_interest_derived", scale = 6, precision = 19, nullable = true)
+    private BigDecimal interestAccrued;
+    
     @Column(name = "fee_charges_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal feeChargesCharged;
 
