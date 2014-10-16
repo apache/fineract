@@ -222,7 +222,6 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             if (totalAccInterest == null) {
                 totalAccInterest = BigDecimal.ZERO;
             }
-            interestportion = interestportion.subtract(totalAccInterest);
             amount = amount.add(interestportion);
             totalAccInterest = totalAccInterest.add(interestportion);
             if (interestportion.compareTo(BigDecimal.ZERO) == 0) {

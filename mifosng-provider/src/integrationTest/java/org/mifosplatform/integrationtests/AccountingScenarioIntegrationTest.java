@@ -768,10 +768,18 @@ public class AccountingScenarioIntegrationTest {
 
         final float FEE_PORTION = 50.0f;
         final float PENALTY_PORTION = 100.0f;
+        final float NEXT_FEE_PORTION = 55.0f;
+        final float NEXT_PENALTY_PORTION = 105.0f;
+
         Integer flat = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(FEE_PORTION), false));
         Integer flatSpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getLoanSpecifiedDueDateJSON(
                 ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(PENALTY_PORTION), true));
+
+        Integer flatNext = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getLoanSpecifiedDueDateJSON(
+                ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(NEXT_FEE_PORTION), false));
+        Integer flatSpecifiedDueDateNext = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
+                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, String.valueOf(NEXT_PENALTY_PORTION), true));
 
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -804,11 +812,23 @@ public class AccountingScenarioIntegrationTest {
                         dateFormat.format(todayDate.getTime()), String.valueOf(PENALTY_PORTION)));
         todayDate.add(Calendar.DATE, 1);
         String runOndate = dateFormat.format(todayDate.getTime());
+
         this.loanTransactionHelper
                 .addChargesForLoan(
                         loanID,
                         LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flat), runOndate,
                                 String.valueOf(FEE_PORTION)));
+
+        todayDate.add(Calendar.DATE, 1);
+        this.loanTransactionHelper.addChargesForLoan(
+                loanID,
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatSpecifiedDueDateNext),
+                        dateFormat.format(todayDate.getTime()), String.valueOf(NEXT_PENALTY_PORTION)));
+
+        this.loanTransactionHelper.addChargesForLoan(
+                loanID,
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(flatNext),
+                        dateFormat.format(todayDate.getTime()), String.valueOf(NEXT_FEE_PORTION)));
 
         // CHECK ACCOUNT ENTRIES
         System.out.println("Entries ......");
@@ -843,6 +863,14 @@ public class AccountingScenarioIntegrationTest {
         INTEREST_3_DAYS = new Float(numberFormat.format(INTEREST_3_DAYS));
         this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(runOndate), INTEREST_3_DAYS, FEE_PORTION,
                 PENALTY_PORTION, loanID);
+
+        runOndate = dateFormat.format(todayDate.getTime());
+
+        this.periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(runOndate);
+        float interestPerDay = totalInterest / totalDaysInPeriod;
+        interestPerDay = new Float(numberFormat.format(interestPerDay));
+        this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(runOndate), interestPerDay, NEXT_FEE_PORTION,
+                NEXT_PENALTY_PORTION, loanID);
 
     }
 
