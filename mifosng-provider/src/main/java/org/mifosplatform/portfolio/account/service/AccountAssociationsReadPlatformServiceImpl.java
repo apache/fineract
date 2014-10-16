@@ -74,8 +74,10 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
 
         final List<Integer> statusList = this.jdbcTemplate.queryForList(sql, Integer.class, savingsId);
         for (final Integer status : statusList) {
-            final LoanStatus loanStatus = LoanStatus.fromInt(status);
-            if (loanStatus.isActiveOrAwaitingApprovalOrDisbursal() || loanStatus.isUnderTransfer()) { return true; }
+            if(status !=null){
+                final LoanStatus loanStatus = LoanStatus.fromInt(status);
+                if (loanStatus.isActiveOrAwaitingApprovalOrDisbursal() || loanStatus.isUnderTransfer()) { return true; }
+            }
         }
 
         final String savsql = "select savingAccount.status_enum as status from m_portfolio_account_associations aa "
@@ -84,10 +86,11 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
 
         final List<Integer> savstatusList = this.jdbcTemplate.queryForList(savsql, Integer.class, savingsId);
         for (final Integer status : savstatusList) {
-            final SavingsAccountStatusType saveStatus = SavingsAccountStatusType.fromInt(status);
-            if (saveStatus.isActiveOrAwaitingApprovalOrDisbursal() || saveStatus.isUnderTransfer()) { return true; }
+            if(status !=null){
+                final SavingsAccountStatusType saveStatus = SavingsAccountStatusType.fromInt(status);
+                if (saveStatus.isActiveOrAwaitingApprovalOrDisbursal() || saveStatus.isUnderTransfer()) { return true; }
+            }
         }
-
         return hasActiveAccount;
     }
 
