@@ -19,9 +19,12 @@ import org.mifosplatform.infrastructure.hooks.data.Field;
 import org.mifosplatform.infrastructure.hooks.data.Grouping;
 import org.mifosplatform.infrastructure.hooks.data.HookData;
 import org.mifosplatform.infrastructure.hooks.data.HookTemplateData;
+import org.mifosplatform.infrastructure.hooks.domain.Hook;
+import org.mifosplatform.infrastructure.hooks.domain.HookRepository;
 import org.mifosplatform.infrastructure.hooks.exception.HookNotFoundException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -31,12 +34,15 @@ import org.springframework.stereotype.Service;
 public class HookReadPlatformServiceImpl implements HookReadPlatformService {
 
 	private final JdbcTemplate jdbcTemplate;
+        private final HookRepository hookRepository;
 	private final PlatformSecurityContext context;
 
 	@Autowired
 	public HookReadPlatformServiceImpl(final PlatformSecurityContext context,
+			final HookRepository hookRepository,
 			final RoutingDataSource dataSource) {
 		this.context = context;
+                this.hookRepository = hookRepository;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
@@ -62,6 +68,15 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
 			throw new HookNotFoundException(hookId);
 		}
 
+	}
+
+	@Override
+	@Cacheable(value = "hooks", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('HK')")
+	public List<Hook> retrieveHooksByEvent(final String actionName,
+			final String entityName) {
+
+		return this.hookRepository.findAllHooksListeningToEvent(actionName,
+				entityName);
 	}
 
 	@Override

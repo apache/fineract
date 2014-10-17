@@ -14,6 +14,7 @@ import retrofit.client.Response;
 import retrofit.http.Body;
 import retrofit.http.FieldMap;
 import retrofit.http.FormUrlEncoded;
+import retrofit.http.GET;
 import retrofit.http.Header;
 import retrofit.http.POST;
 
@@ -26,6 +27,10 @@ public interface WebHookService {
 	final static String TENANT_HEADER = "X-Mifos-Platform-TenantId";
 	final static String ENDPOINT_HEADER = "X-Mifos-Endpoint";
 	final static String API_KEY_HEADER = "X-Mifos-API-Key";
+
+	// Ping
+	@GET("/")
+	Response sendEmptyRequest();
 
 	// Template - Web
 	@POST("/")

@@ -41,6 +41,7 @@ public class WebXmlConfiguration {
         jerseyServletRegistration.addInitParameter("com.sun.jersey.api.json.POJOMappingFeature", "true");
         jerseyServletRegistration.addInitParameter("com.sun.jersey.spi.container.ContainerResponseFilters",
                 ResponseCorsFilter.class.getName());
+        jerseyServletRegistration.addInitParameter("com.sun.jersey.config.feature.DisableWADL", "true");
         // debugging for development:
         // jerseyServletRegistration.addInitParameter("com.sun.jersey.spi.container.ContainerRequestFilters",
         // LoggingFilter.class.getName());

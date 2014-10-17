@@ -65,8 +65,10 @@ public class Hook extends AbstractAuditableCustom<AppUser, Long> {
 			final Set<HookResource> events) {
 		final String displayName = command
 				.stringValueOfParameterNamed(displayNameParamName);
-		final Boolean isActive = command
+		Boolean isActive = command
 				.booleanObjectValueOfParameterNamed(isActiveParamName);
+        if(isActive == null)
+            isActive = false;
 		return new Hook(template, displayName, isActive, config, events);
 	}
 

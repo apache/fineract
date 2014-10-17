@@ -7,9 +7,11 @@ package org.mifosplatform.infrastructure.hooks.service;
 
 import static org.mifosplatform.infrastructure.hooks.api.HookApiConstants.actionNameParamName;
 import static org.mifosplatform.infrastructure.hooks.api.HookApiConstants.configParamName;
+import static org.mifosplatform.infrastructure.hooks.api.HookApiConstants.contentTypeName;
 import static org.mifosplatform.infrastructure.hooks.api.HookApiConstants.entityNameParamName;
 import static org.mifosplatform.infrastructure.hooks.api.HookApiConstants.eventsParamName;
 import static org.mifosplatform.infrastructure.hooks.api.HookApiConstants.nameParamName;
+import static org.mifosplatform.infrastructure.hooks.api.HookApiConstants.payloadURLName;
 import static org.mifosplatform.infrastructure.hooks.api.HookApiConstants.webTemplateName;
 
 import java.util.ArrayList;
@@ -36,12 +38,17 @@ import org.mifosplatform.infrastructure.hooks.domain.HookTemplateRepository;
 import org.mifosplatform.infrastructure.hooks.domain.Schema;
 import org.mifosplatform.infrastructure.hooks.exception.HookNotFoundException;
 import org.mifosplatform.infrastructure.hooks.exception.HookTemplateNotFoundException;
+import org.mifosplatform.infrastructure.hooks.processor.ProcessorHelper;
+import org.mifosplatform.infrastructure.hooks.processor.WebHookService;
 import org.mifosplatform.infrastructure.hooks.serialization.HookCommandFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import retrofit.RetrofitError;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -72,6 +79,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements
 
 	@Transactional
 	@Override
+	@CacheEvict(value = "hooks", allEntries = true)
 	public CommandProcessingResult createHook(final JsonCommand command) {
 
 		try {
@@ -90,7 +98,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements
 			final Hook hook = Hook.fromJson(command, template, config,
 					allEvents);
 
-			validateHookRules(template, config);
+			validateHookRules(template, config, allEvents);
 
 			this.hookRepository.save(hook);
 
@@ -105,6 +113,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements
 
 	@Transactional
 	@Override
+	@CacheEvict(value = "hooks", allEntries = true)
 	public CommandProcessingResult updateHook(final Long hookId,
 			final JsonCommand command) {
 
@@ -156,6 +165,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements
 
 	@Transactional
 	@Override
+	@CacheEvict(value = "hooks", allEntries = true)
 	public CommandProcessingResult deleteHook(final Long hookId) {
 
 		this.context.authenticatedUser();
@@ -200,7 +210,9 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements
 
 		for (final Entry<String, String> configEntry : hookConfig.entrySet()) {
 			for (final Schema field : fields) {
-				if (field.getFieldName().equalsIgnoreCase(configEntry.getKey())) {
+				final String fieldName = field.getFieldName();
+				if (fieldName.equalsIgnoreCase(configEntry.getKey())) {
+
 					final HookConfiguration config = HookConfiguration
 							.createNewWithoutHook(field.getFieldType(),
 									configEntry.getKey(),
@@ -237,7 +249,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements
 	}
 
 	private void validateHookRules(final HookTemplate template,
-			final Set<HookConfiguration> config) {
+			final Set<HookConfiguration> config, Set<HookResource> events) {
 
 		final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(
@@ -246,6 +258,43 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements
 		if (!template.getName().equalsIgnoreCase(webTemplateName)
 				&& this.hookRepository.findOneByTemplateId(template.getId()) != null) {
 			final String errorMessage = "multiple.non.web.template.hooks.not.supported";
+			baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
+					errorMessage);
+		}
+
+		for (final HookConfiguration conf : config) {
+			final String fieldValue = conf.getFieldValue();
+			if (conf.getFieldName().equals(contentTypeName)) {
+				if (!(fieldValue.equalsIgnoreCase("json") || fieldValue
+						.equalsIgnoreCase("form"))) {
+					final String errorMessage = "content.type.must.be.json.or.form";
+					baseDataValidator.reset()
+							.failWithCodeNoParameterAddedToErrorCode(
+									errorMessage);
+				}
+			}
+
+			if (conf.getFieldName().equals(payloadURLName)) {
+				try {
+					final WebHookService service = ProcessorHelper
+							.createWebHookService(fieldValue);
+					service.sendEmptyRequest();
+				} catch (RetrofitError re) {
+					// Swallow error if it's because of method not supported or
+					// if url throws 404 - required for integration test,
+					// url generated on 1st POST request
+					if (re.getResponse() == null) {
+						String errorMessage = "url.invalid";
+						baseDataValidator.reset()
+						.failWithCodeNoParameterAddedToErrorCode(
+								errorMessage);
+					}
+				}
+			}
+		}
+
+		if (events == null || events.isEmpty()) {
+			final String errorMessage = "registered.events.cannot.be.empty";
 			baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
 					errorMessage);
 		}
@@ -261,8 +310,8 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements
 				}
 				if (!found) {
 					final String errorMessage = "required.config.field."
-							+ field.getFieldName() + ".not.provided";
-					baseDataValidator.reset()
+							+ "not.provided";
+					baseDataValidator.reset().value(field.getFieldName())
 							.failWithCodeNoParameterAddedToErrorCode(
 									errorMessage);
 				}

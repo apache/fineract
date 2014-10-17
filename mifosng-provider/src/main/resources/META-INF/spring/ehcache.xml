@@ -34,4 +34,6 @@
 		overflowToDisk="false" />
 	<cache name="codes" maxEntriesLocalHeap="10000" eternal="true"
 		overflowToDisk="false" />
+	<cache name="hooks" maxEntriesLocalHeap="10000" eternal="true"
+		overflowToDisk="false" />
 </ehcache>

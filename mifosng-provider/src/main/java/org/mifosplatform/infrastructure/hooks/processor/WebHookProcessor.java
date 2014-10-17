@@ -57,7 +57,7 @@ public class WebHookProcessor implements HookProcessor {
 	private void sendRequest(final String url, final String contentType,
 			final String payload, final String entityName,
 			final String actionName, final String tenantIdentifier,
-			final String authToken) {
+			@SuppressWarnings("unused") final String authToken) {
 
 		final String mifosEndpointUrl = System.getProperty("baseUrl");
 		final WebHookService service = ProcessorHelper
@@ -70,13 +70,11 @@ public class WebHookProcessor implements HookProcessor {
 				|| contentType.contains("json")) {
 			final JsonObject json = new JsonParser().parse(payload)
 					.getAsJsonObject();
-			json.addProperty("mifosToken", authToken);
 			service.sendJsonRequest(entityName, actionName, tenantIdentifier,
 					mifosEndpointUrl, json, callback);
 		} else {
 			Map<String, String> map = new HashMap<>();
 			map = new Gson().fromJson(payload, map.getClass());
-			map.put("mifosToken", authToken);
 			service.sendFormRequest(entityName, actionName, tenantIdentifier,
 					mifosEndpointUrl, map, callback);
 		}
