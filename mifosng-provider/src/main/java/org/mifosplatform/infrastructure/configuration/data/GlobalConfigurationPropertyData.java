@@ -18,18 +18,24 @@ public class GlobalConfigurationPropertyData {
     private final Long value;
     @SuppressWarnings("unused")
     private final Long id;
+    @SuppressWarnings("unused")
+    private final String description;
 
-    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value) {
+    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value,
+    		final String description) {
         this.name = name;
         this.enabled = enabled;
         this.value = value;
         this.id = null;
+        this.description = description;
     }
 
-    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value, final Long id) {
+    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value,
+    		final Long id, final String description) {
         this.name = name;
         this.enabled = enabled;
         this.value = value;
         this.id = id;
+        this.description = description;
     }
 }

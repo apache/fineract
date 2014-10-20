@@ -59,9 +59,14 @@ public class SavingsAccountHelper {
     }
 
     public Integer applyForSavingsApplication(final Integer ID, final Integer savingsProductID, final String accountType) {
-        System.out.println("--------------------------------APPLYING FOR SAVINGS APPLICATION--------------------------------");
+    	return applyForSavingsApplicationOnDate(ID, savingsProductID, accountType, CREATED_DATE);
+    }
+    
+    public Integer applyForSavingsApplicationOnDate(final Integer ID, final Integer savingsProductID, final String accountType,
+    		final String submittedOnDate) {
+    	System.out.println("--------------------------------APPLYING FOR SAVINGS APPLICATION--------------------------------");
         final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
-                .withSubmittedOnDate(CREATED_DATE) //
+                .withSubmittedOnDate(submittedOnDate) //
                 .build(ID.toString(), savingsProductID.toString(), accountType);
         return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
                 savingsApplicationJSON, "savingsId");
@@ -77,8 +82,15 @@ public class SavingsAccountHelper {
     }
 
     public HashMap approveSavings(final Integer savingsID) {
-        System.out.println("--------------------------------- APPROVING SAVINGS APPLICATION ------------------------------------");
-        return performSavingApplicationActions(createSavingsOperationURL(APPROVE_SAVINGS_COMMAND, savingsID), getApproveSavingsAsJSON());
+       return approveSavingsOnDate(savingsID, null);
+    }
+    
+    public HashMap approveSavingsOnDate(final Integer savingsID, final String approvalDate) {
+    	 System.out.println("--------------------------------- APPROVING SAVINGS APPLICATION ------------------------------------");
+         final String savingsOperationURL = createSavingsOperationURL(APPROVE_SAVINGS_COMMAND, savingsID);
+         if(approvalDate == null || approvalDate == "")
+         	return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJSON());
+     	 return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJsonOnDate(approvalDate));
     }
 
     public HashMap undoApproval(final Integer savingsID) {
@@ -185,10 +197,14 @@ public class SavingsAccountHelper {
     }
 
     private String getApproveSavingsAsJSON() {
-        final HashMap<String, String> map = new HashMap<>();
+        return getApproveSavingsAsJsonOnDate(CREATED_DATE_PLUS_ONE);
+    }
+    
+    private String getApproveSavingsAsJsonOnDate(final String approvalDate) {
+    	final HashMap<String, String> map = new HashMap<>();
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
-        map.put("approvedOnDate", CREATED_DATE_PLUS_ONE);
+        map.put("approvedOnDate", approvalDate);
         map.put("note", "Approval NOTE");
         String savingsAccountApproveJson = new Gson().toJson(map);
         System.out.println(savingsAccountApproveJson);

@@ -52,7 +52,7 @@ public class PostingPeriod {
             final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
             final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
-            final Money minBalanceForInterestCalculation) {
+            final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd) {
 
         final List<EndOfDayBalance> accountEndOfDayBalances = new ArrayList<>();
         boolean interestTransfered = false;
@@ -113,13 +113,14 @@ public class PostingPeriod {
 
         return new PostingPeriod(periodInterval, currency, periodStartingBalance, openingDayBalance, interestCompoundingPeriodType,
                 interestCalculationType, interestRateAsFraction, daysInYear, compoundingPeriods, interestTransfered,
-                minBalanceForInterestCalculation);
+                minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd);
     }
 
     private PostingPeriod(final LocalDateInterval periodInterval, final MonetaryCurrency currency, final Money openingBalance,
             final Money closingBalance, final SavingsCompoundingInterestPeriodType interestCompoundingType,
             final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
-            final List<CompoundingPeriod> compoundingPeriods, boolean interestTransfered, final Money minBalanceForInterestCalculation) {
+            final List<CompoundingPeriod> compoundingPeriods, boolean interestTransfered, final Money minBalanceForInterestCalculation,
+            final boolean isSavingsInterestPostingAtCurrentPeriodEnd) {
         this.periodInterval = periodInterval;
         this.currency = currency;
         this.openingBalance = openingBalance;
@@ -129,8 +130,11 @@ public class PostingPeriod {
         this.interestRateAsFraction = interestRateAsFraction;
         this.daysInYear = daysInYear;
         this.compoundingPeriods = compoundingPeriods;
-
-        this.dateOfPostingTransaction = periodInterval.endDate().plusDays(1);
+        
+        if(isSavingsInterestPostingAtCurrentPeriodEnd)
+        	this.dateOfPostingTransaction = periodInterval.endDate();
+        else
+        	this.dateOfPostingTransaction = periodInterval.endDate().plusDays(1);
         this.interestTransfered = interestTransfered;
         this.minBalanceForInterestCalculation = minBalanceForInterestCalculation;
     }
