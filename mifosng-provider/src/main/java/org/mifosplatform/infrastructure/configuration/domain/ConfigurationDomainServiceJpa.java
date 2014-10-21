@@ -135,5 +135,21 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
         return property.getValue();
     }
+    
+    @Override
+    public boolean isSavingsInterestPostingAtCurrentPeriodEnd() {
+        final String propertyName = "savings-interest-posting-current-period-end";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
+        return property.isEnabled();
+    }
+    
+    @Override
+    public Integer retrieveFinancialYearBeginningMonth() {
+        final String propertyName = "financial-year-beginning-month";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
+        if(property.isEnabled())
+        	return property.getValue().intValue();
+    	return 1;
+    }
 
 }

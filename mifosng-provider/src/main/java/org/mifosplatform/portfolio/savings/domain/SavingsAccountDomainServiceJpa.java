@@ -15,6 +15,7 @@ import java.util.Set;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.accounting.journalentry.service.JournalEntryWritePlatformService;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
@@ -34,16 +35,19 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public SavingsAccountDomainServiceJpa(final SavingsAccountRepositoryWrapper savingsAccountRepository,
             final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService) {
+            final JournalEntryWritePlatformService journalEntryWritePlatformService,
+            final ConfigurationDomainService configurationDomainService) {
         this.savingsAccountRepository = savingsAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
+        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional
@@ -51,6 +55,11 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     public SavingsAccountTransaction handleWithdrawal(final SavingsAccount account, final DateTimeFormatter fmt,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
             final SavingsTransactionBooleanValues transactionBooleanValues) {
+    	
+    	final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
+				.isSavingsInterestPostingAtCurrentPeriodEnd();
+    	final Integer financialYearBeginningMonth = this.configurationDomainService
+    			.retrieveFinancialYearBeginningMonth();
 
         if (transactionBooleanValues.isRegularTransaction() && !account.allowWithdrawal()) { throw new DepositAccountTransactionNotAllowedException(
                 account.getId(), "withdraw", account.depositAccountType()); }
@@ -64,10 +73,14 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final MathContext mc = MathContext.DECIMAL64;
         if (account.isBeforeLastPostingPeriod(transactionDate)) {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.postInterest(mc, today, transactionBooleanValues.isInterestTransfer());
+            account.postInterest(mc, today, transactionBooleanValues.isInterestTransfer(),
+            		isSavingsInterestPostingAtCurrentPeriodEnd,
+            		financialYearBeginningMonth);
         } else {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.calculateInterestUsing(mc, today, transactionBooleanValues.isInterestTransfer());
+            account.calculateInterestUsing(mc, today, transactionBooleanValues.isInterestTransfer(),
+            		isSavingsInterestPostingAtCurrentPeriodEnd,
+            		financialYearBeginningMonth);
         }
         account.validateAccountBalanceDoesNotBecomeNegative(transactionAmount, transactionBooleanValues.isWithdrawBalance());
         saveTransactionToGenerateTransactionId(withdrawal);
@@ -83,6 +96,11 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     public SavingsAccountTransaction handleDeposit(final SavingsAccount account, final DateTimeFormatter fmt,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
             final boolean isAccountTransfer, final boolean isRegularTransaction) {
+    	
+    	final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
+				.isSavingsInterestPostingAtCurrentPeriodEnd();
+    	final Integer financialYearBeginningMonth = this.configurationDomainService
+    			.retrieveFinancialYearBeginningMonth();
 
         if (isRegularTransaction && !account.allowDeposit()) { throw new DepositAccountTransactionNotAllowedException(account.getId(),
                 "deposit", account.depositAccountType()); }
@@ -98,10 +116,13 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final MathContext mc = MathContext.DECIMAL64;
         if (account.isBeforeLastPostingPeriod(transactionDate)) {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.postInterest(mc, today, isInterestTransfer);
+            account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
+            		financialYearBeginningMonth);
         } else {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.calculateInterestUsing(mc, today, isInterestTransfer);
+            account.calculateInterestUsing(mc, today, isInterestTransfer,
+            		isSavingsInterestPostingAtCurrentPeriodEnd,
+            		financialYearBeginningMonth);
         }
 
         saveTransactionToGenerateTransactionId(deposit);
