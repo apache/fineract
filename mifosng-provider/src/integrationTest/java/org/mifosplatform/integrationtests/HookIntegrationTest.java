@@ -52,13 +52,26 @@ public class HookIntegrationTest {
         this.hookHelper.createHook(payloadURL);
         final Integer createdOfficeID = this.officeHelper.createOffice("01 January 2012");
         try {
-            // sleep for a three seconds to increase the likelihood of the
-            // previous request for creating office completing
-            TimeUnit.SECONDS.sleep(3);
-            final String json = RestAssured.get(payloadURL.replace("?", "")).asString();
-            final Integer notificationOfficeId = JsonPath.with(json).get("officeId");
-            assertEquals("Equality check for created officeId and hook received payload officeId", createdOfficeID, notificationOfficeId);
-            System.out.println("Notification Office Id - " + notificationOfficeId);
+
+            /**
+             * sleep for a three seconds after each failure to increase the
+             * likelihood of the previous request for creating office completing
+             **/
+
+            for (int i = 0; i < 6; i++) {
+                try {
+                    final String json = RestAssured.get(payloadURL.replace("?", "")).asString();
+                    final Integer notificationOfficeId = JsonPath.with(json).get("officeId");
+                    assertEquals("Equality check for created officeId and hook received payload officeId", createdOfficeID,
+                            notificationOfficeId);
+                    System.out.println("Notification Office Id - " + notificationOfficeId);
+                    i = 6;
+                } catch (Exception e) {
+                    TimeUnit.SECONDS.sleep(3);
+                    i++;
+                }
+            }
+
         } catch (final Exception e) {
             if (e instanceof HttpHostConnectException) {
                 fail("Failed to connect to https://echo-webhook.herokuapp.com platform");
@@ -67,5 +80,4 @@ public class HookIntegrationTest {
         }
 
     }
-
 }
