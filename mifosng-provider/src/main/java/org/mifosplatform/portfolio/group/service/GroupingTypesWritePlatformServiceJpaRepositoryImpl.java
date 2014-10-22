@@ -88,6 +88,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     private final SavingsAccountRepository savingsRepository;
     private final CommandProcessingService commandProcessingService;
     private final CalendarInstanceRepository calendarInstanceRepository;
+    private final SavingsAccountRepository savingsAccountRepository;
+
 
     @Autowired
     public GroupingTypesWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -96,7 +98,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final GroupLevelRepository groupLevelRepository, final GroupingTypesDataValidator fromApiJsonDeserializer,
             final LoanRepository loanRepository, final SavingsAccountRepository savingsRepository,
             final CodeValueRepositoryWrapper codeValueRepository, final CommandProcessingService commandProcessingService,
-            final CalendarInstanceRepository calendarInstanceRepository) {
+            final CalendarInstanceRepository calendarInstanceRepository,final SavingsAccountRepository savingsAccountRepository) {
         this.context = context;
         this.groupRepository = groupRepository;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
@@ -110,6 +112,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         this.codeValueRepository = codeValueRepository;
         this.commandProcessingService = commandProcessingService;
         this.calendarInstanceRepository = calendarInstanceRepository;
+        this.savingsAccountRepository = savingsAccountRepository;
     }
 
     private CommandProcessingResult createGroupingType(final JsonCommand command, final GroupTypes groupingType, final Long centerId) {
@@ -405,7 +408,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     }
 
     @Override
-    public CommandProcessingResult assignGroupOrCenterStaff(final Long grouptId, final JsonCommand command) {
+    public CommandProcessingResult assignGroupOrCenterStaff(final Long groupId,final JsonCommand command) {
 
         this.context.authenticatedUser();
 
@@ -413,12 +416,41 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         this.fromApiJsonDeserializer.validateForAssignStaff(command.json());
 
-        final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(grouptId);
+        final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(groupId);
 
         Staff staff = null;
         final Long staffId = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
+
+        final boolean inheritStaffForClientAccounts = command.booleanPrimitiveValueOfParameterNamed(GroupingTypesApiConstants.inheritStaffForClientAccounts);
         staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, groupForUpdate.getOffice().getHierarchy());
         groupForUpdate.updateStaff(staff);
+
+        if(inheritStaffForClientAccounts){
+            LocalDate loanOfficerReassignmentDate = LocalDate.now();
+            /*
+            update loan officer for client and  update loan officer for clients loans and savings
+            */
+            Set<Client> clients = groupForUpdate.getClientMembers();
+            if(clients !=null){
+                for(Client client : clients){
+                    client.updateStaff(staff);
+                    if(this.loanRepository.doNonClosedLoanAccountsExistForClient(client.getId())){
+                        for(final Loan loan :this.loanRepository.findLoanByClientId(client.getId())){
+                            if (loan.isDisbursed() && !loan.isClosed()){
+                                loan.reassignLoanOfficer(staff,loanOfficerReassignmentDate);
+                            }
+                        }
+                    }
+                    if(this.savingsAccountRepository.doNonClosedSavingAccountsExistForClient(client.getId())){
+                        for (final SavingsAccount savingsAccount : this.savingsAccountRepository.findSavingAccountByClientId(client.getId())){
+                            if (!savingsAccount.isClosed()){
+                                savingsAccount.update(staff);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         this.groupRepository.saveAndFlush(groupForUpdate);
 
@@ -427,7 +459,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         return new CommandProcessingResultBuilder() //
                 .withOfficeId(groupForUpdate.officeId()) //
                 .withEntityId(groupForUpdate.getId()) //
-                .withGroupId(grouptId) //
+                .withGroupId(groupId) //
                 .with(actualChanges) //
                 .build();
     }

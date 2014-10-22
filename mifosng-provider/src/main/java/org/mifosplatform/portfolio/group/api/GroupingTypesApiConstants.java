@@ -43,6 +43,7 @@ public class GroupingTypesApiConstants {
     public static final String groupMembersParamName = "groupMembers";
 
     public static final String submittedOnDateParamName = "submittedOnDate";
+    public static final String inheritStaffForClientAccounts   = "inheritStaffForClientAccounts";
 
     // group parameters
     public static final String centerIdParamName = "centerId";

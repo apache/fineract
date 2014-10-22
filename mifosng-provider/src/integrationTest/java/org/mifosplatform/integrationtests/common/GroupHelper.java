@@ -76,6 +76,19 @@ public class GroupHelper {
         return Utils.performServerDelete(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, "groupId");
     }
 
+
+    public static Object assignStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId,final Long staffId){
+        final String GROUP_ASSIGN_STAFF_URL = "/mifosng-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER + "&command=assignStaff";
+        System.out.println("---------------------------------DELETE GROUP---------------------------------------------");
+        return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL,assignStaffAsJSON(staffId),"changes");
+    }
+    public static Object assignStaffInheritStaffForClientAccounts(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId,final String staffId){
+        final String GROUP_ASSIGN_STAFF_URL = "/mifosng-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER + "&command=assignStaff";
+        System.out.println("---------------------------------DELETE GROUP---------------------------------------------");
+        return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL,assignStaffAndInheritStaffForClientAccountsAsJSON(staffId),"changes");
+    }
+
+
     public static String getTestGroupAsJSON(final boolean active, final String activationDate) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("officeId", "1");
@@ -125,6 +138,20 @@ public class GroupHelper {
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }
+    public static String assignStaffAsJSON(final Long staffId) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("staffId", staffId);
+        System.out.println("map : " + map);
+        return new Gson().toJson(map);
+    }
+    public static String assignStaffAndInheritStaffForClientAccountsAsJSON(final String staffId) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("staffId", staffId);
+        map.put("inheritStaffForClientAccounts","true");
+        System.out.println("map : " + map);
+        return new Gson().toJson(map);
+    }
+
 
     public static void verifyGroupCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID) {

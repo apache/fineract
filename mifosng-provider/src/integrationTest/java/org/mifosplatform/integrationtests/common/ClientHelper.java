@@ -33,6 +33,24 @@ public class ClientHelper {
                 "clientId");
     }
 
+    public static Object assignStaffToClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+                                       final String clientId, final String staffId) {
+        final String CLIENT_ASSIGN_STAFF_URL = "/mifosng-provider/api/v1/clients/" + clientId + "?" + Utils.TENANT_IDENTIFIER + "&command=assignStaff";
+
+        System.out.println("---------------------------------CREATING A CLIENT---------------------------------------------");
+        return Utils.performServerPost(requestSpec, responseSpec, CLIENT_ASSIGN_STAFF_URL, assignStaffToClientAsJson(staffId),
+                "changes");
+    }
+
+    public static Integer getClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+                                    final String clientId){
+        final String GET_CLIENT_URL = "/mifosng-provider/api/v1/clients/" + clientId + "?" + Utils.TENANT_IDENTIFIER ;
+
+        System.out.println("---------------------------------GET A CLIENT---------------------------------------------");
+        return Utils.performServerGet(requestSpec, responseSpec, GET_CLIENT_URL,"staffId");
+
+    }
+
     public static String getTestClientAsJSON(final String dateOfJoining, final String officeId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("officeId", officeId);
@@ -43,6 +61,13 @@ public class ClientHelper {
         map.put("locale", "en");
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
+        System.out.println("map : " + map);
+        return new Gson().toJson(map);
+    }
+
+    public static String assignStaffToClientAsJson(final String staffId){
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("staffId", staffId);
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }

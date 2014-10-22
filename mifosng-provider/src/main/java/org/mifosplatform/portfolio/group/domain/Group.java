@@ -567,4 +567,8 @@ public final class Group extends AbstractPersistable<Long> {
 
         return differences;
     }
+
+    public Set<Client> getClientMembers() {
+        return this.clientMembers;
+    }
 }

@@ -368,7 +368,7 @@ public final class GroupingTypesDataValidator {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
-        final Set<String> supportedParametersAssignStaff = new HashSet<>(Arrays.asList(GroupingTypesApiConstants.staffIdParamName));
+        final Set<String> supportedParametersAssignStaff = new HashSet<>(Arrays.asList(GroupingTypesApiConstants.staffIdParamName,GroupingTypesApiConstants.inheritStaffForClientAccounts));
 
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParametersAssignStaff);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -381,6 +381,11 @@ public final class GroupingTypesDataValidator {
         final String staffIdParameterName = GroupingTypesApiConstants.staffIdParamName;
         final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
         baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().longGreaterThanZero();
+
+        final String inheritStaffForClientAccountsParamName = GroupingTypesApiConstants.inheritStaffForClientAccounts;
+        final Boolean inheritStaffForClientAccounts= this.fromApiJsonHelper.extractBooleanNamed(inheritStaffForClientAccountsParamName,element);
+        baseDataValidator.reset().parameter(inheritStaffForClientAccountsParamName).value(inheritStaffForClientAccounts).ignoreIfNull().notBlank().isOneOfTheseValues(true, false);
+
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }

@@ -5979,6 +5979,25 @@ Request Body:
                     <h4>Assign a Staff</h4>
                     <p>Allows you to assign <i>Staff</i> to an existing Group.</p>
                     <p>The selected Staff should be belong to the same office (or an office higher up in the hierarchy) as this group</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>staffId</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>inheritStaffForClientAccounts</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Boolean if true all members of the group (i.e all clients with active loans and savings ) will inherit the staffId</td>
+						</tr>
+					</table>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=assignStaff</code>
