@@ -15,7 +15,6 @@ import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
@@ -34,17 +33,14 @@ import org.springframework.stereotype.Service;
 public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-    private final PlatformSecurityContext context;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;
     private final DropdownReadPlatformService dropdownReadPlatformService;
 
     @Autowired
-    public ChargeReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final CurrencyReadPlatformService currencyReadPlatformService,
+    public ChargeReadPlatformServiceImpl(final CurrencyReadPlatformService currencyReadPlatformService,
             final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final RoutingDataSource dataSource,
             final DropdownReadPlatformService dropdownReadPlatformService) {
-        this.context = context;
         this.chargeDropdownReadPlatformService = chargeDropdownReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.currencyReadPlatformService = currencyReadPlatformService;
@@ -54,8 +50,6 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     @Override
     @Cacheable(value = "charges", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('ch')")
     public Collection<ChargeData> retrieveAllCharges() {
-        this.context.authenticatedUser();
-
         final ChargeMapper rm = new ChargeMapper();
 
         final String sql = "select " + rm.chargeSchema() + " where c.is_deleted=0 order by c.name ";
@@ -65,8 +59,6 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
     @Override
     public Collection<ChargeData> retrieveAllChargesForCurrency(String currencyCode) {
-        this.context.authenticatedUser();
-
         final ChargeMapper rm = new ChargeMapper();
 
         final String sql = "select " + rm.chargeSchema() + " where c.is_deleted=0 and c.currency_code='" + currencyCode
@@ -78,8 +70,6 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     @Override
     public ChargeData retrieveCharge(final Long chargeId) {
         try {
-            this.context.authenticatedUser();
-
             final ChargeMapper rm = new ChargeMapper();
 
             final String sql = "select " + rm.chargeSchema() + " where c.id = ? and c.is_deleted=0 ";
@@ -92,8 +82,6 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
     @Override
     public ChargeData retrieveNewChargeDetails() {
-
-        this.context.authenticatedUser();
 
         final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
         final List<EnumOptionData> allowedChargeCalculationTypeOptions = this.chargeDropdownReadPlatformService.retrieveCalculationTypes();
@@ -116,9 +104,6 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
     @Override
     public Collection<ChargeData> retrieveLoanProductCharges(final Long loanProductId) {
-
-        this.context.authenticatedUser();
-
         final ChargeMapper rm = new ChargeMapper();
 
         final String sql = "select " + rm.loanProductChargeSchema() + " where c.is_deleted=0 and c.is_active=1 and plc.product_loan_id=?";
@@ -128,8 +113,6 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
     @Override
     public Collection<ChargeData> retrieveLoanProductCharges(final Long loanProductId, final Integer chargeTime) {
-
-        this.context.authenticatedUser();
 
         final ChargeMapper rm = new ChargeMapper();
 
@@ -141,8 +124,6 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
     @Override
     public Collection<ChargeData> retrieveLoanApplicableCharges(final boolean feeChargesOnly, Integer[] excludeChargeTimes) {
-        this.context.authenticatedUser();
-
         final ChargeMapper rm = new ChargeMapper();
         String excludeClause = "";
         Object[] params = new Object[] { ChargeAppliesTo.LOAN.getValue() };
@@ -170,8 +151,6 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
     @Override
     public Collection<ChargeData> retrieveLoanApplicablePenalties() {
-        this.context.authenticatedUser();
-
         final ChargeMapper rm = new ChargeMapper();
 
         final String sql = "select " + rm.chargeSchema()
@@ -254,8 +233,6 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
     @Override
     public Collection<ChargeData> retrieveSavingsAccountApplicableCharges(final boolean feeChargesOnly) {
-        this.context.authenticatedUser();
-
         final ChargeMapper rm = new ChargeMapper();
 
         String sql = "select " + rm.chargeSchema()
@@ -270,8 +247,6 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
     @Override
     public Collection<ChargeData> retrieveSavingsAccountApplicablePenalties() {
-        this.context.authenticatedUser();
-
         final ChargeMapper rm = new ChargeMapper();
 
         final String sql = "select " + rm.chargeSchema()
@@ -281,8 +256,6 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
     @Override
     public Collection<ChargeData> retrieveSavingsProductCharges(final Long savingsProductId) {
-        this.context.authenticatedUser();
-
         final ChargeMapper rm = new ChargeMapper();
 
         final String sql = "select " + rm.savingsProductChargeSchema()
