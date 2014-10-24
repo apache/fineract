@@ -265,10 +265,10 @@ public class RecurringDepositProductsApiResource {
 
         // charges
         final boolean feeChargesOnly = true;
-        Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSavingsAccountApplicableCharges(feeChargesOnly);
+        Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSavingsApplicableCharges(feeChargesOnly);
         chargeOptions = CollectionUtils.isEmpty(chargeOptions) ? null : chargeOptions;
 
-        Collection<ChargeData> penaltyOptions = this.chargeReadPlatformService.retrieveSavingsAccountApplicablePenalties();
+        Collection<ChargeData> penaltyOptions = this.chargeReadPlatformService.retrieveSavingsApplicablePenalties();
         penaltyOptions = CollectionUtils.isEmpty(penaltyOptions) ? null : penaltyOptions;
 
         final Collection<EnumOptionData> periodFrequencyTypeOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();

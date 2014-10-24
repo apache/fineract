@@ -21,15 +21,30 @@ public interface ChargeReadPlatformService {
     ChargeData retrieveNewChargeDetails();
 
     /**
-     * Returns all charges applicable for loans
+     * Returns all Fees (excluding penalties) applicable for loans
      * 
-     * @param feeChargesOnly
-     *            If set to "true", only fees are returned
+     * @return
+     */
+    Collection<ChargeData> retrieveLoanApplicableFees();
+
+    /**
+     * Returns all charges applicable for a given loan account
+     * 
      * @param excludeChargeTimes
      *            Excludes Given List of Charge Types from the response
      * @return
      */
-    Collection<ChargeData> retrieveLoanApplicableCharges(boolean feeChargesOnly, ChargeTimeType[] excludeChargeTimes);
+    Collection<ChargeData> retrieveLoanAccountApplicableCharges(final Long loanId, ChargeTimeType[] excludeChargeTimes);
+
+    /**
+     * Returns all charges applicable for a given loan product (filter based on
+     * Currency of Selected Loan Product)
+     * 
+     * @param excludeChargeTimes
+     *            Excludes Given List of Charge Types from the response
+     * @return
+     */
+    Collection<ChargeData> retrieveLoanProductApplicableCharges(final Long loanProductId, ChargeTimeType[] excludeChargeTimes);
 
     /**
      * Returns all Penalties applicable for loans
@@ -62,14 +77,14 @@ public interface ChargeReadPlatformService {
      * @param feeChargesOnly
      * @return
      */
-    Collection<ChargeData> retrieveSavingsAccountApplicableCharges(boolean feeChargesOnly);
+    Collection<ChargeData> retrieveSavingsApplicableCharges(boolean feeChargesOnly);
 
     /**
      * Returns all penalties applicable for savings
      * 
      * @return
      */
-    Collection<ChargeData> retrieveSavingsAccountApplicablePenalties();
+    Collection<ChargeData> retrieveSavingsApplicablePenalties();
 
     /**
      * Returns all charges applicable for a given savings product

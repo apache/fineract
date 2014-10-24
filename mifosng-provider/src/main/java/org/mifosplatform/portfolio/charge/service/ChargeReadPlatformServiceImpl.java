@@ -124,10 +124,20 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveLoanApplicableCharges(final boolean feeChargesOnly, ChargeTimeType[] excludeChargeTimes) {
+    public Collection<ChargeData> retrieveLoanApplicableFees() {
+        final ChargeMapper rm = new ChargeMapper();
+        Object[] params = new Object[] { ChargeAppliesTo.LOAN.getValue() };
+        String sql = "select " + rm.chargeSchema()
+                + " where c.is_deleted=0 and c.is_active=1 and c.is_penalty=0 and c.charge_applies_to_enum=? order by c.name ";
+
+        return this.jdbcTemplate.query(sql, rm, params);
+    }
+
+    @Override
+    public Collection<ChargeData> retrieveLoanAccountApplicableCharges(final Long loanId, ChargeTimeType[] excludeChargeTimes) {
         final ChargeMapper rm = new ChargeMapper();
         String excludeClause = "";
-        Object[] params = new Object[] { ChargeAppliesTo.LOAN.getValue() };
+        Object[] params = new Object[] { loanId, ChargeAppliesTo.LOAN.getValue() };
         if (excludeChargeTimes != null && excludeChargeTimes.length > 0) {
             excludeClause = " and c.charge_time_enum not in(?) ";
             StringBuilder sb = new StringBuilder();
@@ -137,15 +147,32 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 }
                 sb.append(excludeChargeTimes[i].getValue());
             }
-            params = new Object[] { ChargeAppliesTo.LOAN.getValue(), sb.toString() };
+            params[2] = sb.toString();
         }
-        String sql = "select " + rm.chargeSchema() + " where c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=?"
-                + excludeClause + " order by c.name ";
-        if (feeChargesOnly) {
-            sql = "select " + rm.chargeSchema()
-                    + " where c.is_deleted=0 and c.is_active=1 and c.is_penalty=0 and c.charge_applies_to_enum=? " + excludeClause
-                    + "order by c.name ";
+        String sql = "select " + rm.chargeSchema() + " join m_loan la on la.currency_code = c.currency_code" + " where la.id=?"
+                + " and c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=?" + excludeClause + " order by c.name ";
+
+        return this.jdbcTemplate.query(sql, rm, params);
+    }
+
+    @Override
+    public Collection<ChargeData> retrieveLoanProductApplicableCharges(final Long loanProductId, ChargeTimeType[] excludeChargeTimes) {
+        final ChargeMapper rm = new ChargeMapper();
+        String excludeClause = "";
+        Object[] params = new Object[] { loanProductId, ChargeAppliesTo.LOAN.getValue() };
+        if (excludeChargeTimes != null && excludeChargeTimes.length > 0) {
+            excludeClause = " and c.charge_time_enum not in(?) ";
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < excludeChargeTimes.length; i++) {
+                if (i != 0) {
+                    sb.append(",");
+                }
+                sb.append(excludeChargeTimes[i].getValue());
+            }
+            params[2] = sb.toString();
         }
+        String sql = "select " + rm.chargeSchema() + " join m_product_loan lp on lp.currency_code = c.currency_code" + " where lp.id=?"
+                + " and c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=?" + excludeClause + " order by c.name ";
 
         return this.jdbcTemplate.query(sql, rm, params);
     }
@@ -233,7 +260,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveSavingsAccountApplicableCharges(final boolean feeChargesOnly) {
+    public Collection<ChargeData> retrieveSavingsApplicableCharges(final boolean feeChargesOnly) {
         final ChargeMapper rm = new ChargeMapper();
 
         String sql = "select " + rm.chargeSchema()
@@ -247,7 +274,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveSavingsAccountApplicablePenalties() {
+    public Collection<ChargeData> retrieveSavingsApplicablePenalties() {
         final ChargeMapper rm = new ChargeMapper();
 
         final String sql = "select " + rm.chargeSchema()

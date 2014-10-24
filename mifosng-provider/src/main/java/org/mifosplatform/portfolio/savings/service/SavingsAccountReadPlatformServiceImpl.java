@@ -518,7 +518,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             final boolean feeChargesOnly = false;
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
-                    .retrieveSavingsAccountApplicableCharges(feeChargesOnly);
+                    .retrieveSavingsApplicableCharges(feeChargesOnly);
 
             Collection<StaffData> fieldOfficerOptions = null;
 
@@ -577,7 +577,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             final boolean feeChargesOnly = true;
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
-                    .retrieveSavingsAccountApplicableCharges(feeChargesOnly);
+                    .retrieveSavingsApplicableCharges(feeChargesOnly);
 
             template = SavingsAccountData.withTemplateOptions(template, productOptions, fieldOfficerOptions,
                     interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,

@@ -351,7 +351,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
             final boolean feeChargesOnly = false;
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
-                    .retrieveSavingsAccountApplicableCharges(feeChargesOnly);
+                    .retrieveSavingsApplicableCharges(feeChargesOnly);
 
             Collection<StaffData> fieldOfficerOptions = null;
 
@@ -428,7 +428,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
             final boolean feeChargesOnly = true;
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
-                    .retrieveSavingsAccountApplicableCharges(feeChargesOnly);
+                    .retrieveSavingsApplicableCharges(feeChargesOnly);
 
             if (depositAccountType.isFixedDeposit()) {
 
