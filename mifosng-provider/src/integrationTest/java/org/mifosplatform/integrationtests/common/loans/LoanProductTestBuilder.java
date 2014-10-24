@@ -87,6 +87,7 @@ public class LoanProductTestBuilder {
     private String recalculationRestFrequencyType = "1";
     private String recalculationRestFrequencyInterval = "0";
     private String recalculationRestFrequencyDate = null;
+    private String minimumDaysBetweenDisbursalAndFirstRepayment = "0";
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -120,6 +121,7 @@ public class LoanProductTestBuilder {
         map.put("minPrincipal", this.minPrincipal);
         map.put("maxPrincipal", this.maxPrincipal);
         map.put("overdueDaysForNPA", this.overdueDaysForNPA);
+        map.put("minimumDaysBetweenDisbursalAndFirstRepayment", this.minimumDaysBetweenDisbursalAndFirstRepayment);
         if (multiDisburseLoan) {
             map.put("multiDisburseLoan", this.multiDisburseLoan);
             map.put("maxTrancheCount", this.maxTrancheCount);
@@ -377,4 +379,8 @@ public class LoanProductTestBuilder {
         return this;
     }
 
+    public LoanProductTestBuilder  withMinimumDaysBetweenDisbursalAndFirstRepayment(final String minimumDaysBetweenDisbursalAndFirstRepayment){ 
+    	this.minimumDaysBetweenDisbursalAndFirstRepayment = minimumDaysBetweenDisbursalAndFirstRepayment;
+    	return this;
+    }
 }

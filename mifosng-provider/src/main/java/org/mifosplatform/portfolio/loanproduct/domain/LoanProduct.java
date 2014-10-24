@@ -121,6 +121,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     @Column(name = "overdue_days_for_npa", nullable = true)
     private Integer overdueDaysForNPA;
+    
+    @Column(name = "min_days_between_disbursal_and_first_repayment", nullable = true)
+    private Integer minimumDaysBetweenDisbursalAndFirstRepayment;
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
@@ -164,6 +167,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
         final Integer graceOnPrincipalPayment = command.integerValueOfParameterNamed("graceOnPrincipalPayment");
         final Integer graceOnInterestPayment = command.integerValueOfParameterNamed("graceOnInterestPayment");
         final Integer graceOnInterestCharged = command.integerValueOfParameterNamed("graceOnInterestCharged");
+        final Integer minimumDaysBetweenDisbursalAndFirstRepayment = command
+                .integerValueOfParameterNamed("minimumDaysBetweenDisbursalAndFirstRepayment");        
 
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
         final boolean includeInBorrowerCycle = command.booleanPrimitiveValueOfParameterNamed("includeInBorrowerCycle");
@@ -213,7 +218,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 graceOnInterestCharged, amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle,
                 startDate, closeDate, externalId, useBorrowerCycle, loanProductBorrowerCycleVariations, multiDisburseLoan, maxTrancheCount,
                 outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
-                isInterestRecalculationEnabled, interestRecalculationSettings);
+                isInterestRecalculationEnabled, interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment);
 
     }
 
@@ -430,7 +435,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations, final boolean multiDisburseLoan,
             final Integer maxTrancheCount, final BigDecimal outstandingLoanBalance, final Integer graceOnArrearsAgeing,
             final Integer overdueDaysForNPA, final DaysInMonthType daysInMonthType, final DaysInYearType daysInYearType,
-            final boolean isInterestRecalculationEnabled, final LoanProductInterestRecalculationDetails productInterestRecalculationDetails) {
+            final boolean isInterestRecalculationEnabled, final LoanProductInterestRecalculationDetails productInterestRecalculationDetails,
+            final Integer minimumDaysBetweenDisbursalAndFirstRepayment) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -479,6 +485,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         this.loanProducTrancheDetails = new LoanProductTrancheDetails(multiDisburseLoan, maxTrancheCount, outstandingLoanBalance);
         this.overdueDaysForNPA = overdueDaysForNPA;
         this.productInterestRecalculationDetails = productInterestRecalculationDetails;
+        this.minimumDaysBetweenDisbursalAndFirstRepayment = minimumDaysBetweenDisbursalAndFirstRepayment;
     }
 
     public MonetaryCurrency getCurrency() {
@@ -650,6 +657,15 @@ public class LoanProduct extends AbstractPersistable<Long> {
             this.overdueDaysForNPA = newValue;
         }
 
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment,
+                this.minimumDaysBetweenDisbursalAndFirstRepayment)) {
+            final Integer newValue = command
+                    .integerValueOfParameterNamed(LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment);
+            actualChanges.put(LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.minimumDaysBetweenDisbursalAndFirstRepayment = newValue;
+        }
+        
         /**
          * Update interest recalculation settings
          */
@@ -793,6 +809,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return this.loanProductRelatedDetail.isInterestRecalculationEnabled();
     }
 
+    public Integer getMinimumDaysBetweenDisbursalAndFirstRepayment(){
+        return this.minimumDaysBetweenDisbursalAndFirstRepayment == null?0:this.minimumDaysBetweenDisbursalAndFirstRepayment;
+    }
+    
     public LoanProductBorrowerCycleVariations fetchLoanProductBorrowerCycleVariationById(Long id) {
         LoanProductBorrowerCycleVariations borrowerCycleVariation = null;
         for (LoanProductBorrowerCycleVariations cycleVariation : this.borrowerCycleVariations) {

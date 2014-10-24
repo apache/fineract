@@ -49,6 +49,10 @@ public class LoanTransactionHelper {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, APPLY_LOAN_URL, loanApplicationJSON, "loanId");
     }
 
+    public Object createLoanAccount(final String loanApplicationJSON, final String responseAttribute) {
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, APPLY_LOAN_URL, loanApplicationJSON, responseAttribute);
+    }
+
     public Integer updateLoan(final Integer id, final String loanApplicationJSON) {
         return Utils.performServerPut(this.requestSpec, this.responseSpec, "/mifosng-provider/api/v1/loans/" + id
                 + "?" + Utils.TENANT_IDENTIFIER, loanApplicationJSON, "loanId");
