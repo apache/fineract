@@ -470,7 +470,7 @@ public class LoansApiResource {
         }
 
         Collection<ChargeData> overdueCharges = this.chargeReadPlatformService.retrieveLoanProductCharges(loanBasicDetails.loanProductId(),
-                ChargeTimeType.OVERDUE_INSTALLMENT.getValue());
+                ChargeTimeType.OVERDUE_INSTALLMENT);
 
         final LoanAccountData loanAccount = LoanAccountData.associationsAndTemplate(loanBasicDetails, repaymentSchedule, loanRepayments,
                 charges, collateral, guarantors, meeting, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,

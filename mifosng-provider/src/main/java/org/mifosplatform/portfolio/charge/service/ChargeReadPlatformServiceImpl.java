@@ -19,6 +19,7 @@ import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.domain.ChargeAppliesTo;
+import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
 import org.mifosplatform.portfolio.charge.exception.ChargeNotFoundException;
 import org.mifosplatform.portfolio.common.service.CommonEnumerations;
 import org.mifosplatform.portfolio.common.service.DropdownReadPlatformService;
@@ -112,14 +113,14 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveLoanProductCharges(final Long loanProductId, final Integer chargeTime) {
+    public Collection<ChargeData> retrieveLoanProductCharges(final Long loanProductId, final ChargeTimeType chargeTime) {
 
         final ChargeMapper rm = new ChargeMapper();
 
         final String sql = "select " + rm.loanProductChargeSchema()
                 + " where c.is_deleted=0 and c.is_active=1 and plc.product_loan_id=? and c.charge_time_enum=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId, chargeTime });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId, chargeTime.getValue() });
     }
 
     @Override
