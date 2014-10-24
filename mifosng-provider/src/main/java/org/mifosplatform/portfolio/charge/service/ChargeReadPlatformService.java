@@ -26,9 +26,10 @@ public interface ChargeReadPlatformService {
      * @param feeChargesOnly
      *            If set to "true", only fees are returned
      * @param excludeChargeTimes
+     *            Excludes Given List of Charge Types from the response
      * @return
      */
-    Collection<ChargeData> retrieveLoanApplicableCharges(boolean feeChargesOnly, Integer[] excludeChargeTimes);
+    Collection<ChargeData> retrieveLoanApplicableCharges(boolean feeChargesOnly, ChargeTimeType[] excludeChargeTimes);
 
     /**
      * Returns all Penalties applicable for loans

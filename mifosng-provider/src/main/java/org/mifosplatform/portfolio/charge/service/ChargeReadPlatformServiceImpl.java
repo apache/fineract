@@ -124,7 +124,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveLoanApplicableCharges(final boolean feeChargesOnly, Integer[] excludeChargeTimes) {
+    public Collection<ChargeData> retrieveLoanApplicableCharges(final boolean feeChargesOnly, ChargeTimeType[] excludeChargeTimes) {
         final ChargeMapper rm = new ChargeMapper();
         String excludeClause = "";
         Object[] params = new Object[] { ChargeAppliesTo.LOAN.getValue() };
@@ -135,7 +135,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 if (i != 0) {
                     sb.append(",");
                 }
-                sb.append(excludeChargeTimes[i]);
+                sb.append(excludeChargeTimes[i].getValue());
             }
             params = new Object[] { ChargeAppliesTo.LOAN.getValue(), sb.toString() };
         }

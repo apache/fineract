@@ -1243,7 +1243,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 .retrieveCodeValuesByCode("LoanCollateral");
         final boolean feeChargesOnly = false;
         final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly,
-                new Integer[] { ChargeTimeType.OVERDUE_INSTALLMENT.getValue() });
+                new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT });
         Integer loanCycleCounter = null;
         if (loanProduct.useBorrowerCycle()) {
             if (clientId == null) {
@@ -1673,7 +1673,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             final String sql = "select " + rm.getSchema()
                     + " where lrs.loan_id = ? and lrs.interest_waived_derived is not null order by lrs.installment ASC ";
-            return this.jdbcTemplate.query(sql, rm, new Object[] { loanId});
+            return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }

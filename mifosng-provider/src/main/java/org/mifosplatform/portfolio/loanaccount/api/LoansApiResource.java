@@ -442,7 +442,7 @@ public class LoansApiResource {
             repaymentStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
             final boolean feeChargesOnly = false;
             chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly,
-                    new Integer[] { ChargeTimeType.OVERDUE_INSTALLMENT.getValue() });
+                    new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT });
             chargeTemplate = this.loanChargeReadPlatformService.retrieveLoanChargeTemplate();
 
             allowedLoanOfficers = this.loanReadPlatformService.retrieveAllowedLoanOfficers(loanBasicDetails.officeId(),
