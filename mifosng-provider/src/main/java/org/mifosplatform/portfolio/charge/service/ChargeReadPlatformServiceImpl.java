@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.charge.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -30,6 +31,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author vishwas
+ * 
+ */
 @Service
 public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService {
 
@@ -136,32 +141,24 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     @Override
     public Collection<ChargeData> retrieveLoanAccountApplicableCharges(final Long loanId, ChargeTimeType[] excludeChargeTimes) {
         final ChargeMapper rm = new ChargeMapper();
-        String excludeClause = "";
+        StringBuilder excludeClause = new StringBuilder("");
         Object[] params = new Object[] { loanId, ChargeAppliesTo.LOAN.getValue() };
-        if (excludeChargeTimes != null && excludeChargeTimes.length > 0) {
-            excludeClause = " and c.charge_time_enum not in(?) ";
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < excludeChargeTimes.length; i++) {
-                if (i != 0) {
-                    sb.append(",");
-                }
-                sb.append(excludeChargeTimes[i].getValue());
-            }
-            params[2] = sb.toString();
-        }
+        params = processChargeExclusionsForLoans(excludeChargeTimes, excludeClause, params);
         String sql = "select " + rm.chargeSchema() + " join m_loan la on la.currency_code = c.currency_code" + " where la.id=?"
                 + " and c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=?" + excludeClause + " order by c.name ";
 
         return this.jdbcTemplate.query(sql, rm, params);
     }
 
-    @Override
-    public Collection<ChargeData> retrieveLoanProductApplicableCharges(final Long loanProductId, ChargeTimeType[] excludeChargeTimes) {
-        final ChargeMapper rm = new ChargeMapper();
-        String excludeClause = "";
-        Object[] params = new Object[] { loanProductId, ChargeAppliesTo.LOAN.getValue() };
+    /**
+     * @param excludeChargeTimes
+     * @param excludeClause
+     * @param params
+     * @return
+     */
+    private Object[] processChargeExclusionsForLoans(ChargeTimeType[] excludeChargeTimes, StringBuilder excludeClause, Object[] params) {
         if (excludeChargeTimes != null && excludeChargeTimes.length > 0) {
-            excludeClause = " and c.charge_time_enum not in(?) ";
+            excludeClause = excludeClause.append(" and c.charge_time_enum not in(?) ");
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < excludeChargeTimes.length; i++) {
                 if (i != 0) {
@@ -169,8 +166,18 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 }
                 sb.append(excludeChargeTimes[i].getValue());
             }
-            params[2] = sb.toString();
+            params = Arrays.copyOf(params, params.length + 1);
+            params[params.length - 1] = sb.toString();
         }
+        return params;
+    }
+
+    @Override
+    public Collection<ChargeData> retrieveLoanProductApplicableCharges(final Long loanProductId, ChargeTimeType[] excludeChargeTimes) {
+        final ChargeMapper rm = new ChargeMapper();
+        StringBuilder excludeClause = new StringBuilder("");
+        Object[] params = new Object[] { loanProductId, ChargeAppliesTo.LOAN.getValue() };
+        params = processChargeExclusionsForLoans(excludeChargeTimes, excludeClause, params);
         String sql = "select " + rm.chargeSchema() + " join m_product_loan lp on lp.currency_code = c.currency_code" + " where lp.id=?"
                 + " and c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=?" + excludeClause + " order by c.name ";
 
