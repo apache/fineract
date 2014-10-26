@@ -52,4 +52,9 @@ public enum InterestRecalculationCompoundingMethod {
     public String getCode() {
         return this.code;
     }
+
+    public boolean isFeeCompoundingEnabled() {
+        return this.getValue().equals(InterestRecalculationCompoundingMethod.FEE.getValue())
+                || this.getValue().equals(InterestRecalculationCompoundingMethod.INTEREST_AND_FEE.getValue());
+    }
 }

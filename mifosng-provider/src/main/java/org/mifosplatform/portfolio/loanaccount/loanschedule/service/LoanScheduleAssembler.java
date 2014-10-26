@@ -43,6 +43,7 @@ import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
 import org.mifosplatform.portfolio.loanaccount.api.LoanApiConstants;
 import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
+import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -358,30 +359,34 @@ public class LoanScheduleAssembler {
         final RoundingMode roundingMode = RoundingMode.HALF_EVEN;
         final MathContext mc = new MathContext(8, roundingMode);
 
-        final MonetaryCurrency currency = loanApplicationTerms.getCurrency();
-        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
-        return loanScheduleGenerator.generate(mc, applicationCurrency, loanApplicationTerms, loanCharges, isHolidayEnabled, holidays,
-                workingDays);
+        HolidayDetailDTO detailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
+
+        return loanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges, detailDTO);
     }
 
     public LoanScheduleModel assembleForInterestRecalculation(final LoanApplicationTerms loanApplicationTerms, final Long officeId,
             List<LoanTransaction> transactions, final Set<LoanCharge> loanCharges,
             final List<LoanRepaymentScheduleInstallment> previousSchedule,
-            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, LocalDate recalculateFrom) {
+            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, LocalDate recalculateFrom,
+            LocalDate recalculateDueDateChargesFrom) {
         final RoundingMode roundingMode = RoundingMode.HALF_EVEN;
         final MathContext mc = new MathContext(8, roundingMode);
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
-        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository
-                .findOneWithNotFoundDetection(loanApplicationTerms.getCurrency());
 
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId, loanApplicationTerms
                 .getExpectedDisbursementDate().toDate(), HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
 
         final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
-        return loanScheduleGenerator.rescheduleNextInstallments(mc, applicationCurrency, loanApplicationTerms, loanCharges,
-                isHolidayEnabled, holidays, workingDays, transactions, loanRepaymentScheduleTransactionProcessor, previousSchedule,
-                recalculateFrom);
+        HolidayDetailDTO detailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
+        final Long waitPeriod = this.configurationDomainService.retrievePenaltyWaitPeriod();
+        int penaltyWaitPeriod = 0;
+        if (waitPeriod != null) {
+            penaltyWaitPeriod = waitPeriod.intValue();
+        }
+        return loanScheduleGenerator.rescheduleNextInstallments(mc, loanApplicationTerms, loanCharges, detailDTO, transactions,
+                loanRepaymentScheduleTransactionProcessor, previousSchedule, recalculateFrom, recalculateDueDateChargesFrom,
+                penaltyWaitPeriod);
     }
 
     public LoanRepaymentScheduleInstallment calculatePrepaymentAmount(List<LoanRepaymentScheduleInstallment> installments,
@@ -400,8 +405,8 @@ public class LoanScheduleAssembler {
         CalendarInstance calendarInstance = loanApplicationTerms.getRestCalendarInstance();
         LocalDate nextScheduleDate = CalendarUtils.getNextScheduleDate(calendarInstance.getCalendar(), onDate.minusDays(1));
         if (loanApplicationTerms.getRecalculationFrequencyType().isSameAsRepayment()) {
-            nextScheduleDate = scheduledDateGenerator.adjustRepaymentDate(nextScheduleDate, loanApplicationTerms, isHolidayEnabled,
-                    holidays, workingDays);
+            HolidayDetailDTO detailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
+            nextScheduleDate = scheduledDateGenerator.adjustRepaymentDate(nextScheduleDate, loanApplicationTerms, detailDTO);
         }
 
         return loanScheduleGenerator.calculatePrepaymentAmount(installments, currency, nextScheduleDate,

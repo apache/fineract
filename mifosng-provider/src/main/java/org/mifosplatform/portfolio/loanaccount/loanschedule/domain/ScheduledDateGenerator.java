@@ -5,30 +5,25 @@
  */
 package org.mifosplatform.portfolio.loanaccount.loanschedule.domain;
 
-import java.util.List;
-
 import org.joda.time.LocalDate;
-import org.mifosplatform.organisation.holiday.domain.Holiday;
-import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
+import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
 
 public interface ScheduledDateGenerator {
 
-    LocalDate getLastRepaymentDate(LoanApplicationTerms loanApplicationTerms, boolean isHolidayEnabled, List<Holiday> holidays,
-            final WorkingDays workingDays);
+    LocalDate getLastRepaymentDate(LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO);
 
     LocalDate idealDisbursementDateBasedOnFirstRepaymentDate(PeriodFrequencyType repaymentPeriodFrequencyType, int repaidEvery,
             final LocalDate firstRepaymentDate);
 
     LocalDate generateNextRepaymentDate(LocalDate lastRepaymentDate, LoanApplicationTerms loanApplicationTerms, boolean isFirstRepayment);
 
-    LocalDate adjustRepaymentDate(LocalDate dueRepaymentPeriodDate, LoanApplicationTerms loanApplicationTerms, boolean isHolidayEnabled,
-            List<Holiday> holidays, WorkingDays workingDays);
+    LocalDate adjustRepaymentDate(LocalDate dueRepaymentPeriodDate, LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO);
 
     LocalDate getRepaymentPeriodDate(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate);
 
     Boolean isDateFallsInSchedule(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate, LocalDate date);
 
     LocalDate generateNextScheduleDateStartingFromDisburseDate(LocalDate lastRepaymentDate, LoanApplicationTerms loanApplicationTerms,
-            boolean isHolidayEnabled, List<Holiday> holidays, final WorkingDays workingDays);
+            final HolidayDetailDTO holidayDetailDTO);
 }

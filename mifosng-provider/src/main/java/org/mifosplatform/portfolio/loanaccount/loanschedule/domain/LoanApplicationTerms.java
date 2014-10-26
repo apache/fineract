@@ -110,7 +110,7 @@ public final class LoanApplicationTerms {
     private BigDecimal maxOutstandingBalance;
 
     private List<LoanTermVariationsData> emiAmountVariations;
-    
+
     private Money totalInterestDue;
 
     private final DaysInMonthType daysInMonthType;
@@ -505,7 +505,7 @@ public final class LoanApplicationTerms {
         final int periodsElapsed = 0;
         final double paymentPerRepaymentPeriod = paymentPerPeriod(periodicInterestRate, this.principal, periodsElapsed);
         double totalRepayment = paymentPerRepaymentPeriod * this.numberOfRepayments;
-        
+
         return Money.of(this.principal.getCurrency(), BigDecimal.valueOf(totalRepayment));
     }
 
@@ -521,16 +521,16 @@ public final class LoanApplicationTerms {
             case FLAT:
                 final BigDecimal interestRateForLoanTerm = calculateFlatInterestRateForLoanTerm(calculator, mc);
                 totalInterestDue = this.principal.multiplyRetainScale(interestRateForLoanTerm, mc.getRoundingMode());
-                
+
             break;
             case DECLINING_BALANCE:
             break;
             case INVALID:
             break;
         }
-        
-        if(this.totalInterestDue != null) {
-        	totalInterestDue = this.totalInterestDue;
+
+        if (this.totalInterestDue != null) {
+            totalInterestDue = this.totalInterestDue;
         }
 
         return totalInterestDue;
@@ -544,7 +544,7 @@ public final class LoanApplicationTerms {
         final BigDecimal loanTermPeriodsInYearBigDecimal = BigDecimal.valueOf(loanTermPeriodsInOneYear);
 
         final BigDecimal loanTermFrequencyBigDecimal = calculatePeriodsInLoanTerm();
-        
+
         return this.annualNominalInterestRate.divide(loanTermPeriodsInYearBigDecimal, mc).divide(divisor, mc)
                 .multiply(loanTermFrequencyBigDecimal);
     }
@@ -1078,59 +1078,62 @@ public final class LoanApplicationTerms {
         return numberOfPeriods;
     }
 
-    
     public RecalculationFrequencyType getRecalculationFrequencyType() {
         return this.recalculationFrequencyType;
     }
-    
+
     public void updateNumberOfRepayments(final Integer numberOfRepayments) {
-    	this.numberOfRepayments = numberOfRepayments;
+        this.numberOfRepayments = numberOfRepayments;
     }
-    
+
     public void updatePrincipalGrace(final Integer principalGrace) {
-    	this.principalGrace = principalGrace;
+        this.principalGrace = principalGrace;
     }
-    
+
     public void updateInterestPaymentGrace(final Integer interestPaymentGrace) {
-    	this.interestPaymentGrace = interestPaymentGrace;
+        this.interestPaymentGrace = interestPaymentGrace;
     }
-    
+
     public void updateInterestRatePerPeriod(BigDecimal interestRatePerPeriod) {
-    	if(interestRatePerPeriod != null) {
-    		this.interestRatePerPeriod = interestRatePerPeriod;
-    	}
+        if (interestRatePerPeriod != null) {
+            this.interestRatePerPeriod = interestRatePerPeriod;
+        }
     }
-    
+
     public void updateAnnualNominalInterestRate(BigDecimal annualNominalInterestRate) {
-    	if(annualNominalInterestRate != null) {
-    		this.annualNominalInterestRate = annualNominalInterestRate;
-    	}
+        if (annualNominalInterestRate != null) {
+            this.annualNominalInterestRate = annualNominalInterestRate;
+        }
     }
-    
+
     public BigDecimal getInterestRatePerPeriod() {
-    	return this.interestRatePerPeriod;
+        return this.interestRatePerPeriod;
     }
-    
+
     public BigDecimal getAnnualNominalInterestRate() {
-    	return this.annualNominalInterestRate;
+        return this.annualNominalInterestRate;
     }
-    
+
     public void updateInterestChargedFromDate(LocalDate interestChargedFromDate) {
-    	if(interestChargedFromDate != null) {
-    		this.interestChargedFromDate = interestChargedFromDate;
-    	}
+        if (interestChargedFromDate != null) {
+            this.interestChargedFromDate = interestChargedFromDate;
+        }
     }
-    
+
     public void updateLoanTermFrequency(Integer loanTermFrequency) {
-    	if(loanTermFrequency != null) {
-    		this.loanTermFrequency = loanTermFrequency;
-    	}
+        if (loanTermFrequency != null) {
+            this.loanTermFrequency = loanTermFrequency;
+        }
     }
-    
+
     public void updateTotalInterestDue(Money totalInterestDue) {
-    	
-    	if(totalInterestDue != null) {
-    		this.totalInterestDue = totalInterestDue;
-    	}
+
+        if (totalInterestDue != null) {
+            this.totalInterestDue = totalInterestDue;
+        }
+    }
+
+    public ApplicationCurrency getApplicationCurrency() {
+        return this.currency;
     }
 }

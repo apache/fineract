@@ -241,7 +241,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
             final Money feeChargesWaived, final Money penaltyChargesWaived, final Money unrecognizedCharge) {
         final LoanTransaction waiver = new LoanTransaction(loan, office, LoanTransactionType.WAIVE_CHARGES, waived.getAmount(), waiveDate,
                 null);
-        waiver.updateChargesComponents(feeChargesWaived, penaltyChargesWaived,unrecognizedCharge);
+        waiver.updateChargesComponents(feeChargesWaived, penaltyChargesWaived, unrecognizedCharge);
 
         return waiver;
     }
@@ -304,7 +304,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         updateChargesComponents(feeCharges, penaltyCharges);
     }
 
-    private void updateChargesComponents(final Money feeCharges, final Money penaltyCharges) {
+    public void updateChargesComponents(final Money feeCharges, final Money penaltyCharges) {
         final MonetaryCurrency currency = feeCharges.getCurrency();
         this.feeChargesPortion = defaultToNullIfZero(getFeeChargesPortion(currency).plus(feeCharges).getAmount());
         this.penaltyChargesPortion = defaultToNullIfZero(getPenaltyChargesPortion(currency).plus(penaltyCharges).getAmount());
@@ -322,7 +322,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         this.interestPortion = defaultToNullIfZero(getInterestPortion(currency).plus(interest).getAmount());
         this.unrecognizedIncomePortion = defaultToNullIfZero(getUnrecognizedIncomePortion(currency).plus(unrecognizedInterest).getAmount());
     }
-    
+
     public void adjustInterestComponent(final MonetaryCurrency currency) {
         this.interestPortion = defaultToNullIfZero(getInterestPortion(currency).minus(getUnrecognizedIncomePortion(currency)).getAmount());
     }
@@ -503,7 +503,8 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         }
         return new LoanTransactionData(getId(), this.office.getId(), this.office.getName(), transactionType, paymentDetailData,
                 currencyData, getTransactionDate(), this.amount, this.principalPortion, this.interestPortion, this.feeChargesPortion,
-                this.penaltyChargesPortion, this.overPaymentPortion, this.externalId, transfer, null, outstandingLoanBalance, unrecognizedIncomePortion);
+                this.penaltyChargesPortion, this.overPaymentPortion, this.externalId, transfer, null, outstandingLoanBalance,
+                unrecognizedIncomePortion);
     }
 
     public Map<String, Object> toMapData(final CurrencyData currencyData) {

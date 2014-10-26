@@ -20,6 +20,7 @@ import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomain
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.holiday.domain.HolidayRepository;
@@ -43,7 +44,9 @@ import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
+import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.mifosplatform.portfolio.loanaccount.data.LoanScheduleAccrualData;
+import org.mifosplatform.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.mifosplatform.portfolio.loanaccount.service.LoanAccrualWritePlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanAssembler;
@@ -149,6 +152,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         ApplicationCurrency applicationCurrency = null;
         LocalDate calculatedRepaymentsStartingFromDate = null;
         boolean isHolidayEnabled = false;
+        LocalDate recalculateFrom = null;
+        Long overdurPenaltyWaitPeriod = null;
+        LocalDate recalculateDueDateChargesFrom = null;
         if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
             restCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(loan.loanInterestRecalculationDetailId(),
                     CalendarEntityType.LOAN_RECALCULATION_DETAIL.getValue());
@@ -161,12 +167,17 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                     calendarInstance);
 
             isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+            overdurPenaltyWaitPeriod = this.configurationDomainService.retrievePenaltyWaitPeriod();
         }
+        HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays, allowTransactionsOnHoliday,
+                allowTransactionsOnNonWorkingDay);
+        final ScheduleGeneratorDTO scheduleGeneratorDTO = new ScheduleGeneratorDTO(loanScheduleFactory, applicationCurrency,
+                calculatedRepaymentsStartingFromDate, holidayDetailDTO, restCalendarInstance, recalculateFrom, overdurPenaltyWaitPeriod,
+                recalculateDueDateChargesFrom);
 
         final ChangedTransactionDetail changedTransactionDetail = loan.makeRepayment(newRepaymentTransaction,
-                defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds, allowTransactionsOnHoliday,
-                holidays, workingDays, allowTransactionsOnNonWorkingDay, isHolidayEnabled, isRecoveryRepayment, this.loanScheduleFactory,
-                applicationCurrency, calculatedRepaymentsStartingFromDate, restCalendarInstance);
+                defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds, isRecoveryRepayment,
+                scheduleGeneratorDTO);
 
         saveLoanTransactionWithDataIntegrityViolationChecks(newRepaymentTransaction);
 
@@ -259,17 +270,21 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         final LoanTransaction newPaymentTransaction = LoanTransaction.loanPayment(null, loan.getOffice(), paymentAmout, paymentDetail,
                 transactionDate, txnExternalId, loanTransactionType);
-        final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
-        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
-                transactionDate.toDate(), HolidayStatusType.ACTIVE.getValue());
-        final WorkingDays workingDays = this.workingDaysRepository.findOne();
-        final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
+
         if (loanTransactionType.isRepaymentAtDisbursement()) {
             loan.handlePayDisbursementTransaction(chargeId, newPaymentTransaction, existingTransactionIds, existingReversedTransactionIds);
         } else {
+            final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
+            final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
+                    transactionDate.toDate(), HolidayStatusType.ACTIVE.getValue());
+            final WorkingDays workingDays = this.workingDaysRepository.findOne();
+            final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
+            final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+            HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays, allowTransactionsOnHoliday,
+                    allowTransactionsOnNonWorkingDay);
+
             loan.makeChargePayment(chargeId, defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds,
-                    allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay, newPaymentTransaction,
-                    installmentNumber);
+                    holidayDetailDTO, newPaymentTransaction, installmentNumber);
         }
         saveLoanTransactionWithDataIntegrityViolationChecks(newPaymentTransaction);
         saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
@@ -422,7 +437,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Override
     public void recalculateAccruals(Loan loan) {
         LocalDate accruedTill = loan.getAccruedTill();
-        if (!loan.repaymentScheduleDetail().isInterestRecalculationEnabled() || accruedTill == null || loan.isAccrualsPresent()) { return; }
+        if (!loan.isPeriodicAccrualAccountingEnabledOnLoanProduct() || !loan.repaymentScheduleDetail().isInterestRecalculationEnabled()
+                || accruedTill == null || loan.isNpa() || !loan.status().isActive()) { return; }
         Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas = new ArrayList<>();
         List<LoanRepaymentScheduleInstallment> installments = loan.fetchRepaymentScheduleInstallments();
         Long loanId = loan.getId();
@@ -436,9 +452,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
         CurrencyData currencyData = applicationCurrency.toData();
         Set<LoanCharge> loanCharges = loan.charges();
-        BigDecimal accruedInterestIncome = null;
-        BigDecimal accruedFeeIncome = null;
-        BigDecimal accruedPenaltyIncome = null;
 
         for (LoanRepaymentScheduleInstallment installment : installments) {
             if (!accruedTill.isBefore(installment.getDueDate())
@@ -463,7 +476,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                         accrualStartDate, repaymentFrequency, repayEvery, installment.getDueDate(), installment.getFromDate(),
                         installment.getId(), loanProductId, installment.getInterestCharged(currency).getAmount(), installment
                                 .getFeeChargesCharged(currency).getAmount(), installment.getPenaltyChargesCharged(currency).getAmount(),
-                        accruedInterestIncome, accruedFeeIncome, accruedPenaltyIncome, currencyData, interestCalculatedFrom, installment
+                        installment.getInterestAccrued(currency).getAmount(), installment.getFeeAccrued(currency).getAmount(), installment
+                                .getPenaltyAccrued(currency).getAmount(), currencyData, interestCalculatedFrom, installment
                                 .getInterestWaived(currency).getAmount());
                 loanScheduleAccrualDatas.add(accrualData);
 
@@ -471,7 +485,11 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         if (!loanScheduleAccrualDatas.isEmpty()) {
-            this.accrualWritePlatformService.addPeriodicAccruals(accruedTill, loanScheduleAccrualDatas);
+            String error = this.accrualWritePlatformService.addPeriodicAccruals(accruedTill, loanScheduleAccrualDatas);
+            if (error.length() > 0) {
+                String globalisationMessageCode = "error.msg.accrual.exception";
+                throw new GeneralPlatformDomainRuleException(globalisationMessageCode, error, error);
+            }
         }
     }
 

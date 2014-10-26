@@ -23,7 +23,8 @@ public interface LoanRepaymentScheduleTransactionProcessor {
             Set<LoanCharge> charges);
 
     ChangedTransactionDetail handleTransaction(LocalDate disbursementDate, List<LoanTransaction> repaymentsOrWaivers,
-            MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Set<LoanCharge> charges);
+            MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Set<LoanCharge> charges,
+            LocalDate recalculateChargesFrom);
 
     void handleWriteOff(LoanTransaction loanTransaction, MonetaryCurrency loanCurrency,
             List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments);
@@ -31,13 +32,18 @@ public interface LoanRepaymentScheduleTransactionProcessor {
     List<RecalculationDetail> handleRepaymentSchedule(List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments, LoanRepaymentScheduleInstallment currentInstallment,
             Map<LocalDate, LocalDate> recalculationDates, LoanTransaction preCloseTransaction);
-    
+
     /**
-     * Used in interest recalculation to introduce new interest only installment.
+     * Used in interest recalculation to introduce new interest only
+     * installment.
      */
     boolean isInterestFirstRepaymentScheduleTransactionProcessor();
-    
+
     void applyTransaction(List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments);
+
+    ChangedTransactionDetail populateDerivedFeildsWithoutReprocess(LocalDate disbursementDate,
+            List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges, LocalDate recalculateChargesFrom);
 
 }
