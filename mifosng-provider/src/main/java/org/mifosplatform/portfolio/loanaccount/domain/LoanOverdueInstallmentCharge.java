@@ -24,19 +24,27 @@ public class LoanOverdueInstallmentCharge extends AbstractPersistable<Long> {
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_schedule_id", referencedColumnName = "id", nullable = false)
     private LoanRepaymentScheduleInstallment installment;
-    
-    @Column(name="frequency_number")
+
+    @Column(name = "frequency_number")
     private Integer frequencyNumber;
 
- 
-    public LoanOverdueInstallmentCharge(){
-        
+    public LoanOverdueInstallmentCharge() {
+
     }
-    
-    public LoanOverdueInstallmentCharge(final LoanCharge loanCharge,final LoanRepaymentScheduleInstallment installment, final Integer frequencyNumber){
+
+    public LoanOverdueInstallmentCharge(final LoanCharge loanCharge, final LoanRepaymentScheduleInstallment installment,
+            final Integer frequencyNumber) {
         this.loancharge = loanCharge;
         this.installment = installment;
         this.frequencyNumber = frequencyNumber;
+    }
+
+    public void updateLoanRepaymentScheduleInstallment(LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment) {
+        this.installment = loanRepaymentScheduleInstallment;
+    }
+
+    public LoanRepaymentScheduleInstallment getInstallment() {
+        return this.installment;
     }
 
 }

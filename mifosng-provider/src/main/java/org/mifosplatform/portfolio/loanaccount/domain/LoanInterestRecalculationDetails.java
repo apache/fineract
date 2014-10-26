@@ -35,6 +35,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_loan_recalculation_details")
 public class LoanInterestRecalculationDetails extends AbstractPersistable<Long> {
 
+    @SuppressWarnings("unused")
     @OneToOne
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;

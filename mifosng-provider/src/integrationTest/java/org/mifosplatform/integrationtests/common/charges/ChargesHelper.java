@@ -222,6 +222,18 @@ public class ChargesHelper {
         System.out.println(chargesCreateJson);
         return chargesCreateJson;
     }
+    
+    public static String getLoanOverdueFeeJSONWithCalculattionTypePercentage() {
+        final HashMap<String, Object> map = populateDefaultsForLoan();
+        map.put("penalty", ChargesHelper.penalty);
+        map.put("amount", "10");
+        map.put("chargePaymentMode", ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
+        map.put("chargeTimeType", CHARGE_OVERDUE_INSTALLMENT_FEE);
+        map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST);
+        String chargesCreateJson = new Gson().toJson(map);
+        System.out.println(chargesCreateJson);
+        return chargesCreateJson;
+    }
 
     public static HashMap<String, Object> populateDefaultsForLoan() {
         final HashMap<String, Object> map = new HashMap<>();

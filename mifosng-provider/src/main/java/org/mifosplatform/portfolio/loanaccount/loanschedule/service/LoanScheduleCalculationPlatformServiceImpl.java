@@ -176,7 +176,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
 
         LoanScheduleModel model = this.loanScheduleAssembler.assembleForInterestRecalculation(loanApplicationTerms, loan.getOfficeId(),
                 modifiedTransactions, loan.charges(), loan.fetchRepaymentScheduleInstallments(), loanRepaymentScheduleTransactionProcessor,
-                LocalDate.now());
+                LocalDate.now(), LocalDate.now());
         LoanScheduleData scheduleDate = model.toData();
         Collection<LoanSchedulePeriodData> periodDatas = scheduleDate.getPeriods();
         for (LoanSchedulePeriodData periodData : periodDatas) {

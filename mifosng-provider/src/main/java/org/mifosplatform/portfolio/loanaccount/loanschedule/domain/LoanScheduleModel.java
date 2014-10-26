@@ -42,6 +42,15 @@ public final class LoanScheduleModel {
                 totalOutstanding);
     }
 
+    public static LoanScheduleModel withOverdueChargeUpdation(final Collection<LoanScheduleModelPeriod> periods,
+            final LoanScheduleModel loanScheduleModel, final BigDecimal totalPenaltyChargesCharged) {
+
+        return new LoanScheduleModel(periods, loanScheduleModel.applicationCurrency, loanScheduleModel.loanTermInDays,
+                loanScheduleModel.totalPrincipalDisbursed, loanScheduleModel.totalPrincipalExpected, loanScheduleModel.totalPrincipalPaid,
+                loanScheduleModel.totalInterestCharged, loanScheduleModel.totalFeeChargesCharged, totalPenaltyChargesCharged,
+                loanScheduleModel.totalRepaymentExpected, loanScheduleModel.totalOutstanding);
+    }
+
     private LoanScheduleModel(final Collection<LoanScheduleModelPeriod> periods, final ApplicationCurrency applicationCurrency,
             final int loanTermInDays, final Money principalDisbursed, final BigDecimal totalPrincipalExpected,
             final BigDecimal totalPrincipalPaid, final BigDecimal totalInterestCharged, final BigDecimal totalFeeChargesCharged,
@@ -84,5 +93,10 @@ public final class LoanScheduleModel {
 
     public Collection<LoanScheduleModelPeriod> getPeriods() {
         return this.periods;
+    }
+
+    
+    public BigDecimal getTotalPenaltyChargesCharged() {
+        return this.totalPenaltyChargesCharged;
     }
 }

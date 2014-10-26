@@ -10,10 +10,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
-import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
+import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
@@ -23,19 +22,19 @@ import org.mifosplatform.portfolio.loanaccount.rescheduleloan.domain.LoanResched
 
 public interface LoanScheduleGenerator {
 
-    LoanScheduleModel generate(MathContext mc, ApplicationCurrency applicationCurrency, LoanApplicationTerms loanApplicationTerms,
-            Set<LoanCharge> loanCharges, boolean isHolidayEnabled, List<Holiday> holidays, final WorkingDays workingDays);
+    LoanScheduleModel generate(MathContext mc, LoanApplicationTerms loanApplicationTerms, Set<LoanCharge> loanCharges,
+            final HolidayDetailDTO holidayDetailDTO);
 
-    LoanScheduleModel rescheduleNextInstallments(MathContext mc, ApplicationCurrency applicationCurrency,
-            LoanApplicationTerms loanApplicationTerms, Set<LoanCharge> loanCharges, boolean isHolidayEnabled, List<Holiday> holidays,
-            WorkingDays workingDays, List<LoanTransaction> transactions,
+    LoanScheduleModel rescheduleNextInstallments(MathContext mc, LoanApplicationTerms loanApplicationTerms, Set<LoanCharge> loanCharges,
+            final HolidayDetailDTO holidayDetailDTO, List<LoanTransaction> transactions,
             LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
-            List<LoanRepaymentScheduleInstallment> previousSchedule, LocalDate recalculateFrom);
+            List<LoanRepaymentScheduleInstallment> previousSchedule, LocalDate recalculateFrom, LocalDate lastTransactionDate,
+            int penaltyWaitPeriod);
 
-    LoanRepaymentScheduleInstallment calculatePrepaymentAmount(List<LoanRepaymentScheduleInstallment> installments, MonetaryCurrency currency,
-            LocalDate onDate, LocalDate interestChargedFromLocalDate, LoanApplicationTerms loanApplicationTerms, MathContext mc, Set<LoanCharge> charges);
-    
-    LoanRescheduleModel reschedule(final MathContext mathContext, final LoanRescheduleRequest loanRescheduleRequest, 
-			final ApplicationCurrency applicationCurrency, final boolean isHolidayEnabled, 
-			final List<Holiday> holidays, final WorkingDays workingDays);
+    LoanRepaymentScheduleInstallment calculatePrepaymentAmount(List<LoanRepaymentScheduleInstallment> installments,
+            MonetaryCurrency currency, LocalDate onDate, LocalDate interestChargedFromLocalDate, LoanApplicationTerms loanApplicationTerms,
+            MathContext mc, Set<LoanCharge> charges);
+
+    LoanRescheduleModel reschedule(final MathContext mathContext, final LoanRescheduleRequest loanRescheduleRequest,
+            final ApplicationCurrency applicationCurrency, final HolidayDetailDTO holidayDetailDTO);
 }
