@@ -227,7 +227,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
         catch (final DataIntegrityViolationException dve) {
             // handle the data integrity violation
-            handleCreateActionDataIntegrityViolation(jsonCommand, dve);
+            handleDataIntegrityViolation(jsonCommand, dve);
 
             // return an empty command processing result object
             return CommandProcessingResult.empty();
@@ -350,7 +350,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
         catch (final DataIntegrityViolationException dve) {
             // handle the data integrity violation
-            handleApproveActionDataIntegrityViolation(jsonCommand, dve);
+            handleDataIntegrityViolation(jsonCommand, dve);
 
             // return an empty command processing result object
             return CommandProcessingResult.empty();
@@ -373,7 +373,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             this.loanRescheduleRequestDataValidator.validateForRejectAction(jsonCommand, loanRescheduleRequest);
 
             final AppUser appUser = this.platformSecurityContext.authenticatedUser();
-            final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+            final Map<String, Object> changes = new LinkedHashMap<>();
 
             LocalDate rejectedOnDate = jsonCommand.localDateValueOfParameterNamed("rejectedOnDate");
             final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat()).withLocale(
@@ -394,7 +394,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
         catch (final DataIntegrityViolationException dve) {
             // handle the data integrity violation
-            handleRejectActionDataIntegrityViolation(jsonCommand, dve);
+            handleDataIntegrityViolation(jsonCommand, dve);
 
             // return an empty command processing result object
             return CommandProcessingResult.empty();
@@ -402,8 +402,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     }
 
     /**
-     * handles the data integrity violation exception caught in the create
-     * method
+     * handles the data integrity violation exception for loan reschedule write
+     * services
      * 
      * @param jsonCommand
      *            JSON command object
@@ -412,49 +412,12 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
      * @return void
      **/
     @SuppressWarnings("unused")
-    private void handleCreateActionDataIntegrityViolation(final JsonCommand jsonCommand, final DataIntegrityViolationException dve) {
+    private void handleDataIntegrityViolation(final JsonCommand jsonCommand, final DataIntegrityViolationException dve) {
 
         logger.error(dve.getMessage(), dve);
 
-        throw new PlatformDataIntegrityException("error.msg.group.unknown.data.integrity.issue",
+        throw new PlatformDataIntegrityException("error.msg.loan.reschedule.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
 
-    /**
-     * handles the data integrity violation exception caught in the reject
-     * method
-     * 
-     * @param jsonCommand
-     *            JSON command object
-     * @param dve
-     *            data integrity violation exception
-     * @return void
-     **/
-    @SuppressWarnings("unused")
-    private void handleRejectActionDataIntegrityViolation(final JsonCommand jsonCommand, final DataIntegrityViolationException dve) {
-
-        logger.error(dve.getMessage(), dve);
-
-        throw new PlatformDataIntegrityException("error.msg.group.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
-    }
-
-    /**
-     * handles the data integrity violation exception caught in the approve
-     * method
-     * 
-     * @param jsonCommand
-     *            JSON command object
-     * @param dve
-     *            data integrity violation exception
-     * @return void
-     **/
-    @SuppressWarnings("unused")
-    private void handleApproveActionDataIntegrityViolation(final JsonCommand jsonCommand, final DataIntegrityViolationException dve) {
-
-        logger.error(dve.getMessage(), dve);
-
-        throw new PlatformDataIntegrityException("error.msg.group.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
-    }
 }

@@ -10,12 +10,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class RescheduleLoansApiConstants {
-	public final static String ENTITY_NAME = "RESCHEDULELOAN";
-	
-	// general
+
+    public final static String ENTITY_NAME = "RESCHEDULELOAN";
+
+    // general
     public static final String localeParamName = "locale";
     public static final String dateFormatParamName = "dateFormat";
-    
+
     // create action request parameters
     public static final String loanIdParamName = "loanId";
     public static final String graceOnPrincipalParamName = "graceOnPrincipal";
@@ -28,21 +29,21 @@ public class RescheduleLoansApiConstants {
     public static final String rescheduleReasonCommentParamName = "rescheduleReasonComment";
     public static final String submittedOnDateParamName = "submittedOnDate";
     public static final String adjustedDueDateParamName = "adjustedDueDate";
-    
-    public static final Set<String> CREATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName, 
-			dateFormatParamName, graceOnPrincipalParamName, graceOnInterestParamName, extraTermsParamName, 
-			rescheduleFromDateParamName, newInterestRateParamName, rescheduleReasonIdParamName, rescheduleReasonCommentParamName, 
-			submittedOnDateParamName, loanIdParamName, adjustedDueDateParamName, recalculateInterestParamName));
-    
+
+    public static final Set<String> CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName, dateFormatParamName,
+            graceOnPrincipalParamName, graceOnInterestParamName, extraTermsParamName, rescheduleFromDateParamName,
+            newInterestRateParamName, rescheduleReasonIdParamName, rescheduleReasonCommentParamName, submittedOnDateParamName,
+            loanIdParamName, adjustedDueDateParamName, recalculateInterestParamName));
+
     // reject action request parameters
     public static final String rejectedOnDateParam = "rejectedOnDate";
-    
-    public static final Set<String> REJECT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName, 
-    		dateFormatParamName, rejectedOnDateParam));
-    
+
+    public static final Set<String> REJECT_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName, dateFormatParamName,
+            rejectedOnDateParam));
+
     // approve action request parameters
     public static final String approvedOnDateParam = "approvedOnDate";
-    
-    public static final Set<String> APPROVE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName, 
-    		dateFormatParamName, approvedOnDateParam));
+
+    public static final Set<String> APPROVE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName, dateFormatParamName,
+            approvedOnDateParam));
 }
