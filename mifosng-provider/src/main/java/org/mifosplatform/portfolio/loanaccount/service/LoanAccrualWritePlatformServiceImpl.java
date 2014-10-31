@@ -152,7 +152,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
                             updateCharges(loanChargeMap.get(accrualData.getLoanId()), accrualData, accrualData.getFromDateAsLocaldate(),
                                     tilldate);
                             updateInterestIncome(accrualData, loanWaiverTansactions, loanWaiverSchedules, tilldate);
-                            addAccrualTillSpecificDate(tilldate, accrualData, accruredTill);
+                            addAccrualTillSpecificDate(tilldate, accrualData);
                         }
                     } else {
                         updateCharges(loanChargeMap.get(accrualData.getLoanId()), accrualData, accrualData.getFromDateAsLocaldate(),
@@ -176,8 +176,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         return sb.toString();
     }
 
-    private void addAccrualTillSpecificDate(final LocalDate tilldate, final LoanScheduleAccrualData accrualData,
-            final LocalDate accruredTill) throws Exception {
+    private void addAccrualTillSpecificDate(final LocalDate tilldate, final LoanScheduleAccrualData accrualData) throws Exception {
         LocalDate interestStartDate = accrualData.getFromDateAsLocaldate();
         if (accrualData.getInterestCalculatedFrom() != null
                 && accrualData.getFromDateAsLocaldate().isBefore(accrualData.getInterestCalculatedFrom())) {
@@ -189,10 +188,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         }
 
         int totalNumberOfDays = Days.daysBetween(interestStartDate, accrualData.getDueDateAsLocaldate()).getDays();
-        LocalDate startDate = accruredTill;
-        if (startDate == null) {
-            startDate = accrualData.getFromDateAsLocaldate();
-        }
+        LocalDate startDate = accrualData.getFromDateAsLocaldate();
         if (accrualData.getInterestCalculatedFrom() != null && startDate.isBefore(accrualData.getInterestCalculatedFrom())) {
             if (accrualData.getInterestCalculatedFrom().isBefore(tilldate)) {
                 startDate = accrualData.getInterestCalculatedFrom();
@@ -222,6 +218,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             if (totalAccInterest == null) {
                 totalAccInterest = BigDecimal.ZERO;
             }
+            interestportion = interestportion.subtract(totalAccInterest);
             amount = amount.add(interestportion);
             totalAccInterest = totalAccInterest.add(interestportion);
             if (interestportion.compareTo(BigDecimal.ZERO) == 0) {

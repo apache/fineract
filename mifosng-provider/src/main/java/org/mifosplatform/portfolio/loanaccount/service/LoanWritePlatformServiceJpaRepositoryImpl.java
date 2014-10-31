@@ -1183,6 +1183,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             final String defaultUserMessage = "Installment charge cannot be added to the loan.";
             throw new LoanChargeCannotBeAddedException("loanCharge", "overdue.charge", defaultUserMessage, null, chargeDefinition.getName());
+        } else if(loanCharge.getDueLocalDate() != null &&  loanCharge.getDueLocalDate().isBefore(loan.getLastUserTransactionForChargeCalc())){
+            final String defaultUserMessage = "charge after last transaction date can not be added to loan.";
+            throw new LoanChargeCannotBeAddedException("loanCharge", "date.is.after.last.transaction.date", defaultUserMessage, null, chargeDefinition.getName());
         }
 
         final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
