@@ -867,7 +867,7 @@ public class AccountingScenarioIntegrationTest {
         runOndate = dateFormat.format(todayDate.getTime());
 
         this.periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(runOndate);
-        float interestPerDay = totalInterest / totalDaysInPeriod;
+        float interestPerDay = (totalInterest / totalDaysInPeriod *4) - INTEREST_3_DAYS ;
         interestPerDay = new Float(numberFormat.format(interestPerDay));
         this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(runOndate), interestPerDay, NEXT_FEE_PORTION,
                 NEXT_PENALTY_PORTION, loanID);

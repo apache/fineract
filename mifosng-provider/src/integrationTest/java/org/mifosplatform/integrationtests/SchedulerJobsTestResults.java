@@ -569,7 +569,7 @@ public class SchedulerJobsTestResults {
         DateFormat monthDayFormat = new SimpleDateFormat("dd MMMM", Locale.US);
 
         Calendar todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -1);
+        todaysDate.add(Calendar.WEEK_OF_YEAR, -1);
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
 
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());

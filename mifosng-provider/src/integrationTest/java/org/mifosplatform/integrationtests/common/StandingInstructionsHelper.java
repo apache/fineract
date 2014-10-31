@@ -77,7 +77,7 @@ public class StandingInstructionsHelper {
         map.put("validTill", validTo);
         map.put("recurrenceType", RECURRENCE_TYPE_PERIODIC);
         map.put("recurrenceInterval", "1");
-        map.put("recurrenceFrequency", RECURRENCE_FREQUENCY_MONTHS);
+        map.put("recurrenceFrequency", RECURRENCE_FREQUENCY_WEEKS);
         map.put("recurrenceOnMonthDay", monthDay);
         String savingsApplicationJSON = new Gson().toJson(map);
         System.out.println(savingsApplicationJSON);
