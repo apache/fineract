@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -120,6 +121,7 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleM
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.ScheduledDateGenerator;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleHistoryWritePlatformService;
+import org.mifosplatform.portfolio.loanaccount.serialization.LoanApplicationCommandFromApiJsonHelper;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanEventApiJsonValidator;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanUpdateCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanproduct.data.LoanOverdueDTO;
@@ -178,6 +180,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final CalendarRepository calendarRepository;
     private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
     private final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService;
+    private final LoanApplicationCommandFromApiJsonHelper loanApplicationCommandFromApiJsonHelper;
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -199,7 +202,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final FromJsonHelper fromApiJsonHelper, final AccountTransferRepository accountTransferRepository,
             final CalendarRepository calendarRepository,
             final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository,
-            final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService) {
+            final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService,
+            final LoanApplicationCommandFromApiJsonHelper loanApplicationCommandFromApiJsonHelper) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
@@ -229,6 +233,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.calendarRepository = calendarRepository;
         this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
         this.loanScheduleHistoryWritePlatformService = loanScheduleHistoryWritePlatformService;
+        this.loanApplicationCommandFromApiJsonHelper = loanApplicationCommandFromApiJsonHelper;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -1179,14 +1184,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LoanCharge loanCharge = LoanCharge.createNewFromJson(loan, chargeDefinition, command);
 
-        if (chargeDefinition.isOverdueInstallment()) {
-
-            final String defaultUserMessage = "Installment charge cannot be added to the loan.";
-            throw new LoanChargeCannotBeAddedException("loanCharge", "overdue.charge", defaultUserMessage, null, chargeDefinition.getName());
-        } else if(loanCharge.getDueLocalDate() != null &&  loanCharge.getDueLocalDate().isBefore(loan.getLastUserTransactionForChargeCalc())){
-            final String defaultUserMessage = "charge after last transaction date can not be added to loan.";
-            throw new LoanChargeCannotBeAddedException("loanCharge", "date.is.after.last.transaction.date", defaultUserMessage, null, chargeDefinition.getName());
-        }
+        validateAddLoanCharge(loan, chargeDefinition, loanCharge);
 
         final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
         final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
@@ -1215,6 +1213,31 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(loanId) //
                 .build();
+    }
+
+    private void validateAddLoanCharge(final Loan loan, final Charge chargeDefinition, final LoanCharge loanCharge) {
+        if (chargeDefinition.isOverdueInstallment()) {
+            final String defaultUserMessage = "Installment charge cannot be added to the loan.";
+            throw new LoanChargeCannotBeAddedException("loanCharge", "overdue.charge", defaultUserMessage, null, chargeDefinition.getName());
+        } else if (loanCharge.getDueLocalDate() != null
+                && loanCharge.getDueLocalDate().isBefore(loan.getLastUserTransactionForChargeCalc())) {
+            final String defaultUserMessage = "charge with date before last transaction date can not be added to loan.";
+            throw new LoanChargeCannotBeAddedException("loanCharge", "date.is.before.last.transaction.date", defaultUserMessage, null,
+                    chargeDefinition.getName());
+        } else if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+
+            if (loanCharge.isInstalmentFee() && loan.status().isActive()) {
+                final String defaultUserMessage = "installment charge addition not allowed after disbursement";
+                throw new LoanChargeCannotBeAddedException("loanCharge", "installment.charge", defaultUserMessage, null,
+                        chargeDefinition.getName());
+            }
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final Set<LoanCharge> loanCharges = new HashSet<>(1);
+            loanCharges.add(loanCharge);
+            this.loanApplicationCommandFromApiJsonHelper.validateLoanCharges(loanCharges, dataValidationErrors);
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+
     }
 
     public void runScheduleRecalculation(Loan loan) {

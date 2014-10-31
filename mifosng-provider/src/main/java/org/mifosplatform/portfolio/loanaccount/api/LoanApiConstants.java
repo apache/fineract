@@ -28,6 +28,10 @@ public interface LoanApiConstants {
     public static final String principalDisbursedParameterName = "transactionAmount";
 
     public static final String ALREADY_DISBURSED = "can.not.change.disbursement.date";
+    
+    public static final String LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE= "loancharge.with.calculation.type.interest.not.allowed";
+    
+    public static final String LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_PRINCIPAL_CALCULATION_TYPE= "loancharge.with.calculation.type.principal.not.allowed";
 
     // Interest recalculation related
     public static final String isInterestRecalculationEnabledParameterName = "isInterestRecalculationEnabled";

@@ -4377,7 +4377,8 @@ public class Loan extends AbstractPersistable<Long> {
             if (!loanCharge.isDueAtDisbursement()) {
                 updateOverdueScheduleInstallment(loanCharge);
                 if (loanCharge.getDueLocalDate() == null || (!lastRepaymentDate.isBefore(loanCharge.getDueLocalDate()))) {
-                    if (!loanCharge.isWaived() && !lastTransactionDate.isAfter(loanCharge.getDueLocalDate())) {
+                    if (!loanCharge.isWaived()
+                            && (loanCharge.getDueLocalDate() == null || !lastTransactionDate.isAfter(loanCharge.getDueLocalDate()))) {
                         recalculateLoanCharge(loanCharge, generatorDTO.getPenaltyWaitPeriod());
                         loanCharge.updateWaivedAmount(getCurrency());
                     }

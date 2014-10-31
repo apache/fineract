@@ -25,6 +25,7 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.loanaccount.api.LoanApiConstants;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
@@ -836,11 +837,53 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
     }
 
-    public void validateRecalcuationFrequency(final LocalDate recalculationFrequencyDate, final LocalDate expectedDisbursementDate) {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+    public void validateRecalcuationFrequency(final LocalDate recalculationFrequencyDate, final LocalDate expectedDisbursementDate,
+            final List<ApiParameterError> dataValidationErrors) {
+
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
         baseDataValidator.reset().parameter(LoanProductConstants.recalculationRestFrequencyDateParamName).value(recalculationFrequencyDate)
                 .notNull().validateDateBeforeOrEqual(expectedDisbursementDate);
+    }
+
+    public void validateLoanCharges(final Set<LoanCharge> charges, final List<ApiParameterError> dataValidationErrors) {
+        if (charges == null) { return; }
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
+        for (LoanCharge loanCharge : charges) {
+            String errorcode = null;
+            switch (loanCharge.getChargeCalculation()) {
+                case PERCENT_OF_AMOUNT:
+                    if (loanCharge.isInstalmentFee()) {
+                        errorcode = "installment." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_PRINCIPAL_CALCULATION_TYPE;
+
+                    }
+                break;
+                case PERCENT_OF_AMOUNT_AND_INTEREST:
+                    if (loanCharge.isInstalmentFee()) {
+                        errorcode = "installment." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_PRINCIPAL_CALCULATION_TYPE;
+                    } else if (loanCharge.isSpecifiedDueDate()) {
+                        errorcode = "specific." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
+                    }
+                break;
+                case PERCENT_OF_INTEREST:
+                    if (loanCharge.isSpecifiedDueDate()) {
+                        errorcode = "specific." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
+                    }
+                break;
+
+                default:
+                break;
+            }
+            if (errorcode != null) {
+                baseDataValidator.reset().parameter("charges").failWithCode(errorcode);
+            }
+        }
+    }
+
+    public void validateLoanForInterestRecalculation(final LocalDate recalculationFrequencyDate, final LocalDate expectedDisbursementDate,
+            final Set<LoanCharge> charges) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        validateRecalcuationFrequency(recalculationFrequencyDate, expectedDisbursementDate, dataValidationErrors);
+        validateLoanCharges(charges, dataValidationErrors);
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
