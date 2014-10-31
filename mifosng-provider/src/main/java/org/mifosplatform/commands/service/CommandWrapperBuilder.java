@@ -658,6 +658,15 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId + "/transactions/" + transactionId;
         return this;
     }
+    
+    public CommandWrapperBuilder refundLoanTransactionByCash(final Long loanId) {
+        this.actionName = "REFUNDBYCASH";
+        this.entityName = "LOAN";
+        this.entityId = null;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions/template?command=refundbycash";
+        return this;
+    }
 
     public CommandWrapperBuilder createLoanApplication() {
         this.actionName = "CREATE";
@@ -2111,5 +2120,13 @@ public class CommandWrapperBuilder {
     	this.entityId = requestId;
     	this.href = "/rescheduleloans/" + requestId + "?command=reject";
     	return this;
+    }
+    
+    public CommandWrapperBuilder refundByTransfer() {
+        this.actionName = "REFUNDBYTRANSFER";
+        this.entityName = "ACCOUNTTRANSFER";
+        this.entityId = null;
+        this.href = "/refundByTransfer";
+        return this;
     }
 }

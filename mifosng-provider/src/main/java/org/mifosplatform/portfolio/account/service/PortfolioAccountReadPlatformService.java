@@ -18,4 +18,6 @@ public interface PortfolioAccountReadPlatformService {
     Collection<PortfolioAccountData> retrieveAllForLookup(Integer toAccountType, Long toClientId, long[] accountStatus);
 
     Collection<PortfolioAccountData> retrieveAllForLookup(Integer toAccountType, Long toClientId, String currencyCode, long[] accountStatus, Integer depositType);
+    
+    PortfolioAccountData retrieveOneByPaidInAdvance(Long accountId, Integer accountTypeId);
 }

@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,7 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanSummaryData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
+import org.mifosplatform.portfolio.loanaccount.data.PaidInAdvanceData;
 import org.mifosplatform.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -1743,6 +1745,61 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     totalActualCostOfLoanForPeriod);
         }
 
+    }
+    
+    @Override
+    public Date retrieveMinimumDateOfRepaymentTransaction(Long loanId) {
+        // TODO Auto-generated method stub
+        Date date = this.jdbcTemplate.queryForObject(
+                "select min(transaction_date) from m_loan_transaction where loan_id=? and transaction_type_enum=2",
+                new Object[] { loanId }, Date.class);
+
+        return date;
+    }
+    
+    @Override
+    public PaidInAdvanceData retrieveTotalPaidInAdvance(Long loanId) {
+        // TODO Auto-generated method stub
+        try {
+            final String sql = "  select (SUM(ifnull(mr.principal_completed_derived, 0)) +"
+                    + " + SUM(ifnull(mr.interest_completed_derived, 0)) " + " + SUM(ifnull(mr.fee_charges_completed_derived, 0)) "
+                    + " + SUM(ifnull(mr.penalty_charges_completed_derived, 0))) as total_in_advance_derived "
+                    + " from m_loan ml INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id "
+                    + " where ml.id=? and  mr.duedate >= CURDATE() group by ml.id having "
+                    + " (SUM(ifnull(mr.principal_completed_derived, 0))  " + " + SUM(ifnull(mr.interest_completed_derived, 0)) "
+                    + " + SUM(ifnull(mr.fee_charges_completed_derived, 0)) "
+                    + "+  SUM(ifnull(mr.penalty_charges_completed_derived, 0))) > 0";
+            BigDecimal bigDecimal = this.jdbcTemplate.queryForObject(sql, BigDecimal.class, loanId);
+            return new PaidInAdvanceData(bigDecimal);
+        } catch (DataAccessException e) {
+            // TODO Auto-generated catch block
+            return new PaidInAdvanceData(new BigDecimal(0));
+        }
+    }
+    
+    @Override
+    public LoanTransactionData retrieveRefundByCashTemplate(Long loanId) {
+        // TODO Auto-generated method stub
+        this.context.authenticatedUser();
+
+        // TODO - KW - OPTIMIZE - write simple sql query to fetch back date of
+        // possible next transaction date.
+        final Loan loan = this.loanRepository.findOne(loanId);
+        if (loan == null) { throw new LoanNotFoundException(loanId); }
+
+        final MonetaryCurrency currency = loan.getCurrency();
+        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
+
+        final CurrencyData currencyData = applicationCurrency.toData();
+
+        final LocalDate earliestUnpaidInstallmentDate = new LocalDate();
+
+        final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.REFUND_FOR_ACTIVE_LOAN);
+        final Collection<CodeValueData> paymentOptions = this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
+        return new LoanTransactionData(null, null, null, transactionType, null, currencyData, earliestUnpaidInstallmentDate,
+                retrieveTotalPaidInAdvance(loan.getId()).getPaidInAdvance(), null, null, null, null, null, null, paymentOptions, null, null,
+                null, null);
     }
 
 }

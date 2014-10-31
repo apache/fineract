@@ -204,6 +204,11 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         applyCharge.updateChargesComponents(feeCharges, penaltyCharges);
         return applyCharge;
     }
+    
+    public static LoanTransaction refundForActiveLoan(final Office office, final Money amount, final PaymentDetail paymentDetail,
+            final LocalDate paymentDate, final String externalId) {
+        return new LoanTransaction(null, office, LoanTransactionType.REFUND_FOR_ACTIVE_LOAN, paymentDetail, amount.getAmount(), paymentDate, externalId);
+    }
 
     public static boolean transactionAmountsMatch(final MonetaryCurrency currency, final LoanTransaction loanTransaction,
             final LoanTransaction newLoanTransaction) {
@@ -576,6 +581,15 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     public void updateOutstandingLoanBalance(BigDecimal outstandingLoanBalance) {
         this.outstandingLoanBalance = outstandingLoanBalance;
+    }
+    
+     public boolean isNotRefundForActiveLoan() {
+        // TODO Auto-generated method stub
+        return !isRefundForActiveLoan();
+    }
+
+    public boolean isRefundForActiveLoan() {
+        return LoanTransactionType.REFUND_FOR_ACTIVE_LOAN.equals(getTypeOf()) && isNotReversed();
     }
 
 }

@@ -35,6 +35,7 @@ public class LoanTransactionHelper {
     private static final String WAIVE_INTEREST_COMMAND = "waiveinterest";
     private static final String MAKE_REPAYMENT_COMMAND = "repayment";
     private static final String WITHDRAW_LOAN_APPLICATION_COMMAND = "withdrawnByApplicant";
+    private static final String MAKE_REFUND_BY_CASH_COMMAND = "refundByCash";
 
     public LoanTransactionHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
@@ -352,6 +353,10 @@ public class LoanTransactionHelper {
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "");
         return response;
     }
+    
+    private String createLoanRefundTransferURL() {
+        return "/mifosng-provider/api/v1/accounttransfers/refundByTransfer?tenantIdentifier=default";
+    }
 
     public void verifyRepaymentScheduleEntryFor(final int repaymentNumber, final float expectedPrincipalOutstanding, final Integer loanID) {
         System.out.println("---------------------------GETTING LOAN REPAYMENT SCHEDULE--------------------------------");
@@ -388,5 +393,45 @@ public class LoanTransactionHelper {
         }
         assertTrue("No Accrual entries are posted", isTransactionFound);
 
+    }
+    
+    public HashMap makeRefundByCash(final String date, final Float amountToBeRefunded, final Integer loanID) {
+        return performLoanTransaction(createLoanTransactionURL(MAKE_REFUND_BY_CASH_COMMAND, loanID),
+                getRefundByCashBodyAsJSON(date, amountToBeRefunded));
+    }
+
+    public HashMap makeRefundByTransfer(final Integer fromAccountId, final Integer toClientId, final Integer toAccountId,
+            final Integer fromClientId, final String date, final Float amountToBeRefunded) {
+        return performLoanTransaction(createLoanRefundTransferURL(),
+                getRefundByTransferBodyAsJSON(fromAccountId, toClientId, toAccountId, fromClientId, date, amountToBeRefunded));
+    }
+
+    private String getRefundByCashBodyAsJSON(final String transactionDate, final Float transactionAmount) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", "en");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("transactionDate", transactionDate);
+        map.put("transactionAmount", transactionAmount.toString());
+        map.put("note", "Refund Made!!!");
+        return new Gson().toJson(map);
+    }
+
+    private String getRefundByTransferBodyAsJSON(final Integer fromAccountId, final Integer toClientId, final Integer toAccountId,
+            final Integer fromClientId, final String transactionDate, final Float transactionAmount) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("fromAccountId", fromAccountId.toString());
+        map.put("fromAccountType", "1");
+        map.put("toOfficeId", "1");
+        map.put("toClientId", toClientId.toString());
+        map.put("toAccountType", "2");
+        map.put("toAccountId", toAccountId.toString());
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("transferDate", transactionDate);
+        map.put("transferAmount", transactionAmount.toString());
+        map.put("transferDescription", "Refund Made!!!");
+        map.put("fromClientId", fromClientId.toString());
+        map.put("fromOfficeId", "1");
+        map.put("locale", "en");
+        return new Gson().toJson(map);
     }
 }

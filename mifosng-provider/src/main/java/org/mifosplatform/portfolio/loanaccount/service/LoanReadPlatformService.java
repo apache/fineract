@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.loanaccount.service;
 
 import java.util.Collection;
+import java.util.Date;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.service.Page;
@@ -17,8 +18,8 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
+import org.mifosplatform.portfolio.loanaccount.data.PaidInAdvanceData;
 import org.mifosplatform.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
@@ -97,4 +98,10 @@ public interface LoanReadPlatformService {
     Collection<LoanTransactionData> retrieveWaiverLoanTransactions(Long loanId);
 
     Collection<LoanSchedulePeriodData> fetchWaiverInterestRepaymentData(Long loanId);
+    
+    Date retrieveMinimumDateOfRepaymentTransaction(Long loanId);
+
+	PaidInAdvanceData retrieveTotalPaidInAdvance(Long loanId);
+	
+	LoanTransactionData retrieveRefundByCashTemplate(Long loanId);
 }

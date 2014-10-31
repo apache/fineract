@@ -81,4 +81,6 @@ public interface LoanWritePlatformService {
 
     void recalculateInterest();
 
+	CommandProcessingResult makeLoanRefund(Long loanId, JsonCommand command);
+
 }

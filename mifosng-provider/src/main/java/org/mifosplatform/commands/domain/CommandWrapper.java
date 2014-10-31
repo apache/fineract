@@ -920,5 +920,17 @@ public class CommandWrapper {
     public boolean isInactivateSavingsAccountCharge() {
         return this.actionName.equalsIgnoreCase("INACTIVATE") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNTCHARGE");
     }
+    
+    public boolean isRefundByTransfer() {
+        return this.actionName.equalsIgnoreCase("REFUNDBYTRANSFER");
+    }
+    
+    public boolean isLoanRefundByCash() {
+        return this.actionName.equalsIgnoreCase("REFUNDBYCASH") && this.entityName.equalsIgnoreCase("LOAN");
+    }
+   
+    public boolean isUndoLoanRefund() {
+        return this.actionName.equalsIgnoreCase("UNDOREFUND") && this.entityName.equalsIgnoreCase("LOAN");
+    }
 
 }

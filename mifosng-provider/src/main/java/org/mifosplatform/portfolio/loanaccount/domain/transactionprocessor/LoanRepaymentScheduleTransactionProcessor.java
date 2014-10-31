@@ -45,5 +45,10 @@ public interface LoanRepaymentScheduleTransactionProcessor {
     ChangedTransactionDetail populateDerivedFeildsWithoutReprocess(LocalDate disbursementDate,
             List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges, LocalDate recalculateChargesFrom);
+            
+    void handleRefund(LoanTransaction loanTransaction,
+			MonetaryCurrency currency,
+			List<LoanRepaymentScheduleInstallment> installments,
+			final Set<LoanCharge> charges);        
 
 }
