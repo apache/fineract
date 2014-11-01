@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 1 Nov 2014 - 1.25.1.RELEASE
 1. 12 Oct 2014 - 1.25.0.RELEASE
 1. 10 Jul 2014 - 1.24.0.RELEASE
 1. 16 Jun 2014 - 1.23.1.RELEASE
@@ -66,6 +67,31 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.25.1.RELEASE
+=============
+Bug Release
+
+This feature release adds the ability to associate current accounts with clients along with other improvements and enhancements
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-1466] - Savings interest posting - Should be flexible
+ - [MIFOSX-1632] - Fine tuning of Accrual transactions with interest recalculation
+
+Bugs 
+ - [MIFOSX-1586] - Applying overdue charge for a loan with interest recalculation causes the application to create multiple schedules for the same loan account
+ - [MIFOSX-1589] - Support for Charge and interest waivers with Accrual accounting
+ - [MIFOSX-1595] - Periodic accrual is posting wrong interest when run multiple times in a repayment period
+ - [MIFOSX-1606] - Closing savings account throws null pointer exception
+ - [MIFOSX-1608] - Rounding issue in periodic accrual for loan accounts with Decimal Place as Zero.
+ - [MIFOSX-1612] - If a loan disbursal is undone, then the journal entries created for the accrued interest on that loan is not being reversed.
+ - [MIFOSX-1631] - Not able to disburse loan with installment fees attached
+
+Community App
+ - [MIFOSX-1626] - Pagination Issue in Audit Trails Search
+ - [MIFOSX-1604] - Community app always uploads signature to the "default" tenant, similar issues exists with loan documents
 
 1.25.0.RELEASE
 =============
