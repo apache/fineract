@@ -216,8 +216,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 final LocalDate recalculationFrequencyDate = this.fromJsonHelper.extractLocalDateNamed(
                         LoanProductConstants.recalculationRestFrequencyDateParamName, command.parsedJson());
                 if (!newLoanApplication.loanInterestRecalculationDetails().getRestFrequencyType().isSameAsRepayment()) {
-                    this.fromApiJsonDeserializer.validateRecalcuationFrequency(recalculationFrequencyDate,
-                            newLoanApplication.getExpectedDisbursedOnLocalDate());
+                    this.fromApiJsonDeserializer.validateLoanForInterestRecalculation(recalculationFrequencyDate,
+                            newLoanApplication.getExpectedDisbursedOnLocalDate(), newLoanApplication.charges());
                 }
                 createAndPersistCalendarInstanceForInterestRecalculation(newLoanApplication);
             }
@@ -624,8 +624,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     recalculationFrequencyDate = this.fromJsonHelper.extractLocalDateNamed(
                             LoanProductConstants.recalculationRestFrequencyDateParamName, command.parsedJson());
                     if (!existingLoanApplication.loanInterestRecalculationDetails().getRestFrequencyType().isSameAsRepayment()) {
-                        this.fromApiJsonDeserializer.validateRecalcuationFrequency(recalculationFrequencyDate,
-                                existingLoanApplication.getExpectedDisbursedOnLocalDate());
+                        this.fromApiJsonDeserializer.validateLoanForInterestRecalculation(recalculationFrequencyDate,
+                                existingLoanApplication.getExpectedDisbursedOnLocalDate(), existingLoanApplication.charges());
                     }
                 }
 
