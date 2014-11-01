@@ -72,8 +72,6 @@ Releases
 =============
 Bug Release
 
-This feature release adds the ability to associate current accounts with clients along with other improvements and enhancements
-
 Platform & API
 
 New Features & Improvements
