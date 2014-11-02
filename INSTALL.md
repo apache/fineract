@@ -136,7 +136,7 @@ select * from schema_version;
 
 If the table does not exist, create the same using the script at https://gist.github.com/vishwasbabu/dc105b6a9450cff8ff1f
 
-Next, check if the patch for "externalizing mysql connection properties" has been run (i.e if you are updating from 1.21 or higher version of Mifos X)
+Next, check if the patch for "externalizing mysql connection properties" has been run (i.e if you are updating from 1.21 or a higher version of Mifos X)
 
 ````
 mysql -uroot -pmysql
