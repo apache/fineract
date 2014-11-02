@@ -145,7 +145,7 @@ use `mifosplatform-tenants`;
 select pool_initial_size from tenants;
 ```
 
-If the above query does not throw an error (Unknown column 'pool_initial_size'), *schema_version* needs to be updated with the details of this patch
+If the above query does **not** throw an error (Unknown column 'pool_initial_size'), *schema_version* needs to be updated with the details of this patch by executing the scripts below
 
 ```
 mysql -uroot -pmysql
