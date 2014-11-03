@@ -18,6 +18,7 @@ import org.mifosplatform.commands.service.CommandProcessingService;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -42,6 +43,7 @@ import org.mifosplatform.portfolio.client.exception.InvalidClientSavingProductEx
 import org.mifosplatform.portfolio.client.exception.InvalidClientStateTransitionException;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
+import org.mifosplatform.portfolio.group.exception.GroupMemberCountNotInPermissibleRangeException;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
@@ -82,6 +84,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final SavingsProductRepository savingsProductRepository;
     private final SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService;
     private final CommandProcessingService commandProcessingService;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -91,7 +94,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final CodeValueRepositoryWrapper codeValueRepository, final LoanRepository loanRepository,
             final SavingsAccountRepository savingsRepository, final SavingsProductRepository savingsProductRepository,
             final SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService,
-            final CommandProcessingService commandProcessingService) {
+            final CommandProcessingService commandProcessingService, final ConfigurationDomainService configurationDomainService) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.officeRepository = officeRepository;
@@ -106,6 +109,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.savingsProductRepository = savingsProductRepository;
         this.savingsApplicationProcessWritePlatformService = savingsApplicationProcessWritePlatformService;
         this.commandProcessingService = commandProcessingService;
+        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional
@@ -215,6 +219,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     clientType, clientClassification, command);
             boolean rollbackTransaction = false;
             if (newClient.isActive()) {
+                validateParentGroupRulesBeforeClientActivation(newClient);
                 final CommandWrapper commandWrapper = new CommandWrapperBuilder().activateClient(null).build();
                 rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
             }
@@ -275,7 +280,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 }
                 clientForUpdate.updateStaff(newStaff);
             }
-            
+
             if (changes.containsKey(ClientApiConstants.genderIdParamName)) {
 
                 final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.genderIdParamName);
@@ -351,6 +356,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             this.fromApiJsonDeserializer.validateActivation(command);
 
             final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+            validateParentGroupRulesBeforeClientActivation(client);
 
             final Locale locale = command.extractLocale();
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
@@ -566,6 +572,24 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 .withClientId(clientId) //
                 .with(actualChanges) //
                 .build();
+    }
+
+    /*
+     * To become a part of a group, group may have set of criteria to be met
+     * before client can become member of it.
+     */
+    private void validateParentGroupRulesBeforeClientActivation(Client client) {
+        Integer minNumberOfClients = configurationDomainService.retrieveMinAllowedClientsInGroup();
+        Integer maxNumberOfClients = configurationDomainService.retrieveMaxAllowedClientsInGroup();
+        for (Group group : client.getGroups()) {
+            /**
+             * Since this Client has not yet been associated with the group,
+             * reduce maxNumberOfClients by 1
+             **/
+            final boolean validationsuccess = group.isGroupsClientCountWithinMaxRange(maxNumberOfClients - 1);
+            if (!validationsuccess) { throw new GroupMemberCountNotInPermissibleRangeException(group.getId(), minNumberOfClients,
+                    maxNumberOfClients); }
+        }
     }
 
 }

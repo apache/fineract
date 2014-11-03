@@ -30,12 +30,6 @@ public class GroupLevel extends AbstractPersistable<Long> {
     @Column(name = "can_have_clients", nullable = false)
     private boolean canHaveClients = false;
 
-    @Column(name = "min_clients", nullable = false)
-    private final Long minClients;
-    
-    @Column(name = "max_clients", nullable = false)
-    private final Long maxClients;
-    
     public GroupLevel() {
 
         this.parentId = null;
@@ -43,22 +37,17 @@ public class GroupLevel extends AbstractPersistable<Long> {
         this.levelName = null;
         this.recursable = false;
         this.canHaveClients = false;
-        this.minClients = null;
-        this.maxClients = null;
 
     }
 
     public GroupLevel(final Long parentId, final boolean isSuperParent, final String levelName, final boolean recursable,
-            final boolean canHaveClients, final Long minClients, final Long maxClients) {
+            final boolean canHaveClients) {
 
         this.superParent = isSuperParent;
         this.parentId = parentId;
         this.levelName = levelName;
         this.recursable = recursable;
         this.canHaveClients = canHaveClients;
-        this.minClients = minClients;
-        this.maxClients = maxClients;
-
     }
 
     public Long getParentId() {
@@ -88,12 +77,9 @@ public class GroupLevel extends AbstractPersistable<Long> {
     public boolean isCenter() {
         return this.levelName.equalsIgnoreCase("Center");
     }
-    
-    public Long getMinClients(){
-        return this.minClients;
+
+    public boolean isGroup() {
+        return this.levelName.equalsIgnoreCase("Group");
     }
-    
-    public Long getMaxClients(){
-        return this.maxClients;
-    }
+
 }

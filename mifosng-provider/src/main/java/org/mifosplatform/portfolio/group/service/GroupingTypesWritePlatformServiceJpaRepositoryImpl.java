@@ -19,6 +19,7 @@ import org.mifosplatform.commands.service.CommandProcessingService;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -47,6 +48,7 @@ import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
 import org.mifosplatform.portfolio.group.domain.GroupTypes;
 import org.mifosplatform.portfolio.group.exception.GroupAccountExistsException;
 import org.mifosplatform.portfolio.group.exception.GroupHasNoStaffException;
+import org.mifosplatform.portfolio.group.exception.GroupMemberCountNotInPermissibleRangeException;
 import org.mifosplatform.portfolio.group.exception.GroupMustBePendingToBeDeletedException;
 import org.mifosplatform.portfolio.group.exception.InvalidGroupLevelException;
 import org.mifosplatform.portfolio.group.exception.InvalidGroupStateTransitionException;
@@ -85,6 +87,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     private final SavingsAccountRepository savingsRepository;
     private final CommandProcessingService commandProcessingService;
     private final CalendarInstanceRepository calendarInstanceRepository;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public GroupingTypesWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -93,7 +96,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final GroupLevelRepository groupLevelRepository, final GroupingTypesDataValidator fromApiJsonDeserializer,
             final LoanRepository loanRepository, final SavingsAccountRepository savingsRepository,
             final CodeValueRepositoryWrapper codeValueRepository, final CommandProcessingService commandProcessingService,
-            final CalendarInstanceRepository calendarInstanceRepository) {
+            final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService) {
         this.context = context;
         this.groupRepository = groupRepository;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
@@ -107,6 +110,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         this.codeValueRepository = codeValueRepository;
         this.commandProcessingService = commandProcessingService;
         this.calendarInstanceRepository = calendarInstanceRepository;
+        this.configurationDomainService = configurationDomainService;
     }
 
     private CommandProcessingResult createGroupingType(final JsonCommand command, final GroupTypes groupingType, final Long centerId) {
@@ -157,6 +161,11 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
             boolean rollbackTransaction = false;
             if (newGroup.isActive()) {
+                // validate Group creation rules for Group
+                if (newGroup.isGroup()) {
+                    validateGroupRulesBeforeActivation(newGroup);
+                }
+
                 if (newGroup.isCenter()) {
                     final CommandWrapper commandWrapper = new CommandWrapperBuilder().activateCenter(null).build();
                     rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
@@ -226,6 +235,10 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
             final Group group = this.groupRepository.findOneWithNotFoundDetection(groupId);
 
+            if (group.isGroup()) {
+                validateGroupRulesBeforeActivation(group);
+            }
+
             final LocalDate activationDate = command.localDateValueOfParameterNamed("activationDate");
 
             validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(group.getOffice(), group.getGroupLevel(), activationDate);
@@ -243,6 +256,20 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             handleGroupDataIntegrityIssues(command, dve, GroupTypes.GROUP);
             return CommandProcessingResult.empty();
         }
+    }
+
+    private void validateGroupRulesBeforeActivation(final Group group) {
+        Integer minClients = configurationDomainService.retrieveMinAllowedClientsInGroup();
+        Integer maxClients = configurationDomainService.retrieveMaxAllowedClientsInGroup();
+        boolean isGroupClientCountValid = group.isGroupsClientCountWithinMinMaxRange(minClients, maxClients);
+        if (!isGroupClientCountValid) { throw new GroupMemberCountNotInPermissibleRangeException(group.getId(), minClients, maxClients); }
+    }
+
+    public void validateGroupRulesBeforeClientAssociation(final Group group) {
+        Integer minClients = configurationDomainService.retrieveMinAllowedClientsInGroup();
+        Integer maxClients = configurationDomainService.retrieveMaxAllowedClientsInGroup();
+        boolean isGroupClientCountValid = group.isGroupsClientCountWithinMaxRange(maxClients);
+        if (!isGroupClientCountValid) { throw new GroupMemberCountNotInPermissibleRangeException(group.getId(), minClients, maxClients); }
     }
 
     @Transactional
@@ -645,6 +672,10 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         final Map<String, Object> actualChanges = new HashMap<>();
 
         final List<String> changes = groupForUpdate.associateClients(clientMembers);
+
+        if (groupForUpdate.isGroup()) {
+            validateGroupRulesBeforeClientAssociation(groupForUpdate);
+        }
         if (!changes.isEmpty()) {
             actualChanges.put(GroupingTypesApiConstants.clientMembersParamName, changes);
         }

@@ -117,19 +117,20 @@ public final class Group extends AbstractPersistable<Long> {
     @ManyToOne(optional = true)
     @JoinColumn(name = "submittedon_userid", nullable = true)
     private AppUser submittedBy;
-    
-    //  JPA default constructor for entity
+
+    // JPA default constructor for entity
     protected Group() {
         this.name = null;
         this.externalId = null;
         this.clientMembers = new HashSet<>();
-        }
-    
+    }
+
     public static Group newGroup(final Office office, final Staff staff, final Group parent, final GroupLevel groupLevel,
             final String name, final String externalId, final boolean active, final LocalDate activationDate,
             final Set<Client> clientMembers, final Set<Group> groupMembers, final LocalDate submittedOnDate, final AppUser currentUser) {
-      
-        //  By default new group is created in PENDING status, unless explicitly status is set to active
+
+        // By default new group is created in PENDING status, unless explicitly
+        // status is set to active
         GroupingTypeStatus status = GroupingTypeStatus.PENDING;
         LocalDate groupActivationDate = null;
         if (active) {
@@ -144,7 +145,7 @@ public final class Group extends AbstractPersistable<Long> {
     private Group(final Office office, final Staff staff, final Group parent, final GroupLevel groupLevel, final String name,
             final String externalId, final GroupingTypeStatus status, final LocalDate activationDate, final Set<Client> clientMembers,
             final Set<Group> groupMembers, final LocalDate submittedOnDate, final AppUser currentUser) {
-        
+
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         this.office = office;
@@ -175,24 +176,23 @@ public final class Group extends AbstractPersistable<Long> {
         this.submittedBy = currentUser;
 
         associateClients(clientMembers);
-        
+
         /*
-         * Always keep status change at the bottom, as status change rule depends on the attribute's value
+         * Always keep status change at the bottom, as status change rule
+         * depends on the attribute's value
          */
-        
+
         setStatus(activationDate, currentUser, status, dataValidationErrors);
-        
+
         throwExceptionIfErrors(dataValidationErrors);
     }
-    
 
     private void setStatus(final LocalDate activationDate, final AppUser loginUser, final GroupingTypeStatus status,
             final List<ApiParameterError> dataValidationErrors) {
 
         if (status.isActive()) {
             activate(loginUser, activationDate, dataValidationErrors);
-        }
-        else{
+        } else {
             this.status = status.getValue();
         }
 
@@ -201,13 +201,11 @@ public final class Group extends AbstractPersistable<Long> {
     private void activate(final AppUser currentUser, final LocalDate activationLocalDate, final List<ApiParameterError> dataValidationErrors) {
 
         validateStatusNotEqualToActiveAndLogError(dataValidationErrors);
-        validateRequiredNumberOfClientPerGroupAngLogError(dataValidationErrors);
-        
         if (dataValidationErrors.isEmpty()) {
             this.status = GroupingTypeStatus.ACTIVE.getValue();
             setActivationDate(activationLocalDate.toDate(), currentUser, dataValidationErrors);
         }
-        
+
     }
 
     public void activate(final AppUser currentUser, final LocalDate activationLocalDate) {
@@ -215,10 +213,10 @@ public final class Group extends AbstractPersistable<Long> {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         activate(currentUser, activationLocalDate, dataValidationErrors);
         throwExceptionIfErrors(dataValidationErrors);
-        
+
     }
 
-    private void setActivationDate(final Date activationDate, final AppUser loginUser, final List<ApiParameterError> dataValidationErrors){
+    private void setActivationDate(final Date activationDate, final AppUser loginUser, final List<ApiParameterError> dataValidationErrors) {
 
         if (activationDate != null) {
             this.activationDate = activationDate;
@@ -226,7 +224,7 @@ public final class Group extends AbstractPersistable<Long> {
         }
 
         validateActivationDate(dataValidationErrors);
-        
+
     }
 
     public boolean isActivatedAfter(final LocalDate submittedOn) {
@@ -238,7 +236,7 @@ public final class Group extends AbstractPersistable<Long> {
     }
 
     public boolean isActive() {
-        return this.status != null ? GroupingTypeStatus.fromInt(this.status).isActive(): false;
+        return this.status != null ? GroupingTypeStatus.fromInt(this.status).isActive() : false;
     }
 
     private boolean isDateInTheFuture(final LocalDate localDate) {
@@ -313,15 +311,6 @@ public final class Group extends AbstractPersistable<Long> {
     }
 
     public List<String> associateClients(final Set<Client> clientMembersSet) {
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final List<String> newlyAssociatedClients = associateClients(clientMembersSet, dataValidationErrors);
-        throwExceptionIfErrors(dataValidationErrors);
-        return newlyAssociatedClients;
-        
-    }
-
-    public List<String> associateClients(final Set<Client> clientMembersSet, final List<ApiParameterError> dataValidationErrors) {
         final List<String> differences = new ArrayList<>();
         for (final Client client : clientMembersSet) {
             if (hasClientAsMember(client)) { throw new ClientExistInGroupException(client.getId(), getId()); }
@@ -329,13 +318,6 @@ public final class Group extends AbstractPersistable<Long> {
             differences.add(client.getId().toString());
         }
 
-        /*
-         * Minimum and maximum number of client rule is applicable only for active group
-         */
-        if (isActive()) {
-            validateGroupHasMoreThanRequiredNumberOfClientsAngLogError(dataValidationErrors);
-        }
-        
         return differences;
     }
 
@@ -352,7 +334,7 @@ public final class Group extends AbstractPersistable<Long> {
 
         return differences;
     }
-    
+
     public boolean hasClientAsMember(final Client client) {
         return this.clientMembers.contains(client);
     }
@@ -423,6 +405,10 @@ public final class Group extends AbstractPersistable<Long> {
 
     public boolean isCenter() {
         return this.groupLevel.isCenter();
+    }
+
+    public boolean isGroup() {
+        return this.groupLevel.isGroup();
     }
 
     public boolean isTransferInProgress() {
@@ -512,7 +498,6 @@ public final class Group extends AbstractPersistable<Long> {
                         .getParent().getId(), group.getId());
             }
 
-
             this.groupMembers.add(group);
             differences.add(group.getId().toString());
         }
@@ -535,76 +520,55 @@ public final class Group extends AbstractPersistable<Long> {
         return differences;
     }
 
-    public void validateRequiredNumberOfClientPerGroupAngLogError(final List<ApiParameterError> dataValidationErrors) {
+    public Boolean isGroupsClientCountWithinMinMaxRange(Integer minClients, Integer maxClients) {
 
-        if (!hasGroupRequiredNumberOfClients()) {
+        if (maxClients == null && minClients == null) { return true; }
 
-            // This validation not strictly related to a parameter, that is the
-            // reason parameterName is set null
+        // set minClients or maxClients to 0 if null
 
-            final String parameterName = null;
-            final String globalisationMessageCode = "error.msg.group.activation.without.required.number.of.members";
-            final String defaultUserMessage = "Group should have number of members between " + this.groupLevel.getMinClients() + " and "
-                    + this.groupLevel.getMaxClients();
-            final ApiParameterError error = ApiParameterError.parameterError(globalisationMessageCode, defaultUserMessage, parameterName);
-
-            dataValidationErrors.add(error);
-
+        if (minClients == null) {
+            minClients = 0;
         }
-    }
-    
-    private Boolean hasGroupRequiredNumberOfClients() {
 
-        /*
-         * If maximum clients required per group is set to zero or less then zero
-         * then irrespective of minimum required number, below condition returns true
-         * that means this is rule is not validated
-         */
-        
-        if (this.clientMembers.size() >= this.groupLevel.getMinClients()
-                && (this.clientMembers.size() < this.groupLevel.getMaxClients() || this.groupLevel.getMaxClients() <= 0)) { return true; }
+        if (maxClients == null) {
+            maxClients = Integer.MAX_VALUE;
+        }
+
+        Set<Client> activeClientMembers = getActiveClientMembers();
+
+        if (activeClientMembers.size() >= minClients && activeClientMembers.size() <= maxClients) { return true; }
         return false;
-
     }
 
-    public void validateGroupHasMoreThanRequiredNumberOfClientsAngLogError(final List<ApiParameterError> dataValidationErrors) {
-
-        if (hasGroupMoreThanRequiredNumberOfClients()) {
-
-            // This validation not strictly related to a parameter, that is the
-            // reason parameterName is set null
-
-            final String parameterName = null;
-            final String globalisationMessageCode = "error.msg.group.can.not.have.more.than.required.number.of.members";
-            final String defaultUserMessage = "Group should have number of members between " + this.groupLevel.getMinClients() + " and "
-                    + this.groupLevel.getMaxClients();
-            final ApiParameterError error = ApiParameterError.parameterError(globalisationMessageCode, defaultUserMessage, parameterName);
-
-            dataValidationErrors.add(error);
-
+    public Boolean isGroupsClientCountWithinMaxRange(Integer maxClients) {
+        Set<Client> activeClientMembers = getActiveClientMembers();
+        if (maxClients == null) {
+            return true;
+        } else if (activeClientMembers.size() <= maxClients) {
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private Boolean hasGroupMoreThanRequiredNumberOfClients(){
-        /*
-         * If maximum clients required per group is set to zero or less then zero
-         * then below condition returns always false
-         * that means this is rule is not validated and group can have unlimited number of clients.
-         */
-
-        if (this.clientMembers.size() > this.groupLevel.getMaxClients() && this.groupLevel.getMaxClients() > 0) { return true; }
-        return false;
-        
+    public Set<Client> getActiveClientMembers() {
+        Set<Client> activeClientMembers = new HashSet<>();
+        for (Client client : this.clientMembers) {
+            if (client.isActive()) {
+                activeClientMembers.add(client);
+            }
+        }
+        return activeClientMembers;
     }
-    
+
     private void validateActivationDate(final List<ApiParameterError> dataValidationErrors) {
 
         if (getSubmittedOnDate() != null && isDateInTheFuture(getSubmittedOnDate())) {
 
             final String defaultUserMessage = "Submitted on date cannot be in the future.";
             final String globalisationMessageCode = "error.msg.group.submittedOnDate.in.the.future";
-            final ApiParameterError error = ApiParameterError.parameterError(globalisationMessageCode ,
-                    defaultUserMessage, GroupingTypesApiConstants.submittedOnDateParamName, this.submittedOnDate);
+            final ApiParameterError error = ApiParameterError.parameterError(globalisationMessageCode, defaultUserMessage,
+                    GroupingTypesApiConstants.submittedOnDateParamName, this.submittedOnDate);
 
             dataValidationErrors.add(error);
         }
@@ -638,11 +602,11 @@ public final class Group extends AbstractPersistable<Long> {
         }
     }
 
-    private void validateStatusNotEqualToActiveAndLogError(final List<ApiParameterError> dataValidationErrors){
-        
+    private void validateStatusNotEqualToActiveAndLogError(final List<ApiParameterError> dataValidationErrors) {
+
         if (isActive()) {
             final String defaultUserMessage = "Cannot activate group. Group is already active.";
-            final String globalisationMessageCode = "error.msg.group.already.active";  
+            final String globalisationMessageCode = "error.msg.group.already.active";
             final ApiParameterError error = ApiParameterError.parameterError(globalisationMessageCode, defaultUserMessage,
                     GroupingTypesApiConstants.activeParamName, true);
             dataValidationErrors.add(error);

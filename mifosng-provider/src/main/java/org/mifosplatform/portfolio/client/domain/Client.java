@@ -298,12 +298,11 @@ public final class Client extends AbstractPersistable<Long> {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         validateNameParts(dataValidationErrors);
         validateActivationDate(dataValidationErrors);
-        validateClientsGroupRules(dataValidationErrors);
-        
+
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-        
+
     }
-    
+
     public boolean isAccountNumberRequiresAutoGeneration() {
         return this.accountNumberRequiresAutoGeneration;
     }
@@ -449,7 +448,6 @@ public final class Client extends AbstractPersistable<Long> {
             actualChanges.put(ClientApiConstants.savingsProductIdParamName, newValue);
         }
 
-
         if (command.isChangeInLongParameterNamed(ClientApiConstants.genderIdParamName, genderId())) {
             final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.genderIdParamName);
             actualChanges.put(ClientApiConstants.genderIdParamName, newValue);
@@ -464,7 +462,6 @@ public final class Client extends AbstractPersistable<Long> {
             final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.clientClassificationIdParamName);
             actualChanges.put(ClientApiConstants.clientClassificationIdParamName, newValue);
         }
-
 
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
@@ -490,7 +487,7 @@ public final class Client extends AbstractPersistable<Long> {
             this.dateOfBirth = newValue.toDate();
         }
 
-        if (command.isChangeInLocalDateParameterNamed(ClientApiConstants.submittedOnDateParamName,getSubmittedOnDate())) {
+        if (command.isChangeInLocalDateParameterNamed(ClientApiConstants.submittedOnDateParamName, getSubmittedOnDate())) {
             final String valueAsInput = command.stringValueOfParameterNamed(ClientApiConstants.submittedOnDateParamName);
             actualChanges.put(ClientApiConstants.submittedOnDateParamName, valueAsInput);
             actualChanges.put(ClientApiConstants.dateFormatParamName, dateFormatAsInput);
@@ -507,7 +504,6 @@ public final class Client extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
-   
     private void validateNameParts(final List<ApiParameterError> dataValidationErrors) {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("client");
 
@@ -569,18 +565,6 @@ public final class Client extends AbstractPersistable<Long> {
                         ClientApiConstants.activationDateParamName, getActivationLocalDate());
                 dataValidationErrors.add(error);
             }
-        }
-    }
-    
-    /*
-     * To become a part of a group, group may have set of criteria to be met
-     * before client can become member of it. This method is placeholder for
-     * such validation.
-     */
-
-    private void validateClientsGroupRules(final List<ApiParameterError> dataValidationErrors) {
-        for (Group group : this.groups) {
-            group.validateGroupHasMoreThanRequiredNumberOfClientsAngLogError(dataValidationErrors);
         }
     }
 

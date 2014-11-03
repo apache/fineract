@@ -34,9 +34,13 @@ public interface ConfigurationDomainService {
     Long retrievePasswordLiveTime();
 
     Long retrieveGraceOnPenaltyPostingPeriod();
-    
+
     boolean isSavingsInterestPostingAtCurrentPeriodEnd();
-    
+
     Integer retrieveFinancialYearBeginningMonth();
-    
+
+    public Integer retrieveMinAllowedClientsInGroup();
+
+    public Integer retrieveMaxAllowedClientsInGroup();
+
 }

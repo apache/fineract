@@ -113,14 +113,13 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
         return property.getValue();
     }
-    
+
     @Override
     public Long retrieveGraceOnPenaltyPostingPeriod() {
         final String propertyName = "grace-on-penalty-posting";
         final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
         return property.getValue();
     }
-
 
     @Override
     public boolean isPasswordForcedResetEnable() {
@@ -135,21 +134,36 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
         return property.getValue();
     }
-    
+
     @Override
     public boolean isSavingsInterestPostingAtCurrentPeriodEnd() {
         final String propertyName = "savings-interest-posting-current-period-end";
         final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
         return property.isEnabled();
     }
-    
+
     @Override
     public Integer retrieveFinancialYearBeginningMonth() {
         final String propertyName = "financial-year-beginning-month";
         final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
-        if(property.isEnabled())
-        	return property.getValue().intValue();
-    	return 1;
+        if (property.isEnabled()) return property.getValue().intValue();
+        return 1;
+    }
+
+    @Override
+    public Integer retrieveMinAllowedClientsInGroup() {
+        final String propertyName = "min-clients-in-group";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
+        if (property.isEnabled()) { return property.getValue().intValue(); }
+        return null;
+    }
+
+    @Override
+    public Integer retrieveMaxAllowedClientsInGroup() {
+        final String propertyName = "max-clients-in-group";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
+        if (property.isEnabled()) { return property.getValue().intValue(); }
+        return null;
     }
 
 }
