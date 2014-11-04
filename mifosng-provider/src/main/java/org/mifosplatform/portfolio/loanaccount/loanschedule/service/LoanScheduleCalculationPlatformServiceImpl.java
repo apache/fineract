@@ -154,8 +154,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         LoanApplicationTerms loanApplicationTerms = loan.constructLoanApplicationTerms(applicationCurrency,
                 calculatedRepaymentsStartingFromDate, restCalendarInstance);
         LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = this.loanScheduleAssembler.calculatePrepaymentAmount(
-                loan.fetchRepaymentScheduleInstallments(), currency, LocalDate.now(), loanApplicationTerms, loan.getOfficeId(),
-                loan.charges());
+                loan.fetchRepaymentScheduleInstallments(), currency, LocalDate.now(), loanApplicationTerms, loan.charges());
         Money totalAmount = totalPrincipal.plus(loanRepaymentScheduleInstallment.getFeeChargesOutstanding(currency)).plus(
                 loanRepaymentScheduleInstallment.getPenaltyChargesOutstanding(currency));
         Money interestDue = Money.zero(currency);
