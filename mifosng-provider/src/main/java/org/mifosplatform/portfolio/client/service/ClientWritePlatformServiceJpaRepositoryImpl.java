@@ -581,15 +581,16 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private void validateParentGroupRulesBeforeClientActivation(Client client) {
         Integer minNumberOfClients = configurationDomainService.retrieveMinAllowedClientsInGroup();
         Integer maxNumberOfClients = configurationDomainService.retrieveMaxAllowedClientsInGroup();
-        for (Group group : client.getGroups()) {
-            /**
-             * Since this Client has not yet been associated with the group,
-             * reduce maxNumberOfClients by 1
-             **/
-            final boolean validationsuccess = group.isGroupsClientCountWithinMaxRange(maxNumberOfClients - 1);
-            if (!validationsuccess) { throw new GroupMemberCountNotInPermissibleRangeException(group.getId(), minNumberOfClients,
-                    maxNumberOfClients); }
+        if (client.getGroups() != null) {
+            for (Group group : client.getGroups()) {
+                /**
+                 * Since this Client has not yet been associated with the group,
+                 * reduce maxNumberOfClients by 1
+                 **/
+                final boolean validationsuccess = group.isGroupsClientCountWithinMaxRange(maxNumberOfClients - 1);
+                if (!validationsuccess) { throw new GroupMemberCountNotInPermissibleRangeException(group.getId(), minNumberOfClients,
+                        maxNumberOfClients); }
+            }
         }
     }
-
 }
