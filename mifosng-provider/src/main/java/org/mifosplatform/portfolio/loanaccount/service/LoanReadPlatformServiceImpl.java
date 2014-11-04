@@ -207,7 +207,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             /*** TODO Vishwas: Remove references to "Contra" from the codebase ***/
             final String sql = "select "
                     + rm.LoanPaymentsSchema()
-                    + " where tr.loan_id = ? and tr.transaction_type_enum not in (0, 3) and tr.is_reversed=0 order by tr.transaction_date ASC,id ";
+                    + " where tr.loan_id = ? and tr.transaction_type_enum not in (0, 3) and  (tr.is_reversed=0 or tr.manually_adjusted_or_reversed = 1) order by tr.transaction_date ASC,id ";
             return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
         } catch (final EmptyResultDataAccessException e) {
             return null;
@@ -369,7 +369,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                         .getPrincipalOutstanding(currency).getAmount(), loanRepaymentScheduleInstallment.getInterestOutstanding(currency)
                         .getAmount(), loanRepaymentScheduleInstallment.getFeeChargesOutstanding(currency).getAmount(),
                 loanRepaymentScheduleInstallment.getPenaltyChargesOutstanding(currency).getAmount(), null, unrecognizedIncomePortion,
-                paymentOptions, null, null, null, outstandingLoanBalance);
+                paymentOptions, null, null, null, outstandingLoanBalance,false);
     }
 
     @Override
@@ -398,7 +398,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                         .getPrincipalOutstanding(currency).getAmount(), loanRepaymentScheduleInstallment.getInterestOutstanding(currency)
                         .getAmount(), loanRepaymentScheduleInstallment.getFeeChargesOutstanding(currency).getAmount(),
                 loanRepaymentScheduleInstallment.getPenaltyChargesOutstanding(currency).getAmount(), null, unrecognizedIncomePortion,
-                paymentOptions, null, null, null, outstandingLoanBalance);
+                paymentOptions, null, null, null, outstandingLoanBalance,false);
     }
 
     @Override
@@ -424,7 +424,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final BigDecimal outstandingLoanBalance = null;
         final BigDecimal unrecognizedIncomePortion = null;
         return new LoanTransactionData(null, null, null, transactionType, null, currencyData, waiveOfInterest.getTransactionDate(), amount,
-                null, null, null, null, null, null, null, null, outstandingLoanBalance, unrecognizedIncomePortion);
+                null, null, null, null, null, null, null, null, outstandingLoanBalance, unrecognizedIncomePortion,false);
     }
 
     @Override
@@ -435,7 +435,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WRITEOFF);
         final BigDecimal unrecognizedIncomePortion = null;
         return new LoanTransactionData(null, null, null, transactionType, null, null, DateUtils.getLocalDateOfTenant(), null, null, null,
-                null, null, null, null, null, null, outstandingLoanBalance, unrecognizedIncomePortion);
+                null, null, null, null, null, null, outstandingLoanBalance, unrecognizedIncomePortion,false);
+
     }
 
     @Override
@@ -451,7 +452,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final BigDecimal unrecognizedIncomePortion = null;
         return new LoanTransactionData(null, null, null, transactionType, null, null, loan.getExpectedDisbursedOnLocalDateForTemplate(),
                 loan.getDisburseAmountForTemplate(), null, null, null, null, null, unrecognizedIncomePortion, paymentOptions, null, null,
-                loan.retriveLastEmiAmount(), outstandingLoanBalance);
+                loan.retriveLastEmiAmount(), outstandingLoanBalance,false);
+
     }
 
     @Override
@@ -1072,6 +1074,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " tr.overpayment_portion_derived as overpayment, tr.outstanding_loan_balance_derived as outstandingLoanBalance, "
                     + " tr.unrecognized_income_portion as unrecognizedIncome,"
                     + " tr.submitted_on_date as submittedOnDate, "
+                    + " tr.manually_adjusted_or_reversed as manuallyReversed, "
                     + " pd.payment_type_cv_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, "
                     + " pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode, "
                     + " l.currency_code as currencyCode, l.currency_digits as currencyDigits, l.currency_multiplesof as inMultiplesOf, rc.`name` as currencyName, "
@@ -1108,6 +1111,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String officeName = rs.getString("officeName");
             final int transactionTypeInt = JdbcSupport.getInteger(rs, "transactionType");
             final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(transactionTypeInt);
+            final boolean manuallyReversed = rs.getBoolean("manuallyReversed");
+
 
             PaymentDetailData paymentDetailData = null;
 
@@ -1157,10 +1162,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 transfer = AccountTransferData.transferBasicDetails(toTransferId, currencyData, toTransferAmount, toTransferDate,
                         toTransferDescription, toTransferReversed);
             }
-
             return new LoanTransactionData(id, officeId, officeName, transactionType, paymentDetailData, currencyData, date, totalAmount,
                     principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion, overPaymentPortion,
-                    unrecognizedIncomePortion, externalId, transfer, null, outstandingLoanBalance, submittedOnDate);
+                    unrecognizedIncomePortion, externalId, transfer, null, outstandingLoanBalance, submittedOnDate,manuallyReversed);
         }
     }
 
@@ -1579,7 +1583,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         BigDecimal outstandingLoanBalance = null;
         final BigDecimal unrecognizedIncomePortion = null;
         return new LoanTransactionData(null, null, null, transactionType, null, null, null, loan.getTotalWrittenOff(), null, null, null,
-                null, null, unrecognizedIncomePortion, paymentOptions, null, null, null, outstandingLoanBalance);
+                null, null, unrecognizedIncomePortion, paymentOptions, null, null, null, outstandingLoanBalance,false);
+
 
     }
 
@@ -1592,7 +1597,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final BigDecimal unrecognizedIncomePortion = null;
         return new LoanTransactionData(null, null, null, transactionType, null, loan.currency(), DateUtils.getLocalDateOfTenant(),
                 loan.getTotalOutstandingAmount(), null, null, null, null, null, null, null, null, outstandingLoanBalance,
-                unrecognizedIncomePortion);
+                unrecognizedIncomePortion,false);
     }
 
     @Override
@@ -1660,7 +1665,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal outstandingLoanBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "outstandingLoanBalance");
 
             return new LoanTransactionData(id, transactionType, date, totalAmount, principalPortion, interestPortion, feeChargesPortion,
-                    penaltyChargesPortion, overPaymentPortion, unrecognizedIncomePortion, outstandingLoanBalance);
+                    penaltyChargesPortion, overPaymentPortion, unrecognizedIncomePortion, outstandingLoanBalance,false);
         }
     }
 
@@ -1742,7 +1747,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     totalPaid, totalPaidInAdvanceForPeriod, totalPaidLateForPeriod, totalWaived, totalWrittenOff, totalOutstanding,
                     totalActualCostOfLoanForPeriod);
         }
-
     }
 
 }
