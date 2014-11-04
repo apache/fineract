@@ -26,68 +26,54 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_loan_repayment_schedule_history")
 public class LoanRepaymentScheduleHistory extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id")
     private Loan loan;
 
-    @SuppressWarnings("unused")
     @OneToOne(optional = true)
     @JoinColumn(name = "loan_reschedule_request_id")
     private LoanRescheduleRequest loanRescheduleRequest;
 
-    @SuppressWarnings("unused")
     @Column(name = "installment", nullable = false)
     private Integer installmentNumber;
 
-    @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "fromdate", nullable = true)
     private Date fromDate;
 
-    @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "duedate", nullable = false)
     private Date dueDate;
 
-    @SuppressWarnings("unused")
     @Column(name = "principal_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal principal;
 
-    @SuppressWarnings("unused")
     @Column(name = "interest_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal interestCharged;
 
-    @SuppressWarnings("unused")
     @Column(name = "fee_charges_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal feeChargesCharged;
 
-    @SuppressWarnings("unused")
     @Column(name = "penalty_charges_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal penaltyCharges;
 
-    @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "created_date")
     private Date createdOnDate;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "createdby_id")
     private AppUser createdByUser;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "lastmodifiedby_id")
     private AppUser lastModifiedByUser;
 
-    @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "lastmodified_date")
     private Date lastModifiedOnDate;
 
     @Column(name = "version")
-    @SuppressWarnings("unused")
     private Integer version;
 
     /**

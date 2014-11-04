@@ -24,7 +24,6 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_loan_disbursement_detail")
 public class LoanDisbursementDetails extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;
@@ -93,9 +92,9 @@ public class LoanDisbursementDetails extends AbstractPersistable<Long> {
     public BigDecimal principal() {
         return this.principal;
     }
-    
+
     public BigDecimal approvedPrincipal() {
-    	return this.approvedPrincipal;
+        return this.approvedPrincipal;
     }
 
     public void updatePrincipal(BigDecimal principal) {

@@ -4599,7 +4599,7 @@ public class Loan extends AbstractPersistable<Long> {
      **/
     public List<DisbursementData> getDisbursmentData() {
         Iterator<LoanDisbursementDetails> iterator = this.getDisbursementDetails().iterator();
-        List<DisbursementData> disbursementData = new ArrayList<DisbursementData>();
+        List<DisbursementData> disbursementData = new ArrayList<>();
 
         while (iterator.hasNext()) {
             LoanDisbursementDetails loanDisbursementDetails = iterator.next();

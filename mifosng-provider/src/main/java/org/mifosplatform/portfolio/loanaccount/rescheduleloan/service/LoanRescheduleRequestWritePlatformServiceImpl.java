@@ -250,7 +250,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             this.loanRescheduleRequestDataValidator.validateForApproveAction(jsonCommand, loanRescheduleRequest);
 
             final AppUser appUser = this.platformSecurityContext.authenticatedUser();
-            final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+            final Map<String, Object> changes = new LinkedHashMap<>();
 
             LocalDate approvedOnDate = jsonCommand.localDateValueOfParameterNamed("approvedOnDate");
             final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat()).withLocale(
