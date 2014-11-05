@@ -70,7 +70,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.interestRecalculationCompoundingMethodParameterName,
             LoanProductConstants.recalculationRestFrequencyDateParamName,
             LoanProductConstants.recalculationRestFrequencyIntervalParameterName,
-            LoanProductConstants.recalculationRestFrequencyTypeParameterName));
+            LoanProductConstants.recalculationRestFrequencyTypeParameterName,
+            LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -103,7 +104,14 @@ public final class LoanProductDataValidator {
             final Long fundId = this.fromApiJsonHelper.extractLongNamed("fundId", element);
             baseDataValidator.reset().parameter("fundId").value(fundId).ignoreIfNull().integerGreaterThanZero();
         }
-
+        
+        if (this.fromApiJsonHelper.parameterExists("minimumDaysBetweenDisbursalAndFirstRepayment", element)) {
+            final Long minimumDaysBetweenDisbursalAndFirstRepayment = this.fromApiJsonHelper.extractLongNamed(
+                    "minimumDaysBetweenDisbursalAndFirstRepayment", element);
+            baseDataValidator.reset().parameter("minimumDaysBetweenDisbursalAndFirstRepayment")
+                    .value(minimumDaysBetweenDisbursalAndFirstRepayment).ignoreIfNull().integerGreaterThanZero();
+        }
+        
         final Boolean includeInBorrowerCycle = this.fromApiJsonHelper.extractBooleanNamed("includeInBorrowerCycle", element);
         baseDataValidator.reset().parameter("includeInBorrowerCycle").value(includeInBorrowerCycle).ignoreIfNull()
                 .validateForBooleanValue();

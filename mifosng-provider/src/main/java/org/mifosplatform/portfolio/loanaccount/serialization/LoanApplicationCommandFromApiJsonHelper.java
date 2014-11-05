@@ -112,6 +112,19 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             if (loanType.isJLGAccount()) {
                 baseDataValidator.reset().parameter("clientId").value(clientId).notNull().integerGreaterThanZero();
                 baseDataValidator.reset().parameter("groupId").value(groupId).notNull().longGreaterThanZero();
+
+                // if it is JLG loan then must have a meeting details (calendar)
+                final String calendarIdParameterName = "calendarId";
+                final Long calendarId = this.fromApiJsonHelper.extractLongNamed(calendarIdParameterName, element);
+                baseDataValidator.reset().parameter(calendarIdParameterName).value(calendarId).notNull().integerGreaterThanZero();
+
+                // if it is JLG loan then must have a syncDisbursement
+                final String syncDisbursementParameterName = "syncDisbursementWithMeeting";
+                final Boolean syncDisbursement = this.fromApiJsonHelper.extractBooleanNamed(syncDisbursementParameterName, element);
+
+                if (syncDisbursement == null) {
+                    baseDataValidator.reset().parameter(syncDisbursementParameterName).value(syncDisbursement).trueOrFalseRequired(false);
+                }
             }
 
         }
@@ -330,25 +343,6 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             } else {
                 baseDataValidator.reset().parameter(collateralParameterName).expectedArrayButIsNot();
             }
-        }
-
-        boolean meetingIdRequired = false;
-        // validate syncDisbursement
-        final String syncDisbursementParameterName = "syncDisbursementWithMeeting";
-        if (this.fromApiJsonHelper.parameterExists(syncDisbursementParameterName, element)) {
-            final Boolean syncDisbursement = this.fromApiJsonHelper.extractBooleanNamed(syncDisbursementParameterName, element);
-            if (syncDisbursement == null) {
-                baseDataValidator.reset().parameter(syncDisbursementParameterName).value(syncDisbursement).trueOrFalseRequired(false);
-            } else if (syncDisbursement.booleanValue()) {
-                meetingIdRequired = true;
-            }
-        }
-
-        final String calendarIdParameterName = "calendarId";
-        // if disbursement is synced then must have a meeting (calendar)
-        if (meetingIdRequired || this.fromApiJsonHelper.parameterExists(calendarIdParameterName, element)) {
-            final Long calendarId = this.fromApiJsonHelper.extractLongNamed(calendarIdParameterName, element);
-            baseDataValidator.reset().parameter(calendarIdParameterName).value(calendarId).notNull().integerGreaterThanZero();
         }
 
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.emiAmountParameterName, element)) {

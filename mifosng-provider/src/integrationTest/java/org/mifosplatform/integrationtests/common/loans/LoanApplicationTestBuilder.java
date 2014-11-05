@@ -47,6 +47,7 @@ public class LoanApplicationTestBuilder {
     private List<HashMap> disbursementData = null;
     private List<HashMap> charges = new ArrayList<HashMap>();
     private String recalculationRestFrequencyDate = null;
+    private String repaymentsStartingFromDate = null;
 
     public String build(final String ID, final String loanProductId, final String savingsID) {
 
@@ -73,6 +74,8 @@ public class LoanApplicationTestBuilder {
         map.put("expectedDisbursementDate", this.expectedDisbursmentDate);
         map.put("submittedOnDate", this.submittedOnDate);
         map.put("loanType", this.loanType);
+        map.put("repaymentsStartingFromDate", this.repaymentsStartingFromDate);
+        
         if (charges != null) {
             map.put("charges", charges);
         }
@@ -238,6 +241,11 @@ public class LoanApplicationTestBuilder {
 
     public LoanApplicationTestBuilder withRestFrequencyDate(final String recalculationRestFrequencyDate) {
         this.recalculationRestFrequencyDate = recalculationRestFrequencyDate;
+        return this;
+    }
+    
+    public LoanApplicationTestBuilder withFirstRepaymentDate(final String firstRepaymentDate) {
+        this.repaymentsStartingFromDate = firstRepaymentDate;
         return this;
     }
 }

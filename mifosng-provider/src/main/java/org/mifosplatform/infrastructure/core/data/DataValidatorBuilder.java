@@ -130,6 +130,10 @@ public class DataValidatorBuilder {
     }
 
     /*** FIXME: Vishwas, why does this method have a parameter? Seems wrong ***/
+    /*
+     * This method is not meant for validation, if you have mandatory boolean param and 
+     * if it has invalid value or value not passed then call this method, this method is always used with input as false   
+     */
     public DataValidatorBuilder trueOrFalseRequired(final boolean trueOfFalseFieldProvided) {
         if (!trueOfFalseFieldProvided && !this.ignoreNullValue) {
             final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")

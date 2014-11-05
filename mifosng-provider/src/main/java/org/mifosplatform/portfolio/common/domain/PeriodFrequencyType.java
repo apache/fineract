@@ -58,7 +58,15 @@ public enum PeriodFrequencyType {
     }
 
     public boolean isYearly() {
-        return this.value.equals(PeriodFrequencyType.MONTHS.getValue());
+        return this.value.equals(PeriodFrequencyType.YEARS.getValue());
+    }
+    
+    public boolean isWeekly() {
+        return this.value.equals(PeriodFrequencyType.WEEKS.getValue());
+    }
+
+    public boolean isDaily() {
+        return this.value.equals(PeriodFrequencyType.DAYS.getValue());
     }
     
     public boolean isInvalid() {
