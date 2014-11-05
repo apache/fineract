@@ -51,7 +51,7 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationDateException;
-import org.mifosplatform.portfolio.loanaccount.exception.MinimumDaysBetweenDisbursalAndFirstRepaymentRuleException;
+import org.mifosplatform.portfolio.loanaccount.exception.MinDaysBetweenDisbursalAndFirstRepaymentViolationException;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
@@ -161,16 +161,15 @@ public class LoanScheduleAssembler {
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed("expectedDisbursementDate", element);
         final LocalDate repaymentsStartingFromDate = this.fromApiJsonHelper.extractLocalDateNamed("repaymentsStartingFromDate", element);
         LocalDate calculatedRepaymentsStartingFromDate = null;
-        
+
         final Boolean synchDisbursement = this.fromApiJsonHelper.extractBooleanNamed("syncDisbursementWithMeeting", element);
         final Long calendarId = this.fromApiJsonHelper.extractLongNamed("calendarId", element);
         Calendar calendar = null;
-        
+
         final String loanTypeParameterName = "loanType";
         final String loanTypeStr = this.fromApiJsonHelper.extractStringNamed(loanTypeParameterName, element);
-        
+
         final AccountType loanType = AccountType.fromName(loanTypeStr);
-        
 
         /*
          * If it is JLG loan then make sure loan frequency is same as
@@ -237,20 +236,20 @@ public class LoanScheduleAssembler {
         /*
          * If first repayment is not derived and instead directly taken from
          * input then copy the value of repaymentsStartingFromDate to
-         * calculatedRepaymentsStartingFromDate 
+         * calculatedRepaymentsStartingFromDate
          * 
-         * TODO: The reason for this bad code is, LoanApplicationTerms.assembleFrom 
-         * takes both repaymentsStartingFromDate and calculatedRepaymentsStartingFromDate
-         * and derived data has precedence over input date, 
+         * TODO: The reason for this bad code is,
+         * LoanApplicationTerms.assembleFrom takes both
+         * repaymentsStartingFromDate and calculatedRepaymentsStartingFromDate
+         * and derived data has precedence over input date,
          * 
          * FIXME:LoanApplicationTerms.assembleFrom should take only one
          * "first repayment date" than taking two dates with same purpose.
-         * 
          */
         if (!isRepaymentsStartingFromDateDerived) {
             calculatedRepaymentsStartingFromDate = repaymentsStartingFromDate;
         }
-        
+
         // grace details
         final Integer graceOnPrincipalPayment = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnPrincipalPayment", element);
         final Integer graceOnInterestPayment = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestPayment", element);
@@ -467,66 +466,62 @@ public class LoanScheduleAssembler {
             }
         }
     }
-    
-    private LocalDate deriveFirstRepaymentDate(final AccountType loanType, final Integer repaymentEvery, 
+
+    private LocalDate deriveFirstRepaymentDate(final AccountType loanType, final Integer repaymentEvery,
             final LocalDate expectedDisbursementDate, final PeriodFrequencyType repaymentPeriodFrequencyType,
-            final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final Calendar calendar){
-        
+            final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final Calendar calendar) {
+
         LocalDate derivedFirstRepayment = null;
-        LocalDate dateBasedOnRepaymentFrequency = null;
-        final LocalDate dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment = expectedDisbursementDate.plusDays(minimumDaysBetweenDisbursalAndFirstRepayment);
+        LocalDate dateBasedOnRepaymentFrequency;
+        final LocalDate dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment = expectedDisbursementDate
+                .plusDays(minimumDaysBetweenDisbursalAndFirstRepayment);
 
         if (loanType.isIndividualAccount() || loanType.isGroupAccount()) {
-            // Derive the first repayment date as greater date among (disbursement date + plus frequency) or 
-            // (disbursement date + minimum between disbursal and first repayment )
+            // Derive the first repayment date as greater date among
+            // (disbursement date + plus frequency) or
+            // (disbursement date + minimum between disbursal and first
+            // repayment )
             if (repaymentPeriodFrequencyType.isDaily()) {
                 dateBasedOnRepaymentFrequency = expectedDisbursementDate.plusDays(repaymentEvery);
-            }
-            else if(repaymentPeriodFrequencyType.isWeekly()){
+            } else if (repaymentPeriodFrequencyType.isWeekly()) {
                 dateBasedOnRepaymentFrequency = expectedDisbursementDate.plusWeeks(repaymentEvery);
-            }
-            else if (repaymentPeriodFrequencyType.isMonthly()) {
+            } else if (repaymentPeriodFrequencyType.isMonthly()) {
                 dateBasedOnRepaymentFrequency = expectedDisbursementDate.plusMonths(repaymentEvery);
-            }
-            else if (repaymentPeriodFrequencyType.isYearly()){
+            } else if (repaymentPeriodFrequencyType.isYearly()) {
                 dateBasedOnRepaymentFrequency = expectedDisbursementDate.plusYears(repaymentEvery);
             }
-            derivedFirstRepayment = dateBasedOnRepaymentFrequency.isAfter(dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment)?dateBasedOnRepaymentFrequency:dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment;
-        }
-        else if(loanType.isJLGAccount()){
+            derivedFirstRepayment = dateBasedOnRepaymentFrequency.isAfter(dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment) ? dateBasedOnRepaymentFrequency
+                    : dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment;
+        } else if (loanType.isJLGAccount()) {
 
-            final LocalDate refernceDateForCalculatingFirstRepaymentDate = expectedDisbursementDate;     
-            derivedFirstRepayment = deriveFirstRepaymentDateForJLGLoans(repaymentEvery, expectedDisbursementDate,refernceDateForCalculatingFirstRepaymentDate,
-                    repaymentPeriodFrequencyType,minimumDaysBetweenDisbursalAndFirstRepayment, calendar);
+            final LocalDate refernceDateForCalculatingFirstRepaymentDate = expectedDisbursementDate;
+            derivedFirstRepayment = deriveFirstRepaymentDateForJLGLoans(repaymentEvery, expectedDisbursementDate,
+                    refernceDateForCalculatingFirstRepaymentDate, repaymentPeriodFrequencyType,
+                    minimumDaysBetweenDisbursalAndFirstRepayment, calendar);
 
         }
-        
+
         return derivedFirstRepayment;
     }
-    
-    private LocalDate deriveFirstRepaymentDateForJLGLoans(final Integer repaymentEvery, 
-            final LocalDate expectedDisbursementDate, final LocalDate refernceDateForCalculatingFirstRepaymentDate,
-            final PeriodFrequencyType repaymentPeriodFrequencyType,final Integer minimumDaysBetweenDisbursalAndFirstRepayment, 
-            final Calendar calendar){
-    	
-            final String frequency = CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(repaymentPeriodFrequencyType);
-            final LocalDate derivedFirstRepayment = CalendarUtils.getFirstRepaymentMeetingDate(calendar, refernceDateForCalculatingFirstRepaymentDate,
-                    repaymentEvery, frequency);
-            final LocalDate minimumFirstRepaymentDate = expectedDisbursementDate.plusDays(minimumDaysBetweenDisbursalAndFirstRepayment); 
-        return minimumFirstRepaymentDate.isBefore(derivedFirstRepayment) ? derivedFirstRepayment
-                :deriveFirstRepaymentDateForJLGLoans(repaymentEvery, expectedDisbursementDate,derivedFirstRepayment, repaymentPeriodFrequencyType,
-                        minimumDaysBetweenDisbursalAndFirstRepayment, calendar);
+
+    private LocalDate deriveFirstRepaymentDateForJLGLoans(final Integer repaymentEvery, final LocalDate expectedDisbursementDate,
+            final LocalDate refernceDateForCalculatingFirstRepaymentDate, final PeriodFrequencyType repaymentPeriodFrequencyType,
+            final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final Calendar calendar) {
+
+        final String frequency = CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(repaymentPeriodFrequencyType);
+        final LocalDate derivedFirstRepayment = CalendarUtils.getFirstRepaymentMeetingDate(calendar,
+                refernceDateForCalculatingFirstRepaymentDate, repaymentEvery, frequency);
+        final LocalDate minimumFirstRepaymentDate = expectedDisbursementDate.plusDays(minimumDaysBetweenDisbursalAndFirstRepayment);
+        return minimumFirstRepaymentDate.isBefore(derivedFirstRepayment) ? derivedFirstRepayment : deriveFirstRepaymentDateForJLGLoans(
+                repaymentEvery, expectedDisbursementDate, derivedFirstRepayment, repaymentPeriodFrequencyType,
+                minimumDaysBetweenDisbursalAndFirstRepayment, calendar);
     }
-    
-    private void validateMinimumDaysBetweenDisbursalAndFirstRepayment(final LocalDate disbursalDate,
-    		final LocalDate firstRepaymentDate, final Integer minimumDaysBetweenDisbursalAndFirstRepayment){
-    	
-    	final LocalDate minimumFirstRepaymentDate = disbursalDate.plusDays(minimumDaysBetweenDisbursalAndFirstRepayment);  
-    	if(firstRepaymentDate.isBefore(minimumFirstRepaymentDate)){
-            final String errorMessage = "Number of days between disbursal date (" + disbursalDate + ") and first repayment date ("
-            		+ firstRepaymentDate + ") can't be less than minimumDaysBetweenDisbursalAndFirstRepayment (" 
-            		+ minimumDaysBetweenDisbursalAndFirstRepayment + ")." ;
-            throw new MinimumDaysBetweenDisbursalAndFirstRepaymentRuleException(errorMessage);
-    	}
+
+    private void validateMinimumDaysBetweenDisbursalAndFirstRepayment(final LocalDate disbursalDate, final LocalDate firstRepaymentDate,
+            final Integer minimumDaysBetweenDisbursalAndFirstRepayment) {
+
+        final LocalDate minimumFirstRepaymentDate = disbursalDate.plusDays(minimumDaysBetweenDisbursalAndFirstRepayment);
+        if (firstRepaymentDate.isBefore(minimumFirstRepaymentDate)) { throw new MinDaysBetweenDisbursalAndFirstRepaymentViolationException(
+                disbursalDate, firstRepaymentDate, minimumDaysBetweenDisbursalAndFirstRepayment); }
     }
 }

@@ -104,14 +104,14 @@ public final class LoanProductDataValidator {
             final Long fundId = this.fromApiJsonHelper.extractLongNamed("fundId", element);
             baseDataValidator.reset().parameter("fundId").value(fundId).ignoreIfNull().integerGreaterThanZero();
         }
-        
-        if (this.fromApiJsonHelper.parameterExists("minimumDaysBetweenDisbursalAndFirstRepayment", element)) {
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment, element)) {
             final Long minimumDaysBetweenDisbursalAndFirstRepayment = this.fromApiJsonHelper.extractLongNamed(
-                    "minimumDaysBetweenDisbursalAndFirstRepayment", element);
-            baseDataValidator.reset().parameter("minimumDaysBetweenDisbursalAndFirstRepayment")
+                    LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment)
                     .value(minimumDaysBetweenDisbursalAndFirstRepayment).ignoreIfNull().integerGreaterThanZero();
         }
-        
+
         final Boolean includeInBorrowerCycle = this.fromApiJsonHelper.extractBooleanNamed("includeInBorrowerCycle", element);
         baseDataValidator.reset().parameter("includeInBorrowerCycle").value(includeInBorrowerCycle).ignoreIfNull()
                 .validateForBooleanValue();

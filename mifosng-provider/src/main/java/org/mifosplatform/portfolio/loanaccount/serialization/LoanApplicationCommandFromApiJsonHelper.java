@@ -112,19 +112,32 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             if (loanType.isJLGAccount()) {
                 baseDataValidator.reset().parameter("clientId").value(clientId).notNull().integerGreaterThanZero();
                 baseDataValidator.reset().parameter("groupId").value(groupId).notNull().longGreaterThanZero();
+                /**
+                 * these validations should be carried out based on Global
+                 * configurations, commenting them for now
+                 **/
 
-                // if it is JLG loan then must have a meeting details (calendar)
-                final String calendarIdParameterName = "calendarId";
-                final Long calendarId = this.fromApiJsonHelper.extractLongNamed(calendarIdParameterName, element);
-                baseDataValidator.reset().parameter(calendarIdParameterName).value(calendarId).notNull().integerGreaterThanZero();
-
-                // if it is JLG loan then must have a syncDisbursement
-                final String syncDisbursementParameterName = "syncDisbursementWithMeeting";
-                final Boolean syncDisbursement = this.fromApiJsonHelper.extractBooleanNamed(syncDisbursementParameterName, element);
-
-                if (syncDisbursement == null) {
-                    baseDataValidator.reset().parameter(syncDisbursementParameterName).value(syncDisbursement).trueOrFalseRequired(false);
-                }
+                /**
+                 * // if it is JLG loan then must have a meeting details
+                 * (calendar) final String calendarIdParameterName =
+                 * "calendarId"; final Long calendarId =
+                 * this.fromApiJsonHelper.extractLongNamed
+                 * (calendarIdParameterName, element);
+                 * baseDataValidator.reset().
+                 * parameter(calendarIdParameterName).value
+                 * (calendarId).notNull().integerGreaterThanZero();
+                 * 
+                 * // if it is JLG loan then must have a syncDisbursement final
+                 * String syncDisbursementParameterName =
+                 * "syncDisbursementWithMeeting"; final Boolean syncDisbursement
+                 * = this.fromApiJsonHelper.extractBooleanNamed(
+                 * syncDisbursementParameterName, element);
+                 * 
+                 * if (syncDisbursement == null) {
+                 * baseDataValidator.reset().parameter
+                 * (syncDisbursementParameterName
+                 * ).value(syncDisbursement).trueOrFalseRequired(false); }
+                 **/
             }
 
         }
