@@ -472,7 +472,7 @@ public class LoanScheduleAssembler {
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final Calendar calendar) {
 
         LocalDate derivedFirstRepayment = null;
-        LocalDate dateBasedOnRepaymentFrequency;
+        LocalDate dateBasedOnRepaymentFrequency = null;
         final LocalDate dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment = expectedDisbursementDate
                 .plusDays(minimumDaysBetweenDisbursalAndFirstRepayment);
 
