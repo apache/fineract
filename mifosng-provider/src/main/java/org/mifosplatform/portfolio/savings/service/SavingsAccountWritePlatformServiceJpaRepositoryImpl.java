@@ -708,7 +708,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         savingsAccount.getTransactions().add(acceptTransferTransaction);
         savingsAccount.setStatus(SavingsAccountStatusType.ACTIVE.getValue());
         if (fieldOfficer != null) {
-            savingsAccount.update(fieldOfficer);
+            savingsAccount.reassignSavingsOfficer(fieldOfficer, transferDate);
         }
         boolean isInterestTransfer = false;
         final MathContext mc = MathContext.DECIMAL64;

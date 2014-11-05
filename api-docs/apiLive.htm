@@ -1460,9 +1460,16 @@
 							<tr>
 								<td><a href="#journalentries">Journal Entries</a></td>
 								<td>journalentries</td>
-								<td><a href="#journalentries_create">Create Journal Entries</a><br> 
-								<a href="#journalentries_updatebalance">Update Journal Entries Running Balance</a></td>
+								<td><a href="#journalentries_create">Create Journal Entries</a></td>
 								<td><a href="#journalentries_list">List Journal Entries</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>journalentries?command=updateRunningBalance</td>
+								<td><a href="#journalentries_updatebalance">Update Running Balance for Journal Entries</a></td>
+								<td></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -30795,7 +30802,7 @@ Request Body:
 POST https://DomainName/api/v1/journalentries?command=updateRunningBalance
                     </code>
                     <code class="method-request">
-POST journalentries
+POST journalentries?command=updateRunningBalance
 Content-Type: application/json 
 Request Body:
 {
@@ -30893,7 +30900,7 @@ GET https://DomainName/api/v1/journalentries/{entryId}
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
-GET https://DomainName/api/v1/journalentries/{transactionId}
+GET https://DomainName/api/v1/journalentries/{transactionId}?command=reverse
                     </code>
                     <code class="method-request">
 POST journalentries/C1MAE935K0IAEYA?command=reverse
@@ -33203,9 +33210,16 @@ No Request Body:
 				<tr>
 					<td><a href="#journalentries">Journal Entries</a></td>
 					<td>journalentries</td>
-					<td><a href="#journalentries_create">Create Journal Entries</a><br>
-					<a href="#journalentries_updatebalance">Update Journal Entries Running Balance</a></td>
+					<td><a href="#journalentries_create">Create Journal Entries</a></td>
 					<td><a href="#journalentries_list">List Journal Entries</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>journalentries?command=updateRunningBalance</td>
+					<td><a href="#journalentries_updatebalance">Update Running Balance for Journal Entries</a></td>
+					<td></td>
 					<td></td>
 					<td></td>
 				</tr>

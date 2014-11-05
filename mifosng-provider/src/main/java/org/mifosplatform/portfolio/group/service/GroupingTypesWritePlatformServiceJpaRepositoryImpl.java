@@ -469,7 +469,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                         for (final SavingsAccount savingsAccount : this.savingsAccountRepository
                                 .findSavingAccountByClientId(client.getId())) {
                             if (!savingsAccount.isClosed()) {
-                                savingsAccount.update(staff);
+                                savingsAccount.reassignSavingsOfficer(staff, loanOfficerReassignmentDate);
                             }
                         }
                     }
