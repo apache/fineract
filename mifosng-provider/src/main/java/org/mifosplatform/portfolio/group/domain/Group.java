@@ -617,4 +617,7 @@ public final class Group extends AbstractPersistable<Long> {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
+    public Set<Client> getClientMembers() {
+        return this.clientMembers;
+    }
 }
