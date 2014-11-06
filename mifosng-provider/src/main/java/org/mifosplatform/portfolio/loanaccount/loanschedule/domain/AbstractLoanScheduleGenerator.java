@@ -794,6 +794,12 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
                     Money principalDue = Money.of(currency, period.principalDue());
                     Money interestDue = Money.of(currency, period.interestDue());
+                    
+                    if(principalDue.isZero() && interestDue.isZero()) {
+                        period.updateFeeChargesDue(Money.zero(currency));
+                        period.updatePenaltyChargesDue(Money.zero(currency));
+                    }
+                    
                     Money feeChargesDue = Money.of(currency, period.feeChargesDue());
                     Money penaltyChargesDue = Money.of(currency, period.penaltyChargesDue());
 
