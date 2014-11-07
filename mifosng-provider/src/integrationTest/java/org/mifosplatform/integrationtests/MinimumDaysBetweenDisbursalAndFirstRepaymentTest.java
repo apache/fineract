@@ -6,7 +6,6 @@
 package org.mifosplatform.integrationtests;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +22,6 @@ import org.mifosplatform.integrationtests.common.loans.LoanApplicationTestBuilde
 import org.mifosplatform.integrationtests.common.loans.LoanProductTestBuilder;
 import org.mifosplatform.integrationtests.common.loans.LoanStatusChecker;
 import org.mifosplatform.integrationtests.common.loans.LoanTransactionHelper;
-import org.mifosplatform.integrationtests.common.savings.SavingsAccountHelper;
 
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
@@ -136,7 +134,7 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
 
         List<HashMap> error = (List<HashMap>) this.loanTransactionHelper.createLoanAccount(loanApplicationJSON,
                 CommonConstants.RESPONSE_ERROR);
-        assertEquals("validation.msg.loan.days.between.first.repayment.and.disbursal.are.less than.minimum.number.of.days.required", error
+        assertEquals("error.msg.loan.days.between.first.repayment.and.disbursal.are.less.than.minimum.allowed.numbers", error
                 .get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
     }

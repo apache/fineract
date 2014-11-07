@@ -42,7 +42,7 @@ public class LoanProductTestBuilder {
     public static final String RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS = "2";
     public static final String RECALCULATION_STRATEGY_REDUCE_EMI_AMOUN = "3";
 
-    public static final String RECALCULATION_COMPOUNDING_METHOD_NONE= "0";
+    public static final String RECALCULATION_COMPOUNDING_METHOD_NONE = "0";
     public static final String RECALCULATION_COMPOUNDING_METHOD_INTEREST = "1";
     public static final String RECALCULATION_COMPOUNDING_METHOD_FEE = "2";
     public static final String RECALCULATION_COMPOUNDING_METHOD_INTEREST_AND_FEE = "3";
@@ -87,7 +87,7 @@ public class LoanProductTestBuilder {
     private String recalculationRestFrequencyType = "1";
     private String recalculationRestFrequencyInterval = "0";
     private String recalculationRestFrequencyDate = null;
-    private String minimumDaysBetweenDisbursalAndFirstRepayment = "0";
+    private String minimumDaysBetweenDisbursalAndFirstRepayment = null;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -121,7 +121,9 @@ public class LoanProductTestBuilder {
         map.put("minPrincipal", this.minPrincipal);
         map.put("maxPrincipal", this.maxPrincipal);
         map.put("overdueDaysForNPA", this.overdueDaysForNPA);
-        map.put("minimumDaysBetweenDisbursalAndFirstRepayment", this.minimumDaysBetweenDisbursalAndFirstRepayment);
+        if (this.minimumDaysBetweenDisbursalAndFirstRepayment != null) {
+            map.put("minimumDaysBetweenDisbursalAndFirstRepayment", this.minimumDaysBetweenDisbursalAndFirstRepayment);
+        }
         if (multiDisburseLoan) {
             map.put("multiDisburseLoan", this.multiDisburseLoan);
             map.put("maxTrancheCount", this.maxTrancheCount);
@@ -379,8 +381,8 @@ public class LoanProductTestBuilder {
         return this;
     }
 
-    public LoanProductTestBuilder  withMinimumDaysBetweenDisbursalAndFirstRepayment(final String minimumDaysBetweenDisbursalAndFirstRepayment){ 
-    	this.minimumDaysBetweenDisbursalAndFirstRepayment = minimumDaysBetweenDisbursalAndFirstRepayment;
-    	return this;
+    public LoanProductTestBuilder withMinimumDaysBetweenDisbursalAndFirstRepayment(final String minimumDaysBetweenDisbursalAndFirstRepayment) {
+        this.minimumDaysBetweenDisbursalAndFirstRepayment = minimumDaysBetweenDisbursalAndFirstRepayment;
+        return this;
     }
 }
