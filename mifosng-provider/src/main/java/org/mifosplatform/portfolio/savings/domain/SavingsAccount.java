@@ -870,7 +870,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final BigDecimal withdrawalFee = null;
             // deal with potential minRequiredBalance and
             // enforceMinRequiredBalance
-            if (!isWithdrawBalance && transaction.isDebit()) {
+            if (!isWithdrawBalance && transaction.canProcessBalanceCheck()) {
                 if (runningBalance.minus(minRequiredBalance).isLessThanZero()) { throw new InsufficientAccountBalanceException(
                         "transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount); }
             }
@@ -891,7 +891,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             }
 
             // enforceMinRequiredBalance
-            if (transaction.isDebit()) {
+            if (transaction.canProcessBalanceCheck()) {
                 if (runningBalance.minus(minRequiredBalance).isLessThanZero()) {
                     final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
                     final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)

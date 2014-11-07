@@ -202,9 +202,10 @@ public class ClientSavingsIntegrationTest {
         Assert.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = "1500.0";
+        final String openningBalance = "1600";
         final String enforceMinRequiredBalance = "true";
         final boolean allowOverdraft = false;
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, openningBalance ,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
         Assert.assertNotNull(savingsProductID);
 
@@ -227,7 +228,7 @@ public class ClientSavingsIntegrationTest {
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        Float balance = new Float(MINIMUM_OPENING_BALANCE);
+        Float balance = new Float(openningBalance);
         Float chargeAmt = 100f;
         balance -= chargeAmt;
         assertEquals("Verifying opening Balance", balance, summary.get("accountBalance"));

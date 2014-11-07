@@ -77,4 +77,8 @@ public class SavingsAccountChargePaidBy extends AbstractPersistable<Long> {
     public boolean isPenaltyCharge() {
         return (this.savingsAccountCharge == null) ? false : this.savingsAccountCharge.isPenaltyCharge();
     }
+
+    public boolean canOverriteSavingAccountRules() {
+        return (this.savingsAccountCharge == null) ? false : this.savingsAccountCharge.canOverriteSavingAccountRules();
+    }
 }

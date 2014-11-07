@@ -514,6 +514,15 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isWaiveCharge();
     }
 
+    private boolean canOverriteSavingAccountRules() {
+        final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
+        return (isChargeTransaction() && chargePaidBy != null) ? chargePaidBy.canOverriteSavingAccountRules() : false;
+    }
+
+    public boolean canProcessBalanceCheck() {
+        return isDebit() && !canOverriteSavingAccountRules();
+    }
+
     public boolean isFeeCharge() {
         final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
         return (isPayCharge() && chargePaidBy != null) ? chargePaidBy.isFeeCharge() : false;
