@@ -5,13 +5,18 @@
  */
 package org.mifosplatform.portfolio.account.service;
 
+import java.util.Collection;
+
+import org.mifosplatform.portfolio.account.data.AccountAssociationsData;
 import org.mifosplatform.portfolio.account.data.PortfolioAccountData;
 
 public interface AccountAssociationsReadPlatformService {
 
-    public PortfolioAccountData retriveLoanAssociation(final Long loanId);
+    public PortfolioAccountData retriveLoanLinkedAssociation(final Long loanId);
 
     public boolean isLinkedWithAnyActiveAccount(final Long savingsId);
 
-    public PortfolioAccountData retriveSavingsAssociation(final Long savingsId);
+    public PortfolioAccountData retriveSavingsLinkedAssociation(final Long savingsId);
+
+    public Collection<AccountAssociationsData> retriveLoanAssociations(Long loanId, Integer associationType);
 }

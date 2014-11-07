@@ -26,6 +26,7 @@ import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityExce
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.staff.domain.Staff;
+import org.mifosplatform.portfolio.account.domain.AccountAssociationType;
 import org.mifosplatform.portfolio.account.domain.AccountAssociations;
 import org.mifosplatform.portfolio.account.domain.AccountAssociationsRepository;
 import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
@@ -254,7 +255,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(savingsAccountId);
                 this.fromApiJsonDeserializer.validatelinkedSavingsAccount(savingsAccount, newLoanApplication);
                 final AccountAssociations accountAssociations = AccountAssociations.associateSavingsAccount(newLoanApplication,
-                        savingsAccount);
+                        savingsAccount, AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
                 this.accountAssociationsRepository.save(accountAssociations);
             }
 
@@ -589,7 +590,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(savingsAccountId);
                     this.fromApiJsonDeserializer.validatelinkedSavingsAccount(savingsAccount, existingLoanApplication);
                     if (accountAssociations == null) {
-                        accountAssociations = AccountAssociations.associateSavingsAccount(existingLoanApplication, savingsAccount);
+                        accountAssociations = AccountAssociations.associateSavingsAccount(existingLoanApplication, savingsAccount,
+                                AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
                     } else {
                         accountAssociations.updateLinkedSavingsAccount(savingsAccount);
                     }

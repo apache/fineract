@@ -129,6 +129,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
     private LoanProductInterestRecalculationDetails productInterestRecalculationDetails;
 
+    @Column(name = "hold_guarantee_funds")
+    private boolean holdGuaranteeFunds;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
+    private LoanProductGuaranteeDetails loanProductGuaranteeDetails;
+
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator) {
 
@@ -211,6 +218,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
         if (isInterestRecalculationEnabled) {
             interestRecalculationSettings = LoanProductInterestRecalculationDetails.createFrom(command);
         }
+
+        final boolean holdGuarantorFunds = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.holdGuaranteeFundsParamName);
+        LoanProductGuaranteeDetails loanProductGuaranteeDetails = null;
+        if (holdGuarantorFunds) {
+            loanProductGuaranteeDetails = LoanProductGuaranteeDetails.createFrom(command);
+        }
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
                 annualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentFrequencyType,
@@ -218,12 +232,18 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 graceOnInterestCharged, amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle,
                 startDate, closeDate, externalId, useBorrowerCycle, loanProductBorrowerCycleVariations, multiDisburseLoan, maxTrancheCount,
                 outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
-                isInterestRecalculationEnabled, interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment);
+                isInterestRecalculationEnabled, interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment,
+                holdGuarantorFunds, loanProductGuaranteeDetails);
 
     }
 
-    public void updateLoanProductForInterestRecalculationDetails() {
-        this.productInterestRecalculationDetails.updateProduct(this);
+    public void updateLoanProductInRelatedClasses() {
+        if (this.isInterestRecalculationEnabled()) {
+            this.productInterestRecalculationDetails.updateProduct(this);
+        }
+        if (this.holdGuaranteeFunds) {
+            this.loanProductGuaranteeDetails.updateProduct(this);
+        }
     }
 
     /**
@@ -437,7 +457,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final Integer overdueDaysForNPA, final DaysInMonthType daysInMonthType, final DaysInYearType daysInYearType,
             final boolean isInterestRecalculationEnabled,
             final LoanProductInterestRecalculationDetails productInterestRecalculationDetails,
-            final Integer minimumDaysBetweenDisbursalAndFirstRepayment) {
+            final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final boolean holdGuarantorFunds,
+            final LoanProductGuaranteeDetails loanProductGuaranteeDetails) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -487,6 +508,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
         this.overdueDaysForNPA = overdueDaysForNPA;
         this.productInterestRecalculationDetails = productInterestRecalculationDetails;
         this.minimumDaysBetweenDisbursalAndFirstRepayment = minimumDaysBetweenDisbursalAndFirstRepayment;
+        this.holdGuaranteeFunds = holdGuarantorFunds;
+        this.loanProductGuaranteeDetails = loanProductGuaranteeDetails;
     }
 
     public MonetaryCurrency getCurrency() {
@@ -688,6 +711,30 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
         if (!isInterestRecalculationEnabledChanged && this.isInterestRecalculationEnabled()) {
             this.productInterestRecalculationDetails.update(command, actualChanges, localeAsInput);
+        }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.holdGuaranteeFundsParamName, this.holdGuaranteeFunds)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.holdGuaranteeFundsParamName);
+            actualChanges.put(LoanProductConstants.holdGuaranteeFundsParamName, newValue);
+            this.holdGuaranteeFunds = newValue;
+        }
+
+        if (actualChanges.containsKey(LoanProductConstants.holdGuaranteeFundsParamName)) {
+            if (this.holdGuaranteeFunds) {
+                this.loanProductGuaranteeDetails = LoanProductGuaranteeDetails.createFrom(command);
+                this.loanProductGuaranteeDetails.updateProduct(this);
+                actualChanges.put(LoanProductConstants.mandatoryGuaranteeParamName,
+                        this.loanProductGuaranteeDetails.getMandatoryGuarantee());
+                actualChanges.put(LoanProductConstants.minimumGuaranteeFromGuarantorParamName,
+                        this.loanProductGuaranteeDetails.getMinimumGuaranteeFromGuarantor());
+                actualChanges.put(LoanProductConstants.minimumGuaranteeFromOwnFundsParamName,
+                        this.loanProductGuaranteeDetails.getMinimumGuaranteeFromOwnFunds());
+            } else {
+                this.loanProductGuaranteeDetails = null;
+            }
+
+        } else if (this.holdGuaranteeFunds) {
+            this.loanProductGuaranteeDetails.update(command, actualChanges);
         }
 
         return actualChanges;
@@ -928,5 +975,14 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     public LoanProductInterestRecalculationDetails getProductInterestRecalculationDetails() {
         return this.productInterestRecalculationDetails;
+    }
+
+    public boolean isHoldGuaranteeFundsEnabled() {
+        return this.holdGuaranteeFunds;
+    }
+
+    
+    public LoanProductGuaranteeDetails getLoanProductGuaranteeDetails() {
+        return this.loanProductGuaranteeDetails;
     }
 }

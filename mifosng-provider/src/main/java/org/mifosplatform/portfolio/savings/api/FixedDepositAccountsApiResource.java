@@ -209,7 +209,7 @@ public class FixedDepositAccountsApiResource {
 
             if (associationParameters.contains(SavingsApiConstants.linkedAccount)) {
                 mandatoryResponseParameters.add(SavingsApiConstants.linkedAccount);
-                linkedAccount = this.accountAssociationsReadPlatformService.retriveSavingsAssociation(accountId);
+                linkedAccount = this.accountAssociationsReadPlatformService.retriveSavingsLinkedAssociation(accountId);
             }
         }
 

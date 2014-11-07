@@ -405,7 +405,7 @@ public class LoansApiResource {
 
             if (associationParameters.contains("linkedAccount")) {
                 mandatoryResponseParameters.add("linkedAccount");
-                linkedAccount = this.accountAssociationsReadPlatformService.retriveLoanAssociation(loanId);
+                linkedAccount = this.accountAssociationsReadPlatformService.retriveLoanLinkedAssociation(loanId);
             }
 
         }
@@ -460,7 +460,7 @@ public class LoansApiResource {
 
             if (!associationParameters.contains("linkedAccount")) {
                 mandatoryResponseParameters.add("linkedAccount");
-                linkedAccount = this.accountAssociationsReadPlatformService.retriveLoanAssociation(loanId);
+                linkedAccount = this.accountAssociationsReadPlatformService.retriveLoanLinkedAssociation(loanId);
             }
             if (loanBasicDetails.groupId() != null) {
                 calendarOptions = this.loanReadPlatformService.retrieveCalendars(loanBasicDetails.groupId());

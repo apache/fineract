@@ -72,4 +72,10 @@ public interface LoanProductConstants {
     public static final String recalculationRestFrequencyIntervalParameterName = "recalculationRestFrequencyInterval";
     public static final String recalculationRestFrequencyDateParamName = "recalculationRestFrequencyDate";
 
+    // Guarantee related
+    public static final String holdGuaranteeFundsParamName = "holdGuaranteeFunds";
+    public static final String mandatoryGuaranteeParamName = "mandatoryGuarantee";
+    public static final String minimumGuaranteeFromOwnFundsParamName = "minimumGuaranteeFromOwnFunds";
+    public static final String minimumGuaranteeFromGuarantorParamName = "minimumGuaranteeFromGuarantor";
+
 }

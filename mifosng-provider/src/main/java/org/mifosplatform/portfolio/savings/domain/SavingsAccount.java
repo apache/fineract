@@ -249,6 +249,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "min_required_balance", scale = 6, precision = 19, nullable = true)
     private BigDecimal minRequiredBalance;
 
+    @Column(name = "on_hold_funds_derived", scale = 6, precision = 19, nullable = true)
+    private BigDecimal onHoldFunds;
+
     @Temporal(TemporalType.DATE)
     @Column(name = "start_interest_calculation_date")
     protected Date startInterestCalculationDate;
@@ -854,6 +857,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     public void validateAccountBalanceDoesNotBecomeNegative(final BigDecimal transactionAmount, final boolean isWithdrawBalance) {
         final List<SavingsAccountTransaction> transactionsSortedByDate = retreiveListOfTransactions();
         Money runningBalance = Money.zero(this.currency);
+        Money minRequiredBalance = minRequiredBalanceDerived(getCurrency());
         for (final SavingsAccountTransaction transaction : transactionsSortedByDate) {
             if (transaction.isNotReversed() && transaction.isCredit()) {
                 runningBalance = runningBalance.plus(transaction.getAmount(this.currency));
@@ -866,21 +870,11 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final BigDecimal withdrawalFee = null;
             // deal with potential minRequiredBalance and
             // enforceMinRequiredBalance
-            if (!isWithdrawBalance && this.minRequiredBalance != null && this.enforceMinRequiredBalance && transaction.isWithdrawal()) {
-                if (runningBalance.minus(this.minRequiredBalance).isLessThanZero()) { throw new InsufficientAccountBalanceException(
+            if (!isWithdrawBalance && transaction.isDebit()) {
+                if (runningBalance.minus(minRequiredBalance).isLessThanZero()) { throw new InsufficientAccountBalanceException(
                         "transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount); }
             }
 
-            if (runningBalance.isLessThanZero()) {
-                Money limit = runningBalance.zero();
-                if (this.allowOverdraft) {
-                    if (this.overdraftLimit != null) {
-                        limit = limit.plus(this.overdraftLimit);
-                    }
-                }
-                if (limit.plus(runningBalance).isLessThanZero()) { throw new InsufficientAccountBalanceException("transactionAmount",
-                        getAccountBalance(), withdrawalFee, transactionAmount); }
-            }
         }
     }
 
@@ -888,7 +882,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final List<SavingsAccountTransaction> transactionsSortedByDate = retreiveListOfTransactions();
         Money runningBalance = Money.zero(this.currency);
-
+        Money minRequiredBalance = minRequiredBalanceDerived(getCurrency());
         for (final SavingsAccountTransaction transaction : transactionsSortedByDate) {
             if (transaction.isNotReversed() && transaction.isCredit()) {
                 runningBalance = runningBalance.plus(transaction.getAmount(this.currency));
@@ -896,24 +890,20 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 runningBalance = runningBalance.minus(transaction.getAmount(this.currency));
             }
 
-            if (runningBalance.isLessThanZero()) {
-                //
-                final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-                final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(depositAccountType()
-                        .resourceName() + transactionAction);
-
-                if (this.allowOverdraft) {
-                    Money limit = runningBalance.zero();
-                    if (this.overdraftLimit != null) {
-                        limit = limit.plus(this.overdraftLimit);
-                    }
-                    if (limit.plus(runningBalance).isLessThanZero()) {
+            // enforceMinRequiredBalance
+            if (transaction.isDebit()) {
+                if (runningBalance.minus(minRequiredBalance).isLessThanZero()) {
+                    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                    final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                            .resource(depositAccountType().resourceName() + transactionAction);
+                    if (this.allowOverdraft) {
                         baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("results.in.balance.exceeding.overdraft.limit");
+                    } else {
+                        baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("results.in.balance.going.negative");
                     }
-                } else {
-                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("results.in.balance.going.negative");
+                    if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
                 }
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+
             }
         }
     }
@@ -2429,5 +2419,16 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             }
         }
         return savingsAccountCharge;
+    }
+
+    private Money minRequiredBalanceDerived(final MonetaryCurrency currency) {
+        Money minReqBalance = Money.of(currency, this.onHoldFunds);
+        if (this.enforceMinRequiredBalance) {
+            minReqBalance = minReqBalance.plus(this.minRequiredBalance);
+        }
+        if (this.allowOverdraft) {
+            minReqBalance = minReqBalance.minus(this.overdraftLimit);
+        }
+        return minReqBalance;
     }
 }

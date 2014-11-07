@@ -196,7 +196,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             if (amountForDeposit.isGreaterThanZero()) {
 
                 final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService
-                        .retriveSavingsAssociation(savingsId);
+                        .retriveSavingsLinkedAssociation(savingsId);
 
                 if (portfolioAccountData == null) {
                     final PaymentDetail paymentDetail = null;
@@ -274,7 +274,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             Money amountForDeposit = account.activateWithBalance();
             if (amountForDeposit.isGreaterThanZero()) {
                 final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService
-                        .retriveSavingsAssociation(savingsId);
+                        .retriveSavingsLinkedAssociation(savingsId);
                 if (portfolioAccountData == null) {
                     this.depositAccountDomainService.handleRDDeposit(account, fmt, account.getActivationLocalDate(),
                             amountForDeposit.getAmount(), null, isRegularTransaction);
