@@ -97,6 +97,19 @@ public class LoanTransactionHelper {
     public HashMap approveLoan(final String approvalDate, final Integer loanID) {
         return performLoanTransaction(createLoanOperationURL(APPROVE_LOAN_COMMAND, loanID), getApproveLoanAsJSON(approvalDate));
     }
+    
+    public HashMap approveLoanWithApproveAmount(final String approvalDate, final String approvalAmount, final Integer loanID) {
+        return performLoanTransaction(createLoanOperationURL(APPROVE_LOAN_COMMAND, loanID), getApproveLoanAsJSON(approvalDate, approvalAmount));
+    }
+    
+    public Object approveLoanWithApproveAmount(final String approvalDate, final String approvalAmount, final Integer loanID,
+            final String responseAttribute) {
+        
+        final String approvalURL = createLoanOperationURL(APPROVE_LOAN_COMMAND, loanID);
+        final String approvalJSONData = getApproveLoanAsJSON(approvalDate, approvalAmount);
+        
+        return performLoanTransaction(approvalURL, approvalJSONData, responseAttribute);
+    }
 
     public HashMap undoApproval(final Integer loanID) {
         final String undoBodyJson = "{'note':'UNDO APPROVAL'}";
@@ -202,6 +215,16 @@ public class LoanTransactionHelper {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
+        map.put("approvedOnDate", approvalDate);
+        map.put("note", "Approval NOTE");
+        return new Gson().toJson(map);
+    }
+    
+    private String getApproveLoanAsJSON(final String approvalDate, final String approvalAmount) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", "en");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("approvedLoanAmount", approvalAmount);
         map.put("approvedOnDate", approvalDate);
         map.put("note", "Approval NOTE");
         return new Gson().toJson(map);
@@ -355,6 +378,11 @@ public class LoanTransactionHelper {
                 "changes");
         return (HashMap) response.get("status");
     }
+    
+    private Object performLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent, final String responseAttribute) {
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoanTransaction, jsonToBeSent, responseAttribute);
+    }
+    
     
     public HashMap getPrepayAmount(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer loanID) {
         final String URL = "/mifosng-provider/api/v1/loans/" + loanID + "/transactions/template?command=prepayLoan&" + Utils.TENANT_IDENTIFIER;
