@@ -12,6 +12,7 @@ import org.joda.time.Weeks;
 import org.joda.time.Years;
 import org.mifosplatform.organisation.holiday.service.HolidayUtil;
 import org.mifosplatform.organisation.workingdays.service.WorkingDaysUtil;
+import org.mifosplatform.portfolio.common.domain.DayOfWeekType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
 
@@ -41,7 +42,8 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             dueRepaymentPeriodDate = firstRepaymentPeriodDate;
         } else {
             dueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
-                    loanApplicationTerms.getRepaymentEvery(), lastRepaymentDate);
+                    loanApplicationTerms.getRepaymentEvery(), lastRepaymentDate, loanApplicationTerms.getNthDay(),
+                    loanApplicationTerms.getWeekDayType());
         }
         return dueRepaymentPeriodDate;
     }
@@ -58,7 +60,8 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         while (WorkingDaysUtil.isNonWorkingDay(holidayDetailDTO.getWorkingDays(), adjustedDate)) {
 
             final LocalDate nextDueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
-                    loanApplicationTerms.getRepaymentEvery(), adjustedDate);
+                    loanApplicationTerms.getRepaymentEvery(), adjustedDate, loanApplicationTerms.getNthDay(),
+                    loanApplicationTerms.getWeekDayType());
             adjustedDate = WorkingDaysUtil.getOffSetDateIfNonWorkingDay(adjustedDate, nextDueRepaymentPeriodDate,
                     holidayDetailDTO.getWorkingDays());
         }
@@ -70,7 +73,8 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
     }
 
     @Override
-    public LocalDate getRepaymentPeriodDate(final PeriodFrequencyType frequency, final int repaidEvery, final LocalDate startDate) {
+    public LocalDate getRepaymentPeriodDate(final PeriodFrequencyType frequency, final int repaidEvery, final LocalDate startDate,
+            Integer nthDay, DayOfWeekType dayOfWeek) {
         LocalDate dueRepaymentPeriodDate = startDate;
         switch (frequency) {
             case DAYS:
@@ -81,6 +85,9 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             break;
             case MONTHS:
                 dueRepaymentPeriodDate = startDate.plusMonths(repaidEvery);
+                if (!(nthDay == null || nthDay == 0 || dayOfWeek == null || dayOfWeek == DayOfWeekType.INVALID)) {
+                    dueRepaymentPeriodDate = adjustToNthWeekDay(dueRepaymentPeriodDate, nthDay, dayOfWeek.getValue());
+                }
             break;
             case YEARS:
                 dueRepaymentPeriodDate = startDate.plusYears(repaidEvery);
@@ -88,6 +95,21 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             case INVALID:
             break;
         }
+        return dueRepaymentPeriodDate;
+    }
+
+    private LocalDate adjustToNthWeekDay(LocalDate dueRepaymentPeriodDate, int nthDay, int dayOfWeek) {
+        // adjust date to start of month
+        dueRepaymentPeriodDate = dueRepaymentPeriodDate.withDayOfMonth(1);
+        // adjust date to next week if current day is past specified day of
+        // week.
+        if (dueRepaymentPeriodDate.getDayOfWeek() > dayOfWeek) {
+            dueRepaymentPeriodDate = dueRepaymentPeriodDate.plusWeeks(1);
+        }
+        // adjust date to specified date of week
+        dueRepaymentPeriodDate = dueRepaymentPeriodDate.withDayOfWeek(dayOfWeek);
+        // adjust to specified nth week day
+        dueRepaymentPeriodDate = dueRepaymentPeriodDate.plusWeeks(nthDay - 1);
         return dueRepaymentPeriodDate;
     }
 

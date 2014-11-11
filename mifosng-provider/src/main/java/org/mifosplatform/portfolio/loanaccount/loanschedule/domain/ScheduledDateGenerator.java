@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.loanaccount.loanschedule.domain;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.portfolio.common.domain.DayOfWeekType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
 
@@ -18,9 +19,11 @@ public interface ScheduledDateGenerator {
 
     LocalDate generateNextRepaymentDate(LocalDate lastRepaymentDate, LoanApplicationTerms loanApplicationTerms, boolean isFirstRepayment);
 
-    LocalDate adjustRepaymentDate(LocalDate dueRepaymentPeriodDate, LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO);
+    LocalDate adjustRepaymentDate(LocalDate dueRepaymentPeriodDate, LoanApplicationTerms loanApplicationTerms,
+            final HolidayDetailDTO holidayDetailDTO);
 
-    LocalDate getRepaymentPeriodDate(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate);
+    LocalDate getRepaymentPeriodDate(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate, Integer nthDay,
+            DayOfWeekType dayOfWeek);
 
     Boolean isDateFallsInSchedule(PeriodFrequencyType frequency, int repaidEvery, LocalDate startDate, LocalDate date);
 

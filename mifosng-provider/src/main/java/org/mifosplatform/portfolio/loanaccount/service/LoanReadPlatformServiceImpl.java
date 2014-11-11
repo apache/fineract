@@ -501,7 +501,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.principal_amount as principal,l.approved_principal as approvedPrincipal, l.arrearstolerance_amount as inArrearsTolerance, l.number_of_repayments as numberOfRepayments, l.repay_every as repaymentEvery,"
                     + " l.grace_on_principal_periods as graceOnPrincipalPayment, l.grace_on_interest_periods as graceOnInterestPayment, l.grace_interest_free_periods as graceOnInterestCharged,l.grace_on_arrears_ageing as graceOnArrearsAgeing,"
                     + " l.nominal_interest_rate_per_period as interestRatePerPeriod, l.annual_nominal_interest_rate as annualInterestRate, "
-                    + " l.repayment_period_frequency_enum as repaymentFrequencyType, l.interest_period_frequency_enum as interestRateFrequencyType, "
+                    + " l.repayment_period_frequency_enum as repaymentFrequencyType, l.repayment_frequency_nth_day_enum as repaymentFrequencyNthDayType, l.repayment_frequency_day_of_week_enum as repaymentFrequencyDayOfWeekType, l.interest_period_frequency_enum as interestRateFrequencyType, "
                     + " l.term_frequency as termFrequency, l.term_period_frequency_enum as termPeriodFrequencyType, "
                     + " l.amortization_method_enum as amortizationType, l.interest_method_enum as interestType, l.interest_calculated_in_period_enum as interestCalculationPeriodType,"
                     + " l.loan_status_id as lifeCycleStatusId, l.loan_transaction_strategy_id as transactionStrategyId, "
@@ -679,6 +679,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             final int repaymentFrequencyTypeInt = JdbcSupport.getInteger(rs, "repaymentFrequencyType");
             final EnumOptionData repaymentFrequencyType = LoanEnumerations.repaymentFrequencyType(repaymentFrequencyTypeInt);
+            
+            final int repaymentFrequencyNthDayTypeInt = JdbcSupport.getInteger(rs, "repaymentFrequencyNthDayType");
+            final EnumOptionData repaymentFrequencyNthDayType = LoanEnumerations.repaymentFrequencyNthDayType(repaymentFrequencyNthDayTypeInt);
+            
+            final int repaymentFrequencyDayOfWeekTypeInt = JdbcSupport.getInteger(rs, "repaymentFrequencyDayOfWeekType");
+            final EnumOptionData repaymentFrequencyDayOfWeekType = LoanEnumerations.repaymentFrequencyDayOfWeekType(repaymentFrequencyDayOfWeekTypeInt);
 
             final int interestRateFrequencyTypeInt = JdbcSupport.getInteger(rs, "interestRateFrequencyType");
             final EnumOptionData interestRateFrequencyType = LoanEnumerations.interestRateFrequencyType(interestRateFrequencyTypeInt);
@@ -805,12 +811,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     loanType, loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
                     loanOfficerId, loanOfficerName, currencyData, principal, approvedPrincipal, totalOverpaid, inArrearsTolerance,
                     termFrequency, termPeriodFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType,
-                    transactionStrategyId, transactionStrategyName, amortizationType, interestRatePerPeriod, interestRateFrequencyType,
-                    annualInterestRate, interestType, interestCalculationPeriodType, expectedFirstRepaymentOnDate, graceOnPrincipalPayment,
-                    graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, timeline, loanSummary,
-                    feeChargesDueAtDisbursementCharged, syncDisbursementWithMeeting, loanCounter, loanProductCounter, multiDisburseLoan,
-                    fixedEmiAmount, outstandingLoanBalance, inArrears, graceOnArrearsAgeing, isNPA, daysInMonthType, daysInYearType,
-                    isInterestRecalculationEnabled, interestRecalculationData);
+                    repaymentFrequencyNthDayType, repaymentFrequencyDayOfWeekType, transactionStrategyId, transactionStrategyName, amortizationType,
+                    interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType,
+                    expectedFirstRepaymentOnDate, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate,
+                    timeline, loanSummary, feeChargesDueAtDisbursementCharged, syncDisbursementWithMeeting, loanCounter,
+                    loanProductCounter, multiDisburseLoan, fixedEmiAmount, outstandingLoanBalance, inArrears, graceOnArrearsAgeing, isNPA,
+                    daysInMonthType, daysInYearType, isInterestRecalculationEnabled, interestRecalculationData);
         }
     }
 
@@ -1232,6 +1238,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 .retrieveLoanTermFrequencyTypeOptions();
         final Collection<EnumOptionData> repaymentFrequencyTypeOptions = this.loanDropdownReadPlatformService
                 .retrieveRepaymentFrequencyTypeOptions();
+        final Collection<EnumOptionData> repaymentFrequencyNthDayTypeOptions = this.loanDropdownReadPlatformService
+                .retrieveRepaymentFrequencyOptionsForNthDayOfMonth();
+        final Collection<EnumOptionData> repaymentFrequencyDaysOfWeekTypeOptions = this.loanDropdownReadPlatformService
+                .retrieveRepaymentFrequencyOptionsForDaysOfWeek();
         final Collection<EnumOptionData> interestRateFrequencyTypeOptions = this.loanDropdownReadPlatformService
                 .retrieveInterestRateFrequencyTypeOptions();
         final Collection<EnumOptionData> amortizationTypeOptions = this.loanDropdownReadPlatformService
@@ -1257,6 +1267,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
 
         return LoanAccountData.loanProductWithTemplateDefaults(loanProduct, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
+        		repaymentFrequencyNthDayTypeOptions, repaymentFrequencyDaysOfWeekTypeOptions,
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, loanPurposeOptions, loanCollateralOptions,
                 loanCycleCounter);
