@@ -85,7 +85,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             break;
             case MONTHS:
                 dueRepaymentPeriodDate = startDate.plusMonths(repaidEvery);
-                if (!(nthDay == null || nthDay == 0 || dayOfWeek == null || dayOfWeek == DayOfWeekType.INVALID)) {
+                if (!(nthDay == null || dayOfWeek == null || dayOfWeek == DayOfWeekType.INVALID)) {
                     dueRepaymentPeriodDate = adjustToNthWeekDay(dueRepaymentPeriodDate, nthDay, dayOfWeek.getValue());
                 }
             break;

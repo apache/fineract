@@ -1244,9 +1244,9 @@ public final class LoanProductDataValidator {
                             .value(valueUsageCondition)
                             .notNull()
                             .inMinMaxRange(LoanProductValueConditionType.EQUAL.getValue(),
-                                    LoanProductValueConditionType.GRETERTHAN.getValue());
+                                    LoanProductValueConditionType.GREATERTHAN.getValue());
                     if (lastConditionType.equals(LoanProductValueConditionType.EQUAL)
-                            && conditionType.equals(LoanProductValueConditionType.GRETERTHAN)) {
+                            && conditionType.equals(LoanProductValueConditionType.GREATERTHAN)) {
                         if (lastCycleNumber == 0) {
                             baseDataValidator.reset().parameter(cycleNumbersParamName)
                                     .failWithCode(LoanProductConstants.VALUE_CONDITION_START_WITH_ERROR);
@@ -1257,7 +1257,7 @@ public final class LoanProductDataValidator {
                     } else if (lastConditionType.equals(LoanProductValueConditionType.EQUAL)) {
                         baseDataValidator.reset().parameter(cycleNumbersParamName).value(cycleNumber).notNull()
                                 .integerSameAsNumber(lastCycleNumber + 1);
-                    } else if (lastConditionType.equals(LoanProductValueConditionType.GRETERTHAN)) {
+                    } else if (lastConditionType.equals(LoanProductValueConditionType.GREATERTHAN)) {
                         baseDataValidator.reset().parameter(cycleNumbersParamName).value(cycleNumber).notNull()
                                 .integerGreaterThanNumber(lastCycleNumber);
                     }
@@ -1269,7 +1269,7 @@ public final class LoanProductDataValidator {
                     }
                     i++;
                 } while (i < variationArray.size());
-                if (!lastConditionType.equals(LoanProductValueConditionType.GRETERTHAN)) {
+                if (!lastConditionType.equals(LoanProductValueConditionType.GREATERTHAN)) {
                     baseDataValidator.reset().parameter(cycleNumbersParamName)
                             .failWithCode(LoanProductConstants.VALUE_CONDITION_END_WITH_ERROR);
                 }

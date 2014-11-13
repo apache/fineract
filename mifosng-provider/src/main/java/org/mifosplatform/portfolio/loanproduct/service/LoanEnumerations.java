@@ -8,9 +8,9 @@ package org.mifosplatform.portfolio.loanproduct.service;
 import org.mifosplatform.accounting.common.AccountingEnumerations;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.accountdetails.service.AccountEnumerations;
+import org.mifosplatform.portfolio.common.domain.DayOfWeekType;
 import org.mifosplatform.portfolio.common.domain.NthDayType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
-import org.mifosplatform.portfolio.common.domain.DayOfWeekType;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
@@ -55,15 +55,13 @@ public class LoanEnumerations {
             return interestType(id);
         } else if (typeName.equals(INTEREST_CALCULATION_PERIOD_TYPE)) {
             return interestCalculationPeriodType(id);
-        } else if (typeName.equals(ACCOUNTING_RULE_TYPE)) { 
+        } else if (typeName.equals(ACCOUNTING_RULE_TYPE)) {
             return AccountingEnumerations.accountingRuleType(id);
         } else if (typeName.equals(LOAN_TYPE)) {
             return AccountEnumerations.loanType(id);
         } else if (typeName.equals(INTEREST_RECALCULATION_COMPOUNDING_TYPE)) {
             return interestRecalculationCompoundingType(id);
-        } else if (typeName.equals(RESCHEDULE_STRATEGY_TYPE)) {
-            return rescheduleStrategyType(id);
-        }
+        } else if (typeName.equals(RESCHEDULE_STRATEGY_TYPE)) { return rescheduleStrategyType(id); }
         return null;
     }
 
@@ -130,55 +128,50 @@ public class LoanEnumerations {
     public static EnumOptionData repaymentFrequencyType(final int id) {
         return repaymentFrequencyType(PeriodFrequencyType.fromInt(id));
     }
-    
-    public static EnumOptionData repaymentFrequencyNthDayType(final int id) {
+
+    public static EnumOptionData repaymentFrequencyNthDayType(final Integer id) {
+        if (id == null) { return null; }
         return repaymentFrequencyNthDayType(NthDayType.fromInt(id));
     }
-    
+
     public static EnumOptionData repaymentFrequencyNthDayType(final NthDayType type) {
-    	final String codePrefix = "repaymentFrequency.";
-    	long nthDayValue = type.getValue().longValue();
+        final String codePrefix = "repaymentFrequency.";
+        long nthDayValue = type.getValue().longValue();
         EnumOptionData optionData = null;
         switch (type) {
-        	case ONE:
-        		optionData = new EnumOptionData(nthDayValue, codePrefix
-                        + type.getCode(), "first");
-        		break;
-        	case TWO:
-        		optionData = new EnumOptionData(nthDayValue, codePrefix
-                        + type.getCode(), "second");
-        		break;
-        	case THREE:
-        		optionData = new EnumOptionData(nthDayValue, codePrefix
-                        + type.getCode(), "third");
-        		break;
-        	case FOUR:
-        		optionData = new EnumOptionData(nthDayValue, codePrefix
-                        + type.getCode(), "fourth");
-        		break;
-        	case FIVE:
-        		optionData = new EnumOptionData(nthDayValue, codePrefix
-                        + type.getCode(), "fifth");
-        		break;	
-    		default:
-    			optionData = new EnumOptionData(new Integer(0).longValue(), codePrefix
-                        + type.getCode(), "invalid");
-        		break;
-    	}
-        
-    	return optionData;
+            case ONE:
+                optionData = new EnumOptionData(nthDayValue, codePrefix + type.getCode(), "first");
+            break;
+            case TWO:
+                optionData = new EnumOptionData(nthDayValue, codePrefix + type.getCode(), "second");
+            break;
+            case THREE:
+                optionData = new EnumOptionData(nthDayValue, codePrefix + type.getCode(), "third");
+            break;
+            case FOUR:
+                optionData = new EnumOptionData(nthDayValue, codePrefix + type.getCode(), "fourth");
+            break;
+            case FIVE:
+                optionData = new EnumOptionData(nthDayValue, codePrefix + type.getCode(), "fifth");
+            break;
+            default:
+                optionData = new EnumOptionData(new Integer(0).longValue(), codePrefix + type.getCode(), "invalid");
+            break;
+        }
+
+        return optionData;
     }
-    
-    public static EnumOptionData repaymentFrequencyDayOfWeekType(final int id) {
+
+    public static EnumOptionData repaymentFrequencyDayOfWeekType(final Integer id) {
+        if (id == null) { return null; }
         return repaymentFrequencyDayOfWeekType(DayOfWeekType.fromInt(id));
     }
-    
+
     public static EnumOptionData repaymentFrequencyDayOfWeekType(final DayOfWeekType type) {
-    	final String codePrefix = "repaymentFrequency.";
-    	EnumOptionData optionData = new EnumOptionData(type.getValue().longValue(), codePrefix
-                + type.getCode(), type.toString());
-        
-    	return optionData;
+        final String codePrefix = "repaymentFrequency.";
+        EnumOptionData optionData = new EnumOptionData(type.getValue().longValue(), codePrefix + type.getCode(), type.toString());
+
+        return optionData;
     }
 
     public static EnumOptionData repaymentFrequencyType(final PeriodFrequencyType type) {
@@ -455,9 +448,9 @@ public class LoanEnumerations {
                 optionData = new EnumOptionData(LoanProductValueConditionType.EQUAL.getValue().longValue(),
                         LoanProductValueConditionType.EQUAL.getCode(), "equals");
             break;
-            case GRETERTHAN:
-                optionData = new EnumOptionData(LoanProductValueConditionType.GRETERTHAN.getValue().longValue(),
-                        LoanProductValueConditionType.GRETERTHAN.getCode(), "greter than");
+            case GREATERTHAN:
+                optionData = new EnumOptionData(LoanProductValueConditionType.GREATERTHAN.getValue().longValue(),
+                        LoanProductValueConditionType.GREATERTHAN.getCode(), "greter than");
             break;
             default:
                 optionData = new EnumOptionData(LoanProductValueConditionType.INVALID.getValue().longValue(),

@@ -883,7 +883,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
                         break;
                     }
                 } else if (cycleVariation.getBorrowerCycleNumber() < cycleNumber
-                        && cycleVariation.getValueConditionType().equals(LoanProductValueConditionType.GRETERTHAN)) {
+                        && cycleVariation.getValueConditionType().equals(LoanProductValueConditionType.GREATERTHAN)) {
                     switch (cycleVariation.getParamType()) {
                         case PRINCIPAL:
                             if (principalCycleUsed < cycleVariation.getBorrowerCycleNumber()) {

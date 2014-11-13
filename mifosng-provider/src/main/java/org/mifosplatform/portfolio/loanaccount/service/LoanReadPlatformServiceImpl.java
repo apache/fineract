@@ -369,7 +369,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                         .getPrincipalOutstanding(currency).getAmount(), loanRepaymentScheduleInstallment.getInterestOutstanding(currency)
                         .getAmount(), loanRepaymentScheduleInstallment.getFeeChargesOutstanding(currency).getAmount(),
                 loanRepaymentScheduleInstallment.getPenaltyChargesOutstanding(currency).getAmount(), null, unrecognizedIncomePortion,
-                paymentOptions, null, null, null, outstandingLoanBalance,false);
+                paymentOptions, null, null, null, outstandingLoanBalance, false);
     }
 
     @Override
@@ -398,7 +398,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                         .getPrincipalOutstanding(currency).getAmount(), loanRepaymentScheduleInstallment.getInterestOutstanding(currency)
                         .getAmount(), loanRepaymentScheduleInstallment.getFeeChargesOutstanding(currency).getAmount(),
                 loanRepaymentScheduleInstallment.getPenaltyChargesOutstanding(currency).getAmount(), null, unrecognizedIncomePortion,
-                paymentOptions, null, null, null, outstandingLoanBalance,false);
+                paymentOptions, null, null, null, outstandingLoanBalance, false);
     }
 
     @Override
@@ -424,7 +424,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final BigDecimal outstandingLoanBalance = null;
         final BigDecimal unrecognizedIncomePortion = null;
         return new LoanTransactionData(null, null, null, transactionType, null, currencyData, waiveOfInterest.getTransactionDate(), amount,
-                null, null, null, null, null, null, null, null, outstandingLoanBalance, unrecognizedIncomePortion,false);
+                null, null, null, null, null, null, null, null, outstandingLoanBalance, unrecognizedIncomePortion, false);
     }
 
     @Override
@@ -435,7 +435,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WRITEOFF);
         final BigDecimal unrecognizedIncomePortion = null;
         return new LoanTransactionData(null, null, null, transactionType, null, null, DateUtils.getLocalDateOfTenant(), null, null, null,
-                null, null, null, null, null, null, outstandingLoanBalance, unrecognizedIncomePortion,false);
+                null, null, null, null, null, null, outstandingLoanBalance, unrecognizedIncomePortion, false);
 
     }
 
@@ -452,7 +452,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final BigDecimal unrecognizedIncomePortion = null;
         return new LoanTransactionData(null, null, null, transactionType, null, null, loan.getExpectedDisbursedOnLocalDateForTemplate(),
                 loan.getDisburseAmountForTemplate(), null, null, null, null, null, unrecognizedIncomePortion, paymentOptions, null, null,
-                loan.retriveLastEmiAmount(), outstandingLoanBalance,false);
+                loan.retriveLastEmiAmount(), outstandingLoanBalance, false);
 
     }
 
@@ -679,12 +679,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             final int repaymentFrequencyTypeInt = JdbcSupport.getInteger(rs, "repaymentFrequencyType");
             final EnumOptionData repaymentFrequencyType = LoanEnumerations.repaymentFrequencyType(repaymentFrequencyTypeInt);
-            
-            final int repaymentFrequencyNthDayTypeInt = JdbcSupport.getInteger(rs, "repaymentFrequencyNthDayType");
-            final EnumOptionData repaymentFrequencyNthDayType = LoanEnumerations.repaymentFrequencyNthDayType(repaymentFrequencyNthDayTypeInt);
-            
-            final int repaymentFrequencyDayOfWeekTypeInt = JdbcSupport.getInteger(rs, "repaymentFrequencyDayOfWeekType");
-            final EnumOptionData repaymentFrequencyDayOfWeekType = LoanEnumerations.repaymentFrequencyDayOfWeekType(repaymentFrequencyDayOfWeekTypeInt);
+
+            final Integer repaymentFrequencyNthDayTypeInt = JdbcSupport.getInteger(rs, "repaymentFrequencyNthDayType");
+            final EnumOptionData repaymentFrequencyNthDayType = LoanEnumerations
+                    .repaymentFrequencyNthDayType(repaymentFrequencyNthDayTypeInt);
+
+            final Integer repaymentFrequencyDayOfWeekTypeInt = JdbcSupport.getInteger(rs, "repaymentFrequencyDayOfWeekType");
+            final EnumOptionData repaymentFrequencyDayOfWeekType = LoanEnumerations
+                    .repaymentFrequencyDayOfWeekType(repaymentFrequencyDayOfWeekTypeInt);
 
             final int interestRateFrequencyTypeInt = JdbcSupport.getInteger(rs, "interestRateFrequencyType");
             final EnumOptionData interestRateFrequencyType = LoanEnumerations.interestRateFrequencyType(interestRateFrequencyTypeInt);
@@ -811,12 +813,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     loanType, loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
                     loanOfficerId, loanOfficerName, currencyData, principal, approvedPrincipal, totalOverpaid, inArrearsTolerance,
                     termFrequency, termPeriodFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType,
-                    repaymentFrequencyNthDayType, repaymentFrequencyDayOfWeekType, transactionStrategyId, transactionStrategyName, amortizationType,
-                    interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType,
-                    expectedFirstRepaymentOnDate, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate,
-                    timeline, loanSummary, feeChargesDueAtDisbursementCharged, syncDisbursementWithMeeting, loanCounter,
-                    loanProductCounter, multiDisburseLoan, fixedEmiAmount, outstandingLoanBalance, inArrears, graceOnArrearsAgeing, isNPA,
-                    daysInMonthType, daysInYearType, isInterestRecalculationEnabled, interestRecalculationData);
+                    repaymentFrequencyNthDayType, repaymentFrequencyDayOfWeekType, transactionStrategyId, transactionStrategyName,
+                    amortizationType, interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType,
+                    interestCalculationPeriodType, expectedFirstRepaymentOnDate, graceOnPrincipalPayment, graceOnInterestPayment,
+                    graceOnInterestCharged, interestChargedFromDate, timeline, loanSummary, feeChargesDueAtDisbursementCharged,
+                    syncDisbursementWithMeeting, loanCounter, loanProductCounter, multiDisburseLoan, fixedEmiAmount,
+                    outstandingLoanBalance, inArrears, graceOnArrearsAgeing, isNPA, daysInMonthType, daysInYearType,
+                    isInterestRecalculationEnabled, interestRecalculationData);
         }
     }
 
@@ -1119,7 +1122,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(transactionTypeInt);
             final boolean manuallyReversed = rs.getBoolean("manuallyReversed");
 
-
             PaymentDetailData paymentDetailData = null;
 
             if (transactionType.isPaymentOrReceipt()) {
@@ -1170,7 +1172,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             }
             return new LoanTransactionData(id, officeId, officeName, transactionType, paymentDetailData, currencyData, date, totalAmount,
                     principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion, overPaymentPortion,
-                    unrecognizedIncomePortion, externalId, transfer, null, outstandingLoanBalance, submittedOnDate,manuallyReversed);
+                    unrecognizedIncomePortion, externalId, transfer, null, outstandingLoanBalance, submittedOnDate, manuallyReversed);
         }
     }
 
@@ -1267,10 +1269,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
 
         return LoanAccountData.loanProductWithTemplateDefaults(loanProduct, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
-        		repaymentFrequencyNthDayTypeOptions, repaymentFrequencyDaysOfWeekTypeOptions,
-                repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
-                interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, loanPurposeOptions, loanCollateralOptions,
-                loanCycleCounter);
+                repaymentFrequencyNthDayTypeOptions, repaymentFrequencyDaysOfWeekTypeOptions, repaymentStrategyOptions,
+                interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions,
+                fundOptions, chargeOptions, loanPurposeOptions, loanCollateralOptions, loanCycleCounter);
     }
 
     @Override
@@ -1352,12 +1353,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         return this.jdbcTemplate.query(sql, rm, new Object[] { penaltyWaitPeriod });
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Integer retriveLoanCounter(final Long groupId, final Integer loanType, Long productId) {
         final String sql = "Select MAX(l.loan_product_counter) from m_loan l where l.group_id = ?  and l.loan_type_enum = ? and l.product_id=?";
         return this.jdbcTemplate.queryForInt(sql, groupId, loanType, productId);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Integer retriveLoanCounter(final Long clientId, Long productId) {
         final String sql = "Select MAX(l.loan_product_counter) from m_loan l where l.client_id = ? and l.product_id=?";
@@ -1594,8 +1597,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         BigDecimal outstandingLoanBalance = null;
         final BigDecimal unrecognizedIncomePortion = null;
         return new LoanTransactionData(null, null, null, transactionType, null, null, null, loan.getTotalWrittenOff(), null, null, null,
-                null, null, unrecognizedIncomePortion, paymentOptions, null, null, null, outstandingLoanBalance,false);
-
+                null, null, unrecognizedIncomePortion, paymentOptions, null, null, null, outstandingLoanBalance, false);
 
     }
 
@@ -1608,7 +1610,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final BigDecimal unrecognizedIncomePortion = null;
         return new LoanTransactionData(null, null, null, transactionType, null, loan.currency(), DateUtils.getLocalDateOfTenant(),
                 loan.getTotalOutstandingAmount(), null, null, null, null, null, null, null, null, outstandingLoanBalance,
-                unrecognizedIncomePortion,false);
+                unrecognizedIncomePortion, false);
     }
 
     @Override
@@ -1676,7 +1678,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal outstandingLoanBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "outstandingLoanBalance");
 
             return new LoanTransactionData(id, transactionType, date, totalAmount, principalPortion, interestPortion, feeChargesPortion,
-                    penaltyChargesPortion, overPaymentPortion, unrecognizedIncomePortion, outstandingLoanBalance,false);
+                    penaltyChargesPortion, overPaymentPortion, unrecognizedIncomePortion, outstandingLoanBalance, false);
         }
     }
 
