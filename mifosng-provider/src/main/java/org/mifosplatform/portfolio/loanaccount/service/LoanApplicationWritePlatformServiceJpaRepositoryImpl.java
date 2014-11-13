@@ -49,9 +49,12 @@ import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
 import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
+import org.mifosplatform.portfolio.loanaccount.api.LoanApiConstants;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
+import org.mifosplatform.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -121,7 +124,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final AccountAssociationsRepository accountAssociationsRepository;
     private final LoanReadPlatformService loanReadPlatformService;
     private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
-
+    private final LoanAccountDomainService loanAccountDomainService;
+    
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
             final LoanApplicationTransitionApiJsonValidator loanApplicationTransitionApiJsonValidator,
@@ -136,7 +140,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final CalendarRepository calendarRepository, final CalendarInstanceRepository calendarInstanceRepository,
             final SavingsAccountAssembler savingsAccountAssembler, final AccountAssociationsRepository accountAssociationsRepository,
             final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository,
-            final LoanReadPlatformService loanReadPlatformService) {
+            final LoanReadPlatformService loanReadPlatformService, final LoanAccountDomainService loanAccountDomainService) {
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
@@ -161,6 +165,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.accountAssociationsRepository = accountAssociationsRepository;
         this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
         this.loanReadPlatformService = loanReadPlatformService;
+        this.loanAccountDomainService = loanAccountDomainService;
+        
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -722,6 +728,14 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         final Map<String, Object> changes = loan.loanApplicationApproval(currentUser, command, defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
+
+            // If loan approved amount less than loan demanded amount, then need
+            // to recompute the schedule
+            if (changes.containsKey(LoanApiConstants.approvedLoanAmountParameterName)) {
+                ScheduleGeneratorDTO scheduleGeneratorDTO = loanAccountDomainService.buildScheduleGeneratorDTO(loan);
+                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
+            }
+
             this.loanRepository.save(loan);
 
             final String noteText = command.stringValueOfParameterNamed("note");
@@ -756,6 +770,16 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         final Map<String, Object> changes = loan.undoApproval(defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
+            
+            // If loan approved amount is not same as loan amount demanded, then
+            // during undo, restore the demand amount to principal amount.
+            
+            if (changes.containsKey(LoanApiConstants.approvedLoanAmountParameterName)
+                    || changes.containsKey(LoanApiConstants.disbursementPrincipalParameterName )) {
+                ScheduleGeneratorDTO scheduleGeneratorDTO = loanAccountDomainService.buildScheduleGeneratorDTO(loan);
+                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
+            }
+            
             this.loanRepository.save(loan);
 
             final String noteText = command.stringValueOfParameterNamed("note");

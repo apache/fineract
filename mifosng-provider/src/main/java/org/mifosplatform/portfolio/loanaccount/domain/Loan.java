@@ -306,6 +306,9 @@ public class Loan extends AbstractPersistable<Long> {
     @Transient
     private LoanSummaryWrapper loanSummaryWrapper;
 
+    @Column(name = "principal_amount_proposed", scale = 6, precision = 19, nullable = false)
+    private BigDecimal proposedPrincipal;
+
     @Column(name = "approved_principal", scale = 6, precision = 19, nullable = false)
     private BigDecimal approvedPrincipal;
 
@@ -436,6 +439,16 @@ public class Loan extends AbstractPersistable<Long> {
         this.disbursementDetails = disbursementDetails;
         this.approvedPrincipal = this.loanRepaymentScheduleDetail.getPrincipal().getAmount();
         this.createStandingInstructionAtDisbursement = createStandingInstructionAtDisbursement;
+
+        /*
+         * During loan origination stage and before loan is approved
+         * principal_amount, approved_principal and principal_amount_demanded
+         * will same amount and that amount is same as applicant loan demanded
+         * amount.
+         */
+
+        this.proposedPrincipal = this.loanRepaymentScheduleDetail.getPrincipal().getAmount();
+
     }
 
     private LoanSummary updateSummaryWithTotalFeeChargesDueAtDisbursement(final BigDecimal feeChargesDueAtDisbursement) {
@@ -1359,6 +1372,11 @@ public class Loan extends AbstractPersistable<Long> {
             this.approvedPrincipal = newValue;
         }
 
+        if (command.isChangeInBigDecimalParameterNamed(principalParamName, this.proposedPrincipal)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(principalParamName);
+            this.proposedPrincipal = newValue;
+        }
+
         if (loanProduct.isMultiDisburseLoan()) {
             updateDisbursementDetails(command, actualChanges);
             if (command.isChangeInBigDecimalParameterNamed(LoanApiConstants.emiAmountParameterName, this.fixedEmiAmount)) {
@@ -1839,9 +1857,25 @@ public class Loan extends AbstractPersistable<Long> {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
-        final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVED, LoanStatus.fromInt(this.loanStatus));
-        if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
-            this.loanStatus = statusEnum.getValue();
+        /*
+         * statusEnum is holding the possible new status derived from
+         * loanLifecycleStateMachine.transition.
+         */
+
+        final LoanStatus newStatusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVED, LoanStatus.fromInt(this.loanStatus));
+
+        /*
+         * FIXME: There is no need to check below condition, if
+         * loanLifecycleStateMachine.transition is doing it's responsibility
+         * properly. Better implementation approach is, if code passes invalid
+         * combination of states (fromState and toState), state machine should
+         * return invalidate state and below if condition should check for not
+         * equal to invalidateState, instead of check new value is same as
+         * present value.
+         */
+
+        if (!newStatusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
+            this.loanStatus = newStatusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
 
             // only do below if status has changed in the 'approval' case
@@ -1850,6 +1884,35 @@ public class Loan extends AbstractPersistable<Long> {
             if (approvedOn == null) {
                 approvedOn = command.localDateValueOfParameterNamed("eventDate");
                 approvedOnDateChange = command.stringValueOfParameterNamed("eventDate");
+            }
+
+            BigDecimal approvedLoanAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.approvedLoanAmountParameterName);
+
+            if (approvedLoanAmount != null) {
+
+                // Approved amount has to be less than or equal to principal
+                // amount demanded
+
+                if (approvedLoanAmount.compareTo(this.proposedPrincipal) < 1) {
+
+                    this.approvedPrincipal = approvedLoanAmount;
+
+                    /*
+                     * All the calculations are done based on the principal
+                     * amount, so it is necessary to set principal amount to
+                     * approved amount
+                     */
+
+                    this.loanRepaymentScheduleDetail.setPrincipal(approvedLoanAmount);
+
+                    actualChanges.put(LoanApiConstants.approvedLoanAmountParameterName, approvedLoanAmount);
+                    actualChanges.put(LoanApiConstants.disbursementPrincipalParameterName, approvedLoanAmount);
+
+                } else {
+                    final String errorMessage = "Loan approved amount can't be greater than loan amount demanded.";
+                    throw new InvalidLoanStateTransitionException("approval", "amount.can't.be.greater.than.loan.amount.demanded",
+                            errorMessage, this.proposedPrincipal, approvedLoanAmount);
+                }
             }
 
             this.approvedOnDate = approvedOn.toDate();
@@ -1896,6 +1959,16 @@ public class Loan extends AbstractPersistable<Long> {
 
             this.approvedOnDate = null;
             this.approvedBy = null;
+
+            if (this.approvedPrincipal.compareTo(this.proposedPrincipal) != 0) {
+                this.approvedPrincipal = this.proposedPrincipal;
+                this.loanRepaymentScheduleDetail.setPrincipal(this.proposedPrincipal);
+
+                actualChanges.put(LoanApiConstants.approvedLoanAmountParameterName, this.proposedPrincipal);
+                actualChanges.put(LoanApiConstants.disbursementPrincipalParameterName, this.proposedPrincipal);
+
+            }
+
             actualChanges.put("approvedOnDate", "");
 
             this.loanOfficerHistory.clear();
@@ -2176,7 +2249,7 @@ public class Loan extends AbstractPersistable<Long> {
      * Ability to regenerate the repayment schedule based on the loans current
      * details/state.
      */
-    private void regenerateRepaymentSchedule(final ScheduleGeneratorDTO scheduleGeneratorDTO) {
+    public void regenerateRepaymentSchedule(final ScheduleGeneratorDTO scheduleGeneratorDTO) {
 
         final LoanScheduleModel loanSchedule = regenerateScheduleModel(scheduleGeneratorDTO);
 
@@ -2342,7 +2415,7 @@ public class Loan extends AbstractPersistable<Long> {
             final boolean isScheduleRegenerateRequired = isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate);
             this.actualDisbursementDate = null;
             this.disbursedBy = null;
-            boolean isDisbueseAmtChanged = !this.approvedPrincipal.equals(this.loanRepaymentScheduleDetail.getPrincipal());
+            boolean isDisbursedAmountChanged = !this.approvedPrincipal.equals(this.loanRepaymentScheduleDetail.getPrincipal());
             this.loanRepaymentScheduleDetail.setPrincipal(this.approvedPrincipal);
             if (this.loanProduct.isMultiDisburseLoan()) {
                 for (final LoanDisbursementDetails details : this.disbursementDetails) {
@@ -2352,13 +2425,13 @@ public class Loan extends AbstractPersistable<Long> {
             }
             boolean isEmiAmountChanged = this.loanTermVariations.size() > 0;
             updateLoanToPreDisbursalState();
-            if (isScheduleRegenerateRequired || isDisbueseAmtChanged || isEmiAmountChanged
+            if (isScheduleRegenerateRequired || isDisbursedAmountChanged || isEmiAmountChanged
                     || this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
                 // clear off actual disbusrement date so schedule regeneration
                 // uses expected date.
 
                 regenerateRepaymentSchedule(scheduleGeneratorDTO);
-                if (isDisbueseAmtChanged) {
+                if (isDisbursedAmountChanged) {
                     updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
                 }
             }
@@ -3358,6 +3431,10 @@ public class Loan extends AbstractPersistable<Long> {
         return expectedDisbursementDate;
     }
 
+    /*
+     * Reason for derving
+     */
+
     public BigDecimal getDisburseAmountForTemplate() {
         BigDecimal principal = this.loanRepaymentScheduleDetail.getPrincipal().getAmount();
         Collection<LoanDisbursementDetails> details = fetchUndisbursedDetail();
@@ -3677,6 +3754,10 @@ public class Loan extends AbstractPersistable<Long> {
 
     public Set<LoanCollateral> getCollateral() {
         return this.collateral;
+    }
+
+    public BigDecimal getProposedPrincipal() {
+        return this.proposedPrincipal;
     }
 
     public Map<String, Object> deriveAccountingBridgeData(final CurrencyData currencyData, final List<Long> existingTransactionIds,

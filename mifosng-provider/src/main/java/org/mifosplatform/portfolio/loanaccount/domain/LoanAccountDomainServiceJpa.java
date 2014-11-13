@@ -500,5 +500,26 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             this.accountTransferRepository.save(transferTransaction);
         }
     }
+    
+    public ScheduleGeneratorDTO buildScheduleGeneratorDTO(final Loan loan) {
+
+        final MonetaryCurrency currency = loan.getCurrency();
+        ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
+        LocalDate calculatedRepaymentsStartingFromDate = loan.getExpectedFirstRepaymentOnDate();
+        final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan
+                .getExpectedDisbursedOnLocalDate().toDate(), HolidayStatusType.ACTIVE.getValue());
+        final WorkingDays workingDays = this.workingDaysRepository.findOne();
+        final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
+        final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
+
+        HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays, allowTransactionsOnHoliday,
+                allowTransactionsOnNonWorkingDay);
+
+        ScheduleGeneratorDTO scheduleGeneratorDTO = new ScheduleGeneratorDTO(loanScheduleFactory, applicationCurrency,
+                calculatedRepaymentsStartingFromDate, holidayDetailDTO);
+
+        return scheduleGeneratorDTO;
+    }
 
 }

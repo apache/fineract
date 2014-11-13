@@ -65,6 +65,7 @@ import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanApprovalData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
@@ -110,11 +111,13 @@ public class LoansApiResource {
             "expectedFirstRepaymentOnDate", "graceOnPrincipalPayment", "graceOnInterestPayment", "graceOnInterestCharged",
             "interestChargedFromDate", "timeline", "totalFeeChargesAtDisbursement", "summary", "repaymentSchedule", "transactions",
             "charges", "collateral", "guarantors", "meeting", "productOptions", "amortizationTypeOptions", "interestTypeOptions",
-            "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions", "repaymentFrequencyNthDayTypeOptions", "repaymentFrequencyDaysOfWeekTypeOptions", "termFrequencyTypeOptions",
-            "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions", "loanOfficerOptions",
-            "loanPurposeOptions", "loanCollateralOptions", "chargeTemplate", "calendarOptions", "syncDisbursementWithMeeting",
-            "loanCounter", "loanProductCounter", "notes", "accountLinkingOptions", "linkedAccount"));
-    
+            "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions", "repaymentFrequencyNthDayTypeOptions",
+            "repaymentFrequencyDaysOfWeekTypeOptions", "termFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions",
+            "repaymentStrategyOptions", "chargeOptions", "loanOfficerOptions", "loanPurposeOptions", "loanCollateralOptions",
+            "chargeTemplate", "calendarOptions", "syncDisbursementWithMeeting", "loanCounter", "loanProductCounter", "notes",
+            "accountLinkingOptions", "linkedAccount"));
+
+    private final Set<String> LOAN_APPROVAL_DATA_PARAMETERS = new HashSet<>(Arrays.asList("approvalDate", "approvalAmount"));
     private final String resourceNameForPermissions = "LOAN";
 
     private final PlatformSecurityContext context;
@@ -130,6 +133,7 @@ public class LoansApiResource {
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final GroupReadPlatformService groupReadPlatformService;
     private final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer;
+    private final DefaultToApiJsonSerializer<LoanApprovalData> loanApprovalDataToApiJsonSerializer;
     private final DefaultToApiJsonSerializer<LoanScheduleData> loanScheduleToApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final FromJsonHelper fromJsonHelper;
@@ -150,6 +154,7 @@ public class LoansApiResource {
             final GuarantorReadPlatformService guarantorReadPlatformService,
             final CodeValueReadPlatformService codeValueReadPlatformService, final GroupReadPlatformService groupReadPlatformService,
             final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer,
+            final DefaultToApiJsonSerializer<LoanApprovalData> loanApprovalDataToApiJsonSerializer,
             final DefaultToApiJsonSerializer<LoanScheduleData> loanScheduleToApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper, final FromJsonHelper fromJsonHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
@@ -170,6 +175,7 @@ public class LoansApiResource {
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.groupReadPlatformService = groupReadPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
+        this.loanApprovalDataToApiJsonSerializer = loanApprovalDataToApiJsonSerializer;
         this.loanScheduleToApiJsonSerializer = loanScheduleToApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.fromJsonHelper = fromJsonHelper;
@@ -179,6 +185,36 @@ public class LoansApiResource {
         this.portfolioAccountReadPlatformService = portfolioAccountReadPlatformServiceImpl;
         this.accountAssociationsReadPlatformService = accountAssociationsReadPlatformService;
         this.loanScheduleHistoryReadPlatformService = loanScheduleHistoryReadPlatformService;
+    }
+
+    /*
+     * This template API is used for loan approval, ideally this should be
+     * invoked on loan that are pending for approval. But system does not
+     * validate the status of the loan, it returns the template irrespective of
+     * loan status
+     */
+
+    @GET
+    @Path("{loanId}/template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveApprovalTemplate(@PathParam("loanId") final Long loanId, @QueryParam("templateType") final String templateType,
+            @Context final UriInfo uriInfo) {
+
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+
+        LoanApprovalData loanApprovalTemplate = null;
+
+        if (templateType == null) {
+            final String errorMsg = "Loan template type must be provided";
+            throw new LoanTemplateTypeRequiredException(errorMsg);
+        } else if (templateType.equals("approval")) {
+            loanApprovalTemplate = this.loanReadPlatformService.retrieveApprovalTemplate(loanId);
+        }
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.loanApprovalDataToApiJsonSerializer.serialize(settings, loanApprovalTemplate, this.LOAN_APPROVAL_DATA_PARAMETERS);
+
     }
 
     @GET
@@ -413,8 +449,6 @@ public class LoansApiResource {
         Collection<LoanProductData> productOptions = null;
         Collection<EnumOptionData> loanTermFrequencyTypeOptions = null;
         Collection<EnumOptionData> repaymentFrequencyTypeOptions = null;
-        Collection<EnumOptionData> repaymentFrequencyNthDayTypeOptions = null;
-        Collection<EnumOptionData> repaymentFrequencyDaysOfWeekTypeOptions = null;
         Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = null;
         Collection<EnumOptionData> interestRateFrequencyTypeOptions = null;
         Collection<EnumOptionData> amortizationTypeOptions = null;
@@ -434,8 +468,6 @@ public class LoansApiResource {
             productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
             loanTermFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
             repaymentFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
-            repaymentFrequencyNthDayTypeOptions = this.dropdownReadPlatformService.retrieveRepaymentFrequencyOptionsForNthDayOfMonth();
-            repaymentFrequencyDaysOfWeekTypeOptions = this.dropdownReadPlatformService.retrieveRepaymentFrequencyOptionsForDaysOfWeek();
             interestRateFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveInterestRateFrequencyTypeOptions();
 
             amortizationTypeOptions = this.dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();

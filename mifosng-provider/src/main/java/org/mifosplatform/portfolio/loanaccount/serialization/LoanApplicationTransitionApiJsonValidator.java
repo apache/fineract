@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.loanaccount.serialization;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -20,6 +21,7 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.portfolio.loanaccount.api.LoanApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,7 +47,9 @@ public final class LoanApplicationTransitionApiJsonValidator {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Set<String> disbursementParameters = new HashSet<>(Arrays.asList("approvedOnDate", "note", "locale", "dateFormat"));
+        final Set<String> disbursementParameters = new HashSet<>(Arrays.asList(LoanApiConstants.approvedLoanAmountParameterName,
+                LoanApiConstants.approvedOnDateParameterName, LoanApiConstants.noteParameterName, LoanApiConstants.localeParameterName,
+                LoanApiConstants.dateFormatParameterName));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
@@ -54,11 +58,18 @@ public final class LoanApplicationTransitionApiJsonValidator {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loanapplication");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final LocalDate approvedOnDate = this.fromApiJsonHelper.extractLocalDateNamed("approvedOnDate", element);
-        baseDataValidator.reset().parameter("approvedOnDate").value(approvedOnDate).notNull();
 
-        final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
-        baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
+        final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                LoanApiConstants.approvedLoanAmountParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.approvedLoanAmountParameterName).value(principal).ignoreIfNull()
+                .positiveAmount();
+
+        final LocalDate approvedOnDate = this.fromApiJsonHelper
+                .extractLocalDateNamed(LoanApiConstants.approvedOnDateParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.approvedOnDateParameterName).value(approvedOnDate).notNull();
+
+        final String note = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.noteParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -67,7 +78,8 @@ public final class LoanApplicationTransitionApiJsonValidator {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Set<String> disbursementParameters = new HashSet<>(Arrays.asList("rejectedOnDate", "note", "locale", "dateFormat"));
+        final Set<String> disbursementParameters = new HashSet<>(Arrays.asList(LoanApiConstants.rejectedOnDateParameterName,
+                LoanApiConstants.noteParameterName, LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
@@ -76,11 +88,11 @@ public final class LoanApplicationTransitionApiJsonValidator {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loanapplication");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final LocalDate rejectedOnDate = this.fromApiJsonHelper.extractLocalDateNamed("rejectedOnDate", element);
-        baseDataValidator.reset().parameter("rejectedOnDate").value(rejectedOnDate).notNull();
+        final LocalDate rejectedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.rejectedOnDateParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.rejectedOnDateParameterName).value(rejectedOnDate).notNull();
 
-        final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
-        baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
+        final String note = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.noteParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -89,7 +101,8 @@ public final class LoanApplicationTransitionApiJsonValidator {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Set<String> disbursementParameters = new HashSet<>(Arrays.asList("withdrawnOnDate", "note", "locale", "dateFormat"));
+        final Set<String> disbursementParameters = new HashSet<>(Arrays.asList(LoanApiConstants.withdrawnOnDateParameterName,
+                LoanApiConstants.noteParameterName, LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
@@ -98,11 +111,11 @@ public final class LoanApplicationTransitionApiJsonValidator {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loanapplication");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final LocalDate withdrawnOnDate = this.fromApiJsonHelper.extractLocalDateNamed("withdrawnOnDate", element);
-        baseDataValidator.reset().parameter("withdrawnOnDate").value(withdrawnOnDate).notNull();
+        final LocalDate withdrawnOnDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.withdrawnOnDateParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.withdrawnOnDateParameterName).value(withdrawnOnDate).notNull();
 
-        final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
-        baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
+        final String note = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.noteParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
