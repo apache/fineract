@@ -2430,4 +2430,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
         return savingsAccountCharge;
     }
+    
+    public String getAccountNumber() {
+        return this.accountNumber;
+    }
 }

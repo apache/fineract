@@ -550,7 +550,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.interest_recalculation_enabled as isInterestRecalculationEnabled, "
                     + " lir.id as lirId, lir.loan_id as loanId, lir.compound_type_enum as compoundType, lir.reschedule_strategy_enum as rescheduleStrategy, "
                     + " lir.rest_frequency_type_enum as restFrequencyEnum, lir.rest_frequency_interval as restFrequencyInterval, "
-                    + " lir.rest_freqency_date as restFrequencyDate "
+                    + " lir.rest_freqency_date as restFrequencyDate, "
+                    + " l.create_standing_instruction_at_disbursement as createStandingInstructionAtDisbursement "
                     + " from m_loan l" //
                     + " join m_product_loan lp on lp.id = l.product_id" //
                     + " left join m_loan_recalculation_details lir on lir.loan_id = l.id "
@@ -788,6 +789,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final int daysInYear = JdbcSupport.getInteger(rs, "daysInYear");
             final EnumOptionData daysInYearType = CommonEnumerations.daysInYearType(daysInYear);
             final boolean isInterestRecalculationEnabled = rs.getBoolean("isInterestRecalculationEnabled");
+            final Boolean createStandingInstructionAtDisbursement = rs.getBoolean("createStandingInstructionAtDisbursement");
 
             LoanInterestRecalculationData interestRecalculationData = null;
             if (isInterestRecalculationEnabled) {
@@ -819,7 +821,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     graceOnInterestCharged, interestChargedFromDate, timeline, loanSummary, feeChargesDueAtDisbursementCharged,
                     syncDisbursementWithMeeting, loanCounter, loanProductCounter, multiDisburseLoan, fixedEmiAmount,
                     outstandingLoanBalance, inArrears, graceOnArrearsAgeing, isNPA, daysInMonthType, daysInYearType,
-                    isInterestRecalculationEnabled, interestRecalculationData);
+                    isInterestRecalculationEnabled, interestRecalculationData, createStandingInstructionAtDisbursement);
         }
     }
 
