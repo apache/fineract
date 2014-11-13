@@ -157,10 +157,10 @@ public class Loan extends AbstractPersistable<Long> {
     @Embedded
     private LoanProductRelatedDetail loanRepaymentScheduleDetail;
 
-    @Column(name = "repayment_frequency_nth_day_enum", nullable = false)
+    @Column(name = "repayment_frequency_nth_day_enum", nullable = true)
     private Integer repaymentFrequencyNthDayType;
 
-    @Column(name = "repayment_frequency_day_of_week_enum", nullable = false)
+    @Column(name = "repayment_frequency_day_of_week_enum", nullable = true)
     private Integer repaymentFrequencyDayOfWeekType;
 
     @Column(name = "term_frequency", nullable = false)
