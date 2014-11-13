@@ -24827,20 +24827,20 @@ No Request Body:
 <a id="standinginstruction" name="standinginstruction" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h2>Standing Instruction:</h2>
-	        <p>Ability to be able to transfer monetary funds from one account to another.</p>
-	        <p>Note: At present only savings account to savings account and savings account to Loan account.</p>
+	        <h2>Standing Instructions</h2>
+	        <p>Standing instructions (or standing orders) refer to instructions a bank account holder ("the payer") gives to his or her bank to pay a set amount at regular intervals to another's ("the payee's") account.</p>
+	        <p>Note: At present only savings account to savings account and savings account to Loan account transfers are permitted.</p>
 	      	<table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Parameters</div></td></tr>
 
 				<tr class=alt><td>name</td></tr>
-				<tr><td class=fielddesc>Standing Instruction Name.</td></tr>
+				<tr><td class=fielddesc>A name for this Standing Instruction</td></tr>
 
 	            <tr class=alt><td>fromOfficeId</td></tr>
 				<tr><td class=fielddesc>The id of the office/branch from which the transfer is made.</td></tr>
 
 				<tr class=alt><td>fromClientId</td></tr>
-				<tr><td class=fielddesc>The id of the client from which the transfer is made.</td></tr>
+				<tr><td class=fielddesc>The id of the client (payer) who makes the transfer</td></tr>
 
 				<tr class=alt><td>fromAccountType</td></tr>
 				<tr><td class=fielddesc>The type of account from which the transfer is made. 1=Loan Account, 2=Savings Account</td></tr>
@@ -24852,28 +24852,28 @@ No Request Body:
 				<tr><td class=fielddesc>The id of the office/branch to which the transfer is made.</td></tr>
 
 				<tr class=alt><td>toClientId</td></tr>
-				<tr><td class=fielddesc>The id of the client to which the transfer is made.</td></tr>
+				<tr><td class=fielddesc>The id of the client (payee), to whose account the transfer is made.</td></tr>
 
 				<tr class=alt><td>toAccountType</td></tr>
 				<tr><td class=fielddesc>The type of account to which the transfer is made. 1=Loan Account, 2=Savings Account</td></tr>
 
 				<tr class=alt><td>toAccountId</td></tr>
-				<tr><td class=fielddesc>The id of the account to which the transfer is made. The accouont must be <i>active</i> and must have the same currency as that of the selected <b>fromAccountId</b>.</td></tr>
+				<tr><td class=fielddesc>The id of the account to which the transfer is made. The account must be <i>active</i> and must be in the same currency as that of the selected <b>fromAccountId</b>.</td></tr>
 
 				<tr class=alt><td>priority</td></tr>
-				<tr><td class=fielddesc>The priority of instruction while executiing instructions. 1= URGENT,2 = HIGH, 3 = MEDIUM, 4 = LOW </td></tr>
+				<tr><td class=fielddesc>The priority of instruction while executing instructions. 1= URGENT,2 = HIGH, 3 = MEDIUM, 4 = LOW </td></tr>
 
 				<tr class=alt><td>transferType</td></tr>
-				<tr><td class=fielddesc>The type of account transfer from which account to which. 1=Account Transfer(savings to savings), 2=Loan Repayment</td></tr>
+				<tr><td class=fielddesc>Identifies the source and destination account types. 1=Account Transfer(savings to savings), 2=Loan Repayment</td></tr>
 
 				<tr class=alt><td>instructionType</td></tr>
-				<tr><td class=fielddesc>The Standing instruction amount for transfer type while execution of standing instruction. 1. FIXED, 2.DUES</td></tr>
+				<tr><td class=fielddesc>Determines the amount to be transferred while executing a standing instruction. 1. FIXED, 2.DUES</td></tr>
 
 				<tr class=alt><td>status</td></tr>
-				<tr><td class=fielddesc>The Standing instruction state. 1. Active, 2.Disabled,3.deleted</td></tr>
+				<tr><td class=fielddesc>The Standing instruction state. 1. Active, 2.Disabled, 3.Deleted</td></tr>
 
 				<tr class=alt><td>recurrenceType</td></tr>
-				<tr><td class=fielddesc>The Standing instruction schedule type for execution.. 1. Periodic, 2.As per dues</td></tr>
+				<tr><td class=fielddesc>Determines the recurrence of this standing instruction, can be either 1. Periodic or 2.As per dues</td></tr>
 
 				<tr class=alt><td>validFrom</td></tr>
 				<tr><td class=fielddesc>The Standing instruction's Start date.</td></tr>
@@ -24883,19 +24883,19 @@ No Request Body:
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Parameters</div></td></tr>
 
 				<tr class=alt><td>amount</td></tr>
-				<tr><td class=fielddesc>Transfer amount while running the instruction. must be provided if <b>instructionType</b> is fixed</td></tr>
+				<tr><td class=fielddesc>Transfer amount while running the instruction. must be provided if the selected <b>instructionType</b> is fixed</td></tr>
 
 				<tr class=alt><td>validTill</td></tr>
-				<tr><td class=fielddesc>The Standing instruction's Start date.</td></tr>
+				<tr><td class=fielddesc>The Standing instruction's end date.</td></tr>
 
 				<tr class=alt><td>recurrenceFrequency</td></tr>
-				<tr><td class=fielddesc>The periodic frequency of standing instruction.must be provided if <b>recurrenceType</b> is Periodic. 0=days,1= weeks,2=months,3=years</td></tr>
+				<tr><td class=fielddesc>The recurrence frequency of a Standing instruction's execution. Must be provided if the <b>recurrenceType</b> is Periodic. 0 = days, 1 = weekly, 2 = monthly, 3 = yearly</td></tr>
 
 				<tr class=alt><td>recurrenceInterval</td></tr>
-				<tr><td class=fielddesc>The periodic frequency interval of standing instruction.must be provided if <b>recurrenceType</b> is Periodic</td></tr>
+				<tr><td class=fielddesc>The recurrence interval of a standing instruction execution, determines the recurrence schedule when combined with <b>recurrenceFrequency</b>. Must be provided if the <b>recurrenceType</b> is periodic</td></tr>
 
 				<tr class=alt><td>recurrenceOnMonthDay</td></tr>
-				<tr><td class=fielddesc>The Month and Day of periodic frequency.must be provided if <b>recurrenceFrequency</b> is months or years</td></tr>
+				<tr><td class=fielddesc>The Month and Day of recurrence. Must be provided if the <b>recurrenceFrequency</b> is monthly or yearly</td></tr>
 
 
 			</table>
@@ -24953,114 +24953,6 @@ No Request Body:
     {
       "id": 1,
       "displayName": "Client_FirstName_2VRAG Client_LastName_9QCY",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 2,
-      "displayName": "Client_FirstName_ZYDN2 Client_LastName_XVOP",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 3,
-      "displayName": "Client_FirstName_89LYT Client_LastName_4EY6",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 4,
-      "displayName": "Client_FirstName_PRCBG Client_LastName_JZU2",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 5,
-      "displayName": "Client_FirstName_J37GR Client_LastName_1T3X",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 6,
-      "displayName": "Client_FirstName_ZVHM2 Client_LastName_RUGS",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 7,
-      "displayName": "Client_FirstName_RBALP Client_LastName_437P",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 8,
-      "displayName": "Client_FirstName_R7M4V Client_LastName_Q5ED",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 9,
-      "displayName": "Client_FirstName_WIBDE Client_LastName_U91T",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 10,
-      "displayName": "Client_FirstName_26QJT Client_LastName_BEHD",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 11,
-      "displayName": "Client_FirstName_W071M Client_LastName_L7Z2",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 12,
-      "displayName": "Client_FirstName_QUHDJ Client_LastName_S4C5",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 13,
-      "displayName": "Client_FirstName_MNP4W Client_LastName_J8Y3",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 14,
-      "displayName": "Client_FirstName_TL6I8 Client_LastName_5YHG",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 15,
-      "displayName": "Client_FirstName_LUTBO Client_LastName_DITS",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 16,
-      "displayName": "Client_FirstName_UE39Z Client_LastName_PUWZ",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 17,
-      "displayName": "Client_FirstName_M8SD2 Client_LastName_J6QK",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 18,
-      "displayName": "Client_FirstName_SG8NF Client_LastName_BM1J",
-      "officeId": 1,
-      "officeName": "Head Office"
-    },
-    {
-      "id": 19,
-      "displayName": "Client_FirstName_BW0C8 Client_LastName_LGV9",
       "officeId": 1,
       "officeName": "Head Office"
     },
