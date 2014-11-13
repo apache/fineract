@@ -44,10 +44,10 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
     private Integer groupCalendarId;
     private Integer loanProductId;
     private Integer loanId;
-    private String loanPrincipalAmount = "100000.00";
-    private String numberOfRepayments = "12";
-    private String interestRatePerPeriod = "18";
-    private String groupActivationDate = "1 August 2014";
+    private final String loanPrincipalAmount = "100000.00";
+    private final String numberOfRepayments = "12";
+    private final String interestRatePerPeriod = "18";
+    private final String groupActivationDate = "1 August 2014";
 
     @Before
     public void setup() {
@@ -134,8 +134,8 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
 
         List<HashMap> error = (List<HashMap>) this.loanTransactionHelper.createLoanAccount(loanApplicationJSON,
                 CommonConstants.RESPONSE_ERROR);
-        assertEquals("error.msg.loan.days.between.first.repayment.and.disbursal.are.less.than.minimum.allowed.numbers", error
-                .get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        assertEquals("error.msg.loan.days.between.first.repayment.and.disbursal.are.less.than.minimum.allowed",
+                error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
     }
 
@@ -174,8 +174,8 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
         final String interval = "1"; // Every one week
         final String repeatsOnDay = "1"; // 1:Monday
 
-        this.groupCalendarId = CalendarHelper.createMeetingCalendarForGroup(this.requestSpec, this.responseSpec, this.groupId, startDate,
-                frequency, interval, repeatsOnDay);
+        this.setGroupCalendarId(CalendarHelper.createMeetingCalendarForGroup(this.requestSpec, this.responseSpec, this.groupId, startDate,
+                frequency, interval, repeatsOnDay));
     }
 
     /**
@@ -195,5 +195,13 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
                 .withInterestRateFrequencyTypeAsYear()
                 .withMinimumDaysBetweenDisbursalAndFirstRepayment(minimumDaysBetweenDisbursalAndFirstRepayment).build(null);
         this.loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+    }
+
+    public Integer getGroupCalendarId() {
+        return groupCalendarId;
+    }
+
+    public void setGroupCalendarId(Integer groupCalendarId) {
+        this.groupCalendarId = groupCalendarId;
     }
 }
