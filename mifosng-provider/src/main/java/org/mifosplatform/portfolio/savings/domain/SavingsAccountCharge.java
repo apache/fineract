@@ -40,6 +40,10 @@ import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
 import org.mifosplatform.portfolio.charge.exception.SavingsAccountChargeWithoutMandatoryFieldException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
+/**
+ * @author dv6
+ * 
+ */
 @Entity
 @Table(name = "m_savings_account_charge")
 public class SavingsAccountCharge extends AbstractPersistable<Long> {
@@ -822,5 +826,17 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
     public boolean isNotActive() {
         return !isActive();
+    }
+
+    /**
+     * This method is to identify the charges which can override the savings
+     * rules(for example if there is a minimum enforced balance of 1000 on
+     * savings account with account balance of 1000, still these charges can be
+     * collected as these charges are initiated by system and it can bring down
+     * the balance below the enforced minimum balance).
+     * 
+     */
+    public boolean canOverriteSavingAccountRules() {
+        return !(this.isSavingsActivation() || this.isWithdrawalFee());
     }
 }

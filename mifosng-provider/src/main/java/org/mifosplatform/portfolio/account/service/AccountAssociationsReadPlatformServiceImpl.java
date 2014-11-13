@@ -7,12 +7,14 @@ package org.mifosplatform.portfolio.account.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.portfolio.account.data.AccountAssociationsData;
 import org.mifosplatform.portfolio.account.data.PortfolioAccountData;
+import org.mifosplatform.portfolio.account.domain.AccountAssociationType;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountStatusType;
 import org.slf4j.Logger;
@@ -35,12 +37,13 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
     }
 
     @Override
-    public PortfolioAccountData retriveLoanAssociation(final Long loanId) {
+    public PortfolioAccountData retriveLoanLinkedAssociation(final Long loanId) {
         PortfolioAccountData linkedAccount = null;
         final AccountAssociationsMapper mapper = new AccountAssociationsMapper();
-        final String sql = "select " + mapper.schema() + " where aa.loan_account_id = ? ";
+        final String sql = "select " + mapper.schema() + " where aa.loan_account_id = ? and aa.association_type_enum = ?";
         try {
-            final AccountAssociationsData accountAssociationsData = this.jdbcTemplate.queryForObject(sql, mapper, loanId);
+            final AccountAssociationsData accountAssociationsData = this.jdbcTemplate.queryForObject(sql, mapper, loanId,
+                    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
             if (accountAssociationsData != null) {
                 linkedAccount = accountAssociationsData.linkedAccount();
             }
@@ -49,14 +52,27 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
         }
         return linkedAccount;
     }
-    
+
     @Override
-    public PortfolioAccountData retriveSavingsAssociation(final Long savingsId) {
+    public Collection<AccountAssociationsData> retriveLoanAssociations(final Long loanId, final Integer associationType) {
+        final AccountAssociationsMapper mapper = new AccountAssociationsMapper();
+        final String sql = "select " + mapper.schema() + " where aa.loan_account_id = ? and aa.association_type_enum = ?";
+        try {
+            return this.jdbcTemplate.query(sql, mapper, loanId, associationType);
+        } catch (final EmptyResultDataAccessException e) {
+            return null;
+        }
+
+    }
+
+    @Override
+    public PortfolioAccountData retriveSavingsLinkedAssociation(final Long savingsId) {
         PortfolioAccountData linkedAccount = null;
         final AccountAssociationsMapper mapper = new AccountAssociationsMapper();
-        final String sql = "select " + mapper.schema() + " where aa.savings_account_id = ? ";
+        final String sql = "select " + mapper.schema() + " where aa.savings_account_id = ? and aa.association_type_enum = ?";
         try {
-            final AccountAssociationsData accountAssociationsData = this.jdbcTemplate.queryForObject(sql, mapper, savingsId);
+            final AccountAssociationsData accountAssociationsData = this.jdbcTemplate.queryForObject(sql, mapper, savingsId,
+                    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
             if (accountAssociationsData != null) {
                 linkedAccount = accountAssociationsData.linkedAccount();
             }
@@ -74,7 +90,7 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
 
         final List<Integer> statusList = this.jdbcTemplate.queryForList(sql, Integer.class, savingsId);
         for (final Integer status : statusList) {
-            if(status !=null){
+            if (status != null) {
                 final LoanStatus loanStatus = LoanStatus.fromInt(status);
                 if (loanStatus.isActiveOrAwaitingApprovalOrDisbursal() || loanStatus.isUnderTransfer()) { return true; }
             }
@@ -86,7 +102,7 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
 
         final List<Integer> savstatusList = this.jdbcTemplate.queryForList(savsql, Integer.class, savingsId);
         for (final Integer status : savstatusList) {
-            if(status !=null){
+            if (status != null) {
                 final SavingsAccountStatusType saveStatus = SavingsAccountStatusType.fromInt(status);
                 if (saveStatus.isActiveOrAwaitingApprovalOrDisbursal() || saveStatus.isUnderTransfer()) { return true; }
             }

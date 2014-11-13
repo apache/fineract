@@ -33,6 +33,7 @@ import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
+import org.mifosplatform.portfolio.account.domain.AccountAssociationType;
 import org.mifosplatform.portfolio.account.domain.AccountAssociations;
 import org.mifosplatform.portfolio.account.domain.AccountAssociationsRepository;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
@@ -115,8 +116,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final FixedDepositAccountRepository fixedDepositAccountRepository,
             final RecurringDepositAccountRepository recurringDepositAccountRepository,
             final AccountAssociationsRepository accountAssociationsRepository, final FromJsonHelper fromJsonHelper,
-            final CalendarInstanceRepository calendarInstanceRepository,
-            final ConfigurationDomainService configurationDomainService) {
+            final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.depositAccountAssembler = depositAccountAssembler;
@@ -171,11 +171,10 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         try {
             this.depositAccountDataValidator.validateFixedDepositForSubmit(command.json());
             final AppUser submittedBy = this.context.authenticatedUser();
-            
+
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
-    				.isSavingsInterestPostingAtCurrentPeriodEnd();
-            final Integer financialYearBeginningMonth = this.configurationDomainService
-        			.retrieveFinancialYearBeginningMonth();
+                    .isSavingsInterestPostingAtCurrentPeriodEnd();
+            final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
 
             final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFrom(command, submittedBy,
                     DepositAccountType.FIXED_DEPOSIT);
@@ -183,8 +182,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final MathContext mc = MathContext.DECIMAL64;
             final boolean isPreMatureClosure = false;
 
-            account.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure,
-            		isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+            account.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
+                    financialYearBeginningMonth);
             this.fixedDepositAccountRepository.save(account);
 
             if (account.isAccountNumberRequiresAutoGeneration()) {
@@ -201,7 +200,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsAccountId,
                         DepositAccountType.SAVINGS_DEPOSIT);
                 this.depositAccountDataValidator.validatelinkedSavingsAccount(savingsAccount, account);
-                final AccountAssociations accountAssociations = AccountAssociations.associateSavingsAccount(account, savingsAccount);
+                final AccountAssociations accountAssociations = AccountAssociations.associateSavingsAccount(account, savingsAccount,
+                        AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
                 this.accountAssociationsRepository.save(accountAssociations);
             }
 
@@ -227,11 +227,10 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         try {
             this.depositAccountDataValidator.validateRecurringDepositForSubmit(command.json());
             final AppUser submittedBy = this.context.authenticatedUser();
-            
+
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
-    				.isSavingsInterestPostingAtCurrentPeriodEnd();
-            final Integer financialYearBeginningMonth = this.configurationDomainService
-        			.retrieveFinancialYearBeginningMonth();
+                    .isSavingsInterestPostingAtCurrentPeriodEnd();
+            final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
 
             final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(command,
                     submittedBy, DepositAccountType.RECURRING_DEPOSIT);
@@ -257,8 +256,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             frequency = frequency == -1 ? 1 : frequency;
             account.generateSchedule(frequencyType, frequency, calendar);
             final boolean isPreMatureClosure = false;
-            account.updateMaturityDateAndAmount(mc, isPreMatureClosure,
-            		isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+            account.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
+                    financialYearBeginningMonth);
             account.validateApplicableInterestRate();
             this.savingAccountRepository.save(account);
 
@@ -334,11 +333,10 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     public CommandProcessingResult modifyFDApplication(final Long accountId, final JsonCommand command) {
         try {
             this.depositAccountDataValidator.validateFixedDepositForUpdate(command.json());
-            
+
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
-    				.isSavingsInterestPostingAtCurrentPeriodEnd();
-            final Integer financialYearBeginningMonth = this.configurationDomainService
-        			.retrieveFinancialYearBeginningMonth();
+                    .isSavingsInterestPostingAtCurrentPeriodEnd();
+            final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
 
             final Map<String, Object> changes = new LinkedHashMap<>(20);
 
@@ -353,79 +351,10 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 final MathContext mc = MathContext.DECIMAL64;
                 final boolean isPreMatureClosure = false;
                 account.updateMaturityDateAndAmountBeforeAccountActivation(mc, isPreMatureClosure,
-                		isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+                        isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
                 this.savingAccountRepository.save(account);
             }
-
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .withEntityId(accountId) //
-                    .withOfficeId(account.officeId()) //
-                    .withClientId(account.clientId()) //
-                    .withGroupId(account.groupId()) //
-                    .withSavingsId(accountId) //
-                    .with(changes) //
-                    .build();
-        } catch (final DataAccessException dve) {
-            handleDataIntegrityIssues(command, dve);
-            return new CommandProcessingResult(Long.valueOf(-1));
-        }
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult modifyRDApplication(final Long accountId, final JsonCommand command) {
-        try {
-            this.depositAccountDataValidator.validateRecurringDepositForUpdate(command.json());
             
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
-    				.isSavingsInterestPostingAtCurrentPeriodEnd();
-            final Integer financialYearBeginningMonth = this.configurationDomainService
-        			.retrieveFinancialYearBeginningMonth();
-
-            final Map<String, Object> changes = new LinkedHashMap<>(20);
-
-            final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(accountId,
-                    DepositAccountType.RECURRING_DEPOSIT);
-            checkClientOrGroupActive(account);
-            account.modifyApplication(command, changes);
-            account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), DepositAccountType.RECURRING_DEPOSIT.resourceName());
-
-            if (!changes.isEmpty()) {
-                updateFDAndRDCommonChanges(changes, command, account);
-                final MathContext mc = MathContext.DECIMAL64;
-                final CalendarInstance calendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
-                        accountId, CalendarEntityType.SAVINGS.getValue(), CalendarType.COLLECTION.getValue());
-                final Calendar calendar = calendarInstance.getCalendar();
-                final PeriodFrequencyType frequencyType = CalendarFrequencyType.from(CalendarUtils.getFrequency(calendar.getRecurrence()));
-                Integer frequency = CalendarUtils.getInterval(calendar.getRecurrence());
-                frequency = frequency == -1 ? 1 : frequency;
-                account.generateSchedule(frequencyType, frequency, calendar);
-                final boolean isPreMatureClosure = false;
-                account.updateMaturityDateAndAmount(mc, isPreMatureClosure,
-                		isSavingsInterestPostingAtCurrentPeriodEnd,
-                		financialYearBeginningMonth);
-                account.validateApplicableInterestRate();
-                this.savingAccountRepository.save(account);
-
-            }
-
-            // update calendar details
-            if (!account.isCalendarInherited()) {
-                final LocalDate calendarStartDate = account.depositStartDate();
-                final Integer frequencyType = command.integerValueSansLocaleOfParameterNamed(recurringFrequencyTypeParamName);
-                final PeriodFrequencyType periodFrequencyType = PeriodFrequencyType.fromInt(frequencyType);
-                final Integer frequency = command.integerValueSansLocaleOfParameterNamed(recurringFrequencyParamName);
-                final Integer repeatsOnDay = calendarStartDate.getDayOfWeek();
-
-                CalendarInstance calendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
-                        accountId, CalendarEntityType.SAVINGS.getValue(), CalendarType.COLLECTION.getValue());
-                Calendar calendar = calendarInstance.getCalendar();
-                calendar.updateRepeatingCalendar(calendarStartDate, CalendarFrequencyType.from(periodFrequencyType), frequency,
-                        repeatsOnDay);
-                this.calendarInstanceRepository.save(calendarInstance);
-            }
-
             boolean isLinkedAccRequired = command.booleanPrimitiveValueOfParameterNamed(transferInterestToSavingsParamName);
 
             // Save linked account information
@@ -458,7 +387,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                             DepositAccountType.SAVINGS_DEPOSIT);
                     this.depositAccountDataValidator.validatelinkedSavingsAccount(savingsAccount, account);
                     if (accountAssociations == null) {
-                        accountAssociations = AccountAssociations.associateSavingsAccount(account, savingsAccount);
+                        accountAssociations = AccountAssociations.associateSavingsAccount(account, savingsAccount,
+                                AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
                     } else {
                         accountAssociations.updateLinkedSavingsAccount(savingsAccount);
                     }
@@ -466,6 +396,74 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     this.accountAssociationsRepository.save(accountAssociations);
                 }
             }
+
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(accountId) //
+                    .withOfficeId(account.officeId()) //
+                    .withClientId(account.clientId()) //
+                    .withGroupId(account.groupId()) //
+                    .withSavingsId(accountId) //
+                    .with(changes) //
+                    .build();
+        } catch (final DataAccessException dve) {
+            handleDataIntegrityIssues(command, dve);
+            return new CommandProcessingResult(Long.valueOf(-1));
+        }
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult modifyRDApplication(final Long accountId, final JsonCommand command) {
+        try {
+            this.depositAccountDataValidator.validateRecurringDepositForUpdate(command.json());
+
+            final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
+                    .isSavingsInterestPostingAtCurrentPeriodEnd();
+            final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
+
+            final Map<String, Object> changes = new LinkedHashMap<>(20);
+
+            final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(accountId,
+                    DepositAccountType.RECURRING_DEPOSIT);
+            checkClientOrGroupActive(account);
+            account.modifyApplication(command, changes);
+            account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), DepositAccountType.RECURRING_DEPOSIT.resourceName());
+
+            if (!changes.isEmpty()) {
+                updateFDAndRDCommonChanges(changes, command, account);
+                final MathContext mc = MathContext.DECIMAL64;
+                final CalendarInstance calendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
+                        accountId, CalendarEntityType.SAVINGS.getValue(), CalendarType.COLLECTION.getValue());
+                final Calendar calendar = calendarInstance.getCalendar();
+                final PeriodFrequencyType frequencyType = CalendarFrequencyType.from(CalendarUtils.getFrequency(calendar.getRecurrence()));
+                Integer frequency = CalendarUtils.getInterval(calendar.getRecurrence());
+                frequency = frequency == -1 ? 1 : frequency;
+                account.generateSchedule(frequencyType, frequency, calendar);
+                final boolean isPreMatureClosure = false;
+                account.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
+                        financialYearBeginningMonth);
+                account.validateApplicableInterestRate();
+                this.savingAccountRepository.save(account);
+
+            }
+
+            // update calendar details
+            if (!account.isCalendarInherited()) {
+                final LocalDate calendarStartDate = account.depositStartDate();
+                final Integer frequencyType = command.integerValueSansLocaleOfParameterNamed(recurringFrequencyTypeParamName);
+                final PeriodFrequencyType periodFrequencyType = PeriodFrequencyType.fromInt(frequencyType);
+                final Integer frequency = command.integerValueSansLocaleOfParameterNamed(recurringFrequencyParamName);
+                final Integer repeatsOnDay = calendarStartDate.getDayOfWeek();
+
+                CalendarInstance calendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
+                        accountId, CalendarEntityType.SAVINGS.getValue(), CalendarType.COLLECTION.getValue());
+                Calendar calendar = calendarInstance.getCalendar();
+                calendar.updateRepeatingCalendar(calendarStartDate, CalendarFrequencyType.from(periodFrequencyType), frequency,
+                        repeatsOnDay);
+                this.calendarInstanceRepository.save(calendarInstance);
+            }
+
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
