@@ -181,14 +181,12 @@ public class LoanScheduleAssembler {
          * be either same frequency or loan freq is multiple of center/group
          * meeting freq multiples
          */
-        if (loanType.isJLGAccount()) {
-            if ((synchDisbursement != null && synchDisbursement.booleanValue())) {
+        if (loanType.isJLGAccount() && calendarId != null ) {
                 calendar = this.calendarRepository.findOne(calendarId);
                 if (calendar == null) { throw new CalendarNotFoundException(calendarId); }
                 final PeriodFrequencyType meetingPeriodFrequency = CalendarUtils.getMeetingPeriodFrequencyType(calendar.getRecurrence());
                 validateRepaymentFrequencyIsSameAsMeetingFrequency(meetingPeriodFrequency.getValue(), repaymentFrequencyType,
                         CalendarUtils.getInterval(calendar.getRecurrence()), repaymentEvery);
-            }
         }
 
         /*

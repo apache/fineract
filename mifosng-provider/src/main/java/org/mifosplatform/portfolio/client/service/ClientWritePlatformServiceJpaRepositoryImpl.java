@@ -581,7 +581,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private void validateParentGroupRulesBeforeClientActivation(Client client) {
         Integer minNumberOfClients = configurationDomainService.retrieveMinAllowedClientsInGroup();
         Integer maxNumberOfClients = configurationDomainService.retrieveMaxAllowedClientsInGroup();
-        if (client.getGroups() != null) {
+        if (client.getGroups() != null && maxNumberOfClients != null) {
             for (Group group : client.getGroups()) {
                 /**
                  * Since this Client has not yet been associated with the group,
