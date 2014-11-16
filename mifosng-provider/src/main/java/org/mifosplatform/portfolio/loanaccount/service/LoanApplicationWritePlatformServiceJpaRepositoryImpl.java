@@ -389,9 +389,12 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
              * If there are any charges already present, which are now not
              * passed in as a part of the request, deem the charges as modified
              **/
-            if (!possiblyModifedLoanCharges.containsAll(existingCharges)) {
-                isChargeModified = true;
+            if(!possiblyModifedLoanCharges.isEmpty()){
+                if (!possiblyModifedLoanCharges.containsAll(existingCharges)) {
+                    isChargeModified = true;
+                }
             }
+
 
             /**
              * If any new charges are added or values of existing charges are
