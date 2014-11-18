@@ -19,20 +19,32 @@ public class CodeValueData implements Serializable {
 
     @SuppressWarnings("unused")
     private final Integer position;
+    
+    @SuppressWarnings("unused")
+    private final String description;
 
     public static CodeValueData instance(final Long id, final String name, final Integer position) {
-        return new CodeValueData(id, name, position);
-    }
+        String description = null;
+       return new CodeValueData(id, name, position, description);
+       }
 
+    public static CodeValueData instance(final Long id, final String name, final String description) {
+       Integer position = null;
+       return new CodeValueData(id, name, position, description);
+       }
+    
     public static CodeValueData instance(final Long id, final String name) {
-        return new CodeValueData(id, name, null);
-    }
+        String description = null;
+        Integer position=null;
+        return new CodeValueData(id, name, position, description);
+       }
 
-    private CodeValueData(final Long id, final String name, final Integer position) {
-        this.id = id;
-        this.name = name;
-        this.position = position;
-    }
+       private CodeValueData(final Long id, final String name, final Integer position, final String description) {
+       this.id = id;
+       this.name = name;
+       this.position = position;
+       this.description = description;
+       }
 
     public Long getId() {
         return this.id;
