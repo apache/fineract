@@ -17,14 +17,14 @@ public interface ProductToGLAccountMappingReadPlatformService {
 
     public List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappingsForLoanProduct(final Long loanProductId);
 
-    public List<ChargeToGLAccountMapper> fetchFeeToIncomeAccountMappingsForLoanProduct(final Long loanProductId);
+    public List<ChargeToGLAccountMapper> fetchFeeToIncomeOrLiabilityAccountMappingsForLoanProduct(final Long loanProductId);
 
     public List<ChargeToGLAccountMapper> fetchPenaltyToIncomeAccountMappingsForLoanProduct(final Long loanProductId);
 
     public Map<String, Object> fetchAccountMappingDetailsForSavingsProduct(final Long savingsProductId, final Integer accountingType);
 
     public List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappingsForSavingsProduct(final Long savingsProductId);
-    
+
     public List<ChargeToGLAccountMapper> fetchFeeToIncomeAccountMappingsForSavingsProduct(final Long savingsProductId);
 
     public List<ChargeToGLAccountMapper> fetchPenaltyToIncomeAccountMappingsForSavingsProduct(final Long savingsProductId);

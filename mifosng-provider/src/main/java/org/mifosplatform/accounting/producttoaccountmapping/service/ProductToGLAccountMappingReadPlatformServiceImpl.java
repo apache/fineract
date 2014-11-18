@@ -262,7 +262,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
     }
 
     @Override
-    public List<ChargeToGLAccountMapper> fetchFeeToIncomeAccountMappingsForLoanProduct(final Long loanProductId) {
+    public List<ChargeToGLAccountMapper> fetchFeeToIncomeOrLiabilityAccountMappingsForLoanProduct(final Long loanProductId) {
         return fetchChargeToIncomeAccountMappings(PortfolioProductType.LOAN, loanProductId, false);
     }
 

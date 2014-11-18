@@ -12,6 +12,7 @@ import org.mifosplatform.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR
 import org.mifosplatform.accounting.common.AccountingConstants.SAVINGS_PRODUCT_ACCOUNTING_PARAMS;
 import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountRepository;
+import org.mifosplatform.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
 import org.mifosplatform.accounting.producttoaccountmapping.domain.PortfolioProductType;
 import org.mifosplatform.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
@@ -30,8 +31,10 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
     @Autowired
     public SavingsProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,
             final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper,
-            final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final ChargeRepositoryWrapper chargeRepositoryWrapper) {
-        super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, codeValueRepositoryWrapper, chargeRepositoryWrapper);
+            final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final ChargeRepositoryWrapper chargeRepositoryWrapper,
+            final GLAccountRepositoryWrapper accountRepositoryWrapper) {
+        super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, codeValueRepositoryWrapper, chargeRepositoryWrapper,
+                accountRepositoryWrapper);
     }
 
     /*** Set of abstractions for saving Saving Products to GL Account Mappings ***/
@@ -97,8 +100,8 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
     public void saveChargesToIncomeAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
             final Map<String, Object> changes) {
         // save both fee and penalty charges
-        saveChargesToIncomeAccountMappings(command, element, productId, changes, PortfolioProductType.SAVING, true);
-        saveChargesToIncomeAccountMappings(command, element, productId, changes, PortfolioProductType.SAVING, false);
+        saveChargesToIncomeOrLiabilityAccountMappings(command, element, productId, changes, PortfolioProductType.SAVING, true);
+        saveChargesToIncomeOrLiabilityAccountMappings(command, element, productId, changes, PortfolioProductType.SAVING, false);
     }
 
     public void updateChargesToIncomeAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,

@@ -205,7 +205,7 @@ public class LoanProductsApiResource {
                     .accountingRuleType().getId().intValue());
             paymentChannelToFundSourceMappings = this.accountMappingReadPlatformService
                     .fetchPaymentTypeToFundSourceMappingsForLoanProduct(productId);
-            feeToGLAccountMappings = this.accountMappingReadPlatformService.fetchFeeToIncomeAccountMappingsForLoanProduct(productId);
+            feeToGLAccountMappings = this.accountMappingReadPlatformService.fetchFeeToIncomeOrLiabilityAccountMappingsForLoanProduct(productId);
             penaltyToGLAccountMappings = this.accountMappingReadPlatformService
                     .fetchPenaltyToIncomeAccountMappingsForLoanProduct(productId);
             loanProduct = LoanProductData.withAccountingDetails(loanProduct, accountingMappings, paymentChannelToFundSourceMappings,

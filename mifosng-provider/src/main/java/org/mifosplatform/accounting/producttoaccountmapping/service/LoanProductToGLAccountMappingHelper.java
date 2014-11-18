@@ -13,6 +13,7 @@ import org.mifosplatform.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR
 import org.mifosplatform.accounting.common.AccountingConstants.LOAN_PRODUCT_ACCOUNTING_PARAMS;
 import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountRepository;
+import org.mifosplatform.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
 import org.mifosplatform.accounting.producttoaccountmapping.domain.PortfolioProductType;
 import org.mifosplatform.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
@@ -31,8 +32,10 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
     @Autowired
     public LoanProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,
             final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper,
-            final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final ChargeRepositoryWrapper chargeRepositoryWrapper) {
-        super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, codeValueRepositoryWrapper, chargeRepositoryWrapper);
+            final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final ChargeRepositoryWrapper chargeRepositoryWrapper,
+            final GLAccountRepositoryWrapper accountRepositoryWrapper) {
+        super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, codeValueRepositoryWrapper, chargeRepositoryWrapper,
+                accountRepositoryWrapper);
     }
 
     /*** Set of abstractions for saving Loan Products to GL Account Mappings ***/
@@ -97,8 +100,8 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
     public void saveChargesToIncomeAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
             final Map<String, Object> changes) {
         // save both fee and penalty charges
-        saveChargesToIncomeAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN, true);
-        saveChargesToIncomeAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN, false);
+        saveChargesToIncomeOrLiabilityAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN, true);
+        saveChargesToIncomeOrLiabilityAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN, false);
     }
 
     public void updateChargesToIncomeAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
