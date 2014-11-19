@@ -52,6 +52,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
 import org.mifosplatform.portfolio.account.service.AccountTransfersReadPlatformService;
@@ -88,6 +89,7 @@ import com.google.gson.JsonObject;
 @Service
 public class DepositAccountAssembler {
 
+	private final PlatformSecurityContext context;
     private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
     private final SavingsHelper savingsHelper;
     private final ClientRepositoryWrapper clientRepository;
@@ -108,7 +110,8 @@ public class DepositAccountAssembler {
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper,
             final DepositProductAssembler depositProductAssembler,
             final RecurringDepositProductRepository recurringDepositProductRepository,
-            final AccountTransfersReadPlatformService accountTransfersReadPlatformService) {
+            final AccountTransfersReadPlatformService accountTransfersReadPlatformService,
+            final PlatformSecurityContext context) {
 
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
@@ -121,6 +124,7 @@ public class DepositAccountAssembler {
         this.depositProductAssembler = depositProductAssembler;
         this.recurringDepositProductRepository = recurringDepositProductRepository;
         this.savingsHelper = new SavingsHelper(accountTransfersReadPlatformService);
+        this.context = context;
     }
 
     /**
@@ -390,6 +394,10 @@ public class DepositAccountAssembler {
     }
 
     public Collection<SavingsAccountTransactionDTO> assembleBulkMandatorySavingsAccountTransactionDTOs(final JsonCommand command) {
+    	AppUser user = null;
+    	if (this.context != null) {
+    		user = this.context.authenticatedUser();
+    	}
         final String json = command.json();
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -412,7 +420,7 @@ public class DepositAccountAssembler {
                     final BigDecimal dueAmount = this.fromApiJsonHelper.extractBigDecimalNamed(transactionAmountParamName,
                             savingsTransactionElement, locale);
                     final SavingsAccountTransactionDTO savingsAccountTransactionDTO = new SavingsAccountTransactionDTO(formatter,
-                            transactionDate, dueAmount, paymentDetail, new Date(), savingsId);
+                            transactionDate, dueAmount, paymentDetail, new Date(), savingsId, user);
                     savingsAccountTransactions.add(savingsAccountTransactionDTO);
                 }
             }

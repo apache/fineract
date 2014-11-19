@@ -142,7 +142,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             final boolean isRecoveryRepayment = false;
             final LoanTransaction loanRepaymentTransaction = this.loanAccountDomainService.makeRepayment(toLoanAccount,
                     new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, null,
-                    isRecoveryRepayment, isAccountTransfer);
+                    isRecoveryRepayment, isAccountTransfer, null); // FIXME: should not be sending null for currentUser for account transfers
 
             final AccountTransferDetails accountTransferDetails = this.accountTransferAssembler.assembleSavingsToLoanTransfer(command,
                     fromSavingsAccount, toLoanAccount, withdrawal, loanRepaymentTransaction);
@@ -157,7 +157,8 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             final Loan fromLoanAccount = this.loanAccountAssembler.assembleFrom(fromLoanAccountId);
 
             final LoanTransaction loanRefundTransaction = this.loanAccountDomainService.makeRefund(fromLoanAccountId,
-                    new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, null);
+                    new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, null,
+                    null); // FIXME: should not be sending null for currentUser for account transfers
 
             final Long toSavingsAccountId = command.longValueOfParameterNamed(toAccountIdParamName);
             final SavingsAccount toSavingsAccount = this.savingsAccountAssembler.assembleFrom(toSavingsAccountId);
@@ -271,13 +272,14 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                 loanTransaction = this.loanAccountDomainService.makeChargePayment(toLoanAccount, accountTransferDTO.getChargeId(),
                         accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
                         accountTransferDTO.getPaymentDetail(), null, null, accountTransferDTO.getToTransferType(),
-                        accountTransferDTO.getLoanInstallmentNumber());
+                        accountTransferDTO.getLoanInstallmentNumber(), null); // FIXME: should not be sending null for currentUser for account transfers
 
             } else {
                 final boolean isRecoveryRepayment = false;
                 loanTransaction = this.loanAccountDomainService.makeRepayment(toLoanAccount, new CommandProcessingResultBuilder(),
                         accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
-                        accountTransferDTO.getPaymentDetail(), null, null, isRecoveryRepayment, isAccountTransfer);
+                        accountTransferDTO.getPaymentDetail(), null, null, isRecoveryRepayment, isAccountTransfer,
+                        null); // FIXME: should not be sending null for currentUser for account transfers
             }
 
             accountTransferDetails = this.accountTransferAssembler.assembleSavingsToLoanTransfer(accountTransferDTO, fromSavingsAccount,
@@ -344,12 +346,13 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             if (LoanTransactionType.DISBURSEMENT.getValue().equals(accountTransferDTO.getFromTransferType())) {
                 loanTransaction = this.loanAccountDomainService.makeDisburseTransaction(accountTransferDTO.getFromAccountId(),
                         accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
-                        accountTransferDTO.getPaymentDetail(), accountTransferDTO.getNoteText(), accountTransferDTO.getTxnExternalId());
+                        accountTransferDTO.getPaymentDetail(), accountTransferDTO.getNoteText(), accountTransferDTO.getTxnExternalId(),
+                        null); // FIXME: should not be sending null for currentUser for account transfers
             } else {
                 loanTransaction = this.loanAccountDomainService.makeRefund(accountTransferDTO.getFromAccountId(),
                         new CommandProcessingResultBuilder(), accountTransferDTO.getTransactionDate(),
                         accountTransferDTO.getTransactionAmount(), accountTransferDTO.getPaymentDetail(), accountTransferDTO.getNoteText(),
-                        accountTransferDTO.getTxnExternalId());
+                        accountTransferDTO.getTxnExternalId(), null); // FIXME: should not be sending null for currentUser for account transfers
             }
 
             final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount,

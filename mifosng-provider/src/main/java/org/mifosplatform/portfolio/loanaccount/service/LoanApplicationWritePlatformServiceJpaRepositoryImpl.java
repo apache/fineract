@@ -360,7 +360,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     public CommandProcessingResult modifyApplication(final Long loanId, final JsonCommand command) {
 
         try {
-            this.context.authenticatedUser();
+            AppUser currentUser = this.context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForModify(command.json());
 
@@ -519,7 +519,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 final JsonQuery query = JsonQuery.from(command.json(), parsedQuery, this.fromJsonHelper);
 
                 final LoanScheduleModel loanSchedule = this.calculationPlatformService.calculateLoanSchedule(query, false);
-                existingLoanApplication.updateLoanSchedule(loanSchedule);
+                existingLoanApplication.updateLoanSchedule(loanSchedule, currentUser);
                 existingLoanApplication.recalculateAllCharges();
             }
 
@@ -733,7 +733,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             // to recompute the schedule
             if (changes.containsKey(LoanApiConstants.approvedLoanAmountParameterName)) {
                 ScheduleGeneratorDTO scheduleGeneratorDTO = loanAccountDomainService.buildScheduleGeneratorDTO(loan);
-                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
+                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
             }
 
             this.loanRepository.save(loan);
@@ -761,7 +761,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Override
     public CommandProcessingResult undoApplicationApproval(final Long loanId, final JsonCommand command) {
 
-        this.context.authenticatedUser();
+        AppUser currentUser = this.context.authenticatedUser();
 
         this.fromApiJsonDeserializer.validateForUndo(command.json());
 
@@ -777,7 +777,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (changes.containsKey(LoanApiConstants.approvedLoanAmountParameterName)
                     || changes.containsKey(LoanApiConstants.disbursementPrincipalParameterName )) {
                 ScheduleGeneratorDTO scheduleGeneratorDTO = loanAccountDomainService.buildScheduleGeneratorDTO(loan);
-                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
+                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
             }
             
             this.loanRepository.save(loan);

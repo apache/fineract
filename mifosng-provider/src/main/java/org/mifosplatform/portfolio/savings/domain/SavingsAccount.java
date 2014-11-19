@@ -738,7 +738,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final Money amount = Money.of(this.currency, transactionDTO.getTransactionAmount());
 
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, office(), transactionDTO.getPaymentDetail(),
-                transactionDTO.getTransactionDate(), amount, transactionDTO.getCreatedDate());
+                transactionDTO.getTransactionDate(), amount, transactionDTO.getCreatedDate(), transactionDTO.getAppUser());
         this.transactions.add(transaction);
 
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
@@ -821,21 +821,23 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final Money transactionAmountMoney = Money.of(this.currency, transactionDTO.getTransactionAmount());
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, office(),
                 transactionDTO.getPaymentDetail(), transactionDTO.getTransactionDate(), transactionAmountMoney,
-                transactionDTO.getCreatedDate());
+                transactionDTO.getCreatedDate(), transactionDTO.getAppUser());
         this.transactions.add(transaction);
 
         if (applyWithdrawFee) {
             // auto pay withdrawal fee
-            payWithdrawalFee(transactionDTO.getTransactionAmount(), transactionDTO.getTransactionDate());
+            payWithdrawalFee(transactionDTO.getTransactionAmount(), transactionDTO.getTransactionDate(),
+            		transactionDTO.getAppUser());
         }
         return transaction;
     }
 
-    private void payWithdrawalFee(final BigDecimal transactionAmoount, final LocalDate transactionDate) {
+    private void payWithdrawalFee(final BigDecimal transactionAmoount, final LocalDate transactionDate,
+    		final AppUser user) {
         for (SavingsAccountCharge charge : this.charges()) {
             if (charge.isWithdrawalFee() && charge.isActive()) {
                 charge.updateWithdralFeeAmount(transactionAmoount);
-                this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate);
+                this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate, user);
             }
         }
     }
@@ -1817,7 +1819,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public void processAccountUponActivation(final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
-            final Integer financialYearBeginningMonth) {
+            final Integer financialYearBeginningMonth, final AppUser user) {
 
         // update annual fee due date
         for (SavingsAccountCharge charge : this.charges()) {
@@ -1825,7 +1827,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
 
         // auto pay the activation time charges
-        this.payActivationCharges(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+        this.payActivationCharges(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, user);
         // TODO : AA add activation charges to actual changes list
     }
 
@@ -1848,12 +1850,13 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivationLocalDate());
     }
 
-    private void payActivationCharges(final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
+    private void payActivationCharges(final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
+    		final AppUser user) {
         boolean isSavingsChargeApplied = false;
         for (SavingsAccountCharge savingsAccountCharge : this.charges()) {
             if (savingsAccountCharge.isSavingsActivation()) {
                 isSavingsChargeApplied = true;
-                payCharge(savingsAccountCharge, savingsAccountCharge.getAmountOutstanding(getCurrency()), getActivationLocalDate());
+                payCharge(savingsAccountCharge, savingsAccountCharge.getAmountOutstanding(getCurrency()), getActivationLocalDate(), user);
             }
         }
 
@@ -2037,7 +2040,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.charges.remove(charge);
     }
 
-    public void waiveCharge(final Long savingsAccountChargeId) {
+    public void waiveCharge(final Long savingsAccountChargeId, final AppUser user) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -2076,7 +2079,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         // waive charge
         final Money amountWaived = savingsAccountCharge.waive(getCurrency());
-        handleWaiverChargeTransactions(savingsAccountCharge, amountWaived);
+        handleWaiverChargeTransactions(savingsAccountCharge, amountWaived, user);
 
     }
 
@@ -2167,7 +2170,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public void payCharge(final SavingsAccountCharge savingsAccountCharge, final BigDecimal amountPaid, final LocalDate transactionDate,
-            final DateTimeFormatter formatter) {
+            final DateTimeFormatter formatter, final AppUser user) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -2242,32 +2245,34 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
-        this.payCharge(savingsAccountCharge, chargePaid, transactionDate);
+        this.payCharge(savingsAccountCharge, chargePaid, transactionDate, user);
     }
 
-    public void payCharge(final SavingsAccountCharge savingsAccountCharge, final Money amountPaid, final LocalDate transactionDate) {
+    public void payCharge(final SavingsAccountCharge savingsAccountCharge, final Money amountPaid, final LocalDate transactionDate,
+    		final AppUser user) {
         savingsAccountCharge.pay(getCurrency(), amountPaid);
-        handlePayChargeTransactions(savingsAccountCharge, amountPaid, transactionDate);
+        handlePayChargeTransactions(savingsAccountCharge, amountPaid, transactionDate, user);
     }
 
     private void handlePayChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount,
-            final LocalDate transactionDate) {
+            final LocalDate transactionDate, final AppUser user) {
         SavingsAccountTransaction chargeTransaction = null;
 
         if (savingsAccountCharge.isWithdrawalFee()) {
-            chargeTransaction = SavingsAccountTransaction.withdrawalFee(this, office(), transactionDate, transactionAmount);
+            chargeTransaction = SavingsAccountTransaction.withdrawalFee(this, office(), transactionDate, transactionAmount, user);
         } else if (savingsAccountCharge.isAnnualFee()) {
-            chargeTransaction = SavingsAccountTransaction.annualFee(this, office(), transactionDate, transactionAmount);
+            chargeTransaction = SavingsAccountTransaction.annualFee(this, office(), transactionDate, transactionAmount, user);
         } else {
-            chargeTransaction = SavingsAccountTransaction.charge(this, office(), transactionDate, transactionAmount);
+            chargeTransaction = SavingsAccountTransaction.charge(this, office(), transactionDate, transactionAmount, user);
         }
 
         handleChargeTransactions(savingsAccountCharge, chargeTransaction);
     }
 
-    private void handleWaiverChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount) {
+    private void handleWaiverChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount,
+    		AppUser user) {
         final SavingsAccountTransaction chargeTransaction = SavingsAccountTransaction.waiver(this, office(),
-                DateUtils.getLocalDateOfTenant(), transactionAmount);
+                DateUtils.getLocalDateOfTenant(), transactionAmount, user);
         handleChargeTransactions(savingsAccountCharge, chargeTransaction);
     }
 

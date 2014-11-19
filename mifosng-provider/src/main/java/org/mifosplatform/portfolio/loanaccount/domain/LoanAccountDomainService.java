@@ -12,23 +12,26 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
+import org.mifosplatform.useradministration.domain.AppUser;
 
 public interface LoanAccountDomainService {
 
     LoanTransaction makeRepayment(Loan loan, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId,
-            final boolean isRecoveryRepayment, boolean isAccountTransfer);
+            final boolean isRecoveryRepayment, boolean isAccountTransfer, final AppUser currentUser);
 
     LoanTransaction makeRefund(Long accountId, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId);
+            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId,
+            final AppUser currentUser);
 
     void reverseTransfer(LoanTransaction loanTransaction);
 
     LoanTransaction makeChargePayment(Loan loan, Long chargeId, LocalDate transactionDate, BigDecimal transactionAmount,
-            PaymentDetail paymentDetail, String noteText, String txnExternalId, Integer transactionType, Integer installmentNumber);
+            PaymentDetail paymentDetail, String noteText, String txnExternalId, Integer transactionType, Integer installmentNumber,
+            final AppUser currentUser);
 
     LoanTransaction makeDisburseTransaction(Long loanId, LocalDate transactionDate, BigDecimal transactionAmount,
-            PaymentDetail paymentDetail, String noteText, String txnExternalId);
+            PaymentDetail paymentDetail, String noteText, String txnExternalId, final AppUser currentUser);
 
     LocalDate getCalculatedRepaymentsStartingFromDate(LocalDate actualDisbursementDate, Loan loan, CalendarInstance calendarInstance);
 
