@@ -4864,4 +4864,17 @@ public class Loan extends AbstractPersistable<Long> {
     public Boolean shouldCreateStandingInstructionAtDisbursement() {
         return (this.createStandingInstructionAtDisbursement != null) && this.createStandingInstructionAtDisbursement;
     }
+
+    public Collection<LoanCharge> getLoanCharges(LocalDate dueDate) {
+        Collection<LoanCharge> loanCharges = new ArrayList<>();
+
+        for (LoanCharge loanCharge : charges) {
+
+            if ((loanCharge.getDueLocalDate() != null) && loanCharge.getDueLocalDate().equals(dueDate)) {
+                loanCharges.add(loanCharge);
+            }
+        }
+
+        return loanCharges;
+    }
 }
