@@ -17,6 +17,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
@@ -24,6 +25,7 @@ import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.portfolio.savings.SavingsTransactionBooleanValues;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.mifosplatform.portfolio.savings.exception.DepositAccountTransactionNotAllowedException;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainService {
 
+	private final PlatformSecurityContext context;
     private final SavingsAccountRepositoryWrapper savingsAccountRepository;
     private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
@@ -42,12 +45,14 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
             final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
-            final ConfigurationDomainService configurationDomainService) {
+            final ConfigurationDomainService configurationDomainService,
+            final PlatformSecurityContext context) {
         this.savingsAccountRepository = savingsAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
         this.configurationDomainService = configurationDomainService;
+        this.context = context;
     }
 
     @Transactional
@@ -56,6 +61,10 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
             final SavingsTransactionBooleanValues transactionBooleanValues) {
     	
+    	AppUser user = null;
+    	if (this.context != null) {
+    		user = this.context.authenticatedUser();
+    	}
     	final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
 				.isSavingsInterestPostingAtCurrentPeriodEnd();
     	final Integer financialYearBeginningMonth = this.configurationDomainService
@@ -67,7 +76,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                paymentDetail, new Date());
+                paymentDetail, new Date(), user);
         final SavingsAccountTransaction withdrawal = account.withdraw(transactionDTO, transactionBooleanValues.isApplyWithdrawFee());
 
         final MathContext mc = MathContext.DECIMAL64;
@@ -97,6 +106,10 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
             final boolean isAccountTransfer, final boolean isRegularTransaction) {
     	
+    	AppUser user = null;
+    	if (this.context != null) {
+    		user = this.context.authenticatedUser();
+    	}
     	final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
 				.isSavingsInterestPostingAtCurrentPeriodEnd();
     	final Integer financialYearBeginningMonth = this.configurationDomainService
@@ -110,7 +123,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                paymentDetail, new Date());
+                paymentDetail, new Date(), user);
         final SavingsAccountTransaction deposit = account.deposit(transactionDTO);
 
         final MathContext mc = MathContext.DECIMAL64;
