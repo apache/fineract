@@ -42,7 +42,6 @@ import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargePaidByData;
 import org.mifosplatform.portfolio.loanaccount.data.ScheduleGeneratorDTO;
-import org.mifosplatform.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanAccountDomainService;
@@ -120,14 +119,11 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository, ConfigurationDomainService configurationDomainService,
             HolidayRepositoryWrapper holidayRepository, WorkingDaysRepositoryWrapper workingDaysRepository,
             LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository,
-            final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService, 
-            final CalendarInstanceRepository calendarInstanceRepository, 
-            final LoanAccountDomainService loanAccountDomainService, 
-            final LoanChargeReadPlatformService loanChargeReadPlatformService, 
-            final LoanScheduleGeneratorFactory loanScheduleFactory, 
-            final LoanTransactionRepository loanTransactionRepository, 
-            final JournalEntryWritePlatformService journalEntryWritePlatformService, 
-            final LoanRepository loanRepository, 
+            final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService,
+            final CalendarInstanceRepository calendarInstanceRepository, final LoanAccountDomainService loanAccountDomainService,
+            final LoanChargeReadPlatformService loanChargeReadPlatformService, final LoanScheduleGeneratorFactory loanScheduleFactory,
+            final LoanTransactionRepository loanTransactionRepository,
+            final JournalEntryWritePlatformService journalEntryWritePlatformService, final LoanRepository loanRepository,
             final LoanAssembler loanAssembler) {
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
@@ -271,7 +267,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
         catch (final DataIntegrityViolationException dve) {
             // handle the data integrity violation
-            handleDataIntegrityViolation(jsonCommand, dve);
+            handleDataIntegrityViolation(dve);
 
             // return an empty command processing result object
             return CommandProcessingResult.empty();
@@ -331,7 +327,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 final Collection<LoanRescheduleModelRepaymentPeriod> periods = loanRescheduleModel.getPeriods();
                 List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();
                 Collection<LoanCharge> waiveLoanCharges = new ArrayList<>();
-                
+
                 for (LoanRescheduleModelRepaymentPeriod period : periods) {
 
                     if (period.isNew()) {
@@ -349,7 +345,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
                                 LocalDate periodDueDate = repaymentScheduleInstallment.getDueDate();
                                 Money zeroAmount = Money.of(currency, new BigDecimal(0));
-                                
+
                                 repaymentScheduleInstallment.updateInstallmentNumber(period.periodNumber());
                                 repaymentScheduleInstallment.updateFromDate(period.periodFromDate());
                                 repaymentScheduleInstallment.updateDueDate(period.periodDueDate());
@@ -358,10 +354,10 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
                                 if (Money.of(currency, period.principalDue()).isZero() && Money.of(currency, period.interestDue()).isZero()
                                         && repaymentScheduleInstallment.isNotFullyPaidOff()) {
-                                    
-                                    if(repaymentScheduleInstallment.getPenaltyChargesOutstanding(currency).isGreaterThan(zeroAmount) || 
-                                            repaymentScheduleInstallment.getFeeChargesOutstanding(currency).isGreaterThan(zeroAmount)) {
-                                        
+
+                                    if (repaymentScheduleInstallment.getPenaltyChargesOutstanding(currency).isGreaterThan(zeroAmount)
+                                            || repaymentScheduleInstallment.getFeeChargesOutstanding(currency).isGreaterThan(zeroAmount)) {
+
                                         waiveLoanCharges.addAll(loan.getLoanCharges(periodDueDate));
                                     }
                                 }
@@ -378,7 +374,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
                 loan.updateRescheduledByUser(appUser);
                 loan.updateRescheduledOnDate(new LocalDate());
-                
+
                 // waive all loan charges of zero instalments
                 waiveLoanCharges(loan, waiveLoanCharges);
 
@@ -394,12 +390,13 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
                 // update the status of the request
                 loanRescheduleRequest.approve(appUser, approvedOnDate);
-                
-                // update the derived fields of each loan repayments schedule instalments
+
+                // update the derived fields of each loan repayments schedule
+                // instalments
                 for (final LoanRepaymentScheduleInstallment repaymentScheduleInstallment : repaymentScheduleInstallments) {
                     repaymentScheduleInstallment.updateDerivedFields(currency, new LocalDate());
                 }
-                
+
                 // update the loan object
                 this.loanRepository.save(loan);
             }
@@ -410,36 +407,39 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
         catch (final DataIntegrityViolationException dve) {
             // handle the data integrity violation
-            handleDataIntegrityViolation(jsonCommand, dve);
+            handleDataIntegrityViolation(dve);
 
             // return an empty command processing result object
             return CommandProcessingResult.empty();
         }
     }
 
-    /** 
-     * waive all charges in the collection 
+    /**
+     * waive all charges in the collection
      * 
-     * @param loan Loan object
-     * @param loanCharges collection of LoanCharge objects
+     * @param loan
+     *            Loan object
+     * @param loanCharges
+     *            collection of LoanCharge objects
      * @return void
      **/
     private void waiveLoanCharges(Loan loan, Collection<LoanCharge> loanCharges) {
+        AppUser currentUser = this.platformSecurityContext.authenticatedUser();
         this.loanAssembler.setHelpers(loan);
-        
+
         for (LoanCharge loanCharge : loanCharges) {
-            
+
             if (loanCharge.isNotFullyPaid() && !loanCharge.isWaived()) {
                 Integer loanInstallmentNumber = null;
-                
+
                 if (loanCharge.isInstalmentFee()) {
                     LoanInstallmentCharge chargePerInstallment = loanCharge.getUnpaidInstallmentLoanCharge();
-                    
+
                     if (chargePerInstallment != null) {
                         loanInstallmentNumber = chargePerInstallment.getRepaymentInstallment().getInstallmentNumber();
                     }
                 }
-                
+
                 final Map<String, Object> changes = new LinkedHashMap<>(3);
 
                 final List<Long> existingTransactionIds = new ArrayList<>();
@@ -454,8 +454,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 LocalDate lastTransactionDate = null;
                 Long overdurPenaltyWaitPeriod = null;
                 if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
-                    restCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(loan.loanInterestRecalculationDetailId(),
-                            CalendarEntityType.LOAN_RECALCULATION_DETAIL.getValue());
+                    restCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(
+                            loan.loanInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_DETAIL.getValue());
 
                     final MonetaryCurrency currency = loan.getCurrency();
                     applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
@@ -465,15 +465,16 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                             loan.getDisbursementDate(), loan, calendarInstance);
 
                     isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
-                    holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan.getDisbursementDate().toDate());
+                    holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan.getDisbursementDate()
+                            .toDate());
                     workingDays = this.workingDaysRepository.findOne();
                     overdurPenaltyWaitPeriod = this.configurationDomainService.retrievePenaltyWaitPeriod();
                 }
-                
+
                 HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
                 ScheduleGeneratorDTO scheduleGeneratorDTO = new ScheduleGeneratorDTO(loanScheduleFactory, applicationCurrency,
-                        calculatedRepaymentsStartingFromDate, holidayDetailDTO, restCalendarInstance, recalculateFrom, overdurPenaltyWaitPeriod,
-                        lastTransactionDate);
+                        calculatedRepaymentsStartingFromDate, holidayDetailDTO, restCalendarInstance, recalculateFrom,
+                        overdurPenaltyWaitPeriod, lastTransactionDate);
 
                 Money accruedCharge = Money.zero(loan.getCurrency());
                 if (loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
@@ -485,10 +486,11 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 }
 
                 final LoanTransaction loanTransaction = loan.waiveLoanCharge(loanCharge, defaultLoanLifecycleStateMachine(), changes,
-                        existingTransactionIds, existingReversedTransactionIds, loanInstallmentNumber, scheduleGeneratorDTO, accruedCharge);
+                        existingTransactionIds, existingReversedTransactionIds, loanInstallmentNumber, scheduleGeneratorDTO, accruedCharge,
+                        currentUser);
 
                 this.loanTransactionRepository.save(loanTransaction);
-                
+
                 postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
             }
         }
@@ -545,7 +547,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
         catch (final DataIntegrityViolationException dve) {
             // handle the data integrity violation
-            handleDataIntegrityViolation(jsonCommand, dve);
+            handleDataIntegrityViolation(dve);
 
             // return an empty command processing result object
             return CommandProcessingResult.empty();
@@ -562,7 +564,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
      *            data integrity violation exception
      * @return void
      **/
-    private void handleDataIntegrityViolation(final JsonCommand jsonCommand, final DataIntegrityViolationException dve) {
+    private void handleDataIntegrityViolation(final DataIntegrityViolationException dve) {
 
         logger.error(dve.getMessage(), dve);
 
