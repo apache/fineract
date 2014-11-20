@@ -489,7 +489,7 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
             // abstain from validation as user allowed fetch their own data no
             // matter what permissions they have.
         } else {
-            validateHasPermissionTo(function);
+            validateHasReadPermission(function);
         }
     }
 
