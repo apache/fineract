@@ -16,6 +16,7 @@ import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
@@ -169,7 +170,8 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
             modifiedTransactions.add(LoanTransaction.copyTransactionProperties(loanTransaction));
         }
         if (isNewPaymentRequired) {
-            LoanTransaction ondayPaymentTransaction = LoanTransaction.repayment(null, totalAmount, null, LocalDate.now(), null);
+            LoanTransaction ondayPaymentTransaction = LoanTransaction.repayment(null, totalAmount, null, LocalDate.now(), null,
+            		DateUtils.getLocalDateTimeOfTenant(), null);
             modifiedTransactions.add(ondayPaymentTransaction);
         }
 

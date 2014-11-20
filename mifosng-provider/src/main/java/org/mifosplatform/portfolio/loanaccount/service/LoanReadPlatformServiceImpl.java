@@ -405,7 +405,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     @Override
     public LoanTransactionData retrieveWaiveInterestDetails(final Long loanId) {
 
-        this.context.authenticatedUser();
+        AppUser currentUser = this.context.authenticatedUser();
 
         // TODO - KW -OPTIMIZE - write simple sql query to fetch back overdue
         // interest that can be waived along with the date of repayment period
@@ -417,7 +417,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
         final CurrencyData currencyData = applicationCurrency.toData();
 
-        final LoanTransaction waiveOfInterest = loan.deriveDefaultInterestWaiverTransaction();
+        final LoanTransaction waiveOfInterest = loan.deriveDefaultInterestWaiverTransaction(
+        		DateUtils.getLocalDateTimeOfTenant(), currentUser);
 
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WAIVE_INTEREST);
 

@@ -232,7 +232,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
             reinvestedDeposit.updateMaturityDateAndAmount(mc, isPreMatureClosure,
             		isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
-            reinvestedDeposit.processAccountUponActivation(fmt);
+            reinvestedDeposit.processAccountUponActivation(fmt, user);
             reinvestedDeposit.updateMaturityDateAndAmount(mc, isPreMatureClosure,
             		isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
             this.savingsAccountRepository.save(reinvestedDeposit);
