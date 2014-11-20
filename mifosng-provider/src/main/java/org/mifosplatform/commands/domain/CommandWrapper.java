@@ -375,6 +375,30 @@ public class CommandWrapper {
     public boolean isLoanResource() {
         return this.entityName.equalsIgnoreCase("LOAN");
     }
+    
+    public boolean isTellerResource() {
+        return this.entityName.equalsIgnoreCase("TELLER");
+    }
+    
+    public boolean isAllocateCashier() {
+        return this.actionName.equalsIgnoreCase("ALLOCATECASHIER");
+    }
+    
+    public boolean isUpdateCashierAllocation() {
+        return this.actionName.equalsIgnoreCase("UPDATECASHIERALLOCATION");
+    }
+    
+    public boolean isDeleteCashierAllocation() {
+        return this.actionName.equalsIgnoreCase("DELETECASHIERALLOCATION");
+    }
+
+    public boolean isAllocateCashToCashier() {
+        return this.actionName.equalsIgnoreCase("ALLOCATECASHTOCASHIER");
+    }
+    
+    public boolean isSettleCashFromCashier() {
+        return this.actionName.equalsIgnoreCase("SETTLECASHFROMCASHIER");
+    }
 
     public boolean isLoanChargeResource() {
         return this.entityName.equalsIgnoreCase("LOANCHARGE");
