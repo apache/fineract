@@ -1185,6 +1185,13 @@ public class Loan extends AbstractPersistable<Long> {
             this.accountNumber = StringUtils.defaultIfEmpty(newValue, null);
         }
 
+        final String createSiAtDisbursementParameterName = "createStandingInstructionAtDisbursement";
+        if (command.isChangeInBooleanParameterNamed(createSiAtDisbursementParameterName, shouldCreateStandingInstructionAtDisbursement())) {
+            final Boolean valueAsInput = command.booleanObjectValueOfParameterNamed(createSiAtDisbursementParameterName);
+            actualChanges.put(createSiAtDisbursementParameterName, valueAsInput);
+            this.createStandingInstructionAtDisbursement = valueAsInput;            
+        }
+        
         final String externalIdParamName = "externalId";
         if (command.isChangeInStringParameterNamed(externalIdParamName, this.externalId)) {
             final String newValue = command.stringValueOfParameterNamed(externalIdParamName);
