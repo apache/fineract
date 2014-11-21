@@ -173,4 +173,13 @@ public class GLAccountData {
         return this.glCode;
     }
 
+    public EnumOptionData getType() {
+        return this.type;
+    }
+
+    public Integer getTypeId() {
+        if (this.type != null) { return this.type.getId().intValue(); }
+        return null;
+    }
+
 }

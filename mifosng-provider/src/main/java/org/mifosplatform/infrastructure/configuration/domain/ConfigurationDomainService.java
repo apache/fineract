@@ -35,6 +35,8 @@ public interface ConfigurationDomainService {
 
     Long retrieveGraceOnPenaltyPostingPeriod();
 
+    Long retrieveOpeningBalancesContraAccount();
+
     boolean isSavingsInterestPostingAtCurrentPeriodEnd();
 
     Integer retrieveFinancialYearBeginningMonth();

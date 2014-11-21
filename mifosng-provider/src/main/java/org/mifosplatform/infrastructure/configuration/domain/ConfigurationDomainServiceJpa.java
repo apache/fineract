@@ -136,6 +136,13 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
+    public Long retrieveOpeningBalancesContraAccount() {
+        final String propertyName = "office-opening-balances-contra-account";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
+        return property.getValue();
+    }
+
+    @Override
     public boolean isSavingsInterestPostingAtCurrentPeriodEnd() {
         final String propertyName = "savings-interest-posting-current-period-end";
         final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
