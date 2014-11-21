@@ -125,7 +125,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanReadPlatformService loanReadPlatformService;
     private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
     private final LoanAccountDomainService loanAccountDomainService;
-    
+
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
             final LoanApplicationTransitionApiJsonValidator loanApplicationTransitionApiJsonValidator,
@@ -166,7 +166,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanAccountDomainService = loanAccountDomainService;
-        
+
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -179,7 +179,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     public CommandProcessingResult submitApplication(final JsonCommand command) {
 
         try {
-            final AppUser currentUser = this.context.authenticatedUser();
+            final AppUser currentUser = getAppUserIfPresent();
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
@@ -360,7 +360,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     public CommandProcessingResult modifyApplication(final Long loanId, final JsonCommand command) {
 
         try {
-            AppUser currentUser = this.context.authenticatedUser();
+            AppUser currentUser = getAppUserIfPresent();
 
             this.fromApiJsonDeserializer.validateForModify(command.json());
 
@@ -389,12 +389,11 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
              * If there are any charges already present, which are now not
              * passed in as a part of the request, deem the charges as modified
              **/
-            if(!possiblyModifedLoanCharges.isEmpty()){
+            if (!possiblyModifedLoanCharges.isEmpty()) {
                 if (!possiblyModifedLoanCharges.containsAll(existingCharges)) {
                     isChargeModified = true;
                 }
             }
-
 
             /**
              * If any new charges are added or values of existing charges are
@@ -697,8 +696,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Override
     public CommandProcessingResult deleteApplication(final Long loanId) {
 
-        this.context.authenticatedUser();
-
         final Loan loan = retrieveLoanBy(loanId);
         checkClientOrGroupActive(loan);
 
@@ -722,7 +719,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Override
     public CommandProcessingResult approveApplication(final Long loanId, final JsonCommand command) {
 
-        final AppUser currentUser = this.context.authenticatedUser();
+        final AppUser currentUser = getAppUserIfPresent();
 
         this.loanApplicationTransitionApiJsonValidator.validateApproval(command.json());
 
@@ -764,7 +761,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Override
     public CommandProcessingResult undoApplicationApproval(final Long loanId, final JsonCommand command) {
 
-        AppUser currentUser = this.context.authenticatedUser();
+        AppUser currentUser = getAppUserIfPresent();
 
         this.fromApiJsonDeserializer.validateForUndo(command.json());
 
@@ -773,16 +770,16 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         final Map<String, Object> changes = loan.undoApproval(defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
-            
+
             // If loan approved amount is not same as loan amount demanded, then
             // during undo, restore the demand amount to principal amount.
-            
+
             if (changes.containsKey(LoanApiConstants.approvedLoanAmountParameterName)
-                    || changes.containsKey(LoanApiConstants.disbursementPrincipalParameterName )) {
+                    || changes.containsKey(LoanApiConstants.disbursementPrincipalParameterName)) {
                 ScheduleGeneratorDTO scheduleGeneratorDTO = loanAccountDomainService.buildScheduleGeneratorDTO(loan);
                 loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
             }
-            
+
             this.loanRepository.save(loan);
 
             final String noteText = command.stringValueOfParameterNamed("note");
@@ -807,7 +804,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Override
     public CommandProcessingResult rejectApplication(final Long loanId, final JsonCommand command) {
 
-        final AppUser currentUser = this.context.authenticatedUser();
+        final AppUser currentUser = getAppUserIfPresent();
 
         this.loanApplicationTransitionApiJsonValidator.validateRejection(command.json());
 
@@ -840,7 +837,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Override
     public CommandProcessingResult applicantWithdrawsFromApplication(final Long loanId, final JsonCommand command) {
 
-        final AppUser currentUser = this.context.authenticatedUser();
+        final AppUser currentUser = getAppUserIfPresent();
 
         this.loanApplicationTransitionApiJsonValidator.validateApplicantWithdrawal(command.json());
 
@@ -935,6 +932,14 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                     "Validation errors exist.", dataValidationErrors); }
         }
+    }
+
+    private AppUser getAppUserIfPresent() {
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.getAuthenticatedUserIfPresent();
+        }
+        return user;
     }
 
 }

@@ -89,7 +89,7 @@ import com.google.gson.JsonObject;
 @Service
 public class DepositAccountAssembler {
 
-	private final PlatformSecurityContext context;
+    private final PlatformSecurityContext context;
     private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
     private final SavingsHelper savingsHelper;
     private final ClientRepositoryWrapper clientRepository;
@@ -110,8 +110,7 @@ public class DepositAccountAssembler {
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper,
             final DepositProductAssembler depositProductAssembler,
             final RecurringDepositProductRepository recurringDepositProductRepository,
-            final AccountTransfersReadPlatformService accountTransfersReadPlatformService,
-            final PlatformSecurityContext context) {
+            final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final PlatformSecurityContext context) {
 
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
@@ -394,10 +393,7 @@ public class DepositAccountAssembler {
     }
 
     public Collection<SavingsAccountTransactionDTO> assembleBulkMandatorySavingsAccountTransactionDTOs(final JsonCommand command) {
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
+        AppUser user = getAppUserIfPresent();
         final String json = command.json();
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -428,4 +424,13 @@ public class DepositAccountAssembler {
 
         return savingsAccountTransactions;
     }
+
+    private AppUser getAppUserIfPresent() {
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.getAuthenticatedUserIfPresent();
+        }
+        return user;
+    }
+
 }

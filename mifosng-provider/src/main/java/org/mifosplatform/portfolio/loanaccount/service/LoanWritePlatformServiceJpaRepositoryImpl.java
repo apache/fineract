@@ -1374,10 +1374,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     private boolean addCharge(final Loan loan, final Charge chargeDefinition, final LoanCharge loanCharge) {
 
-        AppUser currentUser = null;
-        if (this.context != null) {
-            currentUser = this.context.authenticatedUser();
-        }
+        AppUser currentUser = getAppUserIfPresent();
         if (!loan.hasCurrencyCodeOf(chargeDefinition.getCurrencyCode())) {
             final String errorMessage = "Charge and Loan must have the same currency.";
             throw new InvalidCurrencyException("loanCharge", "attach.to.loan", errorMessage);
@@ -1774,10 +1771,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     public LoanTransaction initiateLoanTransfer(final Long accountId, final LocalDate transferDate) {
 
-        AppUser currentUser = null;
-        if (this.context != null) {
-            currentUser = this.context.authenticatedUser();
-        }
+        AppUser currentUser = getAppUserIfPresent();
 
         final Loan loan = this.loanAssembler.assembleFrom(accountId);
         checkClientOrGroupActive(loan);
@@ -1803,10 +1797,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public LoanTransaction acceptLoanTransfer(final Long accountId, final LocalDate transferDate, final Office acceptedInOffice,
             final Staff loanOfficer) {
 
-        AppUser currentUser = null;
-        if (this.context != null) {
-            currentUser = this.context.authenticatedUser();
-        }
+        AppUser currentUser = getAppUserIfPresent();
 
         final Loan loan = this.loanAssembler.assembleFrom(accountId);
 
@@ -1837,10 +1828,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     public LoanTransaction withdrawLoanTransfer(final Long accountId, final LocalDate transferDate) {
 
-        AppUser currentUser = null;
-        if (this.context != null) {
-            currentUser = this.context.authenticatedUser();
-        }
+        AppUser currentUser = getAppUserIfPresent();
 
         final Loan loan = this.loanAssembler.assembleFrom(accountId);
 
@@ -2389,7 +2377,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Override
     public CommandProcessingResult undoWriteOff(Long loanId) {
-        final AppUser currentUser = this.context.authenticatedUser();
+        final AppUser currentUser = getAppUserIfPresent();
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
@@ -2593,10 +2581,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     public void recalculateInterest(final long loanId) {
-        AppUser currentUser = null;
-        if (this.context != null) {
-            currentUser = this.context.authenticatedUser();
-        }
+        AppUser currentUser = getAppUserIfPresent();
         Loan loan = this.loanAssembler.assembleFrom(loanId);
         CalendarInstance restCalendarInstance = null;
         ApplicationCurrency applicationCurrency = null;
@@ -2662,7 +2647,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     private void regenerateScheduleOnDisbursement(final JsonCommand command, final Loan loan, final boolean recalculateSchedule,
             final ScheduleGeneratorDTO scheduleGeneratorDTO) {
-        AppUser currentUser = this.context.authenticatedUser();
+        AppUser currentUser = getAppUserIfPresent();
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
         BigDecimal emiAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.emiAmountParameterName);
         loan.regenerateScheduleOnDisbursement(scheduleGeneratorDTO, recalculateSchedule, actualDisbursementDate, emiAmount, currentUser);
@@ -2681,6 +2666,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
         }
         return installments;
+    }
+
+    private AppUser getAppUserIfPresent() {
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.getAuthenticatedUserIfPresent();
+        }
+        return user;
     }
 
 }

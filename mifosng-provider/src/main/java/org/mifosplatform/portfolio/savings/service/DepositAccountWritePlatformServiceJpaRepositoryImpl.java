@@ -583,11 +583,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
     @Override
     public CommandProcessingResult adjustRDTransaction(final Long savingsId, final Long transactionId, final JsonCommand command) {
-    	
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
+
+        AppUser user = getAppUserIfPresent();
 
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
@@ -830,10 +827,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     public SavingsAccountTransaction initiateSavingsTransfer(final Long accountId, final LocalDate transferDate,
             final DepositAccountType depositAccountType) {
 
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
+        AppUser user = getAppUserIfPresent();
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
@@ -864,11 +858,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     @Override
     public SavingsAccountTransaction withdrawSavingsTransfer(final Long accountId, final LocalDate transferDate,
             final DepositAccountType depositAccountType) {
-    	
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
+
+        AppUser user = getAppUserIfPresent();
 
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
@@ -908,11 +899,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     public SavingsAccountTransaction acceptSavingsTransfer(final Long accountId, final LocalDate transferDate,
             final Office acceptedInOffice, final Staff fieldOfficer, final DepositAccountType depositAccountType) {
 
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
-    	
+        AppUser user = getAppUserIfPresent();
+
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
@@ -1057,10 +1045,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     public CommandProcessingResult waiveCharge(final Long savingsAccountId, final Long savingsAccountChargeId,
             @SuppressWarnings("unused") final DepositAccountType depositAccountType) {
 
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
+        AppUser user = getAppUserIfPresent();
 
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
@@ -1131,8 +1116,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     public CommandProcessingResult payCharge(final Long savingsAccountId, final Long savingsAccountChargeId, final JsonCommand command,
             @SuppressWarnings("unused") final DepositAccountType depositAccountType) {
 
-    	this.context.authenticatedUser();
-    	
+        this.context.authenticatedUser();
+
         this.savingsAccountChargeDataValidator.validatePayCharge(command.json());
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
@@ -1191,11 +1176,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     @Transactional
     private void payCharge(final SavingsAccountCharge savingsAccountCharge, final LocalDate transactionDate, final BigDecimal amountPaid,
             final DateTimeFormatter formatter) {
-    	
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
+
+        AppUser user = getAppUserIfPresent();
 
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
@@ -1275,6 +1257,14 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         return this.depositAccountDomainService.handleRDDeposit(account, accountTransactionDTO.getFormatter(),
                 accountTransactionDTO.getTransactionDate(), accountTransactionDTO.getTransactionAmount(),
                 accountTransactionDTO.getPaymentDetail(), isRegularTransaction);
+    }
+
+    private AppUser getAppUserIfPresent() {
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.getAuthenticatedUserIfPresent();
+        }
+        return user;
     }
 
 }
