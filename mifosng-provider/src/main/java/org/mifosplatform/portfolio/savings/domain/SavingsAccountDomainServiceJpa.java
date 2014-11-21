@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainService {
 
-	private final PlatformSecurityContext context;
+    private final PlatformSecurityContext context;
     private final SavingsAccountRepositoryWrapper savingsAccountRepository;
     private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
@@ -45,8 +45,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
             final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
-            final ConfigurationDomainService configurationDomainService,
-            final PlatformSecurityContext context) {
+            final ConfigurationDomainService configurationDomainService, final PlatformSecurityContext context) {
         this.savingsAccountRepository = savingsAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
@@ -60,15 +59,11 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     public SavingsAccountTransaction handleWithdrawal(final SavingsAccount account, final DateTimeFormatter fmt,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
             final SavingsTransactionBooleanValues transactionBooleanValues) {
-    	
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
-    	final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
-				.isSavingsInterestPostingAtCurrentPeriodEnd();
-    	final Integer financialYearBeginningMonth = this.configurationDomainService
-    			.retrieveFinancialYearBeginningMonth();
+
+        AppUser user = getAppUserIfPresent();
+        final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
+                .isSavingsInterestPostingAtCurrentPeriodEnd();
+        final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
 
         if (transactionBooleanValues.isRegularTransaction() && !account.allowWithdrawal()) { throw new DepositAccountTransactionNotAllowedException(
                 account.getId(), "withdraw", account.depositAccountType()); }
@@ -82,14 +77,12 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final MathContext mc = MathContext.DECIMAL64;
         if (account.isBeforeLastPostingPeriod(transactionDate)) {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.postInterest(mc, today, transactionBooleanValues.isInterestTransfer(),
-            		isSavingsInterestPostingAtCurrentPeriodEnd,
-            		financialYearBeginningMonth);
+            account.postInterest(mc, today, transactionBooleanValues.isInterestTransfer(), isSavingsInterestPostingAtCurrentPeriodEnd,
+                    financialYearBeginningMonth);
         } else {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
             account.calculateInterestUsing(mc, today, transactionBooleanValues.isInterestTransfer(),
-            		isSavingsInterestPostingAtCurrentPeriodEnd,
-            		financialYearBeginningMonth);
+                    isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
         }
         account.validateAccountBalanceDoesNotBecomeNegative(transactionAmount, transactionBooleanValues.isWithdrawBalance());
         saveTransactionToGenerateTransactionId(withdrawal);
@@ -100,20 +93,27 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         return withdrawal;
     }
 
+    private AppUser getAppUserIfPresent() {
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.getAuthenticatedUserIfPresent();
+        }
+        return user;
+    }
+
     @Transactional
     @Override
     public SavingsAccountTransaction handleDeposit(final SavingsAccount account, final DateTimeFormatter fmt,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
             final boolean isAccountTransfer, final boolean isRegularTransaction) {
-    	
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
-    	final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
-				.isSavingsInterestPostingAtCurrentPeriodEnd();
-    	final Integer financialYearBeginningMonth = this.configurationDomainService
-    			.retrieveFinancialYearBeginningMonth();
+
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.authenticatedUser();
+        }
+        final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
+                .isSavingsInterestPostingAtCurrentPeriodEnd();
+        final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
 
         if (isRegularTransaction && !account.allowDeposit()) { throw new DepositAccountTransactionNotAllowedException(account.getId(),
                 "deposit", account.depositAccountType()); }
@@ -129,13 +129,11 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final MathContext mc = MathContext.DECIMAL64;
         if (account.isBeforeLastPostingPeriod(transactionDate)) {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-            		financialYearBeginningMonth);
+            account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
         } else {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.calculateInterestUsing(mc, today, isInterestTransfer,
-            		isSavingsInterestPostingAtCurrentPeriodEnd,
-            		financialYearBeginningMonth);
+            account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
+                    financialYearBeginningMonth);
         }
 
         saveTransactionToGenerateTransactionId(deposit);

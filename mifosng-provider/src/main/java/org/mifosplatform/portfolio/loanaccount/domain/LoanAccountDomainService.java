@@ -12,26 +12,23 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
-import org.mifosplatform.useradministration.domain.AppUser;
 
 public interface LoanAccountDomainService {
 
     LoanTransaction makeRepayment(Loan loan, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId,
-            final boolean isRecoveryRepayment, boolean isAccountTransfer, final AppUser currentUser);
+            final boolean isRecoveryRepayment, boolean isAccountTransfer);
 
     LoanTransaction makeRefund(Long accountId, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
-            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId,
-            final AppUser currentUser);
+            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId);
 
     void reverseTransfer(LoanTransaction loanTransaction);
 
     LoanTransaction makeChargePayment(Loan loan, Long chargeId, LocalDate transactionDate, BigDecimal transactionAmount,
-            PaymentDetail paymentDetail, String noteText, String txnExternalId, Integer transactionType, Integer installmentNumber,
-            final AppUser currentUser);
+            PaymentDetail paymentDetail, String noteText, String txnExternalId, Integer transactionType, Integer installmentNumber);
 
     LoanTransaction makeDisburseTransaction(Long loanId, LocalDate transactionDate, BigDecimal transactionAmount,
-            PaymentDetail paymentDetail, String noteText, String txnExternalId, final AppUser currentUser);
+            PaymentDetail paymentDetail, String noteText, String txnExternalId);
 
     LocalDate getCalculatedRepaymentsStartingFromDate(LocalDate actualDisbursementDate, Loan loan, CalendarInstance calendarInstance);
 
@@ -43,7 +40,7 @@ public interface LoanAccountDomainService {
      * @param loan
      */
     void recalculateAccruals(Loan loan);
-    
+
     /**
      * This method is used for building ScheduleGeneratorDTO from loan, usages
      * are as, if have loan and some of the terms are modified which may impact
@@ -52,7 +49,7 @@ public interface LoanAccountDomainService {
      * 
      * @param loan
      */
-    
+
     public ScheduleGeneratorDTO buildScheduleGeneratorDTO(final Loan loan);
-    
+
 }

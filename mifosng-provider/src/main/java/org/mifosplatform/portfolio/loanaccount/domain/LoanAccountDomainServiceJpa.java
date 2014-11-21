@@ -24,6 +24,7 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.holiday.domain.HolidayRepository;
 import org.mifosplatform.organisation.holiday.domain.HolidayStatusType;
@@ -81,6 +82,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
     private final LoanAccrualWritePlatformService accrualWritePlatformService;
+    private final PlatformSecurityContext context;
 
     @Autowired
     public LoanAccountDomainServiceJpa(final LoanAssembler loanAccountAssembler, final LoanRepository loanRepository,
@@ -93,7 +95,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
             final CalendarInstanceRepository calendarInstanceRepository,
             final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository,
-            final LoanAccrualWritePlatformService accrualWritePlatformService) {
+            final LoanAccrualWritePlatformService accrualWritePlatformService, final PlatformSecurityContext context) {
         this.loanAccountAssembler = loanAccountAssembler;
         this.loanRepository = loanRepository;
         this.loanTransactionRepository = loanTransactionRepository;
@@ -109,15 +111,15 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
         this.accrualWritePlatformService = accrualWritePlatformService;
+        this.context = context;
     }
 
     @Transactional
     @Override
     public LoanTransaction makeRepayment(final Loan loan, final CommandProcessingResultBuilder builderResult,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText,
-            final String txnExternalId, final boolean isRecoveryRepayment, boolean isAccountTransfer,
-            final AppUser currentUser) {
-
+            final String txnExternalId, final boolean isRecoveryRepayment, boolean isAccountTransfer) {
+        AppUser currentUser = getAppUserIfPresent();
         checkClientOrGroupActive(loan);
 
         // TODO: Is it required to validate transaction date with meeting dates
@@ -262,8 +264,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Transactional
     public LoanTransaction makeChargePayment(final Loan loan, final Long chargeId, final LocalDate transactionDate,
             final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText, final String txnExternalId,
-            final Integer transactionType, Integer installmentNumber, final AppUser currentUser) {
-
+            final Integer transactionType, Integer installmentNumber) {
+        AppUser currentUser = getAppUserIfPresent();
         boolean isAccountTransfer = true;
         checkClientOrGroupActive(loan);
 
@@ -334,7 +336,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Override
     public LoanTransaction makeRefund(final Long accountId, final CommandProcessingResultBuilder builderResult,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText,
-            final String txnExternalId, final AppUser currentUser) {
+            final String txnExternalId) {
+        AppUser currentUser = getAppUserIfPresent();
         boolean isAccountTransfer = true;
         final Loan loan = this.loanAccountAssembler.assembleFrom(accountId);
         checkClientOrGroupActive(loan);
@@ -375,7 +378,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Transactional
     @Override
     public LoanTransaction makeDisburseTransaction(final Long loanId, final LocalDate transactionDate, final BigDecimal transactionAmount,
-            final PaymentDetail paymentDetail, final String noteText, final String txnExternalId, final AppUser currentUser) {
+            final PaymentDetail paymentDetail, final String noteText, final String txnExternalId) {
+        AppUser currentUser = getAppUserIfPresent();
         final Loan loan = this.loanAccountAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
         boolean isAccountTransfer = true;
@@ -505,7 +509,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             this.accountTransferRepository.save(transferTransaction);
         }
     }
-    
+
+    @Override
     public ScheduleGeneratorDTO buildScheduleGeneratorDTO(final Loan loan) {
 
         final MonetaryCurrency currency = loan.getCurrency();
@@ -525,6 +530,14 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 calculatedRepaymentsStartingFromDate, holidayDetailDTO);
 
         return scheduleGeneratorDTO;
+    }
+
+    private AppUser getAppUserIfPresent() {
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.getAuthenticatedUserIfPresent();
+        }
+        return user;
     }
 
 }

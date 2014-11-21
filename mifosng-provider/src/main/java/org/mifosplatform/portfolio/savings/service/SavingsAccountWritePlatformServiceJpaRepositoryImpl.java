@@ -195,11 +195,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public void processPostActiveActions(final SavingsAccount account, final DateTimeFormatter fmt, final Set<Long> existingTransactionIds,
             final Set<Long> existingReversedTransactionIds) {
 
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
-    	
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.authenticatedUser();
+        }
+
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
@@ -297,11 +297,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Override
     public CommandProcessingResult applyAnnualFee(final Long savingsAccountChargeId, final Long accountId) {
 
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
-    	
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.authenticatedUser();
+        }
+
         final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository.findOneWithNotFoundDetection(
                 savingsAccountChargeId, accountId);
 
@@ -471,11 +471,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Override
     public CommandProcessingResult adjustSavingsTransaction(final Long savingsId, final Long transactionId, final JsonCommand command) {
 
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
-    	
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.authenticatedUser();
+        }
+
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
@@ -640,11 +640,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Override
     public SavingsAccountTransaction initiateSavingsTransfer(final Long accountId, final LocalDate transferDate) {
 
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
-    	
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.authenticatedUser();
+        }
+
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
@@ -675,11 +675,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Override
     public SavingsAccountTransaction withdrawSavingsTransfer(final Long accountId, final LocalDate transferDate) {
 
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
-    	
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.authenticatedUser();
+        }
+
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
@@ -718,11 +718,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public SavingsAccountTransaction acceptSavingsTransfer(final Long accountId, final LocalDate transferDate,
             final Office acceptedInOffice, final Staff fieldOfficer) {
 
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
-    	
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.authenticatedUser();
+        }
+
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
@@ -866,10 +866,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Override
     public CommandProcessingResult waiveCharge(final Long savingsAccountId, final Long savingsAccountChargeId) {
 
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.authenticatedUser();
+        }
 
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
@@ -939,11 +939,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Override
     public CommandProcessingResult payCharge(final Long savingsAccountId, final Long savingsAccountChargeId, final JsonCommand command) {
 
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
-    	
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.authenticatedUser();
+        }
+
         this.savingsAccountChargeDataValidator.validatePayCharge(command.json());
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
@@ -987,11 +987,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Override
     public void applyChargeDue(final Long savingsAccountChargeId, final Long accountId) {
         // always use current date as transaction date for batch job
-    	AppUser user = null;
-    	if (this.context != null) {
-    		user = this.context.authenticatedUser();
-    	}
-    	
+        AppUser user = null;
+
         final LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
         final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository.findOneWithNotFoundDetection(
                 savingsAccountChargeId, accountId);

@@ -66,6 +66,25 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
     }
 
     @Override
+    public AppUser getAuthenticatedUserIfPresent() {
+
+        AppUser currentUser = null;
+        final SecurityContext context = SecurityContextHolder.getContext();
+        if (context != null) {
+            final Authentication auth = context.getAuthentication();
+            if (auth != null) {
+                currentUser = (AppUser) auth.getPrincipal();
+            }
+        }
+
+        if (currentUser == null) { return null; }
+
+        if (this.doesPasswordHasToBeRenewed(currentUser)) { throw new ResetPasswordException(currentUser.getId()); }
+
+        return currentUser;
+    }
+
+    @Override
     public AppUser authenticatedUser(CommandWrapper commandWrapper) {
 
         AppUser currentUser = null;

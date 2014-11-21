@@ -28,7 +28,6 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_product_loan_guarantee_details")
 public class LoanProductGuaranteeDetails extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @OneToOne
     @JoinColumn(name = "loan_product_id", nullable = false)
     private LoanProduct loanProduct;
@@ -93,17 +92,14 @@ public class LoanProductGuaranteeDetails extends AbstractPersistable<Long> {
 
     }
 
-    
     public BigDecimal getMandatoryGuarantee() {
         return this.mandatoryGuarantee;
     }
 
-    
     public BigDecimal getMinimumGuaranteeFromOwnFunds() {
         return this.minimumGuaranteeFromOwnFunds;
     }
 
-    
     public BigDecimal getMinimumGuaranteeFromGuarantor() {
         return this.minimumGuaranteeFromGuarantor;
     }
