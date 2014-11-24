@@ -31,6 +31,7 @@ import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
+import org.mifosplatform.portfolio.account.data.PortfolioAccountDTO;
 import org.mifosplatform.portfolio.account.data.PortfolioAccountData;
 import org.mifosplatform.portfolio.account.data.StandingInstructionDTO;
 import org.mifosplatform.portfolio.account.data.StandingInstructionData;
@@ -152,8 +153,9 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
             if (mostRelevantFromAccountType == 1) {
                 loanStatus = new long[] { 300, 700 };
             }
-            fromAccountOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(mostRelevantFromAccountType,
-                    mostRelevantFromClientId, loanStatus);
+            PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(mostRelevantFromAccountType, mostRelevantFromClientId,
+                    loanStatus);
+            fromAccountOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(portfolioAccountDTO);
         }
 
         Collection<OfficeData> fromOfficeOptions = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
@@ -228,8 +230,9 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
 
         final String currencyCode = excludeThisAccountFromOptions != null ? excludeThisAccountFromOptions.currencyCode() : null;
 
-        Collection<PortfolioAccountData> accountOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(toAccountType,
-                toClientId, currencyCode, null, null);
+        PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(toAccountType, toClientId, currencyCode, null, null);
+        Collection<PortfolioAccountData> accountOptions = this.portfolioAccountReadPlatformService
+                .retrieveAllForLookup(portfolioAccountDTO);
         if (!CollectionUtils.isEmpty(accountOptions)) {
             accountOptions.remove(excludeThisAccountFromOptions);
         } else {

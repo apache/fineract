@@ -6,6 +6,8 @@
 package org.mifosplatform.portfolio.loanaccount.guarantor.serialization;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,7 +50,13 @@ public final class GuarantorCommandFromApiJsonDeserializer extends AbstractFromA
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
+        final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject());
+        final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(element.getAsJsonObject());
 
+        return extractGuarantorCommand(element, locale, dateFormat);
+    }
+
+    private GuarantorCommand extractGuarantorCommand(final JsonElement element, final Locale locale, final String dateFormat) {
         final Long clientRelationshipTypeId = this.fromApiJsonHelper.extractLongNamed(
                 GUARANTOR_JSON_INPUT_PARAMS.CLIENT_RELATIONSHIP_TYPE_ID.getValue(), element);
         final Integer guarantorTypeId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
@@ -69,9 +77,14 @@ public final class GuarantorCommandFromApiJsonDeserializer extends AbstractFromA
         final String housePhoneNumber = this.fromApiJsonHelper.extractStringNamed(GUARANTOR_JSON_INPUT_PARAMS.PHONE_NUMBER.getValue(),
                 element);
         final String comment = this.fromApiJsonHelper.extractStringNamed(GUARANTOR_JSON_INPUT_PARAMS.COMMENT.getValue(), element);
-        final LocalDate dob = this.fromApiJsonHelper.extractLocalDateNamed(GUARANTOR_JSON_INPUT_PARAMS.DATE_OF_BIRTH.getValue(), element);
+        final LocalDate dob = this.fromApiJsonHelper.extractLocalDateNamed(GUARANTOR_JSON_INPUT_PARAMS.DATE_OF_BIRTH.getValue(), element,
+                dateFormat, locale);
+        final Long savingsId = this.fromApiJsonHelper.extractLongNamed(GUARANTOR_JSON_INPUT_PARAMS.SAVINGS_ID.getValue(), element);
+        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(GUARANTOR_JSON_INPUT_PARAMS.AMOUNT.getValue(), element,
+                locale);
 
         return new GuarantorCommand(clientRelationshipTypeId, guarantorTypeId, entityId, firstname, lastname, addressLine1, addressLine2,
-                city, state, zip, country, mobileNumber, housePhoneNumber, comment, dob);
+                city, state, zip, country, mobileNumber, housePhoneNumber, comment, dob, savingsId, amount);
     }
+
 }

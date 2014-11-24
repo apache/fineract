@@ -11,6 +11,7 @@ import java.util.List;
 import org.mifosplatform.accounting.common.AccountingEnumerations;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.savings.DepositAccountOnClosureType;
+import org.mifosplatform.portfolio.savings.DepositAccountOnHoldTransactionType;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.PreClosurePenalInterestOnType;
 import org.mifosplatform.portfolio.savings.RecurringDepositType;
@@ -728,4 +729,28 @@ public class SavingsEnumerations {
         }
         return optionDatas;
     }
+
+    public static EnumOptionData onHoldTransactionType(final int id) {
+        return onHoldTransactionType(DepositAccountOnHoldTransactionType.fromInt(id));
+    }
+
+    public static EnumOptionData onHoldTransactionType(final DepositAccountOnHoldTransactionType type) {
+        EnumOptionData optionData = new EnumOptionData(DepositAccountOnHoldTransactionType.INVALID.getValue().longValue(),
+                DepositAccountType.INVALID.getCode(), "Invalid");
+        switch (type) {
+            case INVALID:
+            break;
+            case HOLD:
+                optionData = new EnumOptionData(DepositAccountOnHoldTransactionType.HOLD.getValue().longValue(),
+                        DepositAccountOnHoldTransactionType.HOLD.getCode(), "hold");
+            break;
+            case RELEASE:
+                optionData = new EnumOptionData(DepositAccountOnHoldTransactionType.RELEASE.getValue().longValue(),
+                        DepositAccountOnHoldTransactionType.RELEASE.getCode(), "release");
+            break;
+
+        }
+        return optionData;
+    }
+
 }

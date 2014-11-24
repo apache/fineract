@@ -99,4 +99,6 @@ public interface LoanReadPlatformService {
     Collection<LoanTransactionData> retrieveWaiverLoanTransactions(Long loanId);
 
     Collection<LoanSchedulePeriodData> fetchWaiverInterestRepaymentData(Long loanId);
+
+    boolean isGuaranteeRequired(Long loanId);
 }

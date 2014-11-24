@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
@@ -85,28 +86,38 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
     @Override
     public boolean isLinkedWithAnyActiveAccount(final Long savingsId) {
         boolean hasActiveAccount = false;
-        final String sql = "select loanAccount.loan_status_id as status from m_portfolio_account_associations aa "
-                + "left join m_loan loanAccount on loanAccount.id = aa.loan_account_id " + "where aa.linked_savings_account_id = ?";
 
-        final List<Integer> statusList = this.jdbcTemplate.queryForList(sql, Integer.class, savingsId);
-        for (final Integer status : statusList) {
-            if (status != null) {
-                final LoanStatus loanStatus = LoanStatus.fromInt(status);
-                if (loanStatus.isActiveOrAwaitingApprovalOrDisbursal() || loanStatus.isUnderTransfer()) { return true; }
-            }
-        }
-
-        final String savsql = "select savingAccount.status_enum as status from m_portfolio_account_associations aa "
+        final String sql1 = "select aa.is_active as active,aa.association_type_enum as type, loanAccount.loan_status_id as loanStatus,"
+                + "savingAccount.status_enum as savingsStatus from m_portfolio_account_associations aa "
+                + "left join m_loan loanAccount on loanAccount.id = aa.loan_account_id "
                 + "left join m_savings_account savingAccount on savingAccount.id = aa.savings_account_id "
                 + "where aa.linked_savings_account_id = ?";
 
-        final List<Integer> savstatusList = this.jdbcTemplate.queryForList(savsql, Integer.class, savingsId);
-        for (final Integer status : savstatusList) {
-            if (status != null) {
-                final SavingsAccountStatusType saveStatus = SavingsAccountStatusType.fromInt(status);
-                if (saveStatus.isActiveOrAwaitingApprovalOrDisbursal() || saveStatus.isUnderTransfer()) { return true; }
+        final List<Map<String, Object>> statusList = this.jdbcTemplate.queryForList(sql1, savingsId);
+        for (final Map<String, Object> statusMap : statusList) {
+            AccountAssociationType associationType = AccountAssociationType.fromInt((Integer) statusMap.get("type"));
+            if (!associationType.isLinkedAccountAssociation() && (Boolean) statusMap.get("active")) {
+                hasActiveAccount = true;
+                break;
+            }
+
+            if (statusMap.get("loanStatus") != null) {
+                final LoanStatus loanStatus = LoanStatus.fromInt((Integer) statusMap.get("loanStatus"));
+                if (loanStatus.isActiveOrAwaitingApprovalOrDisbursal() || loanStatus.isUnderTransfer()) {
+                    hasActiveAccount = true;
+                    break;
+                }
+            }
+
+            if (statusMap.get("savingsStatus") != null) {
+                final SavingsAccountStatusType saveStatus = SavingsAccountStatusType.fromInt((Integer) statusMap.get("savingsStatus"));
+                if (saveStatus.isActiveOrAwaitingApprovalOrDisbursal() || saveStatus.isUnderTransfer()) {
+                    hasActiveAccount = true;
+                    break;
+                }
             }
         }
+
         return hasActiveAccount;
     }
 

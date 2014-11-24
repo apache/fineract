@@ -260,8 +260,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (savingsAccountId != null) {
                 final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(savingsAccountId);
                 this.fromApiJsonDeserializer.validatelinkedSavingsAccount(savingsAccount, newLoanApplication);
+                boolean isActive = true;
                 final AccountAssociations accountAssociations = AccountAssociations.associateSavingsAccount(newLoanApplication,
-                        savingsAccount, AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
+                        savingsAccount, AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue(), isActive);
                 this.accountAssociationsRepository.save(accountAssociations);
             }
 
@@ -598,8 +599,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(savingsAccountId);
                     this.fromApiJsonDeserializer.validatelinkedSavingsAccount(savingsAccount, existingLoanApplication);
                     if (accountAssociations == null) {
+                        boolean isActive = true;
                         accountAssociations = AccountAssociations.associateSavingsAccount(existingLoanApplication, savingsAccount,
-                                AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
+                                AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue(), isActive);
                     } else {
                         accountAssociations.updateLinkedSavingsAccount(savingsAccount);
                     }

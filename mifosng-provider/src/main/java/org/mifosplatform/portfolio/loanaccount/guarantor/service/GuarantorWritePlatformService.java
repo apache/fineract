@@ -14,6 +14,6 @@ public interface GuarantorWritePlatformService {
 
     CommandProcessingResult updateGuarantor(final Long loanId, final Long guarantorId, final JsonCommand command);
 
-    CommandProcessingResult removeGuarantor(final Long loanId, final Long guarantorId);
+    CommandProcessingResult removeGuarantor(final Long loanId, final Long guarantorId, Long guarantorFundingId);
 
 }

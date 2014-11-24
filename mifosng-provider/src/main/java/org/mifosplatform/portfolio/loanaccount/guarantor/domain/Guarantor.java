@@ -5,19 +5,25 @@
  */
 package org.mifosplatform.portfolio.loanaccount.guarantor.domain;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
@@ -79,22 +85,22 @@ public class Guarantor extends AbstractPersistable<Long> {
     @Column(name = "comment", length = 500)
     private String comment;
 
+    @Column(name = "is_active", nullable = false)
+    private boolean active;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "guarantor", orphanRemoval = true)
+    private final List<GuarantorFundingDetails> guarantorFundDetails = new ArrayList<>();
+
     protected Guarantor() {
 
     }
 
-    public static Guarantor createNew(final Loan loan, final CodeValue clientRelationshipType, final Integer gurantorType,
-            final Long entityId, final String firstname, final String lastname, final Date dateOfBirth, final String addressLine1,
-            final String addressLine2, final String city, final String state, final String country, final String zip,
-            final String housePhoneNumber, final String mobilePhoneNumber, final String comment) {
-        return new Guarantor(loan, clientRelationshipType, gurantorType, entityId, firstname, lastname, dateOfBirth, addressLine1,
-                addressLine2, city, state, country, zip, housePhoneNumber, mobilePhoneNumber, comment);
-    }
-
-    public Guarantor(final Loan loan, final CodeValue clientRelationshipType, final Integer gurantorType, final Long entityId,
+    private Guarantor(final Loan loan, final CodeValue clientRelationshipType, final Integer gurantorType, final Long entityId,
             final String firstname, final String lastname, final Date dateOfBirth, final String addressLine1, final String addressLine2,
             final String city, final String state, final String country, final String zip, final String housePhoneNumber,
-            final String mobilePhoneNumber, final String comment) {
+            final String mobilePhoneNumber, final String comment, final boolean active,
+            final List<GuarantorFundingDetails> guarantorFundDetails) {
         this.loan = loan;
         this.clientRelationshipType = clientRelationshipType;
         this.gurantorType = gurantorType;
@@ -111,13 +117,16 @@ public class Guarantor extends AbstractPersistable<Long> {
         this.housePhoneNumber = StringUtils.defaultIfEmpty(housePhoneNumber, null);
         this.mobilePhoneNumber = StringUtils.defaultIfEmpty(mobilePhoneNumber, null);
         this.comment = StringUtils.defaultIfEmpty(comment, null);
+        this.active = active;
+        this.guarantorFundDetails.addAll(guarantorFundDetails);
     }
 
-    public static Guarantor fromJson(final Loan loan, final CodeValue clientRelationshipType, final JsonCommand command) {
+    public static Guarantor fromJson(final Loan loan, final CodeValue clientRelationshipType, final JsonCommand command,
+            final List<GuarantorFundingDetails> fundingDetails) {
         final Integer gurantorType = command.integerValueSansLocaleOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID
                 .getValue());
         final Long entityId = command.longValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID.getValue());
-
+        final boolean active = true;
         if (GuarantorType.EXTERNAL.getValue().equals(gurantorType)) {
             final String firstname = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.FIRSTNAME.getValue());
             final String lastname = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.LASTNAME.getValue());
@@ -133,11 +142,11 @@ public class Guarantor extends AbstractPersistable<Long> {
             final String comment = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.COMMENT.getValue());
 
             return new Guarantor(loan, clientRelationshipType, gurantorType, entityId, firstname, lastname, dateOfBirth, addressLine1,
-                    addressLine2, city, state, country, zip, housePhoneNumber, mobilePhoneNumber, comment);
+                    addressLine2, city, state, country, zip, housePhoneNumber, mobilePhoneNumber, comment, active, fundingDetails);
         }
 
         return new Guarantor(loan, clientRelationshipType, gurantorType, entityId, null, null, null, null, null, null, null, null, null,
-                null, null, null);
+                null, null, null, active, fundingDetails);
 
     }
 
@@ -145,7 +154,6 @@ public class Guarantor extends AbstractPersistable<Long> {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
-        handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID.getValue(), this.gurantorType, true);
         handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.CLIENT_RELATIONSHIP_TYPE_ID.getValue(), 0, true);
 
         if (isExternalGuarantor()) {
@@ -162,9 +170,6 @@ public class Guarantor extends AbstractPersistable<Long> {
             handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.MOBILE_NUMBER.getValue(), this.mobilePhoneNumber);
             handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.COMMENT.getValue(), this.comment);
             updateExistingEntityToNull();
-        } else {
-            handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID.getValue(), this.entityId);
-            updateExternalGuarantorFieldsToNull();
         }
 
         return actualChanges;
@@ -236,20 +241,6 @@ public class Guarantor extends AbstractPersistable<Long> {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            Long propertyToBeUpdated) {
-        if (command.isChangeInLongParameterNamed(paramName, propertyToBeUpdated)) {
-            final Long newValue = command.longValueOfParameterNamed(paramName);
-            actualChanges.put(paramName, newValue);
-            propertyToBeUpdated = newValue;
-
-            // now update actual property
-            if (paramName.equals(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID.getValue())) {
-                this.entityId = newValue;
-            }
-        }
-    }
-
-    private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
             Date propertyToBeUpdated) {
         if (command.isChangeInDateParameterNamed(paramName, propertyToBeUpdated)) {
             final Date newValue = command.DateValueOfParameterNamed(paramName);
@@ -287,26 +278,71 @@ public class Guarantor extends AbstractPersistable<Long> {
         this.clientRelationshipType = clientRelationshipType;
     }
 
-    private void updateExternalGuarantorFieldsToNull() {
-        this.firstname = null;
-        this.lastname = null;
-        this.dateOfBirth = null;
-        this.addressLine1 = null;
-        this.addressLine2 = null;
-        this.city = null;
-        this.state = null;
-        this.country = null;
-        this.zip = null;
-        this.housePhoneNumber = null;
-        this.mobilePhoneNumber = null;
-        this.comment = null;
-    }
-
     private void updateExistingEntityToNull() {
         this.entityId = null;
     }
 
     public Integer getGurantorType() {
         return this.gurantorType;
+    }
+
+    public boolean isActive() {
+        return this.active;
+    }
+
+    public void updateStatus(final boolean status) {
+        this.active = status;
+    }
+
+    public void addFundingDetails(final List<GuarantorFundingDetails> fundingDetails) {
+        this.guarantorFundDetails.addAll(fundingDetails);
+    }
+
+    public void updateStatus(final GuarantorFundingDetails guarantorFundingDetails, final GuarantorFundStatusType fundStatusType) {
+        guarantorFundingDetails.updateStatus(fundStatusType);
+        updateStatus();
+    }
+
+    public GuarantorFundingDetails getGuarantorFundingDetail(final Long fundingDetailId) {
+        GuarantorFundingDetails guarantorFundingDetails = null;
+        for (GuarantorFundingDetails fundingDetails : this.guarantorFundDetails) {
+            if (fundingDetails.getId().equals(fundingDetailId)) {
+                guarantorFundingDetails = fundingDetails;
+                break;
+            }
+        }
+        return guarantorFundingDetails;
+    }
+
+    private void updateStatus() {
+        boolean isActive = false;
+        for (GuarantorFundingDetails guarantorFundingDetails : this.guarantorFundDetails) {
+            if (guarantorFundingDetails.getStatus().isActive()) {
+                isActive = true;
+                break;
+            }
+        }
+        this.active = isActive;
+    }
+
+    public Loan getLoan() {
+        return this.loan;
+    }
+
+    public List<GuarantorFundingDetails> getGuarantorFundDetails() {
+        return this.guarantorFundDetails;
+    }
+
+    public boolean hasGuarantor(Long savingsId) {
+        if (savingsId == null) { return false; }
+        boolean hasGuarantee = false;
+        for (GuarantorFundingDetails guarantorFundingDetails : this.guarantorFundDetails) {
+            if (guarantorFundingDetails.getStatus().isActive()
+                    && savingsId.equals(guarantorFundingDetails.getLinkedSavingsAccount().getId())) {
+                hasGuarantee = true;
+                break;
+            }
+        }
+        return hasGuarantee;
     }
 }
