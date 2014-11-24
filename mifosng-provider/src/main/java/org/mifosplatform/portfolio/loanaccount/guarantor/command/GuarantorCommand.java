@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.loanaccount.guarantor.command;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -41,11 +42,13 @@ public class GuarantorCommand {
     private final String housePhoneNumber;
     private final String comment;
     private final LocalDate dob;
+    private final Long savingsId;
+    private final BigDecimal amount;
 
     public GuarantorCommand(final Long clientRelationshipTypeId, final Integer guarantorTypeId, final Long entityId,
             final String firstname, final String lastname, final String addressLine1, final String addressLine2, final String city,
             final String state, final String zip, final String country, final String mobileNumber, final String housePhoneNumber,
-            final String comment, final LocalDate dob) {
+            final String comment, final LocalDate dob, final Long savingsId, final BigDecimal amount) {
 
         this.clientRelationshipTypeId = clientRelationshipTypeId;
 
@@ -66,6 +69,8 @@ public class GuarantorCommand {
         this.housePhoneNumber = housePhoneNumber;
         this.comment = comment;
         this.dob = dob;
+        this.savingsId = savingsId;
+        this.amount = amount;
     }
 
     public boolean isExternalGuarantor() {
@@ -92,6 +97,12 @@ public class GuarantorCommand {
         if (!isExternalGuarantor()) {
             baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID.getValue()).value(this.entityId).notNull()
                     .integerGreaterThanZero();
+            baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.SAVINGS_ID.getValue()).value(this.savingsId)
+                    .longGreaterThanZero();
+            if (this.savingsId != null) {
+                baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.AMOUNT.getValue()).value(this.amount).notNull()
+                        .positiveAmount();
+            }
         } else {
             // validate for an external guarantor
             baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.FIRSTNAME.getValue()).value(this.firstname).notBlank()
@@ -120,6 +131,12 @@ public class GuarantorCommand {
         if (!isExternalGuarantor()) {
             baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID.getValue()).value(this.entityId).ignoreIfNull()
                     .integerGreaterThanZero();
+            baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.SAVINGS_ID.getValue()).value(this.savingsId)
+                    .longGreaterThanZero();
+            if (this.savingsId != null) {
+                baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.AMOUNT.getValue()).value(this.amount).notNull()
+                        .positiveAmount();
+            }
         } else {
             // TODO: Vishwas this validation is buggy (it is compulsory to
             // update
@@ -184,5 +201,13 @@ public class GuarantorCommand {
 
     public Integer getGuarantorTypeId() {
         return this.guarantorTypeId;
+    }
+
+    public Long getSavingsId() {
+        return this.savingsId;
+    }
+
+    public BigDecimal getAmount() {
+        return this.amount;
     }
 }

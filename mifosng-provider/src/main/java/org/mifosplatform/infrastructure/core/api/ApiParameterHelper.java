@@ -55,6 +55,16 @@ public class ApiParameterHelper {
         return fields;
     }
 
+    public static void excludeAssociationsForResponseIfProvided(final MultivaluedMap<String, String> queryParams, Set<String> fields) {
+        String commaSerperatedParameters = "";
+        if (queryParams.getFirst("exclude") != null) {
+            commaSerperatedParameters = queryParams.getFirst("exclude");
+            if (StringUtils.isNotBlank(commaSerperatedParameters)) {
+                fields.removeAll(new HashSet<>(Arrays.asList(commaSerperatedParameters.split("\\s*,\\s*"))));
+            }
+        }
+    }
+
     public static boolean prettyPrint(final MultivaluedMap<String, String> queryParams) {
         boolean prettyPrint = false;
         if (queryParams.getFirst("pretty") != null) {

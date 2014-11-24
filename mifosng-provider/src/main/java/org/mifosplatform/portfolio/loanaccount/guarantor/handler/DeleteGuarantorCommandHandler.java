@@ -26,6 +26,6 @@ public class DeleteGuarantorCommandHandler implements NewCommandSourceHandler {
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.guarantorWritePlatformService.removeGuarantor(command.getLoanId(), command.entityId());
+        return this.guarantorWritePlatformService.removeGuarantor(command.getLoanId(), command.entityId(), command.subentityId());
     }
 }

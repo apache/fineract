@@ -42,25 +42,30 @@ public class AccountAssociations extends AbstractPersistable<Long> {
     @Column(name = "association_type_enum", nullable = false)
     private Integer associationType;
 
+    @SuppressWarnings("unused")
+    @Column(name = "is_active", nullable = false)
+    private boolean active = true;
+
     protected AccountAssociations() {}
 
     private AccountAssociations(final Loan loanAccount, final SavingsAccount savingsAccount, final Loan linkedLoanAccount,
-            final SavingsAccount linkedSavingsAccount, final Integer associationType) {
+            final SavingsAccount linkedSavingsAccount, final Integer associationType, boolean active) {
         this.loanAccount = loanAccount;
         this.savingsAccount = savingsAccount;
         this.linkedLoanAccount = linkedLoanAccount;
         this.linkedSavingsAccount = linkedSavingsAccount;
         this.associationType = associationType;
+        this.active = active;
     }
 
     public static AccountAssociations associateSavingsAccount(final Loan loan, final SavingsAccount savingsAccount,
-            final Integer associationType) {
-        return new AccountAssociations(loan, null, null, savingsAccount, associationType);
+            final Integer associationType, boolean isActive) {
+        return new AccountAssociations(loan, null, null, savingsAccount, associationType, isActive);
     }
 
     public static AccountAssociations associateSavingsAccount(final SavingsAccount savingsAccount,
-            final SavingsAccount linkedSavingsAccount, final Integer associationType) {
-        return new AccountAssociations(null, savingsAccount, null, linkedSavingsAccount, associationType);
+            final SavingsAccount linkedSavingsAccount, final Integer associationType, boolean isActive) {
+        return new AccountAssociations(null, savingsAccount, null, linkedSavingsAccount, associationType, isActive);
     }
 
     public SavingsAccount linkedSavingsAccount() {

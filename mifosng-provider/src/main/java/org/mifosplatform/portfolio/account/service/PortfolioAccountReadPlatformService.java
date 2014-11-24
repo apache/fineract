@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.account.service;
 
 import java.util.Collection;
 
+import org.mifosplatform.portfolio.account.data.PortfolioAccountDTO;
 import org.mifosplatform.portfolio.account.data.PortfolioAccountData;
 
 public interface PortfolioAccountReadPlatformService {
@@ -15,7 +16,5 @@ public interface PortfolioAccountReadPlatformService {
 
     PortfolioAccountData retrieveOne(Long accountId, Integer accountTypeId, String currencyCode);
 
-    Collection<PortfolioAccountData> retrieveAllForLookup(Integer toAccountType, Long toClientId, long[] accountStatus);
-
-    Collection<PortfolioAccountData> retrieveAllForLookup(Integer toAccountType, Long toClientId, String currencyCode, long[] accountStatus, Integer depositType);
+    Collection<PortfolioAccountData> retrieveAllForLookup(final PortfolioAccountDTO portfolioAccountDTO);
 }

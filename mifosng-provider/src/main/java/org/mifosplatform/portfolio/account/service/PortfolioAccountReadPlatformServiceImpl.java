@@ -16,6 +16,7 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
+import org.mifosplatform.portfolio.account.data.PortfolioAccountDTO;
 import org.mifosplatform.portfolio.account.data.PortfolioAccountData;
 import org.mifosplatform.portfolio.account.exception.AccountTransferNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,36 +87,29 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
     }
 
     @Override
-    public Collection<PortfolioAccountData> retrieveAllForLookup(final Integer accountTypeId, final Long clientId,
-            final long[] accountStatus) {
-        return retrieveAllForLookup(accountTypeId, clientId, null, accountStatus, null);
-    }
-
-    @Override
-    public Collection<PortfolioAccountData> retrieveAllForLookup(final Integer accountTypeId, final Long clientId,
-            final String currencyCode, final long[] accountStatus, final Integer depositType) {
+    public Collection<PortfolioAccountData> retrieveAllForLookup(final PortfolioAccountDTO portfolioAccountDTO) {
 
         List<Object> sqlParams = new ArrayList<>();
-        sqlParams.add(clientId);
+        sqlParams.add(portfolioAccountDTO.getClientId());
         Collection<PortfolioAccountData> accounts = null;
         String sql = null;
         String defaultAccountStatus = "300";
-        if (accountStatus != null) {
-            for (final long status : accountStatus) {
+        if (portfolioAccountDTO.getAccountStatus() != null) {
+            for (final long status : portfolioAccountDTO.getAccountStatus()) {
                 defaultAccountStatus += ", " + status;
             }
             defaultAccountStatus = defaultAccountStatus.substring(defaultAccountStatus.indexOf(",") + 1);
         }
-        final PortfolioAccountType accountType = PortfolioAccountType.fromInt(accountTypeId);
+        final PortfolioAccountType accountType = PortfolioAccountType.fromInt(portfolioAccountDTO.getAccountTypeId());
         switch (accountType) {
             case INVALID:
             break;
             case LOAN:
                 sql = "select " + this.loanAccountMapper.schema() + " where la.client_id = ? and la.loan_status_id in ("
                         + defaultAccountStatus.toString() + ")";
-                if (currencyCode != null) {
+                if (portfolioAccountDTO.getCurrencyCode() != null) {
                     sql += " and la.currency_code = ?";
-                    sqlParams.add(currencyCode);
+                    sqlParams.add(portfolioAccountDTO.getCurrencyCode());
                 }
 
                 accounts = this.jdbcTemplate.query(sql, this.loanAccountMapper, sqlParams.toArray());
@@ -123,14 +117,18 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
             case SAVINGS:
                 sql = "select " + this.savingsAccountMapper.schema() + " where sa.client_id = ? and sa.status_enum in ("
                         + defaultAccountStatus.toString() + ")";
-                if (currencyCode != null) {
+                if (portfolioAccountDTO.getCurrencyCode() != null) {
                     sql += " and sa.currency_code = ?";
-                    sqlParams.add(currencyCode);
+                    sqlParams.add(portfolioAccountDTO.getCurrencyCode());
                 }
 
-                if (depositType != null) {
+                if (portfolioAccountDTO.getDepositType() != null) {
                     sql += " and sa.deposit_type_enum = ?";
-                    sqlParams.add(depositType);
+                    sqlParams.add(portfolioAccountDTO.getDepositType());
+                }
+                
+                if(portfolioAccountDTO.isExcludeOverDraftAccounts()){
+                    sql += " and sa.allow_overdraft = 0";
                 }
 
                 accounts = this.jdbcTemplate.query(sql, this.savingsAccountMapper, sqlParams.toArray());

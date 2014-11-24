@@ -200,8 +200,9 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsAccountId,
                         DepositAccountType.SAVINGS_DEPOSIT);
                 this.depositAccountDataValidator.validatelinkedSavingsAccount(savingsAccount, account);
+                boolean isActive = true;
                 final AccountAssociations accountAssociations = AccountAssociations.associateSavingsAccount(account, savingsAccount,
-                        AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
+                        AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue(), isActive);
                 this.accountAssociationsRepository.save(accountAssociations);
             }
 
@@ -354,7 +355,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                         isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
                 this.savingAccountRepository.save(account);
             }
-            
+
             boolean isLinkedAccRequired = command.booleanPrimitiveValueOfParameterNamed(transferInterestToSavingsParamName);
 
             // Save linked account information
@@ -387,8 +388,9 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                             DepositAccountType.SAVINGS_DEPOSIT);
                     this.depositAccountDataValidator.validatelinkedSavingsAccount(savingsAccount, account);
                     if (accountAssociations == null) {
+                        boolean isActive = true;
                         accountAssociations = AccountAssociations.associateSavingsAccount(account, savingsAccount,
-                                AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
+                                AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue(), isActive);
                     } else {
                         accountAssociations.updateLinkedSavingsAccount(savingsAccount);
                     }
@@ -463,7 +465,6 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                         repeatsOnDay);
                 this.calendarInstanceRepository.save(calendarInstance);
             }
-
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //

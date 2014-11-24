@@ -46,6 +46,7 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
+import org.mifosplatform.portfolio.account.data.PortfolioAccountDTO;
 import org.mifosplatform.portfolio.account.data.PortfolioAccountData;
 import org.mifosplatform.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.mifosplatform.portfolio.account.service.PortfolioAccountReadPlatformService;
@@ -306,9 +307,9 @@ public class LoansApiResource {
                     currencyCode = currencyData.code();
                 }
                 final long[] accountStatus = { SavingsAccountStatusType.ACTIVE.getValue() };
-                accountLinkingOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(
-                        PortfolioAccountType.SAVINGS.getValue(), clientId, currencyCode, accountStatus,
-                        DepositAccountType.SAVINGS_DEPOSIT.getValue());
+                PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(PortfolioAccountType.SAVINGS.getValue(), clientId,
+                        currencyCode, accountStatus, DepositAccountType.SAVINGS_DEPOSIT.getValue());
+                accountLinkingOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(portfolioAccountDTO);
 
             }
 
@@ -361,6 +362,8 @@ public class LoansApiResource {
                 associationParameters.addAll(Arrays.asList("repaymentSchedule", "futureSchedule", "originalSchedule", "transactions",
                         "charges", "guarantors", "collateral", "notes", "linkedAccount", "multiDisburseDetails"));
             }
+
+            ApiParameterHelper.excludeAssociationsForResponseIfProvided(uriInfo.getQueryParameters(), associationParameters);
 
             if (associationParameters.contains("guarantors")) {
                 mandatoryResponseParameters.add("guarantors");
@@ -491,8 +494,9 @@ public class LoansApiResource {
                 currencyCode = currencyData.code();
             }
             final long[] accountStatus = { SavingsAccountStatusType.ACTIVE.getValue() };
-            accountLinkingOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(PortfolioAccountType.SAVINGS.getValue(),
+            PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(PortfolioAccountType.SAVINGS.getValue(),
                     loanBasicDetails.clientId(), currencyCode, accountStatus, DepositAccountType.SAVINGS_DEPOSIT.getValue());
+            accountLinkingOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(portfolioAccountDTO);
 
             if (!associationParameters.contains("linkedAccount")) {
                 mandatoryResponseParameters.add("linkedAccount");
