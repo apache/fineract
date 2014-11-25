@@ -99,7 +99,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     private final Date createdDate;
     
     @ManyToOne
-    @JoinColumn(name = "appuser_id", nullable = false)
+    @JoinColumn(name = "appuser_id", nullable = true)
     private AppUser appUser;
 
     protected SavingsAccountTransaction() {
