@@ -575,7 +575,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     }
 
     /*
-     * To become a part of a group, group may have set of criteria to be met
+     * To become a part of a group, group may have set of criteria to be m et
      * before client can become member of it.
      */
     private void validateParentGroupRulesBeforeClientActivation(Client client) {
@@ -592,5 +592,90 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                         maxNumberOfClients); }
             }
         }
+    }
+
+    @Override
+    public CommandProcessingResult rejectClient(final Long entityId, final JsonCommand command) {
+        final AppUser currentUser = this.context.authenticatedUser();
+        this.fromApiJsonDeserializer.validateRejection(command);
+
+        final Client client = this.clientRepository.findOneWithNotFoundDetection(entityId);
+        final LocalDate rejectDate = command.localDateValueOfParameterNamed(ClientApiConstants.rejectDateParamName);
+        final Long rejectReasonId = command.longValueOfParameterNamed(ClientApiConstants.rejectReasonIdParamName);
+
+        final CodeValue rejectReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
+                ClientApiConstants.CLIENT_REJECT_REASON, rejectReasonId);
+
+        if (ClientStatus.fromInt(client.getStatus()).isRejected()) {
+            final String errorMessage = "Client is already rejected.";
+            throw new InvalidClientStateTransitionException("rejected", "is.already.rejected", errorMessage);
+        } else if (client.isNotPending() || client.getSubmittedOnDate().isAfter(rejectDate)) {
+            final String errorMessage = "The client is  active or The client rejetDate cannot be before the client SubmittedDate.";
+            throw new InvalidClientStateTransitionException("rejected", "date.cannot.before.client.submitted.date", errorMessage,
+                    rejectDate, client.getSubmittedOnDate());
+        } else {
+            client.reject(currentUser, rejectReason, rejectDate.toDate());
+            this.clientRepository.saveAndFlush(client);
+        }
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withClientId(entityId) //
+                .withEntityId(entityId) //
+                .build();
+    }
+
+    @Override
+    public CommandProcessingResult withdrawClient(Long entityId, JsonCommand command) {
+        final AppUser currentUser = this.context.authenticatedUser();
+        this.fromApiJsonDeserializer.validateWithdrawn(command);
+
+        final Client client = this.clientRepository.findOneWithNotFoundDetection(entityId);
+        final LocalDate withdrawDate = command.localDateValueOfParameterNamed(ClientApiConstants.withdrawDateParamName);
+        final Long withdrawReasonId = command.longValueOfParameterNamed(ClientApiConstants.withdrawReasonIdParamName);
+
+        final CodeValue withdrawReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
+                ClientApiConstants.CLIENT_WITHDRAW_REASON, withdrawReasonId);
+
+        if (ClientStatus.fromInt(client.getStatus()).isRejected()) {
+            final String errorMessage = "Client is already Withdrawn.";
+            throw new InvalidClientStateTransitionException("withdrawn", "is.already.withdrawn", errorMessage);
+        } else if (client.isNotPending() || client.getSubmittedOnDate().isAfter(withdrawDate)) {
+            final String errorMessage = "The client is  active or The client withdrawDate cannot be before the client SubmittedDate.";
+            throw new InvalidClientStateTransitionException("withdrawn", "date.cannot.before.client.submitted.date", errorMessage,
+                    withdrawDate, client.getSubmittedOnDate());
+        } else {
+            client.withdraw(currentUser, withdrawReason, withdrawDate.toDate());
+            this.clientRepository.saveAndFlush(client);
+        }
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withClientId(entityId) //
+                .withEntityId(entityId) //
+                .build();
+    }
+    
+    @Override
+    public CommandProcessingResult reActivateClient(Long entityId, JsonCommand command) {
+        final AppUser currentUser = this.context.authenticatedUser();
+        this.fromApiJsonDeserializer.validateReactivate(command);
+
+        final Client client = this.clientRepository.findOneWithNotFoundDetection(entityId);
+        final LocalDate reactivateDate = command.localDateValueOfParameterNamed(ClientApiConstants.reactivationDateParamName);
+      
+
+        if (ClientStatus.fromInt(client.getStatus()).isActive()) {
+            final String errorMessage = "Client is already activated.";
+            throw new InvalidClientStateTransitionException("activated", "is.already.activated", errorMessage);
+        } else if (client.isClosed()) {
+            client.reActivate(currentUser, reactivateDate.toDate());
+            this.clientRepository.saveAndFlush(client);
+        } 
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withClientId(entityId) //
+                .withEntityId(entityId) //
+                .build();
     }
 }

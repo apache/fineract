@@ -345,7 +345,6 @@ public final class ClientDataValidator {
                     .longGreaterThanZero();
         }
 
-
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.dateOfBirthParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.dateOfBirthParamName, element);
@@ -385,8 +384,6 @@ public final class ClientDataValidator {
             final Object forceError = null;
             baseDataValidator.reset().anyOfNotNull(forceError);
         }
-
-
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -515,4 +512,78 @@ public final class ClientDataValidator {
 
     }
 
+    public void validateRejection(final JsonCommand command) {
+
+        final String json = command.json();
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.CLIENT_REJECT_DATA_PARAMETERS);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+
+        final JsonElement element = command.parsedJson();
+
+        final LocalDate rejectDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.rejectDateParamName, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.rejectDateParamName).value(rejectDate).notNull();
+
+        final Long rejectReasonId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.rejectReasonIdParamName, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.rejectReasonIdParamName).value(rejectReasonId).notNull()
+                .longGreaterThanZero();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+
+    }
+
+    public void validateWithdrawn(final JsonCommand command) {
+
+        final String json = command.json();
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.CLIENT_WITHDRAW_DATA_PARAMETERS);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+
+        final JsonElement element = command.parsedJson();
+
+        final LocalDate withdrawDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.withdrawDateParamName, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.withdrawDateParamName).value(withdrawDate).notNull();
+
+        final Long withdrawReasonId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.withdrawReasonIdParamName, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.withdrawReasonIdParamName).value(withdrawReasonId).notNull()
+                .longGreaterThanZero();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+
+    }
+
+    public void validateReactivate(final JsonCommand command) {
+
+        final String json = command.json();
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.REACTIVATION_REQUEST_DATA_PARAMETERS);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+
+        final JsonElement element = command.parsedJson();
+
+        final LocalDate reactivationDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.reactivationDateParamName,
+                element);
+        baseDataValidator.reset().parameter(ClientApiConstants.reactivationDateParamName).value(reactivationDate).notNull();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+
+    }
 }
