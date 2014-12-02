@@ -24,8 +24,9 @@ public class FundsHelper {
     }
 
     private String name;
+    private Integer resourceId;
 
-    FundsHelper() {
+    public FundsHelper() {
         super();
     }
 
@@ -38,6 +39,10 @@ public class FundsHelper {
         return this.name;
     }
 
+    public Integer getResourceID() {
+        return this.resourceId;
+    }
+
     public String toJSON() {
         return new Gson().toJson(this);
     }
@@ -46,7 +51,7 @@ public class FundsHelper {
         return new Gson().fromJson(jsonData, FundsHelper.class);
     }
 
-    public Builder create(final String name) {
+    public static Builder create(final String name) {
         return new Builder(name);
     }
 
