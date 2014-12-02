@@ -13880,6 +13880,7 @@ Content-Type: application/json
 Request Body: 
 {
 	"name":"Ration Card",
+	"description: "Ration card information",
 	"position":"1"
 }
 					</code>
@@ -13909,26 +13910,31 @@ GET https://DomainName/api/v1/codes/{codeId}/codevalues
   {
     "id": 1,
     "name": "Passport",
+    "description: "Passport information",
     "position": 0
   },
   {
     "id": 2,
     "name": "Id",
+    "description: "ID information",
     "position": 0
   },
   {
     "id": 3,
     "name": "Drivers License",
+    "description: "Drivers License information",
     "position": 0
   },
   {
     "id": 4,
     "name": "Any Other Id Type",
+    "description: "Any Other Id Type information",
     "position": 0
   },
   {
     "id": 5,
     "name": "Ration Card",
+    "description: "Ration Card information",
     "position": 1
   }
 ]
@@ -13953,6 +13959,7 @@ GET https://DomainName/api/v1/codes/{codeId}/codevalues/{codevalueId}
 {
   "id": 1,
   "name": "Passport",
+  "description: "Passport information",
   "position": 0
 }
 					</code>
@@ -13976,14 +13983,17 @@ Content-Type: application/json
 Request Body: 
 { 
 	"name": "Indian Passport",
+	"description": "Indian Passport information",
 	"position":2
 }
 					</code>
 					<code class="method-response">
 {
   "resourceId": 1,
-  "changes": {
+  "changes": 
+  {
     "name": "Indian Passport",
+    "description": "Indian Passport information",
     "position": 2
   }
 }

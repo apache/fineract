@@ -35,7 +35,7 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
     private static final class CodeValueDataMapper implements RowMapper<CodeValueData> {
 
         public String schema() {
-            return " cv.id as id, cv.code_value as value, cv.code_id as codeId, cv.order_position as position"
+            return " cv.id as id, cv.code_value as value, cv.code_id as codeId, cv.code_description as description, cv.order_position as position"
                     + " from m_code_value as cv join m_code c on cv.code_id = c.id ";
         }
 
@@ -45,8 +45,8 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
             final Long id = rs.getLong("id");
             final String value = rs.getString("value");
             final Integer position = rs.getInt("position");
-
-            return CodeValueData.instance(id, value, position);
+            final String description = rs.getString("description");
+            return CodeValueData.instance(id, value, position, description);
         }
     }
 
@@ -76,19 +76,16 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
     @Override
     public CodeValueData retrieveCodeValue(final Long codeValueId) {
 
-    	try {
-			this.context.authenticatedUser();
+        try {
+            this.context.authenticatedUser();
 
-			final CodeValueDataMapper rm = new CodeValueDataMapper();
-			final String sql = "select " + rm.schema()
-					+ "where cv.id = ? order by position";
+            final CodeValueDataMapper rm = new CodeValueDataMapper();
+            final String sql = "select " + rm.schema() + "where cv.id = ? order by position";
 
-			return this.jdbcTemplate.queryForObject(sql, rm,
-					new Object[] { codeValueId });
-		} catch (final EmptyResultDataAccessException e) {
-			throw new CodeValueNotFoundException(codeValueId);
-		}
-
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeValueId });
+        } catch (final EmptyResultDataAccessException e) {
+            throw new CodeValueNotFoundException(codeValueId);
+        }
 
     }
 }
