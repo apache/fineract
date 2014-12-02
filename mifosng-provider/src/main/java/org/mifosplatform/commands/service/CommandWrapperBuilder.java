@@ -6,6 +6,7 @@
 package org.mifosplatform.commands.service;
 
 import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.infrastructure.accountnumberformat.service.AccountNumberFormatConstants;
 
 public class CommandWrapperBuilder {
 
@@ -833,7 +834,7 @@ public class CommandWrapperBuilder {
         this.href = "/glclosures/" + glClosureId;
         return this;
     }
-    
+
     public CommandWrapperBuilder excuteAccrualAccounting() {
         this.actionName = "EXECUTE";
         this.entityName = "PERIODICACCRUALACCOUNTING";
@@ -1504,7 +1505,7 @@ public class CommandWrapperBuilder {
         this.href = "/centers/" + centerId + "?command=close";
         return this;
     }
-    
+
     public CommandWrapperBuilder associateGroupsToCenter(final Long centerId) {
         this.actionName = "ASSOCIATEGROUPS";
         this.entityName = "CENTER";
@@ -2074,8 +2075,9 @@ public class CommandWrapperBuilder {
         this.entityId = entityId;
         return this;
     }
+
     public CommandWrapperBuilder assignSavingsOfficer(final Long accountId) {
-    	this.actionName = "UPDATESAVINGSOFFICER";
+        this.actionName = "UPDATESAVINGSOFFICER";
         this.entityName = "SAVINGSACCOUNT";
         this.entityId = accountId;
         this.href = "/savingsaccounts/" + accountId + "?command=assignSavingsOfficer";
@@ -2097,20 +2099,44 @@ public class CommandWrapperBuilder {
         this.href = "/rescheduleloans";
         return this;
     }
-    
+
     public CommandWrapperBuilder approveLoanRescheduleRequest(final String entityName, final Long requestId) {
-    	this.actionName = "APPROVE";
-    	this.entityName = entityName;
-    	this.entityId = requestId;
-    	this.href = "/rescheduleloans/" + requestId + "?command=approve";
-    	return this;
+        this.actionName = "APPROVE";
+        this.entityName = entityName;
+        this.entityId = requestId;
+        this.href = "/rescheduleloans/" + requestId + "?command=approve";
+        return this;
     }
-    
+
     public CommandWrapperBuilder rejectLoanRescheduleRequest(final String entityName, final Long requestId) {
-    	this.actionName = "REJECT";
-    	this.entityName = entityName;
-    	this.entityId = requestId;
-    	this.href = "/rescheduleloans/" + requestId + "?command=reject";
-    	return this;
+        this.actionName = "REJECT";
+        this.entityName = entityName;
+        this.entityId = requestId;
+        this.href = "/rescheduleloans/" + requestId + "?command=reject";
+        return this;
+    }
+
+    public CommandWrapperBuilder createAccountNumberFormat() {
+        this.actionName = "CREATE";
+        this.entityName = AccountNumberFormatConstants.ENTITY_NAME.toUpperCase();
+        this.href = AccountNumberFormatConstants.resourceRelativeURL;
+        return this;
+    }
+
+    public CommandWrapperBuilder updateAccountNumberFormat(final Long accountNumberFormatId) {
+        this.actionName = "UPDATE";
+        this.entityName = AccountNumberFormatConstants.ENTITY_NAME.toUpperCase();
+        this.entityId = accountNumberFormatId;
+        this.href = AccountNumberFormatConstants.resourceRelativeURL + "/" + accountNumberFormatId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteAccountNumberFormat(final Long accountNumberFormatId) {
+        this.actionName = "DELETE";
+        this.entityName = AccountNumberFormatConstants.ENTITY_NAME.toUpperCase();
+        this.entityId = accountNumberFormatId;
+        this.href = "AccountNumberFormatConstants.resourceRelativeURL" + "/" + accountNumberFormatId;
+        this.json = "{}";
+        return this;
     }
 }

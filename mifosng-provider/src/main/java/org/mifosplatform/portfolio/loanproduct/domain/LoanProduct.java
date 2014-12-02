@@ -981,8 +981,12 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return this.holdGuaranteeFunds;
     }
 
-    
     public LoanProductGuaranteeDetails getLoanProductGuaranteeDetails() {
         return this.loanProductGuaranteeDetails;
     }
+
+    public String getShortName() {
+        return this.shortName;
+    }
+
 }

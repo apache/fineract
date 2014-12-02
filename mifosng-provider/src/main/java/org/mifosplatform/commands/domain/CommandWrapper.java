@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.commands.domain;
 
+import org.mifosplatform.infrastructure.accountnumberformat.service.AccountNumberFormatConstants;
 import org.mifosplatform.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
 
 public class CommandWrapper {
@@ -245,25 +246,30 @@ public class CommandWrapper {
         return this.entityName.equalsIgnoreCase("SMS");
     }
 
-    public boolean isSmsCampaignResource(){
+    public boolean isSmsCampaignResource() {
         return this.entityName.equals("SMS_CAMPAIGN");
     }
-    
+
     public boolean isLoanRescheduleResource() {
-    	return this.entityName.equals(RescheduleLoansApiConstants.ENTITY_NAME);
+        return this.entityName.equals(RescheduleLoansApiConstants.ENTITY_NAME);
     }
-    
+
+    public boolean isAccountNumberFormatResource() {
+        return this.entityName.equals(AccountNumberFormatConstants.ENTITY_NAME.toUpperCase());
+    }
+
     public boolean isApprove() {
-    	return this.actionName.equalsIgnoreCase("APPROVE");
+        return this.actionName.equalsIgnoreCase("APPROVE");
     }
-    
+
     public boolean isReject() {
-    	return this.actionName.equalsIgnoreCase("REJECT");
+        return this.actionName.equalsIgnoreCase("REJECT");
     }
 
     public boolean isSmsCampaignActivation() {
         return this.actionName.equalsIgnoreCase("ACTIVATE") && this.entityName.equalsIgnoreCase("SMS_CAMPAIGN");
     }
+
     public boolean isSmsCampaignClosure() {
         return this.actionName.equalsIgnoreCase("CLOSE") && this.entityName.equalsIgnoreCase("SMS_CAMPAIGN");
     }
@@ -295,11 +301,11 @@ public class CommandWrapper {
     public boolean isJournalEntryResource() {
         return this.entityName.equalsIgnoreCase("JOURNALENTRY");
     }
-    
+
     public boolean isPeriodicAccrualResource() {
         return this.entityName.equalsIgnoreCase("PERIODICACCRUALACCOUNTING");
     }
-    
+
     public boolean isExecute() {
         return this.actionName.equalsIgnoreCase("EXECUTE");
     }
@@ -588,15 +594,15 @@ public class CommandWrapper {
     public boolean isAdjustSavingsAccountTransaction() {
         return this.actionName.equalsIgnoreCase("ADJUSTTRANSACTION") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
     }
-    
-    public boolean isUpdateSavingsOfficer(){
-    	return this.actionName.equalsIgnoreCase("UPDATESAVINGSOFFICER") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+
+    public boolean isUpdateSavingsOfficer() {
+        return this.actionName.equalsIgnoreCase("UPDATESAVINGSOFFICER") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
     }
 
-    public boolean isRemoveSavingsOfficer(){
-    	return this.actionName.equalsIgnoreCase("REMOVESAVINGSOFFICER") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+    public boolean isRemoveSavingsOfficer() {
+        return this.actionName.equalsIgnoreCase("REMOVESAVINGSOFFICER") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
     }
-    
+
     public boolean isSavingsAccountChargeResource() {
         return this.entityName.equalsIgnoreCase("SAVINGSACCOUNTCHARGE");
     }

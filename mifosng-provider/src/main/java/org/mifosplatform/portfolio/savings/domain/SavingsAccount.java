@@ -826,14 +826,12 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         if (applyWithdrawFee) {
             // auto pay withdrawal fee
-            payWithdrawalFee(transactionDTO.getTransactionAmount(), transactionDTO.getTransactionDate(),
-            		transactionDTO.getAppUser());
+            payWithdrawalFee(transactionDTO.getTransactionAmount(), transactionDTO.getTransactionDate(), transactionDTO.getAppUser());
         }
         return transaction;
     }
 
-    private void payWithdrawalFee(final BigDecimal transactionAmoount, final LocalDate transactionDate,
-    		final AppUser user) {
+    private void payWithdrawalFee(final BigDecimal transactionAmoount, final LocalDate transactionDate, final AppUser user) {
         for (SavingsAccountCharge charge : this.charges()) {
             if (charge.isWithdrawalFee() && charge.isActive()) {
                 charge.updateWithdralFeeAmount(transactionAmoount);
@@ -1212,6 +1210,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     public Long productId() {
         return this.product.getId();
+    }
+
+    public SavingsProduct savingsProduct() {
+        return this.product;
     }
 
     private Boolean isCashBasedAccountingEnabledOnSavingsProduct() {
@@ -1851,7 +1853,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     private void payActivationCharges(final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
-    		final AppUser user) {
+            final AppUser user) {
         boolean isSavingsChargeApplied = false;
         for (SavingsAccountCharge savingsAccountCharge : this.charges()) {
             if (savingsAccountCharge.isSavingsActivation()) {
@@ -2249,7 +2251,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public void payCharge(final SavingsAccountCharge savingsAccountCharge, final Money amountPaid, final LocalDate transactionDate,
-    		final AppUser user) {
+            final AppUser user) {
         savingsAccountCharge.pay(getCurrency(), amountPaid);
         handlePayChargeTransactions(savingsAccountCharge, amountPaid, transactionDate, user);
     }
@@ -2269,8 +2271,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         handleChargeTransactions(savingsAccountCharge, chargeTransaction);
     }
 
-    private void handleWaiverChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount,
-    		AppUser user) {
+    private void handleWaiverChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount, AppUser user) {
         final SavingsAccountTransaction chargeTransaction = SavingsAccountTransaction.waiver(this, office(),
                 DateUtils.getLocalDateOfTenant(), transactionAmount, user);
         handleChargeTransactions(savingsAccountCharge, chargeTransaction);
