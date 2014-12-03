@@ -29,7 +29,7 @@ public class FundsResourceHandler {
                                                                  final ResponseSpecification responseSpec) {
         final String URL = FUNDS_URL + "?" + Utils.TENANT_IDENTIFIER;
         List<HashMap<String, Object>> list = Utils.performServerGet(requestSpec, responseSpec, URL, "");
-        String jsonData = new Gson().toJson(list);
+        final String jsonData = new Gson().toJson(list);
         return new Gson().fromJson(jsonData, new TypeToken<List<FundsHelper>>(){}.getType());
     }
 
@@ -37,8 +37,29 @@ public class FundsResourceHandler {
                                       final RequestSpecification requestSpec,
                                       final ResponseSpecification responseSpec) {
         final String URL = FUNDS_URL + "/" + fundID + "?" + Utils.TENANT_IDENTIFIER;
-        HashMap map = Utils.performServerGet(requestSpec, responseSpec, URL, "");
-        return new Gson().toJson(map);
+        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "");
+        return new Gson().toJson(response);
+    }
+
+    public static FundsHelper updateFund(final Long fundID,
+                                         final String newName,
+                                         final String newExternalId,
+                                         final RequestSpecification requestSpec,
+                                         final ResponseSpecification responseSpec) {
+        final HashMap<String, String> map = new HashMap<>();
+        if (!newName.isEmpty()) {
+            map.put("name", newName);
+        } else if (!newExternalId.isEmpty()) {
+            // to test that the externalId cannot be updated
+            map.put("externalId", newExternalId);
+        }
+
+        String updateJSON = new Gson().toJson(map);
+
+        final String URL = FUNDS_URL + "/" + fundID + "?" + Utils.TENANT_IDENTIFIER;
+        final HashMap<String, String> response = Utils.performServerPut(requestSpec, responseSpec, URL, updateJSON, "changes");
+        final String jsonData = new Gson().toJson(response);
+        return new Gson().fromJson(jsonData, FundsHelper.class);
     }
 
 }

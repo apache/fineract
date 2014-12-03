@@ -41,6 +41,18 @@ public class FundsIntegrationTest {
     }
 
     @Test
+    public void testCreateFaultyFund() {
+        FundsHelper fh = FundsHelper
+                         .create(Utils.randomNameGenerator("", 120))
+                         .externalId(Utils.randomNameGenerator("fund-", 120))
+                         .build();
+        String jsonData = fh.toJSON();
+
+        final Long fundID = createFund(jsonData, this.requestSpec, this.responseSpec);
+        Assert.assertNull(fundID);
+    }
+
+    @Test
     public void testRetrieveFund() {
         FundsHelper fh = FundsHelper
                          .create(Utils.randomNameGenerator("", 10))
@@ -82,10 +94,43 @@ public class FundsIntegrationTest {
         assertEquals(map.get("userMessageGlobalisationCode"), "error.msg.resource.not.found");
     }
 
+    @Test
+    public void testUpdateFund() {
+        FundsHelper fh = FundsHelper
+                         .create(Utils.randomNameGenerator("", 10))
+                         .externalId(Utils.randomNameGenerator("fund-", 5))
+                         .build();
+        String jsonData = fh.toJSON();
+
+        final Long fundID = createFund(jsonData, this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(fundID);
+
+        String newName = Utils.randomNameGenerator("", 10);
+        String newExternalId = Utils.randomNameGenerator("fund-", 5);
+        FundsHelper fh2 = FundsResourceHandler.updateFund(fundID, newName, newExternalId, this.requestSpec, this.responseSpec);
+
+        Assert.assertEquals(newName, fh2.getName());
+        Assert.assertNull(fh2.getExternalId());
+    }
+
+    @Test
+    public void testUpdateUnknownFund() {
+        String newName = Utils.randomNameGenerator("", 10);
+        String newExternalId = Utils.randomNameGenerator("fund-", 5);
+        FundsHelper fh = FundsResourceHandler.updateFund(Long.MAX_VALUE, newName, newExternalId, this.requestSpec, this.responseSpec);
+        Assert.assertNull(fh);
+    }
+
     private Long createFund(final String fundJSON,
                             final RequestSpecification requestSpec,
                             final ResponseSpecification responseSpec) {
-        return new Long(String.valueOf(FundsResourceHandler.createFund(fundJSON, requestSpec, responseSpec)));
+        String fundId = String.valueOf(FundsResourceHandler.createFund(fundJSON, requestSpec, responseSpec));
+        if (fundId.equals("null")) {
+            // Invalid JSON data parameters
+            return null;
+        }
+
+        return new Long(fundId);
     }
 
 }
