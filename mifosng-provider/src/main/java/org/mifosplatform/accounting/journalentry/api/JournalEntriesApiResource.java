@@ -142,11 +142,12 @@ public class JournalEntriesApiResource {
     @Path("{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createReversalJournalEntry(@PathParam("transactionId") final String transactionId,
+    public String createReversalJournalEntry(final String jsonRequestBody,
+            @PathParam("transactionId") final String transactionId,
             @QueryParam("command") final String commandParam) {
         CommandProcessingResult result = null;
         if (is(commandParam, "reverse")) {
-            final CommandWrapper commandRequest = new CommandWrapperBuilder().reverseJournalEntry(transactionId).build();
+            final CommandWrapper commandRequest = new CommandWrapperBuilder().reverseJournalEntry(transactionId).withJson(jsonRequestBody).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
