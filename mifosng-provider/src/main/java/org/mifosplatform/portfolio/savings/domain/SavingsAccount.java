@@ -1149,16 +1149,16 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         accountingBridgeData.put("accrualBasedAccountingEnabled", isAccrualBasedAccountingEnabledOnSavingsProduct());
         accountingBridgeData.put("isAccountTransfer", isAccountTransfer);
 
-        final List<Map<String, Object>> newLoanTransactions = new ArrayList<>();
+        final List<Map<String, Object>> newSavingsTransactions = new ArrayList<>();
         for (final SavingsAccountTransaction transaction : this.transactions) {
             if (transaction.isReversed() && !existingReversedTransactionIds.contains(transaction.getId())) {
-                newLoanTransactions.add(transaction.toMapData(currencyData));
+                newSavingsTransactions.add(transaction.toMapData(currencyData));
             } else if (!existingTransactionIds.contains(transaction.getId())) {
-                newLoanTransactions.add(transaction.toMapData(currencyData));
+                newSavingsTransactions.add(transaction.toMapData(currencyData));
             }
         }
 
-        accountingBridgeData.put("newSavingsTransactions", newLoanTransactions);
+        accountingBridgeData.put("newSavingsTransactions", newSavingsTransactions);
         return accountingBridgeData;
     }
 
