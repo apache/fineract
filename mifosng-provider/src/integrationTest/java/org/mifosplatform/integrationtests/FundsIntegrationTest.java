@@ -5,8 +5,10 @@
  */
 package org.mifosplatform.integrationtests;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.junit.Assert;
 import org.junit.Before;
@@ -21,9 +23,7 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Funds Integration Test for checking Funds Application.
@@ -43,10 +43,13 @@ public class FundsIntegrationTest {
 
     @Test
     public void testRetrieveFund() {
-        FundsHelper fh = FundsHelper.create(Utils.randomNameGenerator("", 10)).build();
+        FundsHelper fh = FundsHelper
+                         .create(Utils.randomNameGenerator("", 10))
+                         .externalId(Utils.randomNameGenerator("fund-", 5))
+                         .build();
         String jsonData = fh.toJSON();
 
-        final Integer fundID = createFund(jsonData, this.requestSpec, this.responseSpec);
+        final Long fundID = createFund(jsonData, this.requestSpec, this.responseSpec);
         Assert.assertNotNull(fundID);
 
         jsonData = FundsResourceHandler.retrieveFund(fundID, this.requestSpec, this.responseSpec);
@@ -57,28 +60,36 @@ public class FundsIntegrationTest {
 
     @Test
     public void testRetrieveAllFunds() {
-        FundsHelper fh = FundsHelper.create(Utils.randomNameGenerator("", 10)).build();
+        FundsHelper fh = FundsHelper
+                         .create(Utils.randomNameGenerator("", 10))
+                         .externalId(Utils.randomNameGenerator("fund-", 5))
+                         .build();
         String jsonData = fh.toJSON();
 
-        final Integer fundID = createFund(jsonData, this.requestSpec, this.responseSpec);
+        final Long fundID = createFund(jsonData, this.requestSpec, this.responseSpec);
         Assert.assertNotNull(fundID);
 
-        List<HashMap> list = FundsResourceHandler.retrieveAllFunds(this.requestSpec, this.responseSpec);
+        List<HashMap<String, Object>> list = FundsResourceHandler.retrieveAllFunds(this.requestSpec, this.responseSpec);
+
         Assert.assertNotNull(list);
+        Assert.assertThat(list.size(), greaterThanOrEqualTo(1));
+
+        jsonData = new Gson().toJson(list);
+        List<FundsHelper> fhList = new Gson().fromJson(jsonData, new TypeToken<List<FundsHelper>>(){}.getType());
+        Assert.assertThat(fhList, hasItem(fh));
     }
 
     @Test
     public void testFundUnknown() {
-        String jsonData = FundsResourceHandler.retrieveFund(Integer.MAX_VALUE, this.requestSpec, this.responseSpec);
+        String jsonData = FundsResourceHandler.retrieveFund(Long.MAX_VALUE, this.requestSpec, this.responseSpec);
         HashMap<String, String> map = new Gson().fromJson(jsonData, HashMap.class);
         assertEquals(map.get("userMessageGlobalisationCode"), "error.msg.resource.not.found");
     }
 
-    private Integer createFund(final String fundJSON,
-                               final RequestSpecification requestSpec,
-                               final ResponseSpecification responseSpec) {
-        System.out.println("------------------ CREATING NEW FUND  ------------------");
-        return FundsResourceHandler.createFund(fundJSON, requestSpec, responseSpec);
+    private Long createFund(final String fundJSON,
+                            final RequestSpecification requestSpec,
+                            final ResponseSpecification responseSpec) {
+        return new Long(String.valueOf(FundsResourceHandler.createFund(fundJSON, requestSpec, responseSpec)));
     }
 
 }

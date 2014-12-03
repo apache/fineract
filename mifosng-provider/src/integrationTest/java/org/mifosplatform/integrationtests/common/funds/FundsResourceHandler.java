@@ -24,13 +24,13 @@ public class FundsResourceHandler {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_FUNDS_URL, fundJSON, "resourceId");
     }
 
-    public static List<HashMap> retrieveAllFunds(final RequestSpecification requestSpec,
-                                                 final ResponseSpecification responseSpec) {
+    public static List<HashMap<String, Object>> retrieveAllFunds(final RequestSpecification requestSpec,
+                                                                 final ResponseSpecification responseSpec) {
         final String URL = FUNDS_URL + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, URL, "");
     }
 
-    public static String retrieveFund(final Integer fundID,
+    public static String retrieveFund(final Long fundID,
                                       final RequestSpecification requestSpec,
                                       final ResponseSpecification responseSpec) {
         final String URL = FUNDS_URL + "/" + fundID + "?" + Utils.TENANT_IDENTIFIER;
