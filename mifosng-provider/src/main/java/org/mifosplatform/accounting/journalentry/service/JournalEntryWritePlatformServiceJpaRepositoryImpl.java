@@ -37,8 +37,11 @@ import org.mifosplatform.accounting.rule.domain.AccountingRule;
 import org.mifosplatform.accounting.rule.domain.AccountingRuleRepository;
 import org.mifosplatform.accounting.rule.exception.AccountingRuleNotFoundException;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.domain.Office;
@@ -279,11 +282,17 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         final Long officeId = journalEntries.get(0).getOffice().getId();
         final String reversalTransactionId = generateTransactionId(officeId);
         final boolean manualEntry = true;
+        String reversalComment = command.stringValueOfParameterNamed("comments");
+        final boolean useDefaultComment = StringUtils.isBlank(reversalComment);
+
+        validateCommentForReversal(reversalComment);
 
         for (final JournalEntry journalEntry : journalEntries) {
             JournalEntry reversalJournalEntry;
-            final String reversalComment = "Reversal entry for Journal Entry with Entry Id  :" + journalEntry.getId()
-                    + " and transaction Id " + command.getTransactionId();
+            if (useDefaultComment) {
+                reversalComment = "Reversal entry for Journal Entry with Entry Id  :" + journalEntry.getId()
+                        + " and transaction Id " + command.getTransactionId();
+            }
             if (journalEntry.isDebitEntry()) {
                 reversalJournalEntry = JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getPaymentDetails(),
                         journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), reversalTransactionId, manualEntry,
@@ -303,6 +312,17 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             this.glJournalEntryRepository.saveAndFlush(journalEntry);
         }
         return new CommandProcessingResultBuilder().withTransactionId(reversalTransactionId).build();
+    }
+
+    private void validateCommentForReversal(final String reversalComment) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("GLJournalEntry");
+
+        baseDataValidator.reset().parameter("comments").value(reversalComment).notExceedingLengthOf(500);
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
     }
 
     @Transactional
