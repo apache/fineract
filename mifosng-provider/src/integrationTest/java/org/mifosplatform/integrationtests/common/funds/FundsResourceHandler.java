@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.integrationtests.common.funds;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
@@ -24,10 +25,12 @@ public class FundsResourceHandler {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_FUNDS_URL, fundJSON, "resourceId");
     }
 
-    public static List<HashMap<String, Object>> retrieveAllFunds(final RequestSpecification requestSpec,
+    public static List<FundsHelper> retrieveAllFunds(final RequestSpecification requestSpec,
                                                                  final ResponseSpecification responseSpec) {
         final String URL = FUNDS_URL + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerGet(requestSpec, responseSpec, URL, "");
+        List<HashMap<String, Object>> list = Utils.performServerGet(requestSpec, responseSpec, URL, "");
+        String jsonData = new Gson().toJson(list);
+        return new Gson().fromJson(jsonData, new TypeToken<List<FundsHelper>>(){}.getType());
     }
 
     public static String retrieveFund(final Long fundID,

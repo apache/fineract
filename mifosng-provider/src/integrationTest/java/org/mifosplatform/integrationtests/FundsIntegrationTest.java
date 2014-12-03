@@ -8,7 +8,6 @@ package org.mifosplatform.integrationtests;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.junit.Assert;
 import org.junit.Before;
@@ -69,13 +68,10 @@ public class FundsIntegrationTest {
         final Long fundID = createFund(jsonData, this.requestSpec, this.responseSpec);
         Assert.assertNotNull(fundID);
 
-        List<HashMap<String, Object>> list = FundsResourceHandler.retrieveAllFunds(this.requestSpec, this.responseSpec);
+        List<FundsHelper> fhList = FundsResourceHandler.retrieveAllFunds(this.requestSpec, this.responseSpec);
 
-        Assert.assertNotNull(list);
-        Assert.assertThat(list.size(), greaterThanOrEqualTo(1));
-
-        jsonData = new Gson().toJson(list);
-        List<FundsHelper> fhList = new Gson().fromJson(jsonData, new TypeToken<List<FundsHelper>>(){}.getType());
+        Assert.assertNotNull(fhList);
+        Assert.assertThat(fhList.size(), greaterThanOrEqualTo(1));
         Assert.assertThat(fhList, hasItem(fh));
     }
 
