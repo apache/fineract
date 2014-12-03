@@ -46,15 +46,8 @@ public class FundsResourceHandler {
                                          final String newExternalId,
                                          final RequestSpecification requestSpec,
                                          final ResponseSpecification responseSpec) {
-        final HashMap<String, String> map = new HashMap<>();
-        if (!newName.isEmpty()) {
-            map.put("name", newName);
-        } else if (!newExternalId.isEmpty()) {
-            // to test that the externalId cannot be updated
-            map.put("externalId", newExternalId);
-        }
-
-        String updateJSON = new Gson().toJson(map);
+        FundsHelper fh = FundsHelper.create(newName).externalId(newExternalId).build();
+        String updateJSON = new Gson().toJson(fh);
 
         final String URL = FUNDS_URL + "/" + fundID + "?" + Utils.TENANT_IDENTIFIER;
         final HashMap<String, String> response = Utils.performServerPut(requestSpec, responseSpec, URL, updateJSON, "changes");

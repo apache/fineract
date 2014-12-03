@@ -37,7 +37,7 @@ public class FundsIntegrationTest {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().build();
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
@@ -48,8 +48,23 @@ public class FundsIntegrationTest {
                          .build();
         String jsonData = fh.toJSON();
 
-        final Long fundID = createFund(jsonData, this.requestSpec, this.responseSpec);
+        final Long fundID = createFund(jsonData, this.requestSpec, this.responseSpec.statusCode(400));
         Assert.assertNull(fundID);
+    }
+
+    @Test
+    public void testDuplicates() {
+        FundsHelper fh = FundsHelper
+                .create(Utils.randomNameGenerator("", 10))
+                .externalId(Utils.randomNameGenerator("fund-", 5))
+                .build();
+        String jsonData = fh.toJSON();
+
+        final Long fundID = createFund(jsonData, this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(fundID);
+
+        final Long fundID2 = createFund(jsonData, this.requestSpec, this.responseSpec.statusCode(403));
+        Assert.assertNull(fundID2);
     }
 
     @Test
@@ -89,7 +104,7 @@ public class FundsIntegrationTest {
 
     @Test
     public void testFundUnknown() {
-        String jsonData = FundsResourceHandler.retrieveFund(Long.MAX_VALUE, this.requestSpec, this.responseSpec);
+        String jsonData = FundsResourceHandler.retrieveFund(Long.MAX_VALUE, this.requestSpec, this.responseSpec.statusCode(404));
         HashMap<String, String> map = new Gson().fromJson(jsonData, HashMap.class);
         assertEquals(map.get("userMessageGlobalisationCode"), "error.msg.resource.not.found");
     }
@@ -110,14 +125,14 @@ public class FundsIntegrationTest {
         FundsHelper fh2 = FundsResourceHandler.updateFund(fundID, newName, newExternalId, this.requestSpec, this.responseSpec);
 
         Assert.assertEquals(newName, fh2.getName());
-        Assert.assertNull(fh2.getExternalId());
+        Assert.assertEquals(newExternalId, fh2.getExternalId());
     }
 
     @Test
     public void testUpdateUnknownFund() {
         String newName = Utils.randomNameGenerator("", 10);
         String newExternalId = Utils.randomNameGenerator("fund-", 5);
-        FundsHelper fh = FundsResourceHandler.updateFund(Long.MAX_VALUE, newName, newExternalId, this.requestSpec, this.responseSpec);
+        FundsHelper fh = FundsResourceHandler.updateFund(Long.MAX_VALUE, newName, newExternalId, this.requestSpec, this.responseSpec.statusCode(404));
         Assert.assertNull(fh);
     }
 
