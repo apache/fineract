@@ -11,7 +11,6 @@ import static org.junit.Assert.assertThat;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mifosplatform.ServerApplication;
 import org.mifosplatform.common.RestAssuredFixture;
@@ -26,7 +25,6 @@ public class SpringBootServerLoginTest extends AbstractSpringBootWithMariaDB4jIn
     protected RestAssuredFixture util;
 
     @Test
-    @Ignore("functionality currently broken on Windows and Integration Testing environment")
     public void hasMifosPlatformStarted() {
         util = new RestAssuredFixture(8443);
         List<Map<String, String>> response = util.httpGet("/users");
