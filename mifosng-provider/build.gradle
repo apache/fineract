@@ -73,7 +73,7 @@ dependencies {
 			)
 
 	compile(
-				[group: 'ch.vorburger.mariaDB4j', name: 'mariaDB4j', version: '2.1.0'],
+				[group: 'ch.vorburger.mariaDB4j', name: 'mariaDB4j', version: '2.1.1'],
 
 				[group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion],
 				[group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springBootVersion],
