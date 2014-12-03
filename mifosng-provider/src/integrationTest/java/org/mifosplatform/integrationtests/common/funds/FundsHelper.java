@@ -70,7 +70,10 @@ public class FundsHelper {
 
     @Override
     public int hashCode() {
-        return this.name.hashCode();
+        if (this.name != null) {
+            return this.name.hashCode();
+        }
+        return super.hashCode();
     }
 
     @Override
