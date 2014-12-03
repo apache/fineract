@@ -14,6 +14,9 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.accountnumberformat.domain.AccountNumberFormat;
+import org.mifosplatform.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
+import org.mifosplatform.infrastructure.accountnumberformat.domain.EntityAccountType;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
@@ -39,7 +42,6 @@ import org.mifosplatform.portfolio.calendar.domain.CalendarRepository;
 import org.mifosplatform.portfolio.calendar.domain.CalendarType;
 import org.mifosplatform.portfolio.calendar.exception.CalendarNotFoundException;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
-import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
@@ -114,7 +116,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanChargeAssembler loanChargeAssembler;
     private final CollateralAssembler loanCollateralAssembler;
     private final AprCalculator aprCalculator;
-    private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
+    private final AccountNumberGenerator accountNumberGenerator;
     private final LoanSummaryWrapper loanSummaryWrapper;
     private final GroupRepositoryWrapper groupRepository;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
@@ -125,6 +127,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanReadPlatformService loanReadPlatformService;
     private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
     private final LoanAccountDomainService loanAccountDomainService;
+    private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
 
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
@@ -134,13 +137,14 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanAssembler loanAssembler, final LoanChargeAssembler loanChargeAssembler,
             final CollateralAssembler loanCollateralAssembler, final LoanRepository loanRepository, final NoteRepository noteRepository,
             final LoanScheduleCalculationPlatformService calculationPlatformService, final ClientRepositoryWrapper clientRepository,
-            final LoanProductRepository loanProductRepository, final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
+            final LoanProductRepository loanProductRepository, final AccountNumberGenerator accountNumberGenerator,
             final LoanSummaryWrapper loanSummaryWrapper, final GroupRepositoryWrapper groupRepository,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             final CalendarRepository calendarRepository, final CalendarInstanceRepository calendarInstanceRepository,
             final SavingsAccountAssembler savingsAccountAssembler, final AccountAssociationsRepository accountAssociationsRepository,
             final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository,
-            final LoanReadPlatformService loanReadPlatformService, final LoanAccountDomainService loanAccountDomainService) {
+            final LoanReadPlatformService loanReadPlatformService, final LoanAccountDomainService loanAccountDomainService,
+            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository) {
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
@@ -155,7 +159,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.calculationPlatformService = calculationPlatformService;
         this.clientRepository = clientRepository;
         this.loanProductRepository = loanProductRepository;
-        this.accountIdentifierGeneratorFactory = accountIdentifierGeneratorFactory;
+        this.accountNumberGenerator = accountNumberGenerator;
         this.loanSummaryWrapper = loanSummaryWrapper;
         this.groupRepository = groupRepository;
         this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
@@ -166,6 +170,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanAccountDomainService = loanAccountDomainService;
+        this.accountNumberFormatRepository = accountNumberFormatRepository;
 
     }
 
@@ -230,9 +235,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             }
 
             if (newLoanApplication.isAccountNumberRequiresAutoGeneration()) {
-                final AccountNumberGenerator accountNoGenerator = this.accountIdentifierGeneratorFactory
-                        .determineLoanAccountNoGenerator(newLoanApplication.getId());
-                newLoanApplication.updateAccountNo(accountNoGenerator.generate());
+                final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository
+                        .findByAccountType(EntityAccountType.LOAN);
+                newLoanApplication.updateAccountNo(this.accountNumberGenerator.generate(newLoanApplication, accountNumberFormat));
                 this.loanRepository.save(newLoanApplication);
             }
 

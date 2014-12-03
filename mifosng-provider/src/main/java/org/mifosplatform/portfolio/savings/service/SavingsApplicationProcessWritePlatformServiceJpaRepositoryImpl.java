@@ -18,6 +18,9 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandProcessingService;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
+import org.mifosplatform.infrastructure.accountnumberformat.domain.AccountNumberFormat;
+import org.mifosplatform.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
+import org.mifosplatform.infrastructure.accountnumberformat.domain.EntityAccountType;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -31,7 +34,6 @@ import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
-import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
@@ -71,7 +73,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final SavingsAccountRepositoryWrapper savingAccountRepository;
     private final SavingsAccountAssembler savingAccountAssembler;
     private final SavingsAccountDataValidator savingsAccountDataValidator;
-    private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
+    private final AccountNumberGenerator accountNumberGenerator;
     private final ClientRepositoryWrapper clientRepository;
     private final GroupRepository groupRepository;
     private final SavingsProductRepository savingsProductRepository;
@@ -82,22 +84,24 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final CommandProcessingService commandProcessingService;
     private final SavingsAccountDomainService savingsAccountDomainService;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
+    private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
 
     @Autowired
     public SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final SavingsAccountRepositoryWrapper savingAccountRepository, final SavingsAccountAssembler savingAccountAssembler,
-            final SavingsAccountDataValidator savingsAccountDataValidator,
-            final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory, final ClientRepositoryWrapper clientRepository,
-            final GroupRepository groupRepository, final SavingsProductRepository savingsProductRepository,
-            final NoteRepository noteRepository, final StaffRepositoryWrapper staffRepository,
+            final SavingsAccountDataValidator savingsAccountDataValidator, final AccountNumberGenerator accountNumberGenerator,
+            final ClientRepositoryWrapper clientRepository, final GroupRepository groupRepository,
+            final SavingsProductRepository savingsProductRepository, final NoteRepository noteRepository,
+            final StaffRepositoryWrapper staffRepository,
             final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator,
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final CommandProcessingService commandProcessingService,
             final SavingsAccountDomainService savingsAccountDomainService,
-            final SavingsAccountWritePlatformService savingsAccountWritePlatformService) {
+            final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
+            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.savingAccountAssembler = savingAccountAssembler;
-        this.accountIdentifierGeneratorFactory = accountIdentifierGeneratorFactory;
+        this.accountNumberGenerator = accountNumberGenerator;
         this.savingsAccountDataValidator = savingsAccountDataValidator;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
@@ -108,6 +112,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.savingsAccountChargeAssembler = savingsAccountChargeAssembler;
         this.commandProcessingService = commandProcessingService;
         this.savingsAccountDomainService = savingsAccountDomainService;
+        this.accountNumberFormatRepository = accountNumberFormatRepository;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
     }
 
@@ -168,9 +173,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
     private void generateAccountNumber(final SavingsAccount account) {
         if (account.isAccountNumberRequiresAutoGeneration()) {
-            final AccountNumberGenerator accountNoGenerator = this.accountIdentifierGeneratorFactory
-                    .determineSavingsAccountNoGenerator(account.getId());
-            account.updateAccountNo(accountNoGenerator.generate());
+            final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.SAVINGS);
+            account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
 
             this.savingAccountRepository.save(account);
         }

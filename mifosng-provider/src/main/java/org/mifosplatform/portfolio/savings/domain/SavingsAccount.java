@@ -49,6 +49,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
@@ -104,6 +105,9 @@ import com.google.gson.JsonArray;
 @DiscriminatorColumn(name = "deposit_type_enum", discriminatorType = DiscriminatorType.INTEGER)
 @DiscriminatorValue("100")
 public class SavingsAccount extends AbstractPersistable<Long> {
+
+    @Version
+    int version;
 
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
     protected String accountNumber;
@@ -826,14 +830,12 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         if (applyWithdrawFee) {
             // auto pay withdrawal fee
-            payWithdrawalFee(transactionDTO.getTransactionAmount(), transactionDTO.getTransactionDate(),
-            		transactionDTO.getAppUser());
+            payWithdrawalFee(transactionDTO.getTransactionAmount(), transactionDTO.getTransactionDate(), transactionDTO.getAppUser());
         }
         return transaction;
     }
 
-    private void payWithdrawalFee(final BigDecimal transactionAmoount, final LocalDate transactionDate,
-    		final AppUser user) {
+    private void payWithdrawalFee(final BigDecimal transactionAmoount, final LocalDate transactionDate, final AppUser user) {
         for (SavingsAccountCharge charge : this.charges()) {
             if (charge.isWithdrawalFee() && charge.isActive()) {
                 charge.updateWithdralFeeAmount(transactionAmoount);
@@ -1147,16 +1149,16 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         accountingBridgeData.put("accrualBasedAccountingEnabled", isAccrualBasedAccountingEnabledOnSavingsProduct());
         accountingBridgeData.put("isAccountTransfer", isAccountTransfer);
 
-        final List<Map<String, Object>> newLoanTransactions = new ArrayList<>();
+        final List<Map<String, Object>> newSavingsTransactions = new ArrayList<>();
         for (final SavingsAccountTransaction transaction : this.transactions) {
             if (transaction.isReversed() && !existingReversedTransactionIds.contains(transaction.getId())) {
-                newLoanTransactions.add(transaction.toMapData(currencyData));
+                newSavingsTransactions.add(transaction.toMapData(currencyData));
             } else if (!existingTransactionIds.contains(transaction.getId())) {
-                newLoanTransactions.add(transaction.toMapData(currencyData));
+                newSavingsTransactions.add(transaction.toMapData(currencyData));
             }
         }
 
-        accountingBridgeData.put("newSavingsTransactions", newLoanTransactions);
+        accountingBridgeData.put("newSavingsTransactions", newSavingsTransactions);
         return accountingBridgeData;
     }
 
@@ -1212,6 +1214,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     public Long productId() {
         return this.product.getId();
+    }
+
+    public SavingsProduct savingsProduct() {
+        return this.product;
     }
 
     private Boolean isCashBasedAccountingEnabledOnSavingsProduct() {
@@ -1851,7 +1857,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     private void payActivationCharges(final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
-    		final AppUser user) {
+            final AppUser user) {
         boolean isSavingsChargeApplied = false;
         for (SavingsAccountCharge savingsAccountCharge : this.charges()) {
             if (savingsAccountCharge.isSavingsActivation()) {
@@ -2249,7 +2255,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public void payCharge(final SavingsAccountCharge savingsAccountCharge, final Money amountPaid, final LocalDate transactionDate,
-    		final AppUser user) {
+            final AppUser user) {
         savingsAccountCharge.pay(getCurrency(), amountPaid);
         handlePayChargeTransactions(savingsAccountCharge, amountPaid, transactionDate, user);
     }
@@ -2269,8 +2275,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         handleChargeTransactions(savingsAccountCharge, chargeTransaction);
     }
 
-    private void handleWaiverChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount,
-    		AppUser user) {
+    private void handleWaiverChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount, AppUser user) {
         final SavingsAccountTransaction chargeTransaction = SavingsAccountTransaction.waiver(this, office(),
                 DateUtils.getLocalDateOfTenant(), transactionAmount, user);
         handleChargeTransactions(savingsAccountCharge, chargeTransaction);

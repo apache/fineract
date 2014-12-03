@@ -19,6 +19,9 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.accountnumberformat.domain.AccountNumberFormat;
+import org.mifosplatform.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
+import org.mifosplatform.infrastructure.accountnumberformat.domain.EntityAccountType;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
@@ -44,7 +47,6 @@ import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.mifosplatform.portfolio.calendar.domain.CalendarType;
 import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
-import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
@@ -91,7 +93,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final RecurringDepositAccountRepository recurringDepositAccountRepository;
     private final DepositAccountAssembler depositAccountAssembler;
     private final DepositAccountDataValidator depositAccountDataValidator;
-    private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
+    private final AccountNumberGenerator accountNumberGenerator;
     private final ClientRepositoryWrapper clientRepository;
     private final GroupRepository groupRepository;
     private final SavingsProductRepository savingsProductRepository;
@@ -103,24 +105,26 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final FromJsonHelper fromJsonHelper;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final ConfigurationDomainService configurationDomainService;
+    private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
 
     @Autowired
     public DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final SavingsAccountRepositoryWrapper savingAccountRepository, final DepositAccountAssembler depositAccountAssembler,
-            final DepositAccountDataValidator depositAccountDataValidator,
-            final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory, final ClientRepositoryWrapper clientRepository,
-            final GroupRepository groupRepository, final SavingsProductRepository savingsProductRepository,
-            final NoteRepository noteRepository, final StaffRepositoryWrapper staffRepository,
+            final DepositAccountDataValidator depositAccountDataValidator, final AccountNumberGenerator accountNumberGenerator,
+            final ClientRepositoryWrapper clientRepository, final GroupRepository groupRepository,
+            final SavingsProductRepository savingsProductRepository, final NoteRepository noteRepository,
+            final StaffRepositoryWrapper staffRepository,
             final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator,
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler,
             final FixedDepositAccountRepository fixedDepositAccountRepository,
             final RecurringDepositAccountRepository recurringDepositAccountRepository,
             final AccountAssociationsRepository accountAssociationsRepository, final FromJsonHelper fromJsonHelper,
-            final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService) {
+            final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
+            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.depositAccountAssembler = depositAccountAssembler;
-        this.accountIdentifierGeneratorFactory = accountIdentifierGeneratorFactory;
+        this.accountNumberGenerator = accountNumberGenerator;
         this.depositAccountDataValidator = depositAccountDataValidator;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
@@ -135,6 +139,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.fromJsonHelper = fromJsonHelper;
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.configurationDomainService = configurationDomainService;
+        this.accountNumberFormatRepository = accountNumberFormatRepository;
     }
 
     /*
@@ -187,9 +192,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             this.fixedDepositAccountRepository.save(account);
 
             if (account.isAccountNumberRequiresAutoGeneration()) {
-                final AccountNumberGenerator accountNoGenerator = this.accountIdentifierGeneratorFactory
-                        .determineSavingsAccountNoGenerator(account.getId());
-                account.updateAccountNo(accountNoGenerator.generate());
+                AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.CLIENT);
+                account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
 
                 this.savingAccountRepository.save(account);
             }
@@ -239,9 +243,9 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             this.recurringDepositAccountRepository.save(account);
 
             if (account.isAccountNumberRequiresAutoGeneration()) {
-                final AccountNumberGenerator accountNoGenerator = this.accountIdentifierGeneratorFactory
-                        .determineSavingsAccountNoGenerator(account.getId());
-                account.updateAccountNo(accountNoGenerator.generate());
+                final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository
+                        .findByAccountType(EntityAccountType.SAVINGS);
+                account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
             }
 
             final Long savingsId = account.getId();

@@ -16,6 +16,9 @@ import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandProcessingService;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
+import org.mifosplatform.infrastructure.accountnumberformat.domain.AccountNumberFormat;
+import org.mifosplatform.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
+import org.mifosplatform.infrastructure.accountnumberformat.domain.EntityAccountType;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -32,7 +35,6 @@ import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.mifosplatform.portfolio.client.data.ClientDataValidator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
-import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.ClientStatus;
@@ -76,7 +78,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final NoteRepository noteRepository;
     private final GroupRepository groupRepository;
     private final ClientDataValidator fromApiJsonDeserializer;
-    private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
+    private final AccountNumberGenerator accountNumberGenerator;
     private final StaffRepositoryWrapper staffRepository;
     private final CodeValueRepositoryWrapper codeValueRepository;
     private final LoanRepository loanRepository;
@@ -85,22 +87,24 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService;
     private final CommandProcessingService commandProcessingService;
     private final ConfigurationDomainService configurationDomainService;
+    private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final ClientRepositoryWrapper clientRepository, final OfficeRepository officeRepository, final NoteRepository noteRepository,
-            final ClientDataValidator fromApiJsonDeserializer, final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
+            final ClientDataValidator fromApiJsonDeserializer, final AccountNumberGenerator accountNumberGenerator,
             final GroupRepository groupRepository, final StaffRepositoryWrapper staffRepository,
             final CodeValueRepositoryWrapper codeValueRepository, final LoanRepository loanRepository,
             final SavingsAccountRepository savingsRepository, final SavingsProductRepository savingsProductRepository,
             final SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService,
-            final CommandProcessingService commandProcessingService, final ConfigurationDomainService configurationDomainService) {
+            final CommandProcessingService commandProcessingService, final ConfigurationDomainService configurationDomainService,
+            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.officeRepository = officeRepository;
         this.noteRepository = noteRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.accountIdentifierGeneratorFactory = accountIdentifierGeneratorFactory;
+        this.accountNumberGenerator = accountNumberGenerator;
         this.groupRepository = groupRepository;
         this.staffRepository = staffRepository;
         this.codeValueRepository = codeValueRepository;
@@ -110,6 +114,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.savingsApplicationProcessWritePlatformService = savingsApplicationProcessWritePlatformService;
         this.commandProcessingService = commandProcessingService;
         this.configurationDomainService = configurationDomainService;
+        this.accountNumberFormatRepository = accountNumberFormatRepository;
     }
 
     @Transactional
@@ -227,9 +232,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             this.clientRepository.save(newClient);
 
             if (newClient.isAccountNumberRequiresAutoGeneration()) {
-                final AccountNumberGenerator accountNoGenerator = this.accountIdentifierGeneratorFactory
-                        .determineClientAccountNoGenerator(newClient.getId());
-                newClient.updateAccountNo(accountNoGenerator.generate());
+                AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.CLIENT);
+                newClient.updateAccountNo(accountNumberGenerator.generate(newClient, accountNumberFormat));
                 this.clientRepository.save(newClient);
             }
 

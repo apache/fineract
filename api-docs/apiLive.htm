@@ -2015,6 +2015,22 @@
 								<td><a href="#configs_hook_delete">Delete a Hook</a></td>
 							</tr>
 							<tr>
+								<td><a href="#accountnumberformats">Account number format</a></td>
+								<td>accountnumberformats</td>
+								<td><a href="#accountnumberformats_create">Create an Account number format</a></td>
+								<td><a href="#accountnumberformats_list">List Account number formats</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>accountnumberformats/{accountnumberformatId}</td>
+								<td></td>
+								<td><a href="#accountnumberformats_retrieve">Retrieve an Account number format</a></td>
+								<td><a href="#accountnumberformats_update">Update an Account number format</a></td>
+								<td><a href="#accountnumberformats_delete">Delete an Account number format</a></td>
+							</tr>
+							<tr>
 								<td><a href="#configs_codes">Codes</a></td>
 								<td>codes</td>
 								<td><a href="#configs_codes_create">Create a Code</a></td>
@@ -14452,6 +14468,337 @@ GET https://DomainName/api/v1/audits
 				</div>
 			</div>
 
+			<!--Start of Account Number Format functionality-->
+
+			<a id="accountnumberformats" name="accountnumberformats" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Account number format</h3>
+					<p>Account number preferences are used to describe custom formats for account numbers associated with Customer, Loan and Savings accounts.                   
+					</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>accountType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Identifies the type of the Account for which the Account number format applies <br/>
+							Refer <a href="#accountnumberformats_template">Retrieve
+							Account number formats Template</a> for complete
+							details
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>prefixType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Identifies a custom prefix for the account number
+							<br/>
+							Refer <a href="#accountnumberformats_template">Retrieve
+							Account number formats Template</a> for complete
+							details
+							</td>
+						</tr>
+						
+					</table>
+				</div>
+			</div>
+
+			<a id="accountnumberformats_list" name="accountnumberformats_list"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Account number formats</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>accountnumberformats</div>
+					<br>
+					<br>
+					<div class=apiClick>accountnumberformats?fields=accountType,prefixType</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/accountnumberformats
+					</code>
+					<code class="method-response">
+[
+   {
+       "id": 2,
+       "accountType":
+       {
+           "id": 1,
+           "code": "accountType.client",
+           "value": "CLIENT"
+       },
+       "prefixType":
+       {
+           "id": 101,
+           "code": "accountNumberPrefixType.clientType",
+           "value": "CLIENT_TYPE"
+       }
+   },
+   {
+       "id": 3,
+       "accountType":
+       {
+           "id": 2,
+           "code": "accountType.loan",
+           "value": "LOAN"
+       },
+       "prefixType":
+       {
+           "id": 201,
+           "code": "accountNumberPrefixType.loanProductShortName",
+           "value": "LOAN_PRODUCT_SHORT_NAME"
+       }
+   }
+]
+					</code>
+				</div>
+			</div>
+
+			<a id="accountnumberformats_template" name="accountnumberformats_template"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Account number format Template</h4>
+					<p>This is a convenience resource. It can be useful when
+						building maintenance user interface screens for client
+						applications. The template data returned consists of any or all
+						of:
+					<ul>
+						<li class=normalli>Field Defaults</li>
+						<li class=normalli>Allowed Value Lists</li>
+					</ul>
+					</p>
+					<p>Example Request:</p>
+					<div class=apiClick>accountnumberformats/template</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/accountnumberformats/template
+					</code>
+					<code class="method-response">
+
+
+    {
+       "accountTypeOptions":
+       [
+           {
+               "id": 1,
+               "code": "accountType.client",
+               "value": "CLIENT"
+           },
+           {
+               "id": 2,
+               "code": "accountType.loan",
+               "value": "LOAN"
+           },
+           {
+               "id": 3,
+               "code": "accountType.savings",
+               "value": "SAVINGS"
+           }
+       ],
+       "prefixTypeOptions":
+       {
+           "accountType.loan":
+           [
+               {
+                   "id": 201,
+                   "code": "accountNumberPrefixType.loanProductShortName",
+                   "value": "LOAN_PRODUCT_SHORT_NAME"
+               },
+               {
+                   "id": 1,
+                   "code": "accountNumberPrefixType.officeName",
+                   "value": "OFFICE_NAME"
+               }
+           ],
+           "accountType.client":
+           [
+               {
+                   "id": 1,
+                   "code": "accountNumberPrefixType.officeName",
+                   "value": "OFFICE_NAME"
+               },
+               {
+                   "id": 101,
+                   "code": "accountNumberPrefixType.clientType",
+                   "value": "CLIENT_TYPE"
+               }
+           ],
+           "accountType.savings":
+           [
+               {
+                   "id": 301,
+                   "code": "accountNumberPrefixType.savingsProductShortName",
+                   "value": "SAVINGS_PRODUCT_SHORT_NAME"
+               },
+               {
+                   "id": 1,
+                   "code": "accountNumberPrefixType.officeName",
+                   "value": "OFFICE_NAME"
+               }
+           ]
+       }
+    }
+
+
+					</code>
+				</div>
+			</div>
+
+			<a id="accountnumberformats_retrieve" name="accountnumberformats_retrieve"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve an Account number format</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>accountnumberformats/1</div>
+					<br>
+					<br>
+					<div class=apiClick>accountnumberformats/1?template=true</div>
+					<br>
+					<br>
+					<div class=apiClick>accountnumberformats/1?fields=accountType,prefixType</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/accountnumberformats/{accountnumberformatId}
+					</code>
+					<code class="method-response">
+
+{
+   "id": 2,
+   "accountType":
+   {
+       "id": 1,
+       "code": "accountType.client",
+       "value": "CLIENT"
+   },
+   "prefixType":
+   {
+       "id": 101,
+       "code": "accountNumberPrefixType.clientType",
+       "value": "CLIENT_TYPE"
+   }
+}
+
+					</code>
+				</div>
+			</div>
+
+			<a id="accountnumberformats_create" name="accountnumberformats_create" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Create an Account number format</h4>
+                    <p>
+                        <b>Note:</b> You may associate a single Account number format for a given account type<br>
+                    </p>
+                    <table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields
+								for Account number formats</div></td>
+						</tr>
+						<tr class=alt>
+							<td>accountType</td>
+						</tr>
+                    </table>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+POST https://DomainName/api/v1/accountnumberformats
+                    </code>
+                    <code class="method-request">
+POST /accountnumberformats
+Content-Type: application/json 
+Request Body:
+{
+    accountType :1,
+    prefixType: 101
+}
+                    </code>
+                    <code class="method-response">
+{
+   "resourceId": 4
+}
+
+                    </code>
+                    <code class="method-request">
+POST /accountnumberformats
+Content-Type: application/json 
+Request Body:
+{
+    accountType :2,
+    prefixType: 201
+}
+                    </code>
+                    <code class="method-response">
+{
+   "resourceId": 5
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="accountnumberformats_update" name="accountnumberformats_update"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update an Account number format</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/accountnumberformats/{accountnumberformatId}
+					</code>
+					<code class="method-request">
+PUT accountnumberformats/2
+Content-Type: application/json 
+Request Body: 
+{
+  prefixType:1
+}
+					</code>
+					<code class="method-response">
+{
+   "resourceId": 2,
+   "changes":
+   {
+       "prefixType": "OFFICE_NAME"
+   }
+}
+
+					</code>
+				</div>
+			</div>
+
+			<a id="accountnumberformats_delete" name="accountnumberformats_delete" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete an Account number format</h4>
+					<p>
+						<b>Note:</b> Account numbers created while this format was active would remain unchanged.
+					</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/accountnumberformats/{accountnumberformatId}
+					</code>
+					<code class="method-request">
+DELETE accountnumberformats/2
+Content-Type: application/json 
+No Request Body:
+					</code>
+					<code class="method-response">
+{
+   "resourceId": 2
+}
+
+					</code>
+				</div>
+			</div>
 
 			<!-- Maker Checker starts here -->
 			<a id="makercheckers" name="makercheckers" class="old-syle-anchor">&nbsp;</a>
