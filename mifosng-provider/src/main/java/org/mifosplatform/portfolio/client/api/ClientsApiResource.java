@@ -39,7 +39,7 @@ import org.mifosplatform.portfolio.accountdetails.data.AccountSummaryCollectionD
 import org.mifosplatform.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
-import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
 import org.mifosplatform.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -17,7 +17,7 @@ import org.mifosplatform.infrastructure.jobs.data.JobDetailData;
 import org.mifosplatform.infrastructure.jobs.data.JobDetailHistoryData;
 import org.mifosplatform.infrastructure.jobs.exception.JobNotFoundException;
 import org.mifosplatform.infrastructure.jobs.exception.OperationNotAllowedException;
-import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;

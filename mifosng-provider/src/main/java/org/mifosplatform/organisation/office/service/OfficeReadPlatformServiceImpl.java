@@ -20,6 +20,7 @@ import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformServi
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.data.OfficeTransactionData;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -128,7 +129,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
     @Override
     @Cacheable(value = "offices", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'of')")
-    public Collection<OfficeData> retrieveAllOffices(final boolean includeAllOffices) {
+    public Collection<OfficeData> retrieveAllOffices(final boolean includeAllOffices, final SearchParameters searchParameters) {
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         String hierarchySearchString = null;
@@ -138,9 +139,22 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             hierarchySearchString = hierarchy + "%";
         }
         final OfficeMapper rm = new OfficeMapper();
-        final String sql = "select " + rm.officeSchema() + "where o.hierarchy like ? order by o.hierarchy";
+        final StringBuilder sqlBuilder = new StringBuilder(200);
+        sqlBuilder.append("select ");
+        sqlBuilder.append(rm.officeSchema());
+        sqlBuilder.append(" where o.hierarchy like ? ");
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { hierarchySearchString });
+        if (searchParameters.isOrderByRequested()) {
+            sqlBuilder.append("order by ").append(searchParameters.getOrderBy());
+
+            if (searchParameters.isSortOrderProvided()) {
+                sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+            }
+        } else {
+            sqlBuilder.append("order by o.hierarchy");
+        }
+
+        return this.jdbcTemplate.query(sqlBuilder.toString(), rm, new Object[] { hierarchySearchString });
     }
 
     @Override

@@ -33,6 +33,7 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -72,11 +73,14 @@ public class OfficesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveOffices(@Context final UriInfo uriInfo,
-            @DefaultValue("false") @QueryParam("includeAllOffices") final boolean onlyManualEntries) {
+            @DefaultValue("false") @QueryParam("includeAllOffices") final boolean onlyManualEntries,
+            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final Collection<OfficeData> offices = this.readPlatformService.retrieveAllOffices(onlyManualEntries);
+        final SearchParameters searchParameters = SearchParameters.forOffices(orderBy, sortOrder);
+
+        final Collection<OfficeData> offices = this.readPlatformService.retrieveAllOffices(onlyManualEntries, searchParameters);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, offices, this.RESPONSE_DATA_PARAMETERS);

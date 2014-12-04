@@ -10,7 +10,7 @@ import java.util.Collection;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.mifosplatform.portfolio.account.data.AccountTransferData;
-import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 
 public interface AccountTransfersReadPlatformService {
 

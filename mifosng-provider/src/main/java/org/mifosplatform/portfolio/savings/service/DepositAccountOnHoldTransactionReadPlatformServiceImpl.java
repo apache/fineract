@@ -17,7 +17,7 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
-import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.portfolio.savings.data.DepositAccountOnHoldTransactionData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;

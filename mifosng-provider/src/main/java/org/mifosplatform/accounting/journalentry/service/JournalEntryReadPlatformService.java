@@ -10,7 +10,7 @@ import java.util.Date;
 import org.mifosplatform.accounting.journalentry.data.JournalEntryAssociationParametersData;
 import org.mifosplatform.accounting.journalentry.data.JournalEntryData;
 import org.mifosplatform.infrastructure.core.service.Page;
-import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 
 public interface JournalEntryReadPlatformService {
 

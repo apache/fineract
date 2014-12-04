@@ -9,7 +9,7 @@ import java.util.Collection;
 
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 
 public interface ClientReadPlatformService {
 

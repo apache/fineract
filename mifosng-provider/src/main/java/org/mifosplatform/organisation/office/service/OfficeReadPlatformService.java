@@ -9,10 +9,11 @@ import java.util.Collection;
 
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.data.OfficeTransactionData;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 
 public interface OfficeReadPlatformService {
 
-    Collection<OfficeData> retrieveAllOffices(boolean includeAllOffices);
+    Collection<OfficeData> retrieveAllOffices(boolean includeAllOffices, SearchParameters searchParameters);
 
     Collection<OfficeData> retrieveAllOfficesForDropdown();
 

@@ -10,6 +10,7 @@ import java.util.Date;
 
 import org.mifosplatform.infrastructure.core.data.PaginationParameters;
 import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.portfolio.group.data.CenterData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.data.StaffCenterData;

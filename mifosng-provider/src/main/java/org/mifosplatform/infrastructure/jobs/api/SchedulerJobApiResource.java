@@ -36,7 +36,7 @@ import org.mifosplatform.infrastructure.jobs.service.JobRegisterService;
 import org.mifosplatform.infrastructure.jobs.service.SchedulerJobRunnerReadService;
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

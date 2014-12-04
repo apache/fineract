@@ -10,7 +10,7 @@ import java.util.List;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.jobs.data.JobDetailData;
 import org.mifosplatform.infrastructure.jobs.data.JobDetailHistoryData;
-import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 
 public interface SchedulerJobRunnerReadService {
 
