@@ -8,14 +8,21 @@ package org.mifosplatform.portfolio.savings.domain;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+import org.joda.time.LocalDate;
+import org.mifosplatform.portfolio.loanaccount.guarantor.domain.GuarantorFundingTransaction;
+import org.mifosplatform.portfolio.savings.DepositAccountOnHoldTransactionType;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -36,8 +43,59 @@ public class DepositAccountOnHoldTransaction extends AbstractPersistable<Long> {
     @Temporal(TemporalType.DATE)
     @Column(name = "transaction_date", nullable = false)
     private Date transactionDate;
-    
+
     @Column(name = "is_reversed", nullable = false)
     private boolean reversed;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_date", nullable = false)
+    private Date createdDate;
+    
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "depositAccountOnHoldTransaction", optional = true, orphanRemoval = true)
+    private GuarantorFundingTransaction guarantorFundingTransaction;
+
+    protected DepositAccountOnHoldTransaction() {}
+
+    private DepositAccountOnHoldTransaction(final SavingsAccount savingsAccount, final BigDecimal amount,
+            final DepositAccountOnHoldTransactionType transactionType, final LocalDate transactionDate, final boolean reversed) {
+        this.savingsAccount = savingsAccount;
+        this.amount = amount;
+        this.transactionType = transactionType.getValue();
+        this.transactionDate = transactionDate.toDate();
+        this.createdDate = new Date();
+        this.reversed = reversed;
+    }
+
+    public static DepositAccountOnHoldTransaction hold(final SavingsAccount savingsAccount, final BigDecimal amount,
+            final LocalDate transactionDate) {
+        boolean reversed = false;
+        return new DepositAccountOnHoldTransaction(savingsAccount, amount, DepositAccountOnHoldTransactionType.HOLD, transactionDate,
+                reversed);
+    }
+
+    public static DepositAccountOnHoldTransaction release(final SavingsAccount savingsAccount, final BigDecimal amount,
+            final LocalDate transactionDate) {
+        boolean reversed = false;
+        return new DepositAccountOnHoldTransaction(savingsAccount, amount, DepositAccountOnHoldTransactionType.RELEASE, transactionDate,
+                reversed);
+    }
+
+    public BigDecimal getAmount() {
+        return this.amount;
+    }
+
+    public void reverseTransaction() {
+        this.reversed = true;
+        if (this.getTransactionType().isHold()) {
+            this.savingsAccount.releaseFunds(this.amount);
+        } else {
+            this.savingsAccount.holdFunds(this.amount);
+        }
+    }
+
+    public DepositAccountOnHoldTransactionType getTransactionType() {
+        return DepositAccountOnHoldTransactionType.fromInt(this.transactionType);
+
+    }
 
 }

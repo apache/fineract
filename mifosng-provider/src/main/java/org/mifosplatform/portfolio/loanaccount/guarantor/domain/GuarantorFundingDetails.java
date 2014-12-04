@@ -20,6 +20,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.mifosplatform.portfolio.account.domain.AccountAssociations;
+import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
@@ -46,7 +47,7 @@ public class GuarantorFundingDetails extends AbstractPersistable<Long> {
 
     @Column(name = "amount_remaining_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountRemaining;
-    
+
     @Column(name = "amount_transfered_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountTransfered;
 
@@ -70,12 +71,62 @@ public class GuarantorFundingDetails extends AbstractPersistable<Long> {
     public void updateStatus(final GuarantorFundStatusType guarantorFundStatusType) {
         this.status = guarantorFundStatusType.getValue();
     }
-    
-    public GuarantorFundStatusType getStatus(){
+
+    public GuarantorFundStatusType getStatus() {
         return GuarantorFundStatusType.fromInt(this.status);
     }
-    
-    public SavingsAccount getLinkedSavingsAccount(){
+
+    public SavingsAccount getLinkedSavingsAccount() {
         return accountAssociations.linkedSavingsAccount();
+    }
+
+    public Loan getLoanAccount() {
+        return this.guarantor.getLoan();
+    }
+
+    public BigDecimal getAmount() {
+        return this.amount;
+    }
+
+    public BigDecimal getAmountReleased() {
+        return this.amountReleased == null ? BigDecimal.ZERO : this.amountReleased;
+    }
+
+    public BigDecimal getAmountRemaining() {
+        return this.amountRemaining == null ? BigDecimal.ZERO : this.amountRemaining;
+    }
+
+    public BigDecimal getAmountTransfered() {
+        return this.amountTransfered == null ? BigDecimal.ZERO : this.amountTransfered;
+    }
+
+    public void releaseFunds(final BigDecimal amount) {
+        this.amountReleased = getAmountReleased().add(amount);
+        this.amountRemaining = getAmountRemaining().subtract(amount);
+        if (this.amountRemaining.compareTo(BigDecimal.ZERO) == 0) {
+            this.updateStatus(GuarantorFundStatusType.COMPLETED);
+        }
+    }
+
+    public void undoReleaseFunds(final BigDecimal amount) {
+        this.amountReleased = getAmountReleased().subtract(amount);
+        this.amountRemaining = getAmountRemaining().add(amount);
+        if (getStatus().isCompleted() && this.amountRemaining.compareTo(BigDecimal.ZERO) == 1) {
+            this.updateStatus(GuarantorFundStatusType.ACTIVE);
+        }
+    }
+
+    public void withdrawFunds(final BigDecimal amount) {
+        this.amountTransfered = amount;
+    }
+
+    public void addGuarantorFundingTransactions(final GuarantorFundingTransaction guarantorFundingTransaction) {
+        this.guarantorFundingTransactions.add(guarantorFundingTransaction);
+    }
+
+    public void undoAllTransactions() {
+        for (GuarantorFundingTransaction fundingTransaction : this.guarantorFundingTransactions) {
+            fundingTransaction.reverseTransaction();
+        }
     }
 }

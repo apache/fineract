@@ -11,16 +11,16 @@ public class SavingsTransactionBooleanValues {
     private final boolean isRegularTransaction;
     private final boolean isApplyWithdrawFee;
     private final boolean isInterestTransfer;
-    private final boolean isWithdrawBalance;
+    private final boolean isExceptionForBalanceCheck;
 
     public SavingsTransactionBooleanValues(final boolean isAccountTransfer, final boolean isRegularTransaction,
-            final boolean isApplyWithdrawFee, final boolean isInterestTransfer, final boolean isWithdrawBalance) {
+            final boolean isApplyWithdrawFee, final boolean isInterestTransfer, final boolean isExceptionForBalanceCheck) {
 
         this.isAccountTransfer = isAccountTransfer;
         this.isRegularTransaction = isRegularTransaction;
         this.isApplyWithdrawFee = isApplyWithdrawFee;
         this.isInterestTransfer = isInterestTransfer;
-        this.isWithdrawBalance = isWithdrawBalance;
+        this.isExceptionForBalanceCheck = isExceptionForBalanceCheck;
     }
 
     public boolean isAccountTransfer() {
@@ -39,8 +39,8 @@ public class SavingsTransactionBooleanValues {
         return this.isInterestTransfer;
     }
 
-    public boolean isWithdrawBalance() {
-        return this.isWithdrawBalance;
+    public boolean isExceptionForBalanceCheck() {
+        return this.isExceptionForBalanceCheck;
     }
 
 }

@@ -186,7 +186,16 @@ public class CommandWrapperBuilder {
         this.entityName = "GUARANTOR";
         this.entityId = null;
         this.loanId = loanId;
-        this.href = "/loans/" + loanId + "/guarantors/template";
+        this.href = "/loans/" + loanId + "/guarantors";
+        return this;
+    }
+
+    public CommandWrapperBuilder recoverFromGuarantor(final Long loanId) {
+        this.actionName = "RECOVERGUARANTEES";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "?command=recoverGuarantees";
         return this;
     }
 

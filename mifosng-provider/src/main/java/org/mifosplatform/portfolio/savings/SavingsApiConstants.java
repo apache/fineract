@@ -101,6 +101,7 @@ public class SavingsApiConstants {
     public static final String enforceMinRequiredBalanceParamName = "enforceMinRequiredBalance";
     public static final String minBalanceForInterestCalculationParamName = "minBalanceForInterestCalculation";
     public static final String withdrawBalanceParamName = "withdrawBalance";
+    public static final String onHoldFundsParamName = "onHoldFunds";
 
     // transaction parameters
     public static final String transactionDateParamName = "transactionDate";
@@ -137,6 +138,11 @@ public class SavingsApiConstants {
     public static final String transactions = "transactions";
     public static final String charges = "charges";
     public static final String linkedAccount = "linkedAccount";
+
+    // Savings on hold transaction
+    public static final String onHoldTransactionTypeParamName = "transactionType";
+    public static final String onHoldTransactionDateParamName = "transactionDate";
+    public static final String onHoldReversedParamName = "reversed";
 
     public static final Set<String> SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             monthDayFormatParamName, nameParamName, shortNameParamName, descriptionParamName, currencyCodeParamName,
@@ -195,7 +201,7 @@ public class SavingsApiConstants {
             withdrawalFeeAmountParamName, withdrawalFeeTypeParamName, withdrawalFeeForTransfersParamName, feeAmountParamName,
             feeOnMonthDayParamName, "summary", "transactions", "productOptions", "interestCompoundingPeriodTypeOptions",
             "interestPostingPeriodTypeOptions", "interestCalculationTypeOptions", "interestCalculationDaysInYearTypeOptions",
-            "lockinPeriodFrequencyTypeOptions", "withdrawalFeeTypeOptions", "withdrawalFee", "annualFee"));
+            "lockinPeriodFrequencyTypeOptions", "withdrawalFeeTypeOptions", "withdrawalFee", "annualFee", onHoldFundsParamName));
 
     public static final Set<String> SAVINGS_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, transactionDateParamName, transactionAmountParamName, paymentTypeIdParamName,
@@ -224,4 +230,7 @@ public class SavingsApiConstants {
 
     public static final Set<String> SAVINGS_ACCOUNT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
             amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName));
+
+    public static final Set<String> SAVINGS_ACCOUNT_ON_HOLD_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
+            amountParamName, onHoldTransactionTypeParamName, onHoldTransactionDateParamName, onHoldReversedParamName));
 }
