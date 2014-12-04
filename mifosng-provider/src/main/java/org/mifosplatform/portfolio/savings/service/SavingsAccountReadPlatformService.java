@@ -8,7 +8,7 @@ package org.mifosplatform.portfolio.savings.service;
 import java.util.Collection;
 
 import org.mifosplatform.infrastructure.core.service.Page;
-import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionData;

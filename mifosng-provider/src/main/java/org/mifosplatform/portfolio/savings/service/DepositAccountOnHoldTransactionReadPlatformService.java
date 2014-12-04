@@ -6,7 +6,7 @@
 package org.mifosplatform.portfolio.savings.service;
 
 import org.mifosplatform.infrastructure.core.service.Page;
-import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.portfolio.savings.data.DepositAccountOnHoldTransactionData;
 
 public interface DepositAccountOnHoldTransactionReadPlatformService {

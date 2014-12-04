@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.portfolio.group.service;
+package org.mifosplatform.infrastructure.core.service;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -53,6 +53,11 @@ public final class SearchParameters {
 
         return new SearchParameters(sqlSearch, officeId, externalId, name, hierarchy, null, null, offset, maxLimitAllowed, orderBy,
                 sortOrder, staffId, accountNo);
+    }
+
+    public static SearchParameters forOffices(final String orderBy, final String sortOrder) {
+        return new SearchParameters(null, null, null, null, null, null, null, null, null, orderBy, sortOrder,
+                null, null);
     }
 
     public static SearchParameters forLoans(final String sqlSearch, final String externalId, final Integer offset, final Integer limit,

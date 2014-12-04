@@ -38,7 +38,7 @@ import org.mifosplatform.portfolio.account.data.StandingInstructionDTO;
 import org.mifosplatform.portfolio.account.data.StandingInstructionData;
 import org.mifosplatform.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.mifosplatform.portfolio.account.service.StandingInstructionReadPlatformService;
-import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

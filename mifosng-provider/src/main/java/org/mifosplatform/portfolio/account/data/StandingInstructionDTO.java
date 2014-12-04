@@ -7,7 +7,7 @@ package org.mifosplatform.portfolio.account.data;
 
 import java.util.Date;
 
-import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 
 public class StandingInstructionDTO {
 
