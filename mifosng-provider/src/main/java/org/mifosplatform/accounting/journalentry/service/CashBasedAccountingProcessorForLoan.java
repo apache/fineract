@@ -73,10 +73,13 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
              **/
             else if (loanTransactionDTO.getTransactionType().isWriteOff()) {
                 final BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
-                this.helper.createCashBasedJournalEntriesAndReversalsForLoan(office, currencyCode,
-                        CASH_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.getValue(), CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue(),
-                        loanProductId, paymentTypeId, loanId, transactionId, transactionDate, principalAmount,
-                        loanTransactionDTO.isReversed());
+                if (principalAmount != null && !(principalAmount.compareTo(BigDecimal.ZERO) == 0)) {
+                    this.helper.createCashBasedJournalEntriesAndReversalsForLoan(office, currencyCode,
+                            CASH_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.getValue(), CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue(),
+                            loanProductId, paymentTypeId, loanId, transactionId, transactionDate, principalAmount,
+                            loanTransactionDTO.isReversed());
+
+                }
             } else if (loanTransactionDTO.getTransactionType().isInitiateTransfer()
                     || loanTransactionDTO.getTransactionType().isApproveTransfer()
                     || loanTransactionDTO.getTransactionType().isWithdrawTransfer()) {
