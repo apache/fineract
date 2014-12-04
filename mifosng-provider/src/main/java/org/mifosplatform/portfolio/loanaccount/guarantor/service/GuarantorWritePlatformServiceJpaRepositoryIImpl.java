@@ -105,7 +105,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                         GuarantorFundStatusType.ACTIVE.getValue(), guarantorCommand.getAmount());
                 guarantorFundingDetails.add(fundingDetails);
                 if (loan.isDisbursed() || loan.isApproved()
-                        || (loan.getGuaranteeAmount() != null || loan.loanProduct().isHoldGuaranteeFundsEnabled())) {
+                        && (loan.getGuaranteeAmount() != null || loan.loanProduct().isHoldGuaranteeFundsEnabled())) {
                     this.guarantorDomainService.assignGuarantor(fundingDetails, LocalDate.now());
                     loan.updateGuaranteeAmount(fundingDetails.getAmount());
                 }
@@ -232,7 +232,9 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
         if (guarantorForDelete == null || (guarantorFundingId == null && !guarantorForDelete.getGuarantorFundDetails().isEmpty())) { throw new GuarantorNotFoundException(
                 loanId, guarantorId, guarantorFundingId); }
         CommandProcessingResult commandProcessingResult = removeGuarantor(guarantorForDelete, loanId, guarantorFundingId);
-        this.guarantorDomainService.validateGuarantorBusinessRules(loan);
+        if (loan.isApproved() || loan.isDisbursed()) {
+            this.guarantorDomainService.validateGuarantorBusinessRules(loan);
+        }
         return commandProcessingResult;
     }
 
