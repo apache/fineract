@@ -290,6 +290,10 @@ public class CommandWrapper {
         return this.entityName.equalsIgnoreCase("GUARANTOR");
     }
 
+    public boolean isGuaranteeRecovery() {
+        return this.actionName.equalsIgnoreCase("RECOVERGUARANTEES");
+    }
+
     public boolean isGLAccountResource() {
         return this.entityName.equalsIgnoreCase("GLACCOUNT");
     }

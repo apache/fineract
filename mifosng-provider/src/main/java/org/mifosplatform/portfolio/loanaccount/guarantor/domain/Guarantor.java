@@ -345,4 +345,12 @@ public class Guarantor extends AbstractPersistable<Long> {
         }
         return hasGuarantee;
     }
+
+    public boolean isSelfGuarantee() {
+        boolean isSelf = false;
+        if (isExistingCustomer() && getEntityId().equals(getClientId())) {
+            isSelf = true;
+        }
+        return isSelf;
+    }
 }

@@ -858,7 +858,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return transactionBeforeLastInterestPosting;
     }
 
-    public void validateAccountBalanceDoesNotBecomeNegative(final BigDecimal transactionAmount, final boolean isWithdrawBalance) {
+    public void validateAccountBalanceDoesNotBecomeNegative(final BigDecimal transactionAmount, final boolean isException) {
         final List<SavingsAccountTransaction> transactionsSortedByDate = retreiveListOfTransactions();
         Money runningBalance = Money.zero(this.currency);
         Money minRequiredBalance = minRequiredBalanceDerived(getCurrency());
@@ -874,7 +874,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final BigDecimal withdrawalFee = null;
             // deal with potential minRequiredBalance and
             // enforceMinRequiredBalance
-            if (!isWithdrawBalance && transaction.canProcessBalanceCheck()) {
+            if (!isException && transaction.canProcessBalanceCheck()) {
                 if (runningBalance.minus(minRequiredBalance).isLessThanZero()) { throw new InsufficientAccountBalanceException(
                         "transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount); }
             }
@@ -2444,5 +2444,21 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             minReqBalance = minReqBalance.minus(this.overdraftLimit);
         }
         return minReqBalance;
+    }
+
+    public BigDecimal getOnHoldFunds() {
+        return this.onHoldFunds == null ? BigDecimal.ZERO : this.onHoldFunds;
+    }
+
+    public void holdFunds(BigDecimal onHoldFunds) {
+        this.onHoldFunds = getOnHoldFunds().add(onHoldFunds);
+    }
+
+    public void releaseFunds(BigDecimal onHoldFunds) {
+        this.onHoldFunds = getOnHoldFunds().subtract(onHoldFunds);
+    }
+
+    public BigDecimal getWithdrawableBalance() {
+        return getAccountBalance().subtract(minRequiredBalanceDerived(getCurrency()).getAmount());
     }
 }

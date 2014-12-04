@@ -44,7 +44,9 @@ import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
+import org.mifosplatform.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
+import org.mifosplatform.portfolio.common.service.BusinessEventNotifierService;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
 import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
@@ -83,6 +85,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
     private final LoanAccrualWritePlatformService accrualWritePlatformService;
     private final PlatformSecurityContext context;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Autowired
     public LoanAccountDomainServiceJpa(final LoanAssembler loanAccountAssembler, final LoanRepository loanRepository,
@@ -95,7 +98,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
             final CalendarInstanceRepository calendarInstanceRepository,
             final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository,
-            final LoanAccrualWritePlatformService accrualWritePlatformService, final PlatformSecurityContext context) {
+            final LoanAccrualWritePlatformService accrualWritePlatformService, final PlatformSecurityContext context,
+            final BusinessEventNotifierService businessEventNotifierService) {
         this.loanAccountAssembler = loanAccountAssembler;
         this.loanRepository = loanRepository;
         this.loanTransactionRepository = loanTransactionRepository;
@@ -112,6 +116,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
         this.accrualWritePlatformService = accrualWritePlatformService;
         this.context = context;
+        this.businessEventNotifierService = businessEventNotifierService;
     }
 
     @Transactional
@@ -215,6 +220,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
 
         recalculateAccruals(loan);
+
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_MAKE_REPAYMENT, newRepaymentTransaction);
+
         builderResult.withEntityId(newRepaymentTransaction.getId()) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
