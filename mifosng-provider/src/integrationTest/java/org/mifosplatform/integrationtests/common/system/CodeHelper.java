@@ -27,6 +27,7 @@ public class CodeHelper {
 
     public static final String CODE_VALUE_ID_ATTRIBUTE_NAME = "id";
     public static final String CODE_VALUE_NAME_ATTRIBUTE_NAME = "name";
+    public static final String CODE_VALUE_DESCRIPTION_ATTRIBUTE_NAME = "description";
     public static final String CODE_VALUE_POSITION_ATTRIBUTE_NAME = "position";
     public static final String CODE_VALUE_URL = "/mifosng-provider/api/v1/codes/[codeId]/codevalues";
 
@@ -76,9 +77,12 @@ public class CodeHelper {
         return new Gson().toJson(map);
     }
 
-    public static String getTestCodeValueAsJSON(final String codeValueName, final Integer position) {
+    public static String getTestCodeValueAsJSON(final String codeValueName, final String description, final Integer position) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put(CODE_VALUE_NAME_ATTRIBUTE_NAME, codeValueName);
+        if (description != null) {
+            map.put(CODE_VALUE_DESCRIPTION_ATTRIBUTE_NAME, description);
+        }
         map.put(CODE_VALUE_POSITION_ATTRIBUTE_NAME, position);
         return new Gson().toJson(map);
     }
@@ -93,9 +97,16 @@ public class CodeHelper {
 
     public static Object createCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer codeId, final String codeValueName, final Integer position, final String jsonAttributeToGetback) {
+        String description = null;
+        return createCodeValue(requestSpec, responseSpec, codeId, codeValueName, description, position, jsonAttributeToGetback);
+    }
+
+    public static Object createCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer codeId, final String codeValueName, final String description, final Integer position,
+            final String jsonAttributeToGetback) {
 
         return Utils.performServerPost(requestSpec, responseSpec, CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "?"
-                + Utils.TENANT_IDENTIFIER, getTestCodeValueAsJSON(codeValueName, position), jsonAttributeToGetback);
+                + Utils.TENANT_IDENTIFIER, getTestCodeValueAsJSON(codeValueName, description, position), jsonAttributeToGetback);
     }
 
     public static Object getCodeValuesForCode(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -123,9 +134,16 @@ public class CodeHelper {
     public static Object updateCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer codeId, final Integer codeValueId, final String codeValueName, final Integer position,
             final String jsonAttributeToGetback) {
+        String description = null;
+        return updateCodeValue(requestSpec, responseSpec, codeId, codeValueId, codeValueName, description, position, jsonAttributeToGetback);
+    }
+
+    public static Object updateCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer codeId, final Integer codeValueId, final String codeValueName, final String description, final Integer position,
+            final String jsonAttributeToGetback) {
 
         return Utils.performServerPut(requestSpec, responseSpec, CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "/" + codeValueId
-                + "?" + Utils.TENANT_IDENTIFIER, getTestCodeValueAsJSON(codeValueName, position), jsonAttributeToGetback);
+                + "?" + Utils.TENANT_IDENTIFIER, getTestCodeValueAsJSON(codeValueName, description, position), jsonAttributeToGetback);
     }
 
 }
