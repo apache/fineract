@@ -17,11 +17,13 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.exception.SQLGrammarException;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.mifosplatform.infrastructure.codes.service.CodeReadPlatformService;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -76,8 +78,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         {
             put("string", "VARCHAR");
             put("number", "INT");
+            put("boolean", "BIT");
             put("decimal", "DECIMAL");
             put("date", "DATE");
+            put("datetime", "DATETIME");
             put("text", "TEXT");
             put("dropdown", "INT");
         }
@@ -514,7 +518,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             /***
              * In cases of tables storing hierarchical entities (like m_group),
              * different entities would end up being stored in the same table.
-             * 
+             *
              * Ex: Centers are a specific type of group, add abstractions for
              * the same
              ***/
@@ -777,7 +781,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     /**
      * Update data table, set column value to empty string where current value
      * is NULL. Run update SQL only if the "mandatory" property is set to true
-     * 
+     *
      * @param datatableName
      *            Name of data table
      * @param column
@@ -1028,7 +1032,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             if (datatableId != null) {
                 pkValue = datatableId;
             }
-            final String sql = getUpdateSql(dataTableName, pkName, pkValue, changes);
+            final String sql = getUpdateSql(grs.getColumnHeaders(), dataTableName, pkName, pkValue, changes);
             logger.info("Update sql: " + sql);
             if (StringUtils.isNotBlank(sql)) {
                 this.jdbcTemplate.update(sql);
@@ -1312,18 +1316,24 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         String selectColumns = "";
         String columnName = "";
         String pValue = null;
-        for (final String key : affectedColumns.keySet()) {
-            pValue = affectedColumns.get(key);
+        for(final ResultsetColumnHeaderData pColumnHeader : columnHeaders) {
+            final String key = pColumnHeader.getColumnName();
+            if(affectedColumns.containsKey(key)) {
+                pValue = affectedColumns.get(key);
+                if (StringUtils.isEmpty(pValue)) {
+                    pValueWrite = "null";
+                } else {
+                    if ("bit".equalsIgnoreCase(pColumnHeader.getColumnType())) {
+                        pValueWrite = BooleanUtils.toString(BooleanUtils.toBooleanObject(pValue), "1", "0", "null");
+                    } else {
+                        pValueWrite = singleQuote + this.genericDataService.replace(pValue, singleQuote, singleQuote + singleQuote) + singleQuote;
+                    }
 
-            if (StringUtils.isEmpty(pValue)) {
-                pValueWrite = "null";
-            } else {
-                pValueWrite = singleQuote + this.genericDataService.replace(pValue, singleQuote, singleQuote + singleQuote) + singleQuote;
-
+                }
+                columnName = "`" + key + "`";
+                insertColumns += ", " + columnName;
+                selectColumns += "," + pValueWrite + " as " + columnName;
             }
-            columnName = "`" + key + "`";
-            insertColumns += ", " + columnName;
-            selectColumns += "," + pValueWrite + " as " + columnName;
         }
 
         addSql = "insert into `" + datatable + "` (`" + fkName + "` " + insertColumns + ")" + " select " + appTableId + " as id"
@@ -1337,7 +1347,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     /**
      * This method is used special for ppi cases Where the score need to be
      * computed
-     * 
+     *
      * @param columnHeaders
      * @param datatable
      * @param fkName
@@ -1385,8 +1395,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return vaddSql;
     }
 
-    private String getUpdateSql(final String datatable, final String keyFieldName, final Long keyFieldValue,
-            final Map<String, Object> changedColumns) {
+    private String getUpdateSql(List<ResultsetColumnHeaderData> columnHeaders, final String datatable,
+                                final String keyFieldName, final Long keyFieldValue,
+                                final Map<String, Object> changedColumns) {
 
         // just updating fields that have changed since pre-update read - though
         // its possible these values are different from the page the user was
@@ -1402,22 +1413,28 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         final String singleQuote = "'";
         boolean firstColumn = true;
         String sql = "update `" + datatable + "` ";
+        for (final ResultsetColumnHeaderData pColumnHeader : columnHeaders) {
+            final String key = pColumnHeader.getColumnName();
+            if(changedColumns.containsKey(key)) {
+                if (firstColumn) {
+                    sql += " set ";
+                    firstColumn = false;
+                } else {
+                    sql += ", ";
+                }
 
-        for (final String key : changedColumns.keySet()) {
-            if (firstColumn) {
-                sql += " set ";
-                firstColumn = false;
-            } else {
-                sql += ", ";
+                pValue = (String) changedColumns.get(key);
+                if (StringUtils.isEmpty(pValue)) {
+                    pValueWrite = "null";
+                } else {
+                    if ("bit".equalsIgnoreCase(pColumnHeader.getColumnType())) {
+                        pValueWrite = BooleanUtils.toString(BooleanUtils.toBooleanObject(pValue), "1", "0", "null");
+                    } else {
+                        pValueWrite = singleQuote + this.genericDataService.replace(pValue, singleQuote, singleQuote + singleQuote) + singleQuote;
+                    }
+                }
+                sql += "`" + key + "` = " + pValueWrite;
             }
-
-            pValue = (String) changedColumns.get(key);
-            if (StringUtils.isEmpty(pValue)) {
-                pValueWrite = "null";
-            } else {
-                pValueWrite = singleQuote + this.genericDataService.replace(pValue, singleQuote, singleQuote + singleQuote) + singleQuote;
-            }
-            sql += "`" + key + "` = " + pValueWrite;
         }
 
         sql += " where " + keyFieldName + " = " + keyFieldValue;
@@ -1511,7 +1528,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final Locale clientApplicationLocale) {
 
         String paramValue = pValue;
-        if (columnHeader.isDateDisplayType() || columnHeader.isIntegerDisplayType() || columnHeader.isDecimalDisplayType()) {
+        if (columnHeader.isDateDisplayType() || columnHeader.isDateTimeDisplayType()
+                || columnHeader.isIntegerDisplayType() || columnHeader.isDecimalDisplayType() || columnHeader.isBooleanDisplayType()) {
             // only trim if string is not empty and is not null.
             // throws a NULL pointer exception if the check below is not applied
             paramValue = StringUtils.isNotEmpty(paramValue) ? paramValue.trim() : paramValue;
@@ -1569,6 +1587,14 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 } else {
                     paramValue = tmpDate.toString();
                 }
+            } else if (columnHeader.isDateTimeDisplayType()) {
+                final LocalDateTime tmpDateTime = JsonParserHelper.convertDateTimeFrom(paramValue,
+                        columnHeader.getColumnName(), dateFormat, clientApplicationLocale);
+                if (tmpDateTime == null) {
+                    paramValue = null;
+                } else {
+                    paramValue = tmpDateTime.toString();
+                }
             } else if (columnHeader.isIntegerDisplayType()) {
                 final Integer tmpInt = this.helper.convertToInteger(paramValue, columnHeader.getColumnName(), clientApplicationLocale);
                 if (tmpInt == null) {
@@ -1582,6 +1608,20 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                     paramValue = null;
                 } else {
                     paramValue = tmpDecimal.toString();
+                }
+            } else if (columnHeader.isBooleanDisplayType()) {
+
+                final Boolean tmpBoolean = BooleanUtils.toBooleanObject(paramValue);
+                if (tmpBoolean == null) {
+                    final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.boolean.format", "The parameter "
+                            + columnHeader.getColumnName() + " has value: " + paramValue + " which is invalid boolean value.",
+                            columnHeader.getColumnName(), paramValue);
+                    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                    dataValidationErrors.add(error);
+                    throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                            dataValidationErrors);
+                } else {
+                    paramValue = tmpBoolean.toString();
                 }
             } else if (columnHeader.isString()) {
                 if (paramValue.length() > columnHeader.getColumnLength()) {

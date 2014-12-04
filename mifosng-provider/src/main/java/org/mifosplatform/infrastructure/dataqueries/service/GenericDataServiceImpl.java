@@ -11,6 +11,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
@@ -147,8 +148,13 @@ public class GenericDataServiceImpl implements GenericDataService {
                             final LocalDate localDate = new LocalDate(currVal);
                             writer.append("[" + localDate.getYear() + ", " + localDate.getMonthOfYear() + ", " + localDate.getDayOfMonth()
                                     + "]");
+                        } else if (currColType.equals("DATETIME")) {
+                            final LocalDateTime localDateTime = new LocalDateTime(currVal);
+                            writer.append("[" + localDateTime.getYear() + ", " + localDateTime.getMonthOfYear() + ", "
+                                    + localDateTime.getDayOfMonth() + " " + localDateTime.getHourOfDay() + ", "
+                                    + localDateTime.getMinuteOfHour() + ", " + localDateTime.getSecondOfMinute() + ", "
+                                    + localDateTime.getMillisOfSecond() + "]");
                         } else {
-
                             writer.append(doubleQuote + replace(currVal, doubleQuote, slashDoubleQuote) + doubleQuote);
                         }
                     }
