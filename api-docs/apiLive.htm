@@ -196,7 +196,7 @@
 							<tr>
 								<td></td>
 								<td>clients/{clientId}?command=reject</td>
-								<td><a href="#clients_reject">Reject a Client</a></td>
+								<td><a href="#clients_reject">Reject a Client Application</a></td>
 								<td></td>
 								<td></td>
 								<td></td>
@@ -204,7 +204,7 @@
 							<tr>
 								<td></td>
 								<td>clients/{clientId}?command=withdraw</td>
-								<td><a href="#clients_withdraw">Withdraw a Client</a></td>
+								<td><a href="#clients_withdraw">Withdraw a Client Application</a></td>
 								<td></td>
 								<td></td>
 								<td></td>
@@ -3544,9 +3544,19 @@ Request Body:
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Reject a Client</h4>
-	        <p>Clients can be rejected when client is in pending status. This API exists to reject a client .</p>
-	        <p>If the client is any other status results in error.</p>
+	        <p>Clients can be rejected when client is in pending for activation status.</p>
+	        <p>If the client is any other status, this API throws an error.</p>
+	        <table class=matrixHeading>
+				<tr class="matrixHeadingBG">
+					<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+				</tr>
+				<tr class=alt>
+					<td>rejectDate, rejectReasonId<br>
+					</td>
+				</tr>
+			</table>
 	    </div>
+	    
 		<div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=reject</code>
 	        <code class="method-request">POST clients/1?command=reject
@@ -3572,8 +3582,17 @@ Request Body:
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Withdraw a Client</h4>
-	        <p>Clients can be withdrawn when client is in pending status. This API exists to withdraw a client .</p>
-	        <p>If the client is any other status results in error.</p>
+	        <p>Client applications can be withdrawn when client is in a pending for activation status.</p>
+	        <p>If the client is any other status, this API throws an error.</p>
+	        <table class=matrixHeading>
+				<tr class="matrixHeadingBG">
+					<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+				</tr>
+				<tr class=alt>
+					<td>withdrawDate, withdrawReasonId<br>
+					</td>
+				</tr>
+			</table>
 	    </div>
 		<div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=withdraw</code>
@@ -3601,9 +3620,18 @@ Request Body:
 	<a id="clients_reactivate" name="clients_reactivate" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h4>Reactivating a Client</h4>
-	        <p>Clients can be reactivated when client is in closed status. This API exists to reactivate a client .</p>
-	        <p>If the client is any other status results in error.</p>
+	        <h4>Reactivate a Client</h4>
+	        <p>Clients can be reactivated after they have been closed.</p>
+	        <p>Trying to reactivate a client in any other state throws an error.</p>
+	         <table class=matrixHeading>
+				<tr class="matrixHeadingBG">
+					<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+				</tr>
+				<tr class=alt>
+					<td>reactivationDate<br>
+					</td>
+				</tr>
+			</table>
 	    </div>
 		<div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=reactivate</code>

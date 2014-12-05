@@ -156,7 +156,7 @@ public final class Client extends AbstractPersistable<Long> {
     @ManyToOne(optional = true)
     @JoinColumn(name = "withdraw_on_userid", nullable = true)
     private AppUser withdrawnBy;
-    
+
     @Column(name = "reactivated_on_date", nullable = true)
     @Temporal(TemporalType.DATE)
     private Date reactivateDate;
@@ -164,7 +164,6 @@ public final class Client extends AbstractPersistable<Long> {
     @ManyToOne(optional = true)
     @JoinColumn(name = "reactivated_on_userid", nullable = true)
     private AppUser reactivatedBy;
-
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "closedon_userid", nullable = true)
@@ -811,6 +810,10 @@ public final class Client extends AbstractPersistable<Long> {
         return clientClassificationId;
     }
 
+    public LocalDate getClosureDate() {
+        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.closureDate), null);
+    }
+
     public CodeValue gender() {
         return this.gender;
     }
@@ -866,6 +869,7 @@ public final class Client extends AbstractPersistable<Long> {
         this.status = ClientStatus.WITHDRAWN.getValue();
 
     }
+
     public void reActivate(AppUser currentUser, Date reactivateDate) {
         this.reactivateDate = reactivateDate;
         this.reactivatedBy = currentUser;

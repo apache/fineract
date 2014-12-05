@@ -610,17 +610,17 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         final CodeValue rejectReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
                 ClientApiConstants.CLIENT_REJECT_REASON, rejectReasonId);
 
-        if (ClientStatus.fromInt(client.getStatus()).isRejected()) {
-            final String errorMessage = "Client is already rejected.";
-            throw new InvalidClientStateTransitionException("rejected", "is.already.rejected", errorMessage);
-        } else if (client.isNotPending() || client.getSubmittedOnDate().isAfter(rejectDate)) {
-            final String errorMessage = "The client is  active or The client rejetDate cannot be before the client SubmittedDate.";
-            throw new InvalidClientStateTransitionException("rejected", "date.cannot.before.client.submitted.date", errorMessage,
+        if (client.isNotPending()) {
+            final String errorMessage = "Only clients pending activation may be withdrawn.";
+            throw new InvalidClientStateTransitionException("rejection", "on.account.not.in.pending.activation.status", errorMessage,
                     rejectDate, client.getSubmittedOnDate());
-        } else {
-            client.reject(currentUser, rejectReason, rejectDate.toDate());
-            this.clientRepository.saveAndFlush(client);
+        } else if (client.getSubmittedOnDate().isAfter(rejectDate)) {
+            final String errorMessage = "The client rejection date cannot be before the client submitted date.";
+            throw new InvalidClientStateTransitionException("rejection", "date.cannot.before.client.submitted.date", errorMessage,
+                    rejectDate, client.getSubmittedOnDate());
         }
+        client.reject(currentUser, rejectReason, rejectDate.toDate());
+        this.clientRepository.saveAndFlush(client);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -641,17 +641,17 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         final CodeValue withdrawReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
                 ClientApiConstants.CLIENT_WITHDRAW_REASON, withdrawReasonId);
 
-        if (ClientStatus.fromInt(client.getStatus()).isRejected()) {
-            final String errorMessage = "Client is already Withdrawn.";
-            throw new InvalidClientStateTransitionException("withdrawn", "is.already.withdrawn", errorMessage);
-        } else if (client.isNotPending() || client.getSubmittedOnDate().isAfter(withdrawDate)) {
-            final String errorMessage = "The client is  active or The client withdrawDate cannot be before the client SubmittedDate.";
-            throw new InvalidClientStateTransitionException("withdrawn", "date.cannot.before.client.submitted.date", errorMessage,
+        if (client.isNotPending()) {
+            final String errorMessage = "Only clients pending activation may be withdrawn.";
+            throw new InvalidClientStateTransitionException("withdrawal", "on.account.not.in.pending.activation.status", errorMessage,
                     withdrawDate, client.getSubmittedOnDate());
-        } else {
-            client.withdraw(currentUser, withdrawReason, withdrawDate.toDate());
-            this.clientRepository.saveAndFlush(client);
+        } else if (client.getSubmittedOnDate().isAfter(withdrawDate)) {
+            final String errorMessage = "The client withdrawal date cannot be before the client submitted date.";
+            throw new InvalidClientStateTransitionException("withdrawal", "date.cannot.before.client.submitted.date", errorMessage,
+                    withdrawDate, client.getSubmittedOnDate());
         }
+        client.withdraw(currentUser, withdrawReason, withdrawDate.toDate());
+        this.clientRepository.saveAndFlush(client);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -659,7 +659,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 .withEntityId(entityId) //
                 .build();
     }
-    
+
     @Override
     public CommandProcessingResult reActivateClient(Long entityId, JsonCommand command) {
         final AppUser currentUser = this.context.authenticatedUser();
@@ -667,15 +667,18 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
         final Client client = this.clientRepository.findOneWithNotFoundDetection(entityId);
         final LocalDate reactivateDate = command.localDateValueOfParameterNamed(ClientApiConstants.reactivationDateParamName);
-      
 
-        if (ClientStatus.fromInt(client.getStatus()).isActive()) {
-            final String errorMessage = "Client is already activated.";
-            throw new InvalidClientStateTransitionException("activated", "is.already.activated", errorMessage);
-        } else if (client.isClosed()) {
-            client.reActivate(currentUser, reactivateDate.toDate());
-            this.clientRepository.saveAndFlush(client);
-        } 
+        if (!client.isClosed()) {
+            final String errorMessage = "only closed clients may be reactivated.";
+            throw new InvalidClientStateTransitionException("reactivation", "on.nonclosed.account", errorMessage);
+        } else if (client.getClosureDate().isAfter(reactivateDate)) {
+            final String errorMessage = "The client reactivation date cannot be before the client closed date.";
+            throw new InvalidClientStateTransitionException("reactivation", "date.cannot.before.client.closed.date", errorMessage,
+                    reactivateDate, client.getClosureDate());
+        }
+        client.reActivate(currentUser, reactivateDate.toDate());
+        this.clientRepository.saveAndFlush(client);
+
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withClientId(entityId) //
