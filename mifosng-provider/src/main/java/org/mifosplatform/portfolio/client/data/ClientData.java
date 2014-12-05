@@ -69,7 +69,7 @@ final public class ClientData implements Comparable<ClientData> {
     // template
     private final Collection<OfficeData> officeOptions;
     private final Collection<StaffData> staffOptions;
-    private final Collection<CodeValueData> closureReasons;
+    private final Collection<CodeValueData> narrations;
     private final Collection<SavingsProductData> savingProductOptions;
     private final Collection<SavingsAccountData> savingAccountOptions;
     private final Collection<CodeValueData> genderOptions;
@@ -77,7 +77,7 @@ final public class ClientData implements Comparable<ClientData> {
     private final Collection<CodeValueData> clientClassificationOptions;
 
     public static ClientData template(final Long officeId, final LocalDate joinedDate, final Collection<OfficeData> officeOptions,
-            final Collection<StaffData> staffOptions, final Collection<CodeValueData> closureReasons,
+            final Collection<StaffData> staffOptions, final Collection<CodeValueData> narrations,
             final Collection<CodeValueData> genderOptions, final Collection<SavingsProductData> savingProductOptions,
             final Collection<CodeValueData> clientTypeOptions, final Collection<CodeValueData> clientClassificationOptions) {
         final String accountNo = null;
@@ -109,7 +109,7 @@ final public class ClientData implements Comparable<ClientData> {
         final CodeValueData clientClassification = null;
         return new ClientData(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
                 middlename, lastname, fullname, displayName, externalId, mobileNo, dateOfBirth, gender, joinedDate, imageId, staffId,
-                staffName, officeOptions, groups, staffOptions, closureReasons, genderOptions, timeline, savingProductOptions,
+                staffName, officeOptions, groups, staffOptions, narrations, genderOptions, timeline, savingProductOptions,
                 savingsProductId, savingsProductName, savingsAccountId, savingAccountOptions, clientType, clientClassification,
                 clientTypeOptions, clientClassificationOptions);
 
@@ -121,11 +121,10 @@ final public class ClientData implements Comparable<ClientData> {
                 clientData.transferToOfficeId, clientData.transferToOfficeName, clientData.id, clientData.firstname, clientData.middlename,
                 clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId, clientData.mobileNo,
                 clientData.dateOfBirth, clientData.gender, clientData.activationDate, clientData.imageId, clientData.staffId,
-                clientData.staffName, templateData.officeOptions, clientData.groups, templateData.staffOptions,
-                templateData.closureReasons, templateData.genderOptions, clientData.timeline, templateData.savingProductOptions,
-                clientData.savingsProductId, clientData.savingsProductName, clientData.savingsAccountId, clientData.savingAccountOptions,
-                clientData.clientType, clientData.clientClassification, templateData.clientTypeOptions,
-                templateData.clientClassificationOptions);
+                clientData.staffName, templateData.officeOptions, clientData.groups, templateData.staffOptions, templateData.narrations,
+                templateData.genderOptions, clientData.timeline, templateData.savingProductOptions, clientData.savingsProductId,
+                clientData.savingsProductName, clientData.savingsAccountId, clientData.savingAccountOptions, clientData.clientType,
+                clientData.clientClassification, templateData.clientTypeOptions, templateData.clientClassificationOptions);
 
     }
 
@@ -136,7 +135,7 @@ final public class ClientData implements Comparable<ClientData> {
                 clientData.transferToOfficeId, clientData.transferToOfficeName, clientData.id, clientData.firstname, clientData.middlename,
                 clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId, clientData.mobileNo,
                 clientData.dateOfBirth, clientData.gender, clientData.activationDate, clientData.imageId, clientData.staffId,
-                clientData.staffName, clientData.officeOptions, clientData.groups, clientData.staffOptions, clientData.closureReasons,
+                clientData.staffName, clientData.officeOptions, clientData.groups, clientData.staffOptions, clientData.narrations,
                 clientData.genderOptions, clientData.timeline, clientData.savingProductOptions, clientData.savingsProductId,
                 clientData.savingsProductName, clientData.savingsAccountId, savingAccountOptions, clientData.clientType,
                 clientData.clientClassification, clientData.clientTypeOptions, clientData.clientClassificationOptions);
@@ -262,7 +261,7 @@ final public class ClientData implements Comparable<ClientData> {
             final String externalId, final String mobileNo, final LocalDate dateOfBirth, final CodeValueData gender,
             final LocalDate activationDate, final Long imageId, final Long staffId, final String staffName,
             final Collection<OfficeData> allowedOffices, final Collection<GroupGeneralData> groups,
-            final Collection<StaffData> staffOptions, final Collection<CodeValueData> closureReasons,
+            final Collection<StaffData> staffOptions, final Collection<CodeValueData> narrations,
             final Collection<CodeValueData> genderOptions, final ClientTimelineData timeline,
             final Collection<SavingsProductData> savingProductOptions, final Long savingsProductId, final String savingsProductName,
             final Long savingsAccountId, final Collection<SavingsAccountData> savingAccountOptions, final CodeValueData clientType,
@@ -308,7 +307,8 @@ final public class ClientData implements Comparable<ClientData> {
         // template
         this.officeOptions = allowedOffices;
         this.staffOptions = staffOptions;
-        this.closureReasons = closureReasons;
+        this.narrations = narrations;
+
         this.genderOptions = genderOptions;
         this.clientClassificationOptions = clientClassificationOptions;
         this.clientTypeOptions = clientTypeOptions;

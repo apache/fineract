@@ -87,8 +87,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
         final Integer loanProductID = createLoanProduct(false, NONE);
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00");
-        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
-                loanID);
+        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,loanID);
         verifyLoanRepaymentSchedule(loanSchedule);
 
     }

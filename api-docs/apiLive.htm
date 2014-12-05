@@ -195,6 +195,30 @@
 							</tr>
 							<tr>
 								<td></td>
+								<td>clients/{clientId}?command=reject</td>
+								<td><a href="#clients_reject">Reject a Client</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>clients/{clientId}?command=withdraw</td>
+								<td><a href="#clients_withdraw">Withdraw a Client</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>clients/{clientId}?command=reactivate</td>
+								<td><a href="#clients_reactivate">Reactivate a Client</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
 								<td>clients/{clientId}?command=assignStaff</td>
 								<td><a href="#clients_assignStaff">Assign Staff</a></td>
 								<td></td>
@@ -3516,6 +3540,91 @@ Request Body:
 	    </div>
 	</div>
 	
+	<a id="clients_reject" name="clients_reject" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Reject a Client</h4>
+	        <p>Clients can be rejected when client is in pending status. This API exists to reject a client .</p>
+	        <p>If the client is any other status results in error.</p>
+	    </div>
+		<div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=reject</code>
+	        <code class="method-request">POST clients/1?command=reject
+Content-Type: application/json
+Request Body:
+{
+"rejectDate":"28 November 2014",
+"rejectReasonId":16,
+"locale":"en",
+"dateFormat":"dd MMMM yyyy"
+}			
+			</code>
+	        <code class="method-response">
+{ 
+  "clientId":15,
+  "resourceId":15
+}
+	        </code>
+	    </div>
+	</div>
+	
+	<a id="clients_withdraw" name="clients_withdraw" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Withdraw a Client</h4>
+	        <p>Clients can be withdrawn when client is in pending status. This API exists to withdraw a client .</p>
+	        <p>If the client is any other status results in error.</p>
+	    </div>
+		<div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=withdraw</code>
+	        <code class="method-request">POST clients/1?command=withdraw
+Content-Type: application/json
+Request Body:
+{
+"withdrawDate":"28 November 2014",
+"withdrawReasonId":17,
+"locale":"en",
+"dateFormat":"dd MMMM yyyy"
+}			
+			</code>
+	        <code class="method-response">
+{ 
+  "officeId":1,
+  "clientId":15,
+  "resourceId":15
+}
+	        </code>
+	    </div>
+	</div>
+	
+	
+	<a id="clients_reactivate" name="clients_reactivate" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Reactivating a Client</h4>
+	        <p>Clients can be reactivated when client is in closed status. This API exists to reactivate a client .</p>
+	        <p>If the client is any other status results in error.</p>
+	    </div>
+		<div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=reactivate</code>
+	        <code class="method-request">POST clients/1?command=reactivate
+Content-Type: application/json
+Request Body:
+{
+"reactivationDate":"28 November 2014",
+"locale":"en",
+"dateFormat":"dd MMMM yyyy"
+}			
+			</code>
+	        <code class="method-response">
+{ 
+
+  "clientId":15,
+  "resourceId":15
+}
+	        </code>
+	    </div>
+	</div>
 		<a id="clients_assignStaff" name="clients_assignStaff" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">

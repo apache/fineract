@@ -661,12 +661,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     }
 
     @Override
-    public ClientData retrieveAllClosureReasons(final String clientClosureReason) {
-        final List<CodeValueData> closureReasons = new ArrayList<>(
-                this.codeValueReadPlatformService.retrieveCodeValuesByCode(clientClosureReason));
+    public ClientData retrieveAllNarrations(final String clientNarrations) {
+        final List<CodeValueData> narrations = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(clientNarrations));
         final Collection<CodeValueData> clientTypeOptions = null;
         final Collection<CodeValueData> clientClassificationOptions = null;
-        return ClientData.template(null, null, null, null, closureReasons, null, null, clientTypeOptions, clientClassificationOptions);
+        return ClientData.template(null, null, null, null, narrations, null, null, clientTypeOptions, clientClassificationOptions);
     }
 
 }
