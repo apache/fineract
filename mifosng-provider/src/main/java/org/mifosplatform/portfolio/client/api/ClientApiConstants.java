@@ -15,6 +15,11 @@ public class ClientApiConstants {
 
     public static final String CLIENT_RESOURCE_NAME = "client";
     public static final String CLIENT_CLOSURE_REASON = "ClientClosureReason";
+    public static final String CLIENT_ACTION_REASON = "ClientActionReason";
+    public static final String CLIENT_REJECT_REASON = "ClientRejectReason";
+    public static final String CLIENT_WITHDRAW_REASON = "ClientWithdrawReason";
+
+	
     public static final String GENDER = "Gender";
     public static final String CLIENT_TYPE = "ClientType";
     public static final String CLIENT_CLASSIFICATION = "ClientClassification";
@@ -36,9 +41,16 @@ public class ClientApiConstants {
     public static final String transferOfficeIdParamName = "transferOfficeIdParamName";
     public static final String activeParamName = "active";
     public static final String activationDateParamName = "activationDate";
+    public static final String reactivationDateParamName = "reactivationDate";
     public static final String staffIdParamName = "staffId";
     public static final String closureDateParamName = "closureDate";
     public static final String closureReasonIdParamName = "closureReasonId";
+    
+    public static final String rejectDateParamName = "rejectDate";
+    public static final String rejectReasonIdParamName ="rejectReasonId";
+    public static final String withdrawDateParamName = "withdrawDate";
+    public static final String withdrawReasonIdParamName ="withdrawReasonId";
+        
     public static final String submittedOnDateParamName = "submittedOnDate";
     public static final String savingsProductIdParamName = "savingsProductId";
     public static final String savingsAccountIdParamName = "savingsAccountId";
@@ -97,7 +109,14 @@ public class ClientApiConstants {
 
     public static final Set<String> ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, activationDateParamName));
+    public static final Set<String> REACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
+            dateFormatParamName, reactivationDateParamName));
 
     public static final Set<String> CLIENT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, closureDateParamName, closureReasonIdParamName));
+	
+    public static final Set<String> CLIENT_REJECT_DATA_PARAMETERS =	new HashSet<>(Arrays.asList(localeParamName,dateFormatParamName,rejectDateParamName,rejectReasonIdParamName));
+
+    public static final Set<String> CLIENT_WITHDRAW_DATA_PARAMETERS =	new HashSet<>(Arrays.asList(localeParamName,dateFormatParamName,withdrawDateParamName,withdrawReasonIdParamName));
+
 }

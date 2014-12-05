@@ -428,7 +428,32 @@ public class CommandWrapperBuilder {
         this.href = "/clients/" + clientId + "?command=close&template=true";
         return this;
     }
-
+    
+    public CommandWrapperBuilder rejectClient(final Long clientId) {
+        this.actionName = "REJECT";
+        this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.clientId = clientId;
+        this.href = "/clients/" + clientId + "?command=reject&template=true";
+        return this;
+    }
+    
+    public CommandWrapperBuilder withdrawClient(final Long clientId) {
+        this.actionName = "WITHDRAW";
+        this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.clientId = clientId;
+        this.href = "/clients/" + clientId + "?command=withdraw&template=true";
+        return this;
+    }
+    public CommandWrapperBuilder reActivateClient(final Long clientId) {
+        this.actionName = "REACTIVATE";
+        this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.clientId = clientId;
+        this.href = "/clients/" + clientId + "?command=reactivate&template=true";
+        return this;
+    }
     public CommandWrapperBuilder proposeClientTransfer(final Long clientId) {
         this.actionName = "PROPOSETRANSFER";
         this.entityName = "CLIENT";

@@ -866,6 +866,12 @@ public class CommandWrapper {
     public boolean isWithdrawal() {
         return this.actionName.equalsIgnoreCase("WITHDRAWAL");
     }
+    public boolean isWithdrawn() {
+        return this.actionName.equalsIgnoreCase("WITHDRAW");
+    }
+    public boolean isReactivated() {
+        return this.actionName.equalsIgnoreCase("REACTIVATE");
+    }
 
     public boolean isActivation() {
         return this.actionName.equalsIgnoreCase("ACTIVATE");
