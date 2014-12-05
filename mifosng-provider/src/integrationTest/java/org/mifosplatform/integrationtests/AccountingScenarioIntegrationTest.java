@@ -573,7 +573,7 @@ public class AccountingScenarioIntegrationTest {
 
         final String jobName = "Add Accrual Transactions";
         try {
-            this.schedulerJobHelper.excuteJob(jobName);
+            this.schedulerJobHelper.executeJob(jobName);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -721,7 +721,7 @@ public class AccountingScenarioIntegrationTest {
 
         final String jobName = "Add Periodic Accrual Transactions";
         try {
-            this.schedulerJobHelper.excuteJob(jobName);
+            this.schedulerJobHelper.executeJob(jobName);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -867,7 +867,7 @@ public class AccountingScenarioIntegrationTest {
         runOndate = dateFormat.format(todayDate.getTime());
 
         this.periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(runOndate);
-        float interestPerDay = (totalInterest / totalDaysInPeriod *4) - INTEREST_3_DAYS ;
+        float interestPerDay = (totalInterest / totalDaysInPeriod * 4) - INTEREST_3_DAYS;
         interestPerDay = new Float(numberFormat.format(interestPerDay));
         this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(runOndate), interestPerDay, NEXT_FEE_PORTION,
                 NEXT_PENALTY_PORTION, loanID);

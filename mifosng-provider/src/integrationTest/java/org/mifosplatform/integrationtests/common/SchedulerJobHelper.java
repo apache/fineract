@@ -7,7 +7,6 @@ package org.mifosplatform.integrationtests.common;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
 
 import org.junit.Assert;
 
@@ -16,7 +15,7 @@ import com.jayway.restassured.builder.ResponseSpecBuilder;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
-@SuppressWarnings({ "unused", "rawtypes", "unchecked" })
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class SchedulerJobHelper {
 
     private final RequestSpecification requestSpec;
@@ -48,9 +47,10 @@ public class SchedulerJobHelper {
         final HashMap response = Utils.performServerGet(requestSpec, responseSpec, GET_SCHEDULER_STATUS_URL, "");
         return response;
     }
-    
-    public static void updateSchedulerStatus(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String command) {
-        final String UPDATE_SCHEDULER_STATUS_URL = "/mifosng-provider/api/v1/scheduler?command=" + command +"&" + Utils.TENANT_IDENTIFIER;
+
+    public static void updateSchedulerStatus(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String command) {
+        final String UPDATE_SCHEDULER_STATUS_URL = "/mifosng-provider/api/v1/scheduler?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ UPDATING SCHEDULER STATUS -------------------------");
         Utils.performServerPost(requestSpec, responseSpec, UPDATE_SCHEDULER_STATUS_URL, runSchedulerJobAsJSON(), null);
     }
@@ -80,12 +80,12 @@ public class SchedulerJobHelper {
     }
 
     public static void runSchedulerJob(final RequestSpecification requestSpec, final String jobId) {
-        final ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(202).build(); 
+        final ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(202).build();
         final String RUN_SCHEDULER_JOB_URL = "/mifosng-provider/api/v1/jobs/" + jobId + "?command=executeJob&" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RUN SCHEDULER JOB -------------------------");
         Utils.performServerPost(requestSpec, responseSpec, RUN_SCHEDULER_JOB_URL, runSchedulerJobAsJSON(), null);
     }
-    
+
     public static String runSchedulerJobAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
         String runSchedulerJob = new Gson().toJson(map);
@@ -93,7 +93,7 @@ public class SchedulerJobHelper {
         return runSchedulerJob;
     }
 
-    public void excuteJob(String JobName) throws InterruptedException {
+    public void executeJob(String JobName) throws InterruptedException {
         ArrayList<HashMap> allSchedulerJobsData = getAllSchedulerJobs(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(allSchedulerJobsData);
 

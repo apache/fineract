@@ -101,7 +101,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
         final Integer loanProductID = createLoanProduct(false, NONE);
 
-        List<HashMap> charges = new ArrayList<HashMap>();
+        List<HashMap> charges = new ArrayList<>();
         Integer flatDisbursement = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getLoanDisbursementJSON());
 
         Integer amountPercentage = ChargesHelper.createCharges(requestSpec, responseSpec,
@@ -208,7 +208,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
         final Integer loanProductID = createLoanProduct(false, NONE);
 
-        List<HashMap> charges = new ArrayList<HashMap>();
+        List<HashMap> charges = new ArrayList<>();
         Integer amountPercentage = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT, "1"));
         addCharges(charges, amountPercentage, "1", null);
@@ -264,7 +264,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
         final Integer loanProductID = createLoanProduct(false, NONE);
 
-        List<HashMap> charges = new ArrayList<HashMap>();
+        List<HashMap> charges = new ArrayList<>();
         Integer flat = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "100", false));
         Integer flatAccTransfer = ChargesHelper.createCharges(requestSpec, responseSpec,
@@ -423,7 +423,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
         final Integer loanProductID = createLoanProduct(false, NONE);
 
-        List<HashMap> charges = new ArrayList<HashMap>();
+        List<HashMap> charges = new ArrayList<>();
         Integer flat = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanInstallmentJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "50", false));
         Integer flatAccTransfer = ChargesHelper.createCharges(requestSpec, responseSpec,
@@ -731,7 +731,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
         final Integer loanProductID = createLoanProduct(true, NONE);
 
-        List<HashMap> tranches = new ArrayList<HashMap>();
+        List<HashMap> tranches = new ArrayList<>();
         tranches.add(createTrancheDetail("1 March 2014", "25000"));
         tranches.add(createTrancheDetail("23 April 2014", "20000"));
 
@@ -773,7 +773,7 @@ public class ClientLoanIntegrationTest {
 
         final Integer savingsId = createSavings(clientID);
 
-        List<HashMap> tranches = new ArrayList<HashMap>();
+        List<HashMap> tranches = new ArrayList<>();
         tranches.add(createTrancheDetail("1 March 2014", "25000"));
         tranches.add(createTrancheDetail("23 April 2014", "20000"));
 
@@ -1135,7 +1135,7 @@ public class ClientLoanIntegrationTest {
     }
 
     private List<HashMap> copyChargesForUpdate(List<HashMap> charges, Integer deleteWithChargeId, String amount) {
-        List<HashMap> loanCharges = new ArrayList<HashMap>();
+        List<HashMap> loanCharges = new ArrayList<>();
         for (HashMap charge : charges) {
             if (!charge.get("chargeId").equals(deleteWithChargeId)) {
                 loanCharges.add(copyForUpdate(charge, amount));
@@ -1211,7 +1211,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
 
         // Add charges with payment mode regular
-        List<HashMap> charges = new ArrayList<HashMap>();
+        List<HashMap> charges = new ArrayList<>();
         Integer flatDisbursement = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getLoanDisbursementJSON());
         addCharges(charges, flatDisbursement, "100", null);
         Integer flatSpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec,
@@ -1387,7 +1387,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
 
         // Add charges with payment mode regular
-        List<HashMap> charges = new ArrayList<HashMap>();
+        List<HashMap> charges = new ArrayList<>();
         Integer percentageDisbursementCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT, "1"));
         addCharges(charges, percentageDisbursementCharge, "1", null);
@@ -1566,7 +1566,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
 
         // Add charges with payment mode regular
-        List<HashMap> charges = new ArrayList<HashMap>();
+        List<HashMap> charges = new ArrayList<>();
         Integer amountPlusInterestPercentageDisbursementCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST, "1"));
         addCharges(charges, amountPlusInterestPercentageDisbursementCharge, "1", null);
@@ -1753,7 +1753,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
 
         // Add charges with payment mode regular
-        List<HashMap> charges = new ArrayList<HashMap>();
+        List<HashMap> charges = new ArrayList<>();
         Integer flatDisbursement = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getLoanDisbursementJSON());
         addCharges(charges, flatDisbursement, "100", null);
         Integer flatSpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec,
@@ -1951,7 +1951,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
 
         // Add charges with payment mode regular
-        List<HashMap> charges = new ArrayList<HashMap>();
+        List<HashMap> charges = new ArrayList<>();
         Integer percentageDisbursementCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT, "1"));
         addCharges(charges, percentageDisbursementCharge, "1", null);
@@ -2145,7 +2145,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
 
         // Add charges with payment mode regular
-        List<HashMap> charges = new ArrayList<HashMap>();
+        List<HashMap> charges = new ArrayList<>();
         Integer amountPlusInterestPercentageDisbursementCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST, "1"));
         addCharges(charges, amountPlusInterestPercentageDisbursementCharge, "1", null);
@@ -2356,7 +2356,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
 
         // Add charges with payment mode regular
-        List<HashMap> charges = new ArrayList<HashMap>();
+        List<HashMap> charges = new ArrayList<>();
         Integer flatDisbursement = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getLoanDisbursementJSON());
         addCharges(charges, flatDisbursement, "100", null);
         Integer flatSpecifiedDueDate = ChargesHelper.createCharges(requestSpec, responseSpec,
@@ -2455,7 +2455,7 @@ public class ClientLoanIntegrationTest {
          */
         final String jobName = "Add Accrual Transactions";
         try {
-            this.schedulerJobHelper.excuteJob(jobName);
+            this.schedulerJobHelper.executeJob(jobName);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -2558,7 +2558,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
 
         // Add charges with payment mode regular
-        List<HashMap> charges = new ArrayList<HashMap>();
+        List<HashMap> charges = new ArrayList<>();
         Integer percentageDisbursementCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT, "1"));
         addCharges(charges, percentageDisbursementCharge, "1", null);
@@ -2661,7 +2661,7 @@ public class ClientLoanIntegrationTest {
 
         final String jobName = "Add Accrual Transactions";
         try {
-            this.schedulerJobHelper.excuteJob(jobName);
+            this.schedulerJobHelper.executeJob(jobName);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -2764,7 +2764,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
 
         // Add charges with payment mode regular
-        List<HashMap> charges = new ArrayList<HashMap>();
+        List<HashMap> charges = new ArrayList<>();
         Integer amountPlusInterestPercentageDisbursementCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST, "1"));
         addCharges(charges, amountPlusInterestPercentageDisbursementCharge, "1", null);
@@ -2871,7 +2871,7 @@ public class ClientLoanIntegrationTest {
 
         final String jobName = "Add Accrual Transactions";
         try {
-            this.schedulerJobHelper.excuteJob(jobName);
+            this.schedulerJobHelper.executeJob(jobName);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -3246,8 +3246,8 @@ public class ClientLoanIntegrationTest {
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_EMI_AMOUN,
                 LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_SAME_AS_REPAYMENT_PERIOD, "0", null, null);
-        
-        List<HashMap> charges = new ArrayList<HashMap>();
+
+        List<HashMap> charges = new ArrayList<>();
         Integer installmentCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getLoanInstallmentJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_INTEREST, "10", false));
         addCharges(charges, installmentCharge, "10", null);
@@ -3324,7 +3324,6 @@ public class ClientLoanIntegrationTest {
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
     }
 
-    
     @Test
     public void testLoanScheduleWithInterestRecalculation_WITH_REST_DAILY_INTEREST_COMPOUND_INTEREST_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS() {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
@@ -3605,7 +3604,7 @@ public class ClientLoanIntegrationTest {
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
         String JobName = "Apply penalty to overdue loans";
-        this.schedulerJobHelper.excuteJob(JobName);
+        this.schedulerJobHelper.executeJob(JobName);
 
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         expectedvalues = new ArrayList<>();
