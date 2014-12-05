@@ -69,6 +69,8 @@ public final class ResultsetColumnHeaderData {
                 displayType = "DECIMAL";
             } else if (isAnyText()) {
                 displayType = "TEXT";
+            } else if(isBit()) {
+                displayType = "BOOLEAN";
             } else {
                 throw new PlatformDataIntegrityException("error.msg.invalid.lookup.type", "Invalid Lookup Type:" + this.columnType
                         + " - Column Name: " + this.columnName);
@@ -137,7 +139,7 @@ public final class ResultsetColumnHeaderData {
     }
 
     private boolean isAnyInteger() {
-        return isInt() || isSmallInt() || isTinyInt() || isMediumInt() || isBigInt() || isBit();
+        return isInt() || isSmallInt() || isTinyInt() || isMediumInt() || isBigInt();
     }
 
     private boolean isInt() {
@@ -184,12 +186,20 @@ public final class ResultsetColumnHeaderData {
         return "DATE".equalsIgnoreCase(this.columnDisplayType);
     }
 
+    public boolean isDateTimeDisplayType() {
+        return "DATETIME".equalsIgnoreCase(this.columnDisplayType);
+    }
+
     public boolean isIntegerDisplayType() {
         return "INTEGER".equalsIgnoreCase(this.columnDisplayType);
     }
 
     public boolean isDecimalDisplayType() {
         return "DECIMAL".equalsIgnoreCase(this.columnDisplayType);
+    }
+
+    public boolean isBooleanDisplayType() {
+        return "BOOLEAN".equalsIgnoreCase(this.columnDisplayType);
     }
 
     public boolean isCodeValueDisplayType() {
