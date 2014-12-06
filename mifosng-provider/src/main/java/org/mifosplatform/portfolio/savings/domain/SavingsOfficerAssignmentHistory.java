@@ -32,7 +32,7 @@ public class SavingsOfficerAssignmentHistory extends AbstractAuditableCustom<App
     @ManyToOne
     @JoinColumn(name = "savings_officer_id", nullable = true)
     private Staff savingsOfficer;
-    
+
     @Temporal(TemporalType.DATE)
     @Column(name = "start_date")
     private Date startDate;
@@ -41,15 +41,17 @@ public class SavingsOfficerAssignmentHistory extends AbstractAuditableCustom<App
     @Column(name = "end_date")
     private Date endDate;
 
-    public static SavingsOfficerAssignmentHistory createNew(final SavingsAccount account, final Staff savingsOfficer,final LocalDate assignmentDate) {
-        return new SavingsOfficerAssignmentHistory(account, savingsOfficer,assignmentDate.toDate(),null);
+    public static SavingsOfficerAssignmentHistory createNew(final SavingsAccount account, final Staff savingsOfficer,
+            final LocalDate assignmentDate) {
+        return new SavingsOfficerAssignmentHistory(account, savingsOfficer, assignmentDate.toDate(), null);
     }
 
     protected SavingsOfficerAssignmentHistory() {
         //
     }
 
-    private SavingsOfficerAssignmentHistory(final SavingsAccount account, final Staff savingsOfficer,final Date startDate, final Date endDate) {
+    private SavingsOfficerAssignmentHistory(final SavingsAccount account, final Staff savingsOfficer, final Date startDate,
+            final Date endDate) {
         this.savingsAccount = account;
         this.savingsOfficer = savingsOfficer;
         this.startDate = startDate;
@@ -63,7 +65,6 @@ public class SavingsOfficerAssignmentHistory extends AbstractAuditableCustom<App
     public boolean isSameSavingsOfficer(final Staff staff) {
         return this.savingsOfficer.identifiedBy(staff);
     }
-    
 
     public void updateStartDate(final LocalDate startDate) {
         this.startDate = startDate.toDate();
@@ -103,4 +104,4 @@ public class SavingsOfficerAssignmentHistory extends AbstractAuditableCustom<App
         return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.endDate), null);
     }
 
-  }
+}

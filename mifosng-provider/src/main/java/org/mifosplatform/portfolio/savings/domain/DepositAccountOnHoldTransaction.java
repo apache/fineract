@@ -50,7 +50,7 @@ public class DepositAccountOnHoldTransaction extends AbstractPersistable<Long> {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date", nullable = false)
     private Date createdDate;
-    
+
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "depositAccountOnHoldTransaction", optional = true, orphanRemoval = true)
     private GuarantorFundingTransaction guarantorFundingTransaction;
 

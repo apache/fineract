@@ -130,11 +130,11 @@ public class PostingPeriod {
         this.interestRateAsFraction = interestRateAsFraction;
         this.daysInYear = daysInYear;
         this.compoundingPeriods = compoundingPeriods;
-        
-        if(isSavingsInterestPostingAtCurrentPeriodEnd)
-        	this.dateOfPostingTransaction = periodInterval.endDate();
+
+        if (isSavingsInterestPostingAtCurrentPeriodEnd)
+            this.dateOfPostingTransaction = periodInterval.endDate();
         else
-        	this.dateOfPostingTransaction = periodInterval.endDate().plusDays(1);
+            this.dateOfPostingTransaction = periodInterval.endDate().plusDays(1);
         this.interestTransfered = interestTransfered;
         this.minBalanceForInterestCalculation = minBalanceForInterestCalculation;
     }

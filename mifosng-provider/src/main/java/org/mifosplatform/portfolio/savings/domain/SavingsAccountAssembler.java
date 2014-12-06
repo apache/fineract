@@ -229,7 +229,7 @@ public class SavingsAccountAssembler {
         } else {
             enforceMinRequiredBalance = product.isMinRequiredBalanceEnforced();
         }
-        
+
         BigDecimal minRequiredBalance = null;
         if (command.parameterExists(minRequiredBalanceParamName)) {
             minRequiredBalance = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(minRequiredBalanceParamName);

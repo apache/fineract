@@ -60,70 +60,65 @@ public final class SavingsHelper {
         LocalDate periodEndDate = interestPostingUpToDate;
         final Integer monthOfYear = periodStartDate.getMonthOfYear();
         financialYearBeginningMonth--;
-    	if(financialYearBeginningMonth == 0)
-    		financialYearBeginningMonth = 12;
-    	
-    	final ArrayList<LocalDate> quarterlyDates = new ArrayList<>();
-    	quarterlyDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth).dayOfMonth().withMaximumValue());
-    	quarterlyDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth)
-    			.plusMonths(3).withYear(periodStartDate.getYear()).dayOfMonth().withMaximumValue());
-    	quarterlyDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth)
-    			.plusMonths(6).withYear(periodStartDate.getYear()).dayOfMonth().withMaximumValue());
-    	quarterlyDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth)
-    			.plusMonths(9).withYear(periodStartDate.getYear()).dayOfMonth().withMaximumValue());
-    	Collections.sort(quarterlyDates);
-    	
-    	final ArrayList<LocalDate> biannualDates = new ArrayList<>();
-    	biannualDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth).dayOfMonth().withMaximumValue());
-    	biannualDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth).plusMonths(6)
-    			.withYear(periodStartDate.getYear()).dayOfMonth().withMaximumValue());
-    	Collections.sort(biannualDates);
-    	
-    	boolean isEndDateSet = false;
-    	
-		switch (interestPostingPeriodType) {
-		case INVALID:
-			break;
-		case MONTHLY:
-			// produce period end date on last day of current month
-			periodEndDate = periodStartDate.dayOfMonth().withMaximumValue();
-			break;
-		case QUATERLY:
-			for(LocalDate quarterlyDate : quarterlyDates) {
-				if(quarterlyDate.isAfter(periodStartDate)) {
-					periodEndDate = quarterlyDate;
-					isEndDateSet = true;
-					break;
-				}
-			}
-			
-			if(!isEndDateSet)
-				periodEndDate = quarterlyDates.get(0).plusYears(1).dayOfMonth().withMaximumValue();
-			break;
-		case BIANNUAL:
-			for(LocalDate biannualDate : biannualDates) {
-				if(biannualDate.isAfter(periodStartDate)) {
-					periodEndDate = biannualDate;
-					isEndDateSet = true;
-					break;
-				}
-			}
-			
-			if(!isEndDateSet)
-				periodEndDate = biannualDates.get(0).plusYears(1).dayOfMonth().withMaximumValue();
-			break;
-		case ANNUAL:
-			if (financialYearBeginningMonth < monthOfYear) {
-				periodEndDate = periodStartDate
-						.withMonthOfYear(financialYearBeginningMonth);
-				periodEndDate = periodEndDate.plusYears(1);
-			} else {
-				periodEndDate = periodStartDate
-						.withMonthOfYear(financialYearBeginningMonth);
-			}
-			periodEndDate = periodEndDate.dayOfMonth().withMaximumValue();
-			break;
-		}
+        if (financialYearBeginningMonth == 0) financialYearBeginningMonth = 12;
+
+        final ArrayList<LocalDate> quarterlyDates = new ArrayList<>();
+        quarterlyDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth).dayOfMonth().withMaximumValue());
+        quarterlyDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth).plusMonths(3).withYear(periodStartDate.getYear())
+                .dayOfMonth().withMaximumValue());
+        quarterlyDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth).plusMonths(6).withYear(periodStartDate.getYear())
+                .dayOfMonth().withMaximumValue());
+        quarterlyDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth).plusMonths(9).withYear(periodStartDate.getYear())
+                .dayOfMonth().withMaximumValue());
+        Collections.sort(quarterlyDates);
+
+        final ArrayList<LocalDate> biannualDates = new ArrayList<>();
+        biannualDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth).dayOfMonth().withMaximumValue());
+        biannualDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth).plusMonths(6).withYear(periodStartDate.getYear())
+                .dayOfMonth().withMaximumValue());
+        Collections.sort(biannualDates);
+
+        boolean isEndDateSet = false;
+
+        switch (interestPostingPeriodType) {
+            case INVALID:
+            break;
+            case MONTHLY:
+                // produce period end date on last day of current month
+                periodEndDate = periodStartDate.dayOfMonth().withMaximumValue();
+            break;
+            case QUATERLY:
+                for (LocalDate quarterlyDate : quarterlyDates) {
+                    if (quarterlyDate.isAfter(periodStartDate)) {
+                        periodEndDate = quarterlyDate;
+                        isEndDateSet = true;
+                        break;
+                    }
+                }
+
+                if (!isEndDateSet) periodEndDate = quarterlyDates.get(0).plusYears(1).dayOfMonth().withMaximumValue();
+            break;
+            case BIANNUAL:
+                for (LocalDate biannualDate : biannualDates) {
+                    if (biannualDate.isAfter(periodStartDate)) {
+                        periodEndDate = biannualDate;
+                        isEndDateSet = true;
+                        break;
+                    }
+                }
+
+                if (!isEndDateSet) periodEndDate = biannualDates.get(0).plusYears(1).dayOfMonth().withMaximumValue();
+            break;
+            case ANNUAL:
+                if (financialYearBeginningMonth < monthOfYear) {
+                    periodEndDate = periodStartDate.withMonthOfYear(financialYearBeginningMonth);
+                    periodEndDate = periodEndDate.plusYears(1);
+                } else {
+                    periodEndDate = periodStartDate.withMonthOfYear(financialYearBeginningMonth);
+                }
+                periodEndDate = periodEndDate.dayOfMonth().withMaximumValue();
+            break;
+        }
 
         // interest posting always occurs on next day after the period end date.
         periodEndDate = periodEndDate.plusDays(1);

@@ -97,7 +97,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date", nullable = false)
     private final Date createdDate;
-    
+
     @ManyToOne
     @JoinColumn(name = "appuser_id", nullable = true)
     private AppUser appUser;
@@ -157,8 +157,8 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
                 isReversed, appUser);
     }
 
-    public static SavingsAccountTransaction initiateTransfer(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
-    		final AppUser appUser) {
+    public static SavingsAccountTransaction initiateTransfer(final SavingsAccount savingsAccount, final Office office,
+            final LocalDate date, final AppUser appUser) {
         final boolean isReversed = false;
         final PaymentDetail paymentDetail = null;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
@@ -167,7 +167,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     }
 
     public static SavingsAccountTransaction approveTransfer(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
-    		final AppUser appUser) {
+            final AppUser appUser) {
         final boolean isReversed = false;
         final PaymentDetail paymentDetail = null;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
@@ -175,8 +175,8 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
                         .getAccountBalance(), isReversed, appUser);
     }
 
-    public static SavingsAccountTransaction withdrawTransfer(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
-    		final AppUser appUser) {
+    public static SavingsAccountTransaction withdrawTransfer(final SavingsAccount savingsAccount, final Office office,
+            final LocalDate date, final AppUser appUser) {
         final boolean isReversed = false;
         final PaymentDetail paymentDetail = null;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
@@ -196,8 +196,8 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     }
 
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final PaymentDetail paymentDetail,
-            final Integer typeOf, final LocalDate transactionLocalDate, final Date createdDate, final Money amount, final boolean isReversed,
-            final AppUser appUser) {
+            final Integer typeOf, final LocalDate transactionLocalDate, final Date createdDate, final Money amount,
+            final boolean isReversed, final AppUser appUser) {
         this(savingsAccount, office, paymentDetail, typeOf, transactionLocalDate, createdDate, amount.getAmount(), isReversed, appUser);
     }
 
