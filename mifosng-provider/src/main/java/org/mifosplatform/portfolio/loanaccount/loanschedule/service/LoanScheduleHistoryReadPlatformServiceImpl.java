@@ -43,6 +43,7 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Integer fetchCurrentVersionNumber(Long loanId) {
         final String sql = "select MAX(lrs.version) from m_loan_repayment_schedule_history lrs where lrs.loan_id = ?";

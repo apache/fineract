@@ -19,17 +19,14 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_portfolio_account_associations")
 public class AccountAssociations extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "loan_account_id", nullable = true)
     private Loan loanAccount;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "savings_account_id", nullable = true)
     private SavingsAccount savingsAccount;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "linked_loan_account_id", nullable = true)
     private Loan linkedLoanAccount;
@@ -38,11 +35,9 @@ public class AccountAssociations extends AbstractPersistable<Long> {
     @JoinColumn(name = "linked_savings_account_id", nullable = true)
     private SavingsAccount linkedSavingsAccount;
 
-    @SuppressWarnings("unused")
     @Column(name = "association_type_enum", nullable = false)
     private Integer associationType;
 
-    @SuppressWarnings("unused")
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
 

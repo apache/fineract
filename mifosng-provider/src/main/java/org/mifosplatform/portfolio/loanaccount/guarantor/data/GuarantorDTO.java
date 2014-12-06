@@ -9,10 +9,11 @@ import java.math.BigDecimal;
 
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 
-
 public class GuarantorDTO {
-    
+
+    @SuppressWarnings("unused")
     private BigDecimal paidAmount;
+    @SuppressWarnings("unused")
     private Loan loan;
 
 }

@@ -252,6 +252,10 @@ public class MeetingsApiResource {
             break;
             case INVALID:
             break;
+            case LOAN_RECALCULATION_DETAIL:
+            break;
+            default:
+            break;
         }
         return resourceDetails.build();
     }

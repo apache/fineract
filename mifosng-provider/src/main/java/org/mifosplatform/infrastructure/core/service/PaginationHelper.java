@@ -18,6 +18,7 @@ public class PaginationHelper<E> {
         final List<E> items = jt.query(sqlFetchRows, args, rowMapper);
 
         // determine how many rows are available
+        @SuppressWarnings("deprecation")
         final int totalFilteredRecords = jt.queryForInt(sqlCountRows);
 
         return new Page<>(items, totalFilteredRecords);

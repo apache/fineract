@@ -13,11 +13,11 @@ import java.util.List;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.infrastructure.jobs.data.JobDetailData;
 import org.mifosplatform.infrastructure.jobs.data.JobDetailHistoryData;
 import org.mifosplatform.infrastructure.jobs.exception.JobNotFoundException;
 import org.mifosplatform.infrastructure.jobs.exception.OperationNotAllowedException;
-import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -99,6 +99,7 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
     private boolean isJobExist(final Long jobId) {
         boolean isJobPresent = false;
         final String sql = "select count(*) from job job where job.id=" + jobId;
+        @SuppressWarnings("deprecation")
         final int count = this.jdbcTemplate.queryForInt(sql);
         if (count == 1) {
             isJobPresent = true;

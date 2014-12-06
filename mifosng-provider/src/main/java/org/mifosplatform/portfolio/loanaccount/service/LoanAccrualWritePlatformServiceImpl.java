@@ -315,6 +315,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             this.jdbcTemplate.update(transactionSql, scheduleAccrualData.getLoanId(), scheduleAccrualData.getOfficeId(),
                     LoanTransactionType.ACCRUAL.getValue(), accruedTill.toDate(), amount, interestportion, feeportion, penaltyportion,
                     DateUtils.getDateOfTenant());
+            @SuppressWarnings("deprecation")
             final Long transactonId = this.jdbcTemplate.queryForLong("SELECT LAST_INSERT_ID()");
 
             Map<LoanChargeData, BigDecimal> applicableCharges = scheduleAccrualData.getApplicableCharges();

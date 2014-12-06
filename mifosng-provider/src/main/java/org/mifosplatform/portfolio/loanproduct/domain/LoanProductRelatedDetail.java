@@ -23,10 +23,8 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
-import org.mifosplatform.portfolio.common.domain.DayOfWeekType;
 import org.mifosplatform.portfolio.common.domain.DaysInMonthType;
 import org.mifosplatform.portfolio.common.domain.DaysInYearType;
-import org.mifosplatform.portfolio.common.domain.NthDayType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
@@ -77,7 +75,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "repayment_period_frequency_enum", nullable = false)
     private PeriodFrequencyType repaymentPeriodFrequencyType;
-    
+
     @Column(name = "number_of_repayments", nullable = false)
     private Integer numberOfRepayments;
 
@@ -172,61 +170,61 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     }
 
     @Override
-	public MonetaryCurrency getCurrency() {
+    public MonetaryCurrency getCurrency() {
         return this.currency.copy();
     }
 
     @Override
-	public Money getPrincipal() {
+    public Money getPrincipal() {
         return Money.of(this.currency, this.principal);
     }
 
     public void setPrincipal(BigDecimal principal) {
         this.principal = principal;
     }
-    
+
     @Override
-	public Integer graceOnInterestCharged() {
+    public Integer graceOnInterestCharged() {
         return this.graceOnInterestCharged;
     }
-    
+
     @Override
-	public Integer graceOnInterestPayment() {
+    public Integer graceOnInterestPayment() {
         return this.graceOnInterestPayment;
     }
-    
+
     @Override
-	public Integer graceOnPrincipalPayment() {
+    public Integer graceOnPrincipalPayment() {
         return this.graceOnPrincipalPayment;
     }
 
     @Override
-	public Money getInArrearsTolerance() {
+    public Money getInArrearsTolerance() {
         return Money.of(this.currency, this.inArrearsTolerance);
     }
 
     @Override
-	public BigDecimal getNominalInterestRatePerPeriod() {
+    public BigDecimal getNominalInterestRatePerPeriod() {
         return BigDecimal.valueOf(Double.valueOf(this.nominalInterestRatePerPeriod.stripTrailingZeros().toString()));
     }
 
     @Override
-	public PeriodFrequencyType getInterestPeriodFrequencyType() {
+    public PeriodFrequencyType getInterestPeriodFrequencyType() {
         return this.interestPeriodFrequencyType;
     }
 
     @Override
-	public BigDecimal getAnnualNominalInterestRate() {
+    public BigDecimal getAnnualNominalInterestRate() {
         return BigDecimal.valueOf(Double.valueOf(this.annualNominalInterestRate.stripTrailingZeros().toString()));
     }
 
     @Override
-	public InterestMethod getInterestMethod() {
+    public InterestMethod getInterestMethod() {
         return this.interestMethod;
     }
 
     @Override
-	public InterestCalculationPeriodMethod getInterestCalculationPeriodMethod() {
+    public InterestCalculationPeriodMethod getInterestCalculationPeriodMethod() {
         return this.interestCalculationPeriodMethod;
     }
 
@@ -239,14 +237,14 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public PeriodFrequencyType getRepaymentPeriodFrequencyType() {
         return this.repaymentPeriodFrequencyType;
     }
-    
-	@Override
+
+    @Override
     public Integer getNumberOfRepayments() {
         return this.numberOfRepayments;
     }
 
     @Override
-	public AmortizationMethod getAmortizationMethod() {
+    public AmortizationMethod getAmortizationMethod() {
         return this.amortizationMethod;
     }
 
@@ -319,16 +317,16 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             actualChanges.put(repaymentFrequencyTypeParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(newValue);
-            
-            if(this.repaymentPeriodFrequencyType == PeriodFrequencyType.MONTHS) {
-            	final String repaymentFrequencyNthDayTypeParamName = "repaymentFrequencyNthDayType";
-            	newValue = command.integerValueOfParameterNamed(repaymentFrequencyNthDayTypeParamName);
-            	actualChanges.put(repaymentFrequencyNthDayTypeParamName, newValue);
-            	
-            	final String repaymentFrequencyDayOfWeekTypeParamName = "repaymentFrequencyDayOfWeekType";
-            	newValue = command.integerValueOfParameterNamed(repaymentFrequencyDayOfWeekTypeParamName);
-            	actualChanges.put(repaymentFrequencyDayOfWeekTypeParamName, newValue);
-            	
+
+            if (this.repaymentPeriodFrequencyType == PeriodFrequencyType.MONTHS) {
+                final String repaymentFrequencyNthDayTypeParamName = "repaymentFrequencyNthDayType";
+                newValue = command.integerValueOfParameterNamed(repaymentFrequencyNthDayTypeParamName);
+                actualChanges.put(repaymentFrequencyNthDayTypeParamName, newValue);
+
+                final String repaymentFrequencyDayOfWeekTypeParamName = "repaymentFrequencyDayOfWeekType";
+                newValue = command.integerValueOfParameterNamed(repaymentFrequencyDayOfWeekTypeParamName);
+                actualChanges.put(repaymentFrequencyDayOfWeekTypeParamName, newValue);
+
                 actualChanges.put("locale", localeAsInput);
             }
         }
@@ -493,7 +491,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     }
 
     @Override
-	public Integer getGraceOnDueDate() {
+    public Integer getGraceOnDueDate() {
         return this.graceOnArrearsAgeing;
     }
 
@@ -512,8 +510,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public void updateIsInterestRecalculationEnabled(final boolean isInterestRecalculationEnabled) {
         this.isInterestRecalculationEnabled = isInterestRecalculationEnabled;
     }
-    
+
     public void updateNumberOfRepayments(Integer numberOfRepayments) {
-    	this.numberOfRepayments = numberOfRepayments;
+        this.numberOfRepayments = numberOfRepayments;
     }
 }
