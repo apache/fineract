@@ -25,6 +25,7 @@ import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarFrequencyType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarRemindBy;
 import org.mifosplatform.portfolio.calendar.domain.CalendarWeekDaysType;
+import org.mifosplatform.portfolio.calendar.exception.CalendarParameterUpdateNotSupportedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -299,4 +300,32 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
                 "Validation errors exist.", dataValidationErrors); }
     }
 
+    public void validateBusinessRulesForUpdate(final String json, final Integer numberOfActiveLoansSyncedTheCalendar) {
+
+        
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        /*
+         * BR1: If calendar is not associated with any of the active loans, RD
+         * accounts and any other active entity then only frequency and interval
+         * are allowed to change
+         */
+
+        if (numberOfActiveLoansSyncedTheCalendar > 0) {
+
+            if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.FREQUENCY.getValue(), element)) {
+                final String defaultUserMessage = "Update of meeting frequency is not supported";
+                throw new CalendarParameterUpdateNotSupportedException("meeting.frequency", defaultUserMessage);
+            }
+
+            if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue(), element)) {
+                final String defaultUserMessage = "Update of meeting interval is not supported";
+                throw new CalendarParameterUpdateNotSupportedException("meeting.interval", defaultUserMessage);
+            }
+
+        }
+        
+    }
+
+        
 }

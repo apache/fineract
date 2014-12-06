@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.calendar.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -39,6 +40,7 @@ import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -154,9 +156,26 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
     @Override
     public CommandProcessingResult updateCalendar(final JsonCommand command) {
 
+        
+        /*
+         * Validate all the data for updating the calendar
+         */
+
         this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
         final Long calendarId = command.entityId();
+
+        final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
+                LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
+        
+        final Integer numberOfActiveLoansSyncedTheCalendar = this.calendarInstanceRepository.countOfActiveLoansWithSyncedToCalendar(calendarId, loanStatuses);
+
+        /*
+         * Validate all the business rules
+         */
+        this.fromApiJsonDeserializer.validateBusinessRulesForUpdate(command.json(), numberOfActiveLoansSyncedTheCalendar);
+        
+        
         final Calendar calendarForUpdate = this.calendarRepository.findOne(calendarId);
         if (calendarForUpdate == null) { throw new CalendarNotFoundException(calendarId); }
         final Date oldStartDate = calendarForUpdate.getStartDate();
