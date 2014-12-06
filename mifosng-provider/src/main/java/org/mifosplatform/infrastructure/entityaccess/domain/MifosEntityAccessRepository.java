@@ -3,14 +3,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.infrastructure.codes.domain;
+package org.mifosplatform.infrastructure.entityaccess.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface CodeValueRepository extends JpaRepository<CodeValue, Long>, JpaSpecificationExecutor<CodeValue> {
-
-    CodeValue findByCodeNameAndId(String codeName, Long id);
-    
-    CodeValue findByCodeNameAndLabel (String codeName, String label);
+public interface MifosEntityAccessRepository extends JpaRepository<MifosEntityAccess, Long>, JpaSpecificationExecutor<MifosEntityAccess> {
+    // no added behaviour
 }

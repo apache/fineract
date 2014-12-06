@@ -15,6 +15,10 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
+import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityAccessType;
+import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityType;
+import org.mifosplatform.infrastructure.entityaccess.service.MifosEntityAccessUtil;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepository;
 import org.mifosplatform.portfolio.charge.exception.ChargeCannotBeDeletedException;
@@ -36,21 +40,27 @@ import org.springframework.transaction.annotation.Transactional;
 public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWritePlatformService {
 
     private final static Logger logger = LoggerFactory.getLogger(ChargeWritePlatformServiceJpaRepositoryImpl.class);
-
+    private final PlatformSecurityContext context;
     private final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
     private final ChargeRepository chargeRepository;
     private final LoanProductRepository loanProductRepository;
+    private final MifosEntityAccessUtil mifosEntityAccessUtil;
 
     @Autowired
-    public ChargeWritePlatformServiceJpaRepositoryImpl(final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final ChargeRepository chargeRepository, final LoanProductRepository loanProductRepository, final RoutingDataSource dataSource) {
+    public ChargeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
+    		final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final ChargeRepository chargeRepository, final LoanProductRepository loanProductRepository, final RoutingDataSource dataSource,
+            final MifosEntityAccessUtil mifosEntityAccessUtil
+            ) {
+    	this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.dataSource = dataSource;
         this.jdbcTemplate = new JdbcTemplate(this.dataSource);
         this.chargeRepository = chargeRepository;
         this.loanProductRepository = loanProductRepository;
+        this.mifosEntityAccessUtil = mifosEntityAccessUtil;
     }
 
     @Transactional
@@ -58,10 +68,18 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
     @CacheEvict(value = "charges", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('ch')")
     public CommandProcessingResult createCharge(final JsonCommand command) {
         try {
+        	this.context.authenticatedUser();
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
             final Charge charge = Charge.fromJson(command);
             this.chargeRepository.save(charge);
+
+            // check if the office specific products are enabled. If yes, then save this savings product against a specific office
+            // i.e. this savings product is specific for this office.
+            mifosEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
+            		MifosEntityAccessType.OFFICE_ACCESS_TO_CHARGES, 
+            		MifosEntityType.CHARGE, 
+            		charge.getId());
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(charge.getId()).build();
         } catch (final DataIntegrityViolationException dve) {

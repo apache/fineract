@@ -15,6 +15,9 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityAccessType;
+import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityType;
+import org.mifosplatform.infrastructure.entityaccess.service.MifosEntityAccessUtil;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
@@ -53,6 +56,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
     private final ChargeRepositoryWrapper chargeRepository;
     private final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService;
+    private final MifosEntityAccessUtil mifosEntityAccessUtil;
 
     @Autowired
     public LoanProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -60,7 +64,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final AprCalculator aprCalculator, final FundRepository fundRepository,
             final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository,
             final ChargeRepositoryWrapper chargeRepository,
-            final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService) {
+            final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
+            final MifosEntityAccessUtil mifosEntityAccessUtil) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanProductRepository = loanProductRepository;
@@ -69,6 +74,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         this.loanTransactionProcessingStrategyRepository = loanTransactionProcessingStrategyRepository;
         this.chargeRepository = chargeRepository;
         this.accountMappingWritePlatformService = accountMappingWritePlatformService;
+        this.mifosEntityAccessUtil = mifosEntityAccessUtil;
     }
 
     @Transactional
@@ -98,6 +104,12 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
             // save accounting mappings
             this.accountMappingWritePlatformService.createLoanProductToGLAccountMapping(loanproduct.getId(), command);
+            // check if the office specific products are enabled. If yes, then save this savings product against a specific office
+            // i.e. this savings product is specific for this office.
+            mifosEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
+            		MifosEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, 
+            		MifosEntityType.LOAN_PRODUCT, 
+            		loanproduct.getId());
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
