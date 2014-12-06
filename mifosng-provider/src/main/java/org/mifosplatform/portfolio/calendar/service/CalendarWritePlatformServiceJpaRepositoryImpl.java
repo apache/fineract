@@ -101,7 +101,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
             entityType = CalendarEntityType.CLIENTS;
             entityId = command.getClientId();
         }
-        
+
         final Integer entityTypeId = entityType.getValue();
         final Calendar newCalendar = Calendar.fromJson(command);
 
@@ -156,7 +156,6 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
     @Override
     public CommandProcessingResult updateCalendar(final JsonCommand command) {
 
-        
         /*
          * Validate all the data for updating the calendar
          */
@@ -167,15 +166,15 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
 
         final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
                 LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
-        
-        final Integer numberOfActiveLoansSyncedTheCalendar = this.calendarInstanceRepository.countOfActiveLoansWithSyncedToCalendar(calendarId, loanStatuses);
+
+        final Integer numberOfActiveLoansSyncedWithThisCalendar = this.calendarInstanceRepository.countOfLoansSyncedWithCalendar(
+                calendarId, loanStatuses);
 
         /*
          * Validate all the business rules
          */
-        this.fromApiJsonDeserializer.validateBusinessRulesForUpdate(command.json(), numberOfActiveLoansSyncedTheCalendar);
-        
-        
+        this.fromApiJsonDeserializer.validateBusinessRulesForUpdate(command.json(), numberOfActiveLoansSyncedWithThisCalendar);
+
         final Calendar calendarForUpdate = this.calendarRepository.findOne(calendarId);
         if (calendarForUpdate == null) { throw new CalendarNotFoundException(calendarId); }
         final Date oldStartDate = calendarForUpdate.getStartDate();
