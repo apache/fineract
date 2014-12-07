@@ -828,6 +828,24 @@ public class RecurringDepositAccount extends SavingsAccount {
         }
     }
 
+    public void updateScheduleInstallmentsWithNewRecommendedDepositAmount(BigDecimal newDepositAmount,
+            LocalDate depositAmountupdatedFromDate) {
+        // reset all installments to process from the beginning, also update
+        // deposit amount as necessary
+        for (RecurringDepositScheduleInstallment currentInstallment : depositScheduleInstallments()) {
+            if (currentInstallment.dueDate().isAfter(depositAmountupdatedFromDate)) {
+                currentInstallment.updateDepositAmountAndResetDerivedFields(newDepositAmount);
+            } else {
+                currentInstallment.resetDerivedFields();
+            }
+        }
+
+        final List<SavingsAccountTransaction> orderedDepositTransactions = retreiveOrderedDepositTransactions();
+        for (SavingsAccountTransaction transaction : orderedDepositTransactions) {
+            handleScheduleInstallments(transaction);
+        }
+    }
+
     private List<SavingsAccountTransaction> retreiveOrderedDepositTransactions() {
         final List<SavingsAccountTransaction> listOfTransactionsSorted = retreiveListOfTransactions();
 
@@ -1123,4 +1141,9 @@ public class RecurringDepositAccount extends SavingsAccount {
     public boolean isTransactionsAllowed() {
         return isActive() || isAccountMatured();
     }
+
+    public DepositAccountRecurringDetail getRecurringDetail() {
+        return this.recurringDetail;
+    }
+
 }

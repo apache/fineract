@@ -31,15 +31,15 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
     private RecurringDepositAccount account;
 
     @Column(name = "installment", nullable = false)
-    private Integer installmentNumber;
+    private final Integer installmentNumber;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "fromdate", nullable = true)
-    private Date fromDate;
+    private final Date fromDate;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "duedate", nullable = false)
-    private Date dueDate;
+    private final Date dueDate;
 
     @Column(name = "deposit_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal depositAmount;
@@ -222,5 +222,10 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
         this.totalPaidLate = null;
         this.obligationsMet = false;
         this.obligationsMetOnDate = null;
+    }
+
+    public void updateDepositAmountAndResetDerivedFields(BigDecimal newDepositAmount) {
+        this.depositAmount = newDepositAmount;
+        this.resetDerivedFields();
     }
 }

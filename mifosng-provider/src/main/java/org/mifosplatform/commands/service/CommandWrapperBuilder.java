@@ -7,6 +7,7 @@ package org.mifosplatform.commands.service;
 
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.infrastructure.accountnumberformat.service.AccountNumberFormatConstants;
+import org.mifosplatform.portfolio.savings.DepositsApiConstants;
 
 public class CommandWrapperBuilder {
 
@@ -428,7 +429,7 @@ public class CommandWrapperBuilder {
         this.href = "/clients/" + clientId + "?command=close&template=true";
         return this;
     }
-    
+
     public CommandWrapperBuilder rejectClient(final Long clientId) {
         this.actionName = "REJECT";
         this.entityName = "CLIENT";
@@ -437,7 +438,7 @@ public class CommandWrapperBuilder {
         this.href = "/clients/" + clientId + "?command=reject&template=true";
         return this;
     }
-    
+
     public CommandWrapperBuilder withdrawClient(final Long clientId) {
         this.actionName = "WITHDRAW";
         this.entityName = "CLIENT";
@@ -446,6 +447,7 @@ public class CommandWrapperBuilder {
         this.href = "/clients/" + clientId + "?command=withdraw&template=true";
         return this;
     }
+
     public CommandWrapperBuilder reActivateClient(final Long clientId) {
         this.actionName = "REACTIVATE";
         this.entityName = "CLIENT";
@@ -454,6 +456,7 @@ public class CommandWrapperBuilder {
         this.href = "/clients/" + clientId + "?command=reactivate&template=true";
         return this;
     }
+
     public CommandWrapperBuilder proposeClientTransfer(final Long clientId) {
         this.actionName = "PROPOSETRANSFER";
         this.entityName = "CLIENT";
@@ -2024,6 +2027,15 @@ public class CommandWrapperBuilder {
         this.entityId = accountId;
         this.savingsId = accountId;
         this.href = "/recurringdepositaccounts/" + accountId + "?command=close";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateDepositAmountForRecurringDepositAccount(final Long accountId) {
+        this.actionName = DepositsApiConstants.UPDATE_DEPOSIT_AMOUNT.toUpperCase();
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.savingsId = accountId;
+        this.href = "/recurringdepositaccounts/" + accountId + "?command=" + DepositsApiConstants.UPDATE_DEPOSIT_AMOUNT;
         return this;
     }
 

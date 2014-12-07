@@ -755,6 +755,14 @@
 							</tr>
 							<tr>
 								<td></td>
+								<td>recurringdepositaccounts/{accountId}?command=updateDepositAmount</td>
+								<td><a href="#rdaccounts_update_deposit_amount">Update recommended deposit amount</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
 								<td>recurringdepositaccounts/{accountId}?command=close</td>
 								<td><a href="#rdaccounts_close">Close a recurring deposit account</a></td>
 								<td></td>
@@ -23459,6 +23467,42 @@ Request Body:
 	        </code>
 	    </div>
 	</div>
+
+	<a id="rdaccounts_update_deposit_amount" name="rdaccounts_update_deposit_amount" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Update the recommended deposit amount for a recurring deposit account</h2>
+	        <p>Updates the recommended deposit amount for a RD account as on the effective date.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/recurringdepositaccounts/{accountId}?command=updateDepositAmount</code>
+	        <code class="method-request">POST recurringdepositaccounts/4?command=updateDepositAmount
+Content-Type: application/json
+Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "effectiveDate": "01 Dec 2014"
+  "mandatoryRecommendedDepositAmount": 398
+}
+			</code>
+	        <code class="method-response">
+
+{
+   "officeId": 1,
+   "clientId": 6,
+   "savingsId": 4,
+   "resourceId": 4,
+   "changes":
+   {
+       "mandatoryRecommendedDepositAmount": 398
+   }
+}
+
+	        </code>
+	    </div>
+	</div>
+
 
 	<a id="rdaccounts_close" name="rdaccounts_close" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">

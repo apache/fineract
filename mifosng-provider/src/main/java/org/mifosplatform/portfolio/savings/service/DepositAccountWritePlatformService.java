@@ -21,6 +21,8 @@ public interface DepositAccountWritePlatformService {
 
     CommandProcessingResult activateRDAccount(Long savingsId, JsonCommand command);
 
+    CommandProcessingResult updateDepositAmountForRDAccount(Long savingsId, JsonCommand command);
+
     CommandProcessingResult depositToFDAccount(Long savingsId, JsonCommand command);
 
     CommandProcessingResult depositToRDAccount(Long savingsId, JsonCommand command);

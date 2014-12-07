@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.savings.domain;
 import static org.mifosplatform.portfolio.savings.DepositsApiConstants.mandatoryRecommendedDepositAmountParamName;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -18,7 +19,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
@@ -89,6 +92,21 @@ public class DepositAccountRecurringDetail extends AbstractPersistable<Long> {
         if (this.recurringDetail != null) {
             actualChanges.putAll(this.recurringDetail.update(command));
         }
+        return actualChanges;
+    }
+
+    public Map<String, Object> updateMandatoryRecommendedDepositAmount(BigDecimal newMandatoryRecommendedDepositAmount,
+            LocalDate effectiveDate, Boolean isSavingsInterestPostingAtCurrentPeriodEnd, Integer financialYearBeginningMonth) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(10);
+        actualChanges.put(mandatoryRecommendedDepositAmountParamName, newMandatoryRecommendedDepositAmount);
+        this.mandatoryRecommendedDepositAmount = newMandatoryRecommendedDepositAmount;
+        RecurringDepositAccount depositAccount = (RecurringDepositAccount) this.account;
+        depositAccount.updateScheduleInstallmentsWithNewRecommendedDepositAmount(newMandatoryRecommendedDepositAmount, effectiveDate);
+        depositAccount.updateOverduePayments(DateUtils.getLocalDateOfTenant());
+        MathContext mc = MathContext.DECIMAL64;
+        Boolean isPreMatureClosure = false;
+        depositAccount.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
+                financialYearBeginningMonth);
         return actualChanges;
     }
 

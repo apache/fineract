@@ -74,6 +74,7 @@ import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
+import org.mifosplatform.portfolio.savings.DepositsApiConstants;
 import org.mifosplatform.portfolio.savings.SavingsAccountTransactionType;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.data.DepositAccountTransactionDataValidator;
@@ -81,6 +82,7 @@ import org.mifosplatform.portfolio.savings.data.SavingsAccountChargeDataValidato
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.mifosplatform.portfolio.savings.domain.DepositAccountAssembler;
 import org.mifosplatform.portfolio.savings.domain.DepositAccountDomainService;
+import org.mifosplatform.portfolio.savings.domain.DepositAccountRecurringDetail;
 import org.mifosplatform.portfolio.savings.domain.FixedDepositAccount;
 import org.mifosplatform.portfolio.savings.domain.RecurringDepositAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
@@ -350,10 +352,38 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
     @Transactional
     @Override
+    public CommandProcessingResult updateDepositAmountForRDAccount(Long savingsId, JsonCommand command) {
+        this.depositAccountTransactionDataValidator.validateDepositAmountUpdate(command);
+        final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
+                .isSavingsInterestPostingAtCurrentPeriodEnd();
+        final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
+
+        final BigDecimal mandatoryRecommendedDepositAmount = command
+                .bigDecimalValueOfParameterNamed(DepositsApiConstants.mandatoryRecommendedDepositAmountParamName);
+
+        final LocalDate depositAmountUpdateEffectiveFromDate = command
+                .localDateValueOfParameterNamed(DepositsApiConstants.effectiveDateParamName);
+
+        final RecurringDepositAccount recurringDepositAccount = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(
+                savingsId, DepositAccountType.RECURRING_DEPOSIT);
+        DepositAccountRecurringDetail recurringDetail = recurringDepositAccount.getRecurringDetail();
+        Map<String, Object> changes = recurringDetail.updateMandatoryRecommendedDepositAmount(mandatoryRecommendedDepositAmount,
+                depositAmountUpdateEffectiveFromDate, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(savingsId) //
+                .withOfficeId(recurringDepositAccount.officeId()) //
+                .withClientId(recurringDepositAccount.clientId()) //
+                .withGroupId(recurringDepositAccount.groupId()) //
+                .withSavingsId(savingsId) //
+                .with(changes) //
+                .build();
+    }
+
+    @Transactional
+    @Override
     public CommandProcessingResult depositToRDAccount(final Long savingsId, final JsonCommand command) {
         boolean isRegularTransaction = true;
-
-        this.context.authenticatedUser();
 
         this.depositAccountTransactionDataValidator.validate(command, DepositAccountType.RECURRING_DEPOSIT);
 

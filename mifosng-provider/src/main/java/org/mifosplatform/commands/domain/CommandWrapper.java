@@ -7,6 +7,7 @@ package org.mifosplatform.commands.domain;
 
 import org.mifosplatform.infrastructure.accountnumberformat.service.AccountNumberFormatConstants;
 import org.mifosplatform.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
+import org.mifosplatform.portfolio.savings.DepositsApiConstants;
 
 public class CommandWrapper {
 
@@ -866,9 +867,11 @@ public class CommandWrapper {
     public boolean isWithdrawal() {
         return this.actionName.equalsIgnoreCase("WITHDRAWAL");
     }
+
     public boolean isWithdrawn() {
         return this.actionName.equalsIgnoreCase("WITHDRAW");
     }
+
     public boolean isReactivated() {
         return this.actionName.equalsIgnoreCase("REACTIVATE");
     }
@@ -899,6 +902,10 @@ public class CommandWrapper {
 
     public boolean isDepositAccountPrematureClose() {
         return this.actionName.equalsIgnoreCase("PREMATURECLOSE") && isDepositAccountResource();
+    }
+
+    public boolean isDepositAmountUpdateForRecurringDepositAccount() {
+        return this.actionName.equalsIgnoreCase(DepositsApiConstants.UPDATE_DEPOSIT_AMOUNT.toUpperCase()) && isDepositAccountResource();
     }
 
     // End - Deposit accounts

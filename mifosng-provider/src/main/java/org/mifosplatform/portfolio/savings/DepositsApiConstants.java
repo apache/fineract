@@ -17,7 +17,7 @@ public class DepositsApiConstants {
     public static final String FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME = "fixeddeposit";
     public static final String RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME = "recurringdeposit";
 
-    // Deposti accounts
+    // Deposit accounts
     public static final String FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME = "fixeddepositaccount";
     public static final String RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME = "recurringdepositaccount";
 
@@ -47,6 +47,7 @@ public class DepositsApiConstants {
     public static String COMMAND_ADJUST_TRANSACTION = "modify";
     public static String COMMAND_WAIVE_CHARGE = "waive";
     public static String COMMAND_PAY_CHARGE = "paycharge";
+    public static String UPDATE_DEPOSIT_AMOUNT = "updateDepositAmount";
 
     // general
     public static final String localeParamName = "locale";
@@ -137,6 +138,9 @@ public class DepositsApiConstants {
     public static final String runningBalanceParamName = "runningBalance";
     public static final String reversedParamName = "reversed";
     public static final String dateParamName = "date";
+
+    // recurring deposits update parameters
+    public static final String effectiveDateParamName = "effectiveDate";
 
     // charges parameters
     public static final String chargeIdParamName = "chargeId";
@@ -330,6 +334,9 @@ public class DepositsApiConstants {
     public static final Set<String> DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, transactionDateParamName, transactionAmountParamName, paymentTypeIdParamName,
             transactionAccountNumberParamName, checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
+
+    public static final Set<String> DEPOSIT_ACCOUNT_RECOMMENDED_DEPOSIT_AMOUNT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(localeParamName, dateFormatParamName, mandatoryRecommendedDepositAmountParamName, effectiveDateParamName));
 
     public static final Set<String> FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
             "accountId", accountNoParamName, "currency", "amount", dateParamName, paymentDetailDataParamName, runningBalanceParamName,
