@@ -833,7 +833,8 @@ public class RecurringDepositAccount extends SavingsAccount {
         // reset all installments to process from the beginning, also update
         // deposit amount as necessary
         for (RecurringDepositScheduleInstallment currentInstallment : depositScheduleInstallments()) {
-            if (currentInstallment.dueDate().isAfter(depositAmountupdatedFromDate)) {
+            if (currentInstallment.dueDate().isAfter(depositAmountupdatedFromDate)
+                    || currentInstallment.dueDate().isEqual(depositAmountupdatedFromDate)) {
                 currentInstallment.updateDepositAmountAndResetDerivedFields(newDepositAmount);
             } else {
                 currentInstallment.resetDerivedFields();
