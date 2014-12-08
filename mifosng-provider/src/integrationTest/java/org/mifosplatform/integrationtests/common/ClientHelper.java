@@ -23,7 +23,7 @@ public class ClientHelper {
     private static final String CLOSE_CLIENT_COMMAND = "close";
     private static final String REACTIVATE_CLIENT_COMMAND = "reactivate";
     private static final String REJECT_CLIENT_COMMAND = "reject";
-    private static final String ACTIVATE_CLIENT_COMMAND ="activate";
+    private static final String ACTIVATE_CLIENT_COMMAND = "activate";
     private static final String WITHDRAW_CLIENT_COMMAND = "withdraw";
 
     public static final String CREATED_DATE = "27 November 2014";
@@ -62,7 +62,8 @@ public class ClientHelper {
         return Utils.performServerPost(requestSpec, responseSpec, CLIENT_ASSIGN_STAFF_URL, assignStaffToClientAsJson(staffId), "changes");
     }
 
-    public static Integer getClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String clientId) {
+    public static Integer getClientsStaffId(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String clientId) {
         return (Integer) getClient(requestSpec, responseSpec, clientId, "staffId");
     }
 
@@ -124,6 +125,7 @@ public class ClientHelper {
         return clientJson;
 
     }
+
     private String getReactivateClientAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", CommonConstants.locale);
@@ -134,6 +136,7 @@ public class ClientHelper {
         return clientJson;
 
     }
+
     private String getRejectClientAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", CommonConstants.locale);
@@ -145,6 +148,7 @@ public class ClientHelper {
         return clientJson;
 
     }
+
     private String getActivateClientAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", CommonConstants.locale);
@@ -167,6 +171,7 @@ public class ClientHelper {
         return clientJson;
 
     }
+
     public HashMap closeClient(final Integer clientId) {
         System.out.println("--------------------------------- CLOSE CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(CLOSE_CLIENT_COMMAND, clientId), getCloseClientAsJSON(), clientId);
@@ -176,19 +181,22 @@ public class ClientHelper {
         System.out.println("--------------------------------- REACTIVATE CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(REACTIVATE_CLIENT_COMMAND, clientId), getReactivateClientAsJSON(), clientId);
     }
+
     public HashMap rejectClient(final Integer clientId) {
         System.out.println("--------------------------------- REJECT CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(REJECT_CLIENT_COMMAND, clientId), getRejectClientAsJSON(), clientId);
     }
-    
+
     public HashMap activateClient(final Integer clientId) {
         System.out.println("--------------------------------- ACTIVATE CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(ACTIVATE_CLIENT_COMMAND, clientId), getActivateClientAsJSON(), clientId);
     }
+
     public HashMap withdrawClient(final Integer clientId) {
         System.out.println("--------------------------------- WITHDRAWN CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(WITHDRAW_CLIENT_COMMAND, clientId), getWithdrawClientAsJSON(), clientId);
     }
+
     private String createClientOperationURL(final String command, final Integer clientId) {
         return CLIENT_URL + "/" + clientId + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
     }
