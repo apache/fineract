@@ -46,9 +46,9 @@ public final class LoanApplicationCommandFromApiJsonHelper {
      */
     final Set<String> supportedParameters = new HashSet<>(Arrays.asList("dateFormat", "locale", "id", "clientId", "groupId", "loanType",
             "productId", "principal", "loanTermFrequency", "loanTermFrequencyType", "numberOfRepayments", "repaymentEvery",
-            "repaymentFrequencyType","repaymentFrequencyNthDayType", "repaymentFrequencyDayOfWeekType", "interestRatePerPeriod", "amortizationType", "interestType", "interestCalculationPeriodType",
-            "expectedDisbursementDate", "repaymentsStartingFromDate", "graceOnPrincipalPayment",
-            "graceOnInterestPayment",
+            "repaymentFrequencyType", "repaymentFrequencyNthDayType", "repaymentFrequencyDayOfWeekType", "interestRatePerPeriod",
+            "amortizationType", "interestType", "interestCalculationPeriodType", "expectedDisbursementDate", "repaymentsStartingFromDate",
+            "graceOnPrincipalPayment", "graceOnInterestPayment",
             "graceOnInterestCharged",
             "interestChargedFromDate", //
             "submittedOnDate",
@@ -78,7 +78,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         this.apiJsonHelper = apiJsonHelper;
     }
 
-    public void validateForCreate(final String json) {
+    public void validateForCreate(final String json, final boolean isMeetingMandatoryForJLGLoans) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -112,32 +112,24 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             if (loanType.isJLGAccount()) {
                 baseDataValidator.reset().parameter("clientId").value(clientId).notNull().integerGreaterThanZero();
                 baseDataValidator.reset().parameter("groupId").value(groupId).notNull().longGreaterThanZero();
-                /**
-                 * these validations should be carried out based on Global
-                 * configurations, commenting them for now
-                 **/
 
-                /**
-                 * // if it is JLG loan then must have a meeting details
-                 * (calendar) final String calendarIdParameterName =
-                 * "calendarId"; final Long calendarId =
-                 * this.fromApiJsonHelper.extractLongNamed
-                 * (calendarIdParameterName, element);
-                 * baseDataValidator.reset().
-                 * parameter(calendarIdParameterName).value
-                 * (calendarId).notNull().integerGreaterThanZero();
-                 * 
-                 * // if it is JLG loan then must have a syncDisbursement final
-                 * String syncDisbursementParameterName =
-                 * "syncDisbursementWithMeeting"; final Boolean syncDisbursement
-                 * = this.fromApiJsonHelper.extractBooleanNamed(
-                 * syncDisbursementParameterName, element);
-                 * 
-                 * if (syncDisbursement == null) {
-                 * baseDataValidator.reset().parameter
-                 * (syncDisbursementParameterName
-                 * ).value(syncDisbursement).trueOrFalseRequired(false); }
-                 **/
+                // if it is JLG loan that must have meeting details
+                if (isMeetingMandatoryForJLGLoans) {
+                    final String calendarIdParameterName = "calendarId";
+                    final Long calendarId = this.fromApiJsonHelper.extractLongNamed(calendarIdParameterName, element);
+                    baseDataValidator.reset().parameter(calendarIdParameterName).value(calendarId).notNull().integerGreaterThanZero();
+
+                    // if it is JLG loan then must have a value for
+                    // syncDisbursement passed in
+                    String syncDisbursementParameterName = "syncDisbursementWithMeeting";
+                    final Boolean syncDisbursement = this.fromApiJsonHelper.extractBooleanNamed(syncDisbursementParameterName, element);
+
+                    if (syncDisbursement == null) {
+                        baseDataValidator.reset().parameter(syncDisbursementParameterName).value(syncDisbursement)
+                                .trueOrFalseRequired(false);
+                    }
+                }
+
             }
 
         }
@@ -289,14 +281,14 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             final Long linkAccountId = this.fromApiJsonHelper.extractLongNamed(linkAccountIdParameterName, element);
             baseDataValidator.reset().parameter(linkAccountIdParameterName).value(linkAccountId).ignoreIfNull().longGreaterThanZero();
         }
-        
+
         final String createSiAtDisbursementParameterName = "createStandingInstructionAtDisbursement";
-        if(this.fromApiJsonHelper.parameterExists(createSiAtDisbursementParameterName, element)) {
-            final Boolean createStandingInstructionAtDisbursement = this.fromApiJsonHelper
-                    .extractBooleanNamed(createSiAtDisbursementParameterName, element);
+        if (this.fromApiJsonHelper.parameterExists(createSiAtDisbursementParameterName, element)) {
+            final Boolean createStandingInstructionAtDisbursement = this.fromApiJsonHelper.extractBooleanNamed(
+                    createSiAtDisbursementParameterName, element);
             final Long linkAccountId = this.fromApiJsonHelper.extractLongNamed(linkAccountIdParameterName, element);
-            
-            if(createStandingInstructionAtDisbursement) {
+
+            if (createStandingInstructionAtDisbursement) {
                 baseDataValidator.reset().parameter(linkAccountIdParameterName).value(linkAccountId).notNull().longGreaterThanZero();
             }
         }

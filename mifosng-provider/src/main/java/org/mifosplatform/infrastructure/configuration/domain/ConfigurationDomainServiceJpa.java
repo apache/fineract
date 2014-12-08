@@ -166,4 +166,11 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         return null;
     }
 
+    @Override
+    public boolean isMeetingMandatoryForJLGLoans() {
+        final String propertyName = "meetings-mandatory-for-jlg-loans";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
+        return property.isEnabled();
+    }
+
 }

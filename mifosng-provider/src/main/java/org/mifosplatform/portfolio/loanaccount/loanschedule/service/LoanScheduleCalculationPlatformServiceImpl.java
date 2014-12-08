@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
@@ -61,6 +62,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     private final LoanAccountDomainService accountDomainService;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public LoanScheduleCalculationPlatformServiceImpl(final CalculateLoanScheduleQueryFromApiJsonHelper fromApiJsonDeserializer,
@@ -69,7 +71,8 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
             final LoanReadPlatformService loanReadPlatformService, final LoanApplicationCommandFromApiJsonHelper loanApiJsonDeserializer,
             final LoanAssembler loanAssembler, final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
             final LoanAccountDomainService accountDomainService, final CalendarInstanceRepository calendarInstanceRepository,
-            final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory) {
+            final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
+            final ConfigurationDomainService configurationDomainService) {
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanScheduleAssembler = loanScheduleAssembler;
         this.fromJsonHelper = fromJsonHelper;
@@ -82,13 +85,19 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         this.accountDomainService = accountDomainService;
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
+        this.configurationDomainService = configurationDomainService;
     }
 
     @Override
     public LoanScheduleModel calculateLoanSchedule(final JsonQuery query, Boolean validateParams) {
 
+        /***
+         * TODO: Vishwas, this is probably not required, test and remove the
+         * same
+         **/
         if (validateParams) {
-            this.loanApiJsonDeserializer.validateForCreate(query.json());
+            boolean isMeetingMandatoryForJLGLoans = configurationDomainService.isMeetingMandatoryForJLGLoans();
+            this.loanApiJsonDeserializer.validateForCreate(query.json(), isMeetingMandatoryForJLGLoans);
         }
         this.fromApiJsonDeserializer.validate(query.json());
 
@@ -171,7 +180,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         }
         if (isNewPaymentRequired) {
             LoanTransaction ondayPaymentTransaction = LoanTransaction.repayment(null, totalAmount, null, LocalDate.now(), null,
-            		DateUtils.getLocalDateTimeOfTenant(), null);
+                    DateUtils.getLocalDateTimeOfTenant(), null);
             modifiedTransactions.add(ondayPaymentTransaction);
         }
 
