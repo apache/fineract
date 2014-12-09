@@ -177,12 +177,54 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
 
         final Calendar calendarForUpdate = this.calendarRepository.findOne(calendarId);
         if (calendarForUpdate == null) { throw new CalendarNotFoundException(calendarId); }
+        
         final Date oldStartDate = calendarForUpdate.getStartDate();
         final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
         // create calendar history before updating calendar
         final CalendarHistory calendarHistory = new CalendarHistory(calendarForUpdate, oldStartDate);
-        final Map<String, Object> changes = calendarForUpdate.update(command);
 
+        Map<String, Object> changes = null;
+        
+        final Boolean reschedulebasedOnMeetingDates = command
+                .booleanObjectValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.RESCHEDULE_BASED_ON_MEETING_DATES.getValue());
+        
+        /*
+         * System allows to change the meeting date by two means,
+         * 
+         * Option 1: reschedulebasedOnMeetingDates = false or reschedulebasedOnMeetingDates is not passed 
+         * By directly editing the recurring day with effective from
+         * date and system decides the next meeting date based on some sensible
+         * logic (i.e., number of minimum days between two repayments)
+         * 
+         * 
+         * Option 2: reschedulebasedOnMeetingDates = true 
+         * By providing alternative meeting date for one of future
+         * meeting date and derive the day of recurrence from the new meeting
+         * date. Ex: User proposes new meeting date say "14/Nov/2014" for
+         * present meeting date "12/Nov/2014", based on this input other values
+         * re derived and loans are rescheduled
+         * 
+         */
+        
+        LocalDate newMeetingDate = null;
+        LocalDate presentMeetingDate = null;
+        
+        if (reschedulebasedOnMeetingDates != null && reschedulebasedOnMeetingDates) {
+
+            newMeetingDate = command.localDateValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.NEW_MEETING_DATE.getValue());
+            presentMeetingDate = command.localDateValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.PRESENT_MEETING_DATE.getValue());
+
+            /*
+             * New meeting date proposed will become the new start date for the
+             * updated calendar
+             */
+
+            changes = calendarForUpdate.updateStartDateAndDerivedFeilds(newMeetingDate);
+
+        } else {
+            changes = calendarForUpdate.update(command);
+        }
+        
         if (!changes.isEmpty()) {
             // update calendar history table only if there is a change in
             // calendar start date.
@@ -202,7 +244,9 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
 
                 if (!CollectionUtils.isEmpty(loanCalendarInstances)) {
                     // update all loans associated with modifying calendar
-                    this.loanWritePlatformService.applyMeetingDateChanges(calendarForUpdate, loanCalendarInstances);
+                    this.loanWritePlatformService.applyMeetingDateChanges(calendarForUpdate, loanCalendarInstances,
+                            reschedulebasedOnMeetingDates, presentMeetingDate, newMeetingDate);
+
                 }
             }
         }
