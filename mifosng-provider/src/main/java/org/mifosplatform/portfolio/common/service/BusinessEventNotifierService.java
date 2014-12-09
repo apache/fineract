@@ -8,14 +8,35 @@ package org.mifosplatform.portfolio.common.service;
 import org.mifosplatform.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
+/**
+ * Implemented class is responsible for notifying the business event to
+ * registered listeners.
+ * 
+ */
 public interface BusinessEventNotifierService {
 
+    /**
+     * Method should be called to notify listeners before Business event
+     * execution for any pre-processing of event
+     */
     public void notifyBusinessEventToBeExecuted(BUSINESS_EVENTS businessEvent, AbstractPersistable<Long> businessEventEntity);
 
+    /**
+     * Method should be called to notify listeners after Business event
+     * execution for any post-processing of event
+     */
     public void notifyBusinessEventWasExecuted(BUSINESS_EVENTS businessEvent, AbstractPersistable<Long> businessEventEntity);
 
+    /**
+     * Method is to register a class as listener for pre-processing of any
+     * Business event
+     */
     public void addBusinessEventPreListners(BUSINESS_EVENTS businessEvent, BusinessEventListner businessEventListner);
 
+    /**
+     * Method is to register a class as listener for post-processing of any
+     * Business event
+     */
     public void addBusinessEventPostListners(BUSINESS_EVENTS businessEvent, BusinessEventListner businessEventListner);
 
 }
