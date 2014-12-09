@@ -763,10 +763,43 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     }
 
     public void validateLoanTermAndRepaidEveryValues(final Integer loanTermFrequency, final Integer loanTermFrequencyType,
-            final Integer numberOfRepayments, final Integer repaymentEvery, final Integer repaymentEveryType) {
+            final Integer numberOfRepayments, final Integer repaymentEvery, final Integer repaymentEveryType, final Loan loan) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         this.apiJsonHelper.validateSelectedPeriodFrequencyTypeIsTheSame(dataValidationErrors, loanTermFrequency, loanTermFrequencyType,
                 numberOfRepayments, repaymentEvery, repaymentEveryType);
+
+        /**
+         * For multi-disbursal loans where schedules are auto-generated based on
+         * a fixed EMI, ensure the number of repayments is within the
+         * permissible range defined by the loan product
+         **/
+        if (loan.loanProduct().isMultiDisburseLoan() && loan.getFixedEmiAmount() != null) {
+            Integer minimumNoOfRepayments = loan.loanProduct().getMinNumberOfRepayments();
+            Integer maximumNoOfRepayments = loan.loanProduct().getMaxNumberOfRepayments();
+            Integer actualNumberOfRepayments = loan.getRepaymentScheduleInstallments().size();
+            // validate actual number of repayments is > minimum number of
+            // repayments
+            if (minimumNoOfRepayments != null && minimumNoOfRepayments != 0 && actualNumberOfRepayments < minimumNoOfRepayments) {
+                final ApiParameterError error = ApiParameterError.generalError(
+                        "validation.msg.loan.numberOfRepayments.lesser.than.minimumNumberOfRepayments",
+                        "The total number of calculated repayments for this loan " + actualNumberOfRepayments
+                                + " is lesser than the allowed minimum of " + minimumNoOfRepayments, actualNumberOfRepayments,
+                        minimumNoOfRepayments);
+                dataValidationErrors.add(error);
+            }
+
+            // validate actual number of repayments is < maximum number of
+            // repayments
+            if (maximumNoOfRepayments != null && maximumNoOfRepayments != 0 && actualNumberOfRepayments > maximumNoOfRepayments) {
+                final ApiParameterError error = ApiParameterError.generalError(
+                        "validation.msg.loan.numberOfRepayments.greater.than.maximumNumberOfRepayments",
+                        "The total number of calculated repayments for this loan " + actualNumberOfRepayments
+                                + " is greater than the allowed maximum of " + maximumNoOfRepayments, actualNumberOfRepayments,
+                        maximumNoOfRepayments);
+                dataValidationErrors.add(error);
+            }
+
+        }
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
     }
