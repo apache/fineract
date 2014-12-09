@@ -1,0 +1,23 @@
+package org.mifosplatform.integrationtests.common.office;
+
+import com.google.gson.Gson;
+
+public class OfficeHelper {
+
+    public static class Builder {
+
+        private String name;
+        private String externalId;
+
+        private Builder(final String name) {
+            this.name = name;
+        }
+
+        public Builder externalId(final String externalId) {
+            this.externalId = externalId;
+            return this;
+        }
+
+
+    }
+}
