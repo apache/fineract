@@ -89,7 +89,7 @@ public class LoanApplicationApprovalTest {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpecForStatusCode403);
         
         @SuppressWarnings("unchecked")
-        List<HashMap> error = (List<HashMap>) this.loanTransactionHelper.approveLoanWithApproveAmount(approveDate, approvalAmount, loanID,
+        List<HashMap> error = (List<HashMap>) this.loanTransactionHelper.approveLoan(approveDate, approvalAmount, loanID,
                 CommonConstants.RESPONSE_ERROR);
         
         assertEquals("error.msg.loan.approval.amount.can't.be.greater.than.loan.amount.demanded", error

@@ -88,6 +88,10 @@ public class LoanProductTestBuilder {
     private String recalculationRestFrequencyInterval = "0";
     private String recalculationRestFrequencyDate = null;
     private String minimumDaysBetweenDisbursalAndFirstRepayment = null;
+    private Boolean holdGuaranteeFunds = null;
+    private String mandatoryGuarantee = null;
+    private String minimumGuaranteeFromOwnFunds = null;
+    private String minimumGuaranteeFromGuarantor = null;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -144,6 +148,14 @@ public class LoanProductTestBuilder {
             map.put("recalculationRestFrequencyType", recalculationRestFrequencyType);
             map.put("recalculationRestFrequencyInterval", recalculationRestFrequencyInterval);
             map.put("recalculationRestFrequencyDate", recalculationRestFrequencyDate);
+        }
+        if (holdGuaranteeFunds != null) {
+            map.put("holdGuaranteeFunds", this.holdGuaranteeFunds);
+            if (this.holdGuaranteeFunds) {
+                map.put("mandatoryGuarantee", this.mandatoryGuarantee);
+                map.put("minimumGuaranteeFromGuarantor", this.minimumGuaranteeFromGuarantor);
+                map.put("minimumGuaranteeFromOwnFunds", this.minimumGuaranteeFromOwnFunds);
+            }
         }
         return new Gson().toJson(map);
     }
@@ -385,4 +397,14 @@ public class LoanProductTestBuilder {
         this.minimumDaysBetweenDisbursalAndFirstRepayment = minimumDaysBetweenDisbursalAndFirstRepayment;
         return this;
     }
+
+    public LoanProductTestBuilder withOnHoldFundDetails(final String mandatoryGuarantee, final String minimumGuaranteeFromGuarantor,
+            final String minimumGuaranteeFromOwnFunds) {
+        this.holdGuaranteeFunds = true;
+        this.mandatoryGuarantee = mandatoryGuarantee;
+        this.minimumGuaranteeFromGuarantor = minimumGuaranteeFromGuarantor;
+        this.minimumGuaranteeFromOwnFunds = minimumGuaranteeFromOwnFunds;
+        return this;
+    }
+
 }

@@ -998,6 +998,14 @@
 								<td></td>
 							</tr>
 							<tr>
+								<td></td>
+								<td>loans/{loanId}?command=recoverGuarantees</td>
+								<td><a href="#loans_recoverguarantee">Recover From Guarantors</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
 								<td><a href="#loans_transactions">Loan Transactions</a></td>
 								<td>loans/{loanId}/transactions?command=repayment</td>
 								<td><a href="#loans_transaction_repayment">Enter a repayment</a></td>
@@ -7383,6 +7391,11 @@ GET https://DomainName/api/v1/loans/template?templateType=individual&clientId=1&
 							optional, <span>Either 'all' or a comma separated list of
 								loan 'associations' (itemised below).</span>
 						</dd>
+						<dt>exclude</dt>
+						<dd>
+							optional, <span>'all' and a comma separated list of
+								loan associations (itemised below) as 'exclude'.</span>
+						</dd>
 						<dd>
 							<br>Associations are just extra pieces of data that you
 							might or might not want to retrieve.<br>
@@ -7421,6 +7434,8 @@ GET https://DomainName/api/v1/loans/template?templateType=individual&clientId=1&
 					<br>
 					<br>
 					<div class=apiClick>loans/1?associations=all</div>
+					<br>
+					<div class=apiClick>loans/1?associations=all&exclude=guarantors</div>
 					<br>
 					<br>
 					<div class=apiClick>loans/1?fields=id,principal,annualInterestRate&associations=repaymentSchedule,transactions</div>
@@ -8234,6 +8249,30 @@ Request Body:
     "approvedOnDate": "20 September 2011",
     "note": "Loan approval note"
   }
+}
+					</code>
+				</div>
+			</div>
+
+			
+			<a id="loans_recoverguarantee" name="loans_recoverguarantee" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Recover Loan Guarantee </h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/{loanId}?command=recoverGuarantees
+					</code>
+					<code class="method-request">
+POST loans/1?command=approve
+Content-Type: application/json 
+No Request Body:
+</code>
+					<code class="method-response">
+{
+  
+  "loanId": 1
 }
 					</code>
 				</div>
@@ -9144,6 +9183,20 @@ Request Body:
 							birth details of an external guarantor
 							</td>
 						</tr>
+						<tr class=alt>
+							<td>savingsId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Guarantors Savings Account on which Amount will be blocked 
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>amount</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Guarantee amount which will be blocked on savings account.
+							</td>
+						</tr>
 					</table>
 				</div>
 			</div>
@@ -9203,6 +9256,7 @@ GET https://DomainName/api/v1/loans/{loanId}/guarantors
 					</p>
 					<p>Example Request:</p>
 					<div class=apiClick>loans/1/guarantors/template</div>
+					<div class=apiClick>loans/1/guarantors/accounts/template?clientId=1</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -9232,6 +9286,39 @@ GET https://DomainName/api/v1/loans/{loanId}/guarantors/template
             "value": "EXTERNAL"
         }
     ]
+}
+					</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loans/{loanId}/guarantors/accounts/template?clientId={clientId}
+					</code>
+					<code class="method-response">
+{
+  "guarantorType": {
+    "id": 1,
+    "code": "guarantor.existing.customer",
+    "value": "CUSTOMER"
+  },
+  "status": false,
+  "accountLinkingOptions": [
+    {
+      "id": 1,
+      "accountNo": "000000001",
+      "clientId": 3,
+      "clientName": "Client_FirstName_UUV18 Client_LastName_9T2D",
+      "productId": 1,
+      "productName": "FIXED_DEPOSIT_PRODUCT_U0NS9T",
+      "fieldOfficerId": 0,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 4,
+        "inMultiplesOf": 100,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      }
+    }
+  ]
 }
 					</code>
 				</div>
@@ -9298,6 +9385,15 @@ GET https://DomainName/api/v1/loans/{loanId}/guarantors/{guarantorId}
 						</tr>
 						<tr class=alt>
 							<td>guarantorTypeId, firstname, lastname</td>
+						</tr>
+                    </table>
+					 <table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields
+								for "internal" guarantors</div></td>
+						</tr>
+						<tr class=alt>
+							<td>savingsId, amount</td>
 						</tr>
                     </table>
                 </div>
@@ -9382,9 +9478,12 @@ Request Body:
 				<div class="method-example">
 					<code class="method-declaration">
 DELETE https://DomainName/api/v1/loans/{loanId}/guarantors/{guarantorId}
+DELETE https://DomainName/api/v1/loans/{loanId}/guarantors/{guarantorId}?guarantorFundingId={guarantorFundingId}
 					</code>
+
 					<code class="method-request">
 DELETE loans/1/guarantors/1
+DELETE loans/1/guarantors/1?guarantorFundingId=1
 Content-Type: application/json 
 No Request Body:
 					</code>
@@ -12282,7 +12381,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							numberOfRepaymentVariationsForBorrowerCycle,
 							interestRateVariationsForBorrowerCycle,
 							multiDisburseLoan,maxTrancheCount,
-							outstandingLoanBalance,overdueDaysForNPA
+							outstandingLoanBalance,overdueDaysForNPA,holdGuaranteeFunds
 							</td>
 						</tr>
 					</table>
@@ -12321,6 +12420,22 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 						</tr>
 						<tr class=alt>
 							<td>recalculationRestFrequencyInterval, recalculationRestFrequencyDate</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>						
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Additional Mandatory Fields if Hold Guarantee funds is enabled(true)</div></td>
+						</tr>
+						<tr class=alt>
+							<td>mandatoryGuarantee</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>						
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Additional Optional Fields if Hold Guarantee funds is enabled(true)</div></td>
+						</tr>
+						<tr class=alt>
+							<td>minimumGuaranteeFromOwnFunds,minimumGuaranteeFromGuarantor</td>
 						</tr>
 					</table>
 				</div>
@@ -12385,7 +12500,8 @@ Request Body:
 "overpaymentLiabilityAccountId":11,
 "daysInMonthType":1,
 "daysInYearType":1,
-"isInterestRecalculationEnabled":"false"
+"isInterestRecalculationEnabled":"false",
+"holdGuaranteeFunds":"false"
 }
 					</code>
 					<code class="method-response">
@@ -33478,6 +33594,14 @@ No Request Body:
 					<td></td>
 					<td>loans/{loanId}?command=undoDisbursal</td>
 					<td><a href="#loans_disburse_undo">Undo Loan Application Disbursal</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>loans/{loanId}?command=recoverGuarantees</td>
+					<td><a href="#loans_recoverguarantee">Recover From Guarantors</a></td>
 					<td></td>
 					<td></td>
 					<td></td>

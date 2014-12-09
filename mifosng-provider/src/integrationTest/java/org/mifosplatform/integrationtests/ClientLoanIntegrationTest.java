@@ -36,8 +36,6 @@ import org.mifosplatform.integrationtests.common.loans.LoanProductTestBuilder;
 import org.mifosplatform.integrationtests.common.loans.LoanStatusChecker;
 import org.mifosplatform.integrationtests.common.loans.LoanTransactionHelper;
 import org.mifosplatform.integrationtests.common.savings.SavingsAccountHelper;
-import org.mifosplatform.integrationtests.common.savings.SavingsProductHelper;
-import org.mifosplatform.integrationtests.common.savings.SavingsStatusChecker;
 
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
@@ -87,7 +85,8 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
         final Integer loanProductID = createLoanProduct(false, NONE);
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00");
-        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,loanID);
+        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
+                loanID);
         verifyLoanRepaymentSchedule(loanSchedule);
 
     }
@@ -324,7 +323,8 @@ public class ClientLoanIntegrationTest {
         validateCharge(flat, loanCharges, "150.0", "150.0", "0.0", "0.0");
         validateNumberForEqual("654.24", String.valueOf(firstInstallment.get("feeChargesDue")));
 
-        final Integer savingsId = createSavings(clientID);
+        final Integer savingsId = SavingsAccountHelper.openSavingsAccount(this.requestSpec, this.responseSpec, clientID,
+                MINIMUM_OPENING_BALANCE);
         this.loanTransactionHelper.updateLoan(loanID,
                 updateLoanJson(clientID, loanProductID, copyChargesForUpdate(loanCharges, null, null), String.valueOf(savingsId)));
 
@@ -527,7 +527,8 @@ public class ClientLoanIntegrationTest {
                 "0.0");
         validateChargeExcludePrecission(flat, loanCharges, "100.0", "400", "0.0", "0.0");
 
-        final Integer savingsId = createSavings(clientID);
+        final Integer savingsId = SavingsAccountHelper.openSavingsAccount(this.requestSpec, this.responseSpec, clientID,
+                MINIMUM_OPENING_BALANCE);
         this.loanTransactionHelper.updateLoan(loanID,
                 updateLoanJson(clientID, loanProductID, copyChargesForUpdate(loanCharges, null, null), String.valueOf(savingsId)));
 
@@ -687,7 +688,8 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
         final Integer loanProductID = createLoanProduct(false, NONE);
 
-        final Integer savingsId = createSavings(clientID);
+        final Integer savingsId = SavingsAccountHelper.openSavingsAccount(this.requestSpec, this.responseSpec, clientID,
+                MINIMUM_OPENING_BALANCE);
 
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, savingsId.toString(), "12,000.00");
         Assert.assertNotNull(loanID);
@@ -770,7 +772,8 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
         final Integer loanProductID = createLoanProduct(true, NONE);
 
-        final Integer savingsId = createSavings(clientID);
+        final Integer savingsId = SavingsAccountHelper.openSavingsAccount(this.requestSpec, this.responseSpec, clientID,
+                MINIMUM_OPENING_BALANCE);
 
         List<HashMap> tranches = new ArrayList<>();
         tranches.add(createTrancheDetail("1 March 2014", "25000"));
@@ -1156,38 +1159,6 @@ public class ClientLoanIntegrationTest {
         }
         map.put("chargeId", charge.get("chargeId"));
         return map;
-    }
-
-    private Integer createSavings(Integer clientID) {
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE);
-        Assert.assertNotNull(savingsProductID);
-
-        SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-
-        final Integer savingsId = savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
-        Assert.assertNotNull(savingsProductID);
-
-        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
-        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
-
-        savingsStatusHashMap = savingsAccountHelper.approveSavings(savingsId);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-
-        savingsStatusHashMap = savingsAccountHelper.activateSavings(savingsId);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
-        return savingsId;
-    }
-
-    private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String minOpenningBalance) {
-        System.out.println("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
-        SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
-        final String savingsProductJSON = savingsProductHelper //
-                .withInterestCompoundingPeriodTypeAsDaily() //
-                .withInterestPostingPeriodTypeAsMonthly() //
-                .withInterestCalculationPeriodTypeAsDailyBalance() //
-                .withMinimumOpenningBalance(minOpenningBalance).build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
     }
 
     private HashMap createTrancheDetail(final String date, final String amount) {
