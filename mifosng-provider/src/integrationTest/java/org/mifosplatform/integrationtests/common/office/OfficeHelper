@@ -36,7 +36,7 @@ public class OfficeHelper {
             this.hierarchy = hierarchy;
         }
         public OfficeHelper build() {
-            return new OfficeHelper(this.name, this.externalId, this.id, this.nameDecorated, this.openingDate, this.hierarchy);
+            return new OfficeHelper(this.name, this.externalId, this.nameDecorated, this.openingDate, this.hierarchy);
         }
 
     }
@@ -94,6 +94,10 @@ public class OfficeHelper {
 
     public int openingDate() {
         return this.openingDate;
+    }
+
+    public static Builder create(final String name) {
+        return new Builder(name);
     }
 
 

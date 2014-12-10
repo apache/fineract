@@ -13,6 +13,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mifosplatform.integrationtests.common.Utils;
+import org.mifosplatform.integrationtests.common.office.OfficeHelper;
+import org.mifosplatform.integrationtests.common.office.OfficeResourceHandler;
 
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
@@ -33,5 +35,32 @@ public class OfficeIntegrationsTest {
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.statusOkResponseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
-}
 
+    @Test
+    public void testCreateOffice()
+    {
+        int random_array = {1997, 26, 12};
+        OfficeHelper oh = OfficeHelper                                            // oh ---> Office Helper
+                          .create(Utils.randomNameGenerator("", 5))
+                          .externalId(Utils.randomNameGenerator("offices-", 7))
+                          .nameDecorated(Utils.randomNameGenerator("", 8))
+                          .openingDate(random_array)
+                          .hierarchy(".")
+                          .build();
+        String JsonData = oh.toJSON();
+        final Long officeID = createOfficeID(JsonData, this.requestSpec, this.statusOkResponseSpec);
+        Assert.assertNotNull(officeID);
+
+    }
+    private Long createOffice(final String officeJSON,
+                            final RequestSpecification requestSpec,
+                            final ResponseSpecification responseSpec) {
+        String officeId = String.valueOf(OfficeResourceHandler.createOffice(officeJSON, requestSpec, responseSpec));
+        if (officeId.equals("null")) {
+            // Invalid JSON data parameters
+            return null;
+        }
+
+        return new Long(officeId);
+}
+}

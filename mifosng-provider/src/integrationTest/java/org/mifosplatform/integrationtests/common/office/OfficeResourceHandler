@@ -14,10 +14,10 @@ public class OfficeResourceHandler {
     private static final String OFFICES_URL = "/mifosng-provider/api/v1/offices";
     private static final String CREATE_OFFICES_URL = OFFICES_URL + "?" + Utils.TENANT_IDENTIFIER;
 
-    public static Integer createFund(final String fundJSON,
+    public static Integer createOffice(final String officeJSON,
                                      final RequestSpecification requestSpec,
                                      final ResponseSpecification responseSpec) {
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_FUNDS_URL, fundJSON, "resourceId");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_OFFICES_URL, officeJSON, "resourceId");
     }
 
     public Integer createOffice(final String openingDate) {
