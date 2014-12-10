@@ -36,7 +36,7 @@ public class CurrenciesTest {
     }
 
     @Test
-    public void testCurrency() {
+    public void testCurrencyElements() {
 
         CurrencyDomain currency = CurrenciesHelper.getCurrencybyCode(requestSpec, responseSpec, "USD");
         CurrencyDomain usd = CurrencyDomain.create("USD", "US Dollar", 2, "$", "currency.USD", "US Dollar ($)").build();
@@ -50,7 +50,8 @@ public class CurrenciesTest {
         Assert.assertEquals(usd, currency);
     }
 
-    public void testCurrencySelection() {
+    @Test
+    public void testUpdateCurrencySelection() {
 
         // Test updation
         ArrayList<String> currenciestoUpdate = new ArrayList<String>();
