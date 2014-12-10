@@ -183,25 +183,14 @@ INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `desc
 #### 2.3.3 Libraries
 
   Ensure the following libraries are in the [TOMCAT_HOME]/lib folder
-  - tomcat-jdbc.jar 
-    - Download link: http://www.java2s.com/Code/JarDownload/tomcat-jdbc/tomcat-jdbc.jar.zip
-    - Page for manual download: http://www.java2s.com/Code/Jar/t/Downloadtomcatjdbcjar.htm
-  - mysql-connector-java-5.1.22 (You will need to download latest MySQL Connector/J Jar file from http://dev.mysql.com/downloads/connector/j/)
+  - tomcat-jdbc.jar (You can download the same from http://central.maven.org/maven2/org/apache/tomcat/tomcat-jdbc/7.0.57/tomcat-jdbc-7.0.57.jar)
+  - mysql-connector-java-5.1.22 (You will need to download the latest MySQL Connector/J Jar file from http://dev.mysql.com/downloads/connector/j/)
 
 #### 2.3.4 Configure for SSL
 
   Generate a new keystore using java keytool (if you havent already done this):
   - Follow docs to create keystore.(http://tomcat.apache.org/tomcat-7.0-doc/ssl-howto.html#Configuration)
-    - To create keystore file:
-      Windows: 
-      ``` %JAVA_HOME%\bin\keytool -genkey -alias tomcat -keyalg RSA ```
-      to add different directory just add:
-      ``` \ -keystore \path\to\my\keystore ```  
-      Unix:
-      ``` $JAVA_HOME/bin/keytool -genkey -alias tomcat -keyalg RSA ```
-      to add different directory just add:
-      ``` \ -keystore \path\to\my\keystore ``` 
-
+   
   - Update server.xml as in docs. (Ther server.xml configuration given in the configure tomcat 7 below is what is need.)
 
   ```sudo keytool -genkey -alias mifostom -keyalg RSA -keystore /home/ubuntu/.keystore```
