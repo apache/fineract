@@ -158,6 +158,11 @@ sourceSets {
             exclude '**/EmbeddedTomcatWithSSLConfiguration.java'
         }
     }
+    test {
+    	java {
+    		exclude '**/core/boot/tests/**'
+    	}
+    }
 }
 }
 
