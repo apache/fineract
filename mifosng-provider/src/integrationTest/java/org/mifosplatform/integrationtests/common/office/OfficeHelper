@@ -23,9 +23,6 @@ public class OfficeHelper {
             return this;
         }
 
-        public Builder id(final long id) {
-            this.id = id;
-        }
 
         public Builder nameDecorated(final String nameDecorated) {
             this.nameDecorated = nameDecorated;
@@ -56,15 +53,13 @@ public class OfficeHelper {
             super();
         }
 
-        private OfficeHelper(final String name,
-                                   final String externalId, final String nameDecorated, final String hierarchy, final int[] openingDate, final Long id) {
+        private OfficeHelper(final String name, final String externalId, final String nameDecorated, final String hierarchy, final int[] openingDate) {
             super();
             this.name = name;
             this.externalId = externalId;
             this.nameDecorated = nameDecorated;
             this.hierarchy = hierarchy;
             this.openingDate = openingDate;
-            this.id = id;
         }
 
 
