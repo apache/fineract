@@ -76,6 +76,10 @@ public final class Client extends AbstractPersistable<Long> {
     @Column(name = "status_enum", nullable = false)
     private Integer status;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sub_status", nullable = true)
+    private CodeValue subStatus;
+    
     @Column(name = "activation_date", nullable = true)
     @Temporal(TemporalType.DATE)
     private Date activationDate;
@@ -739,6 +743,18 @@ public final class Client extends AbstractPersistable<Long> {
 
     public Integer getStatus() {
         return this.status;
+    }
+    
+    public CodeValue subStatus() {
+        return this.subStatus;
+    }
+    
+    public Long subStatusId() {
+        Long subStatusId = null;
+        if (this.subStatus != null) {
+            subStatusId = this.subStatus.getId();
+        }
+        return subStatusId;
     }
 
     public void setStatus(final Integer status) {
