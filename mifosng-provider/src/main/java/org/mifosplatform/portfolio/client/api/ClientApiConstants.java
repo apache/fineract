@@ -46,10 +46,10 @@ public class ClientApiConstants {
     public static final String closureDateParamName = "closureDate";
     public static final String closureReasonIdParamName = "closureReasonId";
     
-    public static final String rejectDateParamName = "rejectDate";
-    public static final String rejectReasonIdParamName ="rejectReasonId";
-    public static final String withdrawDateParamName = "withdrawDate";
-    public static final String withdrawReasonIdParamName ="withdrawReasonId";
+    public static final String rejectDateParamName = "rejectionDate";
+    public static final String rejectReasonIdParamName ="rejectionReasonId";
+    public static final String withdrawDateParamName = "withdrawalDate";
+    public static final String withdrawReasonIdParamName ="withdrawalReasonId";
         
     public static final String submittedOnDateParamName = "submittedOnDate";
     public static final String savingsProductIdParamName = "savingsProductId";
