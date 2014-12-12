@@ -239,6 +239,10 @@ public class CashierTransaction extends AbstractPersistable<Long> {
     public String getTxnNote() {
         return txnNote;
     }
+    
+    public BigDecimal getTxnAmount() {
+        return txnAmount;
+    }
 
     public void setTxnNote (String txnNote) {
         this.txnNote = txnNote;

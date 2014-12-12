@@ -2,6 +2,13 @@ package org.mifosplatform.organisation.teller.service;
 
 import java.util.Map;
 
+import org.mifosplatform.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
+import org.mifosplatform.accounting.financialactivityaccount.domain.FinancialActivityAccount;
+import org.mifosplatform.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
+import org.mifosplatform.accounting.glaccount.domain.GLAccount;
+import org.mifosplatform.accounting.journalentry.domain.JournalEntry;
+import org.mifosplatform.accounting.journalentry.domain.JournalEntryType;
+import org.mifosplatform.accounting.journalentry.domain.JournalEntryRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -44,13 +51,19 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     private final StaffRepository staffRepository;
     private final CashierRepository cashierRepository;
     private final CashierTransactionRepository cashierTxnRepository;
+    private final JournalEntryRepository glJournalEntryRepository;
+    private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper;
+    
     
     @Autowired
     public TellerWritePlatformServiceJpaImpl (final PlatformSecurityContext context,
             final TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final TellerRepository tellerRepository, final OfficeRepository officeRepository,
             final StaffRepository staffRepository, CashierRepository cashierRepository,
-            CashierTransactionRepository cashierTxnRepository) {
+            CashierTransactionRepository cashierTxnRepository,
+            JournalEntryRepository glJournalEntryRepository,
+            FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper
+    		) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.tellerRepository = tellerRepository;
@@ -58,6 +71,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         this.staffRepository = staffRepository;
         this.cashierRepository = cashierRepository;
         this.cashierTxnRepository = cashierTxnRepository;
+        this.glJournalEntryRepository = glJournalEntryRepository;
+		this.financialActivityAccountRepositoryWrapper = financialActivityAccountRepositoryWrapper;
     }
 
 
@@ -65,7 +80,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 	@Transactional
 	public CommandProcessingResult createTeller(JsonCommand command) {
        try {
-            final AppUser currentUser = this.context.authenticatedUser();
+            this.context.authenticatedUser();
             
             final Long officeId = command.longValueOfParameterNamed("officeId");
 
@@ -176,7 +191,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 	@Override
 	public CommandProcessingResult allocateCashierToTeller(final Long tellerId, JsonCommand command) {
 		try {
-            final AppUser currentUser = this.context.authenticatedUser();
+            this.context.authenticatedUser();
             
             // final Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, officeId);
             final Teller teller = this.tellerRepository.findOne(tellerId);
@@ -194,7 +209,6 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
             final Cashier cashier = Cashier.fromJson(tellerOffice, teller, staff,
             		command);
 
-            // pre save to generate id for use in office hierarchy
             this.cashierRepository.save(cashier);
 
             return new CommandProcessingResultBuilder() //
@@ -327,8 +341,50 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
             final CashierTransaction cashierTxn = CashierTransaction.fromJson(cashier, command);
             cashierTxn.setTxnType(txnType.getId());
 
-            // pre save to generate id for use in office hierarchy
             this.cashierTxnRepository.save(cashierTxn);
+            
+            // Pass the journal entries
+            FinancialActivityAccount mainVaultFinancialActivityAccount = this.financialActivityAccountRepositoryWrapper.
+            		findByFinancialActivityTypeWithNotFoundDetection(
+            			FINANCIAL_ACTIVITY.CASH_AT_MAINVAULT.getValue());
+            FinancialActivityAccount tellerCashFinancialActivityAccount = this.financialActivityAccountRepositoryWrapper.
+            		findByFinancialActivityTypeWithNotFoundDetection(
+            			FINANCIAL_ACTIVITY.CASH_AT_TELLER.getValue());
+            GLAccount creditAccount = null;
+            GLAccount debitAccount = null;
+            if (txnType.equals(CashierTxnType.ALLOCATE) ) {
+            	debitAccount = tellerCashFinancialActivityAccount.getGlAccount();
+    			creditAccount = mainVaultFinancialActivityAccount.getGlAccount();
+    		} else if (txnType.equals(CashierTxnType.SETTLE) ) {
+    			debitAccount = mainVaultFinancialActivityAccount.getGlAccount();
+    			creditAccount = tellerCashFinancialActivityAccount.getGlAccount();
+    		}
+			
+            final Office cashierOffice = cashier.getTeller().getOffice();
+            
+	        final Long time = System.currentTimeMillis();
+	        final String uniqueVal = String.valueOf(time) + currentUser.getId() + cashierOffice.getId();
+	        final String transactionId = Long.toHexString(Long.parseLong(uniqueVal));
+			
+			final JournalEntry debitJournalEntry = JournalEntry.createNew(
+					cashierOffice, null, // payment detail
+					debitAccount, "USD", // FIXME: Take currency code from the transaction  
+					transactionId, false, // manual entry
+	                cashierTxn.getTxnDate(), JournalEntryType.DEBIT, cashierTxn.getTxnAmount(),
+	                cashierTxn.getTxnNote(), // Description 
+	                null, null, null, // entity Type, entityId, reference number
+	                null, null); // Loan and Savings Txn
+			final JournalEntry creditJournalEntry = JournalEntry.createNew(
+					cashierOffice, null, // payment detail
+					creditAccount, "USD", // FIXME: Take currency code from the transaction  
+					transactionId, false, // manual entry
+	                cashierTxn.getTxnDate(), JournalEntryType.CREDIT, cashierTxn.getTxnAmount(),
+	                cashierTxn.getTxnNote(), // Description 
+	                null, null, null, // entity Type, entityId, reference number
+	                null, null); // Loan and Savings Txn
+			
+	        this.glJournalEntryRepository.saveAndFlush(debitJournalEntry);
+	        this.glJournalEntryRepository.saveAndFlush(creditJournalEntry);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
