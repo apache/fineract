@@ -8,6 +8,7 @@ package org.mifosplatform.integrationtests.common;
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
+import java.util.List;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -53,6 +54,15 @@ public class ClientHelper {
                 "clientId");
     }
 
+    public static Integer createClientForAccountPreference(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+    		final Integer clientType,String jsonAttributeToGetBack) {
+    	final String activationDate = "04 March 2011";
+    	final String officeId = "1";
+        System.out.println("---------------------------------CREATING A CLIENT BASED ON ACCOUNT PREFERENCE---------------------------------------------");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientWithClientTypeAsJSON(activationDate, officeId, clientType.toString()),
+        		"clientId");
+    }
+    
     public static Object assignStaffToClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId, final String staffId) {
         final String CLIENT_ASSIGN_STAFF_URL = "/mifosng-provider/api/v1/clients/" + clientId + "?" + Utils.TENANT_IDENTIFIER
@@ -80,6 +90,22 @@ public class ClientHelper {
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }
+    
+    public static String getTestClientWithClientTypeAsJSON(final String dateOfJoining, final String officeId,
+    		final String clientType) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("officeId", officeId);
+        map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
+        map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
+        map.put("externalId", randomIDGenerator("ID_", 7));
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("locale", "en");
+        map.put("active", "true");
+        map.put("activationDate", dateOfJoining);
+        map.put("clientTypeId", clientType);
+        System.out.println("map : " + map);
+        return new Gson().toJson(map);
+    }
 
     public static String assignStaffToClientAsJson(final String staffId) {
         final HashMap<String, String> map = new HashMap<>();
@@ -99,7 +125,6 @@ public class ClientHelper {
     public static Object getClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String clientId,
             final String jsonReturn) {
         final String GET_CLIENT_URL = "/mifosng-provider/api/v1/clients/" + clientId + "?" + Utils.TENANT_IDENTIFIER;
-
         System.out.println("---------------------------------GET A CLIENT---------------------------------------------");
         return Utils.performServerGet(requestSpec, responseSpec, GET_CLIENT_URL, jsonReturn);
 
