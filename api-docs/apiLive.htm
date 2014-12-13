@@ -5617,6 +5617,48 @@ GET https://DomainName/mifosng-provider/api/v1/centers?paged=true
 						<tr>
 							<td class=fielddesc>The individual client members that make up the group. The clients must be assigned to the same office as this group.</td>
 						</tr>
+                        <tr class=alt>
+							<td>calendarId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The identifier of the calendar to which the transaction is linked with.</td>
+						</tr>
+						<tr class=alt>
+							<td>transactionDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The date on which the transaction took place.</td>
+						</tr>
+                        <tr class=alt>
+							<td>role</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The role to be assigned to a client.</td>
+						</tr>
+                        <tr class=alt>
+							<td>actualDisbursementDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The date on which the actual disbursement took place.</td>
+						</tr>
+                        <tr class=alt>
+							<td>clientsAttendance</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The clients attendance.</td>
+						</tr>
+                        <tr class=alt>
+							<td>bulkRepaymentTransaction </td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The details of any bulk repayment transactions.</td>
+						</tr>
+                        <tr class=alt>
+							<td>bulkDisbursementTransactions </td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The details of any bulk disbursement transactions.</td>
+						</tr>
 					</table>
 				</div>
 			</div>
@@ -5767,7 +5809,7 @@ GET https://DomainName/mifosng-provider/api/v1/groups/template?centerId=1
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>externalId,staffId,clientMembers</td>
+							<td>externalId, staffId, clientMembers</td>
 						</tr>
 					</table>
 				</div>
@@ -5819,9 +5861,18 @@ Content-Type: application/json Request Body:
 	<a id="groups_activate" name="groups_activate" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h2>Activate a Group</h2>
+	        <h4>Activate a Group</h4>
 	        <p>Groups can be created in a <i>Pending</i> state. This API exists to enable group activation.</p>
 	        <p>If the group happens to be already active this API will result in an error.</p>
+            <table class=matrixHeading>
+				<tr class="matrixHeadingBG">
+                    <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+				</tr>
+                <tr class=alt>
+				    <td>activationDate<br>
+                    </td>
+                </tr>
+            </table>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=activate</code>
@@ -5847,10 +5898,19 @@ Request Body:
 	<a id="groups_associate_clients" name="groups_associate_clients" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h2>Associate Clients</h2>
+	        <h4>Associate Clients</h4>
 	        <p>This API allows to associate existing clients to a group.</p>
 	        <p>The clients are listed from the office to which the group is associated.</p>
 	        <p>If client(s) is already associated with group then API will result in an error.</p>
+            <table class=matrixHeading>
+				<tr class="matrixHeadingBG">
+                    <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+				</tr>
+                <tr class=alt>
+				    <td>clientMembers<br>
+                    </td>
+                </tr>
+            </table>
 	    </div>
 
 	    <div class="method-example">
@@ -5875,9 +5935,18 @@ Request Body:
 	<a id="groups_disassociate_clients" name="groups_disassociate_clients" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h2>Disassociate Clients</h2>
+	        <h4>Disassociate Clients</h4>
 	        <p>This API allows to disassociate clients from a group.</p>
 	        <p>Disassociating a client with active joint liability group loans results in an error.</p>
+            <table class=matrixHeading>
+				<tr class="matrixHeadingBG">
+                    <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+				</tr>
+                <tr class=alt>
+				    <td>clientMembers<br>
+                    </td>
+                </tr>
+            </table>
 	    </div>
 
 	    <div class="method-example">
@@ -5903,7 +5972,7 @@ Request Body:
 			<a id="groups_transfer_clients" name="groups_transfer_clients" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 			    <div class="method-description">
-			        <h2>Transfer Clients across groups</h2>
+			        <h4>Transfer Clients across groups</h4>
 			        <p>This API allows to transfer clients from one group to another</p>
 			        <table class=matrixHeading>
 						<tr class="matrixHeadingBG">
@@ -5978,7 +6047,16 @@ Request Body:
             <div class="method-section">
                 <div class="method-description">
                     <h4>Generate Collection Sheet</h4>
-                    <p>This api retrieves repayment details of all jlg loans of all members of a group on a specified meeting date.</p>
+                    <p>This API retrieves repayment details of all jlg loans of all members of a group on a specified meeting date.</p>
+                    <br>
+                    <table class=matrixHeading>
+				        <tr class="matrixHeadingBG">
+                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+				        </tr>
+                        <tr class=alt>
+				            <td>calendarId, transactionDate</td>
+                        </tr>
+                    </table>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=generateCollectionSheet</code>
@@ -6086,7 +6164,23 @@ Request Body:
                 <div class="method-description">
                     <h4>Save Collection Sheet</h4>
                     <p>This api allows the loan officer to perform bulk repayments of JLG loans for a group on its meeting date.</p>
-
+                    <table class=matrixHeading>
+				        <tr class="matrixHeadingBG">
+                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+				        </tr>
+                        <tr class=alt>
+				            <td>calendarId, transactionDate, actualDisbursementDate</td>
+                        </tr>
+                    </table>
+                    <br>
+                    <table class=matrixHeading>
+				        <tr class="matrixHeadingBG">
+                            <td><div class="mifosXHeading2">Optional Fields</div></td>
+				        </tr>
+                        <tr class=alt>
+				            <td>clientsAttendance, bulkRepaymentTransaction, bulkDisbursementTransactions</td>
+                        </tr>
+                    </table>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=saveCollectionSheet</code>
@@ -6128,6 +6222,14 @@ Request Body:
                 <div class="method-description">
                     <h4>Unassign a Staff</h4>
                     <p>Allows you to unassign the <i>Staff</i>.</p>
+                    <table class=matrixHeading>
+				        <tr class="matrixHeadingBG">
+                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+				        </tr>
+                        <tr class=alt>
+				            <td>staffId</td>
+                        </tr>
+                    </table>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=unassignStaff</code>
@@ -6229,6 +6331,14 @@ Request Body:
                     <h4>Assign a Role</h4>
                     <p>Allows you to assign a <i>Role</i> to an existing member of a group.</p>
                     <p>We can define the different roles applicable to group members by adding code values to the pre-defined system code <b>GROUPROLE</b>. Example:Group leader etc.</p>
+                    <table class=matrixHeading>
+				        <tr class="matrixHeadingBG">
+                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+				        </tr>
+                        <tr class=alt>
+				            <td>clientId, role</td>
+                        </tr>
+                    </table>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=assignRole</code>
@@ -6278,6 +6388,14 @@ Request Body:
                 <div class="method-description">
                     <h4>Update a Role</h4>
                     <p>Allows you to update the member <i>Role</i>.</p>
+                    <table class=matrixHeading>
+				        <tr class="matrixHeadingBG">
+                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+				        </tr>
+                        <tr class=alt>
+				            <td>role</td>
+                        </tr>
+                    </table>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=updateRole&roleId=2</code>
