@@ -7,7 +7,9 @@ package org.mifosplatform.integrationtests.common.system;
 
 import static com.jayway.restassured.RestAssured.given;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.mifosplatform.integrationtests.common.Utils;
 
@@ -52,8 +54,46 @@ public class CodeHelper {
                 jsonAttributeToGetback);
 
     }
+    
+    public static HashMap<String,Object> getCodeByName(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String codeName, final String jsonAttributeToGetback){
 
-    public static Object getAllCodes(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+        final HashMap<String, Object> code =  new HashMap<>();
+
+    	ArrayList<HashMap<String,Object>> getAllCodes = (ArrayList<HashMap<String,Object>>) CodeHelper.getAllCodes(requestSpec, responseSpec);
+		for (HashMap<String, Object>map : getAllCodes) {
+			String name = (String) map.get("name");
+			if (name.equals(codeName)) {
+				code.put("id", map.get("id"));
+				code.put("name", map.get("name"));
+				code.put("position", map.get("position"));
+				code.put("description",map.get("description"));
+				break;
+			}
+		}
+		return code;   
+    }
+    
+	public static HashMap<String,Object> retrieveOrCreateCodeValue(Integer codeId,final RequestSpecification requestSpec, 
+			final ResponseSpecification responseSpec,final String jsonAttributeToGetBack) {
+    	Integer codeValueId = null;
+		final List<HashMap<String,Object>> codeValuesList = 
+				(List<HashMap<String,Object>>) CodeHelper.getCodeValuesForCode(requestSpec,responseSpec, codeId,"");
+		/* If Code Values doesn't exist,then create Code value */
+		if (codeValuesList.size() == 0) {
+			final Integer codeValuePosition = 0;
+			final String codeValue = Utils.randomNameGenerator("", 3);
+			codeValueId = (Integer)CodeHelper.createCodeValue(requestSpec, responseSpec, codeId , codeValue,codeValuePosition, "resourceId");
+
+		} else {
+			codeValueId = (Integer) codeValuesList.get(0).get("id");
+		}
+		return Utils.performServerGet(requestSpec, responseSpec,
+                CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "/" + codeValueId.toString() + "?" + Utils.TENANT_IDENTIFIER,
+                "");
+	}
+
+    public static ArrayList<HashMap<String,Object>> getAllCodes(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
 
         return Utils.performServerGet(requestSpec, responseSpec, CODE_URL + "?" + Utils.TENANT_IDENTIFIER, "");
 
@@ -109,7 +149,7 @@ public class CodeHelper {
                 + Utils.TENANT_IDENTIFIER, getTestCodeValueAsJSON(codeValueName, description, position), jsonAttributeToGetback);
     }
 
-    public static Object getCodeValuesForCode(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+    public static List<HashMap<String,Object>> getCodeValuesForCode(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer codeId, final String jsonAttributeToGetback) {
 
         return Utils.performServerGet(requestSpec, responseSpec, CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "?"

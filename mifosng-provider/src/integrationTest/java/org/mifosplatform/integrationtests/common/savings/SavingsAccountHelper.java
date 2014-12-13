@@ -328,6 +328,11 @@ public class SavingsAccountHelper {
         final ArrayList<HashMap> response = Utils.performServerGet(requestSpec, responseSpec, URL, jSONAttribute);
         return response;
     }
+    
+    public Object getSavingsAccountDetail(final Integer savingsID, final String jsonAttribute){
+    	final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "?associations=all&" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, URL, jsonAttribute);
+    }
 
     public ArrayList getSavingsCharges(final Integer savingsID) {
         final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "/charges?" + Utils.TENANT_IDENTIFIER;
