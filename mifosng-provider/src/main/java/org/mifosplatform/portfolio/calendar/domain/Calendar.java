@@ -329,20 +329,6 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
         final String newRecurrence = Calendar.constructRecurrence(command, this);
         if (!StringUtils.isBlank(this.recurrence) && !newRecurrence.equalsIgnoreCase(this.recurrence)) {
 
-            // FIXME: AA - Is this restriction required only for collection type
-            // meetings or for all?.
-            // Do not allow to change meeting frequency
-
-            if (!CalendarUtils.isFrequencySame(this.recurrence, newRecurrence)) {
-                final String defaultUserMessage = "Update of meeting frequency is not supported";
-                throw new CalendarParameterUpdateNotSupportedException("meeting.frequency", defaultUserMessage);
-            }
-
-            // Do not allow to change meeting interval
-            if (!CalendarUtils.isIntervalSame(this.recurrence, newRecurrence)) {
-                final String defaultUserMessage = "Update of meeting interval is not supported";
-                throw new CalendarParameterUpdateNotSupportedException("meeting.interval", defaultUserMessage);
-            }
             actualChanges.put("recurrence", newRecurrence);
             this.recurrence = StringUtils.defaultIfEmpty(newRecurrence, null);
         }
