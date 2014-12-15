@@ -139,11 +139,11 @@ public final class Client extends AbstractPersistable<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reject_reason_cv_id", nullable = true)
-    private CodeValue rejectReason;
+    private CodeValue rejectionReason;
 
     @Column(name = "rejectedon_date", nullable = true)
     @Temporal(TemporalType.DATE)
-    private Date rejectDate;
+    private Date rejectionDate;
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "rejectedon_userid", nullable = true)
@@ -151,11 +151,11 @@ public final class Client extends AbstractPersistable<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "withdraw_reason_cv_id", nullable = true)
-    private CodeValue withdrawReason;
+    private CodeValue withdrawalReason;
 
     @Column(name = "withdrawn_on_date", nullable = true)
     @Temporal(TemporalType.DATE)
-    private Date withdrawDate;
+    private Date withdrawalDate;
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "withdraw_on_userid", nullable = true)
@@ -866,22 +866,22 @@ public final class Client extends AbstractPersistable<Long> {
         return dateOfBirth;
     }
 
-    public void reject(AppUser currentUser, CodeValue rejectReason, Date rejectDate) {
-        this.rejectReason = rejectReason;
-        this.rejectDate = rejectDate;
+    public void reject(AppUser currentUser, CodeValue rejectionReason, Date rejectionDate) {
+        this.rejectionReason = rejectionReason;
+        this.rejectionDate = rejectionDate;
         this.rejectedBy = currentUser;
         this.updatedBy = currentUser;
-        this.updatedOnDate = rejectDate;
+        this.updatedOnDate = rejectionDate;
         this.status = ClientStatus.REJECTED.getValue();
 
     }
 
-    public void withdraw(AppUser currentUser, CodeValue withdrawReason, Date withdrawDate) {
-        this.withdrawReason = withdrawReason;
-        this.withdrawDate = withdrawDate;
+    public void withdraw(AppUser currentUser, CodeValue withdrawalReason, Date withdrawalDate) {
+        this.withdrawalReason = withdrawalReason;
+        this.withdrawalDate = withdrawalDate;
         this.withdrawnBy = currentUser;
         this.updatedBy = currentUser;
-        this.updatedOnDate = withdrawDate;
+        this.updatedOnDate = withdrawalDate;
         this.status = ClientStatus.WITHDRAWN.getValue();
 
     }

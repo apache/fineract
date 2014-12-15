@@ -527,11 +527,11 @@ public final class ClientDataValidator {
 
         final JsonElement element = command.parsedJson();
 
-        final LocalDate rejectDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.rejectDateParamName, element);
-        baseDataValidator.reset().parameter(ClientApiConstants.rejectDateParamName).value(rejectDate).notNull();
+        final LocalDate rejectionDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.rejectionDateParamName, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.rejectionDateParamName).value(rejectionDate).notNull();
 
-        final Long rejectReasonId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.rejectReasonIdParamName, element);
-        baseDataValidator.reset().parameter(ClientApiConstants.rejectReasonIdParamName).value(rejectReasonId).notNull()
+        final Long rejectionReasonId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.rejectionReasonIdParamName, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.rejectionReasonIdParamName).value(rejectionReasonId).notNull()
                 .longGreaterThanZero();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -553,11 +553,11 @@ public final class ClientDataValidator {
 
         final JsonElement element = command.parsedJson();
 
-        final LocalDate withdrawDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.withdrawDateParamName, element);
-        baseDataValidator.reset().parameter(ClientApiConstants.withdrawDateParamName).value(withdrawDate).notNull();
+        final LocalDate withdrawalDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.withdrawalDateParamName, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.withdrawalDateParamName).value(withdrawalDate).notNull();
 
-        final Long withdrawReasonId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.withdrawReasonIdParamName, element);
-        baseDataValidator.reset().parameter(ClientApiConstants.withdrawReasonIdParamName).value(withdrawReasonId).notNull()
+        final Long withdrawalReasonId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.withdrawalReasonIdParamName, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.withdrawalReasonIdParamName).value(withdrawalReasonId).notNull()
                 .longGreaterThanZero();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
