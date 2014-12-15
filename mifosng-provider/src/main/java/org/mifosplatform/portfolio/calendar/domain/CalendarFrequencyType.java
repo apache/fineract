@@ -82,6 +82,10 @@ public enum CalendarFrequencyType {
         return this.value.equals(CalendarFrequencyType.WEEKLY.value);
     }
 
+    public boolean isMonthly() {
+        return this.value.equals(CalendarFrequencyType.MONTHLY.value);
+    }
+
     public boolean isInvalid() {
         return this.value.equals(CalendarFrequencyType.INVALID.value);
     }

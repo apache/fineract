@@ -17,7 +17,8 @@ public class CalendarConstants {
                 "location"), START_DATE("startDate"), END_DATE("endDate"), CREATED_DATE("createdDate"), DURATION("duration"), TYPE_ID(
                 "typeId"), REPEATING("repeating"), REMIND_BY_ID("remindById"), FIRST_REMINDER("firstReminder"), SECOND_REMINDER(
                 "secondReminder"), LOCALE("locale"), DATE_FORMAT("dateFormat"), FREQUENCY("frequency"), INTERVAL("interval"), REPEATS_ON_DAY(
-                "repeatsOnDay");
+                "repeatsOnDay"), RESCHEDULE_BASED_ON_MEETING_DATES("reschedulebasedOnMeetingDates"), PRESENT_MEETING_DATE(
+                "presentMeetingDate"), NEW_MEETING_DATE("newMeetingDate"), ;
 
         private final String value;
 
