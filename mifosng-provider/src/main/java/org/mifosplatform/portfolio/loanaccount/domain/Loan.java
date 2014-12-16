@@ -1195,9 +1195,9 @@ public class Loan extends AbstractPersistable<Long> {
         if (command.isChangeInBooleanParameterNamed(createSiAtDisbursementParameterName, shouldCreateStandingInstructionAtDisbursement())) {
             final Boolean valueAsInput = command.booleanObjectValueOfParameterNamed(createSiAtDisbursementParameterName);
             actualChanges.put(createSiAtDisbursementParameterName, valueAsInput);
-            this.createStandingInstructionAtDisbursement = valueAsInput;            
+            this.createStandingInstructionAtDisbursement = valueAsInput;
         }
-        
+
         final String externalIdParamName = "externalId";
         if (command.isChangeInStringParameterNamed(externalIdParamName, this.externalId)) {
             final String newValue = command.stringValueOfParameterNamed(externalIdParamName);
@@ -1398,9 +1398,6 @@ public class Loan extends AbstractPersistable<Long> {
 
         if (loanProduct.isMultiDisburseLoan()) {
             updateDisbursementDetails(command, actualChanges);
-            if (command.isChangeInBigDecimalParameterNamed(LoanApiConstants.emiAmountParameterName, this.fixedEmiAmount)) {
-                this.fixedEmiAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.emiAmountParameterName);
-            }
             if (command.isChangeInBigDecimalParameterNamed(LoanApiConstants.maxOutstandingBalanceParameterName,
                     this.maxOutstandingLoanBalance)) {
                 this.maxOutstandingLoanBalance = command
@@ -1417,6 +1414,15 @@ public class Loan extends AbstractPersistable<Long> {
             }
         } else {
             this.disbursementDetails.clear();
+        }
+
+        if (loanProduct.isMultiDisburseLoan() || loanProduct.canDefineInstalmentAmount()) {
+            if (command.isChangeInBigDecimalParameterNamed(LoanApiConstants.emiAmountParameterName, this.fixedEmiAmount)) {
+                this.fixedEmiAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.emiAmountParameterName);
+                actualChanges.put(LoanApiConstants.emiAmountParameterName, this.fixedEmiAmount);
+                actualChanges.put("recalculateLoanSchedule", true);
+            }
+        } else {
             this.fixedEmiAmount = null;
         }
 
@@ -2076,10 +2082,15 @@ public class Loan extends AbstractPersistable<Long> {
     public void regenerateScheduleOnDisbursement(final ScheduleGeneratorDTO scheduleGeneratorDTO, final boolean recalculateSchedule,
             final LocalDate actualDisbursementDate, BigDecimal emiAmount, final AppUser currentUser) {
         boolean isEmiAmountChanged = false;
-        if (this.loanProduct.isMultiDisburseLoan() && emiAmount != null && emiAmount.compareTo(retriveLastEmiAmount()) != 0) {
-            LoanTermVariations loanVariationTerms = new LoanTermVariations(LoanTermVariationType.EMI_AMOUNT.getValue(),
-                    actualDisbursementDate.toDate(), emiAmount, this);
-            this.loanTermVariations.add(loanVariationTerms);
+        if ((this.loanProduct.isMultiDisburseLoan() || this.loanProduct.canDefineInstalmentAmount()) && emiAmount != null
+                && emiAmount.compareTo(retriveLastEmiAmount()) != 0) {
+            if (this.loanProduct.isMultiDisburseLoan()) {
+                LoanTermVariations loanVariationTerms = new LoanTermVariations(LoanTermVariationType.EMI_AMOUNT.getValue(),
+                        actualDisbursementDate.toDate(), emiAmount, this);
+                this.loanTermVariations.add(loanVariationTerms);
+            } else {
+                this.fixedEmiAmount = emiAmount;
+            }
             isEmiAmountChanged = true;
         }
 
@@ -2315,7 +2326,8 @@ public class Loan extends AbstractPersistable<Long> {
                 loanTermFrequency, loanTermPeriodFrequencyType, nthDayType, dayOfWeekType, getDisbursementDate(),
                 getExpectedFirstRepaymentOnDate(), scheduleGeneratorDTO.getCalculatedRepaymentsStartingFromDate(), getInArrearsTolerance(),
                 this.loanRepaymentScheduleDetail, this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount, disbursementData,
-                this.maxOutstandingLoanBalance, loanVariationTermsData, getInterestChargedFromDate());
+                this.maxOutstandingLoanBalance, loanVariationTermsData, getInterestChargedFromDate(),
+                this.loanProduct.getInstalmentAmountInMultiplesOf());
 
         final LoanScheduleModel loanSchedule = loanScheduleGenerator.generate(mc, loanApplicationTerms, charges(),
                 scheduleGeneratorDTO.getHolidayDetailDTO());
@@ -4639,7 +4651,7 @@ public class Loan extends AbstractPersistable<Long> {
                 calculatedRepaymentsStartingFromDate, getInArrearsTolerance(), this.loanRepaymentScheduleDetail,
                 this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount, disbursementData, this.maxOutstandingLoanBalance,
                 loanVariationTermsData, getInterestChargedFromDate(), this.loanInterestRecalculationDetails,
-                calendarInstanceForInterestRecalculation, recalculationFrequencyType);
+                calendarInstanceForInterestRecalculation, recalculationFrequencyType, this.loanProduct.getInstalmentAmountInMultiplesOf());
         return loanApplicationTerms;
     }
 
@@ -4682,7 +4694,8 @@ public class Loan extends AbstractPersistable<Long> {
             final LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms.assembleFrom(null, loanTermFrequency,
                     loanTermPeriodFrequencyType, nthDayType, dayOfWeekType, getDisbursementDate(), getExpectedFirstRepaymentOnDate(), null,
                     getInArrearsTolerance(), this.loanRepaymentScheduleDetail, this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount,
-                    disbursementData, this.maxOutstandingLoanBalance, loanVariationTermsData, getInterestChargedFromDate());
+                    disbursementData, this.maxOutstandingLoanBalance, loanVariationTermsData, getInterestChargedFromDate(),
+                    this.loanProduct.getInstalmentAmountInMultiplesOf());
 
             installment = loanScheduleGenerator.calculatePrepaymentAmount(this.repaymentScheduleInstallments, getCurrency(),
                     LocalDate.now(), getInterestChargedFromDate(), loanApplicationTerms, mc, charges());
@@ -4880,10 +4893,12 @@ public class Loan extends AbstractPersistable<Long> {
                 LoanEnumerations.loanvariationType(LoanTermVariationType.EMI_AMOUNT), expectedDisbursementDate, emiAmount);
         loanVariationTermsData.add(data);
 
-        return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, nthDayType,
-                dayOfWeekType, expectedDisbursementDate, repaymentsStartingFromDate, calculatedRepaymentsStartingFromDate,
-                inArrearsToleranceMoney, this.loanRepaymentScheduleDetail, loanProduct.isMultiDisburseLoan(), emiAmount, disbursementData,
-                maxOutstandingBalance, loanVariationTermsData, interestChargedFromDate);
+        return LoanApplicationTerms
+                .assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, nthDayType, dayOfWeekType,
+                        expectedDisbursementDate, repaymentsStartingFromDate, calculatedRepaymentsStartingFromDate,
+                        inArrearsToleranceMoney, this.loanRepaymentScheduleDetail, loanProduct.isMultiDisburseLoan(), emiAmount,
+                        disbursementData, maxOutstandingBalance, loanVariationTermsData, interestChargedFromDate,
+                        this.loanProduct.getInstalmentAmountInMultiplesOf());
     }
 
     /**

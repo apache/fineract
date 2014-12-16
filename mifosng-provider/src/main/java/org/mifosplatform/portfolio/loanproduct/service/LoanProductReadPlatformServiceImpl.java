@@ -126,6 +126,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.accounting_type as accountingType, lp.include_in_borrower_cycle as includeInBorrowerCycle,lp.use_borrower_cycle as useBorrowerCycle, lp.start_date as startDate, lp.close_date as closeDate,  "
                     + "lp.allow_multiple_disbursals as multiDisburseLoan, lp.max_disbursals as maxTrancheCount, lp.max_outstanding_loan_balance as outstandingLoanBalance, "
                     + "lp.days_in_month_enum as daysInMonth, lp.days_in_year_enum as daysInYear, lp.interest_recalculation_enabled as isInterestRecalculationEnabled, "
+                    + "lp.can_define_fixed_emi_amount as canDefineInstalmentAmount, lp.instalment_amount_in_multiples_of as instalmentAmountInMultiplesOf, "
                     + "lpr.id as lprId, lpr.product_id as productId, lpr.compound_type_enum as compoundType, lpr.reschedule_strategy_enum as rescheduleStrategy, "
                     + "lpr.rest_frequency_type_enum as restFrequencyEnum, lpr.rest_frequency_interval as restFrequencyInterval, "
                     + "lpr.rest_freqency_date as restFrequencyDate, "
@@ -240,6 +241,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final EnumOptionData daysInMonthType = CommonEnumerations.daysInMonthType(daysInMonth);
             final int daysInYear = JdbcSupport.getInteger(rs, "daysInYear");
             final EnumOptionData daysInYearType = CommonEnumerations.daysInYearType(daysInYear);
+            final Integer instalmentAmountInMultiplesOf = JdbcSupport.getInteger(rs, "instalmentAmountInMultiplesOf");
+            final boolean canDefineInstalmentAmount = rs.getBoolean("canDefineInstalmentAmount");
             final boolean isInterestRecalculationEnabled = rs.getBoolean("isInterestRecalculationEnabled");
 
             LoanProductInterestRecalculationData interestRecalculationData = null;
@@ -282,7 +285,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     closeDate, status, externalId, principalVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle,
                     numberOfRepaymentVariationsForBorrowerCycle, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
                     graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
-                    interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds, loanProductGuaranteeData);
+                    interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds, loanProductGuaranteeData,
+                    canDefineInstalmentAmount, instalmentAmountInMultiplesOf);
         }
 
     }

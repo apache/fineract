@@ -136,6 +136,12 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
     private LoanProductGuaranteeDetails loanProductGuaranteeDetails;
 
+    @Column(name = "can_define_fixed_emi_amount")
+    private boolean canDefineInstalmentAmount;
+
+    @Column(name = "instalment_amount_in_multiples_of", nullable = true)
+    private Integer instalmentAmountInMultiplesOf;
+
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator) {
 
@@ -225,6 +231,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
             loanProductGuaranteeDetails = LoanProductGuaranteeDetails.createFrom(command);
         }
 
+        final boolean canDefineEmiAmount = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canDefineEmiAmountParamName);
+        final Integer instalmentAmountInMultiplesOf = command
+                .integerValueOfParameterNamed(LoanProductConstants.instalmentAmountInMultiplesOfParamName);
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
                 annualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentFrequencyType,
@@ -233,7 +243,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 startDate, closeDate, externalId, useBorrowerCycle, loanProductBorrowerCycleVariations, multiDisburseLoan, maxTrancheCount,
                 outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment,
-                holdGuarantorFunds, loanProductGuaranteeDetails);
+                holdGuarantorFunds, loanProductGuaranteeDetails, canDefineEmiAmount, instalmentAmountInMultiplesOf);
 
     }
 
@@ -458,7 +468,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final boolean isInterestRecalculationEnabled,
             final LoanProductInterestRecalculationDetails productInterestRecalculationDetails,
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final boolean holdGuarantorFunds,
-            final LoanProductGuaranteeDetails loanProductGuaranteeDetails) {
+            final LoanProductGuaranteeDetails loanProductGuaranteeDetails, final boolean canDefineEmiAmount,
+            final Integer instalmentAmountInMultiplesOf) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -510,6 +521,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
         this.minimumDaysBetweenDisbursalAndFirstRepayment = minimumDaysBetweenDisbursalAndFirstRepayment;
         this.holdGuaranteeFunds = holdGuarantorFunds;
         this.loanProductGuaranteeDetails = loanProductGuaranteeDetails;
+        this.canDefineInstalmentAmount = canDefineEmiAmount;
+        this.instalmentAmountInMultiplesOf = instalmentAmountInMultiplesOf;
     }
 
     public MonetaryCurrency getCurrency() {
@@ -735,6 +748,20 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
         } else if (this.holdGuaranteeFunds) {
             this.loanProductGuaranteeDetails.update(command, actualChanges);
+        }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.canDefineEmiAmountParamName, this.canDefineInstalmentAmount)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canDefineEmiAmountParamName);
+            actualChanges.put(LoanProductConstants.canDefineEmiAmountParamName, newValue);
+            this.canDefineInstalmentAmount = newValue;
+        }
+
+        if (command.isChangeInIntegerParameterNamedWithNullCheck(LoanProductConstants.instalmentAmountInMultiplesOfParamName,
+                this.instalmentAmountInMultiplesOf)) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.instalmentAmountInMultiplesOfParamName);
+            actualChanges.put(LoanProductConstants.instalmentAmountInMultiplesOfParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.instalmentAmountInMultiplesOf = newValue;
         }
 
         return actualChanges;
@@ -987,6 +1014,14 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     public String getShortName() {
         return this.shortName;
+    }
+
+    public boolean canDefineInstalmentAmount() {
+        return this.canDefineInstalmentAmount;
+    }
+
+    public Integer getInstalmentAmountInMultiplesOf() {
+        return this.instalmentAmountInMultiplesOf;
     }
 
 }

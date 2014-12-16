@@ -73,7 +73,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.recalculationRestFrequencyTypeParameterName,
             LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment, LoanProductConstants.mandatoryGuaranteeParamName,
             LoanProductConstants.holdGuaranteeFundsParamName, LoanProductConstants.minimumGuaranteeFromGuarantorParamName,
-            LoanProductConstants.minimumGuaranteeFromOwnFundsParamName));
+            LoanProductConstants.minimumGuaranteeFromOwnFundsParamName, LoanProductConstants.canDefineEmiAmountParamName,
+            LoanProductConstants.instalmentAmountInMultiplesOfParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -323,6 +324,20 @@ public final class LoanProductDataValidator {
             if (holdGuaranteeFunds) {
                 validateGuaranteeParams(element, baseDataValidator, null);
             }
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.canDefineEmiAmountParamName, element)) {
+            final Boolean canDefineInstalmentAmount = this.fromApiJsonHelper.extractBooleanNamed(
+                    LoanProductConstants.canDefineEmiAmountParamName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.canDefineEmiAmountParamName).value(canDefineInstalmentAmount)
+                    .isOneOfTheseValues(true, false);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.instalmentAmountInMultiplesOfParamName, element)) {
+            final Integer instalmentAmountInMultiplesOf = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
+                    LoanProductConstants.instalmentAmountInMultiplesOfParamName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.instalmentAmountInMultiplesOfParamName)
+                    .value(instalmentAmountInMultiplesOf).ignoreIfNull().integerGreaterThanZero();
         }
 
         // accounting related data validation
@@ -746,6 +761,20 @@ public final class LoanProductDataValidator {
             if (holdGuaranteeFunds) {
                 validateGuaranteeParams(element, baseDataValidator, null);
             }
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.canDefineEmiAmountParamName, element)) {
+            final Boolean canDefineInstalmentAmount = this.fromApiJsonHelper.extractBooleanNamed(
+                    LoanProductConstants.canDefineEmiAmountParamName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.canDefineEmiAmountParamName).value(canDefineInstalmentAmount)
+                    .isOneOfTheseValues(true, false);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.instalmentAmountInMultiplesOfParamName, element)) {
+            final Integer instalmentAmountInMultiplesOf = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
+                    LoanProductConstants.instalmentAmountInMultiplesOfParamName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.instalmentAmountInMultiplesOfParamName)
+                    .value(instalmentAmountInMultiplesOf).ignoreIfNull().integerGreaterThanZero();
         }
 
         final Integer accountingRuleType = this.fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());

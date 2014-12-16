@@ -78,4 +78,8 @@ public interface LoanProductConstants {
     public static final String minimumGuaranteeFromOwnFundsParamName = "minimumGuaranteeFromOwnFunds";
     public static final String minimumGuaranteeFromGuarantorParamName = "minimumGuaranteeFromGuarantor";
 
+    // Fixed installment configuration related
+    public static final String canDefineEmiAmountParamName = "canDefineInstalmentAmount";
+    public static final String instalmentAmountInMultiplesOfParamName = "instalmentAmountInMultiplesOf";
+
 }

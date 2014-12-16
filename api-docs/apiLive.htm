@@ -11032,6 +11032,12 @@ Request Body:
 						<tr>
 							<td class=fielddesc>Override the default value for rounding currency to multiples of value provided.</td>
 						</tr>
+						<tr class=alt>
+							<td>instalmentAmountInMultiplesOf</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Override the default value for rounding instalment amount to multiples of value provided.</td>
+						</tr>
 
 						<tr class=alt>
 							<td>principal</td>
@@ -11131,6 +11137,13 @@ Request Body:
 						</tr>
 						<tr>
 							<td class=fielddesc>The minimum number of days allowed between a Loan disbursal and its first repayment.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>canDefineInstalmentAmount</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>if provided as true, then fixed instalment amount can be provided from loan account. 
 							</td>
 						</tr>
 
@@ -12499,7 +12512,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							numberOfRepaymentVariationsForBorrowerCycle,
 							interestRateVariationsForBorrowerCycle,
 							multiDisburseLoan,maxTrancheCount,
-							outstandingLoanBalance,overdueDaysForNPA,holdGuaranteeFunds
+							outstandingLoanBalance,overdueDaysForNPA, holdGuaranteeFunds, canDefineInstalmentAmount, instalmentAmountInMultiplesOf
 							</td>
 						</tr>
 					</table>
