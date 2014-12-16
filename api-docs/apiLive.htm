@@ -6418,19 +6418,42 @@ Request Body:
 
             <a id="groups_retrieve" name="groups_retrieve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
-				<div class="method-description">
-					<h4>Retrieve a Group</h4>
-					<p>Example Requests:</p>
-					<div class=apiClick>groups/1</div>
-					<br/>
-					<div class=apiClick>groups/1?associations=clientMembers</div>
-				</div>
-				<div class="method-example">
-					<p>Group without details of Client associations.</p>
-					<code class="method-declaration">
+                <div class="method-description">
+                    <h4>Retrieve a Group</h4>
+                    <p>Retrieve group information.</p>
+                    <dl class="argument-list">
+                        <dt>associations</dt>
+                        <dd>
+                            String <span>optional</span>
+                        </dd>
+                        <dd>
+                            One of, or comma separated of <span>clientMembers, activeClientMembers, groupRoles, calendars, collectionMeetingCalendar</span>
+                            <br>
+                            or <span>all</span> for all associations.
+                        </dd>
+                        <dt>staffInSelectedOfficeOnly</dt>
+                        <dd>
+                            Boolean <span>optional</span>, defaults to false
+                        </dd>
+                        <dd>If <strong>staffInSelectedOfficeOnly=true</strong> only staff 
+                        who are associated with the selected branch are returned.</dd>  
+                        <dt>roleId</dt>
+                        <dd>
+                            Long <span>optional</span>
+                        </dd>
+                        <dd>If present, will retrieve group role information</dd>
+                    </dl>
+                    <p>Example Requests:</p>
+                    <div class=apiClick>groups/1</div>
+                    <br/>
+                    <div class=apiClick>groups/1?associations=clientMembers</div>
+                </div>
+                <div class="method-example">
+                    <p>Group without any associations.</p>
+                    <code class="method-declaration">
 GET https://DomainName/mifosng-provider/api/v1/groups/1
-					</code>
-					<code class="method-response">
+                    </code>
+                    <code class="method-response">
 {
   "id": 1,
   "name": "First Group",
@@ -6449,14 +6472,14 @@ GET https://DomainName/mifosng-provider/api/v1/groups/1
     "activatedByLastname": "Administrator"
     }
 }
-					</code>
-				</div>
-				<div class="method-example">
-					<p>Group along with all its Clients.</p>
-					<code class="method-declaration">
+                    </code>
+                </div>
+                <div class="method-example">
+                    <p>Group along with all its Clients.</p>
+                    <code class="method-declaration">
 GET https://DomainName/mifosng-provider/api/v1/groups/1?associations=clientMembers
-					</code>
-					<code class="method-response">
+                    </code>
+                    <code class="method-response">
 {
   "id": 1,
   "name": "First Group",
@@ -6492,9 +6515,9 @@ GET https://DomainName/mifosng-provider/api/v1/groups/1?associations=clientMembe
     }
   ]
 }
-					</code>
-				</div>
-			</div>
+                    </code>
+                </div>
+            </div>
 
 <!--Start of Group account summary -->
 			<a id="groups_accounts" name="groups_accounts" class="old-syle-anchor">&nbsp;</a>

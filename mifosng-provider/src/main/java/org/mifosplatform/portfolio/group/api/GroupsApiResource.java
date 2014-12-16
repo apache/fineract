@@ -190,6 +190,7 @@ public class GroupsApiResource {
 
         // associations
         Collection<ClientData> membersOfGroup = null;
+        Collection<ClientData> activeClientMembers = null;
         Collection<GroupRoleData> groupRoles = null;
         GroupRoleData selectedRole = null;
         Collection<CalendarData> calendars = null;
@@ -197,12 +198,19 @@ public class GroupsApiResource {
 
         if (!associationParameters.isEmpty()) {
             if (associationParameters.contains("all")) {
-                associationParameters.addAll(Arrays.asList("clientMembers", "groupRoles", "calendars", "collectionMeetingCalendar"));
+                associationParameters.addAll(Arrays.asList("clientMembers", "activeClientMembers",
+                        "groupRoles", "calendars", "collectionMeetingCalendar"));
             }
             if (associationParameters.contains("clientMembers")) {
                 membersOfGroup = this.clientReadPlatformService.retrieveClientMembersOfGroup(groupId);
                 if (CollectionUtils.isEmpty(membersOfGroup)) {
                     membersOfGroup = null;
+                }
+            }
+            if (associationParameters.contains("activeClientMembers")) {
+                activeClientMembers = this.clientReadPlatformService.retrieveActiveClientMembersOfGroup(groupId);
+                if (CollectionUtils.isEmpty(activeClientMembers)) {
+                    activeClientMembers = null;
                 }
             }
             if (associationParameters.contains("groupRoles")) {
@@ -243,7 +251,8 @@ public class GroupsApiResource {
                 }
             }
 
-            group = GroupGeneralData.withAssocations(group, membersOfGroup, groupRoles, calendars, collectionMeetingCalendar);
+            group = GroupGeneralData.withAssocations(group, membersOfGroup, activeClientMembers,
+                    groupRoles, calendars, collectionMeetingCalendar);
         }
 
         if (roleId != null) {

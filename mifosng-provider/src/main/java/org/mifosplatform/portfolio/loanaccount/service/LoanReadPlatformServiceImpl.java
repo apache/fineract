@@ -324,11 +324,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         // get group associations
         final Collection<ClientData> membersOfGroup = this.clientReadPlatformService.retrieveClientMembersOfGroup(groupId);
         if (!CollectionUtils.isEmpty(membersOfGroup)) {
+            final Collection<ClientData> activeClientMembers = null;
             final Collection<CalendarData> calendarsData = null;
             final CalendarData collectionMeetingCalendar = null;
             final Collection<GroupRoleData> groupRoles = null;
-            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup, groupRoles, calendarsData,
-                    collectionMeetingCalendar);
+            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup, activeClientMembers,
+                    groupRoles, calendarsData, collectionMeetingCalendar);
         }
 
         final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
@@ -443,14 +444,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     @Override
     public LoanApprovalData retrieveApprovalTemplate(final Long loanId) {
-        
+
         final Loan loan = this.loanRepository.findOne(loanId);
         if (loan == null) { throw new LoanNotFoundException(loanId); }
-        
+
         return new LoanApprovalData(loan.getProposedPrincipal(),DateUtils.getLocalDateOfTenant());
-            
+
     }
-    
+
     @Override
     public LoanTransactionData retrieveDisbursalTemplate(final Long loanId, boolean paymentDetailsRequired) {
         final Loan loan = this.loanRepository.findOne(loanId);
@@ -1317,11 +1318,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         // get group associations
         final Collection<ClientData> membersOfGroup = this.clientReadPlatformService.retrieveActiveClientMembersOfGroup(groupId);
         if (!CollectionUtils.isEmpty(membersOfGroup)) {
+            final Collection<ClientData> activeClientMembers = null;
             final Collection<CalendarData> calendarsData = null;
             final CalendarData collectionMeetingCalendar = null;
             final Collection<GroupRoleData> groupRoles = null;
-            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup, groupRoles, calendarsData,
-                    collectionMeetingCalendar);
+            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup, activeClientMembers,
+                    groupRoles, calendarsData, collectionMeetingCalendar);
         }
 
         return LoanAccountData.groupDefaults(groupAccount, expectedDisbursementDate);
