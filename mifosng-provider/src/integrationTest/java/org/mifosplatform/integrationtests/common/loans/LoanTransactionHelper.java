@@ -92,9 +92,9 @@ public class LoanTransactionHelper {
     }
     
     public Object getLoanProductDetail(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer loanProductId,
-            final String param) {
+            final String jsonAttributeToGetBack) {
         final String URL = "/mifosng-provider/api/v1/loanproducts/" + loanProductId + "?associations=all&" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerGet(requestSpec, responseSpec, URL, param);
+        return Utils.performServerGet(requestSpec, responseSpec, URL, jsonAttributeToGetBack);
     }
 
     public ArrayList getLoanCharges(final Integer loanId) {

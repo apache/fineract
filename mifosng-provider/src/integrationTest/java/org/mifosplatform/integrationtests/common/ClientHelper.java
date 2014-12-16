@@ -8,7 +8,7 @@ package org.mifosplatform.integrationtests.common;
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
-import java.util.List;
+import org.mifosplatform.integrationtests.common.system.CodeHelper;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -60,7 +60,7 @@ public class ClientHelper {
     	final String officeId = "1";
         System.out.println("---------------------------------CREATING A CLIENT BASED ON ACCOUNT PREFERENCE---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientWithClientTypeAsJSON(activationDate, officeId, clientType.toString()),
-        		"clientId");
+        		jsonAttributeToGetBack);
     }
     
     public static Object assignStaffToClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -141,10 +141,21 @@ public class ClientHelper {
 
     private String getCloseClientAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
+        
+        /* Retrieve Code id for the Code "ClientClosureReason" */
+        String codeName = "ClientClosureReason";
+        HashMap<String,Object> code = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, codeName);
+        Integer clientClosureCodeId = (Integer)code.get("id");
+        
+        /* Retrieve/Create Code Values for the Code "ClientClosureReason" */
+        HashMap<String,Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(clientClosureCodeId,this.requestSpec,this.responseSpec);
+        String closureReasonId = (String)codeValue.get("id");
+        
+        map.put("closureReasonId", closureReasonId);
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
         map.put("closureDate", CREATED_DATE_PLUS_ONE);
-        map.put("closureReasonId", "12");
+        
         String clientJson = new Gson().toJson(map);
         System.out.println(clientJson);
         return clientJson;
@@ -166,8 +177,8 @@ public class ClientHelper {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
-        map.put("rejectDate", CREATED_DATE_PLUS_ONE);
-        map.put("rejectReasonId", "15");
+        map.put("rejectionDate", CREATED_DATE_PLUS_ONE);
+        map.put("rejectionReasonId", "15");
         String clientJson = new Gson().toJson(map);
         System.out.println(clientJson);
         return clientJson;
@@ -189,8 +200,8 @@ public class ClientHelper {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
-        map.put("withdrawDate", CREATED_DATE_PLUS_ONE);
-        map.put("withdrawReasonId", "17");
+        map.put("withdrawalDate", CREATED_DATE_PLUS_ONE);
+        map.put("withdrawalReasonId", "17");
         String clientJson = new Gson().toJson(map);
         System.out.println(clientJson);
         return clientJson;

@@ -604,22 +604,22 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.fromApiJsonDeserializer.validateRejection(command);
 
         final Client client = this.clientRepository.findOneWithNotFoundDetection(entityId);
-        final LocalDate rejectDate = command.localDateValueOfParameterNamed(ClientApiConstants.rejectDateParamName);
-        final Long rejectReasonId = command.longValueOfParameterNamed(ClientApiConstants.rejectReasonIdParamName);
+        final LocalDate rejectionDate = command.localDateValueOfParameterNamed(ClientApiConstants.rejectionDateParamName);
+        final Long rejectionReasonId = command.longValueOfParameterNamed(ClientApiConstants.rejectionReasonIdParamName);
 
-        final CodeValue rejectReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
-                ClientApiConstants.CLIENT_REJECT_REASON, rejectReasonId);
+        final CodeValue rejectionReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
+                ClientApiConstants.CLIENT_REJECT_REASON, rejectionReasonId);
 
         if (client.isNotPending()) {
             final String errorMessage = "Only clients pending activation may be withdrawn.";
             throw new InvalidClientStateTransitionException("rejection", "on.account.not.in.pending.activation.status", errorMessage,
-                    rejectDate, client.getSubmittedOnDate());
-        } else if (client.getSubmittedOnDate().isAfter(rejectDate)) {
+                    rejectionDate, client.getSubmittedOnDate());
+        } else if (client.getSubmittedOnDate().isAfter(rejectionDate)) {
             final String errorMessage = "The client rejection date cannot be before the client submitted date.";
             throw new InvalidClientStateTransitionException("rejection", "date.cannot.before.client.submitted.date", errorMessage,
-                    rejectDate, client.getSubmittedOnDate());
+                    rejectionDate, client.getSubmittedOnDate());
         }
-        client.reject(currentUser, rejectReason, rejectDate.toDate());
+        client.reject(currentUser, rejectionReason, rejectionDate.toDate());
         this.clientRepository.saveAndFlush(client);
 
         return new CommandProcessingResultBuilder() //
@@ -635,22 +635,22 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.fromApiJsonDeserializer.validateWithdrawn(command);
 
         final Client client = this.clientRepository.findOneWithNotFoundDetection(entityId);
-        final LocalDate withdrawDate = command.localDateValueOfParameterNamed(ClientApiConstants.withdrawDateParamName);
-        final Long withdrawReasonId = command.longValueOfParameterNamed(ClientApiConstants.withdrawReasonIdParamName);
+        final LocalDate withdrawalDate = command.localDateValueOfParameterNamed(ClientApiConstants.withdrawalDateParamName);
+        final Long withdrawalReasonId = command.longValueOfParameterNamed(ClientApiConstants.withdrawalReasonIdParamName);
 
-        final CodeValue withdrawReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
-                ClientApiConstants.CLIENT_WITHDRAW_REASON, withdrawReasonId);
+        final CodeValue withdrawalReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
+                ClientApiConstants.CLIENT_WITHDRAW_REASON, withdrawalReasonId);
 
         if (client.isNotPending()) {
             final String errorMessage = "Only clients pending activation may be withdrawn.";
             throw new InvalidClientStateTransitionException("withdrawal", "on.account.not.in.pending.activation.status", errorMessage,
-                    withdrawDate, client.getSubmittedOnDate());
-        } else if (client.getSubmittedOnDate().isAfter(withdrawDate)) {
+                    withdrawalDate, client.getSubmittedOnDate());
+        } else if (client.getSubmittedOnDate().isAfter(withdrawalDate)) {
             final String errorMessage = "The client withdrawal date cannot be before the client submitted date.";
             throw new InvalidClientStateTransitionException("withdrawal", "date.cannot.before.client.submitted.date", errorMessage,
-                    withdrawDate, client.getSubmittedOnDate());
+                    withdrawalDate, client.getSubmittedOnDate());
         }
-        client.withdraw(currentUser, withdrawReason, withdrawDate.toDate());
+        client.withdraw(currentUser, withdrawalReason, withdrawalDate.toDate());
         this.clientRepository.saveAndFlush(client);
 
         return new CommandProcessingResultBuilder() //

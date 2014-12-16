@@ -16,8 +16,8 @@ public class ClientApiConstants {
     public static final String CLIENT_RESOURCE_NAME = "client";
     public static final String CLIENT_CLOSURE_REASON = "ClientClosureReason";
     public static final String CLIENT_ACTION_REASON = "ClientActionReason";
-    public static final String CLIENT_REJECT_REASON = "ClientRejectReason";
-    public static final String CLIENT_WITHDRAW_REASON = "ClientWithdrawReason";
+    public static final String CLIENT_REJECT_REASON = "ClientRejectionReason";
+    public static final String CLIENT_WITHDRAW_REASON = "ClientWithdrawalReason";
 
 	
     public static final String GENDER = "Gender";
@@ -46,10 +46,10 @@ public class ClientApiConstants {
     public static final String closureDateParamName = "closureDate";
     public static final String closureReasonIdParamName = "closureReasonId";
     
-    public static final String rejectDateParamName = "rejectionDate";
-    public static final String rejectReasonIdParamName ="rejectionReasonId";
-    public static final String withdrawDateParamName = "withdrawalDate";
-    public static final String withdrawReasonIdParamName ="withdrawalReasonId";
+    public static final String rejectionDateParamName = "rejectionDate";
+    public static final String rejectionReasonIdParamName ="rejectionReasonId";
+    public static final String withdrawalDateParamName = "withdrawalDate";
+    public static final String withdrawalReasonIdParamName ="withdrawalReasonId";
         
     public static final String submittedOnDateParamName = "submittedOnDate";
     public static final String savingsProductIdParamName = "savingsProductId";
@@ -115,8 +115,8 @@ public class ClientApiConstants {
     public static final Set<String> CLIENT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, closureDateParamName, closureReasonIdParamName));
 	
-    public static final Set<String> CLIENT_REJECT_DATA_PARAMETERS =	new HashSet<>(Arrays.asList(localeParamName,dateFormatParamName,rejectDateParamName,rejectReasonIdParamName));
+    public static final Set<String> CLIENT_REJECT_DATA_PARAMETERS =	new HashSet<>(Arrays.asList(localeParamName,dateFormatParamName,rejectionDateParamName,rejectionReasonIdParamName));
 
-    public static final Set<String> CLIENT_WITHDRAW_DATA_PARAMETERS =	new HashSet<>(Arrays.asList(localeParamName,dateFormatParamName,withdrawDateParamName,withdrawReasonIdParamName));
+    public static final Set<String> CLIENT_WITHDRAW_DATA_PARAMETERS =	new HashSet<>(Arrays.asList(localeParamName,dateFormatParamName,withdrawalDateParamName,withdrawalReasonIdParamName));
 
 }

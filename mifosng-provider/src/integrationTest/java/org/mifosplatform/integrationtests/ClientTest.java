@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 import org.mifosplatform.integrationtests.common.ClientHelper;
 import org.mifosplatform.integrationtests.common.Utils;
 
@@ -33,7 +34,7 @@ public class ClientTest {
 
     }
 
-    // @Test
+    @Test
     public void testClientStatus() {
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
