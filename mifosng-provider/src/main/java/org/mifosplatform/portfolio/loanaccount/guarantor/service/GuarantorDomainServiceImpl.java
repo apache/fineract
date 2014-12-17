@@ -235,11 +235,14 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                     final Long fromAccountId = fromSavingsAccount.getId();
                     releaseLoanIds.put(loanId, guarantorFundingDetails.getId());
                     try {
-                        AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate,
-                                guarantorFundingDetails.getAmountRemaining(), fromAccountType, toAccountType, fromAccountId, toAccountId,
-                                description, locale, fmt, paymentDetail, fromTransferType, toTransferType, chargeId, loanInstallmentNumber,
-                                transferType, accountTransferDetails, noteText, txnExternalId, loan, toSavingsAccount, fromSavingsAccount,
-                                isRegularTransaction, isExceptionForBalanceCheck);
+                        BigDecimal remainingAmount = guarantorFundingDetails.getAmountRemaining();
+                        if(loan.getGuaranteeAmount().compareTo(loan.getPrincpal().getAmount()) == 1){
+                            remainingAmount = remainingAmount.multiply(loan.getPrincpal().getAmount()).divide(loan.getGuaranteeAmount(), roundingMode);
+                        }
+                        AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, remainingAmount, fromAccountType,
+                                toAccountType, fromAccountId, toAccountId, description, locale, fmt, paymentDetail, fromTransferType,
+                                toTransferType, chargeId, loanInstallmentNumber, transferType, accountTransferDetails, noteText,
+                                txnExternalId, loan, toSavingsAccount, fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
                         transferAmount(accountTransferDTO);
                     } finally {
                         releaseLoanIds.remove(loanId);
