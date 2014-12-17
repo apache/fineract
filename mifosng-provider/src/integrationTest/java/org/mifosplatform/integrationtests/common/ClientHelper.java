@@ -8,6 +8,7 @@ package org.mifosplatform.integrationtests.common;
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
+
 import org.mifosplatform.integrationtests.common.system.CodeHelper;
 
 import com.google.gson.Gson;
@@ -54,15 +55,16 @@ public class ClientHelper {
                 "clientId");
     }
 
-    public static Integer createClientForAccountPreference(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-    		final Integer clientType,String jsonAttributeToGetBack) {
-    	final String activationDate = "04 March 2011";
-    	final String officeId = "1";
-        System.out.println("---------------------------------CREATING A CLIENT BASED ON ACCOUNT PREFERENCE---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientWithClientTypeAsJSON(activationDate, officeId, clientType.toString()),
-        		jsonAttributeToGetBack);
+    public static Integer createClientForAccountPreference(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer clientType, String jsonAttributeToGetBack) {
+        final String activationDate = "04 March 2011";
+        final String officeId = "1";
+        System.out
+                .println("---------------------------------CREATING A CLIENT BASED ON ACCOUNT PREFERENCE---------------------------------------------");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
+                getTestClientWithClientTypeAsJSON(activationDate, officeId, clientType.toString()), jsonAttributeToGetBack);
     }
-    
+
     public static Object assignStaffToClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId, final String staffId) {
         final String CLIENT_ASSIGN_STAFF_URL = "/mifosng-provider/api/v1/clients/" + clientId + "?" + Utils.TENANT_IDENTIFIER
@@ -90,9 +92,8 @@ public class ClientHelper {
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }
-    
-    public static String getTestClientWithClientTypeAsJSON(final String dateOfJoining, final String officeId,
-    		final String clientType) {
+
+    public static String getTestClientWithClientTypeAsJSON(final String dateOfJoining, final String officeId, final String clientType) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("officeId", officeId);
         map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
@@ -130,9 +131,10 @@ public class ClientHelper {
 
     }
 
-    public static HashMap getClientStatus(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+    @SuppressWarnings("unchecked")
+    public static HashMap<String, Object> getClientStatus(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId) {
-        return (HashMap) getClient(requestSpec, responseSpec, clientId, "status");
+        return (HashMap<String, Object>) getClient(requestSpec, responseSpec, clientId, "status");
     }
 
     private static String randomIDGenerator(final String prefix, final int lenOfRandomSuffix) {
@@ -141,21 +143,21 @@ public class ClientHelper {
 
     private String getCloseClientAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
-        
+
         /* Retrieve Code id for the Code "ClientClosureReason" */
         String codeName = "ClientClosureReason";
-        HashMap<String,Object> code = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, codeName);
-        Integer clientClosureCodeId = (Integer)code.get("id");
-        
+        HashMap<String, Object> code = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, codeName);
+        Integer clientClosureCodeId = (Integer) code.get("id");
+
         /* Retrieve/Create Code Values for the Code "ClientClosureReason" */
-        HashMap<String,Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(clientClosureCodeId,this.requestSpec,this.responseSpec);
-        String closureReasonId = (String)codeValue.get("id");
-        
+        HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(clientClosureCodeId, this.requestSpec, this.responseSpec);
+        String closureReasonId = (String) codeValue.get("id");
+
         map.put("closureReasonId", closureReasonId);
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
         map.put("closureDate", CREATED_DATE_PLUS_ONE);
-        
+
         String clientJson = new Gson().toJson(map);
         System.out.println(clientJson);
         return clientJson;
