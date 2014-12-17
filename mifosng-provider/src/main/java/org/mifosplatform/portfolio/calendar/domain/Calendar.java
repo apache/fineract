@@ -221,7 +221,7 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
+    public Map<String, Object> update(final JsonCommand command, final Boolean areActiveEntitiesSynced ) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
@@ -328,6 +328,25 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
         final String newRecurrence = Calendar.constructRecurrence(command, this);
         if (!StringUtils.isBlank(this.recurrence) && !newRecurrence.equalsIgnoreCase(this.recurrence)) {
+            /*
+             * If active entities like JLG loan or RD accounts are synced to the
+             * calendar then do not allow to change meeting frequency
+             */
+
+            if ( areActiveEntitiesSynced && !CalendarUtils.isFrequencySame(this.recurrence, newRecurrence)) {
+                final String defaultUserMessage = "Update of meeting frequency is not supported";
+                throw new CalendarParameterUpdateNotSupportedException("meeting.frequency", defaultUserMessage);
+            }
+
+            /*
+             * If active entities like JLG loan or RD accounts are synced to the
+             * calendar then do not allow to change meeting interval
+             */
+
+            if (areActiveEntitiesSynced && !CalendarUtils.isIntervalSame(this.recurrence, newRecurrence)) {
+                final String defaultUserMessage = "Update of meeting interval is not supported";
+                throw new CalendarParameterUpdateNotSupportedException("meeting.interval", defaultUserMessage);
+            }
 
             actualChanges.put("recurrence", newRecurrence);
             this.recurrence = StringUtils.defaultIfEmpty(newRecurrence, null);
