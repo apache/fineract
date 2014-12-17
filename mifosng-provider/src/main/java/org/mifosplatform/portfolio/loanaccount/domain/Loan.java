@@ -85,6 +85,7 @@ import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.LoanR
 import org.mifosplatform.portfolio.loanaccount.exception.ExceedingTrancheCountException;
 import org.mifosplatform.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
 import org.mifosplatform.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
+import org.mifosplatform.portfolio.loanaccount.exception.InvalidRefundDateException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanDisbursalException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentDateException;
@@ -1195,9 +1196,9 @@ public class Loan extends AbstractPersistable<Long> {
         if (command.isChangeInBooleanParameterNamed(createSiAtDisbursementParameterName, shouldCreateStandingInstructionAtDisbursement())) {
             final Boolean valueAsInput = command.booleanObjectValueOfParameterNamed(createSiAtDisbursementParameterName);
             actualChanges.put(createSiAtDisbursementParameterName, valueAsInput);
-            this.createStandingInstructionAtDisbursement = valueAsInput;            
+            this.createStandingInstructionAtDisbursement = valueAsInput;
         }
-        
+
         final String externalIdParamName = "externalId";
         if (command.isChangeInStringParameterNamed(externalIdParamName, this.externalId)) {
             final String newValue = command.stringValueOfParameterNamed(externalIdParamName);
@@ -3073,7 +3074,7 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         for (final LoanTransaction loanTransaction : this.loanTransactions) {
-            if (loanTransaction.isRefund() && !loanTransaction.isReversed()) {
+            if ((loanTransaction.isRefund() || loanTransaction.isRefundForActiveLoan()) && !loanTransaction.isReversed()) {
                 totalPaidInRepayments = totalPaidInRepayments.minus(loanTransaction.getAmount(currency));
             }
         }
@@ -3853,15 +3854,13 @@ public class Loan extends AbstractPersistable<Long> {
     public void updateLoanRepaymentScheduleDates(final LocalDate meetingStartDate, final String recuringRule,
             final boolean isHolidayEnabled, final List<Holiday> holidays, final WorkingDays workingDays,
             final Boolean reschedulebasedOnMeetingDates, final LocalDate presentMeetingDate, final LocalDate newMeetingDate) {
-        
+
         // first repayment's from date is same as disbursement date.
         /*
-         * meetingStartDate is used as seedDate Capture the seedDate from
-         * user and use the seedDate as meetingStart date
+         * meetingStartDate is used as seedDate Capture the seedDate from user
+         * and use the seedDate as meetingStart date
          */
 
-        
-        
         LocalDate tmpFromDate = getDisbursementDate();
         final PeriodFrequencyType repaymentPeriodFrequencyType = this.loanRepaymentScheduleDetail.getRepaymentPeriodFrequencyType();
         final Integer loanRepaymentInterval = this.loanRepaymentScheduleDetail.getRepayEvery();
@@ -3869,38 +3868,37 @@ public class Loan extends AbstractPersistable<Long> {
 
         LocalDate newRepaymentDate = null;
         Boolean isFirstTime = true;
-        
+
         for (final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : this.repaymentScheduleInstallments) {
-            
+
             LocalDate oldDueDate = loanRepaymentScheduleInstallment.getDueDate();
-            
-            if ( oldDueDate.isEqual(presentMeetingDate) || oldDueDate.isAfter(presentMeetingDate) ) {
-                
-               
-                if(isFirstTime){
-                    
+
+            if (oldDueDate.isEqual(presentMeetingDate) || oldDueDate.isAfter(presentMeetingDate)) {
+
+                if (isFirstTime) {
+
                     isFirstTime = false;
                     newRepaymentDate = newMeetingDate;
-                    
-                }else{
+
+                } else {
                     // tmpFromDate.plusDays(1) is done to make sure
                     // getNewRepaymentMeetingDate method returns next meeting
                     // date and not the same as tmpFromDate
                     newRepaymentDate = CalendarUtils.getNewRepaymentMeetingDate(recuringRule, tmpFromDate, tmpFromDate.plusDays(1),
                             loanRepaymentInterval, frequency, workingDays);
                 }
-                
+
                 if (isHolidayEnabled) {
                     newRepaymentDate = HolidayUtil.getRepaymentRescheduleDateToIfHoliday(newRepaymentDate, holidays);
                 }
 
                 loanRepaymentScheduleInstallment.updateDueDate(newRepaymentDate);
                 // reset from date to get actual daysInPeriod
-                
-                if(!isFirstTime){
+
+                if (!isFirstTime) {
                     loanRepaymentScheduleInstallment.updateFromDate(tmpFromDate);
                 }
-                
+
                 tmpFromDate = newRepaymentDate;// update with new repayment
                 // date
             } else {
@@ -3911,7 +3909,7 @@ public class Loan extends AbstractPersistable<Long> {
 
     public void updateLoanRepaymentScheduleDates(final LocalDate meetingStartDate, final String recuringRule,
             final boolean isHolidayEnabled, final List<Holiday> holidays, final WorkingDays workingDays) {
-        
+
         // first repayment's from date is same as disbursement date.
         LocalDate tmpFromDate = getDisbursementDate();
         final PeriodFrequencyType repaymentPeriodFrequencyType = this.loanRepaymentScheduleDetail.getRepaymentPeriodFrequencyType();
@@ -3920,18 +3918,17 @@ public class Loan extends AbstractPersistable<Long> {
 
         LocalDate newRepaymentDate = null;
         LocalDate seedDate = meetingStartDate;
-        
+
         for (final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : this.repaymentScheduleInstallments) {
-            
+
             LocalDate oldDueDate = loanRepaymentScheduleInstallment.getDueDate();
-            
+
             // FIXME: AA this won't update repayment dates before current date.
-            
-         
-            if ( oldDueDate.isAfter(seedDate) && oldDueDate.isAfter(DateUtils.getLocalDateOfTenant()) ) {
-                
-                newRepaymentDate = CalendarUtils.getNewRepaymentMeetingDate(recuringRule, seedDate, oldDueDate,
-                        loanRepaymentInterval, frequency, workingDays);
+
+            if (oldDueDate.isAfter(seedDate) && oldDueDate.isAfter(DateUtils.getLocalDateOfTenant())) {
+
+                newRepaymentDate = CalendarUtils.getNewRepaymentMeetingDate(recuringRule, seedDate, oldDueDate, loanRepaymentInterval,
+                        frequency, workingDays);
 
                 final LocalDate maxDateLimitForNewRepayment = getMaxDateLimitForNewRepayment(repaymentPeriodFrequencyType,
                         loanRepaymentInterval, tmpFromDate);
@@ -4167,6 +4164,11 @@ public class Loan extends AbstractPersistable<Long> {
                         action = "charge.payment";
                         postfix = "cannot.be.made.before.client.transfer.date";
                     break;
+                    case LOAN_REFUND:
+                        errorMessage = "The date on which a refund is made cannot be earlier than client's transfer date to this office";
+                        action = "refund";
+                        postfix = "cannot.be.made.before.client.transfer.date";
+                    break;
                     default:
                     break;
                 }
@@ -4368,6 +4370,14 @@ public class Loan extends AbstractPersistable<Long> {
                 if (!isClosedWrittenOff()) {
                     final String defaultUserMessage = "Recovery repayments may only be made on loans which are written off";
                     final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.account.is.not.written.off",
+                            defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
+            case LOAN_REFUND:
+                if (!isOpen()) {
+                    final String defaultUserMessage = "Loan Refund is not allowed. Loan Account is not active.";
+                    final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.refund.account.is.not.active",
                             defaultUserMessage);
                     dataValidationErrors.add(error);
                 }
@@ -4978,5 +4988,129 @@ public class Loan extends AbstractPersistable<Long> {
 
     public BigDecimal getGuaranteeAmount() {
         return this.guaranteeAmountDerived == null ? BigDecimal.ZERO : this.guaranteeAmountDerived;
+    }
+
+    public ChangedTransactionDetail makeRefundForActiveLoan(final LoanTransaction loanTransaction,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine, final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds, final boolean allowTransactionsOnHoliday, final List<Holiday> holidays,
+            final WorkingDays workingDays, final boolean allowTransactionsOnNonWorkingDay) {
+
+        validateAccountStatus(LoanEvent.LOAN_REFUND);
+        validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_REFUND, loanTransaction.getTransactionDate());
+
+        validateRefundDateIsAfterLastRepayment(loanTransaction.getTransactionDate());
+
+        validateRepaymentDateIsOnHoliday(loanTransaction.getTransactionDate(), allowTransactionsOnHoliday, holidays);
+        validateRepaymentDateIsOnNonWorkingDay(loanTransaction.getTransactionDate(), workingDays, allowTransactionsOnNonWorkingDay);
+
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
+
+        final ChangedTransactionDetail changedTransactionDetail = handleRefundTransaction(loanTransaction, loanLifecycleStateMachine, null);
+
+        return changedTransactionDetail;
+
+    }
+
+    private void validateRefundDateIsAfterLastRepayment(final LocalDate refundTransactionDate) {
+        final LocalDate possibleNextRefundDate = possibleNextRefundDate();
+
+        if (possibleNextRefundDate == null || refundTransactionDate.isBefore(possibleNextRefundDate)) { throw new InvalidRefundDateException(
+                refundTransactionDate.toString()); }
+
+    }
+
+    private ChangedTransactionDetail handleRefundTransaction(final LoanTransaction loanTransaction,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransaction adjustedTransaction) {
+
+        ChangedTransactionDetail changedTransactionDetail = null;
+
+        final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REFUND, LoanStatus.fromInt(this.loanStatus));
+        this.loanStatus = statusEnum.getValue();
+
+        loanTransaction.updateLoan(this);
+
+        // final boolean isTransactionChronologicallyLatest =
+        // isChronologicallyLatestRefund(loanTransaction,
+        // this.loanTransactions);
+
+        if (status().isOverpaid() || status().isClosed()) {
+
+            final String errorMessage = "This refund option is only for active loans ";
+            throw new InvalidLoanStateTransitionException("transaction", "is.exceeding.overpaid.amount", errorMessage, this.totalOverpaid,
+                    loanTransaction.getAmount(getCurrency()).getAmount());
+
+        } else if (this.getTotalPaidInRepayments().isZero()) {
+            final String errorMessage = "Cannot refund when no payment has been made";
+            throw new InvalidLoanStateTransitionException("transaction", "no.payment.yet.made.for.loan", errorMessage);
+        }
+
+        if (loanTransaction.isNotZero(loanCurrency())) {
+            this.loanTransactions.add(loanTransaction);
+        }
+
+        if (loanTransaction.isNotRefundForActiveLoan()) {
+            final String errorMessage = "A transaction of type refund was expected but not received.";
+            throw new InvalidLoanTransactionTypeException("transaction", "is.not.a.refund.transaction", errorMessage);
+        }
+
+        final LocalDate loanTransactionDate = loanTransaction.getTransactionDate();
+        if (loanTransactionDate.isBefore(getDisbursementDate())) {
+            final String errorMessage = "The transaction date cannot be before the loan disbursement date: "
+                    + getApprovedOnDate().toString();
+            throw new InvalidLoanStateTransitionException("transaction", "cannot.be.before.disbursement.date", errorMessage,
+                    loanTransactionDate, getDisbursementDate());
+        }
+
+        if (loanTransactionDate.isAfter(DateUtils.getLocalDateOfTenant())) {
+            final String errorMessage = "The transaction date cannot be in the future.";
+            throw new InvalidLoanStateTransitionException("transaction", "cannot.be.a.future.date", errorMessage, loanTransactionDate);
+        }
+
+        if (this.loanProduct.isMultiDisburseLoan() && adjustedTransaction == null) {
+            BigDecimal totalDisbursed = getDisbursedAmount();
+            if (totalDisbursed.compareTo(this.summary.getTotalPrincipalRepaid()) < 0) {
+                final String errorMessage = "The transaction cannot be done before the loan disbursement: "
+                        + getApprovedOnDate().toString();
+                throw new InvalidLoanStateTransitionException("transaction", "cannot.be.done.before.disbursement", errorMessage);
+            }
+        }
+
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
+                .determineProcessor(this.transactionProcessingStrategy);
+
+        // If is a refund
+        if (adjustedTransaction == null) {
+            loanRepaymentScheduleTransactionProcessor.handleRefund(loanTransaction, getCurrency(), this.repaymentScheduleInstallments,
+                    charges());
+        } else {
+            final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
+            changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(),
+                    allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, charges(), null);
+            for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+                mapEntry.getValue().updateLoan(this);
+            }
+
+        }
+
+        updateLoanSummaryDerivedFields();
+
+        doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
+
+        return changedTransactionDetail;
+    }
+
+    public LocalDate possibleNextRefundDate() {
+
+        final LocalDate now = new LocalDate();
+
+        LocalDate lastTransactionDate = null;
+        for (final LoanTransaction transaction : this.loanTransactions) {
+            if ((transaction.isRepayment() || transaction.isRefundForActiveLoan()) && transaction.isNonZero()) {
+                lastTransactionDate = transaction.getTransactionDate();
+            }
+        }
+
+        return lastTransactionDate == null ? now : lastTransactionDate;
     }
 }

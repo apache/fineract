@@ -364,6 +364,10 @@ public class LoanEnumerations {
                 optionData = new LoanTransactionEnumData(LoanTransactionType.CHARGE_PAYMENT.getValue().longValue(),
                         LoanTransactionType.CHARGE_PAYMENT.getCode(), "Charge Payment");
             break;
+            case REFUND_FOR_ACTIVE_LOAN:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.REFUND_FOR_ACTIVE_LOAN.getValue().longValue(),
+                        LoanTransactionType.REFUND_FOR_ACTIVE_LOAN.getCode(), "Refund");
+            break;
             default:
             break;
         }

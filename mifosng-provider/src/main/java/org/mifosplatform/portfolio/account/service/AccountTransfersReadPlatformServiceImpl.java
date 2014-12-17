@@ -411,4 +411,114 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
                 this.accountTransfersMapper);
     }
 
+    @Override
+    public AccountTransferData retrieveRefundByTransferTemplate(final Long fromOfficeId, final Long fromClientId, final Long fromAccountId,
+            final Integer fromAccountType, final Long toOfficeId, final Long toClientId, final Long toAccountId, final Integer toAccountType) {
+        // TODO Auto-generated method stub
+        final EnumOptionData loanAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.LOAN);
+        final EnumOptionData savingsAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.SAVINGS);
+
+        final Integer mostRelevantFromAccountType = fromAccountType;
+        final Collection<EnumOptionData> fromAccountTypeOptions = Arrays.asList(savingsAccountType, loanAccountType);
+        final Collection<EnumOptionData> toAccountTypeOptions;
+        if (mostRelevantFromAccountType == 1) {
+            // overpaid loan amt transfer to savings account
+            toAccountTypeOptions = Arrays.asList(savingsAccountType);
+        } else {
+            toAccountTypeOptions = Arrays.asList(loanAccountType, savingsAccountType);
+        }
+        final Integer mostRelevantToAccountType = toAccountType;
+
+        final EnumOptionData fromAccountTypeData = AccountTransferEnumerations.accountType(mostRelevantFromAccountType);
+        final EnumOptionData toAccountTypeData = AccountTransferEnumerations.accountType(mostRelevantToAccountType);
+
+        // from settings
+        OfficeData fromOffice = null;
+        ClientData fromClient = null;
+        PortfolioAccountData fromAccount = null;
+
+        OfficeData toOffice = null;
+        ClientData toClient = null;
+        PortfolioAccountData toAccount = null;
+
+        // template
+        Collection<PortfolioAccountData> fromAccountOptions = null;
+        Collection<PortfolioAccountData> toAccountOptions = null;
+
+        Long mostRelevantFromOfficeId = fromOfficeId;
+        Long mostRelevantFromClientId = fromClientId;
+
+        Long mostRelevantToOfficeId = toOfficeId;
+        Long mostRelevantToClientId = toClientId;
+
+        if (fromAccountId != null) {
+            Integer accountType;
+            if (mostRelevantFromAccountType == 1) {
+                accountType = PortfolioAccountType.LOAN.getValue();
+            } else {
+                accountType = PortfolioAccountType.SAVINGS.getValue();
+            }
+            fromAccount = this.portfolioAccountReadPlatformService.retrieveOneByPaidInAdvance(fromAccountId, accountType);
+
+            // override provided fromClient with client of account
+            mostRelevantFromClientId = fromAccount.clientId();
+        }
+
+        if (mostRelevantFromClientId != null) {
+            fromClient = this.clientReadPlatformService.retrieveOne(mostRelevantFromClientId);
+            mostRelevantFromOfficeId = fromClient.officeId();
+            long[] loanStatus = null;
+            if (mostRelevantFromAccountType == 1) {
+                loanStatus = new long[] { 300, 700 };
+            }
+            PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(mostRelevantFromAccountType, mostRelevantFromClientId,
+                    loanStatus);
+            fromAccountOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(portfolioAccountDTO);
+        }
+
+        Collection<OfficeData> fromOfficeOptions = null;
+        Collection<ClientData> fromClientOptions = null;
+        if (mostRelevantFromOfficeId != null) {
+            fromOffice = this.officeReadPlatformService.retrieveOffice(mostRelevantFromOfficeId);
+            fromOfficeOptions = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
+            fromClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantFromOfficeId);
+        }
+
+        // defaults
+        final LocalDate transferDate = DateUtils.getLocalDateOfTenant();
+        Collection<OfficeData> toOfficeOptions = fromOfficeOptions;
+        Collection<ClientData> toClientOptions = null;
+
+        if (toAccountId != null && fromAccount != null) {
+            toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, mostRelevantToAccountType,
+                    fromAccount.currencyCode());
+            mostRelevantToClientId = toAccount.clientId();
+        }
+
+        if (mostRelevantToClientId != null) {
+            toClient = this.clientReadPlatformService.retrieveOne(mostRelevantToClientId);
+            mostRelevantToOfficeId = toClient.officeId();
+
+            toClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantToOfficeId);
+
+            toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
+        }
+
+        if (mostRelevantToOfficeId != null) {
+            toOffice = this.officeReadPlatformService.retrieveOffice(mostRelevantToOfficeId);
+            toOfficeOptions = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
+
+            toClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantToOfficeId);
+            if (toClientOptions != null && toClientOptions.size() == 1) {
+                toClient = new ArrayList<>(toClientOptions).get(0);
+
+                toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
+            }
+        }
+
+        return AccountTransferData.template(fromOffice, fromClient, fromAccountTypeData, fromAccount, transferDate, toOffice, toClient,
+                toAccountTypeData, toAccount, fromOfficeOptions, fromClientOptions, fromAccountTypeOptions, fromAccountOptions,
+                toOfficeOptions, toClientOptions, toAccountTypeOptions, toAccountOptions);
+    }
+
 }

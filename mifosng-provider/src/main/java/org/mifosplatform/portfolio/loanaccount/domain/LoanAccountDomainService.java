@@ -31,6 +31,10 @@ public interface LoanAccountDomainService {
             PaymentDetail paymentDetail, String noteText, String txnExternalId);
 
     LocalDate getCalculatedRepaymentsStartingFromDate(LocalDate actualDisbursementDate, Loan loan, CalendarInstance calendarInstance);
+    
+    LoanTransaction makeRefundForActiveLoan(Long accountId, CommandProcessingResultBuilder builderResult,
+			LocalDate transactionDate, BigDecimal transactionAmount,
+			PaymentDetail paymentDetail, String noteText, String txnExternalId);
 
     /**
      * This method is to recalculate and accrue the income till the last accrued

@@ -365,6 +365,22 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr>
+								<td></td>
+								<td>accounttransfers/templateRefundByTransfer</td>
+								<td></td>
+                                <td><a href="#accounttransfers_retrieve_template_refund_by_transfer">Retrieve Refund of an Active Loan by Transfer Template</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>accounttransfers/refundByTransfer</td>
+                                <td><a href="#accounttransfers_refund_by_transfer">Refund an active loan by transfer</a></td>
+                                <td></td>
+								<td></td>
+								<td></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -1061,6 +1077,14 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr>
+                                <td></td>
+                                <td>loans/{loanId}/transactions?command=refundByCash</td>
+                                <td><a href="#loans_transaction_refund_by_cash">Refund an Active Loan by Cash</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
 							<tr>
 								<td><a href="#loans_charges">Loan Charges</a></td>
 								<td>loans/{loanId}/charges</td>
@@ -8914,6 +8938,11 @@ No Request Body:
 							outstanding. The amount that can be waived is limited to the
 							loan's inArrearsTolerance
 						</dd>
+						<dd>
+							<b>'refundbycash'</b><br> "date" is set to the current date <br> 
+							"total" "amount" is set
+							to the total amount paid in advance.
+						</dd>
 					</dl>
 					<p>Example Request:</p>
 					<div class=apiClick>loans/1/transactions/template?command=repayment</div>
@@ -9000,6 +9029,45 @@ Request Body:
 					</code>
 				</div>
 			</div>
+			
+			<a id="loans_transaction_refund_by_cash" name="loans_transaction_refund_by_cash" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Make a Refund of an Active Loan by Cash </h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/{loanId}/transactions?command=refundByCash
+					</code>
+					<code class="method-request">
+POST loans/5/transactions?command=refundByCash
+Content-Type: application/json
+Request Body:
+{
+  "dateFormat": "dd MMMM yyyy",
+  "locale": "en",
+  "transactionDate": "14 May 2013",
+  "transactionAmount": "500.00",
+  "paymentTypeId": "12"
+}
+					</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 5,
+  "resourceId": 564,
+  "changes": {
+    "transactionDate": "14 May 2013",
+    "transactionAmount": "500.00",
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy
+  }
+}
+					</code>
+				</div>
+			</div>
+
 
 			<a id="loans_transaction_waiveinterest" name="loans_transaction_waiveinterest" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -9259,7 +9327,7 @@ Request Body:
 					</code>
 				</div>
 			</div>
-
+			
 			<!--Start of guarantors functionality-->
 
 			<a id="guarantors" name="guarantors" class="old-syle-anchor">&nbsp;</a>
@@ -25621,6 +25689,285 @@ No Request Body:
     "id": 1,
     "accountNo": "000000001"
   }
+}
+	        </code>
+	    </div>
+	</div>
+	
+		<a id="accounttransfers_retrieve_template_refund_by_transfer" name="accounttransfers_retrieve_template_refund_by_transfer" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Refund of an Active Loan by Transfer Template:</h2>
+	        <p>Example Requests : </p>
+	        <div class=apiClick>accounttransfers/templateRefundByTransfer?fromAccountId=2&fromAccountType=1&
+	        toAccountId=1&toAccountType=2&toClientId=1&toOfficeId=1</div>
+	        <br>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://DomainName/api/v1/accounttransfers/templateRefundByTransfer</code>
+	        <code class="method-response">
+{
+   "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 0,
+      "inMultiplesOf": 0,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+   },
+   "transferAmount": 130,
+   "transferDate": [
+      2014,
+      11,
+      1
+   ],
+   "fromOffice": {
+      "id": 1,
+      "name": "Head Office",
+      "nameDecorated": "Head Office",
+      "externalId": "1",
+      "openingDate": [
+         2009,
+         1,
+         1
+      ],
+      "hierarchy": "."
+   },
+   "fromClient": {
+      "id": 1,
+      "accountNo": "000000001",
+      "status": {
+         "id": 300,
+         "code": "clientStatusType.active",
+         "value": "Active"
+      },
+      "active": true,
+      "activationDate": [
+         2012,
+         2,
+         1
+      ],
+      "firstname": "Daniel",
+      "lastname": "Owusu",
+      "displayName": "Daniel Owusu",
+      "gender": {},
+      "clientType": {},
+      "clientClassification": {},
+      "officeId": 1,
+      "officeName": "Head Office",
+      "timeline": {
+         "submittedOnDate": [
+            2012,
+            2,
+            1
+         ],
+         "submittedByUsername": "mifos",
+         "submittedByFirstname": "App",
+         "submittedByLastname": "Administrator",
+         "activatedOnDate": [
+            2012,
+            2,
+            1
+         ],
+         "activatedByUsername": "mifos",
+         "activatedByFirstname": "App",
+         "activatedByLastname": "Administrator"
+      },
+      "groups": []
+   },
+   "fromAccountType": {
+      "id": 1,
+      "code": "accountType.loan",
+      "value": "Loan Account"
+   },
+   "fromAccount": {
+      "id": 2,
+      "accountNo": "000000002",
+      "clientId": 1,
+      "clientName": "Daniel Owusu",
+      "productId": 1,
+      "productName": "CTRL",
+      "fieldOfficerId": 0,
+      "currency": {
+         "code": "USD",
+         "name": "US Dollar",
+         "decimalPlaces": 0,
+         "inMultiplesOf": 0,
+         "displaySymbol": "$",
+         "nameCode": "currency.USD",
+         "displayLabel": "US Dollar ($)"
+      },
+      "amtForTransfer": 130
+   },
+   "toOffice": {
+      "id": 1,
+      "name": "Head Office",
+      "nameDecorated": "Head Office",
+      "externalId": "1",
+      "openingDate": [
+         2009,
+         1,
+         1
+      ],
+      "hierarchy": "."
+   },
+   "toClient": {
+      "id": 1,
+      "displayName": "Daniel Owusu",
+      "officeId": 1,
+      "officeName": "Head Office"
+   },
+   "toAccountType": {
+      "id": 2,
+      "code": "accountType.savings",
+      "value": "Savings Account"
+   },
+   "toAccount": {
+      "id": 1,
+      "accountNo": "000000001",
+      "clientId": 1,
+      "clientName": "Daniel Owusu",
+      "productId": 1,
+      "productName": "TEST",
+      "fieldOfficerId": 0,
+      "currency": {
+         "code": "USD",
+         "name": "US Dollar",
+         "decimalPlaces": 0,
+         "inMultiplesOf": 0,
+         "displaySymbol": "$",
+         "nameCode": "currency.USD",
+         "displayLabel": "US Dollar ($)"
+      }
+   },
+   "fromOfficeOptions": [
+      {
+         "id": 1,
+         "name": "Head Office",
+         "nameDecorated": "Head Office"
+      }
+   ],
+   "fromClientOptions": [
+      {
+         "id": 1,
+         "displayName": "Daniel Owusu",
+         "officeId": 1,
+         "officeName": "Head Office"
+      }
+   ],
+   "fromAccountTypeOptions": [
+      {
+         "id": 2,
+         "code": "accountType.savings",
+         "value": "Savings Account"
+      },
+      {
+         "id": 1,
+         "code": "accountType.loan",
+         "value": "Loan Account"
+      }
+   ],
+   "fromAccountOptions": [
+      {
+         "id": 2,
+         "accountNo": "000000002",
+         "clientId": 1,
+         "clientName": "Daniel Owusu",
+         "productId": 1,
+         "productName": "CTRL",
+         "fieldOfficerId": 0,
+         "currency": {
+            "code": "USD",
+            "name": "US Dollar",
+            "decimalPlaces": 0,
+            "inMultiplesOf": 0,
+            "displaySymbol": "$",
+            "nameCode": "currency.USD",
+            "displayLabel": "US Dollar ($)"
+         }
+      }
+   ],
+   "toOfficeOptions": [
+      {
+         "id": 1,
+         "name": "Head Office",
+         "nameDecorated": "Head Office"
+      }
+   ],
+   "toClientOptions": [
+      {
+         "id": 1,
+         "displayName": "Daniel Owusu",
+         "officeId": 1,
+         "officeName": "Head Office"
+      }
+   ],
+   "toAccountTypeOptions": [
+      {
+         "id": 2,
+         "code": "accountType.savings",
+         "value": "Savings Account"
+      }
+   ],
+   "toAccountOptions": [
+      {
+         "id": 1,
+         "accountNo": "000000001",
+         "clientId": 1,
+         "clientName": "Daniel Owusu",
+         "productId": 1,
+         "productName": "TEST",
+         "fieldOfficerId": 0,
+         "currency": {
+            "code": "USD",
+            "name": "US Dollar",
+            "decimalPlaces": 0,
+            "inMultiplesOf": 0,
+            "displaySymbol": "$",
+            "nameCode": "currency.USD",
+            "displayLabel": "US Dollar ($)"
+         }
+      }
+   ]
+}
+	        </code>
+	    </div>
+	</div>
+	
+	
+		<a id="accounttransfers_refund_by_transfer" name="accounttransfers_refund_by_transfer" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Refund of an Active Loan by Transfer</h2>
+	        <p>Ability to refund an active loan by transferring to a savings account.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/accounttransfers</code>
+	        <code class="method-request">POST refundByTransfer/              
+Content-Type: application/json
+No Request Body:
+{
+   "fromAccountId": "2",
+   "fromAccountType": 1,
+   "toOfficeId": 1,
+   "toClientId": 1,
+   "toAccountType": 2,
+   "toAccountId": 1,
+   "transferAmount": 130,
+   "transferDate": "31 October 2014",
+   "transferDescription": "Transfer refund to my savings account",
+   "locale": "en",
+   "dateFormat": "dd MMMM yyyy",
+   "fromClientId": 1,
+   "fromOfficeId": 1
+
+}
+	        </code>
+	        <code class="method-response">
+{
+  "savingsId": 1,
+  "resourceId": 1
 }
 	        </code>
 	    </div>

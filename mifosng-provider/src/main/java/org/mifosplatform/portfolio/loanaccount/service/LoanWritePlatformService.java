@@ -86,4 +86,6 @@ public interface LoanWritePlatformService {
 
     void applyMeetingDateChanges(Calendar calendar, Collection<CalendarInstance> loanCalendarInstances);
 
+    CommandProcessingResult makeLoanRefund(Long loanId, JsonCommand command);
+
 }

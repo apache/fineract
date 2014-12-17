@@ -96,7 +96,14 @@ public class LoanTransactionsApiResource {
             transactionData = this.loanReadPlatformService.retrieveRecoveryPaymentTemplate(loanId);
         } else if (is(commandParam, "prepayLoan")) {
             transactionData = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(loanId);
-        } else {
+        }
+        else if (is(commandParam, "refundbycash")) {
+            transactionData = this.loanReadPlatformService.retrieveRefundByCashTemplate(loanId);
+        }
+        else if (is(commandParam, "refundbytransfer")) {
+            transactionData = this.loanReadPlatformService.retrieveDisbursalTemplate(loanId, true);
+        }
+        else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
 
@@ -155,6 +162,10 @@ public class LoanTransactionsApiResource {
             final CommandWrapper commandRequest = builder.loanRecoveryPaymentTransaction(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
+        else if (is(commandParam, "refundByCash")) {
+            final CommandWrapper commandRequest = builder.refundLoanTransactionByCash(loanId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } 
 
         if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
 

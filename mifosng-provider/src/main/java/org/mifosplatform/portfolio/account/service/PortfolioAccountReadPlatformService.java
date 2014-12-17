@@ -17,4 +17,6 @@ public interface PortfolioAccountReadPlatformService {
     PortfolioAccountData retrieveOne(Long accountId, Integer accountTypeId, String currencyCode);
 
     Collection<PortfolioAccountData> retrieveAllForLookup(final PortfolioAccountDTO portfolioAccountDTO);
+
+    PortfolioAccountData retrieveOneByPaidInAdvance(Long accountId, Integer accountTypeId);
 }

@@ -252,5 +252,27 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
     public void updateInstallment(LoanRepaymentScheduleInstallment installment) {
         this.installment = installment;
     }
+    
+    public Money undoPaidAmountBy(final Money incrementBy, final Money feeAmount) {
+
+        Money amountPaidToDate = Money.of(incrementBy.getCurrency(), this.amountPaid);
+       
+        Money amountToDeductOnThisCharge = Money.zero(incrementBy.getCurrency());
+        if (incrementBy.isGreaterThanOrEqualTo(amountPaidToDate)) {
+                amountToDeductOnThisCharge = amountPaidToDate;
+            amountPaidToDate = Money.zero(incrementBy.getCurrency());
+            this.amountPaid = amountPaidToDate.getAmount();
+            this.amountOutstanding = this.amount;
+        } else {
+                amountToDeductOnThisCharge = incrementBy;
+            amountPaidToDate = amountPaidToDate.minus(incrementBy);
+            this.amountPaid = amountPaidToDate.getAmount();
+            this.amountOutstanding = calculateAmountOutstanding(incrementBy.getCurrency());
+        }
+        this.amountThroughChargePayment = feeAmount.getAmount();
+        this.paid = determineIfFullyPaid();
+
+        return amountToDeductOnThisCharge;
+    }
 
 }

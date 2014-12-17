@@ -13,6 +13,7 @@ import static org.junit.Assert.fail;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Locale;
 import java.util.Random;
 
@@ -114,6 +115,10 @@ public class Utils {
 
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
         return randomStringGenerator(prefix, lenOfRandomSuffix);
+    }
+    
+    public static String convertDateToURLFormat(final Calendar dateToBeConvert) {
+        return new SimpleDateFormat("dd MMMMMM yyyy").format(dateToBeConvert.getTime());
     }
 
 }

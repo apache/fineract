@@ -130,6 +130,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         if (wrapper.isAccountTransferResource()) {
             if (wrapper.isCreate()) {
                 handler = this.applicationContext.getBean("createAccountTransferCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isRefundByTransfer()) {
+                handler = this.applicationContext.getBean("refundByTransferCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
@@ -396,6 +398,10 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = this.applicationContext.getBean("undoWriteOffLoanCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isGuaranteeRecovery()) {
                 handler = this.applicationContext.getBean("recoverFromGuarantorCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isLoanRefundByCash()) {
+                handler = this.applicationContext.getBean("loanRefundByCashCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUndoLoanRefund()) {
+                handler = this.applicationContext.getBean("loanRefundAdjustmentCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }

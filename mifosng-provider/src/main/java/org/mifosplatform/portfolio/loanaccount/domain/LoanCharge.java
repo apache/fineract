@@ -883,4 +883,48 @@ public class LoanCharge extends AbstractPersistable<Long> {
     public LoanOverdueInstallmentCharge getOverdueInstallmentCharge() {
         return this.overdueInstallmentCharge;
     }
+    
+    public Money undoPaidOrPartiallyAmountBy(final Money incrementBy,final Integer installmentNumber, final Money feeAmount) {
+        Money processAmount = Money.zero(incrementBy.getCurrency());
+        if(isInstalmentFee()){
+            if(installmentNumber == null){
+                processAmount = getLastPaidOrPartiallyPaidInstallmentLoanCharge(incrementBy.getCurrency()).undoPaidAmountBy(incrementBy, feeAmount);
+            }else{
+                processAmount = getInstallmentLoanCharge(installmentNumber).undoPaidAmountBy(incrementBy, feeAmount);
+            }
+        }else{
+            processAmount = incrementBy;
+        }
+        Money amountPaidToDate = Money.of(processAmount.getCurrency(), this.amountPaid);
+        
+        Money amountDeductedOnThisCharge = Money.zero(processAmount.getCurrency());
+        if (processAmount.isGreaterThanOrEqualTo(amountPaidToDate)) {
+                amountDeductedOnThisCharge = amountPaidToDate;
+            amountPaidToDate = Money.zero(processAmount.getCurrency());
+            this.amountPaid = amountPaidToDate.getAmount();
+            this.amountOutstanding = this.amount;
+            this.paid = false;
+
+        } else {
+                amountDeductedOnThisCharge = processAmount;
+            amountPaidToDate = amountPaidToDate.minus(processAmount);
+            this.amountPaid = amountPaidToDate.getAmount();
+            this.amountOutstanding = calculateAmountOutstanding(incrementBy.getCurrency());
+        }
+        return amountDeductedOnThisCharge;
+    }
+    
+    public LoanInstallmentCharge getLastPaidOrPartiallyPaidInstallmentLoanCharge(MonetaryCurrency currency) {
+        LoanInstallmentCharge paidChargePerInstallment = null;
+        for (final LoanInstallmentCharge loanChargePerInstallment : this.loanInstallmentCharge) {
+                Money outstanding = Money.of(currency, loanChargePerInstallment.getAmountOutstanding());
+                final boolean partiallyPaid = outstanding.isGreaterThanZero() && outstanding.isLessThan(loanChargePerInstallment.getAmount(currency)); 
+            if ((partiallyPaid || loanChargePerInstallment.isPaid())
+                    && (paidChargePerInstallment == null || paidChargePerInstallment.getRepaymentInstallment().getDueDate()
+                            .isBefore(loanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
+                paidChargePerInstallment = loanChargePerInstallment;
+            }
+        }
+        return paidChargePerInstallment;
+    }
 }
