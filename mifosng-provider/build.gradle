@@ -65,12 +65,17 @@ if (project.hasProperty('env') && project.getProperty('env') == 'dev') {
 }
 
 task dist(type:Zip){
-	baseName= 'mifosplatform'
+	baseName = 'mifosplatform'
 	version = qualifyVersionIfNecessary(releaseVersion)
+    includeEmptyDirs = true
 	from('../') {
 		fileMode = 0755
 		include '*.md'
 	}
+    from('src/main/dist') {
+        fileMode = 0755
+        include '*'
+    }
 	from('../apps') {
 		fileMode = 0755
 		include '*.md'

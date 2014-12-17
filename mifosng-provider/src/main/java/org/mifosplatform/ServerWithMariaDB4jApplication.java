@@ -12,6 +12,11 @@ import org.mifosplatform.infrastructure.core.boot.db.MariaDB4jDataSourceConfigur
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.Resource;
+
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * Mifos main() application which launches Mifos X in an embedded Tomcat HTTP
@@ -33,6 +38,18 @@ public class ServerWithMariaDB4jApplication {
 
 	public static void main(String[] args) throws Exception {
 		ConfigurableApplicationContext ctx = SpringApplication.run(Configuration.class, args);
+		if (Desktop.isDesktopSupported()) {
+			Resource resource = ctx.getResource("file:" + System.getProperty("user.dir") +
+					System.getProperty("file.separator") + "web" +
+					System.getProperty("file.separator") + "index.html");
+			if (resource.exists()) {
+				try {
+					Desktop.getDesktop().browse(URI.create("https://localhost:8443/mifosng-provider" +
+							"/web/index.html?baseApiUrl=https://localhost:8443" +
+							"&tenantIdentifier=default#/"));
+				} catch (IOException e) {}
+			}
+		}
 		ApplicationExitUtil.waitForKeyPressToCleanlyExit(ctx);
 	}
 
