@@ -1535,7 +1535,11 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         // this.fieldOfficer, approvedOn);
         // this.loanOfficerHistory.add(loanOfficerAssignmentHistory);
         // }
-
+        if (this.savingsOfficer != null) {
+            final SavingsOfficerAssignmentHistory savingsOfficerAssignmentHistory = SavingsOfficerAssignmentHistory.createNew(this,
+                    this.savingsOfficer, approvedOn);
+            this.savingsOfficerHistory.add(savingsOfficerAssignmentHistory);
+        }
         return actualChanges;
     }
 
