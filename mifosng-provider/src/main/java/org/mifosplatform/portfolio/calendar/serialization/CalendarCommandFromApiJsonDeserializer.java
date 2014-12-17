@@ -319,33 +319,5 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
     }
-
-    public void validateBusinessRulesForUpdate(final String json, final Integer numberOfActiveLoansSyncedTheCalendar) {
-
-        
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-
-        /*
-         * BR1: If calendar is not associated with any of the active loans, RD
-         * accounts and any other active entity then only frequency and interval
-         * are allowed to change
-         */
-
-        if (numberOfActiveLoansSyncedTheCalendar > 0) {
-
-            if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.FREQUENCY.getValue(), element)) {
-                final String defaultUserMessage = "Update of meeting frequency is not supported";
-                throw new CalendarParameterUpdateNotSupportedException("meeting.frequency", defaultUserMessage);
-            }
-
-            if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.INTERVAL.getValue(), element)) {
-                final String defaultUserMessage = "Update of meeting interval is not supported";
-                throw new CalendarParameterUpdateNotSupportedException("meeting.interval", defaultUserMessage);
-            }
-
-        }
-        
-    }
-
         
 }

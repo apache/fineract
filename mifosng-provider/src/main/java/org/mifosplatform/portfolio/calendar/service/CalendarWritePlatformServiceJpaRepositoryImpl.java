@@ -159,9 +159,10 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         /*
          * Validate all the data for updating the calendar
          */
-
+        
         this.fromApiJsonDeserializer.validateForUpdate(command.json());
-
+        
+        Boolean areActiveEntitiesSynced = false;
         final Long calendarId = command.entityId();
 
         final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
@@ -171,10 +172,15 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
                 calendarId, loanStatuses);
 
         /*
-         * Validate all the business rules
+         * areActiveEntitiesSynced is set to true, if there are any active loans
+         * synced to this calendar.
          */
-        this.fromApiJsonDeserializer.validateBusinessRulesForUpdate(command.json(), numberOfActiveLoansSyncedWithThisCalendar);
+        
+        if(numberOfActiveLoansSyncedWithThisCalendar > 0){
+            areActiveEntitiesSynced = true;
+        }
 
+        
         final Calendar calendarForUpdate = this.calendarRepository.findOne(calendarId);
         if (calendarForUpdate == null) { throw new CalendarNotFoundException(calendarId); }
         
@@ -222,7 +228,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
             changes = calendarForUpdate.updateStartDateAndDerivedFeilds(newMeetingDate);
 
         } else {
-            changes = calendarForUpdate.update(command);
+            changes = calendarForUpdate.update(command, areActiveEntitiesSynced);
         }
         
         if (!changes.isEmpty()) {
