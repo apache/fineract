@@ -40,10 +40,10 @@ public class ClientTest {
         final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
 
-        HashMap status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
+        HashMap<String,Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientIsActive(status);
 
-        HashMap clientStatusHashMap = this.clientHelper.closeClient(clientId);
+        HashMap<String,Object> clientStatusHashMap = this.clientHelper.closeClient(clientId);
         ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
 
         clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
