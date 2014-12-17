@@ -14,6 +14,8 @@ import org.mifosplatform.accounting.common.AccountingEnumerations;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
+import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityType;
+import org.mifosplatform.infrastructure.entityaccess.service.MifosEntityAccessUtil;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
@@ -32,11 +34,14 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
     private final JdbcTemplate jdbcTemplate;
     private final SavingProductMapper savingsProductRowMapper = new SavingProductMapper();
     private final SavingProductLookupMapper savingsProductLookupsRowMapper = new SavingProductLookupMapper();
+    private final MifosEntityAccessUtil mifosEntityAccessUtil;
 
     @Autowired
-    public SavingsProductReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public SavingsProductReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    		final MifosEntityAccessUtil mifosEntityAccessUtil) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.mifosEntityAccessUtil = mifosEntityAccessUtil;
     }
 
     @Override
@@ -44,7 +49,15 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
         this.context.authenticatedUser();
 
-        final String sql = "select " + this.savingsProductRowMapper.schema() + "where sp.deposit_type_enum = ?";
+        String sql = "select " + this.savingsProductRowMapper.schema() + "where sp.deposit_type_enum = ?";
+        
+		// Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
+		String inClause = mifosEntityAccessUtil.
+				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
+						MifosEntityType.SAVINGS_PRODUCT);
+		if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
+			sql += " and sp.id in ( " + inClause + " ) ";
+		}
 
         return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
     }
@@ -52,7 +65,16 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
     @Override
     public Collection<SavingsProductData> retrieveAllForLookup() {
 
-        final String sql = "select " + this.savingsProductLookupsRowMapper.schema() + " where sp.deposit_type_enum = ?";
+        String sql = "select " + this.savingsProductLookupsRowMapper.schema() + " where sp.deposit_type_enum = ? ";
+        
+        // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
+ 		String inClause = mifosEntityAccessUtil.
+ 				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
+						MifosEntityType.SAVINGS_PRODUCT);
+    	if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
+    		sql += " and id in ( " + inClause + " ) ";
+    	}
+    
 
         return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper,
                 new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
@@ -188,8 +210,24 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
     @Override
     public Collection<SavingsProductData> retrieveAllForLookupByType(Boolean isOverdraftType) {
         String sql = "select " + this.savingsProductLookupsRowMapper.schema();
+
+        boolean inClauseAdded = false;
+        
+        // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
+  		String inClause = mifosEntityAccessUtil.
+  				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
+						MifosEntityType.SAVINGS_PRODUCT);
+    	if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
+    		sql += " where id in ( " + inClause + " ) ";
+    		inClauseAdded = true;
+    	}
+        
         if (isOverdraftType != null) {
-            sql += " where sp.allow_overdraft=?";
+        	if (inClauseAdded) {
+        		sql += " and sp.allow_overdraft=?";
+        	} else {
+        		sql += " where sp.allow_overdraft=?";
+        	}
             return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, isOverdraftType);
         }
 
@@ -202,7 +240,15 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
         this.context.authenticatedUser();
 
-        final String sql = "select " + this.savingsProductRowMapper.schema() + " where sp.currency_code='" + currencyCode + "'";
+        String sql = "select " + this.savingsProductRowMapper.schema() + " where sp.currency_code='" + currencyCode + "'";
+        
+        // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
+  		String inClause = mifosEntityAccessUtil.
+  				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
+						MifosEntityType.SAVINGS_PRODUCT);
+    	if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
+    		sql += " and id in ( " + inClause + " ) ";
+    	}
 
         return this.jdbcTemplate.query(sql, this.savingsProductRowMapper);
     }
