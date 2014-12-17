@@ -1,13 +1,10 @@
+/**
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 package org.mifosplatform.infrastructure.entityaccess.service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
-
-import javax.sql.DataSource;
-
-import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.dataqueries.service.GenericDataServiceImpl;
 import org.mifosplatform.infrastructure.entityaccess.MifosEntityAccessConstants;
@@ -17,7 +14,6 @@ import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityAccessTyp
 import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityType;
 import org.mifosplatform.infrastructure.entityaccess.exception.MifosEntityAccessConfigurationException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
 
 @Service
 public class MifosEntityAccessReadServiceImpl implements MifosEntityAccessReadService {
