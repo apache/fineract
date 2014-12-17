@@ -1913,7 +1913,7 @@ public class Loan extends AbstractPersistable<Long> {
                 // Approved amount has to be less than or equal to principal
                 // amount demanded
 
-                if (approvedLoanAmount.compareTo(this.proposedPrincipal) < 1) {
+                if (approvedLoanAmount.compareTo(this.proposedPrincipal) == -1) {
 
                     this.approvedPrincipal = approvedLoanAmount;
 
@@ -1928,7 +1928,7 @@ public class Loan extends AbstractPersistable<Long> {
                     actualChanges.put(LoanApiConstants.approvedLoanAmountParameterName, approvedLoanAmount);
                     actualChanges.put(LoanApiConstants.disbursementPrincipalParameterName, approvedLoanAmount);
 
-                } else {
+                } else if(approvedLoanAmount.compareTo(this.proposedPrincipal) == 1){
                     final String errorMessage = "Loan approved amount can't be greater than loan amount demanded.";
                     throw new InvalidLoanStateTransitionException("approval", "amount.can't.be.greater.than.loan.amount.demanded",
                             errorMessage, this.proposedPrincipal, approvedLoanAmount);
