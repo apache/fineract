@@ -454,7 +454,7 @@ public class LoanEnumerations {
             break;
             case GREATERTHAN:
                 optionData = new EnumOptionData(LoanProductValueConditionType.GREATERTHAN.getValue().longValue(),
-                        LoanProductValueConditionType.GREATERTHAN.getCode(), "greter than");
+                        LoanProductValueConditionType.GREATERTHAN.getCode(), "greater than");
             break;
             default:
                 optionData = new EnumOptionData(LoanProductValueConditionType.INVALID.getValue().longValue(),
