@@ -85,7 +85,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         final LoanProductMapper rm = new LoanProductMapper(null, null);
 
         String sql = "select " + rm.loanProductSchema();
-        
+
         // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
         String inClause = mifosEntityAccessUtil.
   				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
@@ -99,20 +99,33 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
     @Override
     public Collection<LoanProductData> retrieveAllLoanProductsForLookup() {
+        return retrieveAllLoanProductsForLookup(false);
+    }
 
+    @Override
+    public Collection<LoanProductData> retrieveAllLoanProductsForLookup(final boolean activeOnly) {
         this.context.authenticatedUser();
 
         final LoanProductLookupMapper rm = new LoanProductLookupMapper();
 
-        String sql = "select " + rm.schema();
-        
+        String sql = "select ";
+        if(activeOnly) {
+            sql += rm.activeOnlySchema();
+        } else {
+            sql += rm.schema();
+        }
+
         // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
         String inClause = mifosEntityAccessUtil.
-  				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
-						MifosEntityType.LOAN_PRODUCT);
-    	if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
-    		sql += " where id in ( " + inClause + " ) ";
-    	}
+                getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
+                        MifosEntityType.LOAN_PRODUCT);
+        if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
+            if(activeOnly) {
+                sql += " and id in ( " + inClause + " )";
+            } else {
+                sql += " where id in ( " + inClause + " ) ";
+            }
+        }
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
@@ -314,6 +327,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             return "lp.id as id, lp.name as name from m_product_loan lp";
         }
 
+        public String activeOnlySchema() {
+            return schema() + " where (close_date is null or close_date >= CURDATE())";
+        }
+
         public String productMixSchema() {
             return "lp.id as id, lp.name as name FROM m_product_loan lp left join m_product_mix pm on pm.product_id=lp.id where lp.id not IN("
                     + "select lp.id from m_product_loan lp inner join m_product_mix pm on pm.product_id=lp.id)";
@@ -372,7 +389,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         final LoanProductMapper rm = new LoanProductMapper(null, null);
 
         String sql = "select " + rm.loanProductSchema() + " where lp.currency_code='" + currencyCode + "'";
-        
+
         // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
         String inClause = mifosEntityAccessUtil.
   				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
@@ -392,7 +409,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         final LoanProductLookupMapper rm = new LoanProductLookupMapper();
 
         String sql = "Select " + rm.productMixSchema();
-        
+
         // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
         String inClause = mifosEntityAccessUtil.
   				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
@@ -419,10 +436,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     	if ( (inClause1 != null) && (!(inClause1.trim().isEmpty())) ) {
     		sql += " and rp.id in ( " + inClause1 + " ) ";
     	}
-    	
+
         sql += " UNION Select "
                 + rm.derivedRestrictedProductsSchema() + " where pm.restricted_product_id=?";
-        
+
         // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
         String inClause2 = mifosEntityAccessUtil.
   				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
@@ -442,7 +459,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         final LoanProductLookupMapper rm = new LoanProductLookupMapper();
 
         String sql = "Select " + rm.schema() + " where ";
-        
+
         // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
         String inClause = mifosEntityAccessUtil.
   				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
@@ -450,7 +467,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     	if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
     		sql += " lp.id in ( " + inClause + " ) and ";
     	}
-    	
+
 		sql += "lp.id not in ("
                 + "Select pm.restricted_product_id from m_product_mix pm where pm.product_id=? " + "UNION "
                 + "Select pm.product_id from m_product_mix pm where pm.restricted_product_id=?)";

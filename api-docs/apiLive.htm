@@ -7212,6 +7212,9 @@ An enumeration that indicates the type of transaction processing strategy to be 
 						<dd>
 							Integer <span>mandatory</span>
 						</dd>
+					</dl>
+					<h5>Optional Arguments</h5>
+					<dl class="argument-list">
 						<dt>productId</dt>
 						<dd>
 							Integer <span>optional</span>
@@ -7224,7 +7227,12 @@ An enumeration that indicates the type of transaction processing strategy to be 
 							Boolean <span>optional</span>
 						</dd>
 						<dd>Defaults to false if not provided. If <strong>staffInSelectedOfficeOnly=true</strong> only loan officers 
-						who are associated with the selected branch are returned.</dd>	
+						who are associated with the selected branch are returned.</dd>
+						<dt>activeOnly</dt>
+						<dd>
+							Boolean <span>optional</span>
+						</dd>
+						<dd>Defaults to false if not provided. If <strong>activeOnly=true</strong> only active loan products are returned.</dd>
 					</dl>
 					<p>Example Requests:</p>
 					<div class=apiClick>loans/template?templateType=individual&clientId=1</div>
