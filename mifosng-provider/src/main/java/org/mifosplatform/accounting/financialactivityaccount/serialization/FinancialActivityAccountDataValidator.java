@@ -53,7 +53,8 @@ public final class FinancialActivityAccountDataValidator {
 
         final Integer financialActivityId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(paramNameForFinancialActivity, element);
         baseDataValidator.reset().parameter(paramNameForFinancialActivity).value(financialActivityId).notNull()
-                .isOneOfTheseValues(FINANCIAL_ACTIVITY.ASSET_TRANSFER.getValue(), FINANCIAL_ACTIVITY.LIABILITY_TRANSFER.getValue());
+                .isOneOfTheseValues(FINANCIAL_ACTIVITY.ASSET_TRANSFER.getValue(), FINANCIAL_ACTIVITY.LIABILITY_TRANSFER.getValue(),
+                		FINANCIAL_ACTIVITY.CASH_AT_MAINVAULT.getValue(), FINANCIAL_ACTIVITY.CASH_AT_TELLER.getValue());
 
         final Long glAccountId = this.fromApiJsonHelper.extractLongNamed(paramNameForGLAccount, element);
         baseDataValidator.reset().parameter(paramNameForGLAccount).value(glAccountId).notNull().integerGreaterThanZero();

@@ -25,6 +25,7 @@ public class CommandWrapperBuilder {
     private String transactionId;
     private Long productId;
     private Long templateId;
+    private Long tellerId;
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
@@ -58,6 +59,11 @@ public class CommandWrapperBuilder {
 
     public CommandWrapperBuilder withSubEntityId(final Long withSubEntityId) {
         this.subentityId = withSubEntityId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder withTellerId(final Long withTellerId) {
+        this.tellerId = withTellerId;
         return this;
     }
 
@@ -2202,4 +2208,73 @@ public class CommandWrapperBuilder {
         this.href = "/refundByTransfer";
         return this;
     }
+	
+    public CommandWrapperBuilder createTeller() {
+        this.actionName = "CREATE";
+        this.entityName = "TELLER";
+        this.entityId = null;
+        this.href = "/tellers/templates";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateTeller(final Long tellerId) {
+        this.actionName = "UPDATE";
+        this.entityName = "TELLER";
+        this.entityId = tellerId;
+        this.href = "/tellers/" + tellerId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteTeller(final Long tellerId) {
+        this.actionName = "DELETE";
+        this.entityName = "TELLER";
+        this.entityId = tellerId;
+        this.href = "/tellers/" + tellerId;
+        return this;
+    }
+
+    public CommandWrapperBuilder allocateTeller(final long tellerId) {
+        this.actionName = "ALLOCATECASHIER";
+        this.entityName = "TELLER";
+        this.entityId = tellerId;
+        this.href = "/tellers/" + tellerId + "/cashiers/templates";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateAllocationTeller(final Long tellerId, final Long cashierId) {
+        this.actionName = "UPDATECASHIERALLOCATION";
+        this.entityName = "TELLER";
+        this.entityId = tellerId;
+        this.subentityId = cashierId;
+        this.href = "/tellers/" + tellerId + "/cashiers/" + cashierId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteAllocationTeller(final Long tellerId, final Long cashierId) {
+        this.actionName = "DELETECASHIERALLOCATION";
+        this.entityName = "TELLER";
+        this.entityId = tellerId;
+        this.subentityId = cashierId;
+        this.href = "/tellers/" + tellerId + "/cashiers/" + cashierId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder allocateCashToCashier(final Long tellerId, final Long cashierId) {
+        this.actionName = "ALLOCATECASHTOCASHIER";
+        this.entityName = "TELLER";
+        this.entityId = tellerId;
+        this.subentityId = cashierId;
+        this.href = "/tellers/" + tellerId + "/cashiers/" + cashierId + "/allocate";
+        return this;
+    }
+    
+    public CommandWrapperBuilder settleCashFromCashier(final Long tellerId, final Long cashierId) {
+        this.actionName = "SETTLECASHFROMCASHIER";
+        this.entityName = "TELLER";
+        this.entityId = tellerId;
+        this.subentityId = cashierId;
+        this.href = "/tellers/" + tellerId + "/cashiers/" + cashierId + "/settle";
+        return this;
+    }
+
 }

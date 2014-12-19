@@ -268,6 +268,26 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
+        } else if (wrapper.isTellerResource()) {
+            if (wrapper.isCreate()) {
+                handler = this.applicationContext.getBean("createTellerCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdate()) {
+                handler = this.applicationContext.getBean("updateTellerCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDelete()) {
+                handler = this.applicationContext.getBean("deleteTellerCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isAllocateCashier()) {
+            	handler = this.applicationContext.getBean("allocateCashierToTellerCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdateCashierAllocation()) {
+            	handler = this.applicationContext.getBean("updateCashierAllocationCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDeleteCashierAllocation()) {
+            	handler = this.applicationContext.getBean("deleteCashierAllocationCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isAllocateCashToCashier()) {
+            	handler = this.applicationContext.getBean("allocateCashToCashierCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isSettleCashFromCashier()) {
+            	handler = this.applicationContext.getBean("settleCashFromCashierCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
         } else if (wrapper.isCollateralResource()) {
             if (wrapper.isCreate()) {
                 handler = this.applicationContext.getBean("createCollateralCommandHandler", NewCommandSourceHandler.class);

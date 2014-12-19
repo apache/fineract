@@ -221,7 +221,9 @@ public class AccountingConstants {
     }
 
     public static enum FINANCIAL_ACTIVITY {
-        ASSET_TRANSFER(100, "assetTransfer", GLAccountType.ASSET), LIABILITY_TRANSFER(200, "liabilityTransfer", GLAccountType.LIABILITY);
+        ASSET_TRANSFER(100, "assetTransfer", GLAccountType.ASSET), LIABILITY_TRANSFER(200, "liabilityTransfer", GLAccountType.LIABILITY),
+        CASH_AT_MAINVAULT (300, "cashAtMainVault", GLAccountType.ASSET),
+        CASH_AT_TELLER (400, "cashAtTeller", GLAccountType.ASSET);
 
         private final Integer value;
         private final String code;
