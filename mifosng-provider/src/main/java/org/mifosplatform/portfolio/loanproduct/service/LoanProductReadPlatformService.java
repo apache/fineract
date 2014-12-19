@@ -16,6 +16,8 @@ public interface LoanProductReadPlatformService {
 
     Collection<LoanProductData> retrieveAllLoanProductsForLookup();
 
+    Collection<LoanProductData> retrieveAllLoanProductsForLookup(boolean activeOnly);
+
     LoanProductData retrieveLoanProduct(Long productId);
 
     LoanProductData retrieveNewLoanProductDetails();
