@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 22 Dec 2014 - 1.26.0.RELEASE
 1. 1 Nov 2014 - 1.25.1.RELEASE
 1. 12 Oct 2014 - 1.25.0.RELEASE
 1. 10 Jul 2014 - 1.24.0.RELEASE
@@ -67,6 +68,87 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.26.0.RELEASE
+=============
+This feature release adds support for capturing guarantee requirements for loans and blocking/holding funds in guarantor accounts. It also includes various enhancements like the addition of new statuses for client life cycle, ability to map liability accounts to fees, ability to update deposit amounts for RD, capturing client images from linked webcam along with a number of improvements and bug fixes
+
+New Features & Improvements
+
+Platform & API
+
+New Features & Improvements
+
+ - [MIFOSX-1662] - Adding new statuses to Client lifecyle
+ - [MIFOSX-1663] - Add more flexibility for center/group meeting reschedule
+ - [MIFOSX-1584] - Option to set "minimum days between disbursal and first repayment"
+ - [MIFOSX-1641] - Configure Guarantor requirements for loan product
+ - [MIFOSX-1675] - Add support to capture guarantee details for loans
+ - [MIFOSX-1709] - Workflows for holding and releasing funds on savings account linked as guarantee to loan accounts
+ - [MIFOSX-1728] - Introduce tenure Min/Max constraints for Tranche loans
+ - [MIFOSX-1639] - Auto create standing instruction at loan disbursement
+ - [MIFOSX-1700] - Need ability to update deposit amounts for non interest bearing Recurring deposits
+ - [MIFOSX-1727] - Option to make Calendar Mandatory when disbursing JLG loan
+ - [MIFOSX-1068] - Option to change approved amount during loan approval
+ - [MIFOSX-1175] - Ability to transfer loan officer to a group
+ - [MIFOSX-1523] - Loan rescheduling
+ - [MIFOSX-1514] - Refund for Active Loans
+ - [MIFOSX-1463] - Keep track of manually reversed/adjusted loan repayments
+ - [MIFOSX-1511] - Custom Formats for Client number and account number
+ - [MIFOSX-1630] - Bit and DateTime data type support in DataTable API
+ - [MIFOSX-1619] - Add MifosX Eclipse preferences file into source control
+ - [MIFOSX-1642] - add sub status to client
+ - [MIFOSX-1628] - Log current user for loan and deposit transactions
+ - [MIFOSX-1634] - Add option to account fees as liabilities
+ - [MIFOSX-1638] - Waiving charges attached to zero balance installments - Loan Rescheduling
+ - [MIFOSX-1738] - Create dev and production profiles for Gradle build
+ - [MIFOSX-1566] - Constraint for minimum/maximum number of client in a active group
+ - [MIFOSX-1680] - Option to change center meeting frequency and intervals
+ - [MIFOSX-1674] - Allow the description field added to m_code_value to be edited/entered
+ - [MIFOSX-1739] - Loan Products with close date in the past should not appear in loan account creation dropdown
+
+Bugs
+
+ - [MIFOSX-1699] - Concurrent Savings transactions are not handled correctly
+ - [MIFOSX-1550] - No check for NULL principal amount when creating journal entry for loan write-off
+ - [MIFOSX-1625] - Can't disburse loan with charges configured for periodic accruals
+ - [MIFOSX-1633] - Newly added pentaho reports are missing read permissions 
+ - [MIFOSX-1655] - Updating a loan (with charges attached) after submitting throws an error
+ - [MIFOSX-1656] - Bulk JLG Loan application is not working as expected
+ - [MIFOSX-1661] - Some details provided in the Loan Product page is not displaying in the New loan application page
+ - [MIFOSX-1671] - User with "ALL_FUNCTIONS_READ" permission does not have access to /users/{userId} resource
+ - [MIFOSX-1676] - Issues with Interest posting on Fixed deposit Account
+ - [MIFOSX-1704] - makercheckers endpoint broken for non-superuser roles
+ - [MIFOSX-1747] - Issues with logging on the MifosX platform after Spring boot update
+ - [MIFOSX-1760] - For JLG Loans sync repayment with meeting is not working as expected after loan Approval
+
+
+Community App
+
+ - [MIFOSX-1645] - In UI should not allowed to send multiple requests by submitting request for multiple times for same action
+ - [MIFOSX-1564] - Ability to Capture Client Image from webcams on the Community App
+ - [MIFOSX-1745] - Community app does not allow deleting client images
+ - [MIFOSX-1684] - Default current date for activation dates and submission dates
+ - [MIFOSX-1687] - In search screens, retain the search criteria during browser navigation
+ - [MIFOSX-1692] - Tree view of Chart of Accounts and Offices to have "Expand All" option
+ - [MIFOSX-1591] - The +JLG Loan Application on the view group page has a different colored background color than other actions in the system.
+ - [MIFOSX-1443] - By Clicking on client having Image/Signature, authentication page displays
+ - [MIFOSX-1556] - AdHoc query Search always give error when 'summary' button is clicked
+ - [MIFOSX-1043] - Community app does not support datatables with bit, DateTime fields
+ - [MIFOSX-1559] - Issues related to Manage Groups in Centers and Manage Clients in Groups
+ - [MIFOSX-1239] - Allow tab out from calendar control (to improve data entry efficiency)
+ - [MIFOSX-1529] - Showing Today's Date in Datepicker
+ - [MIFOSX-1546] - Improve UI for Global Configuration
+ - [MIFOSX-1284] - Sort entries in selection lists alphabetically
+ - [MIFOSX-1713] - Ability to hide values in "Approved Amount" and "Disburse Amount" for the loans under submitted and pending approval state
+ - [MIFOSX-1533] - Advanced Search
+ - [MIFOSX-1551] - System -> Audit trails- search is not working as expected
+ - [MIFOSX-1644] - Loans transactions history does not hide transactions which have been undone
+ - [MIFOSX-1730] - Unable to create Tranche loans on the community app when using a Date format other than 'dd MMMM yyyy'
+ - [MIFOSX-1772] - By clicking on the meeting details in Group page (under Center and meeting assigned at center level) displays calendar does not exist error message
+ - [MIFOSX-1575] - Reversing a journal entry does not ask for confirmation.
+ - [MIFOSX-1677] - When moving clients between groups, display customer ids for easier identification
+
 
 1.25.1.RELEASE
 =============
