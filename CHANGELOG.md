@@ -71,7 +71,7 @@ Releases
 
 1.26.0.RELEASE
 =============
-This feature release adds support for capturing guarantee requirements for loans and blocking/holding funds in guarantor accounts. It also includes various enhancements like the addition of new statuses for client life cycle, ability to map liability accounts to fees, ability to update deposit amounts for RD and the ability to capture client images from a linked webcam along with a number of other improvements and bug fixes
+This feature release adds support for capturing guarantee requirements for loans and blocking/holding funds in guarantor accounts. It also includes various enhancements like the addition of new statuses for client life cycle, ability to map liability accounts to fees, ability to update deposit amounts for active recurring deposits and the ability to capture client images from a linked webcam along with a number of other improvements and bug fixes
 
 New Features & Improvements
 
