@@ -148,6 +148,7 @@ Community App
  - [MIFOSX-1772] - By clicking on the meeting details in Group page (under Center and meeting assigned at center level) displays calendar does not exist error message
  - [MIFOSX-1575] - Reversing a journal entry does not ask for confirmation.
  - [MIFOSX-1677] - When moving clients between groups, display customer ids for easier identification
+ - [MIFOSX-1768] - Clean up Loan product creation screen
 
 
 1.25.1.RELEASE
