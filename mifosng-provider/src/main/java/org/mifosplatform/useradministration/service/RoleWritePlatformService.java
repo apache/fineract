@@ -15,4 +15,10 @@ public interface RoleWritePlatformService {
     CommandProcessingResult updateRole(Long roleId, JsonCommand command);
 
     CommandProcessingResult updateRolePermissions(Long roleId, JsonCommand command);
+
+    CommandProcessingResult deleteRole(Long roleId);
+
+    CommandProcessingResult disableRole(Long roleId);
+
+    CommandProcessingResult enableRole(Long roleId);
 }

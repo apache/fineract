@@ -136,6 +136,6 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         final AppUser maker = this.context.authenticatedUser();
         commandSourceInput.markAsRejected(maker, DateTime.now());
         this.commandSourceRepository.save(commandSourceInput);
-        return makerCheckerId ;
+        return makerCheckerId;
     }
 }

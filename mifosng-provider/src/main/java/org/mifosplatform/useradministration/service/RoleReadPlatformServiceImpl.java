@@ -39,6 +39,13 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
     }
 
     @Override
+    public Collection<RoleData> retrieveAllActiveRoles() {
+        final String sql = "select " + this.roleRowMapper.schema() + " where r.is_disabled = 0 order by r.id";
+
+        return this.jdbcTemplate.query(sql, this.roleRowMapper);
+    }
+
+    @Override
     public RoleData retrieveOne(final Long id) {
 
         try {
@@ -58,12 +65,13 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
             final Long id = JdbcSupport.getLong(rs, "id");
             final String name = rs.getString("name");
             final String description = rs.getString("description");
-
-            return new RoleData(id, name, description);
+            final Boolean disabled = rs.getBoolean("disabled");
+            
+            return new RoleData(id, name, description, disabled);
         }
 
         public String schema() {
-            return " r.id as id, r.name as name, r.description as description from m_role r";
+            return " r.id as id, r.name as name, r.description as description, r.is_disabled as disabled from m_role r";
         }
     }
 
@@ -72,6 +80,6 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
         final String sql = "select " + this.roleRowMapper.schema() + " inner join m_appuser_role"
                 + " ar on ar.role_id = r.id where ar.appuser_id= ?";
 
-        return this.jdbcTemplate.query(sql,this.roleRowMapper,new Object[]{appUserId});
+        return this.jdbcTemplate.query(sql, this.roleRowMapper, new Object[] { appUserId });
     }
 }

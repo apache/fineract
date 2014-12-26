@@ -133,7 +133,7 @@ public class ClientHelper {
 
     /* Client status is a map.So adding SuppressWarnings */
     @SuppressWarnings("unchecked")
-	public static HashMap<String,Object> getClientStatus(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+    public static HashMap<String, Object> getClientStatus(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId) {
         return (HashMap<String, Object>) getClient(requestSpec, responseSpec, clientId, "status");
     }
@@ -151,9 +151,9 @@ public class ClientHelper {
         Integer clientClosureCodeId = (Integer) code.get("id");
 
         /* Retrieve/Create Code Values for the Code "ClientClosureReason" */
-        HashMap<String,Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(clientClosureCodeId,this.requestSpec,this.responseSpec);
-        Integer closureReasonId = (Integer)codeValue.get("id");
-        
+        HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(clientClosureCodeId, this.requestSpec, this.responseSpec);
+        Integer closureReasonId = (Integer) codeValue.get("id");
+
         map.put("closureReasonId", closureReasonId.toString());
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
@@ -180,12 +180,13 @@ public class ClientHelper {
         final HashMap<String, String> map = new HashMap<>();
         /* Retrieve Code id for the Code "ClientRejectReason" */
         String codeName = "ClientRejectReason";
-        HashMap<String,Object> code = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, codeName);
-        Integer clientRejectionReasonCodeId = (Integer)code.get("id");
-        
+        HashMap<String, Object> code = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, codeName);
+        Integer clientRejectionReasonCodeId = (Integer) code.get("id");
+
         /* Retrieve/Create Code Values for the Code "ClientRejectReason" */
-        HashMap<String,Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(clientRejectionReasonCodeId,this.requestSpec,this.responseSpec);
-        Integer rejectionReasonId = (Integer)codeValue.get("id");
+        HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(clientRejectionReasonCodeId, this.requestSpec,
+                this.responseSpec);
+        Integer rejectionReasonId = (Integer) codeValue.get("id");
 
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
@@ -212,13 +213,14 @@ public class ClientHelper {
         final HashMap<String, String> map = new HashMap<>();
         /* Retrieve Code id for the Code "ClientWithdrawReason" */
         String codeName = "ClientWithdrawReason";
-        HashMap<String,Object> code = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, codeName);
-        Integer clientWithdrawReasonCodeId = (Integer)code.get("id");
-        
+        HashMap<String, Object> code = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, codeName);
+        Integer clientWithdrawReasonCodeId = (Integer) code.get("id");
+
         /* Retrieve/Create Code Values for the Code "ClientWithdrawReason" */
-        HashMap<String,Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(clientWithdrawReasonCodeId,this.requestSpec,this.responseSpec);
-        Integer withdrawalReasonId = (Integer)codeValue.get("id");
-        
+        HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(clientWithdrawReasonCodeId, this.requestSpec,
+                this.responseSpec);
+        Integer withdrawalReasonId = (Integer) codeValue.get("id");
+
         map.put("locale", CommonConstants.locale);
         map.put("dateFormat", CommonConstants.dateFormat);
         map.put("withdrawalDate", CREATED_DATE_PLUS_ONE);
@@ -229,27 +231,27 @@ public class ClientHelper {
 
     }
 
-    public HashMap<String,Object> closeClient(final Integer clientId) {
+    public HashMap<String, Object> closeClient(final Integer clientId) {
         System.out.println("--------------------------------- CLOSE CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(CLOSE_CLIENT_COMMAND, clientId), getCloseClientAsJSON(), clientId);
     }
 
-    public HashMap<String,Object> reactivateClient(final Integer clientId) {
+    public HashMap<String, Object> reactivateClient(final Integer clientId) {
         System.out.println("--------------------------------- REACTIVATE CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(REACTIVATE_CLIENT_COMMAND, clientId), getReactivateClientAsJSON(), clientId);
     }
 
-    public HashMap<String,Object> rejectClient(final Integer clientId) {
+    public HashMap<String, Object> rejectClient(final Integer clientId) {
         System.out.println("--------------------------------- REJECT CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(REJECT_CLIENT_COMMAND, clientId), getRejectClientAsJSON(), clientId);
     }
 
-    public HashMap<String,Object> activateClient(final Integer clientId) {
+    public HashMap<String, Object> activateClient(final Integer clientId) {
         System.out.println("--------------------------------- ACTIVATE CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(ACTIVATE_CLIENT_COMMAND, clientId), getActivateClientAsJSON(), clientId);
     }
 
-    public HashMap<String,Object> withdrawClient(final Integer clientId) {
+    public HashMap<String, Object> withdrawClient(final Integer clientId) {
         System.out.println("--------------------------------- WITHDRAWN CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(WITHDRAW_CLIENT_COMMAND, clientId), getWithdrawClientAsJSON(), clientId);
     }
@@ -258,9 +260,9 @@ public class ClientHelper {
         return CLIENT_URL + "/" + clientId + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
     }
 
-    private HashMap<String,Object> performClientActions(final String postURLForClient, final String jsonToBeSent, final Integer clientId) {
+    private HashMap<String, Object> performClientActions(final String postURLForClient, final String jsonToBeSent, final Integer clientId) {
         Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForClient, jsonToBeSent, CommonConstants.RESPONSE_STATUS);
-        HashMap<String,Object> response = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
+        HashMap<String, Object> response = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
 
         return response;
     }

@@ -11,16 +11,19 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -46,8 +49,8 @@ public class RolesApiResource {
     /**
      * The set of parameters that are supported in response for {@link RoleData}
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "description",
-            "availablePermissions", "selectedPermissions"));
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "description", "availablePermissions",
+            "selectedPermissions"));
 
     /**
      * The set of parameters that are supported in response for {@link RoleData}
@@ -124,6 +127,35 @@ public class RolesApiResource {
         return this.toApiJsonSerializer.serialize(settings, role, this.RESPONSE_DATA_PARAMETERS);
     }
 
+    /**
+     * Roles enable or disable
+     * 
+     * @param roleId
+     * @param commandParam
+     * @param apiRequestBodyAsJson
+     * @return
+     */
+    @POST
+    @Path("{roleId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String actionsOnRoles(@PathParam("roleId") final Long roleId, @QueryParam("command") final String commandParam,
+            final String apiRequestBodyAsJson) {
+
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+
+        CommandProcessingResult result = null;
+
+        if (is(commandParam, "disable")) {
+            final CommandWrapper commandRequest = builder.disableRole(roleId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "enable")) {
+            final CommandWrapper commandRequest = builder.enableRole(roleId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        }
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
     @PUT
     @Path("{roleId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -171,4 +203,30 @@ public class RolesApiResource {
 
         return this.toApiJsonSerializer.serialize(result);
     }
+
+    /**
+     * Delete Role
+     * 
+     * @param roleId
+     * @return
+     */
+    @DELETE
+    @Path("{roleId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String deleteRole(@PathParam("roleId") final Long roleId) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+                .deleteRole(roleId) //
+                .build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
+    private boolean is(final String commandParam, final String commandValue) {
+        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
+    }
+
 }

@@ -221,15 +221,19 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         } else if (wrapper.isPermissionResource()) {
             handler = this.applicationContext.getBean("updateMakerCheckerPermissionsCommandHandler", NewCommandSourceHandler.class);
         } else if (wrapper.isRoleResource()) {
-
             if (wrapper.isCreate()) {
                 handler = this.applicationContext.getBean("createRoleCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdate()) {
                 handler = this.applicationContext.getBean("updateRoleCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDelete()) {
+                handler = this.applicationContext.getBean("deleteRoleCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDisable()) {
+                handler = this.applicationContext.getBean("disableRoleCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isEnable()) {
+                handler = this.applicationContext.getBean("enableRoleCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
-
         } else if (wrapper.isUserResource()) {
             if (wrapper.isCreate()) {
                 handler = this.applicationContext.getBean("createUserCommandHandler", NewCommandSourceHandler.class);

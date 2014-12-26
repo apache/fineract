@@ -61,7 +61,7 @@ public class CommandWrapperBuilder {
         this.subentityId = withSubEntityId;
         return this;
     }
-    
+
     public CommandWrapperBuilder withTellerId(final Long withTellerId) {
         this.tellerId = withTellerId;
         return this;
@@ -703,7 +703,7 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId + "/transactions/" + transactionId;
         return this;
     }
-    
+
     public CommandWrapperBuilder refundLoanTransactionByCash(final Long loanId) {
         this.actionName = "REFUNDBYCASH";
         this.entityName = "LOAN";
@@ -2200,7 +2200,7 @@ public class CommandWrapperBuilder {
         this.json = "{}";
         return this;
     }
-    
+
     public CommandWrapperBuilder refundByTransfer() {
         this.actionName = "REFUNDBYTRANSFER";
         this.entityName = "ACCOUNTTRANSFER";
@@ -2208,7 +2208,7 @@ public class CommandWrapperBuilder {
         this.href = "/refundByTransfer";
         return this;
     }
-	
+
     public CommandWrapperBuilder createTeller() {
         this.actionName = "CREATE";
         this.entityName = "TELLER";
@@ -2258,7 +2258,7 @@ public class CommandWrapperBuilder {
         this.href = "/tellers/" + tellerId + "/cashiers/" + cashierId;
         return this;
     }
-    
+
     public CommandWrapperBuilder allocateCashToCashier(final Long tellerId, final Long cashierId) {
         this.actionName = "ALLOCATECASHTOCASHIER";
         this.entityName = "TELLER";
@@ -2267,13 +2267,40 @@ public class CommandWrapperBuilder {
         this.href = "/tellers/" + tellerId + "/cashiers/" + cashierId + "/allocate";
         return this;
     }
-    
+
     public CommandWrapperBuilder settleCashFromCashier(final Long tellerId, final Long cashierId) {
         this.actionName = "SETTLECASHFROMCASHIER";
         this.entityName = "TELLER";
         this.entityId = tellerId;
         this.subentityId = cashierId;
         this.href = "/tellers/" + tellerId + "/cashiers/" + cashierId + "/settle";
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteRole(Long roleId) {
+        this.actionName = "DELETE";
+        this.entityName = "ROLE";
+        this.entityId = roleId;
+        this.href = "/roles/" + roleId;
+        this.json = "{}";
+        return this;
+    }
+
+    public CommandWrapperBuilder disableRole(Long roleId) {
+        this.actionName = "DISABLE";
+        this.entityName = "ROLE";
+        this.entityId = roleId;
+        this.href = "/roles/" + roleId + "/disbales";
+        this.json = "{}";
+        return this;
+    }
+
+    public CommandWrapperBuilder enableRole(Long roleId) {
+        this.actionName = "ENABLE";
+        this.entityName = "ROLE";
+        this.entityId = roleId;
+        this.href = "/roles/" + roleId + "/enable";
+        this.json = "{}";
         return this;
     }
 
