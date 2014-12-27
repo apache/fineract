@@ -5,8 +5,6 @@
  */
 package org.mifosplatform.infrastructure.hooks.listener;
 
-import java.util.List;
-
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.hooks.domain.Hook;
@@ -20,48 +18,50 @@ import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class MifosHookListener implements HookListener {
 
-	private final HookProcessorProvider hookProcessorProvider;
-	private final HookReadPlatformService hookReadPlatformService;
-	private final TenantDetailsService tenantDetailsService;
+    private final HookProcessorProvider hookProcessorProvider;
+    private final HookReadPlatformService hookReadPlatformService;
+    private final TenantDetailsService tenantDetailsService;
 
-	@Autowired
-	public MifosHookListener(final HookProcessorProvider hookProcessorProvider,
-                        final HookReadPlatformService hookReadPlatformService,
-			final TenantDetailsService tenantDetailsService) {
-                this.hookReadPlatformService = hookReadPlatformService;
-		this.hookProcessorProvider = hookProcessorProvider;
-		this.tenantDetailsService = tenantDetailsService;
-	}
+    @Autowired
+    public MifosHookListener(final HookProcessorProvider hookProcessorProvider,
+            final HookReadPlatformService hookReadPlatformService,
+            final TenantDetailsService tenantDetailsService) {
+        this.hookReadPlatformService = hookReadPlatformService;
+        this.hookProcessorProvider = hookProcessorProvider;
+        this.tenantDetailsService = tenantDetailsService;
+    }
 
-	@Override
-	public void onApplicationEvent(final HookEvent event) {
+    @Override
+    public void onApplicationEvent(final HookEvent event) {
 
-		final String tenantIdentifier = event.getTenantIdentifier();
-		final MifosPlatformTenant tenant = this.tenantDetailsService
-				.loadTenantById(tenantIdentifier);
-		ThreadLocalContextUtil.setTenant(tenant);
+        final String tenantIdentifier = event.getTenantIdentifier();
+        final MifosPlatformTenant tenant = this.tenantDetailsService
+                .loadTenantById(tenantIdentifier);
+        ThreadLocalContextUtil.setTenant(tenant);
 
-		final AppUser appUser = event.getAppUser();
-		final String authToken = event.getAuthToken();
+        final AppUser appUser = event.getAppUser();
+        final String authToken = event.getAuthToken();
 
-		final HookEventSource hookEventSource = event.getSource();
-		final String entityName = hookEventSource.getEntityName();
-		final String actionName = hookEventSource.getActionName();
-		final String payload = event.getPayload();
-		
-		final List<Hook> hooks = this.hookReadPlatformService
-		        .retrieveHooksByEvent(hookEventSource.getEntityName(),
-		                hookEventSource.getActionName());
+        final HookEventSource hookEventSource = event.getSource();
+        final String entityName = hookEventSource.getEntityName();
+        final String actionName = hookEventSource.getActionName();
+        final String payload = event.getPayload();
 
-		for (final Hook hook : hooks) {
-			final HookProcessor processor = this.hookProcessorProvider
-					.getProcessor(hook);
-			processor.process(hook, appUser, payload, entityName, actionName,
-					tenantIdentifier, authToken);
-		}
-	}
+        final List<Hook> hooks = this.hookReadPlatformService
+                .retrieveHooksByEvent(hookEventSource.getEntityName(),
+                        hookEventSource.getActionName());
+
+        for (final Hook hook : hooks) {
+            final HookProcessor processor = this.hookProcessorProvider
+                    .getProcessor(hook);
+            processor.process(hook, appUser, payload, entityName, actionName,
+                    tenantIdentifier, authToken);
+        }
+    }
 
 }

@@ -28,7 +28,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
 @Entity
-@Table(name = "m_template", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name") })
+@Table(name = "m_template", uniqueConstraints = {@UniqueConstraint(columnNames = {"name"}, name = "unq_name")})
 public class Template extends AbstractPersistable<Long> {
 
     @Column(name = "name", nullable = false, unique = true)
@@ -49,7 +49,8 @@ public class Template extends AbstractPersistable<Long> {
     @OneToMany(targetEntity = TemplateMapper.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<TemplateMapper> mappers;
 
-    public Template(final String name, final String text, final TemplateEntity entity, final TemplateType type,
+    public Template(final String name, final String text,
+            final TemplateEntity entity, final TemplateType type,
             final List<TemplateMapper> mappers) {
         this.name = StringUtils.defaultIfEmpty(name, null);
         this.entity = entity;
@@ -65,16 +66,29 @@ public class Template extends AbstractPersistable<Long> {
     public static Template fromJson(final JsonCommand command) {
         final String name = command.stringValueOfParameterNamed("name");
         final String text = command.stringValueOfParameterNamed("text");
-        final TemplateEntity entity = TemplateEntity.values()[command.integerValueSansLocaleOfParameterNamed("entity")];
-        final TemplateType type = TemplateType.values()[command.integerValueSansLocaleOfParameterNamed("type")];
+        final TemplateEntity entity = TemplateEntity.values()[command
+                .integerValueSansLocaleOfParameterNamed("entity")];
+        final int templateTypeId = command
+                .integerValueSansLocaleOfParameterNamed("type");
+        TemplateType type = null;
+        switch (templateTypeId) {
+            case 0 :
+                type = TemplateType.DOCUMENT;
+                break;
+            case 2 :
+                type = TemplateType.SMS;
+                break;
+        }
 
         final JsonArray array = command.arrayOfParameterNamed("mappers");
 
         final List<TemplateMapper> mappersList = new ArrayList<>();
 
         for (final JsonElement element : array) {
-            mappersList.add(new TemplateMapper(element.getAsJsonObject().get("mappersorder").getAsInt(), element.getAsJsonObject()
-                    .get("mapperskey").getAsString(), element.getAsJsonObject().get("mappersvalue").getAsString()));
+            mappersList.add(new TemplateMapper(element.getAsJsonObject()
+                    .get("mappersorder").getAsInt(), element.getAsJsonObject()
+                    .get("mapperskey").getAsString(), element.getAsJsonObject()
+                    .get("mappersvalue").getAsString()));
         }
 
         return new Template(name, text, entity, type, mappersList);
