@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mifosplatform.integrationtests.common.ClientHelper;
 import org.mifosplatform.integrationtests.common.GroupHelper;
-import org.mifosplatform.integrationtests.common.StaffHelper;
+import org.mifosplatform.integrationtests.common.organisation.StaffHelper;
 import org.mifosplatform.integrationtests.common.Utils;
 import org.mifosplatform.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.mifosplatform.integrationtests.common.loans.LoanProductTestBuilder;
