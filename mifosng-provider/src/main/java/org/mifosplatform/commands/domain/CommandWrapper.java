@@ -967,17 +967,32 @@ public class CommandWrapper {
     public boolean isInactivateSavingsAccountCharge() {
         return this.actionName.equalsIgnoreCase("INACTIVATE") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNTCHARGE");
     }
-    
+
     public boolean isRefundByTransfer() {
         return this.actionName.equalsIgnoreCase("REFUNDBYTRANSFER");
     }
-    
+
     public boolean isLoanRefundByCash() {
         return this.actionName.equalsIgnoreCase("REFUNDBYCASH") && this.entityName.equalsIgnoreCase("LOAN");
     }
-   
+
     public boolean isUndoLoanRefund() {
         return this.actionName.equalsIgnoreCase("UNDOREFUND") && this.entityName.equalsIgnoreCase("LOAN");
     }
 
+    public boolean isDisable() {
+        return isDisableOperation() && this.entityId != null;
+    }
+
+    public boolean isDisableOperation() {
+        return this.actionName.equalsIgnoreCase("DISABLE");
+    }
+
+    public boolean isEnable() {
+        return isEnableOperation() && this.entityId != null;
+    }
+
+    public boolean isEnableOperation() {
+        return this.actionName.equalsIgnoreCase("ENABLE");
+    }
 }

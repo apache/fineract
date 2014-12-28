@@ -25,10 +25,9 @@ import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
-
 /**
- * Util for RestAssured tests.
- * This class here in src/integrationTest is copy/pasted to src/test; please keep them in sync.
+ * Util for RestAssured tests. This class here in src/integrationTest is
+ * copy/pasted to src/test; please keep them in sync.
  */
 @SuppressWarnings("unchecked")
 public class Utils {
@@ -116,7 +115,7 @@ public class Utils {
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
         return randomStringGenerator(prefix, lenOfRandomSuffix);
     }
-    
+
     public static String convertDateToURLFormat(final Calendar dateToBeConvert) {
         return new SimpleDateFormat("dd MMMMMM yyyy").format(dateToBeConvert.getTime());
     }

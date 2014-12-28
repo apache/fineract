@@ -89,7 +89,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
     public AppUserData retrieveNewUserDetails() {
 
         final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
-        final Collection<RoleData> availableRoles = this.roleReadPlatformService.retrieveAll();
+        final Collection<RoleData> availableRoles = this.roleReadPlatformService.retrieveAllActiveRoles();
 
         return AppUserData.template(offices, availableRoles);
     }

@@ -494,7 +494,6 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
     }
 
     public void validateHasCheckerPermissionTo(final String function) {
-
         final String checkerPermissionName = function.toUpperCase() + "_CHECKER";
         if (hasNotPermissionTo("CHECKER_SUPER_USER") && hasNotPermissionTo(checkerPermissionName)) {
             final String authorizationMessage = "User has no authority to be a checker for: " + function;
