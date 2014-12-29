@@ -1,0 +1,15 @@
+Welcome to the Mifos community!
+===============================
+
+Depending on the OS you're running, you should have "runmifosx.sh" (for Linux and Mac) and
+"runmifosx.bat" (for Windows) in this directory. These are small scripts that allow you to
+run MifosX on your computer locally. To be able to run MifosX, just double-click on the script,
+that is, "runmifosx.sh" if you are on Linux or Mac, or "runmifosx.bat" if you are on Windows.
+
+Note
+====
+If you have a web front-end that you want to use along with the backend server, put your index.html
+inside the "web" folder along with all the other source files.
+P.S.: the index.html should be in the "web" folder itself
+
+We hope you'll have an amazing experience working with MifosX.
