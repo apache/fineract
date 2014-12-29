@@ -40,12 +40,13 @@ public class ServerWithMariaDB4jApplication {
 		ConfigurableApplicationContext ctx = SpringApplication.run(Configuration.class, args);
 		if (Desktop.isDesktopSupported()) {
 			Resource resource = ctx.getResource("file:" + System.getProperty("user.dir") +
-					System.getProperty("file.separator") + "web" +
+					System.getProperty("file.separator") + "apps" +
+					System.getProperty("file.separator") + "community-app" +
 					System.getProperty("file.separator") + "index.html");
 			if (resource.exists()) {
 				try {
 					Desktop.getDesktop().browse(URI.create("https://localhost:8443/mifosng-provider" +
-							"/web/index.html?baseApiUrl=https://localhost:8443" +
+							"/apps/community-app/index.html?baseApiUrl=https://localhost:8443" +
 							"&tenantIdentifier=default#/"));
 				} catch (IOException e) {}
 			}

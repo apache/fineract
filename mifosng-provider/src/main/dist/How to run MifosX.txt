@@ -6,10 +6,18 @@ Depending on the OS you're running, you should have "runmifosx.sh" (for Linux an
 run MifosX on your computer locally. To be able to run MifosX, just double-click on the script,
 that is, "runmifosx.sh" if you are on Linux or Mac, or "runmifosx.bat" if you are on Windows.
 
-Note
-====
 If you have a web front-end that you want to use along with the backend server, put your index.html
-inside the "web" folder along with all the other source files.
-P.S.: the index.html should be in the "web" folder itself
+along with all the other source files inside a (sub-folder of) the "apps" folder in the current
+directory from where runmifosx.bat/.sh is launched.  The web UI front-end is then accessible
+under mifosng-provider/apps - for example:
 
-We hope you'll have an amazing experience working with MifosX.
+    https://localhost:8443/mifosng-provider/apps/community-app/index.html
+
+We hope you'll have an amazing experience working with MifosX!
+
+
+PS, internal note to Mifos developers preparing packages, only: For this to work, the WAR of
+the Mifos X distribution ZIP package will (currently) have to be built using
+the Gradle 'dev' environment profile - e.g. using this command:
+
+    ./gradlew -Penv=dev clean war dist
