@@ -90,6 +90,17 @@ public class StaffTest {
         StaffHelper.createStaffWithJson(requestSpec, responseSpec, new Gson().toJson(map));
     }
 
+    public void testStaffCreateExternalIdValidationError() {
+        final HashMap<String, Object> map = new HashMap<>();
+
+        map.put("officeId", 1);
+        map.put("firstname", Utils.randomNameGenerator("michael_", 5));
+        map.put("lastname", Utils.randomNameGenerator("Doe_", 4));
+
+        map.put("externalId", Utils.randomStringGenerator("EXT", 98));
+        StaffHelper.createStaffWithJson(requestSpec, responseSpecForValidationError, new Gson().toJson(map));
+    }
+
     @Test
     public void testStaffFetch() {
         final HashMap response = StaffHelper.getStaff(requestSpec, responseSpec, 1);
@@ -135,5 +146,81 @@ public class StaffTest {
     @Test
     public void testStaffFetchNotFound() {
         StaffHelper.getStaff(requestSpec, responseSpecForNotFoundError, Integer.MAX_VALUE);
+    }
+
+    @Test
+    public void testStaffUpdate() {
+        final HashMap<String, Object> map = new HashMap<>();
+        final String firstname = Utils.randomNameGenerator("michael_", 10);
+        final String lastname = Utils.randomNameGenerator("Doe_", 10);
+        final String externalId = Utils.randomStringGenerator("EXT", 97);
+        final String mobileNo = Utils.randomStringGenerator("num_", 10);
+
+        map.put("firstname", firstname);
+        map.put("lastname", lastname);
+        map.put("externalId", externalId);
+        map.put("mobileNo", mobileNo);
+
+        final HashMap response = (HashMap) StaffHelper.updateStaff(requestSpec, responseSpec, 1, map);
+        final HashMap changes = (HashMap)  response.get("changes");
+
+        Assert.assertEquals(1, response.get("resourceId"));
+        Assert.assertEquals(firstname, changes.get("firstname"));
+        Assert.assertEquals(lastname, changes.get("lastname"));
+        Assert.assertEquals(externalId, changes.get("externalId"));
+        Assert.assertEquals(mobileNo, changes.get("mobileNo"));
+    }
+
+    public void testStaffUpdateLongExternalIdError() {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("externalId", Utils.randomStringGenerator("EXT", 98));
+
+        StaffHelper.updateStaff(requestSpec, responseSpecForValidationError, 1, map);
+    }
+
+    public void testStaffUpdateWrongActiveState() {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("isActive", "xyz");
+
+        StaffHelper.updateStaff(requestSpec, responseSpecForValidationError, 1, map);
+    }
+
+    @Test
+    public void testStaffUpdateNotFoundError() {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("firstname", Utils.randomNameGenerator("michael_", 5));
+
+        StaffHelper.updateStaff(requestSpec, responseSpecForNotFoundError, Integer.MAX_VALUE, map);
+    }
+
+    @Test
+    public void testStaffUpdateValidationError() {
+        final HashMap<String, Object> map = new HashMap<>();
+        final String firstname = Utils.randomNameGenerator("michael_", 5);
+        final String lastname = Utils.randomNameGenerator("Doe_", 4);
+        final String firstnameLong = Utils.randomNameGenerator("michael_", 43);
+        final String lastnameLong = Utils.randomNameGenerator("Doe_", 47);
+
+        map.put("firstname", firstname);
+        map.put("lastname", lastname);
+
+        /** Test long firstname */
+        map.put("firstname", firstnameLong);
+        StaffHelper.updateStaff(requestSpec, responseSpecForValidationError, 1, map);
+        map.put("firstname", firstname);
+
+        /** Test long lastname */
+        map.put("lastname", lastnameLong);
+        StaffHelper.updateStaff(requestSpec, responseSpecForValidationError, 1, map);
+        map.put("lastname", lastname);
+
+        /** Long mobileNo test */
+        map.put("mobileNo", Utils.randomNameGenerator("num_", 47));
+        StaffHelper.updateStaff(requestSpec, responseSpecForValidationError, 1, map);
+        map.remove("mobileNo");
+
+        /** Test unsupported parameter */
+        map.put("xyz", "xyz");
+        StaffHelper.updateStaff(requestSpec, responseSpecForValidationError, 1, map);
     }
 }
