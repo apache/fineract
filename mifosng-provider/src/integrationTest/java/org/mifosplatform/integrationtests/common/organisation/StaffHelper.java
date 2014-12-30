@@ -26,13 +26,11 @@ public class StaffHelper {
     public static final String GROUP_ID = "groupId";
 
 
-
     public static Integer transferStaffToGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
                                                final Integer groupId,final Integer staffToTransfer ,final String note){
         final String url = TRANSFER_STAFF_URL + "/" + groupId + "?command=transferStaff&"+ Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, url, transferStaffToGroupAsJSON(staffToTransfer, note), GROUP_ID);
     }
-
 
     public static String transferStaffToGroupAsJSON(final Integer staffToTransferId,final String note) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -41,8 +39,6 @@ public class StaffHelper {
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }
-
-
 
     public static Integer createStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return (Integer) createStaffWithJson(requestSpec, responseSpec, createStaffAsJSON()).get("resourceId");
@@ -54,15 +50,32 @@ public class StaffHelper {
 
     public static HashMap createStaffWithJson(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String json) {
-        final String url = CREATE_STAFF_URL +"?"+ Utils.TENANT_IDENTIFIER;
+        final String url = CREATE_STAFF_URL + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, url, json, "");
+    }
+
+    public static HashMap getStaff(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer staffId) {
+        final String url = CREATE_STAFF_URL + "/" + staffId + "?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, url, "");
+    }
+
+    public static List<HashMap> getStaffList(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+        final String url = CREATE_STAFF_URL + "?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, url, "");
+    }
+
+    public static Object getStaffListWithState(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String status) {
+        final String url = CREATE_STAFF_URL + "?" + Utils.TENANT_IDENTIFIER + "&status=" + status;
+        return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
 
     public static String createStaffAsJSON(){
         final HashMap<String, Object> map = new HashMap<>();
         map.put("officeId", 1);
-        map.put("firstname", Utils.randomNameGenerator("michael_",5));
-        map.put("lastname", Utils.randomNameGenerator("Doe_",4));
+        map.put("firstname", Utils.randomNameGenerator("michael_", 5));
+        map.put("lastname", Utils.randomNameGenerator("Doe_", 4));
         map.put("isLoanOfficer", true);
         System.out.println("map : " + map);
         return new Gson().toJson(map);
@@ -75,10 +88,10 @@ public class StaffHelper {
             map.put("officeId", 1);
         }
         if(fieldList.contains("firstname")) {
-            map.put("firstname", Utils.randomNameGenerator("michael_",5));
+            map.put("firstname", Utils.randomNameGenerator("michael_", 5));
         }
         if(fieldList.contains("lastname")) {
-            map.put("lastname", Utils.randomNameGenerator("Doe_",4));
+            map.put("lastname", Utils.randomNameGenerator("Doe_", 4));
         }
         if(fieldList.contains("isLoanOfficer")) {
             map.put("isLoanOfficer", true);
