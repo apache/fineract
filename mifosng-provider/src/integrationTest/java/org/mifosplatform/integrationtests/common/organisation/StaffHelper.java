@@ -71,6 +71,13 @@ public class StaffHelper {
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
 
+    public static Object updateStaff(final RequestSpecification requestSpec,
+             final ResponseSpecification responseSpec, final Integer staffId, final HashMap<String, Object> changes) {
+        final String url = CREATE_STAFF_URL + "/" + staffId + "?" + Utils.TENANT_IDENTIFIER;
+        final String json = new Gson().toJson(changes);
+        return Utils.performServerPut(requestSpec, responseSpec, url, json, "");
+    }
+
     public static String createStaffAsJSON(){
         final HashMap<String, Object> map = new HashMap<>();
         map.put("officeId", 1);
