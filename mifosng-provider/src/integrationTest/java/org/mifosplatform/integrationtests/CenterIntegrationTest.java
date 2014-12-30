@@ -6,6 +6,8 @@
 package org.mifosplatform.integrationtests;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.junit.Assert;
@@ -46,6 +48,7 @@ public class CenterIntegrationTest {
         int resourceId = CenterHelper.createCenter(name, officeId, requestSpec, responseSpec);
         CenterDomain center = CenterHelper.retrieveByID(resourceId, requestSpec, responseSpec);
 
+        Assert.assertNotNull(center);
         Assert.assertTrue(center.getName().equals(name));
         Assert.assertTrue(center.getOfficeId() == officeId);
         Assert.assertTrue(center.isActive() == false);
@@ -76,10 +79,50 @@ public class CenterIntegrationTest {
         int resourceId = CenterHelper.createCenter(name, officeId, externalId, staffId, groupMembers, requestSpec, responseSpec);
         CenterDomain center = CenterHelper.retrieveByID(resourceId, requestSpec, responseSpec);
 
+        Assert.assertNotNull(center);
         Assert.assertTrue(center.getName().equals(name));
         Assert.assertTrue(center.getOfficeId() == officeId);
         Assert.assertTrue(center.getExternalId().equals(externalId));
         Assert.assertTrue(center.getStaffId() == staffId);
         Assert.assertTrue(center.isActive() == false);
+        int[] groupMemberList = new int[center.getGroupMembers().size()];
+        for (int i = 0; i < groupMemberList.length; i++) {
+            groupMemberList[i] = ((Double) center.getGroupMembers().get(i).get("id")).intValue();
+        }
+
+        Assert.assertArrayEquals(groupMemberList, groupMembers);
+    }
+
+    @Test
+    public void testListCenters() {
+        ArrayList<CenterDomain> paginatedList = CenterHelper.paginatedListCenters(requestSpec, responseSpec);
+        ArrayList<CenterDomain> list = CenterHelper.listCenters(requestSpec, responseSpec);
+
+        Assert.assertNotNull(paginatedList);
+        Assert.assertNotNull(list);
+        Assert.assertTrue(Arrays.equals(paginatedList.toArray(new CenterDomain[paginatedList.size()]),
+                list.toArray(new CenterDomain[list.size()])));
+    }
+
+    @Test
+    public void testCenterRetrieval() {
+        int id = CenterHelper.listCenters(requestSpec, responseSpec).get(0).getId();
+        Assert.assertTrue(id > 0);
+
+        CenterDomain center = CenterHelper.retrieveByID(id, requestSpec, responseSpec);
+        Assert.assertNotNull(center);
+        Assert.assertNotNull(center.getName());
+        Assert.assertNotNull(center.getHierarchy());
+        Assert.assertNotNull(center.getOfficeName());
+    }
+
+    @Test
+    public void testVoidCenterRetrieval() {
+        ArrayList<CenterDomain> arr = CenterHelper.listCenters(requestSpec, responseSpec);
+        int id = arr.get(arr.size() - 1).getId() + 1;
+
+        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
+        CenterDomain center = CenterHelper.retrieveByID(id, requestSpec, responseSpec);
+        Assert.assertNotNull(center);
     }
 }
