@@ -299,9 +299,6 @@ public class Loan extends AbstractPersistable<Long> {
     @Embedded
     private LoanSummary summary;
 
-    @OneToOne(mappedBy = "loan", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.LAZY)
-    private LoanSummaryArrearsAging summaryArrearsAging;
-
     @Transient
     private boolean accountNumberRequiresAutoGeneration = false;
     @Transient
@@ -1146,7 +1143,6 @@ public class Loan extends AbstractPersistable<Long> {
 
         if (isNotDisbursed()) {
             this.summary.zeroFields();
-            this.summaryArrearsAging = null;
             this.totalOverpaid = null;
         } else {
             final Money overpaidBy = calculateTotalOverpayment();
@@ -1158,13 +1154,6 @@ public class Loan extends AbstractPersistable<Long> {
             final Money principal = this.loanRepaymentScheduleDetail.getPrincipal();
             this.summary.updateSummary(loanCurrency(), principal, this.repaymentScheduleInstallments, this.loanSummaryWrapper,
                     isDisbursed());
-            if (this.summaryArrearsAging == null) {
-                this.summaryArrearsAging = new LoanSummaryArrearsAging(this);
-            }
-            this.summaryArrearsAging.updateSummary(loanCurrency(), this.repaymentScheduleInstallments, this.loanSummaryWrapper);
-            if (this.summaryArrearsAging.isNotInArrears(loanCurrency())) {
-                this.summaryArrearsAging = null;
-            }
             updateLoanOutstandingBalaces();
         }
     }
@@ -1928,7 +1917,7 @@ public class Loan extends AbstractPersistable<Long> {
                     actualChanges.put(LoanApiConstants.approvedLoanAmountParameterName, approvedLoanAmount);
                     actualChanges.put(LoanApiConstants.disbursementPrincipalParameterName, approvedLoanAmount);
 
-                } else if(approvedLoanAmount.compareTo(this.proposedPrincipal) == 1){
+                } else if (approvedLoanAmount.compareTo(this.proposedPrincipal) == 1) {
                     final String errorMessage = "Loan approved amount can't be greater than loan amount demanded.";
                     throw new InvalidLoanStateTransitionException("approval", "amount.can't.be.greater.than.loan.amount.demanded",
                             errorMessage, this.proposedPrincipal, approvedLoanAmount);
@@ -3377,7 +3366,7 @@ public class Loan extends AbstractPersistable<Long> {
         return status().isRejected();
     }
 
-    private boolean isOpen() {
+    public boolean isOpen() {
         return status().isActive();
     }
 
@@ -5113,4 +5102,5 @@ public class Loan extends AbstractPersistable<Long> {
 
         return lastTransactionDate == null ? now : lastTransactionDate;
     }
+
 }

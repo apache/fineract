@@ -24,11 +24,13 @@ public class LoanProductInterestRecalculationData {
     private final EnumOptionData recalculationRestFrequencyType;
     private final Integer recalculationRestFrequencyInterval;
     private final LocalDate recalculationRestFrequencyDate;
+    @SuppressWarnings("unused")
+    private final boolean isArrearsBasedOnOriginalSchedule;
 
     public LoanProductInterestRecalculationData(final Long id, final Long productId,
             final EnumOptionData interestRecalculationCompoundingType, final EnumOptionData rescheduleStrategyType,
             final EnumOptionData recalculationRestFrequencyType, final Integer recalculationRestFrequencyInterval,
-            final LocalDate recalculationRestFrequencyDate) {
+            final LocalDate recalculationRestFrequencyDate, boolean isArrearsBasedOnOriginalSchedule) {
         this.id = id;
         this.productId = productId;
         this.interestRecalculationCompoundingType = interestRecalculationCompoundingType;
@@ -36,6 +38,7 @@ public class LoanProductInterestRecalculationData {
         this.recalculationRestFrequencyType = recalculationRestFrequencyType;
         this.recalculationRestFrequencyInterval = recalculationRestFrequencyInterval;
         this.recalculationRestFrequencyDate = recalculationRestFrequencyDate;
+        this.isArrearsBasedOnOriginalSchedule = isArrearsBasedOnOriginalSchedule;
     }
 
     public static LoanProductInterestRecalculationData sensibleDefaultsForNewLoanProductCreation() {
@@ -46,8 +49,10 @@ public class LoanProductInterestRecalculationData {
         final EnumOptionData recalculationRestFrequencyType = null;
         final Integer recalculationRestFrequencyInterval = null;
         final LocalDate recalculationRestFrequencyDate = null;
+        final boolean isArrearsBasedOnOriginalSchedule = false;
         return new LoanProductInterestRecalculationData(id, productId, interestRecalculationCompoundingType, rescheduleStrategyType,
-                recalculationRestFrequencyType, recalculationRestFrequencyInterval, recalculationRestFrequencyDate);
+                recalculationRestFrequencyType, recalculationRestFrequencyInterval, recalculationRestFrequencyDate,
+                isArrearsBasedOnOriginalSchedule);
     }
 
     public EnumOptionData getInterestRecalculationCompoundingType() {

@@ -136,6 +136,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
     private LoanProductGuaranteeDetails loanProductGuaranteeDetails;
 
+    @Column(name = "account_moves_out_of_npa_only_on_arrears_completion")
+    private boolean accountMovesOutOfNPAOnlyOnArrearsCompletion;
+
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator) {
 
@@ -225,6 +228,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
             loanProductGuaranteeDetails = LoanProductGuaranteeDetails.createFrom(command);
         }
 
+        final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = command
+                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName);
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
                 annualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentFrequencyType,
@@ -233,7 +239,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 startDate, closeDate, externalId, useBorrowerCycle, loanProductBorrowerCycleVariations, multiDisburseLoan, maxTrancheCount,
                 outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment,
-                holdGuarantorFunds, loanProductGuaranteeDetails);
+                holdGuarantorFunds, loanProductGuaranteeDetails, accountMovesOutOfNPAOnlyOnArrearsCompletion);
 
     }
 
@@ -458,7 +464,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final boolean isInterestRecalculationEnabled,
             final LoanProductInterestRecalculationDetails productInterestRecalculationDetails,
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final boolean holdGuarantorFunds,
-            final LoanProductGuaranteeDetails loanProductGuaranteeDetails) {
+            final LoanProductGuaranteeDetails loanProductGuaranteeDetails, final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -510,6 +516,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         this.minimumDaysBetweenDisbursalAndFirstRepayment = minimumDaysBetweenDisbursalAndFirstRepayment;
         this.holdGuaranteeFunds = holdGuarantorFunds;
         this.loanProductGuaranteeDetails = loanProductGuaranteeDetails;
+        this.accountMovesOutOfNPAOnlyOnArrearsCompletion = accountMovesOutOfNPAOnlyOnArrearsCompletion;
     }
 
     public MonetaryCurrency getCurrency() {
@@ -735,6 +742,14 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
         } else if (this.holdGuaranteeFunds) {
             this.loanProductGuaranteeDetails.update(command, actualChanges);
+        }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName,
+                this.accountMovesOutOfNPAOnlyOnArrearsCompletion)) {
+            final boolean newValue = command
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName);
+            actualChanges.put(LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName, newValue);
+            this.accountMovesOutOfNPAOnlyOnArrearsCompletion = newValue;
         }
 
         return actualChanges;
@@ -987,6 +1002,14 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     public String getShortName() {
         return this.shortName;
+    }
+
+    public boolean isArrearsBasedOnOriginalSchedule() {
+        boolean isBasedOnOriginalSchedule = false;
+        if (getProductInterestRecalculationDetails() != null) {
+            isBasedOnOriginalSchedule = getProductInterestRecalculationDetails().isArrearsBasedOnOriginalSchedule();
+        }
+        return isBasedOnOriginalSchedule;
     }
 
 }

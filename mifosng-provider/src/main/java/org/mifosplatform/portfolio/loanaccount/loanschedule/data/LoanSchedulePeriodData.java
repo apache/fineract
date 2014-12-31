@@ -19,13 +19,10 @@ public class LoanSchedulePeriodData {
     private final Integer period;
     private final LocalDate fromDate;
     private final LocalDate dueDate;
-    @SuppressWarnings("unused")
     private final LocalDate obligationsMetOnDate;
-    @SuppressWarnings("unused")
     private final Boolean complete;
     private final Integer daysInPeriod;
     private final BigDecimal principalDisbursed;
-    @SuppressWarnings("unused")
     private final BigDecimal principalOriginalDue;
     private final BigDecimal principalDue;
     private final BigDecimal principalPaid;
@@ -52,21 +49,14 @@ public class LoanSchedulePeriodData {
 
     @SuppressWarnings("unused")
     private final BigDecimal totalOriginalDueForPeriod;
-    @SuppressWarnings("unused")
     private final BigDecimal totalDueForPeriod;
-    @SuppressWarnings("unused")
     private final BigDecimal totalPaidForPeriod;
-    @SuppressWarnings("unused")
     private final BigDecimal totalPaidInAdvanceForPeriod;
-    @SuppressWarnings("unused")
     private final BigDecimal totalPaidLateForPeriod;
-    @SuppressWarnings("unused")
     private final BigDecimal totalWaivedForPeriod;
-    @SuppressWarnings("unused")
     private final BigDecimal totalWrittenOffForPeriod;
     private final BigDecimal totalOutstandingForPeriod;
     private final BigDecimal totalOverdue;
-    @SuppressWarnings("unused")
     private final BigDecimal totalActualCostOfLoanForPeriod;
 
     public static LoanSchedulePeriodData disbursementOnlyPeriod(final LocalDate disbursementDate, final BigDecimal principalDisbursed,
@@ -106,6 +96,26 @@ public class LoanSchedulePeriodData {
                 penaltyChargesWaived, penaltyChargesWrittenOff, penaltyChargesOutstanding, totalDueForPeriod, totalPaid,
                 totalPaidInAdvanceForPeriod, totalPaidLateForPeriod, totalWaived, totalWrittenOff, totalOutstanding,
                 totalActualCostOfLoanForPeriod);
+    }
+
+    public static LoanSchedulePeriodData WithPaidDetail(final LoanSchedulePeriodData loanSchedulePeriodData, final boolean complete,
+            final BigDecimal principalPaid, final BigDecimal interestPaid, final BigDecimal feeChargesPaid,
+            final BigDecimal penaltyChargesPaid) {
+
+        return new LoanSchedulePeriodData(loanSchedulePeriodData.period, loanSchedulePeriodData.fromDate, loanSchedulePeriodData.dueDate,
+                loanSchedulePeriodData.obligationsMetOnDate, complete, loanSchedulePeriodData.principalOriginalDue, principalPaid,
+                loanSchedulePeriodData.principalWrittenOff, loanSchedulePeriodData.principalOutstanding,
+                loanSchedulePeriodData.principalLoanBalanceOutstanding, loanSchedulePeriodData.interestDue, interestPaid,
+                loanSchedulePeriodData.interestWaived, loanSchedulePeriodData.interestWrittenOff,
+                loanSchedulePeriodData.interestOutstanding, loanSchedulePeriodData.feeChargesDue, feeChargesPaid,
+                loanSchedulePeriodData.feeChargesWaived, loanSchedulePeriodData.feeChargesWrittenOff,
+                loanSchedulePeriodData.feeChargesOutstanding, loanSchedulePeriodData.penaltyChargesDue, penaltyChargesPaid,
+                loanSchedulePeriodData.penaltyChargesWaived, loanSchedulePeriodData.penaltyChargesWrittenOff,
+                loanSchedulePeriodData.penaltyChargesOutstanding, loanSchedulePeriodData.totalDueForPeriod,
+                loanSchedulePeriodData.totalPaidForPeriod, loanSchedulePeriodData.totalPaidInAdvanceForPeriod,
+                loanSchedulePeriodData.totalPaidLateForPeriod, loanSchedulePeriodData.totalWaivedForPeriod,
+                loanSchedulePeriodData.totalWrittenOffForPeriod, loanSchedulePeriodData.totalOutstandingForPeriod,
+                loanSchedulePeriodData.totalActualCostOfLoanForPeriod);
     }
 
     /*
@@ -416,5 +426,10 @@ public class LoanSchedulePeriodData {
 
     public BigDecimal principalLoanBalanceOutstanding() {
         return this.principalLoanBalanceOutstanding;
+    }
+
+    
+    public Boolean getComplete() {
+        return this.complete;
     }
 }

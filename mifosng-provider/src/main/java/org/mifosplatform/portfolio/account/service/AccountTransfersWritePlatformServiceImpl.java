@@ -13,7 +13,6 @@ import static org.mifosplatform.portfolio.account.api.AccountTransfersApiConstan
 import static org.mifosplatform.portfolio.account.api.AccountTransfersApiConstants.transferDateParamName;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -37,7 +36,6 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
 import org.mifosplatform.portfolio.loanaccount.exception.InvalidPaidInAdvanceAmountException;
-import org.mifosplatform.portfolio.loanaccount.exception.InvalidRefundDateException;
 import org.mifosplatform.portfolio.loanaccount.service.LoanAssembler;
 import org.mifosplatform.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;

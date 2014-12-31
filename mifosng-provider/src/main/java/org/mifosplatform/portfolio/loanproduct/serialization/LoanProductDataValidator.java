@@ -71,9 +71,10 @@ public final class LoanProductDataValidator {
             LoanProductConstants.recalculationRestFrequencyDateParamName,
             LoanProductConstants.recalculationRestFrequencyIntervalParameterName,
             LoanProductConstants.recalculationRestFrequencyTypeParameterName,
+            LoanProductConstants.isArrearsBasedOnOriginalScheduleParamName,
             LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment, LoanProductConstants.mandatoryGuaranteeParamName,
             LoanProductConstants.holdGuaranteeFundsParamName, LoanProductConstants.minimumGuaranteeFromGuarantorParamName,
-            LoanProductConstants.minimumGuaranteeFromOwnFundsParamName));
+            LoanProductConstants.minimumGuaranteeFromOwnFundsParamName, LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -299,6 +300,13 @@ public final class LoanProductDataValidator {
         baseDataValidator.reset().parameter(LoanProductConstants.daysInMonthTypeParameterName).value(daysInMonthType).notNull()
                 .isOneOfTheseValues(1, 30);
 
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName, element)) {
+            Boolean npaChangeConfig = this.fromApiJsonHelper.extractBooleanNamed(
+                    LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName).value(npaChangeConfig)
+                    .notNull().isOneOfTheseValues(true, false);
+        }
+
         // Interest recalculation settings
         final Boolean isInterestRecalculationEnabled = this.fromApiJsonHelper.extractBooleanNamed(
                 LoanProductConstants.isInterestRecalculationEnabledParameterName, element);
@@ -503,6 +511,12 @@ public final class LoanProductDataValidator {
             }
         }
 
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.isArrearsBasedOnOriginalScheduleParamName, element)) {
+            final Boolean isArrearsBasedOnOriginalSchedule = this.fromApiJsonHelper.extractBooleanNamed(
+                    LoanProductConstants.isArrearsBasedOnOriginalScheduleParamName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.isArrearsBasedOnOriginalScheduleParamName)
+                    .value(isArrearsBasedOnOriginalSchedule).notNull().isOneOfTheseValues(true, false);
+        }
     }
 
     public void validateForUpdate(final String json, final LoanProduct loanProduct) {
@@ -717,6 +731,13 @@ public final class LoanProductDataValidator {
                     element, Locale.getDefault());
             baseDataValidator.reset().parameter(LoanProductConstants.daysInMonthTypeParameterName).value(daysInMonthType).notNull()
                     .isOneOfTheseValues(1, 30);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName, element)) {
+            Boolean npaChangeConfig = this.fromApiJsonHelper.extractBooleanNamed(
+                    LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName).value(npaChangeConfig)
+                    .notNull().isOneOfTheseValues(true, false);
         }
 
         // Interest recalculation settings

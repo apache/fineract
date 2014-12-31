@@ -5,7 +5,9 @@
  */
 package org.mifosplatform.portfolio.common.service;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import java.util.Map;
+
+import org.mifosplatform.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
 
 /**
  * The interface to be implemented by classes that want to be informed when a
@@ -18,11 +20,11 @@ public interface BusinessEventListner {
     /**
      * Implement this method for notifications before executing Business Event
      */
-    public void businessEventToBeExecuted(AbstractPersistable<Long> businessEventEntity);
+    public void businessEventToBeExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity);
 
     /**
      * Implement this method for notifications after executing Business Event
      */
-    public void businessEventWasExecuted(AbstractPersistable<Long> businessEventEntity);
+    public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity);
 
 }

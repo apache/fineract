@@ -10,8 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.mifosplatform.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
 import org.mifosplatform.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,7 +31,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
      * org.springframework.data.jpa.domain.AbstractPersistable)
      */
     @Override
-    public void notifyBusinessEventToBeExecuted(BUSINESS_EVENTS businessEvent, AbstractPersistable<Long> businessEventEntity) {
+    public void notifyBusinessEventToBeExecuted(BUSINESS_EVENTS businessEvent, Map<BUSINESS_ENTITY, Object> businessEventEntity) {
         List<BusinessEventListner> businessEventListners = this.preListners.get(businessEvent);
         if (businessEventListners != null) {
             for (BusinessEventListner eventListner : businessEventListners) {
@@ -51,7 +51,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
      * org.springframework.data.jpa.domain.AbstractPersistable)
      */
     @Override
-    public void notifyBusinessEventWasExecuted(BUSINESS_EVENTS businessEvent, AbstractPersistable<Long> businessEventEntity) {
+    public void notifyBusinessEventWasExecuted(BUSINESS_EVENTS businessEvent, Map<BUSINESS_ENTITY, Object> businessEventEntity) {
         List<BusinessEventListner> businessEventListners = this.postListners.get(businessEvent);
         if (businessEventListners != null) {
             for (BusinessEventListner eventListner : businessEventListners) {

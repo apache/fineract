@@ -86,13 +86,13 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         String sql = "select " + rm.loanProductSchema();
 
-        // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
-        String inClause = mifosEntityAccessUtil.
-  				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
-						MifosEntityType.LOAN_PRODUCT);
-    	if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
-    		sql += " where lp.id in ( " + inClause + " ) ";
-    	}
+        // Check if branch specific products are enabled. If yes, fetch only
+        // products mapped to current user's office
+        String inClause = mifosEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(MifosEntityType.LOAN_PRODUCT);
+        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+            sql += " where lp.id in ( " + inClause + " ) ";
+        }
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
@@ -109,18 +109,18 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         final LoanProductLookupMapper rm = new LoanProductLookupMapper();
 
         String sql = "select ";
-        if(activeOnly) {
+        if (activeOnly) {
             sql += rm.activeOnlySchema();
         } else {
             sql += rm.schema();
         }
 
-        // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
-        String inClause = mifosEntityAccessUtil.
-                getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
-                        MifosEntityType.LOAN_PRODUCT);
-        if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
-            if(activeOnly) {
+        // Check if branch specific products are enabled. If yes, fetch only
+        // products mapped to current user's office
+        String inClause = mifosEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(MifosEntityType.LOAN_PRODUCT);
+        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+            if (activeOnly) {
                 sql += " and id in ( " + inClause + " )";
             } else {
                 sql += " where id in ( " + inClause + " ) ";
@@ -162,10 +162,11 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.days_in_month_enum as daysInMonth, lp.days_in_year_enum as daysInYear, lp.interest_recalculation_enabled as isInterestRecalculationEnabled, "
                     + "lpr.id as lprId, lpr.product_id as productId, lpr.compound_type_enum as compoundType, lpr.reschedule_strategy_enum as rescheduleStrategy, "
                     + "lpr.rest_frequency_type_enum as restFrequencyEnum, lpr.rest_frequency_interval as restFrequencyInterval, "
-                    + "lpr.rest_freqency_date as restFrequencyDate, "
+                    + "lpr.rest_freqency_date as restFrequencyDate, lpr.arrears_based_on_original_schedule as isArrearsBasedOnOriginalSchedule, "
                     + "lp.hold_guarantee_funds as holdGuaranteeFunds, "
                     + "lpg.id as lpgId, lpg.mandatory_guarantee as mandatoryGuarantee, "
                     + "lpg.minimum_guarantee_from_own_funds as minimumGuaranteeFromOwnFunds, lpg.minimum_guarantee_from_guarantor_funds as minimumGuaranteeFromGuarantor, "
+                    + "lp.account_moves_out_of_npa_only_on_arrears_completion as accountMovesOutOfNPAOnlyOnArrearsCompletion, "
                     + "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol, lp.external_id as externalId "
                     + " from m_product_loan lp "
                     + " left join m_fund f on f.id = lp.fund_id "
@@ -290,10 +291,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                 final EnumOptionData restFrequencyType = LoanEnumerations.interestRecalculationFrequencyType(restFrequencyEnumValue);
                 final int restFrequencyInterval = JdbcSupport.getInteger(rs, "restFrequencyInterval");
                 final LocalDate restFrequencyDate = JdbcSupport.getLocalDate(rs, "restFrequencyDate");
-
+                final boolean isArrearsBasedOnOriginalSchedule = rs.getBoolean("isArrearsBasedOnOriginalSchedule");
                 interestRecalculationData = new LoanProductInterestRecalculationData(lprId, productId,
                         interestRecalculationCompoundingType, rescheduleStrategyType, restFrequencyType, restFrequencyInterval,
-                        restFrequencyDate);
+                        restFrequencyDate, isArrearsBasedOnOriginalSchedule);
             }
 
             final boolean holdGuaranteeFunds = rs.getBoolean("holdGuaranteeFunds");
@@ -307,6 +308,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                         minimumGuaranteeFromGuarantor);
             }
 
+            final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = rs.getBoolean("accountMovesOutOfNPAOnlyOnArrearsCompletion");
+
             return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                     minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType,
@@ -316,7 +319,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     closeDate, status, externalId, principalVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle,
                     numberOfRepaymentVariationsForBorrowerCycle, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
                     graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
-                    interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds, loanProductGuaranteeData);
+                    interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds, loanProductGuaranteeData,
+                    accountMovesOutOfNPAOnlyOnArrearsCompletion);
         }
 
     }
@@ -390,13 +394,13 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         String sql = "select " + rm.loanProductSchema() + " where lp.currency_code='" + currencyCode + "'";
 
-        // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
-        String inClause = mifosEntityAccessUtil.
-  				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
-						MifosEntityType.LOAN_PRODUCT);
-    	if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
-    		sql += " and id in ( " + inClause + " ) ";
-    	}
+        // Check if branch specific products are enabled. If yes, fetch only
+        // products mapped to current user's office
+        String inClause = mifosEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(MifosEntityType.LOAN_PRODUCT);
+        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+            sql += " and id in ( " + inClause + " ) ";
+        }
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
@@ -410,13 +414,13 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         String sql = "Select " + rm.productMixSchema();
 
-        // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
-        String inClause = mifosEntityAccessUtil.
-  				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
-						MifosEntityType.LOAN_PRODUCT);
-    	if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
-    		sql += " and lp.id in ( " + inClause + " ) ";
-    	}
+        // Check if branch specific products are enabled. If yes, fetch only
+        // products mapped to current user's office
+        String inClause = mifosEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(MifosEntityType.LOAN_PRODUCT);
+        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+            sql += " and lp.id in ( " + inClause + " ) ";
+        }
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
@@ -429,24 +433,23 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         final LoanProductLookupMapper rm = new LoanProductLookupMapper();
 
         String sql = "Select " + rm.restrictedProductsSchema() + " where pm.product_id=? ";
-        // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
-        String inClause1 = mifosEntityAccessUtil.
-  				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
-						MifosEntityType.LOAN_PRODUCT);
-    	if ( (inClause1 != null) && (!(inClause1.trim().isEmpty())) ) {
-    		sql += " and rp.id in ( " + inClause1 + " ) ";
-    	}
+        // Check if branch specific products are enabled. If yes, fetch only
+        // products mapped to current user's office
+        String inClause1 = mifosEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(MifosEntityType.LOAN_PRODUCT);
+        if ((inClause1 != null) && (!(inClause1.trim().isEmpty()))) {
+            sql += " and rp.id in ( " + inClause1 + " ) ";
+        }
 
-        sql += " UNION Select "
-                + rm.derivedRestrictedProductsSchema() + " where pm.restricted_product_id=?";
+        sql += " UNION Select " + rm.derivedRestrictedProductsSchema() + " where pm.restricted_product_id=?";
 
-        // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
-        String inClause2 = mifosEntityAccessUtil.
-  				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
-						MifosEntityType.LOAN_PRODUCT);
-    	if ( (inClause2 != null) && (!(inClause2.trim().isEmpty())) ) {
-    		sql += " and lp.id in ( " + inClause2 + " ) ";
-    	}
+        // Check if branch specific products are enabled. If yes, fetch only
+        // products mapped to current user's office
+        String inClause2 = mifosEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(MifosEntityType.LOAN_PRODUCT);
+        if ((inClause2 != null) && (!(inClause2.trim().isEmpty()))) {
+            sql += " and lp.id in ( " + inClause2 + " ) ";
+        }
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId });
     }
@@ -460,16 +463,15 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         String sql = "Select " + rm.schema() + " where ";
 
-        // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
-        String inClause = mifosEntityAccessUtil.
-  				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
-						MifosEntityType.LOAN_PRODUCT);
-    	if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
-    		sql += " lp.id in ( " + inClause + " ) and ";
-    	}
+        // Check if branch specific products are enabled. If yes, fetch only
+        // products mapped to current user's office
+        String inClause = mifosEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(MifosEntityType.LOAN_PRODUCT);
+        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+            sql += " lp.id in ( " + inClause + " ) and ";
+        }
 
-		sql += "lp.id not in ("
-                + "Select pm.restricted_product_id from m_product_mix pm where pm.product_id=? " + "UNION "
+        sql += "lp.id not in (" + "Select pm.restricted_product_id from m_product_mix pm where pm.product_id=? " + "UNION "
                 + "Select pm.product_id from m_product_mix pm where pm.restricted_product_id=?)";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId });

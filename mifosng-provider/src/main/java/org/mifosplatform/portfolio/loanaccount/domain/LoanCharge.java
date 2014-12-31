@@ -927,4 +927,9 @@ public class LoanCharge extends AbstractPersistable<Long> {
         }
         return paidChargePerInstallment;
     }
+
+    
+    public Loan getLoan() {
+        return this.loan;
+    }
 }
