@@ -10,13 +10,8 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 
-import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.codes.data.CodeValueData;
-import org.mifosplatform.organisation.office.data.OfficeData;
-import org.mifosplatform.organisation.staff.data.StaffData;
+import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.teller.domain.CashierTxnType;
-import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 
 public final class CashierTransactionData implements Serializable {
 
@@ -40,6 +35,8 @@ public final class CashierTransactionData implements Serializable {
     private final CashierData cashierData;
     private final Date startDate;
     private final Date endDate;
+    
+    private final Collection<CurrencyData> currencyOptions;
 
     /*
      * Creates a new cashier.
@@ -48,7 +45,7 @@ public final class CashierTransactionData implements Serializable {
     		final BigDecimal txnAmount, final Date txnDate, String txnNote, 
     		String entityType, Long entityId, Date createdDate, 
     		Long officeId, String officeName, Long tellerId, String tellerName, String cashierName,
-    		CashierData cashierData, Date startDate, Date endDate ) {
+    		CashierData cashierData, Date startDate, Date endDate, final Collection<CurrencyData> currencyOptions) {
         this.id = id;
         this.cashierId = cashierId;
         this.txnType = txnType;
@@ -68,6 +65,8 @@ public final class CashierTransactionData implements Serializable {
         
         this.startDate = startDate;
         this.endDate = endDate;
+        
+        this.currencyOptions = currencyOptions;
     }
 
     public static CashierTransactionData instance(final Long id, final Long cashierId, CashierTxnType txnType,
@@ -78,16 +77,16 @@ public final class CashierTransactionData implements Serializable {
     		Date startDate, Date endDate) {
         return new CashierTransactionData(id, cashierId, txnType, txnAmount, txnDate, txnNote, entityType, 
         		entityId, createdDate, officeId, officeName, tellerId,
-        		tellerName, cashierName, cashierData, startDate, endDate);
+        		tellerName, cashierName, cashierData, startDate, endDate, null);
     }
     
     public static CashierTransactionData template (final Long cashierId,  
     		final Long tellerId, final String tellerName,
     		final Long officeId, final String officeName, final String cashierName,
-    		final CashierData cashierData, Date startDate, Date endDate) {
+    		final CashierData cashierData, Date startDate, Date endDate, final Collection<CurrencyData> currencyOptions) {
         return new CashierTransactionData(null, cashierId, null, null, null, null, null, 
         		null, null, officeId, officeName, tellerId, tellerName, cashierName, cashierData,
-        		startDate, endDate);
+        		startDate, endDate, currencyOptions);
     }
 
     public Long getId() {
