@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.integrationtests.common;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.google.gson.Gson;
@@ -22,10 +23,11 @@ public class CenterDomain {
         private int officeId;
         private String officeName;
         private String hierarchy;
+        private ArrayList<HashMap> groupMembers;
 
         private Builder(final int id, final int statusid, final String statuscode, final String statusvalue, final boolean active,
                 final String name, final String externalId, final int staffId, final int officeID, final String officeName,
-                final String hierarchy) {
+                final String hierarchy, final ArrayList<HashMap> groupMembers) {
             this.id = id;
             this.status = new HashMap();
             this.status.put("id", statusid);
@@ -38,12 +40,13 @@ public class CenterDomain {
             this.officeId = officeID;
             this.officeName = officeName;
             this.hierarchy = hierarchy;
+            this.groupMembers = groupMembers;
         }
 
         public CenterDomain build() {
             return new CenterDomain(this.id, (int) this.status.get("id"), (String) this.status.get("code"),
                     (String) this.status.get("value"), this.active, this.name, this.externalId, this.staffId, this.officeId,
-                    this.officeName, this.hierarchy);
+                    this.officeName, this.hierarchy, groupMembers);
         }
     }
 
@@ -56,6 +59,7 @@ public class CenterDomain {
     private int officeId;
     private String officeName;
     private String hierarchy;
+    private ArrayList<HashMap> groupMembers;
 
     CenterDomain() {
         super();
@@ -63,7 +67,7 @@ public class CenterDomain {
 
     private CenterDomain(final int id, final int statusid, final String statuscode, final String statusvalue, final boolean active,
             final String name, final String externalId, final int staffId, final int officeID, final String officeName,
-            final String hierarchy) {
+            final String hierarchy, final ArrayList<HashMap> groupMembers) {
         this.id = id;
         this.status = new HashMap();
         this.status.put("id", statusid);
@@ -76,6 +80,7 @@ public class CenterDomain {
         this.officeId = officeID;
         this.officeName = officeName;
         this.hierarchy = hierarchy;
+        this.groupMembers = groupMembers;
     }
 
     public String toJSON() {
@@ -88,8 +93,9 @@ public class CenterDomain {
 
     public static Builder create(final int id, final int statusid, final String statuscode, final String statusvalue, final boolean active,
             final String name, final String externalId, final int staffId, final int officeID, final String officeName,
-            final String hierarchy) {
-        return new Builder(id, statusid, statuscode, statusvalue, active, name, externalId, staffId, officeID, officeName, hierarchy);
+            final String hierarchy, final ArrayList<HashMap> groupMembers) {
+        return new Builder(id, statusid, statuscode, statusvalue, active, name, externalId, staffId, officeID, officeName, hierarchy,
+                groupMembers);
     }
 
     public String getExternalId() {
@@ -128,13 +134,17 @@ public class CenterDomain {
         return this.hierarchy;
     }
 
+    public ArrayList<HashMap> getGroupMembers() {
+        return this.groupMembers;
+    }
+
     @Override
     public int hashCode() {
         int hash = 1;
 
         if (this.id >= 0) hash += this.id;
         if (this.status != null) {
-            if ((int) this.status.get("id") >= 0) hash += (int) this.status.get("id");
+            if ((Double) this.status.get("id") >= 0) hash += (Double) this.status.get("id");
             if ((String) this.status.get("code") != null) hash += this.status.get("code").hashCode();
             if ((String) this.status.get("value") != null) hash += this.status.get("value").hashCode();
         }
@@ -142,6 +152,7 @@ public class CenterDomain {
         if (this.officeId >= 0) hash += this.officeId;
         if (this.officeName != null) hash += this.officeName.hashCode();
         if (this.hierarchy != null) hash += this.hierarchy.hashCode();
+        if (this.groupMembers != null) hash += this.groupMembers.hashCode();
 
         return hash;
     }

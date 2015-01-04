@@ -52,15 +52,13 @@ public class CurrenciesHelper {
             final ResponseSpecification responseSpec, final ArrayList<String> currencies) {
         final String CURRENCIES_UPDATE_URL = CURRENCIES_URL + "?" + Utils.TENANT_IDENTIFIER;
         System.out.println("---------------------------------UPDATE SELECTED CURRENCIES LIST---------------------------------------------");
-        return (ArrayList<String>) Utils.performServerPut(requestSpec, responseSpec, CURRENCIES_UPDATE_URL, currenciesToJSON(currencies),
-                "currencies");
+        HashMap hash = Utils.performServerPut(requestSpec, responseSpec, CURRENCIES_UPDATE_URL, currenciesToJSON(currencies), "changes");
+        return (ArrayList<String>) hash.get("currencies");
     }
 
     private static String currenciesToJSON(final ArrayList<String> currencies) {
         HashMap map = new HashMap<>();
-        for (String e : currencies) {
-            map.put("currencies", e);
-        }
+        map.put("currencies", currencies);
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }

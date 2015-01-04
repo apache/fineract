@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.integrationtests.common;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.google.common.reflect.TypeToken;
@@ -18,11 +19,25 @@ public class CenterHelper {
     private static final String CENTERS_URL = "/mifosng-provider/api/v1/centers";
 
     public static CenterDomain retrieveByID(int id, final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        final String GET_CENTER_BY_ID_URL = CENTERS_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER;
+        final String GET_CENTER_BY_ID_URL = CENTERS_URL + "/" + id + "?associations=groupMembers&" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RETRIEVING CENTER AT " + id + "-------------------------");
         final String jsonData = new Gson().toJson(Utils.performServerGet(requestSpec, responseSpec, GET_CENTER_BY_ID_URL, ""));
-        System.out.print(jsonData);
         return new Gson().fromJson(jsonData, new TypeToken<CenterDomain>() {}.getType());
+    }
+
+    public static ArrayList<CenterDomain> paginatedListCenters(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
+        final String GET_CENTER = CENTERS_URL + "?paged=true&" + Utils.TENANT_IDENTIFIER;
+        System.out.println("------------------------ RETRIEVING CENTERS-------------------------");
+        final String jsonData = new Gson().toJson(Utils.performServerGet(requestSpec, responseSpec, GET_CENTER, "pageItems"));
+        return new Gson().fromJson(jsonData, new TypeToken<ArrayList<CenterDomain>>() {}.getType());
+    }
+
+    public static ArrayList<CenterDomain> listCenters(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+        final String GET_CENTER = CENTERS_URL + "?" + Utils.TENANT_IDENTIFIER;
+        System.out.println("------------------------ RETRIEVING CENTERS-------------------------");
+        final String jsonData = new Gson().toJson(Utils.performServerGet(requestSpec, responseSpec, GET_CENTER, ""));
+        return new Gson().fromJson(jsonData, new TypeToken<ArrayList<CenterDomain>>() {}.getType());
     }
 
     public static int createCenter(final String name, final int officeId, final RequestSpecification requestSpec,

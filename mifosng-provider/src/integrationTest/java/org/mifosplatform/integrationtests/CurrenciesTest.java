@@ -10,7 +10,6 @@ import java.util.Collections;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mifosplatform.integrationtests.common.CurrenciesHelper;
 import org.mifosplatform.integrationtests.common.CurrencyDomain;
@@ -52,8 +51,6 @@ public class CurrenciesTest {
     }
 
     @Test
-    // TODO: fix failing test case
-    @Ignore
     public void testUpdateCurrencySelection() {
 
         // Test updation
