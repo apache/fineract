@@ -41,8 +41,7 @@ public class CenterIntegrationTest {
 
     @Test
     public void testBasicCenterCreation() {
-        OfficeHelper oh = new OfficeHelper(requestSpec, responseSpec);
-        int officeId = oh.createOffice("01 July 2007");
+        int officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
 
         String name = "TestBasicCreation" + new Timestamp(new java.util.Date().getTime());
         int resourceId = CenterHelper.createCenter(name, officeId, requestSpec, responseSpec);
@@ -54,7 +53,6 @@ public class CenterIntegrationTest {
         Assert.assertTrue(center.isActive() == false);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testFullCenterCreation() {
 
@@ -62,20 +60,7 @@ public class CenterIntegrationTest {
         String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
         String externalId = Utils.randomStringGenerator("ID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
         int staffId = StaffHelper.createStaff(requestSpec, responseSpec);
-        int[] groupMembers = new int[3];
-        for (int i = 0; i < groupMembers.length; i++) {
-            final HashMap<String, String> map = new HashMap<>();
-            map.put("officeId", "" + officeId);
-            map.put("name", Utils.randomStringGenerator("Group_Name_", 5));
-            map.put("externalId", Utils.randomStringGenerator("ID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
-            map.put("dateFormat", "dd MMMM yyyy");
-            map.put("locale", "en");
-            map.put("active", "true");
-            map.put("activationDate", "04 March 2011");
-
-            groupMembers[i] = Utils.performServerPost(requestSpec, responseSpec, "/mifosng-provider/api/v1/groups?"
-                    + Utils.TENANT_IDENTIFIER, new Gson().toJson(map), "groupId");
-        }
+        int[] groupMembers = generateGroupMembers(3, officeId);
         int resourceId = CenterHelper.createCenter(name, officeId, externalId, staffId, groupMembers, requestSpec, responseSpec);
         CenterDomain center = CenterHelper.retrieveByID(resourceId, requestSpec, responseSpec);
 
@@ -85,12 +70,7 @@ public class CenterIntegrationTest {
         Assert.assertTrue(center.getExternalId().equals(externalId));
         Assert.assertTrue(center.getStaffId() == staffId);
         Assert.assertTrue(center.isActive() == false);
-        int[] groupMemberList = new int[center.getGroupMembers().size()];
-        for (int i = 0; i < groupMemberList.length; i++) {
-            groupMemberList[i] = ((Double) center.getGroupMembers().get(i).get("id")).intValue();
-        }
-
-        Assert.assertArrayEquals(groupMemberList, groupMembers);
+        Assert.assertArrayEquals(center.getGroupMembers(), groupMembers);
     }
 
     @Test
@@ -120,9 +100,85 @@ public class CenterIntegrationTest {
     public void testVoidCenterRetrieval() {
         ArrayList<CenterDomain> arr = CenterHelper.listCenters(requestSpec, responseSpec);
         int id = arr.get(arr.size() - 1).getId() + 1;
-
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
         CenterDomain center = CenterHelper.retrieveByID(id, requestSpec, responseSpec);
         Assert.assertNotNull(center);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void testCenterUpdate() {
+        int officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
+        String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
+        String externalId = Utils.randomStringGenerator("ID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        int staffId = StaffHelper.createStaff(requestSpec, responseSpec);
+        int[] groupMembers = generateGroupMembers(3, officeId);
+        int resourceId = CenterHelper.createCenter(name, officeId, externalId, staffId, groupMembers, requestSpec, responseSpec);
+
+        String newName = "TestCenterUpdateNew" + new Timestamp(new java.util.Date().getTime());
+        String newExternalId = Utils.randomStringGenerator("newID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        int newStaffId = StaffHelper.createStaff(requestSpec, responseSpec);
+        int[] associateGroupMembers = generateGroupMembers(2, officeId);
+
+        int[] associateResponse = CenterHelper.associateGroups(resourceId, associateGroupMembers, requestSpec, responseSpec);
+        Arrays.sort(associateResponse);
+        Arrays.sort(associateGroupMembers);
+        Assert.assertArrayEquals(associateResponse, associateGroupMembers);
+
+        int[] newGroupMembers = new int[5];
+        for (int i = 0; i < 5; i++) {
+            if (i < 3) {
+                newGroupMembers[i] = groupMembers[i];
+            } else {
+                newGroupMembers[i] = associateGroupMembers[i % 3];
+            }
+        }
+
+        HashMap request = new HashMap();
+        request.put("name", newName);
+        request.put("externalId", newExternalId);
+        request.put("staffId", newStaffId);
+        HashMap response = CenterHelper.updateCenter(resourceId, request, requestSpec, responseSpec);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(newName, response.get("name"));
+        Assert.assertEquals(newExternalId, response.get("externalId"));
+        Assert.assertEquals(newStaffId, response.get("staffId"));
+
+        CenterDomain center = CenterHelper.retrieveByID(resourceId, requestSpec, responseSpec);
+        Assert.assertNotNull(center);
+        Assert.assertEquals(newName, center.getName());
+        Assert.assertEquals(newExternalId, center.getExternalId());
+        Assert.assertEquals(newStaffId, center.getStaffId());
+        Assert.assertArrayEquals(newGroupMembers, center.getGroupMembers());
+    }
+
+    @Test
+    public void testCenterDeletion() {
+        int officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
+        String name = "TestBasicCreation" + new Timestamp(new java.util.Date().getTime());
+        int resourceId = CenterHelper.createCenter(name, officeId, requestSpec, responseSpec);
+
+        CenterHelper.deleteCenter(resourceId, requestSpec, responseSpec);
+        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
+        CenterDomain center = CenterHelper.retrieveByID(resourceId, requestSpec, responseSpec);
+        Assert.assertNotNull(center);
+    }
+
+    private int[] generateGroupMembers(int size, int officeId) {
+        int[] groupMembers = new int[size];
+        for (int i = 0; i < groupMembers.length; i++) {
+            final HashMap<String, String> map = new HashMap<>();
+            map.put("officeId", "" + officeId);
+            map.put("name", Utils.randomStringGenerator("Group_Name_", 5));
+            map.put("externalId", Utils.randomStringGenerator("ID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+            map.put("dateFormat", "dd MMMM yyyy");
+            map.put("locale", "en");
+            map.put("active", "true");
+            map.put("activationDate", "04 March 2011");
+
+            groupMembers[i] = Utils.performServerPost(requestSpec, responseSpec, "/mifosng-provider/api/v1/groups?"
+                    + Utils.TENANT_IDENTIFIER, new Gson().toJson(map), "groupId");
+        }
+        return groupMembers;
     }
 }
