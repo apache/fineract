@@ -176,12 +176,12 @@ public class LoanScheduleAssembler {
         final AccountType loanType = AccountType.fromName(loanTypeStr);
 
         /*
-         * If it is JLG loan then make sure loan frequency is same as
+         * If it is JLG loan/Group Loan then make sure loan frequency is same as
          * Group/Center meeting frequency or multiple of it. TODO: Check should
          * be either same frequency or loan freq is multiple of center/group
          * meeting freq multiples
          */
-        if (loanType.isJLGAccount() && calendarId != null) {
+        if ((loanType.isJLGAccount() || loanType.isGroupAccount()) && calendarId != null) {
             calendar = this.calendarRepository.findOne(calendarId);
             if (calendar == null) { throw new CalendarNotFoundException(calendarId); }
             final PeriodFrequencyType meetingPeriodFrequency = CalendarUtils.getMeetingPeriodFrequencyType(calendar.getRecurrence());
@@ -199,10 +199,10 @@ public class LoanScheduleAssembler {
         }
 
         /*
-         * If it is JLG loan synched with a meeting, then make sure first
+         * If it is JLG loan/Group Loan synched with a meeting, then make sure first
          * repayment falls on meeting date
          */
-        if (loanType.isJLGAccount() && calendar != null) {
+        if ((loanType.isJLGAccount() || loanType.isGroupAccount()) && calendar != null) {
             validateRepaymentsStartDateWithMeetingDates(calculatedRepaymentsStartingFromDate, calendar);
             /*
              * If disbursement is synced on meeting, make sure disbursement date
