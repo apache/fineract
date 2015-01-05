@@ -16,8 +16,8 @@ import org.junit.Test;
 import org.mifosplatform.integrationtests.common.CenterDomain;
 import org.mifosplatform.integrationtests.common.CenterHelper;
 import org.mifosplatform.integrationtests.common.OfficeHelper;
-import org.mifosplatform.integrationtests.common.StaffHelper;
 import org.mifosplatform.integrationtests.common.Utils;
+import org.mifosplatform.integrationtests.common.organisation.StaffHelper;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.builder.RequestSpecBuilder;
