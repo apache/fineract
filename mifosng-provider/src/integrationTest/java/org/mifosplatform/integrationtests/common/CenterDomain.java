@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 import com.google.gson.Gson;
 
-public class CenterDomain {
+public class CenterDomain implements Comparable<CenterDomain> {
 
     public static class Builder {
 
@@ -134,8 +134,12 @@ public class CenterDomain {
         return this.hierarchy;
     }
 
-    public ArrayList<HashMap> getGroupMembers() {
-        return this.groupMembers;
+    public int[] getGroupMembers() {
+        int[] groupMemberList = new int[this.groupMembers.size()];
+        for (int i = 0; i < groupMemberList.length; i++) {
+            groupMemberList[i] = ((Double) this.groupMembers.get(i).get("id")).intValue();
+        }
+        return groupMemberList;
     }
 
     @Override
@@ -167,5 +171,10 @@ public class CenterDomain {
 
         if (this.hashCode() == cd.hashCode()) return true;
         return false;
+    }
+
+    @Override
+    public int compareTo(CenterDomain cd) {
+        return ((Integer) this.id).compareTo(cd.getId());
     }
 }
