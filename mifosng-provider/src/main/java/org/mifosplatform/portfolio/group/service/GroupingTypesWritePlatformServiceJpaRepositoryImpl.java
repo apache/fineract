@@ -589,7 +589,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         final Long closureReasonId = command.longValueOfParameterNamed(GroupingTypesApiConstants.closureReasonIdParamName);
 
         final CodeValue closureReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
-                GroupingTypesApiConstants.GROUP_CLOSURE_REASON, closureReasonId);
+                GroupingTypesApiConstants.CENTER_CLOSURE_REASON, closureReasonId);
 
         final AppUser currentUser = this.context.authenticatedUser();
 

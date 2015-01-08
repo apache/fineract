@@ -504,7 +504,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     @Override
     public CenterData retrieveCenterWithClosureReasons() {
         final List<CodeValueData> closureReasons = new ArrayList<>(
-                this.codeValueReadPlatformService.retrieveCodeValuesByCode(GroupingTypesApiConstants.GROUP_CLOSURE_REASON));
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(GroupingTypesApiConstants.CENTER_CLOSURE_REASON));
         return CenterData.withClosureReasons(closureReasons);
     }
 
