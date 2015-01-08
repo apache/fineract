@@ -1972,7 +1972,7 @@
 								<td></td>
 								<td><a href="#roles_retrieve">Retrieve a Role</a></td>
 								<td><a href="#roles_update">Update a Role</a></td>
-								<td></td>
+								<td><a href="#roles_delete">Delete Role</a></td>
 							</tr>
 							<tr>
 								<td></td>
@@ -1982,6 +1982,22 @@
 										Role's Permissions</a></td>
 								<td><a href="#rolespermissions_update">Update a Role's
 										Permissions</a></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>roles/{roleId}?command=enable</td>
+								<td><a href="#roles_enable">Enable Role</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>roles/{roleId}?command=disable</td>
+								<td><a href="#roles_disable">Disable Role</a></td>
+								<td></td>
+								<td></td>
 								<td></td>
 							</tr>
 							<tr>
@@ -30183,6 +30199,30 @@ GET https://DomainName/api/v1/roles
 					</code>
 				</div>
 			</div>
+			
+			
+			<a id="roles_delete" name="roles_delete" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete a Role</h4>
+					<p>Description : Delete the role in case role is not associated with any users.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/roles/{roleId}
+					</code>
+					<code class="method-request">
+DELETE roles/20
+Content-Type: application/json
+No Request Body
+					</code>
+					<code class="method-response">
+{
+	"resourceId":1
+}	
+					</code>
+				</div>
+			</div>
 
 			<a id="roles_retrieve" name="roles_retrieve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -30300,6 +30340,52 @@ GET https://DomainName/api/v1/roles/{roleId}/permissions
             "selected": false
         }
     ]
+}
+					</code>
+				</div>
+			</div>
+			
+			<a id="roles_enable" name="roles_enable" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Enable Role</h4>
+					<p>Description : Enable role in case role is disabled.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/roles/{roleId}?command=enable
+					</code>
+					<code class="method-request">
+POST roles/1?command=enable
+Content-Type: application/json 
+No Request Body
+</code>
+					<code class="method-response">
+{
+	"resourceId":1
+} 
+					</code>
+				</div>
+			</div>
+			
+			<a id="roles_disable" name="roles_disable" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Disable Role</h4>
+					<p>Description : Disable the role in case role is not associated with any users.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/roles/{roleId}?command=disable
+					</code>
+					<code class="method-request">
+POST roles/1?command=disable
+Content-Type: application/json 
+No Request Body
+</code>
+					<code class="method-response">
+{
+	"resourceId":1
 }
 					</code>
 				</div>

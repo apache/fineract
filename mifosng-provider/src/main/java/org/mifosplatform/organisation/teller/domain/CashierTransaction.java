@@ -54,6 +54,9 @@ public class CashierTransaction extends AbstractPersistable<Long> {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date", nullable = false)
     private Date createdDate;
+    
+    @Column(name = "currency_code", nullable = true)
+    private String currencyCode;
 
     /**
      * Creates a new cashier.
@@ -71,15 +74,16 @@ public class CashierTransaction extends AbstractPersistable<Long> {
         final String entityType = command.stringValueOfParameterNamed("entityType");
         final String txnNote = command.stringValueOfParameterNamed("txnNote");
         final Long entityId = command.longValueOfParameterNamed("entityId");
+        final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
 
         // TODO: get client/loan/savings details
         return new CashierTransaction (cashier, txnType, txnAmount, txnDate, 
-        		entityType, entityId, txnNote);
+        		entityType, entityId, txnNote, currencyCode);
         
     }
     
     public CashierTransaction (Cashier cashier, Integer txnType, BigDecimal txnAmount, 
-    		LocalDate txnDate, String entityType, Long entityId, String txnNote) {
+    		LocalDate txnDate, String entityType, Long entityId, String txnNote, String currencyCode) {
     	this.cashier = cashier;
     	this.txnType = txnType;
     	if (txnDate != null) {
@@ -90,6 +94,7 @@ public class CashierTransaction extends AbstractPersistable<Long> {
     	this.entityId = entityId;
     	this.txnNote = txnNote;
     	this.createdDate = new Date(); 
+    	this.currencyCode = currencyCode;
     }
     
     public Map<String, Object> update(final JsonCommand command) {
@@ -129,6 +134,13 @@ public class CashierTransaction extends AbstractPersistable<Long> {
             final String newValue = command.stringValueOfParameterNamed(txnNoteParamName);
             actualChanges.put(txnNoteParamName, newValue);
             this.txnNote = newValue;
+        }
+        
+        final String currencyCodeParamName = "currencyCode";
+        if (command.isChangeInStringParameterNamed(currencyCodeParamName, this.currencyCode)) {
+            final String newValue = command.stringValueOfParameterNamed(currencyCodeParamName);
+            actualChanges.put(currencyCodeParamName, newValue);
+            this.currencyCode = newValue;
         }
                 
         return actualChanges;
@@ -246,6 +258,14 @@ public class CashierTransaction extends AbstractPersistable<Long> {
 
     public void setTxnNote (String txnNote) {
         this.txnNote = txnNote;
+    }
+    
+    public String getCurrencyCode() {
+        return this.currencyCode;
+    }
+    
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
     }
 
 }

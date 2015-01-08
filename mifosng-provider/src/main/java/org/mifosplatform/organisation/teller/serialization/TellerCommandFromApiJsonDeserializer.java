@@ -42,7 +42,7 @@ public final class TellerCommandFromApiJsonDeserializer {
     		"officeId", "name", "description", "startDate",
             "endDate", "status", "dateFormat", "locale",
             "isFullDay", "staffId", "startTime", "endTime",
-            "txnAmount","txnDate", "txnNote", "entityType", "entityId"));
+            "txnAmount","txnDate", "txnNote", "entityType", "entityId", "currencyCode"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -164,5 +164,8 @@ public final class TellerCommandFromApiJsonDeserializer {
         
         final String txnNote = this.fromApiJsonHelper.extractStringNamed("txnNote", element);
         baseDataValidator.reset().parameter("txnNote").value(txnNote).notExceedingLengthOf(200);
+        
+        final String currencyCode = this.fromApiJsonHelper.extractStringNamed("currencyCode", element);
+        baseDataValidator.reset().parameter("currencyCode").value(currencyCode).notExceedingLengthOf(3);
     }
 }
