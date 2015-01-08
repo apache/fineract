@@ -51,6 +51,17 @@ public class CenterIntegrationTest {
         Assert.assertTrue(center.getName().equals(name));
         Assert.assertTrue(center.getOfficeId() == officeId);
         Assert.assertTrue(center.isActive() == false);
+
+        // Test retrieval by listing all centers
+        int id = CenterHelper.listCenters(requestSpec, responseSpec).get(0).getId();
+        Assert.assertTrue(id > 0);
+
+        CenterDomain retrievedCenter = CenterHelper.retrieveByID(id, requestSpec, responseSpec);
+        Assert.assertNotNull(retrievedCenter);
+        Assert.assertNotNull(retrievedCenter.getName());
+        Assert.assertNotNull(retrievedCenter.getHierarchy());
+        Assert.assertNotNull(retrievedCenter.getOfficeName());
+
     }
 
     @Test
@@ -82,18 +93,6 @@ public class CenterIntegrationTest {
         Assert.assertNotNull(list);
         Assert.assertTrue(Arrays.equals(paginatedList.toArray(new CenterDomain[paginatedList.size()]),
                 list.toArray(new CenterDomain[list.size()])));
-    }
-
-    @Test
-    public void testCenterRetrieval() {
-        int id = CenterHelper.listCenters(requestSpec, responseSpec).get(0).getId();
-        Assert.assertTrue(id > 0);
-
-        CenterDomain center = CenterHelper.retrieveByID(id, requestSpec, responseSpec);
-        Assert.assertNotNull(center);
-        Assert.assertNotNull(center.getName());
-        Assert.assertNotNull(center.getHierarchy());
-        Assert.assertNotNull(center.getOfficeName());
     }
 
     @Test
