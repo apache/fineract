@@ -323,6 +323,14 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("UPDATERUNNINGBALANCE") && this.entityName.equalsIgnoreCase("JOURNALENTRY");
     }
 
+    public boolean isDefineOpeningalance() {
+        return this.actionName.equalsIgnoreCase("DEFINEOPENINGBALANCE") && this.entityName.equalsIgnoreCase("JOURNALENTRY");
+    }
+
+    public boolean isUpdateOpeningbalance() {
+        return this.actionName.equalsIgnoreCase("UPDATEOPENINGBALANCE") && this.entityName.equalsIgnoreCase("JOURNALENTRY");
+    }
+
     public boolean isFundResource() {
         return this.entityName.equalsIgnoreCase("FUND");
     }

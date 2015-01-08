@@ -944,6 +944,22 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder defineOpeningBalanceForJournalEntry() {
+        this.actionName = "DEFINEOPENINGBALANCE";
+        this.entityName = "JOURNALENTRY";
+        this.entityId = null;
+        this.href = "/journalentries/update";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateOpeningBalanceForJournalEntry() {
+        this.actionName = "UPDATEOPENINGBALANCE";
+        this.entityName = "JOURNALENTRY";
+        this.entityId = null;
+        this.href = "/journalentries/update";
+        return this;
+    }
+
     public CommandWrapperBuilder createSavingProduct() {
         this.actionName = "CREATE";
         this.entityName = "SAVINGSPRODUCT";

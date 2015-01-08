@@ -177,4 +177,8 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
         return this.paymentDetail;
     }
 
+    public String getTransactionId() {
+        return transactionId;
+    }
+
 }

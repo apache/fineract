@@ -10,24 +10,35 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.common.AccountingEnumerations;
+import org.mifosplatform.accounting.glaccount.data.GLAccountData;
+import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
+import org.mifosplatform.accounting.glaccount.service.GLAccountReadPlatformService;
 import org.mifosplatform.accounting.journalentry.data.JournalEntryAssociationParametersData;
 import org.mifosplatform.accounting.journalentry.data.JournalEntryData;
+import org.mifosplatform.accounting.journalentry.data.OfficeOpeningBalancesData;
 import org.mifosplatform.accounting.journalentry.data.TransactionDetailData;
 import org.mifosplatform.accounting.journalentry.data.TransactionTypeEnumData;
 import org.mifosplatform.accounting.journalentry.exception.JournalEntriesNotFoundException;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
+import org.mifosplatform.organisation.office.data.OfficeData;
+import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
@@ -41,17 +52,26 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final ConfigurationDomainService configurationDomainService;
+    private final GLAccountReadPlatformService glAccountReadPlatformService;
+    private final OfficeReadPlatformService officeReadPlatformService;
 
     private final PaginationHelper<JournalEntryData> paginationHelper = new PaginationHelper<>();
 
     @Autowired
-    public JournalEntryReadPlatformServiceImpl(final RoutingDataSource dataSource) {
+    public JournalEntryReadPlatformServiceImpl(final RoutingDataSource dataSource,
+            final ConfigurationDomainService configurationDomainService, final GLAccountReadPlatformService glAccountReadPlatformService,
+            final OfficeReadPlatformService officeReadPlatformService) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.configurationDomainService = configurationDomainService;
+        this.glAccountReadPlatformService = glAccountReadPlatformService;
+        this.officeReadPlatformService = officeReadPlatformService;
     }
 
     private static final class GLJournalEntryMapper implements RowMapper<JournalEntryData> {
@@ -333,4 +353,124 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         }
     }
 
+    @Override
+    public OfficeOpeningBalancesData retrieveOfficeOpeningBalances(final Long officeId) {
+
+        /**
+         * Global configuration 'office-opening-balances-contra-account'
+         * property value must not be null and it should be a equity account.
+         */
+        final Long contraId = this.configurationDomainService.retrieveOpeningBalancesContraAccount();
+        if (contraId == null) { throw new GeneralPlatformDomainRuleException(
+                "error.msg.configuration.opening.balance.contra.account.cannot.be.null",
+                "Configuration property 'office-opening-balances-contra-account' value can not be null",
+                "office-opening-balances-contra-account"); }
+
+        final JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData();
+        final GLAccountData contraAccount = this.glAccountReadPlatformService.retrieveGLAccountById(contraId, associationParametersData);
+        if (!GLAccountType.fromInt(contraAccount.getTypeId()).isEquityType()) { throw new GeneralPlatformDomainRuleException(
+                "error.msg.configuration.opening.balance.contra.account.value.is.invalid.account.type",
+                "Global configuration 'office-opening-balances-contra-account' value is not an equity type account", contraId); }
+
+        final OfficeData officeData = this.officeReadPlatformService.retrieveOffice(officeId);
+        final List<JournalEntryData> allOpeningTransactions = populateAllTransactionsFromGLAccounts(contraId);
+        final String contraTransactionId = retrieveContraAccountTransactionId(officeId, contraId);
+
+        List<JournalEntryData> existingOpeningBalanceTransactions = new ArrayList<>();
+        if (StringUtils.isNotBlank(contraTransactionId)) {
+            existingOpeningBalanceTransactions = retrieveOfficeBalanceTransactions(officeId, contraTransactionId);
+        }
+        final List<JournalEntryData> transactions = populateOpeningBalances(existingOpeningBalanceTransactions, allOpeningTransactions);
+        final List<JournalEntryData> assetAccountOpeningBalances = new ArrayList<>();
+        final List<JournalEntryData> liabityAccountOpeningBalances = new ArrayList<>();
+        final List<JournalEntryData> incomeAccountOpeningBalances = new ArrayList<>();
+        final List<JournalEntryData> equityAccountOpeningBalances = new ArrayList<>();
+        final List<JournalEntryData> expenseAccountOpeningBalances = new ArrayList<>();
+
+        for (final JournalEntryData journalEntryData : transactions) {
+            final GLAccountType type = GLAccountType.fromInt(journalEntryData.getGlAccountType().getId().intValue());
+            if (type.isAssetType()) {
+                assetAccountOpeningBalances.add(journalEntryData);
+            } else if (type.isLiabilityType()) {
+                liabityAccountOpeningBalances.add(journalEntryData);
+            } else if (type.isEquityType()) {
+                equityAccountOpeningBalances.add(journalEntryData);
+            } else if (type.isIncomeType()) {
+                incomeAccountOpeningBalances.add(journalEntryData);
+            } else if (type.isExpenseType()) {
+                expenseAccountOpeningBalances.add(journalEntryData);
+            }
+        }
+
+        final LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+
+        final OfficeOpeningBalancesData officeOpeningBalancesData = OfficeOpeningBalancesData.createNew(officeId, officeData.name(),
+                transactionDate, contraAccount, assetAccountOpeningBalances, liabityAccountOpeningBalances, incomeAccountOpeningBalances,
+                equityAccountOpeningBalances, expenseAccountOpeningBalances);
+        return officeOpeningBalancesData;
+    }
+
+    private List<JournalEntryData> populateOpeningBalances(final List<JournalEntryData> existingOpeningBalanceTransactions,
+            final List<JournalEntryData> allOpeningTransactions) {
+        final List<JournalEntryData> allOpeningBalnceTransactions = new ArrayList<>(allOpeningTransactions.size());
+        for (final JournalEntryData newOpeningBalanceTransaction : allOpeningTransactions) {
+            boolean isNewTransactionAddedToCollection = false;
+            for (final JournalEntryData existingOpeningBalanceTransaction : existingOpeningBalanceTransactions) {
+                if (newOpeningBalanceTransaction.getGlAccountId().equals(existingOpeningBalanceTransaction.getGlAccountId())) {
+                    allOpeningBalnceTransactions.add(existingOpeningBalanceTransaction);
+                    isNewTransactionAddedToCollection = true;
+                    break;
+                }
+            }
+            if (!isNewTransactionAddedToCollection) {
+                allOpeningBalnceTransactions.add(newOpeningBalanceTransaction);
+            }
+        }
+        return allOpeningBalnceTransactions;
+    }
+
+    private List<JournalEntryData> populateAllTransactionsFromGLAccounts(final Long contraId) {
+        final List<GLAccountData> glAccounts = this.glAccountReadPlatformService.retrieveAllEnabledDetailGLAccounts();
+        final List<JournalEntryData> openingBalanceTransactions = new ArrayList<>(glAccounts.size());
+
+        for (final GLAccountData glAccountData : glAccounts) {
+            if (!contraId.equals(glAccountData.getId())) {
+                final JournalEntryData openingBalanceTransaction = JournalEntryData.fromGLAccountData(glAccountData);
+                openingBalanceTransactions.add(openingBalanceTransaction);
+            }
+        }
+        return openingBalanceTransactions;
+    }
+
+    private List<JournalEntryData> retrieveOfficeBalanceTransactions(final Long officeId, final String transactionId) {
+        final Long contraId = null;
+        return retrieveContraTransactions(officeId, contraId, transactionId).getPageItems();
+    }
+
+    private String retrieveContraAccountTransactionId(final Long officeId, final Long contraId) {
+        final String transactionId = "";
+        final Page<JournalEntryData> contraJournalEntries = retrieveContraTransactions(officeId, contraId, transactionId);
+        if (!CollectionUtils.isEmpty(contraJournalEntries.getPageItems())) {
+            final JournalEntryData contraTransaction = contraJournalEntries.getPageItems().get(contraJournalEntries.getPageItems().size()-1);
+            return contraTransaction.getTransactionId();
+        }
+        return transactionId;
+    }
+
+    private Page<JournalEntryData> retrieveContraTransactions(final Long officeId, final Long contraId, final String transactionId) {
+        final Integer offset = 0;
+        final Integer limit = null;
+        final String orderBy = "journalEntry.id";
+        final String sortOrder = "ASC";
+        final Integer entityType = null;
+        final Boolean onlyManualEntries = null;
+        final Date fromDate = null;
+        final Date toDate = null;
+        final JournalEntryAssociationParametersData associationParametersData = null;
+
+        final SearchParameters searchParameters = SearchParameters.forJournalEntries(officeId, offset, limit, orderBy, sortOrder);
+        return retrieveAll(searchParameters, contraId, onlyManualEntries, fromDate, toDate, transactionId, entityType,
+                associationParametersData);
+
+    }
 }

@@ -24,6 +24,7 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.accounting.journalentry.data.JournalEntryAssociationParametersData;
 import org.mifosplatform.accounting.journalentry.data.JournalEntryData;
+import org.mifosplatform.accounting.journalentry.data.OfficeOpeningBalancesData;
 import org.mifosplatform.accounting.journalentry.service.JournalEntryReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
@@ -53,7 +54,7 @@ public class JournalEntriesApiResource {
     private final String resourceNameForPermission = "JOURNALENTRY";
 
     private final JournalEntryReadPlatformService journalEntryReadPlatformService;
-    private final DefaultToApiJsonSerializer<JournalEntryData> apiJsonSerializerService;
+    private final DefaultToApiJsonSerializer<Object> apiJsonSerializerService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PlatformSecurityContext context;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
@@ -61,7 +62,7 @@ public class JournalEntriesApiResource {
     @Autowired
     public JournalEntriesApiResource(final PlatformSecurityContext context,
             final JournalEntryReadPlatformService journalEntryReadPlatformService,
-            final DefaultToApiJsonSerializer<JournalEntryData> toApiJsonSerializer,
+            final DefaultToApiJsonSerializer<Object> toApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
@@ -131,6 +132,10 @@ public class JournalEntriesApiResource {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().updateRunningBalanceForJournalEntry()
                     .withJson(jsonRequestBody).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "defineOpeningBalance")) {
+            final CommandWrapper commandRequest = new CommandWrapperBuilder().defineOpeningBalanceForJournalEntry()
+                    .withJson(jsonRequestBody).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().createJournalEntry().withJson(jsonRequestBody).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -154,6 +159,18 @@ public class JournalEntriesApiResource {
         }
 
         return this.apiJsonSerializerService.serialize(result);
+    }
+
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Path("openingbalance")
+    public String retrieveOpeningBalance(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId) {
+
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        final OfficeOpeningBalancesData officeOpeningBalancesData = this.journalEntryReadPlatformService.retrieveOfficeOpeningBalances(officeId);
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.apiJsonSerializerService.serialize(settings, officeOpeningBalancesData);
     }
 
     private boolean is(final String commandParam, final String commandValue) {

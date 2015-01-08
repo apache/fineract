@@ -8,6 +8,7 @@ package org.mifosplatform.accounting.journalentry.data;
 import java.math.BigDecimal;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.accounting.glaccount.data.GLAccountData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 
@@ -99,6 +100,39 @@ public class JournalEntryData {
         this.currency = currency;
     }
 
+    public static JournalEntryData fromGLAccountData(final GLAccountData glAccountData) {
+
+        final Long id = null;
+        final Long officeId = null;
+        final String officeName = null;
+        final String glAccountName = glAccountData.getName();
+        final Long glAccountId = glAccountData.getId();
+        final String glAccountCode = glAccountData.getGlCode();
+        final EnumOptionData glAccountClassification = glAccountData.getType();
+        final LocalDate transactionDate = null;
+        final EnumOptionData entryType = null;
+        final BigDecimal amount = null;
+        final String transactionId = null;
+        final Boolean manualEntry = null;
+        final EnumOptionData entityType = null;
+        final Long entityId = null;
+        final Long createdByUserId = null;
+        final LocalDate createdDate = null;
+        final String createdByUserName = null;
+        final String comments = null;
+        final Boolean reversed = null;
+        final String referenceNumber = null;
+        final BigDecimal officeRunningBalance = null;
+        final BigDecimal organizationRunningBalance = null;
+        final Boolean runningBalanceComputed = null;
+        final TransactionDetailData transactionDetailData = null;
+        final CurrencyData currency = null;
+        return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glAccountCode, glAccountClassification,
+                transactionDate, entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, createdDate,
+                createdByUserName, comments, reversed, referenceNumber, officeRunningBalance, organizationRunningBalance,
+                runningBalanceComputed, transactionDetailData, currency);
+    }
+
     public Long getId() {
         return this.id;
     }
@@ -121,5 +155,9 @@ public class JournalEntryData {
 
     public Long getOfficeId() {
         return this.officeId;
+    }
+
+    public String getTransactionId() {
+        return transactionId;
     }
 }
