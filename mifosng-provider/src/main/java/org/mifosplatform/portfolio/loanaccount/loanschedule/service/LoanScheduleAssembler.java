@@ -442,7 +442,7 @@ public class LoanScheduleAssembler {
         final LocalDate dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment = expectedDisbursementDate
                 .plusDays(minimumDaysBetweenDisbursalAndFirstRepayment);
 
-        if (loanType.isJLGAccount() && calendar != null) {
+        if ((loanType.isJLGAccount()|| loanType.isGroupAccount()) && calendar != null) {
 
             final LocalDate refernceDateForCalculatingFirstRepaymentDate = expectedDisbursementDate;
             derivedFirstRepayment = deriveFirstRepaymentDateForJLGLoans(repaymentEvery, expectedDisbursementDate,
