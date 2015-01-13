@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.template.domain.Template;
 import org.mifosplatform.template.domain.TemplateFunctions;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,23 +36,32 @@ import com.github.mustachejava.MustacheFactory;
 @Service
 public class TemplateMergeService {
 
-//    private final FromJsonHelper fromApiJsonHelper;
+    // private final FromJsonHelper fromApiJsonHelper;
     private Map<String, Object> scopes;
+    private String authToken;
 
-//    @Autowired
-//    public TemplateMergeService(final FromJsonHelper fromApiJsonHelper) {
-//        this.fromApiJsonHelper = fromApiJsonHelper;
-//    }
+    // @Autowired
+    // public TemplateMergeService(final FromJsonHelper fromApiJsonHelper) {
+    // this.fromApiJsonHelper = fromApiJsonHelper;
+    // }
 
-    public String compile(final Template template, final Map<String, Object> scopes) throws MalformedURLException, IOException {
+    public void setAuthToken(final String authToken) {
+        this.authToken = authToken;
+    }
+
+    public String compile(final Template template,
+            final Map<String, Object> scopes) throws MalformedURLException,
+            IOException {
 
         this.scopes = scopes;
         this.scopes.put("static", new TemplateFunctions());
 
         final MustacheFactory mf = new DefaultMustacheFactory();
-        final Mustache mustache = mf.compile(new StringReader(template.getText()), template.getName());
+        final Mustache mustache = mf.compile(
+                new StringReader(template.getText()), template.getName());
 
-        final Map<String, Object> mappers = getCompiledMapFromMappers(template.getMappersAsMap());
+        final Map<String, Object> mappers = getCompiledMapFromMappers(template
+                .getMappersAsMap());
         this.scopes.putAll(mappers);
 
         final StringWriter stringWriter = new StringWriter();
@@ -60,14 +70,16 @@ public class TemplateMergeService {
         return stringWriter.toString();
     }
 
-    private Map<String, Object> getCompiledMapFromMappers(final Map<String, String> data) {
+    private Map<String, Object> getCompiledMapFromMappers(
+            final Map<String, String> data) {
 
         final MustacheFactory mf = new DefaultMustacheFactory();
 
         if (data != null) {
             for (final Map.Entry<String, String> entry : data.entrySet()) {
 
-                final Mustache mappersMustache = mf.compile(new StringReader(entry.getValue()), "");
+                final Mustache mappersMustache = mf.compile(new StringReader(
+                        entry.getValue()), "");
                 final StringWriter stringWriter = new StringWriter();
 
                 mappersMustache.execute(stringWriter, this.scopes);
@@ -88,11 +100,13 @@ public class TemplateMergeService {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, Object> getMapFromUrl(final String url) throws MalformedURLException, IOException {
+    private Map<String, Object> getMapFromUrl(final String url)
+            throws MalformedURLException, IOException {
 
         final HttpURLConnection connection = getConnection(url);
 
-        final String response = getStringFromInputStream(connection.getInputStream());
+        final String response = getStringFromInputStream(connection
+                .getInputStream());
         HashMap<String, Object> result = new HashMap<>();
         if (connection.getContentType().equals("text/plain")) {
             result.put("src", response);
@@ -104,20 +118,29 @@ public class TemplateMergeService {
 
     private HttpURLConnection getConnection(final String url) {
 
-        final String name = SecurityContextHolder.getContext().getAuthentication().getName();
-        final String password = SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
+        if (this.authToken == null) {
+            final String name = SecurityContextHolder.getContext()
+                    .getAuthentication().getName();
+            final String password = SecurityContextHolder.getContext()
+                    .getAuthentication().getCredentials().toString();
 
-        Authenticator.setDefault(new Authenticator() {
+            Authenticator.setDefault(new Authenticator() {
 
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(name, password.toCharArray());
-            }
-        });
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(name, password
+                            .toCharArray());
+                }
+            });
+        }
 
         HttpURLConnection connection = null;
         try {
             connection = (HttpURLConnection) new URL(url).openConnection();
+            if (this.authToken != null) {
+                connection.setRequestProperty("Authorization", "Basic "
+                        + this.authToken);
+            }
             TrustModifier.relaxHostChecking(connection);
 
             connection.setDoInput(true);
