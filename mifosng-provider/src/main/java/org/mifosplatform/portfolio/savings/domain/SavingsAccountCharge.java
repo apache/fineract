@@ -708,25 +708,27 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
     public void updateToNextDueDateFrom(final LocalDate startingDate) {
         if (isAnnualFee() || isMonthlyFee() || isWeeklyFee()) {
-            LocalDate nextDueLocalDate = null;
-            if (isAnnualFee() || isMonthlyFee()) {
-                nextDueLocalDate = startingDate.withMonthOfYear(this.feeOnMonth);
-                nextDueLocalDate = setDayOfMonth(nextDueLocalDate);
-                while (startingDate.isAfter(nextDueLocalDate)) {
-                    nextDueLocalDate = calculateNextDueDate(nextDueLocalDate);
-                }
-            } else if (isWeeklyFee()) {
-                nextDueLocalDate = getDueLocalDate();
-                while (startingDate.isAfter(nextDueLocalDate)) {
-                    nextDueLocalDate = calculateNextDueDate(nextDueLocalDate);
-                }
-            } else {
-                nextDueLocalDate = calculateNextDueDate(startingDate);
-            }
-
-            this.dueDate = nextDueLocalDate.toDate();
+            this.dueDate = getNextDueDateFrom(startingDate).toDate();
         }
+    }
 
+    public LocalDate getNextDueDateFrom(final LocalDate startingDate) {
+        LocalDate nextDueLocalDate = null;
+        if (isAnnualFee() || isMonthlyFee()) {
+            nextDueLocalDate = startingDate.withMonthOfYear(this.feeOnMonth);
+            nextDueLocalDate = setDayOfMonth(nextDueLocalDate);
+            while (startingDate.isAfter(nextDueLocalDate)) {
+                nextDueLocalDate = calculateNextDueDate(nextDueLocalDate);
+            }
+        } else if (isWeeklyFee()) {
+            nextDueLocalDate = getDueLocalDate();
+            while (startingDate.isAfter(nextDueLocalDate)) {
+                nextDueLocalDate = calculateNextDueDate(nextDueLocalDate);
+            }
+        } else {
+            nextDueLocalDate = calculateNextDueDate(startingDate);
+        }
+        return nextDueLocalDate;
     }
 
     private LocalDate calculateNextDueDate(final LocalDate date) {
@@ -807,10 +809,6 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
     private BigDecimal amountPaid() {
         return this.amountPaid;
-    }
-
-    public LocalDate nextDuDate(final LocalDate date) {
-        return calculateNextDueDate(date);
     }
 
     public void inactiavateCharge(final LocalDate inactivationOnDate) {

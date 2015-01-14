@@ -1052,7 +1052,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
 
         } else {
-            final LocalDate nextDueDate = savingsAccountCharge.nextDuDate(inactivationOnDate);
+            final LocalDate nextDueDate = savingsAccountCharge.getNextDueDateFrom(inactivationOnDate);
 
             if (savingsAccountCharge.isChargeIsDue(nextDueDate)) {
                 baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("inactivation.of.charge.not.allowed.when.charge.is.due");
