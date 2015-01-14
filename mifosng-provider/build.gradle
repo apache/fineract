@@ -45,7 +45,7 @@ group = 'org.mifosplatform'
 repositories {
 	jcenter()
 	maven {
-	url "http://repository.pentaho.org/artifactory/pentaho/"
+	url "http://nexus.pentaho.org/content/repositories/pentaho-public-release-repos/"
     }
 	// mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
 }
