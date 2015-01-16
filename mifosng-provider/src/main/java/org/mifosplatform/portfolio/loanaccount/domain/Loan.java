@@ -3142,8 +3142,8 @@ public class Loan extends AbstractPersistable<Long> {
 
             LocalDateTime createdDate = DateUtils.getLocalDateTimeOfTenant();
             loanTransaction = LoanTransaction.writeoff(this, getOffice(), writtenOffOnLocalDate, txnExternalId, createdDate, currentUser);
-            final boolean isLastTransaction = isChronologicallyLatestTransaction(loanTransaction, this.loanTransactions);
-            if (!isLastTransaction) {
+            LocalDate lastTransactionDate = getLastUserTransactionDate();
+            if (lastTransactionDate.isAfter(writtenOffOnLocalDate)) {
                 final String errorMessage = "The date of the writeoff transaction must occur on or before previous transactions.";
                 throw new InvalidLoanStateTransitionException("writeoff", "must.occur.on.or.after.other.transaction.dates", errorMessage,
                         writtenOffOnLocalDate);
