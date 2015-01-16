@@ -5,9 +5,12 @@
  */
 package org.mifosplatform.portfolio.collectionsheet.serialization;
 
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.INDIVIDUAL_COLLECTIONSHEET_SUPPORTED_PARAMS;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.calendarIdParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.dateFormatParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.localeParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.officeIdParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.staffIdParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.transactionDateParamName;
 
 import java.lang.reflect.Type;
@@ -37,8 +40,8 @@ public class CollectionSheetGenerateCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    final Set<String> supportedParameters = new HashSet<>(Arrays.asList(transactionDateParamName, localeParamName,
-            dateFormatParamName, calendarIdParamName));
+    final Set<String> supportedParameters = new HashSet<>(Arrays.asList(transactionDateParamName, localeParamName, dateFormatParamName,
+            calendarIdParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -69,6 +72,36 @@ public class CollectionSheetGenerateCommandFromApiJsonDeserializer {
 
         final Long calendarId = this.fromApiJsonHelper.extractLongNamed(calendarIdParamName, element);
         baseDataValidator.reset().parameter(calendarIdParamName).value(calendarId).notNull();
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
+    }
+
+    public void validateForGenerateCollectionSheetOfIndividuals(final String json) {
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, INDIVIDUAL_COLLECTIONSHEET_SUPPORTED_PARAMS);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("collectionsheet");
+
+        final String transactionDateStr = this.fromApiJsonHelper.extractStringNamed(transactionDateParamName, element);
+        baseDataValidator.reset().parameter(transactionDateParamName).value(transactionDateStr).notBlank();
+
+        if (!StringUtils.isBlank(transactionDateStr)) {
+            final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
+            baseDataValidator.reset().parameter(transactionDateParamName).value(dueDate).notNull();
+        }
+
+        final Long officeId = this.fromApiJsonHelper.extractLongNamed(officeIdParamName, element);
+        baseDataValidator.reset().parameter(officeIdParamName).value(officeId).longGreaterThanZero();
+
+        final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParamName, element);
+        baseDataValidator.reset().parameter(staffIdParamName).value(staffId).longGreaterThanZero();
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }

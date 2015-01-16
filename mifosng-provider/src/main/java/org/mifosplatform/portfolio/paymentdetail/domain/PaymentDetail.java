@@ -76,6 +76,11 @@ public final class PaymentDetail extends AbstractPersistable<Long> {
         return paymentDetail;
     }
 
+    public static PaymentDetail instance(final CodeValue paymentType, final String accountNumber, final String checkNumber,
+            final String routingCode, final String receiptNumber, final String bankNumber) {
+        return new PaymentDetail(paymentType, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber);
+    }
+
     private PaymentDetail(final CodeValue paymentType, final String accountNumber, final String checkNumber, final String routingCode,
             final String receiptNumber, final String bankNumber) {
         this.paymentType = paymentType;

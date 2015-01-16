@@ -31,7 +31,6 @@ public class PaymentDetailWritePlatformServiceJpaRepositoryImpl implements Payme
     }
 
     @Override
-    @Transactional
     public PaymentDetail createPaymentDetail(final JsonCommand command, final Map<String, Object> changes) {
         final Long paymentTypeId = command.longValueOfParameterNamed(PaymentDetailConstants.paymentTypeParamName);
         if (paymentTypeId == null) { return null; }

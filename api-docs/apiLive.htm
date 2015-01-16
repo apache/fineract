@@ -1183,7 +1183,7 @@
 			</div>
 
 			<div class="flybar-nav">
-				<h2 class="flybar-button">Group</h2>
+				<h2 class="flybar-button">Group & Collection Sheet</h2>
 				<div id="toc-menu-loan" class="flybar-menu">
 					<div class="tocMatrix">
 						<table class=matrixHeading>
@@ -1433,6 +1433,24 @@
                                 <td></td>
                                 <td>centers/{centerId}?command=saveCollectionSheet</td>
                                 <td><a href="#centers_save_collectionsheet">Save Collection Sheet</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+							
+							
+							<tr>
+                                <td><a href="#centers">Collection Sheet</a></td>
+                                <td>collectionsheet?command=generateCollectionSheet</td>
+                                <td><a href="#generate_individual_collection_sheet">Generate Collection Sheet</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                           <tr>
+                                <td></td>
+                                <td>collectionsheet?command=saveCollectionSheet</td>
+                                <td><a href="#save_individual_collection_sheet">Save Collection Sheet</a></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
@@ -5334,6 +5352,99 @@ Request Body:
                 </div>
             </div>
 
+			<a id="generate_individual_collection_sheet" name="generate_individual_collection_sheet" class="old-syle-anchor">&nbsp;</a>
+        <div class="method-section">
+            <div class="method-description">
+              <h4>Generate Individual Collection Sheet</h4>
+            <p>This Api retrieves repayment details of all individual loans under a office as on a specified meeting date.</p>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">POST https://Domain Name/api/v1/collectionsheet?command=generateCollectionSheet</code>
+            <code class="method-request">POST collectionsheet?command=generateCollectionSheet
+Content-Type: application/json
+Request Body:
+{  
+   "dateFormat":"dd MMMM yyyy",
+   "locale":"en",
+   "transactionDate":"15 January 2015",
+   "officeId":3
+}
+            </code>
+            <code class="method-response">
+{
+  "dueDate": [
+    2015,
+    1,
+    15
+  ],
+  "clients": [
+    {
+      "clientId": 74,
+      "clientName": "guarantee test",
+      "loans": [
+        {
+          "loanId": 307,
+          "accountId": "000000307",
+          "accountStatusId": 300,
+          "productShortName": "pr",
+          "productId": 60,
+          "currency": {
+            "code": "USD",
+            "name": "US Dollar",
+            "decimalPlaces": 2,
+            "inMultiplesOf": 0,
+            "displaySymbol": "$",
+            "nameCode": "currency.USD",
+            "displayLabel": "US Dollar ($)"
+          },
+          "principalDue": 1126.23,
+          "principalPaid": 8873.77,
+          "interestDue": 0,
+          "interestPaid": 504.95,
+          "totalDue": 1126.23
+        }
+      ],
+      "savings": [
+        {
+          "savingsId": 213,
+          "accountId": "000000213",
+          "accountStatusId": 300,
+          "productName": "11",
+          "productId": 30,
+          "currency": {
+            "code": "USD",
+            "name": "US Dollar",
+            "decimalPlaces": 2,
+            "inMultiplesOf": 0,
+            "displaySymbol": "$",
+            "nameCode": "currency.USD",
+            "displayLabel": "US Dollar ($)"
+          },
+          "dueAmount": 2000
+        }
+      ]
+    }
+  ],
+  "paymentTypeOptions": [
+    {
+      "id": 19,
+      "name": "receipt",
+      "position": 1,
+      "description": "rec"
+    },
+    {
+      "id": 20,
+      "name": "check",
+      "position": 2,
+      "description": "che"
+    }
+  ]
+}
+                    </code>
+                </div>
+            </div>
+
+			
             <a id="centers_save_collectionsheet" name="centers_save_collectionsheet" class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
@@ -5364,17 +5475,55 @@ Request Body:
  "changes": {
   "locale": "en",
   "dateFormat": "dd MMMM yyyy",
-  "bulkTransations": {
-   "loanId": 10,
-   "transactionAmount": 1221.36,
-   "transactionDate": [2014,5,4]
-  }
+  "loanTransactions": [10],
+  "SavingsTransactions": []
+ }
+}
+                    </code>
+                </div>
+            </div>      
+
+			           <a id="save_individual_collection_sheet" name="save_individual_collection_sheet" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Save Collection Sheet</h4>
+                    <p>This Api allows the loan officer to perform bulk repayments of individual loans and deposit of mandatory savings on a given meeting date.</p>      
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">POST https://Domain Name/api/v1/collectionsheet?command=saveCollectionSheet</code>
+                    <code class="method-request">POST collectionsheet?command=saveCollectionSheet
+{
+ "dateFormat": "dd MMMM yyyy",
+ "locale": "en",
+ "transactionDate": "04 May 2014",
+ "actualDisbursementDate": "04 May 2014",
+ "bulkDisbursementTransactions": [],
+ "bulkRepaymentTransactions": [{
+  "loanId": 10,
+  "transactionAmount": 1221.36,
+  "paymentTypeId":19,
+  "receiptNumber":"1245356"
+ }],
+ "bulkSavingsDueTransactions":[]
+}
+                    </code>
+                    <code class="method-response">
+{
+ "groupId": 10,
+ "resourceId": 10,
+ "changes": {
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "loanTransactions": [15],
+  "SavingsTransactions": []
+
  }
 }
                     </code>
                 </div>
             </div>
 
+			
 			<a id="centers_update" name="centers_update" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">

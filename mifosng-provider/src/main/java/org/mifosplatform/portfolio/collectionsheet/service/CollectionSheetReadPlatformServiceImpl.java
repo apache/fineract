@@ -7,6 +7,8 @@ package org.mifosplatform.portfolio.collectionsheet.service;
 
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.calendarIdParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.transactionDateParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.officeIdParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.staffIdParamName;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -20,6 +22,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
+import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
@@ -30,6 +34,9 @@ import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarRepositoryWrapper;
 import org.mifosplatform.portfolio.calendar.exception.NotValidRecurringDateException;
+import org.mifosplatform.portfolio.collectionsheet.data.IndividualClientData;
+import org.mifosplatform.portfolio.collectionsheet.data.IndividualCollectionSheetData;
+import org.mifosplatform.portfolio.collectionsheet.data.IndividualCollectionSheetLoanFlatData;
 import org.mifosplatform.portfolio.collectionsheet.data.JLGClientData;
 import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetData;
 import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetFlatData;
@@ -44,6 +51,7 @@ import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.meeting.attendance.service.AttendanceDropdownReadPlatformService;
 import org.mifosplatform.portfolio.meeting.attendance.service.AttendanceEnumerations;
+import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,14 +73,16 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     private final CollectionSheetGenerateCommandFromApiJsonDeserializer collectionSheetGenerateCommandFromApiJsonDeserializer;
     private final CalendarRepositoryWrapper calendarRepositoryWrapper;
     private final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService;
-    final MandatorySavingsCollectionsheetExtractor mandatorySavingsExtractor = new MandatorySavingsCollectionsheetExtractor();
+    private final MandatorySavingsCollectionsheetExtractor mandatorySavingsExtractor = new MandatorySavingsCollectionsheetExtractor();
+    private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     @Autowired
     public CollectionSheetReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final CenterReadPlatformService centerReadPlatformService, final GroupReadPlatformService groupReadPlatformService,
             final CollectionSheetGenerateCommandFromApiJsonDeserializer collectionSheetGenerateCommandFromApiJsonDeserializer,
             final CalendarRepositoryWrapper calendarRepositoryWrapper,
-            final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService) {
+            final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService,
+            final CodeValueReadPlatformService codeValueReadPlatformService) {
         this.context = context;
         this.centerReadPlatformService = centerReadPlatformService;
         this.namedParameterjdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
@@ -80,6 +90,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         this.groupReadPlatformService = groupReadPlatformService;
         this.calendarRepositoryWrapper = calendarRepositoryWrapper;
         this.attendanceDropdownReadPlatformService = attendanceDropdownReadPlatformService;
+        this.codeValueReadPlatformService = codeValueReadPlatformService;
     }
 
     /*
@@ -94,6 +105,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         boolean firstTime = true;
         Long prevGroupId = null;
         Long prevClientId = null;
+        final Collection<CodeValueData> paymentOptions = this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
 
         final List<JLGGroupData> jlgGroupsData = new ArrayList<>();
         List<JLGClientData> clientsData = new ArrayList<>();
@@ -168,7 +181,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             }
 
             jlgCollectionSheetData = JLGCollectionSheetData.instance(dueDate, loanProducts, jlgGroupsData,
-                    this.attendanceDropdownReadPlatformService.retrieveAttendanceTypeOptions());
+                    this.attendanceDropdownReadPlatformService.retrieveAttendanceTypeOptions(), paymentOptions);
         }
 
         return jlgCollectionSheetData;
@@ -611,6 +624,221 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     currencyDisplaySymbol, currencyNameCode);
 
             return SavingsDueData.instance(savingsId, accountId, accountStatusId, productName, productId, currency, dueAmount);
+        }
+    }
+
+    @Override
+    public IndividualCollectionSheetData generateIndividualCollectionSheet(final JsonQuery query) {
+
+        this.collectionSheetGenerateCommandFromApiJsonDeserializer.validateForGenerateCollectionSheetOfIndividuals(query.json());
+
+        final LocalDate transactionDate = query.localDateValueOfParameterNamed(transactionDateParamName);
+        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        final String transactionDateStr = df.format(transactionDate.toDate());
+
+        final AppUser currentUser = this.context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final String officeHierarchy = hierarchy + "%";
+
+        final Long officeId = query.longValueOfParameterNamed(officeIdParamName);
+        final Long staffId = query.longValueOfParameterNamed(staffIdParamName);
+        final boolean checkForOfficeId = officeId != null;
+        final boolean checkForStaffId = staffId != null;
+
+        final IndividualCollectionSheetFaltDataMapper mapper = new IndividualCollectionSheetFaltDataMapper(checkForOfficeId,
+                checkForStaffId);
+
+        final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("dueDate", transactionDateStr).addValue(
+                "officeHierarchy", officeHierarchy);
+
+        if (checkForOfficeId) {
+            ((MapSqlParameterSource) namedParameters).addValue("officeId", officeId);
+        }
+        if (checkForStaffId) {
+            ((MapSqlParameterSource) namedParameters).addValue("staffId", staffId);
+        }
+
+        final Collection<IndividualCollectionSheetLoanFlatData> collectionSheetFlatDatas = this.namedParameterjdbcTemplate.query(
+                mapper.sqlSchema(), namedParameters, mapper);
+
+        IndividualMandatorySavingsCollectionsheetExtractor mandatorySavingsExtractor = new IndividualMandatorySavingsCollectionsheetExtractor(
+                checkForOfficeId, checkForStaffId);
+        // mandatory savings data for collection sheet
+        Collection<IndividualClientData> clientData = this.namedParameterjdbcTemplate.query(
+                mandatorySavingsExtractor.collectionSheetSchema(), namedParameters, mandatorySavingsExtractor);
+
+        // merge savings data into loan data
+        mergeLoanData(collectionSheetFlatDatas, (List<IndividualClientData>) clientData);
+
+        Collection<CodeValueData> paymentOptions = this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
+
+        return IndividualCollectionSheetData.instance(transactionDate, clientData, paymentOptions);
+
+    }
+
+    private static final class IndividualCollectionSheetFaltDataMapper implements RowMapper<IndividualCollectionSheetLoanFlatData> {
+
+        private final String sql;
+
+        public IndividualCollectionSheetFaltDataMapper(final boolean checkForOfficeId, final boolean checkforStaffId) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("SELECT loandata.*, sum(lc.amount_outstanding_derived) as chargesDue ");
+            sb.append("from (SELECT cl.display_name As clientName, ");
+            sb.append("cl.id As clientId, ln.id As loanId, ln.account_no As accountId, ln.loan_status_id As accountStatusId,");
+            sb.append(" pl.short_name As productShortName, ln.product_id As productId, ");
+            sb.append("ln.currency_code as currencyCode, ln.currency_digits as currencyDigits, ln.currency_multiplesof as inMultiplesOf, ");
+            sb.append("rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, ");
+            sb.append("if(ln.loan_status_id = 200 , ln.principal_amount , null) As disbursementAmount, ");
+            sb.append("sum(ifnull(if(ln.loan_status_id = 300, ls.principal_amount, 0.0), 0.0) - ifnull(if(ln.loan_status_id = 300, ls.principal_completed_derived, 0.0), 0.0)) As principalDue, ");
+            sb.append("ln.principal_repaid_derived As principalPaid, ");
+            sb.append("sum(ifnull(if(ln.loan_status_id = 300, ls.interest_amount, 0.0), 0.0) - ifnull(if(ln.loan_status_id = 300, ls.interest_completed_derived, 0.0), 0.0)) As interestDue, ");
+            sb.append("ln.interest_repaid_derived As interestPaid ");
+            sb.append("FROM m_loan ln ");
+            sb.append("JOIN m_client cl ON cl.id = ln.client_id  ");
+            sb.append("LEFT JOIN m_office of ON of.id = cl.office_id  AND of.hierarchy like :officeHierarchy ");
+            sb.append("LEFT JOIN m_product_loan pl ON pl.id = ln.product_id ");
+            sb.append("LEFT JOIN m_currency rc on rc.`code` = ln.currency_code ");
+            sb.append("JOIN m_loan_repayment_schedule ls ON ls.loan_id = ln.id AND ls.completed_derived = 0 AND ls.duedate <= :dueDate ");
+            sb.append("where ");
+            if (checkForOfficeId) {
+                sb.append("of.id = :officeId and ");
+            }
+            if (checkforStaffId) {
+                sb.append("ln.loan_officer_id = :staffId and ");
+            }
+            sb.append("(ln.loan_status_id = 200 or ln.loan_status_id = 300) ");
+            sb.append("and ln.group_id is null GROUP BY cl.id , ln.id ORDER BY cl.id , ln.id ) loandata ");
+            sb.append("LEFT JOIN m_loan_charge lc ON lc.loan_id = loandata.loanId AND lc.is_paid_derived = 0 AND lc.is_active = 1 AND ( lc.due_for_collection_as_of_date  <= :dueDate OR lc.charge_time_enum = 1) ");
+            sb.append("GROUP BY loandata.clientId, loandata.loanId ORDER BY loandata.clientId, loandata.loanId ");
+
+            sql = sb.toString();
+        }
+
+        public String sqlSchema() {
+            return sql;
+        }
+
+        @Override
+        public IndividualCollectionSheetLoanFlatData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+            final String clientName = rs.getString("clientName");
+            final Long clientId = JdbcSupport.getLong(rs, "clientId");
+            final Long loanId = JdbcSupport.getLong(rs, "loanId");
+            final String accountId = rs.getString("accountId");
+            final Integer accountStatusId = JdbcSupport.getInteger(rs, "accountStatusId");
+            final String productShortName = rs.getString("productShortName");
+            final Long productId = JdbcSupport.getLong(rs, "productId");
+
+            final String currencyCode = rs.getString("currencyCode");
+            final String currencyName = rs.getString("currencyName");
+            final String currencyNameCode = rs.getString("currencyNameCode");
+            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
+            CurrencyData currencyData = null;
+            if (currencyCode != null) {
+                currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
+                        currencyNameCode);
+            }
+
+            final BigDecimal disbursementAmount = rs.getBigDecimal("disbursementAmount");
+            final BigDecimal principalDue = rs.getBigDecimal("principalDue");
+            final BigDecimal principalPaid = rs.getBigDecimal("principalPaid");
+            final BigDecimal interestDue = rs.getBigDecimal("interestDue");
+            final BigDecimal interestPaid = rs.getBigDecimal("interestPaid");
+            final BigDecimal chargesDue = rs.getBigDecimal("chargesDue");
+
+            return new IndividualCollectionSheetLoanFlatData(clientName, clientId, loanId, accountId, accountStatusId, productShortName,
+                    productId, currencyData, disbursementAmount, principalDue, principalPaid, interestDue, interestPaid, chargesDue);
+        }
+
+    }
+
+    private static final class IndividualMandatorySavingsCollectionsheetExtractor implements
+            ResultSetExtractor<Collection<IndividualClientData>> {
+
+        private final SavingsDueDataMapper savingsDueDataMapper = new SavingsDueDataMapper();
+
+        private final String sql;
+
+        public IndividualMandatorySavingsCollectionsheetExtractor(final boolean checkForOfficeId, final boolean checkforStaffId) {
+
+            final StringBuffer sb = new StringBuffer(400);
+            sb.append("SELECT cl.display_name As clientName, cl.id As clientId, ");
+            sb.append("sa.id As savingsId, sa.account_no As accountId, sa.status_enum As accountStatusId, ");
+            sb.append("sp.short_name As productShortName, sp.id As productId, ");
+            sb.append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf, ");
+            sb.append("rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, ");
+            sb.append("sum(ifnull(mss.deposit_amount,0) - ifnull(mss.deposit_amount_completed_derived,0)) as dueAmount ");
+            sb.append("FROM m_savings_account sa ");
+            sb.append("JOIN m_client cl ON cl.id = sa.client_id ");
+            sb.append("JOIN m_savings_product sp ON sa.product_id=sp.id ");
+            sb.append("JOIN m_deposit_account_recurring_detail dard ON sa.id = dard.savings_account_id AND dard.is_mandatory = true AND dard.is_calendar_inherited = false ");
+            sb.append("JOIN m_mandatory_savings_schedule mss ON mss.savings_account_id=sa.id AND mss.completed_derived = 0 AND mss.duedate <= :dueDate ");
+            sb.append("LEFT JOIN m_office of ON of.id = cl.office_id AND of.hierarchy like :officeHierarchy ");
+            sb.append("LEFT JOIN m_currency rc on rc.`code` = sa.currency_code ");
+            sb.append("WHERE sa.status_enum=300 and sa.group_id is null ");
+            sb.append("and (cl.status_enum = 300 or (cl.status_enum = 600 and cl.closedon_date >= :dueDate)) ");
+            if (checkForOfficeId) {
+                sb.append("and of.id = :officeId ");
+            }
+            if (checkforStaffId) {
+                sb.append("and sa.field_officer_id = :staffId ");
+            }
+            sb.append("GROUP BY cl.id , sa.id ORDER BY cl.id , sa.id ");
+
+            this.sql = sb.toString();
+        }
+
+        public String collectionSheetSchema() {
+            return this.sql;
+        }
+
+        @SuppressWarnings("null")
+        @Override
+        public Collection<IndividualClientData> extractData(ResultSet rs) throws SQLException, DataAccessException {
+            List<IndividualClientData> clientData = new ArrayList<>();
+            int rowNum = 0;
+
+            IndividualClientData client = null;
+            Long previousClientId = null;
+
+            while (rs.next()) {
+                final Long clientId = JdbcSupport.getLong(rs, "clientId");
+                if (previousClientId == null || clientId.compareTo(previousClientId) != 0) {
+                    final String clientName = rs.getString("clientName");
+                    client = IndividualClientData.instance(clientId, clientName);
+                    client = IndividualClientData.withSavings(client, new ArrayList<SavingsDueData>());
+                    clientData.add(client);
+                    previousClientId = clientId;
+                }
+                SavingsDueData saving = savingsDueDataMapper.mapRow(rs, rowNum);
+                client.addSavings(saving);
+                rowNum++;
+            }
+
+            return clientData;
+        }
+    }
+
+    private void mergeLoanData(final Collection<IndividualCollectionSheetLoanFlatData> loanFlatDatas, List<IndividualClientData> clientDatas) {
+
+        IndividualClientData clientSavingsData = null;
+        for (IndividualCollectionSheetLoanFlatData loanFlatData : loanFlatDatas) {
+            IndividualClientData clientData = loanFlatData.getClientData();
+            if (clientSavingsData == null || !clientSavingsData.equals(clientData)) {
+                if (clientDatas.contains(clientData)) {
+                    final int index = clientDatas.indexOf(clientData);
+                    if (index < 0) return;
+                    clientSavingsData = clientDatas.get(index);
+                    clientSavingsData.setLoans(new ArrayList<LoanDueData>());
+                } else {
+                    clientSavingsData = clientData;
+                    clientSavingsData.setLoans(new ArrayList<LoanDueData>());
+                    clientDatas.add(clientSavingsData);
+                }
+            }
+            clientSavingsData.addLoans(loanFlatData.getLoanDueData());
         }
     }
 }
