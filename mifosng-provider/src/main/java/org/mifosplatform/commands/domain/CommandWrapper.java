@@ -697,6 +697,11 @@ public class CommandWrapper {
     public boolean isCollectionSheetResource() {
         return this.entityName.equals("COLLECTIONSHEET");
     }
+    
+    public boolean isSaveIndividualCollectionSheet() {
+        return isCollectionSheetResource() && this.actionName.equalsIgnoreCase("SAVE");
+    }
+
 
     public boolean isCenterResource() {
         return this.entityName.equalsIgnoreCase("CENTER");

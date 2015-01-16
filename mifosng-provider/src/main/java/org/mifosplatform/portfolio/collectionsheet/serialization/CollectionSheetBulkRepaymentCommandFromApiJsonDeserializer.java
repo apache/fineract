@@ -16,6 +16,8 @@ import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializ
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
 import org.mifosplatform.portfolio.collectionsheet.command.SingleRepaymentCommand;
+import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
+import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetailAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,14 +34,26 @@ public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer ex
         AbstractFromApiJsonDeserializer<CollectionSheetBulkRepaymentCommand> {
 
     private final FromJsonHelper fromApiJsonHelper;
+    private final PaymentDetailAssembler paymentDetailAssembler;
 
     @Autowired
-    public CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
+    public CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
+            final PaymentDetailAssembler paymentDetailAssembler) {
         this.fromApiJsonHelper = fromApiJsonHelper;
+        this.paymentDetailAssembler = paymentDetailAssembler;
     }
 
     @Override
     public CollectionSheetBulkRepaymentCommand commandFromApiJson(final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        final PaymentDetail paymentDetail = this.paymentDetailAssembler.fetchPaymentDetail(element.getAsJsonObject());
+
+        return commandFromApiJson(json, paymentDetail);
+    }
+
+    public CollectionSheetBulkRepaymentCommand commandFromApiJson(final String json, final PaymentDetail paymentDetail) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
@@ -63,7 +77,12 @@ public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer ex
                     final Long loanId = this.fromApiJsonHelper.extractLongNamed("loanId", loanTransactionElement);
                     final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalNamed("transactionAmount",
                             loanTransactionElement, locale);
-                    loanRepaymentTransactions[i] = new SingleRepaymentCommand(loanId, transactionAmount, transactionDate);
+                    PaymentDetail detail = paymentDetail;
+                    if (paymentDetail == null) {
+                        detail = this.paymentDetailAssembler.fetchPaymentDetail(loanTransactionElement);
+                    }
+
+                    loanRepaymentTransactions[i] = new SingleRepaymentCommand(loanId, transactionAmount, transactionDate, detail);
                 }
             }
         }

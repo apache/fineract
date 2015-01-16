@@ -11,4 +11,6 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 public interface CollectionSheetWritePlatformService {
 
     CommandProcessingResult updateCollectionSheet(JsonCommand command);
+
+    CommandProcessingResult saveIndividualCollectionSheet(JsonCommand command);
 }

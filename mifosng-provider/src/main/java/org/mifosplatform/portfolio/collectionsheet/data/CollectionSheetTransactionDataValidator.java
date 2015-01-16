@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.collectionsheet.data;
 
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.COLLECTIONSHEET_REQUEST_DATA_PARAMETERS;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.COLLECTIONSHEET_RESOURCE_NAME;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.INDIVIDUAL_COLLECTIONSHEET_REQUEST_DATA_PARAMETERS;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.attendanceTypeParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.bulkDisbursementTransactionsParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.bulkRepaymentTransactionsParamName;
@@ -15,8 +16,8 @@ import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstan
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.clientIdParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.clientsAttendanceParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.loanIdParamName;
-import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.savingsIdParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.noteParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.savingsIdParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.transactionAmountParamName;
 import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.transactionDateParamName;
 
@@ -35,6 +36,7 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -82,7 +84,39 @@ public class CollectionSheetTransactionDataValidator {
         validateDisbursementTransactions(element, baseDataValidator);
 
         validateRepaymentTransactions(element, baseDataValidator);
-        
+
+        validateSavingsDueTransactions(element, baseDataValidator);
+        final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject());
+        validatePaymentDetails(baseDataValidator, element, locale);
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateIndividualCollectionSheet(final JsonCommand command) {
+        final String json = command.json();
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, INDIVIDUAL_COLLECTIONSHEET_REQUEST_DATA_PARAMETERS);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(COLLECTIONSHEET_RESOURCE_NAME);
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
+        baseDataValidator.reset().parameter(transactionDateParamName).value(transactionDate).notNull();
+
+        final String note = this.fromApiJsonHelper.extractStringNamed(noteParamName, element);
+        if (StringUtils.isNotBlank(note)) {
+            baseDataValidator.reset().parameter(noteParamName).value(note).notExceedingLengthOf(1000);
+        }
+
+        validateDisbursementTransactions(element, baseDataValidator);
+
+        validateRepaymentTransactions(element, baseDataValidator);
+
         validateSavingsDueTransactions(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -147,11 +181,13 @@ public class CollectionSheetTransactionDataValidator {
                             .integerGreaterThanZero();
                     baseDataValidator.reset().parameter("bulktransaction" + "[" + i + "].disbursement.amount").value(disbursementAmount)
                             .notNull().zeroOrPositiveAmount();
+
+                    validatePaymentDetails(baseDataValidator, loanTransactionElement, locale);
                 }
             }
         }
     }
-    
+
     private void validateSavingsDueTransactions(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
@@ -168,10 +204,24 @@ public class CollectionSheetTransactionDataValidator {
 
                     baseDataValidator.reset().parameter("bulktransaction" + "[" + i + "].savings.id").value(savingsId).notNull()
                             .integerGreaterThanZero();
-                    baseDataValidator.reset().parameter("bulktransaction" + "[" + i + "].due.amount").value(dueAmount)
-                            .notNull().zeroOrPositiveAmount();
+                    baseDataValidator.reset().parameter("bulktransaction" + "[" + i + "].due.amount").value(dueAmount).notNull()
+                            .zeroOrPositiveAmount();
+                    validatePaymentDetails(baseDataValidator, savingsTransactionElement, locale);
                 }
             }
+        }
+    }
+
+    private void validatePaymentDetails(final DataValidatorBuilder baseDataValidator, final JsonElement element, final Locale locale) {
+        // Validate all string payment detail fields for max length
+        final Integer paymentTypeId = this.fromApiJsonHelper.extractIntegerNamed(PaymentDetailConstants.paymentTypeParamName, element,
+                locale);
+        baseDataValidator.reset().parameter(PaymentDetailConstants.paymentTypeParamName).value(paymentTypeId).ignoreIfNull()
+                .integerGreaterThanZero();
+        for (final String paymentDetailParameterName : PaymentDetailConstants.PAYMENT_CREATE_REQUEST_DATA_PARAMETERS) {
+            final String paymentDetailParameterValue = this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
+            baseDataValidator.reset().parameter(paymentDetailParameterName).value(paymentDetailParameterValue).ignoreIfNull()
+                    .notExceedingLengthOf(50);
         }
     }
 

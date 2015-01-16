@@ -192,7 +192,7 @@ body {
 .flybar-nav {
     display: block;
     float: left;
-    width: 90px;
+    min-width: 90px;
     position: relative;
 }
 

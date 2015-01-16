@@ -280,15 +280,15 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else if (wrapper.isDelete()) {
                 handler = this.applicationContext.getBean("deleteTellerCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isAllocateCashier()) {
-            	handler = this.applicationContext.getBean("allocateCashierToTellerCommandHandler", NewCommandSourceHandler.class);
+                handler = this.applicationContext.getBean("allocateCashierToTellerCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdateCashierAllocation()) {
-            	handler = this.applicationContext.getBean("updateCashierAllocationCommandHandler", NewCommandSourceHandler.class);
+                handler = this.applicationContext.getBean("updateCashierAllocationCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isDeleteCashierAllocation()) {
-            	handler = this.applicationContext.getBean("deleteCashierAllocationCommandHandler", NewCommandSourceHandler.class);
+                handler = this.applicationContext.getBean("deleteCashierAllocationCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isAllocateCashToCashier()) {
-            	handler = this.applicationContext.getBean("allocateCashToCashierCommandHandler", NewCommandSourceHandler.class);
+                handler = this.applicationContext.getBean("allocateCashToCashierCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isSettleCashFromCashier()) {
-            	handler = this.applicationContext.getBean("settleCashFromCashierCommandHandler", NewCommandSourceHandler.class);
+                handler = this.applicationContext.getBean("settleCashFromCashierCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
@@ -755,6 +755,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         } else if (wrapper.isCollectionSheetResource()) {
             if (wrapper.isUpdate()) {
                 handler = this.applicationContext.getBean("updateCollectionSheetCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isSaveIndividualCollectionSheet()) {
+                handler = this.applicationContext.getBean("saveIndividualCollectionSheetCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }

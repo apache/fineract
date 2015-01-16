@@ -1425,6 +1425,13 @@ public class CommandWrapperBuilder {
         this.href = "/groups/" + groupId + "?command=saveCollectionSheet";
         return this;
     }
+    
+    public CommandWrapperBuilder saveIndividualCollectionSheet() {
+        this.actionName = "SAVE";
+        this.entityName = "COLLECTIONSHEET";
+        this.href = "/collectionsheet?command=saveCollectionSheet";
+        return this;
+    }
 
     public CommandWrapperBuilder deleteGroup(final Long groupId) {
         this.actionName = "DELETE";

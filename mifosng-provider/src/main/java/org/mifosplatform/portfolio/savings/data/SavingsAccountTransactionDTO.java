@@ -24,8 +24,7 @@ public class SavingsAccountTransactionDTO {
     private final AppUser appUser;
 
     public SavingsAccountTransactionDTO(final DateTimeFormatter formatter, final LocalDate transactionDate,
-            final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final Date createdDate,
-            final AppUser appUser) {
+            final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final Date createdDate, final AppUser appUser) {
         this.formatter = formatter;
         this.transactionDate = transactionDate;
         this.transactionAmount = transactionAmount;
@@ -79,9 +78,8 @@ public class SavingsAccountTransactionDTO {
     public Long getSavingsAccountId() {
         return this.savingsAccountId;
     }
-    
-    public AppUser getAppUser() {
-    	return this.appUser;
-    }
 
+    public AppUser getAppUser() {
+        return this.appUser;
+    }
 }

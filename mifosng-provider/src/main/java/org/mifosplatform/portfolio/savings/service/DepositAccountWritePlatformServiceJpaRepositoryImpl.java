@@ -1286,9 +1286,13 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         boolean isRegularTransaction = false;
         final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(
                 accountTransactionDTO.getSavingsAccountId(), DepositAccountType.RECURRING_DEPOSIT);
+        final PaymentDetail paymentDetail = accountTransactionDTO.getPaymentDetail();
+        if (paymentDetail != null && paymentDetail.getId() == null) {
+            this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
+        }
         return this.depositAccountDomainService.handleRDDeposit(account, accountTransactionDTO.getFormatter(),
-                accountTransactionDTO.getTransactionDate(), accountTransactionDTO.getTransactionAmount(),
-                accountTransactionDTO.getPaymentDetail(), isRegularTransaction);
+                accountTransactionDTO.getTransactionDate(), accountTransactionDTO.getTransactionAmount(), paymentDetail,
+                isRegularTransaction);
     }
 
     private AppUser getAppUserIfPresent() {

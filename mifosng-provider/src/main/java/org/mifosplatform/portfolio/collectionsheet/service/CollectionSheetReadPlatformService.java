@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.collectionsheet.service;
 
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
+import org.mifosplatform.portfolio.collectionsheet.data.IndividualCollectionSheetData;
 import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetData;
 
 public interface CollectionSheetReadPlatformService {
@@ -13,5 +14,7 @@ public interface CollectionSheetReadPlatformService {
     JLGCollectionSheetData generateGroupCollectionSheet(final Long groupId, final JsonQuery query);
 
     JLGCollectionSheetData generateCenterCollectionSheet(final Long groupId, final JsonQuery query);
+
+    IndividualCollectionSheetData generateIndividualCollectionSheet(final JsonQuery query);
 
 }

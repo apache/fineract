@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -124,7 +123,6 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
 import org.mifosplatform.portfolio.loanaccount.exception.InvalidPaidInAdvanceAmountException;
-import org.mifosplatform.portfolio.loanaccount.exception.InvalidRefundDateException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanDisbursalException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerUnassignmentException;
@@ -761,21 +759,22 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final boolean isRecoveryRepayment = false;
 
         if (repaymentCommand == null) { return changes; }
+        List<Long> transactionIds = new ArrayList<>();
         boolean isAccountTransfer = false;
         for (final SingleRepaymentCommand singleLoanRepaymentCommand : repaymentCommand) {
-            /****
-             * TODO Vishwas, have a re-look at this implementation, defaulting
-             * it to null for now
-             ***/
             final Loan loan = this.loanAssembler.assembleFrom(singleLoanRepaymentCommand.getLoanId());
-            final PaymentDetail paymentDetail = null;
+            final PaymentDetail paymentDetail = singleLoanRepaymentCommand.getPaymentDetail();
+            if (paymentDetail != null && paymentDetail.getId() == null) {
+                this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
+            }
             final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
-            this.loanAccountDomainService.makeRepayment(loan, commandProcessingResultBuilder, bulkRepaymentCommand.getTransactionDate(),
+            LoanTransaction loanTransaction = this.loanAccountDomainService.makeRepayment(loan, commandProcessingResultBuilder, bulkRepaymentCommand.getTransactionDate(),
                     singleLoanRepaymentCommand.getTransactionAmount(), paymentDetail, bulkRepaymentCommand.getNote(), null,
                     isRecoveryRepayment, isAccountTransfer);
+            transactionIds.add(loanTransaction.getId());
 
-            changes.put("bulkTransactions", singleLoanRepaymentCommand);
         }
+        changes.put("loanTransactions", transactionIds);
         return changes;
     }
 
@@ -1971,19 +1970,18 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
         this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
     }
-    
+
     @Transactional
     @Override
     public void applyMeetingDateChanges(final Calendar calendar, final Collection<CalendarInstance> loanCalendarInstances) {
 
-        final Boolean reschedulebasedOnMeetingDates = null; 
+        final Boolean reschedulebasedOnMeetingDates = null;
         final LocalDate presentMeetingDate = null;
         final LocalDate newMeetingDate = null;
-        
+
         applyMeetingDateChanges(calendar, loanCalendarInstances, reschedulebasedOnMeetingDates, presentMeetingDate, newMeetingDate);
-        
+
     }
-        
 
     @Transactional
     @Override
@@ -2011,16 +2009,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     throw new CalendarParameterUpdateNotSupportedException("jlg.loan.recalculation", defaultUserMessage);
                 }
                 holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan.getDisbursementDate().toDate());
-                
-                if(reschedulebasedOnMeetingDates != null && reschedulebasedOnMeetingDates ){
+
+                if (reschedulebasedOnMeetingDates != null && reschedulebasedOnMeetingDates) {
                     loan.updateLoanRepaymentScheduleDates(calendar.getStartDateLocalDate(), calendar.getRecurrence(), isHolidayEnabled,
                             holidays, workingDays, reschedulebasedOnMeetingDates, presentMeetingDate, newMeetingDate);
-                }else{
+                } else {
                     loan.updateLoanRepaymentScheduleDates(calendar.getStartDateLocalDate(), calendar.getRecurrence(), isHolidayEnabled,
-                            holidays, workingDays);                    
+                            holidays, workingDays);
                 }
-                
-                
+
                 saveLoanWithDataIntegrityViolationChecks(loan);
             }
         }
@@ -2708,7 +2705,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
         return installments;
     }
-    
+
     @Override
     @Transactional
     public CommandProcessingResult makeLoanRefund(Long loanId, JsonCommand command) {
@@ -2718,11 +2715,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
 
-        //checkRefundDateIsAfterAtLeastOneRepayment(loanId, transactionDate);
+        // checkRefundDateIsAfterAtLeastOneRepayment(loanId, transactionDate);
 
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
         checkIfLoanIsPaidInAdvance(loanId, transactionAmount);
-        
+
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
         changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
@@ -2748,15 +2745,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     }
 
-    private void checkIfLoanIsPaidInAdvance(final Long loanId,final BigDecimal transactionAmount) {
+    private void checkIfLoanIsPaidInAdvance(final Long loanId, final BigDecimal transactionAmount) {
         BigDecimal overpaid = this.loanReadPlatformService.retrieveTotalPaidInAdvance(loanId).getPaidInAdvance();
-        
-        if(overpaid == null || overpaid.equals(new BigDecimal(0)) || transactionAmount.floatValue() > overpaid.floatValue()) {
-            if(overpaid == null)
-                overpaid = BigDecimal.ZERO;
+
+        if (overpaid == null || overpaid.equals(new BigDecimal(0)) || transactionAmount.floatValue() > overpaid.floatValue()) {
+            if (overpaid == null) overpaid = BigDecimal.ZERO;
             throw new InvalidPaidInAdvanceAmountException(overpaid.toPlainString());
         }
-     }
+    }
 
     private AppUser getAppUserIfPresent() {
         AppUser user = null;
