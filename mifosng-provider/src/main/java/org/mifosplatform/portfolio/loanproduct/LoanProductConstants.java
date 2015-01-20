@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.portfolio.loanproduct;
 
+import java.math.BigDecimal;
+
 public interface LoanProductConstants {
 
     public static final String useBorrowerCycleParameterName = "useBorrowerCycle";
@@ -78,4 +80,7 @@ public interface LoanProductConstants {
     public static final String minimumGuaranteeFromOwnFundsParamName = "minimumGuaranteeFromOwnFunds";
     public static final String minimumGuaranteeFromGuarantorParamName = "minimumGuaranteeFromGuarantor";
 
+    public static final String principalThresholdForLastInstalmentParamName = "principalThresholdForLastInstalment";
+    public static final BigDecimal DEFAULT_PRINCIPAL_THRESHOLD_FOR_MULTI_DISBURSE_LOAN = BigDecimal.valueOf(50);
+    public static final BigDecimal DEFAULT_PRINCIPAL_THRESHOLD_FOR_SINGLE_DISBURSE_LOAN = BigDecimal.valueOf(0);
 }

@@ -1928,7 +1928,7 @@ public class Loan extends AbstractPersistable<Long> {
                     actualChanges.put(LoanApiConstants.approvedLoanAmountParameterName, approvedLoanAmount);
                     actualChanges.put(LoanApiConstants.disbursementPrincipalParameterName, approvedLoanAmount);
 
-                } else if(approvedLoanAmount.compareTo(this.proposedPrincipal) == 1){
+                } else if (approvedLoanAmount.compareTo(this.proposedPrincipal) == 1) {
                     final String errorMessage = "Loan approved amount can't be greater than loan amount demanded.";
                     throw new InvalidLoanStateTransitionException("approval", "amount.can't.be.greater.than.loan.amount.demanded",
                             errorMessage, this.proposedPrincipal, approvedLoanAmount);
@@ -2316,7 +2316,8 @@ public class Loan extends AbstractPersistable<Long> {
                 loanTermFrequency, loanTermPeriodFrequencyType, nthDayType, dayOfWeekType, getDisbursementDate(),
                 getExpectedFirstRepaymentOnDate(), scheduleGeneratorDTO.getCalculatedRepaymentsStartingFromDate(), getInArrearsTolerance(),
                 this.loanRepaymentScheduleDetail, this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount, disbursementData,
-                this.maxOutstandingLoanBalance, loanVariationTermsData, getInterestChargedFromDate());
+                this.maxOutstandingLoanBalance, loanVariationTermsData, getInterestChargedFromDate(),
+                this.loanProduct.getPrincipalThresholdForLastInstalment());
 
         final LoanScheduleModel loanSchedule = loanScheduleGenerator.generate(mc, loanApplicationTerms, charges(),
                 scheduleGeneratorDTO.getHolidayDetailDTO());
@@ -4649,7 +4650,8 @@ public class Loan extends AbstractPersistable<Long> {
                 calculatedRepaymentsStartingFromDate, getInArrearsTolerance(), this.loanRepaymentScheduleDetail,
                 this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount, disbursementData, this.maxOutstandingLoanBalance,
                 loanVariationTermsData, getInterestChargedFromDate(), this.loanInterestRecalculationDetails,
-                calendarInstanceForInterestRecalculation, recalculationFrequencyType);
+                calendarInstanceForInterestRecalculation, recalculationFrequencyType,
+                this.loanProduct.getPrincipalThresholdForLastInstalment());
         return loanApplicationTerms;
     }
 
@@ -4692,7 +4694,8 @@ public class Loan extends AbstractPersistable<Long> {
             final LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms.assembleFrom(null, loanTermFrequency,
                     loanTermPeriodFrequencyType, nthDayType, dayOfWeekType, getDisbursementDate(), getExpectedFirstRepaymentOnDate(), null,
                     getInArrearsTolerance(), this.loanRepaymentScheduleDetail, this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount,
-                    disbursementData, this.maxOutstandingLoanBalance, loanVariationTermsData, getInterestChargedFromDate());
+                    disbursementData, this.maxOutstandingLoanBalance, loanVariationTermsData, getInterestChargedFromDate(),
+                    this.loanProduct.getPrincipalThresholdForLastInstalment());
 
             installment = loanScheduleGenerator.calculatePrepaymentAmount(this.repaymentScheduleInstallments, getCurrency(),
                     LocalDate.now(), getInterestChargedFromDate(), loanApplicationTerms, mc, charges());
@@ -4893,7 +4896,8 @@ public class Loan extends AbstractPersistable<Long> {
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, nthDayType,
                 dayOfWeekType, expectedDisbursementDate, repaymentsStartingFromDate, calculatedRepaymentsStartingFromDate,
                 inArrearsToleranceMoney, this.loanRepaymentScheduleDetail, loanProduct.isMultiDisburseLoan(), emiAmount, disbursementData,
-                maxOutstandingBalance, loanVariationTermsData, interestChargedFromDate);
+                maxOutstandingBalance, loanVariationTermsData, interestChargedFromDate,
+                this.loanProduct.getPrincipalThresholdForLastInstalment());
     }
 
     /**
