@@ -47,7 +47,7 @@ $ ./runmifosx.sh
 
 ## 2. Amazon Public AMI
 
-  Use AWS Wizard to launch instance by using this link: <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=ap-southeast-1#launchAmi=ami-a6035af4" title="Latest Mifos Platform Public AMI">Mifos Platform AMI (ami-a6035af4)</a>
+  Use AWS Wizard to launch instance by using this link: <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=ap-southeast-1#launchAmi=ami-909bb3c2" title="Latest Mifos Platform Public AMI">Mifos Platform AMI (ami-909bb3c2)</a>
 
   *Note:* Read through the following as you step through the AWS Wizard
   
@@ -62,13 +62,13 @@ $ ./runmifosx.sh
     - Community app should be available @ https://[public DNS]:8443/community-app
     - API docs should be available @ https://[public DNS]:8443/api-docs/apiLive.htm
 
-  *Name:* Mifos Platform 1.24.0.RELEASE Public AMI
+  *Name:* Mifos Platform 1.26.0.RELEASE Public AMI
   
- - AMI ID: ami-a6035af4
+ - AMI ID: ami-909bb3c2
  - Kernel ID: aki-503e7402
- - Name: Mifos Platform 1.24.0.RELEASE Public AMI
- - Owner: 540782944231
- - Source: 540782944231/Mifos X-1.24.0 release
+ - Name: Mifos Platform 1.26.0.RELEASE Public AMI
+ - Owner: 239215483039
+ - Source: 239215483039/Mifos X-1.26.0 release
  - Architecture: Ubuntu12.04 LTS x86_64
  - Built starting from Ubuntu AMI ami-35acbb41
  - Java 1.7.0_51 64 bit JVM
