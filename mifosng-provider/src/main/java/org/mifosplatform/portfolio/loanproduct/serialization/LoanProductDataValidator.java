@@ -73,7 +73,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.recalculationRestFrequencyTypeParameterName,
             LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment, LoanProductConstants.mandatoryGuaranteeParamName,
             LoanProductConstants.holdGuaranteeFundsParamName, LoanProductConstants.minimumGuaranteeFromGuarantorParamName,
-            LoanProductConstants.minimumGuaranteeFromOwnFundsParamName));
+            LoanProductConstants.minimumGuaranteeFromOwnFundsParamName, LoanProductConstants.principalThresholdForLastInstalmentParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -324,6 +324,11 @@ public final class LoanProductDataValidator {
                 validateGuaranteeParams(element, baseDataValidator, null);
             }
         }
+
+        BigDecimal principalThresholdForLastInstalment = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                LoanProductConstants.principalThresholdForLastInstalmentParamName, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.principalThresholdForLastInstalmentParamName)
+                .value(principalThresholdForLastInstalment).notLessThanMin(BigDecimal.ZERO).notGreaterThanMax(BigDecimal.valueOf(100));
 
         // accounting related data validation
         final Integer accountingRuleType = this.fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());
@@ -746,6 +751,14 @@ public final class LoanProductDataValidator {
             if (holdGuaranteeFunds) {
                 validateGuaranteeParams(element, baseDataValidator, null);
             }
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.principalThresholdForLastInstalmentParamName, element)) {
+            BigDecimal principalThresholdForLastInstalment = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                    LoanProductConstants.principalThresholdForLastInstalmentParamName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.principalThresholdForLastInstalmentParamName)
+                    .value(principalThresholdForLastInstalment).notNull().notLessThanMin(BigDecimal.ZERO)
+                    .notGreaterThanMax(BigDecimal.valueOf(100));
         }
 
         final Integer accountingRuleType = this.fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());

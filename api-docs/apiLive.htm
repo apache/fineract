@@ -11397,7 +11397,14 @@ Request Body:
 							<td class=fielddesc>The minimum number of days allowed between a Loan disbursal and its first repayment.
 							</td>
 						</tr>
+						<tr class=alt>
+							<td>principalThresholdForLastInstalment</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Field represents percentage of current instalment principal amount for comparing against principal outstanding to add another repayment instalment.  If the outstanding principal amount is less then calculated amount, remaining outstanding amount will be added to current instalment. Default value for multi disburse loan is 50% and non-multi disburse loan is 0%
 
+							</td>
+						</tr>
 
 
 
@@ -11641,7 +11648,8 @@ GET https://DomainName/api/v1/loanproducts
       "id": 2,
       "code": "accountingRuleType.cash",
       "value": "CASH BASED"
-    }
+    },
+	"principalThresholdForLastInstalment":0
   }
 ]
 					</code>
@@ -12719,7 +12727,8 @@ GET https://DomainName/api/v1/loanproducts/{productId}
       }
     },
     "multiDisburseLoan":true,"maxTrancheCount":3,"outstandingLoanBalance":36000.000000,
-    "overdueDaysForNPA":2
+    "overdueDaysForNPA":2,
+	"principalThresholdForLastInstalment":50
   ]
 }
 					</code>
@@ -12763,7 +12772,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							numberOfRepaymentVariationsForBorrowerCycle,
 							interestRateVariationsForBorrowerCycle,
 							multiDisburseLoan,maxTrancheCount,
-							outstandingLoanBalance,overdueDaysForNPA,holdGuaranteeFunds
+							outstandingLoanBalance,overdueDaysForNPA,holdGuaranteeFunds, principalThresholdForLastInstalment
 							</td>
 						</tr>
 					</table>
@@ -12883,7 +12892,8 @@ Request Body:
 "daysInMonthType":1,
 "daysInYearType":1,
 "isInterestRecalculationEnabled":"false",
-"holdGuaranteeFunds":"false"
+"holdGuaranteeFunds":"false",
+"principalThresholdForLastInstalment":20
 }
 					</code>
 					<code class="method-response">

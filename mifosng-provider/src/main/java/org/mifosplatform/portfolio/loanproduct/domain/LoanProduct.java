@@ -136,6 +136,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
     private LoanProductGuaranteeDetails loanProductGuaranteeDetails;
 
+    @Column(name = "principal_threshold_for_last_instalment", scale = 2, precision = 5, nullable = false)
+    private BigDecimal principalThresholdForLastInstalment;
+
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator) {
 
@@ -225,6 +228,14 @@ public class LoanProduct extends AbstractPersistable<Long> {
             loanProductGuaranteeDetails = LoanProductGuaranteeDetails.createFrom(command);
         }
 
+        BigDecimal principalThresholdForLastInstalment = command
+                .bigDecimalValueOfParameterNamed(LoanProductConstants.principalThresholdForLastInstalmentParamName);
+
+        if (principalThresholdForLastInstalment == null) {
+            principalThresholdForLastInstalment = multiDisburseLoan ? LoanProductConstants.DEFAULT_PRINCIPAL_THRESHOLD_FOR_MULTI_DISBURSE_LOAN
+                    : LoanProductConstants.DEFAULT_PRINCIPAL_THRESHOLD_FOR_SINGLE_DISBURSE_LOAN;
+        }
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
                 annualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentFrequencyType,
@@ -233,7 +244,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 startDate, closeDate, externalId, useBorrowerCycle, loanProductBorrowerCycleVariations, multiDisburseLoan, maxTrancheCount,
                 outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment,
-                holdGuarantorFunds, loanProductGuaranteeDetails);
+                holdGuarantorFunds, loanProductGuaranteeDetails, principalThresholdForLastInstalment);
 
     }
 
@@ -458,7 +469,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final boolean isInterestRecalculationEnabled,
             final LoanProductInterestRecalculationDetails productInterestRecalculationDetails,
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final boolean holdGuarantorFunds,
-            final LoanProductGuaranteeDetails loanProductGuaranteeDetails) {
+            final LoanProductGuaranteeDetails loanProductGuaranteeDetails, final BigDecimal principalThresholdForLastInstalment) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -510,6 +521,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         this.minimumDaysBetweenDisbursalAndFirstRepayment = minimumDaysBetweenDisbursalAndFirstRepayment;
         this.holdGuaranteeFunds = holdGuarantorFunds;
         this.loanProductGuaranteeDetails = loanProductGuaranteeDetails;
+        this.principalThresholdForLastInstalment = principalThresholdForLastInstalment;
     }
 
     public MonetaryCurrency getCurrency() {
@@ -735,6 +747,14 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
         } else if (this.holdGuaranteeFunds) {
             this.loanProductGuaranteeDetails.update(command, actualChanges);
+        }
+
+        if (command.isChangeInBigDecimalParameterNamed(LoanProductConstants.principalThresholdForLastInstalmentParamName,
+                this.principalThresholdForLastInstalment)) {
+            BigDecimal newValue = command
+                    .bigDecimalValueOfParameterNamed(LoanProductConstants.principalThresholdForLastInstalmentParamName);
+            actualChanges.put(LoanProductConstants.principalThresholdForLastInstalmentParamName, newValue);
+            this.principalThresholdForLastInstalment = newValue;
         }
 
         return actualChanges;
@@ -987,6 +1007,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     public String getShortName() {
         return this.shortName;
+    }
+
+    public BigDecimal getPrincipalThresholdForLastInstalment() {
+        return this.principalThresholdForLastInstalment;
     }
 
 }
