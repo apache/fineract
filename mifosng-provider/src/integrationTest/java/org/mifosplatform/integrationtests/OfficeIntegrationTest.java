@@ -40,13 +40,14 @@ public class OfficeIntegrationTest {
 	public void testOfficeModification() {
 		OfficeHelper oh = new OfficeHelper(requestSpec, responseSpec);
 		int officeId = oh.createOffice("01 July 2007");
-		OfficeDomain oldOffice = oh.retrieveOfficeByID(officeId);
+		String name = Utils.randomNameGenerator("New_Office_", 4);
+		String date = "02 July 2007";
+		String[] dateArr = { "2007", "7", "2" };
 
-		oh.updateOffice(officeId, Utils.randomNameGenerator("New_Office_", 4),
-				"02 July 2007");
+		oh.updateOffice(officeId, name, date);
 		OfficeDomain newOffice = oh.retrieveOfficeByID(officeId);
-		Assert.assertTrue(oldOffice.getName().equals(newOffice.getName()));
-		Assert.assertTrue(oldOffice.getOpeningDate().equals(
-				newOffice.getOpeningDate()));
+
+		Assert.assertTrue(name.equals(newOffice.getName()));
+		Assert.assertArrayEquals(dateArr, newOffice.getOpeningDate());
 	}
 }
