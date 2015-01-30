@@ -6,7 +6,8 @@
 package org.mifosplatform.portfolio.common.service;
 
 import org.mifosplatform.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.mifosplatform.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
+import java.util.Map;
 
 /**
  * Implemented class is responsible for notifying the business event to
@@ -19,13 +20,13 @@ public interface BusinessEventNotifierService {
      * Method should be called to notify listeners before Business event
      * execution for any pre-processing of event
      */
-    public void notifyBusinessEventToBeExecuted(BUSINESS_EVENTS businessEvent, AbstractPersistable<Long> businessEventEntity);
+    public void notifyBusinessEventToBeExecuted(BUSINESS_EVENTS businessEvent, Map<BUSINESS_ENTITY, Object> businessEventEntity);
 
     /**
      * Method should be called to notify listeners after Business event
      * execution for any post-processing of event
      */
-    public void notifyBusinessEventWasExecuted(BUSINESS_EVENTS businessEvent, AbstractPersistable<Long> businessEventEntity);
+    public void notifyBusinessEventWasExecuted(BUSINESS_EVENTS businessEvent, Map<BUSINESS_ENTITY, Object> businessEventEntity);
 
     /**
      * Method is to register a class as listener for pre-processing of any

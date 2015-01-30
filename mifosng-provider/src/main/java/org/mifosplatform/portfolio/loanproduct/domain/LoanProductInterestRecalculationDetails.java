@@ -57,6 +57,9 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
     @Column(name = "rest_freqency_date")
     private Date restFrequencyDate;
 
+    @Column(name = "arrears_based_on_original_schedule")
+    private boolean isArrearsBasedOnOriginalSchedule;
+
     protected LoanProductInterestRecalculationDetails() {
         //
     }
@@ -75,6 +78,8 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
                 .localDateValueOfParameterNamed(LoanProductConstants.recalculationRestFrequencyDateParamName);
         Integer recurrenceInterval = command
                 .integerValueOfParameterNamed(LoanProductConstants.recalculationRestFrequencyIntervalParameterName);
+        final boolean isArrearsBasedOnOriginalSchedule = command
+                .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.isArrearsBasedOnOriginalScheduleParamName);
         RecalculationFrequencyType frequencyType = RecalculationFrequencyType.fromInt(recurrenceFrequency);
         Date recurrenceOnDate = null;
         if (recurrenceOnLocalDate != null) {
@@ -87,17 +92,18 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
         }
 
         return new LoanProductInterestRecalculationDetails(interestRecalculationCompoundingMethod, loanRescheduleStrategyMethod,
-                recurrenceFrequency, recurrenceInterval, recurrenceOnDate);
+                recurrenceFrequency, recurrenceInterval, recurrenceOnDate, isArrearsBasedOnOriginalSchedule);
     }
 
     private LoanProductInterestRecalculationDetails(final Integer interestRecalculationCompoundingMethod,
             final Integer rescheduleStrategyMethod, final Integer restFrequencyType, final Integer restInterval,
-            final Date restFrequencyDate) {
+            final Date restFrequencyDate, final boolean isArrearsBasedOnOriginalSchedule) {
         this.interestRecalculationCompoundingMethod = interestRecalculationCompoundingMethod;
         this.rescheduleStrategyMethod = rescheduleStrategyMethod;
         this.restFrequencyType = restFrequencyType;
         this.restInterval = restInterval;
         this.restFrequencyDate = restFrequencyDate;
+        this.isArrearsBasedOnOriginalSchedule = isArrearsBasedOnOriginalSchedule;
     }
 
     public void updateProduct(final LoanProduct loanProduct) {
@@ -169,6 +175,14 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
                 this.restFrequencyDate = recurrenceOnDate;
             }
         }
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.isArrearsBasedOnOriginalScheduleParamName,
+                this.isArrearsBasedOnOriginalSchedule)) {
+            final boolean newValue = command
+                    .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.isArrearsBasedOnOriginalScheduleParamName);
+            actualChanges.put(LoanProductConstants.isArrearsBasedOnOriginalScheduleParamName, newValue);
+            this.isArrearsBasedOnOriginalSchedule = newValue;
+        }
+
     }
 
     public LocalDate getRestFrequencyLocalDate() {
@@ -185,5 +199,10 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
 
     public Integer getRestInterval() {
         return this.restInterval;
+    }
+
+    
+    public boolean isArrearsBasedOnOriginalSchedule() {
+        return this.isArrearsBasedOnOriginalSchedule;
     }
 }

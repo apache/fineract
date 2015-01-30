@@ -92,6 +92,7 @@ public class LoanProductTestBuilder {
     private String mandatoryGuarantee = null;
     private String minimumGuaranteeFromOwnFunds = null;
     private String minimumGuaranteeFromGuarantor = null;
+    private String isArrearsBasedOnOriginalSchedule = null;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -148,6 +149,9 @@ public class LoanProductTestBuilder {
             map.put("recalculationRestFrequencyType", recalculationRestFrequencyType);
             map.put("recalculationRestFrequencyInterval", recalculationRestFrequencyInterval);
             map.put("recalculationRestFrequencyDate", recalculationRestFrequencyDate);
+            if (isArrearsBasedOnOriginalSchedule != null) {
+                map.put("isArrearsBasedOnOriginalSchedule", isArrearsBasedOnOriginalSchedule);
+            }
         }
         if (holdGuaranteeFunds != null) {
             map.put("holdGuaranteeFunds", this.holdGuaranteeFunds);
@@ -395,6 +399,11 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withMinimumDaysBetweenDisbursalAndFirstRepayment(final String minimumDaysBetweenDisbursalAndFirstRepayment) {
         this.minimumDaysBetweenDisbursalAndFirstRepayment = minimumDaysBetweenDisbursalAndFirstRepayment;
+        return this;
+    }
+
+    public LoanProductTestBuilder withArrearsConfiguration() {
+        this.isArrearsBasedOnOriginalSchedule = "true";
         return this;
     }
 

@@ -138,46 +138,6 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
     @Transactional
     @Override
-    @CronTarget(jobName = JobName.UPDATE_LOAN_ARREARS_AGEING)
-    public void updateLoanArrearsAgeingDetails() {
-
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
-
-        jdbcTemplate.execute("truncate table m_loan_arrears_aging");
-
-        final StringBuilder updateSqlBuilder = new StringBuilder(900);
-
-        updateSqlBuilder
-                .append("INSERT INTO m_loan_arrears_aging(`loan_id`,`principal_overdue_derived`,`interest_overdue_derived`,`fee_charges_overdue_derived`,`penalty_charges_overdue_derived`,`total_overdue_derived`,`overdue_since_date_derived`)");
-        updateSqlBuilder.append("select ml.id as loanId,");
-        updateSqlBuilder
-                .append("SUM((ifnull(mr.principal_amount,0) - ifnull(mr.principal_completed_derived, 0))) as principal_overdue_derived,");
-        updateSqlBuilder
-                .append("SUM((ifnull(mr.interest_amount,0)  - ifnull(mr.interest_completed_derived, 0))) as interest_overdue_derived,");
-        updateSqlBuilder
-                .append("SUM((ifnull(mr.fee_charges_amount,0)  - ifnull(mr.fee_charges_completed_derived, 0))) as fee_charges_overdue_derived,");
-        updateSqlBuilder
-                .append("SUM((ifnull(mr.penalty_charges_amount,0)  - ifnull(mr.penalty_charges_completed_derived, 0))) as penalty_charges_overdue_derived,");
-        updateSqlBuilder.append("SUM((ifnull(mr.principal_amount,0) - ifnull(mr.principal_completed_derived, 0))) +");
-        updateSqlBuilder.append("SUM((ifnull(mr.interest_amount,0)  - ifnull(mr.interest_completed_derived, 0))) +");
-        updateSqlBuilder.append("SUM((ifnull(mr.fee_charges_amount,0)  - ifnull(mr.fee_charges_completed_derived, 0))) +");
-        updateSqlBuilder
-                .append("SUM((ifnull(mr.penalty_charges_amount,0)  - ifnull(mr.penalty_charges_completed_derived, 0))) as total_overdue_derived,");
-        updateSqlBuilder.append("MIN(mr.duedate) as overdue_since_date_derived ");
-        updateSqlBuilder.append(" FROM m_loan ml ");
-        updateSqlBuilder.append(" INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id ");
-        updateSqlBuilder.append(" WHERE ml.loan_status_id = 300 "); // active
-        updateSqlBuilder.append(" and mr.completed_derived is false ");
-        updateSqlBuilder.append(" and mr.duedate < SUBDATE(CURDATE(),INTERVAL  ifnull(ml.grace_on_arrears_ageing,0) day) ");
-        updateSqlBuilder.append(" GROUP BY ml.id");
-
-        final int result = jdbcTemplate.update(updateSqlBuilder.toString());
-
-        logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by update: " + result);
-    }
-
-    @Transactional
-    @Override
     @CronTarget(jobName = JobName.UPDATE_LOAN_PAID_IN_ADVANCE)
     public void updateLoanPaidInAdvance() {
 
@@ -273,18 +233,28 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
 
-        jdbcTemplate.update("UPDATE m_loan ml SET ml.is_npa=0");
+        final StringBuilder resetNPASqlBuilder = new StringBuilder(900);
+        resetNPASqlBuilder.append("update m_loan loan ");
+        resetNPASqlBuilder.append("left join m_loan_arrears_aging laa on laa.loan_id = loan.id ");
+        resetNPASqlBuilder.append("inner join m_product_loan mpl on mpl.id = loan.product_id and mpl.overdue_days_for_npa is not null ");
+        resetNPASqlBuilder.append("set loan.is_npa = 0 ");
+        resetNPASqlBuilder.append("where  loan.loan_status_id = 300 and mpl.account_moves_out_of_npa_only_on_arrears_completion = 0 ");
+        resetNPASqlBuilder
+                .append("or (mpl.account_moves_out_of_npa_only_on_arrears_completion = 1 and laa.overdue_since_date_derived is null)");
+
+        jdbcTemplate.update(resetNPASqlBuilder.toString());
 
         final StringBuilder updateSqlBuilder = new StringBuilder(900);
 
         updateSqlBuilder.append("UPDATE m_loan as ml,");
-        updateSqlBuilder.append(" (select loan.id from m_loan_repayment_schedule mr ");
-        updateSqlBuilder
-                .append(" INNER JOIN  m_loan loan on mr.loan_id = loan.id INNER JOIN m_product_loan mpl on mpl.id = loan.product_id AND mpl.overdue_days_for_npa is not null ");
-        updateSqlBuilder.append("WHERE loan.loan_status_id = 300 and mr.completed_derived is false ");
-        updateSqlBuilder
-                .append(" and mr.duedate < SUBDATE(CURDATE(),INTERVAL  ifnull(mpl.overdue_days_for_npa,0) day) group by loan.id)  as sl ");
-        updateSqlBuilder.append("SET ml.is_npa=1 where ml.id=sl.id");
+        updateSqlBuilder.append(" (select loan.id ");
+        updateSqlBuilder.append("from m_loan_arrears_aging laa");
+        updateSqlBuilder.append(" INNER JOIN  m_loan loan on laa.loan_id = loan.id ");
+        updateSqlBuilder.append(" INNER JOIN m_product_loan mpl on mpl.id = loan.product_id AND mpl.overdue_days_for_npa is not null ");
+        updateSqlBuilder.append("WHERE loan.loan_status_id = 300  and ");
+        updateSqlBuilder.append("laa.overdue_since_date_derived < SUBDATE(CURDATE(),INTERVAL  ifnull(mpl.overdue_days_for_npa,0) day) ");
+        updateSqlBuilder.append("group by loan.id) as sl ");
+        updateSqlBuilder.append("SET ml.is_npa=1 where ml.id=sl.id ");
 
         final int result = jdbcTemplate.update(updateSqlBuilder.toString());
 

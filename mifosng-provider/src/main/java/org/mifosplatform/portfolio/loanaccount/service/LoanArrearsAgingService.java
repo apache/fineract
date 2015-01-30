@@ -1,0 +1,18 @@
+/**
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+package org.mifosplatform.portfolio.loanaccount.service;
+
+import org.mifosplatform.portfolio.loanaccount.domain.Loan;
+
+public interface LoanArrearsAgingService {
+
+    void updateLoanArrearsAgeingDetails();
+
+    void updateLoanArrearsAgeingDetailsWithOriginalSchedule(Loan loan);
+
+    void updateLoanArrearsAgeingDetails(Loan loan);
+
+}

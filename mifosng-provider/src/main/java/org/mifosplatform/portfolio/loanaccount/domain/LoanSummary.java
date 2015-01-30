@@ -306,4 +306,29 @@ public final class LoanSummary {
     public BigDecimal getTotalPrincipalWrittenOff() {
         return this.totalPrincipalWrittenOff;
     }
+
+    
+    public BigDecimal getTotalInterestWaived() {
+        return this.totalInterestWaived;
+    }
+
+    
+    public BigDecimal getTotalFeeChargesRepaid() {
+        return this.totalFeeChargesRepaid;
+    }
+
+    
+    public BigDecimal getTotalFeeChargesWaived() {
+        return this.totalFeeChargesWaived;
+    }
+
+    
+    public BigDecimal getTotalPenaltyChargesRepaid() {
+        return this.totalPenaltyChargesRepaid;
+    }
+
+    
+    public BigDecimal getTotalPenaltyChargesWaived() {
+        return this.totalPenaltyChargesWaived;
+    }
 }
