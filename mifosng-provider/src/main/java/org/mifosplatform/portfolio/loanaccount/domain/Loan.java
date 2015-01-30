@@ -1588,7 +1588,8 @@ public class Loan extends AbstractPersistable<Long> {
                             && StringUtils.isNotBlank((jsonObject.get(LoanApiConstants.disbursementIdParameterName).getAsString()))) {
                         id = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementIdParameterName).getAsLong();
                     }
-                    LoanDisbursementDetails disbursementDetails = new LoanDisbursementDetails(expectedDisbursementDate, null, principal);
+                    Date actualDisbursementDate = null;
+                    LoanDisbursementDetails disbursementDetails = new LoanDisbursementDetails(expectedDisbursementDate, actualDisbursementDate, principal);
                     if (id == null) {
                         disbursementDetails.updateLoan(this);
                         this.disbursementDetails.add(disbursementDetails);
@@ -1611,7 +1612,6 @@ public class Loan extends AbstractPersistable<Long> {
                 }
             }
         }
-
     }
 
     public LoanDisbursementDetails fetchLoanDisbursementsById(Long id) {
@@ -1865,6 +1865,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public Map<String, Object> loanApplicationApproval(final AppUser currentUser, final JsonCommand command,
+    		final JsonArray disbursementDataArray,
             final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
         validateAccountStatus(LoanEvent.LOAN_APPROVED);
@@ -1899,11 +1900,14 @@ public class Loan extends AbstractPersistable<Long> {
                 approvedOn = command.localDateValueOfParameterNamed("eventDate");
                 approvedOnDateChange = command.stringValueOfParameterNamed("eventDate");
             }
+            
+            LocalDate expecteddisbursementDate = command.localDateValueOfParameterNamed("expectedDisbursementDate");
 
             BigDecimal approvedLoanAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.approvedLoanAmountParameterName);
+            
 
             if (approvedLoanAmount != null) {
-
+                
                 // Approved amount has to be less than or equal to principal
                 // amount demanded
 
@@ -1921,14 +1925,36 @@ public class Loan extends AbstractPersistable<Long> {
 
                     actualChanges.put(LoanApiConstants.approvedLoanAmountParameterName, approvedLoanAmount);
                     actualChanges.put(LoanApiConstants.disbursementPrincipalParameterName, approvedLoanAmount);
-
-                } else if (approvedLoanAmount.compareTo(this.proposedPrincipal) == 1) {
+                } else if(approvedLoanAmount.compareTo(this.proposedPrincipal) == 1) {
                     final String errorMessage = "Loan approved amount can't be greater than loan amount demanded.";
                     throw new InvalidLoanStateTransitionException("approval", "amount.can't.be.greater.than.loan.amount.demanded",
                             errorMessage, this.proposedPrincipal, approvedLoanAmount);
                 }
-            }
+                
+                /* Update disbursement details */
+				if (disbursementDataArray != null) {
+					updateDisbursementDetails(command, actualChanges);
+				}
+			}
+			if (loanProduct.isMultiDisburseLoan()) {
 
+				if (this.disbursementDetails.isEmpty()) {
+					final String errorMessage = "For this loan product, disbursement details must be provided";
+					throw new MultiDisbursementDataRequiredException(
+							LoanApiConstants.disbursementDataParameterName,
+							errorMessage);
+				}
+
+				if (this.disbursementDetails.size() > loanProduct
+						.maxTrancheCount()) {
+					final String errorMessage = "Number of tranche shouldn't be greter than "
+							+ loanProduct.maxTrancheCount();
+					throw new ExceedingTrancheCountException(
+							LoanApiConstants.disbursementDataParameterName,
+							errorMessage, loanProduct.maxTrancheCount(),
+							disbursementDetails.size());
+				}
+			}
             this.approvedOnDate = approvedOn.toDate();
             this.approvedBy = currentUser;
             actualChanges.put("locale", command.locale());
@@ -1941,6 +1967,18 @@ public class Loan extends AbstractPersistable<Long> {
                         + submittalDate.toString();
                 throw new InvalidLoanStateTransitionException("approval", "cannot.be.before.submittal.date", errorMessage,
                         getApprovedOnDate(), submittalDate);
+            }
+            
+            if(expecteddisbursementDate != null){
+            	this.expectedDisbursementDate = expecteddisbursementDate.toDate();
+                actualChanges.put("expectedDisbursementDate", expectedDisbursementDate);
+
+                if(expecteddisbursementDate.isBefore(approvedOn)) {
+                	final String errorMessage = "The expected disbursement date should be either on or after the approval date: "
+                            + approvedOn.toString();
+                	throw new InvalidLoanStateTransitionException("expecteddisbursal", "should.be.on.or.after.approval.date", errorMessage,
+                            getApprovedOnDate(), expecteddisbursementDate);
+                }
             }
 
             validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_APPROVED, approvedOn);
@@ -2442,7 +2480,6 @@ public class Loan extends AbstractPersistable<Long> {
             if (this.loanProduct.isMultiDisburseLoan()) {
                 for (final LoanDisbursementDetails details : this.disbursementDetails) {
                     details.updateActualDisbursementDate(null);
-                    details.resetPrincipal();
                 }
             }
             boolean isEmiAmountChanged = this.loanTermVariations.size() > 0;
@@ -4074,6 +4111,9 @@ public class Loan extends AbstractPersistable<Long> {
         return AccountType.fromInt(this.loanType).isGroupAccount();
     }
 
+    public boolean isJLGLoan(){
+    	return AccountType.fromInt(this.loanType).isJLGAccount();
+    }
     public void updateInterestRateFrequencyType() {
         this.loanRepaymentScheduleDetail.updatenterestPeriodFrequencyType(this.loanProduct.getInterestPeriodFrequencyType());
     }
@@ -4828,7 +4868,7 @@ public class Loan extends AbstractPersistable<Long> {
             }
 
             disbursementData.add(new DisbursementData(loanDisbursementDetails.getId(), expectedDisbursementDate, actualDisbursementDate,
-                    loanDisbursementDetails.principal(), loanDisbursementDetails.approvedPrincipal()));
+                    loanDisbursementDetails.principal()));
         }
 
         return disbursementData;

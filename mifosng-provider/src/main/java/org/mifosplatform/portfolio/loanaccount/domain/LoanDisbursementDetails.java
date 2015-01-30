@@ -39,9 +39,6 @@ public class LoanDisbursementDetails extends AbstractPersistable<Long> {
     @Column(name = "principal", scale = 6, precision = 19, nullable = false)
     private BigDecimal principal;
 
-    @Column(name = "approved_principal", scale = 6, precision = 19, nullable = false)
-    private BigDecimal approvedPrincipal;
-
     protected LoanDisbursementDetails() {
 
     }
@@ -50,8 +47,7 @@ public class LoanDisbursementDetails extends AbstractPersistable<Long> {
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.actualDisbursementDate = actualDisbursementDate;
         this.principal = principal;
-        this.approvedPrincipal = principal;
-    }
+     }
 
     public void updateLoan(final Loan loan) {
         this.loan = loan;
@@ -61,14 +57,13 @@ public class LoanDisbursementDetails extends AbstractPersistable<Long> {
     public boolean equals(final Object obj) {
         final LoanDisbursementDetails loanDisbursementDetails = (LoanDisbursementDetails) obj;
         if (loanDisbursementDetails.principal.equals(this.principal)
-                && loanDisbursementDetails.expectedDisbursementDate.equals(this.expectedDisbursementDate)
-                && loanDisbursementDetails.approvedPrincipal.equals(this.approvedPrincipal)) { return true; }
+                && loanDisbursementDetails.expectedDisbursementDate.equals(this.expectedDisbursementDate)) 
+        { return true; }
         return false;
     }
 
     public void copy(final LoanDisbursementDetails disbursementDetails) {
         this.principal = disbursementDetails.principal;
-        this.approvedPrincipal = disbursementDetails.approvedPrincipal;
         this.expectedDisbursementDate = disbursementDetails.expectedDisbursementDate;
         this.actualDisbursementDate = disbursementDetails.actualDisbursementDate;
     }
@@ -93,10 +88,6 @@ public class LoanDisbursementDetails extends AbstractPersistable<Long> {
         return this.principal;
     }
 
-    public BigDecimal approvedPrincipal() {
-        return this.approvedPrincipal;
-    }
-
     public void updatePrincipal(BigDecimal principal) {
         this.principal = principal;
     }
@@ -115,15 +106,11 @@ public class LoanDisbursementDetails extends AbstractPersistable<Long> {
         if (this.actualDisbursementDate != null) {
             actualDisburseDate = new LocalDate(this.actualDisbursementDate);
         }
-        return new DisbursementData(getId(), expectedDisburseDate, actualDisburseDate, this.principal, this.approvedPrincipal);
+        return new DisbursementData(getId(), expectedDisburseDate, actualDisburseDate, this.principal);
     }
 
     public void updateActualDisbursementDate(Date actualDisbursementDate) {
         this.actualDisbursementDate = actualDisbursementDate;
-    }
-
-    public BigDecimal resetPrincipal() {
-        return this.principal = this.approvedPrincipal;
     }
 
     public void updateExpectedDisbursementDate(Date expectedDisbursementDate) {

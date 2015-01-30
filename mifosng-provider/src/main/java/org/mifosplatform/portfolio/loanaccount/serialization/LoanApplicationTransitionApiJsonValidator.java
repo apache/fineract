@@ -49,7 +49,7 @@ public final class LoanApplicationTransitionApiJsonValidator {
 
         final Set<String> disbursementParameters = new HashSet<>(Arrays.asList(LoanApiConstants.approvedLoanAmountParameterName,
                 LoanApiConstants.approvedOnDateParameterName, LoanApiConstants.noteParameterName, LoanApiConstants.localeParameterName,
-                LoanApiConstants.dateFormatParameterName));
+                LoanApiConstants.dateFormatParameterName,LoanApiConstants.disbursementDataParameterName,LoanApiConstants.disbursementDateParameterName));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
@@ -68,10 +68,14 @@ public final class LoanApplicationTransitionApiJsonValidator {
                 .extractLocalDateNamed(LoanApiConstants.approvedOnDateParameterName, element);
         baseDataValidator.reset().parameter(LoanApiConstants.approvedOnDateParameterName).value(approvedOnDate).notNull();
 
+        final LocalDate expectedDisbursementDate = this.fromApiJsonHelper
+                .extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.disbursementDateParameterName).value(expectedDisbursementDate).ignoreIfNull();
+
         final String note = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.noteParameterName, element);
         baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000);
 
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+       throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     public void validateRejection(final String json) {

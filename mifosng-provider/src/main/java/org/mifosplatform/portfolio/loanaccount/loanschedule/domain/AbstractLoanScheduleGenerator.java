@@ -462,11 +462,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             instalmentNumber++;
         }
 
-        if (principalDisbursed.isNotEqualTo(expectedPrincipalDisburse) && diffAmt == null) {
-            final String errorMsg = "One of the Disbursement date is not falling on Loan Schedule";
-            throw new MultiDisbursementDisbursementDateException(errorMsg);
-        }
-
         // 7. determine fees and penalties
         for (LoanScheduleModelPeriod loanScheduleModelPeriod : periods) {
             if (loanScheduleModelPeriod.isRepaymentPeriod()) {

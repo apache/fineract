@@ -907,7 +907,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             this.disbursement = repaymentScheduleRelatedLoanData.disbursementData();
             this.totalFeeChargesDueAtDisbursement = repaymentScheduleRelatedLoanData.getTotalFeeChargesAtDisbursement();
             this.lastDueDate = this.disbursement.disbursementDate();
-            this.outstandingLoanPrincipalBalance = this.disbursement.amount();
+            this.outstandingLoanPrincipalBalance = this.disbursement.amount();            
             this.disbursementData = disbursementData;
             this.excludePastUndisbursed = isInterestRecalculationEnabled;
         }
@@ -1398,7 +1398,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private static final class LoanDisbursementDetailMapper implements RowMapper<DisbursementData> {
 
         public String schema() {
-            return "dd.id as id,dd.expected_disburse_date as expectedDisbursementdate,dd.disbursedon_date as actualDisbursementdate,dd.principal as principal,dd.approved_principal as approvedPrincipal "
+            return "dd.id as id,dd.expected_disburse_date as expectedDisbursementdate,dd.disbursedon_date as actualDisbursementdate,dd.principal as principal "
                     + "from m_loan_disbursement_detail dd";
         }
 
@@ -1408,10 +1408,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final LocalDate expectedDisbursementdate = JdbcSupport.getLocalDate(rs, "expectedDisbursementdate");
             final LocalDate actualDisbursementdate = JdbcSupport.getLocalDate(rs, "actualDisbursementdate");
             final BigDecimal principal = rs.getBigDecimal("principal");
-            final BigDecimal approvedPrincipal = rs.getBigDecimal("approvedPrincipal");
 
-            final DisbursementData disbursementData = new DisbursementData(id, expectedDisbursementdate, actualDisbursementdate, principal,
-                    approvedPrincipal);
+            final DisbursementData disbursementData = new DisbursementData(id, expectedDisbursementdate, actualDisbursementdate, principal);
             return disbursementData;
         }
 

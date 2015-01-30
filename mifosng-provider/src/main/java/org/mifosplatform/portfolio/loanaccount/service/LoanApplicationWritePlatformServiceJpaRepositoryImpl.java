@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.loanaccount.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -73,8 +74,10 @@ import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationDateExce
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
+import org.mifosplatform.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanApplicationCommandFromApiJsonHelper;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanApplicationTransitionApiJsonValidator;
@@ -99,6 +102,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
 @Service
@@ -134,6 +138,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final ConfigurationDomainService configurationDomainService;
+    private final LoanScheduleAssembler loanScheduleAssembler;
+
 
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
@@ -151,7 +157,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository,
             final LoanReadPlatformService loanReadPlatformService, final LoanAccountDomainService loanAccountDomainService,
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
-            final BusinessEventNotifierService businessEventNotifierService, final ConfigurationDomainService configurationDomainService) {
+            final BusinessEventNotifierService businessEventNotifierService, final ConfigurationDomainService configurationDomainService,
+            final LoanScheduleAssembler loanScheduleAssembler) {
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
@@ -180,6 +187,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.accountNumberFormatRepository = accountNumberFormatRepository;
         this.businessEventNotifierService = businessEventNotifierService;
         this.configurationDomainService = configurationDomainService;
+        this.loanScheduleAssembler = loanScheduleAssembler;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -732,29 +740,66 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 .build();
     }
 
+    private void validateMultiDisbursementData(final JsonCommand command, LocalDate expectedDisbursementDate){
+    	final String json = command.json();
+    	final JsonElement element = this.fromJsonHelper.parse(json);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
+        final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
+        if(disbursementDataArray == null || disbursementDataArray.size() == 0){
+        	final String errorMessage = "For this loan product, disbursement details must be provided";
+            throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);       	
+        }
+        final BigDecimal principal = this.fromJsonHelper.extractBigDecimalWithLocaleNamed("approvedLoanAmount", element);  
+        fromApiJsonDeserializer.validateLoanMultiDisbursementdate(element, baseDataValidator, expectedDisbursementDate, principal);
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    }
     @Transactional
     @Override
     public CommandProcessingResult approveApplication(final Long loanId, final JsonCommand command) {
 
         final AppUser currentUser = getAppUserIfPresent();
+        LocalDate expectedDisbursementDate = null;
 
         this.loanApplicationTransitionApiJsonValidator.validateApproval(command.json());
-
+        
         final Loan loan = retrieveLoanBy(loanId);
-        checkClientOrGroupActive(loan);
+        
+        final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
 
-        final Map<String, Object> changes = loan.loanApplicationApproval(currentUser, command, defaultLoanLifecycleStateMachine());
+        expectedDisbursementDate = command.localDateValueOfParameterNamed(LoanApiConstants.disbursementDateParameterName);
+        if(expectedDisbursementDate == null){
+        	expectedDisbursementDate = loan.getExpectedDisbursedOnLocalDate();
+        }
+        if(loan.loanProduct().isMultiDisburseLoan()){
+            	this.validateMultiDisbursementData(command, expectedDisbursementDate);
+        }
+        
+        checkClientOrGroupActive(loan);
+        
+     // validate expected disbursement date against meeting date
+        if (loan.isSyncDisbursementWithMeeting() && (loan.isGroupLoan() || loan.isJLGLoan())) {
+            final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
+                    CalendarEntityType.LOANS.getValue());
+            final Calendar calendar = calendarInstance.getCalendar();            
+            this.loanScheduleAssembler.validateDisbursementDateWithMeetingDates(expectedDisbursementDate, calendar);
+        }
+
+        final Map<String, Object> changes = loan.loanApplicationApproval(currentUser, command, disbursementDataArray, defaultLoanLifecycleStateMachine());
+  
+    	
         if (!changes.isEmpty()) {
 
             // If loan approved amount less than loan demanded amount, then need
             // to recompute the schedule
             if (changes.containsKey(LoanApiConstants.approvedLoanAmountParameterName)) {
                 ScheduleGeneratorDTO scheduleGeneratorDTO = loanAccountDomainService.buildScheduleGeneratorDTO(loan);
-                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
+                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);               
             }
 
             this.loanRepository.save(loan);
-
+           
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
                 final Note note = Note.loanNote(loan, noteText);

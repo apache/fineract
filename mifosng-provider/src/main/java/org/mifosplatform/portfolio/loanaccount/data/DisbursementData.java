@@ -19,16 +19,13 @@ public class DisbursementData implements Comparable<DisbursementData> {
     private final LocalDate expectedDisbursementDate;
     private final LocalDate actualDisbursementDate;
     private final BigDecimal principal;
-    @SuppressWarnings("unused")
-    private final BigDecimal approvedPrincipal;
 
     public DisbursementData(Long id, final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate,
-            final BigDecimal principalDisbursed, final BigDecimal approvedPrincipal) {
+            final BigDecimal principalDisbursed) {
         this.id = id;
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.actualDisbursementDate = actualDisbursementDate;
         this.principal = principalDisbursed;
-        this.approvedPrincipal = approvedPrincipal;
     }
 
     public LocalDate disbursementDate() {
@@ -42,7 +39,7 @@ public class DisbursementData implements Comparable<DisbursementData> {
     public BigDecimal amount() {
         return this.principal;
     }
-
+    
     public boolean isDisbursed() {
         return this.actualDisbursementDate != null;
     }
