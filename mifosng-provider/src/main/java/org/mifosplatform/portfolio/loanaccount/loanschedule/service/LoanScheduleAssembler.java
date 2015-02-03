@@ -251,7 +251,7 @@ public class LoanScheduleAssembler {
         final boolean isInterestRecalculationEnabled = loanProduct.isInterestRecalculationEnabled();
 
         final BigDecimal principalThresholdForLastInstalment = loanProduct.getPrincipalThresholdForLastInstalment();
-        final Integer instalmentAmountInMultiplesOf = loanProduct.getInstalmentAmountInMultiplesOf();
+        final Integer installmentAmountInMultiplesOf= loanProduct.getInstallmentAmountInMultiplesOf();
 
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, nthDay, weekDayType, amortizationMethod, interestMethod,
@@ -260,7 +260,7 @@ public class LoanScheduleAssembler {
                 graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, inArrearsToleranceMoney,
                 loanProduct.isMultiDisburseLoan(), emiAmount, disbursementDatas, maxOutstandingBalance, loanVariationTermsData,
                 graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, principalThresholdForLastInstalment,
-                instalmentAmountInMultiplesOf);
+                installmentAmountInMultiplesOf);
     }
 
     private List<DisbursementData> fetchDisbursementData(final JsonObject command) {

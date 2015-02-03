@@ -84,8 +84,8 @@ public class LoanProductData {
     private final boolean isInterestRecalculationEnabled;
     private final LoanProductInterestRecalculationData interestRecalculationData;
     private final Integer minimumDaysBetweenDisbursalAndFirstRepayment;
-    private final boolean canDefineInstalmentAmount;
-    private final Integer instalmentAmountInMultiplesOf;
+    private final boolean canDefineInstallmentAmount;
+    private final Integer installmentAmountInMultiplesOf;
 
     // charges
     private final Collection<ChargeData> charges;
@@ -199,8 +199,8 @@ public class LoanProductData {
         final boolean isInterestRecalculationEnabled = false;
         final LoanProductInterestRecalculationData interestRecalculationData = null;
         final Integer minimumDaysBetweenDisbursalAndFirstRepayment = null;
-        final boolean canDefineInstalmentAmount = false;
-        final Integer instalmentAmountInMultiplesOf = null;
+        final boolean canDefineInstallmentAmount = false;
+        final Integer installmentAmountInMultiplesOf = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -211,8 +211,8 @@ public class LoanProductData {
                 interestRateVariations, numberOfRepaymentVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
                 graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds, productGuaranteeData,
-                principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstalmentAmount,
-                instalmentAmountInMultiplesOf);
+                principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount,
+                installmentAmountInMultiplesOf);
     }
 
     public static LoanProductData lookupWithCurrency(final Long id, final String name, final CurrencyData currency) {
@@ -270,8 +270,8 @@ public class LoanProductData {
         final LoanProductGuaranteeData productGuaranteeData = null;
         final BigDecimal principalThresholdForLastInstalment = null;
         final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = false;
-        final boolean canDefineInstalmentAmount = false;
-        final Integer instalmentAmountInMultiplesOf = null;
+        final boolean canDefineInstallmentAmount = false;
+        final Integer installmentAmountInMultiplesOf = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -282,8 +282,8 @@ public class LoanProductData {
                 interestRateVariations, numberOfRepaymentVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
                 graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds, productGuaranteeData,
-                principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstalmentAmount,
-                instalmentAmountInMultiplesOf);
+                principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount,
+                installmentAmountInMultiplesOf);
     }
 
     public static LoanProductData sensibleDefaultsForNewLoanProductCreation() {
@@ -348,8 +348,8 @@ public class LoanProductData {
         final LoanProductGuaranteeData productGuaranteeData = null;
         final BigDecimal principalThresholdForLastInstalment = null;
         final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = false;
-        final boolean canDefineInstalmentAmount = false;
-        final Integer instalmentAmountInMultiplesOf = null;
+        final boolean canDefineInstallmentAmount = false;
+        final Integer installmentAmountInMultiplesOf = null;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -361,7 +361,7 @@ public class LoanProductData {
                 multiDisburseLoan, maxTrancheCount, outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType,
                 daysInYearType, isInterestRecalculationEnabled, interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment,
                 holdGuaranteeFunds, productGuaranteeData, principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion,
-                canDefineInstalmentAmount, instalmentAmountInMultiplesOf);
+                canDefineInstallmentAmount, installmentAmountInMultiplesOf);
     }
 
     public static LoanProductData withAccountingDetails(final LoanProductData productData, final Map<String, Object> accountingMappings,
@@ -394,8 +394,8 @@ public class LoanProductData {
             final boolean isInterestRecalculationEnabled, final LoanProductInterestRecalculationData interestRecalculationData,
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment, boolean holdGuaranteeFunds,
             final LoanProductGuaranteeData loanProductGuaranteeData, final BigDecimal principalThresholdForLastInstalment,
-            final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion, boolean canDefineInstalmentAmount,
-            Integer instalmentAmountInMultiplesOf) {
+            final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion, boolean canDefineInstallmentAmount,
+            Integer installmentAmountInMultiplesOf) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -477,8 +477,8 @@ public class LoanProductData {
         this.rescheduleStrategyTypeOptions = null;
         this.interestRecalculationFrequencyTypeOptions = null;
 
-        this.canDefineInstalmentAmount = canDefineInstalmentAmount;
-        this.instalmentAmountInMultiplesOf = instalmentAmountInMultiplesOf;
+        this.canDefineInstallmentAmount = canDefineInstallmentAmount;
+        this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
 
     }
 
@@ -590,8 +590,8 @@ public class LoanProductData {
             this.interestRecalculationFrequencyTypeOptions = interestRecalculationFrequencyTypeOptions;
         }
 
-        this.canDefineInstalmentAmount = productData.canDefineInstalmentAmount;
-        this.instalmentAmountInMultiplesOf = productData.instalmentAmountInMultiplesOf;
+        this.canDefineInstallmentAmount = productData.canDefineInstallmentAmount;
+        this.installmentAmountInMultiplesOf = productData.installmentAmountInMultiplesOf;
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {
@@ -842,7 +842,7 @@ public class LoanProductData {
         return null;
     }
 
-    public boolean canDefineInstalmentAmount() {
-        return this.canDefineInstalmentAmount;
+    public boolean canDefineInstallmentAmount() {
+        return this.canDefineInstallmentAmount;
     }
 }

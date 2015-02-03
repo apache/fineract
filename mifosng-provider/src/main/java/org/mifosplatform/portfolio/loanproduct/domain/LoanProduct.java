@@ -143,10 +143,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
     private boolean accountMovesOutOfNPAOnlyOnArrearsCompletion;
 
     @Column(name = "can_define_fixed_emi_amount")
-    private boolean canDefineInstalmentAmount;
+    private boolean canDefineInstallmentAmount;
 
     @Column(name = "instalment_amount_in_multiples_of", nullable = true)
-    private Integer instalmentAmountInMultiplesOf;
+    private Integer installmentAmountInMultiplesOf;
 
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator) {
@@ -247,8 +247,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
         final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = command
                 .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName);
         final boolean canDefineEmiAmount = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canDefineEmiAmountParamName);
-        final Integer instalmentAmountInMultiplesOf = command
-                .integerValueOfParameterNamed(LoanProductConstants.instalmentAmountInMultiplesOfParamName);
+        final Integer installmentAmountInMultiplesOf = command
+                .integerValueOfParameterNamed(LoanProductConstants.installmentAmountInMultiplesOfParamName);
 
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
@@ -259,7 +259,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment,
                 holdGuarantorFunds, loanProductGuaranteeDetails, principalThresholdForLastInstalment,
-                accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineEmiAmount, instalmentAmountInMultiplesOf);
+                accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineEmiAmount, installmentAmountInMultiplesOf);
 
     }
 
@@ -486,7 +486,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final boolean holdGuarantorFunds,
             final LoanProductGuaranteeDetails loanProductGuaranteeDetails, final BigDecimal principalThresholdForLastInstalment,
             final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion, final boolean canDefineEmiAmount,
-            final Integer instalmentAmountInMultiplesOf) {
+            final Integer installmentAmountInMultiplesOf) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -540,8 +540,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
         this.loanProductGuaranteeDetails = loanProductGuaranteeDetails;
         this.principalThresholdForLastInstalment = principalThresholdForLastInstalment;
         this.accountMovesOutOfNPAOnlyOnArrearsCompletion = accountMovesOutOfNPAOnlyOnArrearsCompletion;
-        this.canDefineInstalmentAmount = canDefineEmiAmount;
-        this.instalmentAmountInMultiplesOf = instalmentAmountInMultiplesOf;
+        this.canDefineInstallmentAmount = canDefineEmiAmount;
+        this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
     }
 
     public MonetaryCurrency getCurrency() {
@@ -783,18 +783,18 @@ public class LoanProduct extends AbstractPersistable<Long> {
             actualChanges.put(LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName, newValue);
             this.accountMovesOutOfNPAOnlyOnArrearsCompletion = newValue;
         }
-        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.canDefineEmiAmountParamName, this.canDefineInstalmentAmount)) {
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.canDefineEmiAmountParamName, this.canDefineInstallmentAmount)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canDefineEmiAmountParamName);
             actualChanges.put(LoanProductConstants.canDefineEmiAmountParamName, newValue);
-            this.canDefineInstalmentAmount = newValue;
+            this.canDefineInstallmentAmount = newValue;
         }
 
-        if (command.isChangeInIntegerParameterNamedWithNullCheck(LoanProductConstants.instalmentAmountInMultiplesOfParamName,
-                this.instalmentAmountInMultiplesOf)) {
-            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.instalmentAmountInMultiplesOfParamName);
-            actualChanges.put(LoanProductConstants.instalmentAmountInMultiplesOfParamName, newValue);
+        if (command.isChangeInIntegerParameterNamedWithNullCheck(LoanProductConstants.installmentAmountInMultiplesOfParamName,
+                this.installmentAmountInMultiplesOf)) {
+            final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.installmentAmountInMultiplesOfParamName);
+            actualChanges.put(LoanProductConstants.installmentAmountInMultiplesOfParamName, newValue);
             actualChanges.put("locale", localeAsInput);
-            this.instalmentAmountInMultiplesOf = newValue;
+            this.installmentAmountInMultiplesOf = newValue;
         }
 
         return actualChanges;
@@ -1061,12 +1061,12 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return isBasedOnOriginalSchedule;
     }
 
-    public boolean canDefineInstalmentAmount() {
-        return this.canDefineInstalmentAmount;
+    public boolean canDefineInstallmentAmount() {
+        return this.canDefineInstallmentAmount;
     }
 
-    public Integer getInstalmentAmountInMultiplesOf() {
-        return this.instalmentAmountInMultiplesOf;
+    public Integer getInstallmentAmountInMultiplesOf() {
+        return this.installmentAmountInMultiplesOf;
     }
 
 }
