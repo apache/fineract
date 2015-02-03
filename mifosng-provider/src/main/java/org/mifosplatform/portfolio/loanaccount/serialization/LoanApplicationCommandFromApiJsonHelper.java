@@ -363,7 +363,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         }
 
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.emiAmountParameterName, element)) {
-            if (!(loanProduct.canDefineInstalmentAmount() || loanProduct.isMultiDisburseLoan())) {
+            if (!(loanProduct.canDefineInstallmentAmount() || loanProduct.isMultiDisburseLoan())) {
                 List<String> unsupportedParameterList = new ArrayList<>();
                 unsupportedParameterList.add(LoanApiConstants.emiAmountParameterName);
                 throw new UnsupportedParameterException(unsupportedParameterList);
@@ -711,7 +711,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         }
 
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.emiAmountParameterName, element)) {
-            if (!(loanProduct.canDefineInstalmentAmount() || loanProduct.isMultiDisburseLoan())) {
+            if (!(loanProduct.canDefineInstallmentAmount() || loanProduct.isMultiDisburseLoan())) {
                 List<String> unsupportedParameterList = new ArrayList<>();
                 unsupportedParameterList.add(LoanApiConstants.emiAmountParameterName);
                 throw new UnsupportedParameterException(unsupportedParameterList);
