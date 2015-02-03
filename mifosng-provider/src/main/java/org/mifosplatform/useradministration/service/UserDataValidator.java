@@ -32,7 +32,7 @@ public final class UserDataValidator {
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("username", "firstname", "lastname", "password",
-            "repeatPassword", "email", "officeId", "notSelectedRoles", "roles", "sendPasswordToEmail", "staffId"));
+            "repeatPassword", "email", "officeId", "notSelectedRoles", "roles", "sendPasswordToEmail", "staffId","passwordNeverExpire"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -84,6 +84,11 @@ public final class UserDataValidator {
         if (this.fromApiJsonHelper.parameterExists("staffId", element)) {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed("staffId", element);
             baseDataValidator.reset().parameter("staffId").value(staffId).notNull().integerGreaterThanZero();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists("passwordNeverExpire", element)) {
+            final boolean passwordNeverExpire = this.fromApiJsonHelper.extractBooleanNamed("passwordNeverExpire", element);
+            baseDataValidator.reset().parameter("passwordNeverExpire").value(passwordNeverExpire).validateForBooleanValue();
         }
 
         final String[] roles = this.fromApiJsonHelper.extractArrayNamed("roles", element);
@@ -149,6 +154,11 @@ public final class UserDataValidator {
             if (StringUtils.isNotBlank(password)) {
                 baseDataValidator.reset().parameter("password").value(password).equalToParameter("repeatPassword", repeatPassword);
             }
+        }
+
+        if (this.fromApiJsonHelper.parameterExists("passwordNeverExpire", element)) {
+            final boolean passwordNeverExpire = this.fromApiJsonHelper.extractBooleanNamed("passwordNeverExpire", element);
+            baseDataValidator.reset().parameter("passwordNeverExpire").value(passwordNeverExpire).validateForBooleanValue();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
