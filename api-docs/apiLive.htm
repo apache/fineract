@@ -11296,6 +11296,12 @@ Request Body:
 						<tr>
 							<td class=fielddesc>Override the default value for rounding currency to multiples of value provided.</td>
 						</tr>
+						<tr class=alt>
+							<td>instalmentAmountInMultiplesOf</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Override the default value for rounding instalment amount to multiples of value provided.</td>
+						</tr>
 
 						<tr class=alt>
 							<td>principal</td>
@@ -11402,7 +11408,12 @@ Request Body:
 						</tr>
 						<tr>
 							<td class=fielddesc>Field represents percentage of current instalment principal amount for comparing against principal outstanding to add another repayment instalment.  If the outstanding principal amount is less then calculated amount, remaining outstanding amount will be added to current instalment. Default value for multi disburse loan is 50% and non-multi disburse loan is 0%
-
+						</tr>
+						<tr class=alt>
+							<td>canDefineInstalmentAmount</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>if provided as true, then fixed instalment amount can be provided from loan account. 
 							</td>
 						</tr>
 
@@ -12786,7 +12797,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							numberOfRepaymentVariationsForBorrowerCycle,
 							interestRateVariationsForBorrowerCycle,
 							multiDisburseLoan,maxTrancheCount,
-							outstandingLoanBalance,overdueDaysForNPA,holdGuaranteeFunds, principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion
+							outstandingLoanBalance,overdueDaysForNPA,holdGuaranteeFunds, principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstalmentAmount, instalmentAmountInMultiplesOf
 							</td>
 						</tr>
 					</table>

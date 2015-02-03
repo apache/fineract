@@ -75,7 +75,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment, LoanProductConstants.mandatoryGuaranteeParamName,
             LoanProductConstants.holdGuaranteeFundsParamName, LoanProductConstants.minimumGuaranteeFromGuarantorParamName,
             LoanProductConstants.minimumGuaranteeFromOwnFundsParamName, LoanProductConstants.principalThresholdForLastInstalmentParamName,
-            LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName));
+            LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName, LoanProductConstants.canDefineEmiAmountParamName,
+            LoanProductConstants.instalmentAmountInMultiplesOfParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -338,6 +339,19 @@ public final class LoanProductDataValidator {
                 LoanProductConstants.principalThresholdForLastInstalmentParamName, element);
         baseDataValidator.reset().parameter(LoanProductConstants.principalThresholdForLastInstalmentParamName)
                 .value(principalThresholdForLastInstalment).notLessThanMin(BigDecimal.ZERO).notGreaterThanMax(BigDecimal.valueOf(100));
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.canDefineEmiAmountParamName, element)) {
+            final Boolean canDefineInstalmentAmount = this.fromApiJsonHelper.extractBooleanNamed(
+                    LoanProductConstants.canDefineEmiAmountParamName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.canDefineEmiAmountParamName).value(canDefineInstalmentAmount)
+                    .isOneOfTheseValues(true, false);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.instalmentAmountInMultiplesOfParamName, element)) {
+            final Integer instalmentAmountInMultiplesOf = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
+                    LoanProductConstants.instalmentAmountInMultiplesOfParamName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.instalmentAmountInMultiplesOfParamName)
+                    .value(instalmentAmountInMultiplesOf).ignoreIfNull().integerGreaterThanZero();
+        }
 
         // accounting related data validation
         final Integer accountingRuleType = this.fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());
@@ -781,6 +795,19 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(LoanProductConstants.principalThresholdForLastInstalmentParamName)
                     .value(principalThresholdForLastInstalment).notNull().notLessThanMin(BigDecimal.ZERO)
                     .notGreaterThanMax(BigDecimal.valueOf(100));
+        }
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.canDefineEmiAmountParamName, element)) {
+            final Boolean canDefineInstalmentAmount = this.fromApiJsonHelper.extractBooleanNamed(
+                    LoanProductConstants.canDefineEmiAmountParamName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.canDefineEmiAmountParamName).value(canDefineInstalmentAmount)
+                    .isOneOfTheseValues(true, false);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.instalmentAmountInMultiplesOfParamName, element)) {
+            final Integer instalmentAmountInMultiplesOf = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
+                    LoanProductConstants.instalmentAmountInMultiplesOfParamName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.instalmentAmountInMultiplesOfParamName)
+                    .value(instalmentAmountInMultiplesOf).ignoreIfNull().integerGreaterThanZero();
         }
 
         final Integer accountingRuleType = this.fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());

@@ -117,7 +117,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             outstandingBalance = outstandingBalance.zero().plus(disburseAmt);
         }
         Money reducePrincipal = totalCumulativePrincipal.zero();
-        Money fixedEmiAmount = totalCumulativePrincipal.zero();
         int daysCalcForInstallmentNumber = 0;
         LocalDate scheduleStartDateAsPerFrequency = periodStartDate;
         while (!outstandingBalance.isZero()) {
@@ -191,7 +190,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             BigDecimal disburseAmt = BigDecimal.ZERO;
             if (loanApplicationTerms.isMultiDisburseLoan()) {
                 loanApplicationTerms.setFixedEmiAmountForPeriod(scheduledDueDate);
-                fixedEmiAmount = fixedEmiAmount.zero().plus(loanApplicationTerms.getFixedEmiAmount());
                 final Collection<DisbursementData> disbursementDatas = new ArrayList<>();
                 LocalDate tillDate = scheduledDueDate;
                 if (prepayDate != null && prepayDate.isBefore(tillDate)) {
@@ -233,16 +231,12 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         if (!loanApplicationTerms.isMultiDisburseLoan()) {
                             loanApplicationTerms.setFixedEmiAmount(null);
                         }
-                        fixedEmiAmount = fixedEmiAmount.zero();
                         outstandingBalance = outstandingBalance.minus(reducePrincipal);
                         balanceForcalculation = balanceForcalculation.minus(reducePrincipal);
                         totalCumulativePrincipal = totalCumulativePrincipal.plus(reducePrincipal);
                         reducePrincipal = reducePrincipal.zero();
                     break;
                     case REDUCE_NUMBER_OF_INSTALLMENTS:
-                        if (fixedEmiAmount.isGreaterThanZero()) {
-                            loanApplicationTerms.setFixedEmiAmount(fixedEmiAmount.getAmount());
-                        }
                         outstandingBalance = outstandingBalance.minus(reducePrincipal);
                         balanceForcalculation = balanceForcalculation.minus(reducePrincipal);
                         totalCumulativePrincipal = totalCumulativePrincipal.plus(reducePrincipal);
@@ -385,14 +379,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             // Exclude principal portion for interest only installments
             if (!recalculatedInterestComponent) {
                 principalForThisPeriod = principalInterestForThisPeriod.principal();
-                if (diffAmt != null && !diffAmt.isEmpty() && loanApplicationTerms.getAmortizationMethod().isEqualInstallment()) {
-                    Money principalToBeAdjust = principalForThisPeriod.zero();
-                    if (fixedEmiAmount.isZero()) {
-                        principalToBeAdjust = principalInterestForThisPeriod.interest().minus(interestForThisinstallment);
-
-                    } else {
-                        principalToBeAdjust = fixedEmiAmount.minus(principalForThisPeriod).minus(interestForThisinstallment);
-                    }
+                if (((diffAmt != null && !diffAmt.isEmpty()) || interestToBeAdded.compareTo(BigDecimal.ZERO) == 1)
+                        && loanApplicationTerms.getAmortizationMethod().isEqualInstallment()) {
+                    Money principalToBeAdjust = Money.of(currency, loanApplicationTerms.getFixedEmiAmount()).minus(principalForThisPeriod)
+                            .minus(interestForThisinstallment);
                     principalForThisPeriod = principalForThisPeriod.plus(principalToBeAdjust);
                     principalForThisPeriod = loanApplicationTerms.adjustPrincipalIfLastRepaymentPeriod(principalForThisPeriod,
                             totalCumulativePrincipal.plus(principalForThisPeriod), periodNumber);
@@ -407,9 +397,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 }
             }
 
-            if (fixedEmiAmount.isZero() && !recalculatedInterestComponent) {
-                fixedEmiAmount = principalForThisPeriod.plus(interestForThisinstallment);
-            }
             reducePrincipal = reducePrincipal.minus(reducePrincipalForCurrentInstallment);
 
             if (principalForThisPeriod.isGreaterThan(reducePrincipalForCurrentInstallment)) {
@@ -542,6 +529,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 }
             }
         }
+
+        loanApplicationTerms.resetFixedEmiAmount();
 
         return LoanScheduleModel.from(periods, applicationCurrency, loanTermInDays, principalDisbursed, totalPrincipalExpected,
                 totalPrincipalPaid, totalInterestCharged, totalFeeChargesCharged, totalPenaltyChargesCharged, totalRepaymentExpected,
@@ -794,12 +783,12 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
                     Money principalDue = Money.of(currency, period.principalDue());
                     Money interestDue = Money.of(currency, period.interestDue());
-                    
-                    if(principalDue.isZero() && interestDue.isZero()) {
+
+                    if (principalDue.isZero() && interestDue.isZero()) {
                         period.updateFeeChargesDue(Money.zero(currency));
                         period.updatePenaltyChargesDue(Money.zero(currency));
                     }
-                    
+
                     Money feeChargesDue = Money.of(currency, period.feeChargesDue());
                     Money penaltyChargesDue = Money.of(currency, period.penaltyChargesDue());
 

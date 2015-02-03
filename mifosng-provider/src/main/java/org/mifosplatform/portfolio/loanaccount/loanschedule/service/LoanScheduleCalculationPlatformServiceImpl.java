@@ -95,18 +95,18 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
          * TODO: Vishwas, this is probably not required, test and remove the
          * same
          **/
+        final Long productId = this.fromJsonHelper.extractLongNamed("productId", query.parsedJson());
+        final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
+        if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
+
         if (validateParams) {
             boolean isMeetingMandatoryForJLGLoans = configurationDomainService.isMeetingMandatoryForJLGLoans();
-            this.loanApiJsonDeserializer.validateForCreate(query.json(), isMeetingMandatoryForJLGLoans);
+            this.loanApiJsonDeserializer.validateForCreate(query.json(), isMeetingMandatoryForJLGLoans, loanProduct);
         }
         this.fromApiJsonDeserializer.validate(query.json());
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
-
-        final Long productId = this.fromJsonHelper.extractLongNamed("productId", query.parsedJson());
-        final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
-        if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
 
         if (loanProduct.useBorrowerCycle()) {
             final Long clientId = this.fromJsonHelper.extractLongNamed("clientId", query.parsedJson());

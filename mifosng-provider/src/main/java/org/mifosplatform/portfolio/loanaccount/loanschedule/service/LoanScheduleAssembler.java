@@ -199,8 +199,8 @@ public class LoanScheduleAssembler {
         }
 
         /*
-         * If it is JLG loan/Group Loan synched with a meeting, then make sure first
-         * repayment falls on meeting date
+         * If it is JLG loan/Group Loan synched with a meeting, then make sure
+         * first repayment falls on meeting date
          */
         if ((loanType.isJLGAccount() || loanType.isGroupAccount()) && calendar != null) {
             validateRepaymentsStartDateWithMeetingDates(calculatedRepaymentsStartingFromDate, calendar);
@@ -249,8 +249,9 @@ public class LoanScheduleAssembler {
         final DaysInYearType daysInYearType = loanProduct.fetchDaysInYearType();
 
         final boolean isInterestRecalculationEnabled = loanProduct.isInterestRecalculationEnabled();
-        
+
         final BigDecimal principalThresholdForLastInstalment = loanProduct.getPrincipalThresholdForLastInstalment();
+        final Integer instalmentAmountInMultiplesOf = loanProduct.getInstalmentAmountInMultiplesOf();
 
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, nthDay, weekDayType, amortizationMethod, interestMethod,
@@ -258,7 +259,8 @@ public class LoanScheduleAssembler {
                 principalMoney, expectedDisbursementDate, repaymentsStartingFromDate, calculatedRepaymentsStartingFromDate,
                 graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, inArrearsToleranceMoney,
                 loanProduct.isMultiDisburseLoan(), emiAmount, disbursementDatas, maxOutstandingBalance, loanVariationTermsData,
-                graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, principalThresholdForLastInstalment);
+                graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, principalThresholdForLastInstalment,
+                instalmentAmountInMultiplesOf);
     }
 
     private List<DisbursementData> fetchDisbursementData(final JsonObject command) {
@@ -444,7 +446,7 @@ public class LoanScheduleAssembler {
         final LocalDate dateBasedOnMinimumDaysBetweenDisbursalAndFirstRepayment = expectedDisbursementDate
                 .plusDays(minimumDaysBetweenDisbursalAndFirstRepayment);
 
-        if ((loanType.isJLGAccount()|| loanType.isGroupAccount()) && calendar != null) {
+        if ((loanType.isJLGAccount() || loanType.isGroupAccount()) && calendar != null) {
 
             final LocalDate refernceDateForCalculatingFirstRepaymentDate = expectedDisbursementDate;
             derivedFirstRepayment = deriveFirstRepaymentDateForJLGLoans(repaymentEvery, expectedDisbursementDate,

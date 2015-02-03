@@ -199,11 +199,13 @@ public class LoanAssembler {
         final EnumOptionData loanType = AccountEnumerations.loanType(loanTypeStr);
         Set<LoanDisbursementDetails> disbursementDetails = null;
         BigDecimal fixedEmiAmount = null;
+        if (loanProduct.isMultiDisburseLoan() || loanProduct.canDefineInstalmentAmount()) {
+            fixedEmiAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.emiAmountParameterName, element);
+        }
         BigDecimal maxOutstandingLoanBalance = null;
         if (loanProduct.isMultiDisburseLoan()) {
             disbursementDetails = fetchDisbursementData(element.getAsJsonObject());
             final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject());
-            fixedEmiAmount = this.fromApiJsonHelper.extractBigDecimalNamed(LoanApiConstants.emiAmountParameterName, element, locale);
             maxOutstandingLoanBalance = this.fromApiJsonHelper.extractBigDecimalNamed(LoanApiConstants.maxOutstandingBalanceParameterName,
                     element, locale);
             if (disbursementDetails.isEmpty()) {

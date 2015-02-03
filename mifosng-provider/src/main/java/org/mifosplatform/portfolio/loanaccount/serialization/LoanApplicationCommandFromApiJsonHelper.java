@@ -21,6 +21,7 @@ import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.infrastructure.core.exception.UnsupportedParameterException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.loanaccount.api.LoanApiConstants;
@@ -78,7 +79,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         this.apiJsonHelper = apiJsonHelper;
     }
 
-    public void validateForCreate(final String json, final boolean isMeetingMandatoryForJLGLoans) {
+    public void validateForCreate(final String json, final boolean isMeetingMandatoryForJLGLoans, final LoanProduct loanProduct) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -362,6 +363,11 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         }
 
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.emiAmountParameterName, element)) {
+            if (!(loanProduct.canDefineInstalmentAmount() || loanProduct.isMultiDisburseLoan())) {
+                List<String> unsupportedParameterList = new ArrayList<>();
+                unsupportedParameterList.add(LoanApiConstants.emiAmountParameterName);
+                throw new UnsupportedParameterException(unsupportedParameterList);
+            }
             final BigDecimal emiAnount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.emiAmountParameterName,
                     element);
             baseDataValidator.reset().parameter(LoanApiConstants.emiAmountParameterName).value(emiAnount).ignoreIfNull().positiveAmount();
@@ -377,7 +383,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
-    public void validateForModify(final String json) {
+    public void validateForModify(final String json, final LoanProduct loanProduct) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -705,6 +711,11 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         }
 
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.emiAmountParameterName, element)) {
+            if (!(loanProduct.canDefineInstalmentAmount() || loanProduct.isMultiDisburseLoan())) {
+                List<String> unsupportedParameterList = new ArrayList<>();
+                unsupportedParameterList.add(LoanApiConstants.emiAmountParameterName);
+                throw new UnsupportedParameterException(unsupportedParameterList);
+            }
             final BigDecimal emiAnount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.emiAmountParameterName,
                     element);
             baseDataValidator.reset().parameter(LoanApiConstants.emiAmountParameterName).value(emiAnount).ignoreIfNull().positiveAmount();

@@ -194,15 +194,15 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         try {
             final AppUser currentUser = getAppUserIfPresent();
             boolean isMeetingMandatoryForJLGLoans = configurationDomainService.isMeetingMandatoryForJLGLoans();
+            final Long productId = this.fromJsonHelper.extractLongNamed("productId", command.parsedJson());
+            final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
+            if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
 
-            this.fromApiJsonDeserializer.validateForCreate(command.json(), isMeetingMandatoryForJLGLoans);
+            this.fromApiJsonDeserializer.validateForCreate(command.json(), isMeetingMandatoryForJLGLoans, loanProduct);
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
 
-            final Long productId = this.fromJsonHelper.extractLongNamed("productId", command.parsedJson());
-            final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
-            if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
             if (loanProduct.useBorrowerCycle()) {
                 final Long clientId = this.fromJsonHelper.extractLongNamed("clientId", command.parsedJson());
                 final Long groupId = this.fromJsonHelper.extractLongNamed("groupId", command.parsedJson());
@@ -377,10 +377,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         try {
             AppUser currentUser = getAppUserIfPresent();
-
-            this.fromApiJsonDeserializer.validateForModify(command.json());
-
             final Loan existingLoanApplication = retrieveLoanBy(loanId);
+            this.fromApiJsonDeserializer.validateForModify(command.json(), existingLoanApplication.loanProduct());
+
             checkClientOrGroupActive(existingLoanApplication);
 
             if (!existingLoanApplication.isSubmittedAndPendingApproval()) { throw new LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified(

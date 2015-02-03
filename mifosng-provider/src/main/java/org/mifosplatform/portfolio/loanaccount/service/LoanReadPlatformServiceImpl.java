@@ -501,6 +501,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.loan_type_enum as loanType, l.loanpurpose_cv_id as loanPurposeId, cv.code_value as loanPurposeName,"
                     + " lp.id as loanProductId, lp.name as loanProductName, lp.description as loanProductDescription,"
                     + " lp.allow_multiple_disbursals as multiDisburseLoan,"
+                    + " lp.can_define_fixed_emi_amount as canDefineInstalmentAmount,"
                     + " c.id as clientId, c.display_name as clientName, c.office_id as clientOfficeId,"
                     + " g.id as groupId, g.display_name as groupName,"
                     + " g.office_id as groupOfficeId, g.staff_id As groupStaffId , g.parent_id as groupParentId, "
@@ -630,6 +631,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String loanProductName = rs.getString("loanProductName");
             final String loanProductDescription = rs.getString("loanProductDescription");
             final Boolean multiDisburseLoan = rs.getBoolean("multiDisburseLoan");
+            final Boolean canDefineInstalmentAmount = rs.getBoolean("canDefineInstalmentAmount");
             final BigDecimal outstandingLoanBalance = rs.getBigDecimal("outstandingLoanBalance");
 
             final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
@@ -835,9 +837,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     amortizationType, interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType,
                     interestCalculationPeriodType, expectedFirstRepaymentOnDate, graceOnPrincipalPayment, graceOnInterestPayment,
                     graceOnInterestCharged, interestChargedFromDate, timeline, loanSummary, feeChargesDueAtDisbursementCharged,
-                    syncDisbursementWithMeeting, loanCounter, loanProductCounter, multiDisburseLoan, fixedEmiAmount,
-                    outstandingLoanBalance, inArrears, graceOnArrearsAgeing, isNPA, daysInMonthType, daysInYearType,
-                    isInterestRecalculationEnabled, interestRecalculationData, createStandingInstructionAtDisbursement);
+                    syncDisbursementWithMeeting, loanCounter, loanProductCounter, multiDisburseLoan, canDefineInstalmentAmount,
+                    fixedEmiAmount, outstandingLoanBalance, inArrears, graceOnArrearsAgeing, isNPA, daysInMonthType,
+                    daysInYearType, isInterestRecalculationEnabled, interestRecalculationData, createStandingInstructionAtDisbursement);
         }
     }
 
