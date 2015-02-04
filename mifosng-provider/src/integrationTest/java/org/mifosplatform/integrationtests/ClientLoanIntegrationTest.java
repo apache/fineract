@@ -3206,7 +3206,7 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2482.76", "46.15", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2505.67", "23.24", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2528.81", "11.67", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.24", "11.67", "0.0", "0.0");
 
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
@@ -3300,7 +3300,7 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "4.62", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2482.76", "46.15", "4.62", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2505.67", "23.24", "2.32", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2528.81", "11.67", "1.17", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.24", "11.67", "1.17", "0.0");
 
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
@@ -3391,7 +3391,7 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2482.55", "46.36", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2505.67", "23.24", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2529.02", "11.67", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.24", "11.67", "0.0", "0.0");
 
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
@@ -3400,7 +3400,7 @@ public class ClientLoanIntegrationTest {
         todaysDate = Calendar.getInstance();
         addRepaymentValues(expectedvalues, todaysDate, 0, "4965.31", "92.51", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2505.67", "23.24", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2529.02", "11.67", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.24", "11.67", "0.0", "0.0");
 
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues, 0);
 
@@ -3515,7 +3515,7 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "100.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2490.75", "38.16", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2505.71", "23.2", "200", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2520.78", "11.63", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.28", "11.63", "0.0", "0.0");
 
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
@@ -3617,7 +3617,7 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, -2, "2482.76", "46.15", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2482.55", "46.36", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2482.33", "46.58", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2552.36", "11.78", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.13", "11.78", "0.0", "0.0");
 
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
@@ -3630,7 +3630,7 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, -2, "2482.76", "46.15", "0.0", "252.89");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2481.38", "47.53", "0.0", "252.89");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2479.99", "48.92", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2555.87", "11.8", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.11", "11.8", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
         Calendar repaymentDate = Calendar.getInstance();
@@ -3646,7 +3646,7 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, -2, "2482.76", "46.15", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2494.22", "34.69", "0.0", "252.89");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2492.89", "36.02", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2530.13", "11.68", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.23", "11.68", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
         repaymentDate = Calendar.getInstance();
@@ -3661,7 +3661,7 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, -2, "2482.76", "46.15", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2494.22", "34.69", "0.0", "252.89");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2498.39", "30.52", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2524.63", "11.65", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.26", "11.65", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
     }
@@ -3722,7 +3722,7 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2482.76", "46.15", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2505.67", "23.24", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2528.81", "11.67", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.24", "11.67", "0.0", "0.0");
 
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
@@ -3815,7 +3815,7 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2482.55", "46.36", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2505.67", "23.24", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2529.02", "11.67", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.24", "11.67", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
         todaysDate = Calendar.getInstance();
@@ -3891,7 +3891,7 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2482.55", "46.36", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2505.67", "23.24", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2529.02", "11.67", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.24", "11.67", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
         todaysDate = Calendar.getInstance();
