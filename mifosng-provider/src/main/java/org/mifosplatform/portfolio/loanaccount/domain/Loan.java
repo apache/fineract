@@ -2380,7 +2380,8 @@ public class Loan extends AbstractPersistable<Long> {
                     getApprovedOnDate());
         }
 
-        if (getExpectedFirstRepaymentOnDate() != null && disbursedOn.isAfter(getExpectedFirstRepaymentOnDate())) {
+        if (getExpectedFirstRepaymentOnDate() != null && disbursedOn.isAfter(getExpectedFirstRepaymentOnDate()) &&
+        		disbursedOn.toDate().equals(this.actualDisbursementDate)) {
             final String errorMessage = "submittedOnDate cannot be after the loans  expectedFirstRepaymentOnDate: "
                     + getExpectedFirstRepaymentOnDate().toString();
             throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.after.expected.first.repayment.date", errorMessage,
