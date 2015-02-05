@@ -378,21 +378,23 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
             BigDecimal amountForRelease = loanTransaction.getPrincipalPortion();
             BigDecimal totalGuaranteeAmount = loan.getGuaranteeAmount();
             BigDecimal principal = loan.getPrincpal().getAmount();
+            if((amountForRelease!=null)&&(totalGuaranteeAmount!=null))
+            {
+                amountForRelease = amountForRelease.multiply(totalGuaranteeAmount).divide(principal,this.roundingMode);
+                List<DepositAccountOnHoldTransaction> accountOnHoldTransactions = new ArrayList<>();
 
-            amountForRelease = amountForRelease.multiply(totalGuaranteeAmount).divide(principal);
-            List<DepositAccountOnHoldTransaction> accountOnHoldTransactions = new ArrayList<>();
-
-            BigDecimal amountLeft = calculateAndRelaseGuarantorFunds(externalGuarantorList, guarantorGuarantee, amountForRelease,
+                BigDecimal amountLeft = calculateAndRelaseGuarantorFunds(externalGuarantorList, guarantorGuarantee, amountForRelease,
                     loanTransaction, accountOnHoldTransactions);
 
-            if (amountLeft.compareTo(BigDecimal.ZERO) == 1) {
-                calculateAndRelaseGuarantorFunds(selfGuarantorList, selfGuarantee, amountLeft, loanTransaction, accountOnHoldTransactions);
-                externalGuarantorList.addAll(selfGuarantorList);
-            }
+                if (amountLeft.compareTo(BigDecimal.ZERO) == 1) {
+                    calculateAndRelaseGuarantorFunds(selfGuarantorList, selfGuarantee, amountLeft, loanTransaction, accountOnHoldTransactions);
+                    externalGuarantorList.addAll(selfGuarantorList);
+                }
 
-            if (!externalGuarantorList.isEmpty()) {
-                this.depositAccountOnHoldTransactionRepository.save(accountOnHoldTransactions);
-                this.guarantorFundingRepository.save(externalGuarantorList);
+                if (!externalGuarantorList.isEmpty()) {
+                    this.depositAccountOnHoldTransactionRepository.save(accountOnHoldTransactions);
+                    this.guarantorFundingRepository.save(externalGuarantorList);
+                }
             }
         }
 
