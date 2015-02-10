@@ -2308,7 +2308,6 @@ public class CommandWrapperBuilder {
         this.json = "{}";
         return this;
     }
-
     public CommandWrapperBuilder disableRole(Long roleId) {
         this.actionName = "DISABLE";
         this.entityName = "ROLE";
@@ -2324,6 +2323,14 @@ public class CommandWrapperBuilder {
         this.entityId = roleId;
         this.href = "/roles/" + roleId + "/enable";
         this.json = "{}";
+        return this;
+    }
+
+    public CommandWrapperBuilder activatePasswordValidationPolicy(final Long validationPolicyId) {
+        this.actionName = "UPDATE";
+        this.entityName = "PASSWORD_VALIDATION_POLICY";
+        this.entityId =validationPolicyId ;
+        this.href = "/passwordValidationPolicy/" + validationPolicyId;
         return this;
     }
 

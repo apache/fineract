@@ -19,6 +19,8 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.useradministration.domain.PasswordValidationPolicy;
+import org.mifosplatform.useradministration.domain.PasswordValidationPolicyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,9 +38,12 @@ public final class UserDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
 
+    private final PasswordValidationPolicyRepository passwordValidationPolicy;
+
     @Autowired
-    public UserDataValidator(final FromJsonHelper fromApiJsonHelper) {
+    public UserDataValidator(final FromJsonHelper fromApiJsonHelper, final PasswordValidationPolicyRepository passwordValidationPolicy) {
         this.fromApiJsonHelper = fromApiJsonHelper;
+        this.passwordValidationPolicy = passwordValidationPolicy;
     }
 
     public void validateForCreate(final String json) {
@@ -69,7 +74,11 @@ public final class UserDataValidator {
             } else {
                 final String password = this.fromApiJsonHelper.extractStringNamed("password", element);
                 final String repeatPassword = this.fromApiJsonHelper.extractStringNamed("repeatPassword", element);
-                baseDataValidator.reset().parameter("password").value(password).notBlank().notExceedingLengthOf(50);
+                final PasswordValidationPolicy validationPolicy = this.passwordValidationPolicy.findActivePasswordValidationPolicy();
+                final String regex = validationPolicy.getRegex();
+                final String description = validationPolicy.getDescription();
+                baseDataValidator.reset().parameter("password").value(password).matchesRegularExpression(regex,description);
+
                 if (StringUtils.isNotBlank(password)) {
                     baseDataValidator.reset().parameter("password").value(password).equalToParameter("repeatPassword", repeatPassword);
                 }
@@ -145,7 +154,12 @@ public final class UserDataValidator {
         if (this.fromApiJsonHelper.parameterExists("password", element)) {
             final String password = this.fromApiJsonHelper.extractStringNamed("password", element);
             final String repeatPassword = this.fromApiJsonHelper.extractStringNamed("repeatPassword", element);
-            baseDataValidator.reset().parameter("password").value(password).notBlank().notExceedingLengthOf(50);
+
+            final PasswordValidationPolicy validationPolicy = this.passwordValidationPolicy.findActivePasswordValidationPolicy();
+            final String regex = validationPolicy.getRegex();
+            final String description = validationPolicy.getDescription();
+            baseDataValidator.reset().parameter("password").value(password).matchesRegularExpression(regex,description);
+
             if (StringUtils.isNotBlank(password)) {
                 baseDataValidator.reset().parameter("password").value(password).equalToParameter("repeatPassword", repeatPassword);
             }

@@ -31,6 +31,8 @@ public class CommandWrapper {
     @SuppressWarnings("unused")
     private Long templateId;
 
+
+
     public static CommandWrapper wrap(final String actionName, final String entityName, final Long resourceId, final Long subresourceId) {
         return new CommandWrapper(null, actionName, entityName, resourceId, subresourceId, null, null);
     }
@@ -1008,4 +1010,13 @@ public class CommandWrapper {
     public boolean isEnableOperation() {
         return this.actionName.equalsIgnoreCase("ENABLE");
     }
+
+    public boolean isPasswordValidationPolicyResource(){
+        return this.entityName.equalsIgnoreCase("PASSWORD_VALIDATION_POLICY");}
+
+
+    public boolean isActivatePasswordValidationPolicy(){
+        return this.actionName.equalsIgnoreCase("UPDATE");
+    }
+
 }

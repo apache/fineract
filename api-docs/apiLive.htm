@@ -2026,6 +2026,14 @@
 								<td><a href="#permissions_update">Enable/Disable Permissions for Maker Checker</a></td>
 								<td></td>
 							</tr>
+							<tr>
+								<td><a href="#password_validation_policy">Password Validation Policy</a></td>
+								<td>paswordValidationPolicy</td>
+								<td><a href=""></a></td>
+								<td><a href="#password_validation_policy_list">List validation Policy</a></td>
+								<td><a href="#password_validation_policy_update">Activate policy</a></td>
+								<td></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -30709,7 +30717,70 @@ Request Body:
 				</div>
 			</div>
 
+			<!-- start of password validation policy api docs -->
+			<a id="password_validation_policy" name="passwordValidationPolicy" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Password validation policy</h3>
+					<p>An API capability to support management of application password validation policy for user administration.</p>
+					<p>There is no Mifos X functionality for creating or validation policy.  The validation policies come pre-installed.</p>
+					<p>Validation policies are not updated, except in the case of enabling them</p>
+				</div>
+			</div>
 
+			<a id="password_validation_policy_list" name="passwordValidationPolicy_list"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Application Password validation policies</h4>
+					<h5>Arguments</h5>
+					<dl class="argument-list">
+
+						</dd>
+					</dl>
+					<p>Example Requests:</p>
+					<div class=apiClick>passwordValidationPolicy</div><br><br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+						GET https://DomainName/api/v1/passwordValidationPolicy
+					</code>
+					<code class="method-response">
+						[
+						{
+						"id": 1,
+						"description": "Password most be at least 1 character and not more that 50 characters long",
+						"active": true
+						},
+						{
+						"id": 2,
+						"description": "Password must be at least 6 characters, no more than 50 characters long, must include at least one upper case letter, one lower case letter, one numeric digit and no space",
+						"active": false
+						}
+						]
+					</code>
+				</div>
+			</div>
+
+			<a id="password_validation_policy_update" name="passwordValidationPolicy_update" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Enable Password validation policy</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+						PUT https://DomainName/api/v1/passwordValidationPolicy/{validationPolicyId}
+					</code>
+					<code class="method-request">
+						PUT passwordValidationPolicy
+						Content-Type: application/json
+						Request Body:
+						{
+
+						}
+					</code>
+				</div>
+			</div>
 			<!-- start of accounting api docs -->
             <a id="glaccounts" name="glaccounts" class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
