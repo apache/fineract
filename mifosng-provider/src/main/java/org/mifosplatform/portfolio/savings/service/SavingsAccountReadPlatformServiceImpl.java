@@ -264,7 +264,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("left join m_appuser rbu on rbu.id = sa.rejectedon_userid ");
             sqlBuilder.append("left join m_appuser wbu on wbu.id = sa.withdrawnon_userid ");
             sqlBuilder.append("left join m_appuser abu on abu.id = sa.approvedon_userid ");
-            sqlBuilder.append("left join m_appuser avbu on rbu.id = sa.activatedon_userid ");
+            sqlBuilder.append("left join m_appuser avbu on avbu.id = sa.activatedon_userid ");
             sqlBuilder.append("left join m_appuser cbu on cbu.id = sa.closedon_userid ");
 
             this.schemaSql = sqlBuilder.toString();
