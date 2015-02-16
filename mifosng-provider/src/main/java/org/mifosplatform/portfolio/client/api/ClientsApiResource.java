@@ -94,12 +94,11 @@ public class ClientsApiResource {
             clientData = this.clientReadPlatformService.retrieveAllNarrations(ClientApiConstants.CLIENT_CLOSURE_REASON);
         } else if (is(commandParam, "acceptTransfer")) {
             clientData = this.clientReadPlatformService.retrieveAllNarrations(ClientApiConstants.CLIENT_CLOSURE_REASON);
-        }else if (is(commandParam, "reject")) {
+        } else if (is(commandParam, "reject")) {
             clientData = this.clientReadPlatformService.retrieveAllNarrations(ClientApiConstants.CLIENT_REJECT_REASON);
-        }else if (is(commandParam, "withdraw")) {
+        } else if (is(commandParam, "withdraw")) {
             clientData = this.clientReadPlatformService.retrieveAllNarrations(ClientApiConstants.CLIENT_WITHDRAW_REASON);
-        }
-        else {
+        } else {
             clientData = this.clientReadPlatformService.retrieveTemplate(officeId, staffInSelectedOfficeOnly);
         }
 
@@ -144,8 +143,7 @@ public class ClientsApiResource {
             final ClientData templateData = this.clientReadPlatformService.retrieveTemplate(clientData.officeId(),
                     staffInSelectedOfficeOnly);
             clientData = ClientData.templateOnTop(clientData, templateData);
-            Collection<SavingsAccountData> savingAccountOptions = this.savingsAccountReadPlatformService.retrieveForLookup(
-                    clientId, null);
+            Collection<SavingsAccountData> savingAccountOptions = this.savingsAccountReadPlatformService.retrieveForLookup(clientId, null);
             if (savingAccountOptions != null && savingAccountOptions.size() > 0) {
                 clientData = ClientData.templateWithSavingAccountOptions(clientData, savingAccountOptions);
             }
@@ -243,21 +241,20 @@ public class ClientsApiResource {
         } else if (is(commandParam, "updateSavingsAccount")) {
             commandRequest = builder.updateClientSavingsAccount(clientId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }else if (is(commandParam,"reject")){
-        	commandRequest = builder.rejectClient(clientId).build();
+        } else if (is(commandParam, "reject")) {
+            commandRequest = builder.rejectClient(clientId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-       }else if (is(commandParam,"withdraw")){
-       	commandRequest = builder.withdrawClient(clientId).build();
-        result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-       }else if (is(commandParam,"reactivate")){
-           commandRequest = builder.reActivateClient(clientId).build();
-           result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-          }
-        
+        } else if (is(commandParam, "withdraw")) {
+            commandRequest = builder.withdrawClient(clientId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "reactivate")) {
+            commandRequest = builder.reActivateClient(clientId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        }
 
         if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate",
                 "unassignStaff", "assignStaff", "close", "proposeTransfer", "withdrawTransfer", "acceptTransfer", "rejectTransfer",
-                "updateSavingsAccount","reject" ,"withdraw","reactivate"}); }
+                "updateSavingsAccount", "reject", "withdraw", "reactivate" }); }
 
         return this.toApiJsonSerializer.serialize(result);
     }

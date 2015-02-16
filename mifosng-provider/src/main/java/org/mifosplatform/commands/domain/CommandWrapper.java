@@ -258,7 +258,7 @@ public class CommandWrapper {
     public boolean isAccountNumberFormatResource() {
         return this.entityName.equals(AccountNumberFormatConstants.ENTITY_NAME.toUpperCase());
     }
-
+    
     public boolean isApprove() {
         return this.actionName.equalsIgnoreCase("APPROVE");
     }
@@ -1007,5 +1007,9 @@ public class CommandWrapper {
 
     public boolean isEnableOperation() {
         return this.actionName.equalsIgnoreCase("ENABLE");
+    }
+    
+    public boolean isEntityMappingResource() {
+        return this.entityName.equalsIgnoreCase("ENTITYMAPPING");
     }
 }

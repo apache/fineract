@@ -7,13 +7,9 @@ package org.mifosplatform.infrastructure.entityaccess.exception;
 
 import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-/**
- * A {@link RuntimeException} thrown when office resources are not found.
- */
-public class MifosEntityAccessNotFoundException extends AbstractPlatformResourceNotFoundException {
+public class MifosEntityToEntityMappingNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public MifosEntityAccessNotFoundException(final Long id) {
-        super("error.msg.entityaccess.id.invalid", "MifosEntityAccess with identifier " + id + " does not exist", id);
+    public MifosEntityToEntityMappingNotFoundException(final String id) {
+        super("error.msg.entityaccess.id.invalid", "MifosEntityToEntityMapping with identifier " + id + " does not exist", id);
     }
-     
 }

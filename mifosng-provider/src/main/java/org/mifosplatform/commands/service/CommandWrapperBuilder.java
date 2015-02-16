@@ -1425,7 +1425,7 @@ public class CommandWrapperBuilder {
         this.href = "/groups/" + groupId + "?command=saveCollectionSheet";
         return this;
     }
-    
+
     public CommandWrapperBuilder saveIndividualCollectionSheet() {
         this.actionName = "SAVE";
         this.entityName = "COLLECTIONSHEET";
@@ -2327,4 +2327,27 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createMap(Long relId) {
+        this.actionName = "CREATE";
+        this.entityName = "ENTITYMAPPING";
+        this.entityId = relId;
+        this.href = "/entitytoentitymapping/" + relId;
+        return this;
+    }
+
+    public CommandWrapperBuilder updateMap(Long mapId) {
+        this.actionName = "UPDATE";
+        this.entityName = "ENTITYMAPPING";
+        this.entityId = mapId;
+        this.href = "/entitytoentitymapping" + mapId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteMap(final Long mapId) {
+        this.actionName = "DELETE";
+        this.entityName = "ENTITYMAPPING";
+        this.entityId = mapId;
+        this.href = "/entitytoentitymapping/" + mapId;
+        return this;
+    }
 }

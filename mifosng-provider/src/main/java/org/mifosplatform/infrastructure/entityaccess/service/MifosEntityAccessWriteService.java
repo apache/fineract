@@ -11,20 +11,23 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 public interface MifosEntityAccessWriteService {
 
-    CommandProcessingResult createEntityAccess (
-    		final JsonCommand command);
-    
-    void addNewEntityAccess (final String entityType, final Long entityId,
-			final CodeValue accessType, 
-			final String secondEntityType, final Long secondEntityId);
+    CommandProcessingResult createEntityAccess(final JsonCommand command);
+
+    CommandProcessingResult createEntityToEntityMapping(final Long relId,final JsonCommand command);
+
+    CommandProcessingResult updateEntityToEntityMapping(final Long mapId, final JsonCommand command);
+
+    CommandProcessingResult deleteEntityToEntityMapping(final Long mapId);
+
+    void addNewEntityAccess(final String entityType, final Long entityId, final CodeValue accessType, final String secondEntityType,
+            final Long secondEntityId);
 
     /*
-    CommandProcessingResult updateEntityAccess (
-    		final Long entityAccessId, final JsonCommand command);
-
-    CommandProcessingResult removeEntityAccess (
-    		final String entityType, final Long entityId,
-    		final Long accessType,
-    		final String secondEntityType, final Long secondEntityId);
-    		*/
+     * CommandProcessingResult updateEntityAccess ( final Long entityAccessId,
+     * final JsonCommand command);
+     * 
+     * CommandProcessingResult removeEntityAccess ( final String entityType,
+     * final Long entityId, final Long accessType, final String
+     * secondEntityType, final Long secondEntityId);
+     */
 }
