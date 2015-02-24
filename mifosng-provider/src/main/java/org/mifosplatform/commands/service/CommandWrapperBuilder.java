@@ -740,6 +740,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder addAndDeleteDisbursementDetails(final Long loanId) {
+        this.actionName = "UPDATE";
+        this.entityName = "DISBURSEMENTDETAIL";
+        this.entityId = null;
+        this.loanId = loanId;    
+        this.href = "/loans/" + loanId + "/editdisbursementdetails/";
+        return this;
+    }
+
     public CommandWrapperBuilder deleteLoanApplication(final Long loanId) {
         this.actionName = "DELETE";
         this.entityName = "LOAN";

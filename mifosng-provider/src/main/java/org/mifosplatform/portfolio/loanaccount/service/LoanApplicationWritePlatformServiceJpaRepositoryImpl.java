@@ -740,7 +740,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 .build();
     }
 
-    private void validateMultiDisbursementData(final JsonCommand command, LocalDate expectedDisbursementDate){
+    public void validateMultiDisbursementData(final JsonCommand command, LocalDate expectedDisbursementDate){
     	final String json = command.json();
     	final JsonElement element = this.fromJsonHelper.parse(json);
 

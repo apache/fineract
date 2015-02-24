@@ -123,11 +123,13 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
+import org.mifosplatform.portfolio.loanaccount.exception.ExceedingTrancheCountException;
 import org.mifosplatform.portfolio.loanaccount.exception.InvalidPaidInAdvanceAmountException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanDisbursalException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerUnassignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
+import org.mifosplatform.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
 import org.mifosplatform.portfolio.loanaccount.guarantor.service.GuarantorDomainService;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
@@ -159,6 +161,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
 @Service
@@ -2541,17 +2544,59 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .build();
     }
 
-    @Override
+    private void validateMultiDisbursementData(final JsonCommand command, LocalDate expectedDisbursementDate){
+    	final String json = command.json();
+    	final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
+        final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
+        if(disbursementDataArray == null || disbursementDataArray.size() == 0){
+        	final String errorMessage = "For this loan product, disbursement details must be provided";
+            throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);       	
+        }
+        final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("approvedLoanAmount", element);
+        
+        loanApplicationCommandFromApiJsonHelper.validateLoanMultiDisbursementdate(element, baseDataValidator, expectedDisbursementDate, principal);
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    }
+    
+	@Override
     @Transactional
-    public CommandProcessingResult updateDisbursementDateForTranche(final Long loanId, final Long disbursementId, final JsonCommand command) {
-
-        AppUser currentUser = getAppUserIfPresent();
-
+	public CommandProcessingResult addAndDeleteLoanDisburseDetails(Long loanId, JsonCommand command) {
+		
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
-        LoanDisbursementDetails loanDisbursementDetails = loan.fetchLoanDisbursementsById(disbursementId);
-        this.loanEventApiJsonValidator.validateUpdateDisbursementDate(command.json(), loanDisbursementDetails);
-        final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
+        final Map<String, Object> actualChanges = new LinkedHashMap<>();
+        LocalDate  expectedDisbursementDate = loan.getExpectedDisbursedOnLocalDate();
+        validateMultiDisbursementData(command, expectedDisbursementDate);
+
+        loan.updateDisbursementDetails(command, actualChanges);
+
+        if (loan.getDisbursementDetails().isEmpty()) {
+			final String errorMessage = "For this loan product, disbursement details must be provided";
+			throw new MultiDisbursementDataRequiredException(
+					LoanApiConstants.disbursementDataParameterName,
+					errorMessage);
+		}
+
+		if (loan.getDisbursementDetails().size() > loan.loanProduct()
+				.maxTrancheCount()) {
+			final String errorMessage = "Number of tranche shouldn't be greter than "
+					+ loan.loanProduct().maxTrancheCount();
+			throw new ExceedingTrancheCountException(
+					LoanApiConstants.disbursementDataParameterName,
+					errorMessage, loan.loanProduct().maxTrancheCount(),
+					loan.getDisbursementDetails().size());
+		}
+		LoanDisbursementDetails updateDetails = null;
+		return processLoanDisbursementDetail(loan, loanId, command, updateDetails);
+        
+	}
+	
+	private CommandProcessingResult processLoanDisbursementDetail(final Loan loan, Long loanId, JsonCommand command, 
+			LoanDisbursementDetails loanDisbursementDetails){
+		final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
                 CalendarEntityType.LOANS.getValue());
         final LocalDate calculatedRepaymentsStartingFromDate = this.loanAccountDomainService.getCalculatedRepaymentsStartingFromDate(
                 loan.getDisbursementDate(), loan, calendarInstance);
@@ -2580,12 +2625,32 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 calculatedRepaymentsStartingFromDate, holidayDetailDTO, restCalendarInstance, recalculateFrom, overdurPenaltyWaitPeriod,
                 lastTransactionDate);
 
-        final ChangedTransactionDetail changedTransactionDetail = loan.updateDisbursementDateForTranche(loanDisbursementDetails, command,
-                existingTransactionIds, existingReversedTransactionIds, changes, scheduleGeneratorDTO, currentUser);
+        ChangedTransactionDetail changedTransactionDetail = null;            
+        AppUser currentUser = getAppUserIfPresent();
+        
+        if(command.entityId() != null){
+
+        	changedTransactionDetail = loan.updateDisbursementDateAndAmountForTranche(loanDisbursementDetails, command,
+                    existingTransactionIds, existingReversedTransactionIds, changes, scheduleGeneratorDTO, currentUser);
+        }else{
+        	Collection<LoanDisbursementDetails> loanDisburseDetails = loan.getDisbursementDetails();
+        	BigDecimal setAmount = BigDecimal.ZERO;
+            for (LoanDisbursementDetails details : loanDisburseDetails) {
+            	setAmount = setAmount.add(details.principal());
+            }
+            
+            loan.repaymentScheduleDetail().setPrincipal(setAmount);
+            
+        	if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+                loan.regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO, currentUser);
+            } else {
+                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
+            }
+        }
 
         saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
-        if (changedTransactionDetail != null) {
+        if (command.entityId() != null && changedTransactionDetail != null) {
             for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                 updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
@@ -2600,8 +2665,21 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(loanId) //
-                .with(changes).build();
+                .with(changes).build(); 
+	}
+	
+    @Override
+    @Transactional
+    public CommandProcessingResult updateDisbursementDateAndAmountForTranche(final Long loanId, final Long disbursementId, final JsonCommand command) {
 
+        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        checkClientOrGroupActive(loan);
+        LoanDisbursementDetails loanDisbursementDetails = loan.fetchLoanDisbursementsById(disbursementId);
+        this.loanEventApiJsonValidator.validateUpdateDisbursementDateAndAmount(command.json(), loanDisbursementDetails);
+        
+		return processLoanDisbursementDetail(loan, loanId, command, loanDisbursementDetails);
+
+        
     }
 
     public LoanTransaction disburseLoanAmountToSavings(final Long loanId, Long loanChargeId, final JsonCommand command,

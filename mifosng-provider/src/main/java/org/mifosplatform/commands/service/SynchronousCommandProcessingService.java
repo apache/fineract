@@ -445,6 +445,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             if (wrapper.isUpdateDisbursementDate()) {
                 handler = this.applicationContext.getBean("updateLoanDisbuseDateCommandHandler", NewCommandSourceHandler.class);
             }
+            if(wrapper.addAndDeleteDisbursementDetails()){
+                handler = this.applicationContext.getBean("addAndDeleteLoanDisburseDetailsCommandHandler", NewCommandSourceHandler.class);
+            }
         } else if (wrapper.isGLAccountResource()) {
             if (wrapper.isCreate()) {
                 handler = this.applicationContext.getBean("createGLAccountCommandHandler", NewCommandSourceHandler.class);

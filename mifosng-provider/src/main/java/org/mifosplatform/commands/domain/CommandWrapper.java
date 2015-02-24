@@ -488,9 +488,13 @@ public class CommandWrapper {
     }
 
     public boolean isUpdateDisbursementDate() {
-        return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL");
+        return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL") && this.entityId != null;
     }
-
+    
+    public boolean addAndDeleteDisbursementDetails() {
+        return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL") && this.entityId == null;
+    }
+    
     public boolean isStandingInstruction() {
         return this.entityName.equalsIgnoreCase("STANDINGINSTRUCTION");
     }

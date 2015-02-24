@@ -113,8 +113,9 @@ public class LoanDisbursementDetails extends AbstractPersistable<Long> {
         this.actualDisbursementDate = actualDisbursementDate;
     }
 
-    public void updateExpectedDisbursementDate(Date expectedDisbursementDate) {
+    public void updateExpectedDisbursementDateAndAmount(Date expectedDisbursementDate, BigDecimal principal) {
         this.expectedDisbursementDate = expectedDisbursementDate;
+        this.principal = principal;
     }
 
 }

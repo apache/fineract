@@ -1392,11 +1392,13 @@ public class Loan extends AbstractPersistable<Long> {
                 this.maxOutstandingLoanBalance = command
                         .bigDecimalValueOfParameterNamed(LoanApiConstants.maxOutstandingBalanceParameterName);
             }
-            if (this.disbursementDetails.isEmpty()) {
+            final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
+
+            if (disbursementDataArray == null || disbursementDataArray.size() == 0) {
                 final String errorMessage = "For this loan product, disbursement details must be provided";
                 throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
             }
-            if (disbursementDetails.size() > loanProduct.maxTrancheCount()) {
+            if (disbursementDataArray.size() > loanProduct.maxTrancheCount()) {
                 final String errorMessage = "Number of tranche shouldn't be greter than " + loanProduct.maxTrancheCount();
                 throw new ExceedingTrancheCountException(LoanApiConstants.disbursementDataParameterName, errorMessage,
                         loanProduct.maxTrancheCount(), disbursementDetails.size());
@@ -1531,7 +1533,7 @@ public class Loan extends AbstractPersistable<Long> {
         return amount;
     }
 
-    private void updateDisbursementDetails(final JsonCommand command, final Map<String, Object> actualChanges) {
+    public void updateDisbursementDetails(final JsonCommand command, final Map<String, Object> actualChanges) {
 
         List<Long> list = fetchDisbursementIds();
 
@@ -1588,23 +1590,27 @@ public class Loan extends AbstractPersistable<Long> {
                             && StringUtils.isNotBlank((jsonObject.get(LoanApiConstants.disbursementIdParameterName).getAsString()))) {
                         id = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementIdParameterName).getAsLong();
                     }
-                    Date actualDisbursementDate = null;
-                    LoanDisbursementDetails disbursementDetails = new LoanDisbursementDetails(expectedDisbursementDate, actualDisbursementDate, principal);
-                    if (id == null) {
-                        disbursementDetails.updateLoan(this);
-                        this.disbursementDetails.add(disbursementDetails);
-                        actualChanges.put(LoanApiConstants.disbursementDataParameterName, expectedDisbursementDate + "-" + principal);
-                        actualChanges.put("recalculateLoanSchedule", true);
-                    } else {
-                        list.remove(id);
+                    if(id != null){
                         LoanDisbursementDetails loanDisbursementDetail = fetchLoanDisbursementsById(id);
-                        if (!loanDisbursementDetail.equals(disbursementDetails)) {
-                            loanDisbursementDetail.copy(disbursementDetails);
-                            actualChanges.put("disbursementDetailId", id);
-                            actualChanges.put("recalculateLoanSchedule", true);
+                        list.remove(id);
+                        if(loanDisbursementDetail.actualDisbursementDate() == null){
+                        	Date actualDisbursementDate = null;
+                            LoanDisbursementDetails disbursementDetails = new LoanDisbursementDetails(expectedDisbursementDate, actualDisbursementDate, principal);
+                            if (!loanDisbursementDetail.equals(disbursementDetails)) {
+                                loanDisbursementDetail.copy(disbursementDetails);
+                                actualChanges.put("disbursementDetailId", id);
+                                actualChanges.put("recalculateLoanSchedule", true);
+                            }
                         }
                     }
-                    i++;
+                    else{
+                    	Date actualDisbursementDate = null;
+                        LoanDisbursementDetails disbursementDetails = new LoanDisbursementDetails(expectedDisbursementDate, actualDisbursementDate, principal);
+                            disbursementDetails.updateLoan(this);
+                            this.disbursementDetails.add(disbursementDetails);
+                            actualChanges.put(LoanApiConstants.disbursementDataParameterName, expectedDisbursementDate + "-" + principal);
+                            actualChanges.put("recalculateLoanSchedule", true);
+                    }i++;
                 } while (i < disbursementDataArray.size());
                 for (Long id : list) {
                     this.disbursementDetails.remove(fetchLoanDisbursementsById(id));
@@ -2173,12 +2179,25 @@ public class Loan extends AbstractPersistable<Long> {
             } else {
                 for (LoanDisbursementDetails disbursementDetails : details) {
                     disbursementDetails.updateActualDisbursementDate(actualDisbursementDate.toDate());
-                    diff = diff.add(disbursementDetails.principal().subtract(principalDisbursed));
                     disbursementDetails.updatePrincipal(principalDisbursed);
                 }
             }
-            this.loanRepaymentScheduleDetail.setPrincipal(this.loanRepaymentScheduleDetail.getPrincipal().minus(diff).getAmount());
-            if (diff.compareTo(BigDecimal.ZERO) == -1) {
+            if(this.loanProduct().isMultiDisburseLoan()){
+                Collection<LoanDisbursementDetails> loanDisburseDetails = this.getDisbursementDetails();
+            	BigDecimal setPrincipalAmount = BigDecimal.ZERO;
+                for (LoanDisbursementDetails disbursementDetails : loanDisburseDetails) {
+                	setPrincipalAmount = setPrincipalAmount.add(disbursementDetails.principal());
+                }
+                this.loanRepaymentScheduleDetail.setPrincipal(setPrincipalAmount);
+                if(setPrincipalAmount.compareTo(this.approvedPrincipal) == 1){
+                	final String errorMsg = "Loan can't be disbursed,disburse amount is exceeding approved principal ";
+                    throw new LoanDisbursalException(errorMsg, "disburse.amount.must.be.less.than.approved.principal", principalDisbursed,
+                            this.approvedPrincipal);
+                }
+            }else{
+                this.loanRepaymentScheduleDetail.setPrincipal(this.loanRepaymentScheduleDetail.getPrincipal().minus(diff).getAmount());
+            }
+            if (!(this.loanProduct().isMultiDisburseLoan()) && diff.compareTo(BigDecimal.ZERO) == -1) {
                 final String errorMsg = "Loan can't be disbursed,disburse amount is exceeding approved amount ";
                 throw new LoanDisbursalException(errorMsg, "disburse.amount.must.be.less.than.approved.amount", principalDisbursed,
                         this.loanRepaymentScheduleDetail.getPrincipal().getAmount());
@@ -3525,7 +3544,7 @@ public class Loan extends AbstractPersistable<Long> {
         boolean isRegenerationRequired = false;
         if (this.loanProduct.isMultiDisburseLoan()) {
             LoanDisbursementDetails details = fetchLastDisburseDetail();
-            if (!details.expectedDisbursementDate().equals(details.actualDisbursementDate())) {
+            if (details != null && !(details.expectedDisbursementDate().equals(details.actualDisbursementDate()))) {
                 isRegenerationRequired = true;
             }
         }
@@ -4454,19 +4473,30 @@ public class Loan extends AbstractPersistable<Long> {
         return this.disbursementDetails;
     }
 
-    public ChangedTransactionDetail updateDisbursementDateForTranche(final LoanDisbursementDetails disbursementDetails,
+    public ChangedTransactionDetail updateDisbursementDateAndAmountForTranche(final LoanDisbursementDetails disbursementDetails,
             final JsonCommand command, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
             final Map<String, Object> actualChanges, final ScheduleGeneratorDTO scheduleGeneratorDTO, final AppUser currentUser) {
+        final Locale locale = command.extractLocale();
         validateAccountStatus(LoanEvent.LOAN_EDIT_MULTI_DISBURSE_DATE);
-        final LocalDate expectedDisbursementDate = command.localDateValueOfParameterNamed(LoanApiConstants.disbursementDateParameterName);
-        disbursementDetails.updateExpectedDisbursementDate(expectedDisbursementDate.toDate());
+        final BigDecimal principal = command.bigDecimalValueOfParameterNamed(LoanApiConstants.updatedDisbursementPrincipalParameterName, locale);
+        final LocalDate expectedDisbursementDate = command.localDateValueOfParameterNamed(LoanApiConstants.updatedDisbursementDateParameterName);
+        disbursementDetails.updateExpectedDisbursementDateAndAmount(expectedDisbursementDate.toDate(), principal);
         actualChanges.put(LoanApiConstants.disbursementDateParameterName,
                 command.stringValueOfParameterNamed(LoanApiConstants.disbursementDateParameterName));
         actualChanges.put(LoanApiConstants.disbursementIdParameterName,
                 command.stringValueOfParameterNamed(LoanApiConstants.disbursementIdParameterName));
+        actualChanges.put(LoanApiConstants.disbursementPrincipalParameterName, 
+        		command.bigDecimalValueOfParameterNamed(LoanApiConstants.disbursementPrincipalParameterName, locale));
         existingTransactionIds.addAll(findExistingTransactionIds());
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
+        Collection<LoanDisbursementDetails> loanDisburseDetails = this.getDisbursementDetails();
+    	BigDecimal setPrincipalAmount = BigDecimal.ZERO;
+        for (LoanDisbursementDetails details : loanDisburseDetails) {
+        	setPrincipalAmount = setPrincipalAmount.add(details.principal());
+        }
+        
+        this.loanRepaymentScheduleDetail.setPrincipal(setPrincipalAmount);
         if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
             regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO, currentUser);
         } else {
@@ -4600,7 +4630,7 @@ public class Loan extends AbstractPersistable<Long> {
         return changedTransactionDetail;
     }
 
-    private void regenerateRepaymentScheduleWithInterestRecalculation(final ScheduleGeneratorDTO generatorDTO, final AppUser currentUser) {
+    public void regenerateRepaymentScheduleWithInterestRecalculation(final ScheduleGeneratorDTO generatorDTO, final AppUser currentUser) {
 
         LocalDate lastTransactionDate = getLastUserTransactionDate();
         generatorDTO.setLastTransactionDate(lastTransactionDate);
