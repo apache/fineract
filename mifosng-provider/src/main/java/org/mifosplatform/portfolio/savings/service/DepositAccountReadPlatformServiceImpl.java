@@ -10,14 +10,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.data.PaginationParameters;
 import org.mifosplatform.infrastructure.core.data.PaginationParametersDataValidator;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
@@ -32,6 +36,7 @@ import org.mifosplatform.portfolio.account.domain.AccountTransferType;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarFrequencyType;
+import org.mifosplatform.portfolio.calendar.domain.CalendarType;
 import org.mifosplatform.portfolio.calendar.service.CalendarReadPlatformService;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
@@ -103,6 +108,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     private final RecurringAccountDepositTransactionTemplateMapper rdTransactionTemplateMapper;
     private final DropdownReadPlatformService dropdownReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
+    private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     @Autowired
     public DepositAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -197,9 +203,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         sqlBuilder.append(this.depositAccountForMaturityRowMapper.schema());
         sqlBuilder.append(" WHERE da.deposit_type_enum in (?, ?) and da.status_enum = ?");
 
-        return this.jdbcTemplate.query(sqlBuilder.toString(), this.depositAccountForMaturityRowMapper, new Object[] {
-                DepositAccountType.FIXED_DEPOSIT.getValue(), DepositAccountType.RECURRING_DEPOSIT.getValue(),
-                SavingsAccountStatusType.ACTIVE.getValue() });
+        LocalDate today = DateUtils.getLocalDateOfTenant();
+
+        return this.jdbcTemplate.query(
+                sqlBuilder.toString(),
+                this.depositAccountForMaturityRowMapper,
+                new Object[] { formatter.print(today), DepositAccountType.FIXED_DEPOSIT.getValue(),
+                        DepositAccountType.RECURRING_DEPOSIT.getValue(), SavingsAccountStatusType.ACTIVE.getValue() });
     }
 
     @Override
@@ -480,6 +490,27 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
         return this.jdbcTemplate.query(sqlBuilder.toString(), mapper, new Object[] { SavingsAccountTransactionType.WITHDRAWAL.getValue(),
                 SavingsAccountTransactionType.INTEREST_POSTING.getValue(), SavingsAccountStatusType.ACTIVE.getValue() });
+    }
+
+    @Override
+    public Collection<Map<String, Object>> retriveDataForRDScheduleCreation() {
+        final StringBuilder sb = new StringBuilder(300);
+        sb.append(" select rd.savings_account_id savingsId, rd.mandatory_recommended_deposit_amount as amount,");
+        sb.append(" mc.recurrence as recurrence ,");
+        sb.append(" max(ms.duedate) as dueDate , max(ms.installment) as installment,");
+        sb.append(" count(ms.installment) as futureInstallemts");
+        sb.append(" from m_deposit_account_term_and_preclosure dat ");
+        sb.append(" inner join m_savings_account sa on sa.id = dat.savings_account_id and sa.status_enum = ?");
+        sb.append(" inner join m_deposit_account_recurring_detail rd on rd.savings_account_id = dat.savings_account_id ");
+        sb.append(" inner join m_calendar_instance mci on mci.entity_type_enum = ? and mci.entity_id = dat.savings_account_id  ");
+        sb.append(" inner join m_calendar mc  on mc.id = mci.calendar_id and mc.calendar_type_enum = ?");
+        sb.append(" inner join m_mandatory_savings_schedule ms on ms.savings_account_id = dat.savings_account_id and ms.duedate > ?");
+        sb.append(" where dat.deposit_period is null");
+        sb.append(" group by ms.savings_account_id");
+
+        return this.jdbcTemplate.queryForList(sb.toString(), SavingsAccountStatusType.ACTIVE.getValue(),
+                CalendarEntityType.SAVINGS.getValue(), CalendarType.COLLECTION.getValue(),
+                formatter.print(DateUtils.getLocalDateOfTenant()));
     }
 
     private static abstract class DepositAccountMapper implements RowMapper<DepositAccountData> {
@@ -1300,6 +1331,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append("da.account_no as accountNumber, ");
             sqlBuilder.append("da.deposit_type_enum as depositTypeId ");
             sqlBuilder.append("FROM m_savings_account da ");
+            sqlBuilder.append("inner join m_deposit_account_term_and_preclosure dat on dat.savings_account_id = da.id ");
+            sqlBuilder.append("and dat.maturity_date is not null and dat.maturity_date <= ? ");
 
             this.schemaSql = sqlBuilder.toString();
         }

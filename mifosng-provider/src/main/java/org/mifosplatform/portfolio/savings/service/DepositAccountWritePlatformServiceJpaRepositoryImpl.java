@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.savings.service;
 
+import static org.mifosplatform.portfolio.savings.DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.amountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeIdParamName;
@@ -312,8 +313,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                         financialYearBeginningMonth);
             }
 
-            final LocalDate overdueUptoDate = account.maturityDate().isAfter(DateUtils.getLocalDateOfTenant()) ? DateUtils
-                    .getLocalDateOfTenant() : account.maturityDate();
+            final LocalDate overdueUptoDate = DateUtils.getLocalDateOfTenant();
             account.updateOverduePayments(overdueUptoDate);
             final boolean isInterestTransfer = false;
             if (account.isBeforeLastPostingPeriod(account.getActivationLocalDate())) {
@@ -586,8 +586,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final boolean isPreMatureClosure = false;
         account.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
 
-        final LocalDate overdueUptoDate = account.maturityDate().isAfter(DateUtils.getLocalDateOfTenant()) ? DateUtils
-                .getLocalDateOfTenant() : account.maturityDate();
+        final LocalDate overdueUptoDate = DateUtils.getLocalDateOfTenant();
 
         if (savingsAccountTransaction.isDeposit()) {
             account.updateScheduleInstallments();
@@ -682,8 +681,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         if (savingsAccountTransaction.isDeposit()) {
             account.handleScheduleInstallments(savingsAccountTransaction);
         }
-        final LocalDate overdueUptoDate = account.maturityDate().isAfter(DateUtils.getLocalDateOfTenant()) ? DateUtils
-                .getLocalDateOfTenant() : account.maturityDate();
+        final LocalDate overdueUptoDate = DateUtils.getLocalDateOfTenant();
         account.updateOverduePayments(overdueUptoDate);
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
@@ -833,6 +831,13 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
                 DepositAccountType.RECURRING_DEPOSIT);
         checkClientOrGroupActive(account);
+        if (account.maturityDate() == null) {
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                    .resource(RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME + DepositsApiConstants.preMatureCloseAction);
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("can.not.close.as.premature");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
 
         this.depositAccountDomainService.handleRDAccountPreMatureClosure(account, paymentDetail, user, command,
                 DateUtils.getLocalDateOfTenant(), changes);
