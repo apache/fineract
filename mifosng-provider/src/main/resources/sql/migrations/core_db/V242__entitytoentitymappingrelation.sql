@@ -33,3 +33,6 @@ INSERT INTO `m_entity_relation` (`from_entity_type`, `to_entity_type`, `code_nam
 INSERT INTO `m_entity_relation` (`from_entity_type`, `to_entity_type`, `code_name`) VALUES (5, 2, 'role_access_to_loan_products');
 INSERT INTO `m_entity_relation` (`from_entity_type`, `to_entity_type`, `code_name`) VALUES (5, 3, 'role_access_to_savings_products');
 
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('infrastructure', 'CREATE_ENTITYMAPPING', 'ENTITYMAPPING', 'CREATE', 0);
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('infrastructure', 'UPDATE_ENTITYMAPPING', 'ENTITYMAPPING', 'UPDATE', 0);
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('infrastructure', 'DELETE_ENTITYMAPPING', 'ENTITYMAPPING', 'DELETE', 0);
