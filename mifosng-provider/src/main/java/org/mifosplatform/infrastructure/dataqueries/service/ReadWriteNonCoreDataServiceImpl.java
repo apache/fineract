@@ -31,6 +31,7 @@ import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.exception.PlatformServiceUnavailableException;
@@ -966,6 +967,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             this.context.authenticatedUser();
             if (!isRegisteredDataTable(datatableName)) { throw new DatatableNotFoundException(datatableName); }
             validateDatatableName(datatableName);
+            assertDataTableEmpty(datatableName);
             deregisterDatatable(datatableName);
             String[] sqlArray = null;
             if (this.configurationDomainService.isConstraintApproachEnabledForDatatables()) {
@@ -988,6 +990,14 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
 
             throwExceptionIfValidationWarningsExist(dataValidationErrors);
+        }
+    }
+
+    private void assertDataTableEmpty(final String datatableName) {
+        final String sql = "select count(*) from `" + datatableName + "`";
+        final int rowCount = this.jdbcTemplate.queryForObject(sql, Integer.class);
+        if (rowCount != 0) {
+            throw new GeneralPlatformDomainRuleException("error.msg.non.empty.datatable.cannot.be.deleted", "Non-empty datatable cannot be deleted.");
         }
     }
 
