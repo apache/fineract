@@ -910,7 +910,17 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
-        } else {
+        } else if (wrapper.isEntityMappingResource()) {
+            if (wrapper.isCreate()) {
+                handler = this.applicationContext.getBean("createEntityToEntityMappingCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdate()) {
+                handler = this.applicationContext.getBean("updateEntityToEntityMappingCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDelete()) {
+                handler = this.applicationContext.getBean("deleteEntityToEntityMappingCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
+        }else {
 
             throw new UnsupportedCommandException(wrapper.commandName());
         }
