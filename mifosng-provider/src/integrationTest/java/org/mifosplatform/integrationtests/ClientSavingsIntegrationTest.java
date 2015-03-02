@@ -205,7 +205,7 @@ public class ClientSavingsIntegrationTest {
         final String openningBalance = "1600";
         final String enforceMinRequiredBalance = "true";
         final boolean allowOverdraft = false;
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, openningBalance ,
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, openningBalance,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
         Assert.assertNotNull(savingsProductID);
 
@@ -551,6 +551,13 @@ public class ClientSavingsIntegrationTest {
                 ((Float) savingsChargeForPay.get("amount")).toString(), sdf.format(cal.getTime()));
         HashMap paidCharge = this.savingsAccountHelper.getSavingsCharge(savingsId, (Integer) savingsChargeForPay.get("id"));
         assertEquals(savingsChargeForPay.get("amount"), paidCharge.get("amountPaid"));
+
+        // temporary fix, this test case needs to be re-factored (will fail
+        // again on Jan 15 2016)
+        cal.set(Calendar.YEAR, (Integer) dates.get(0) + 1);
+        this.savingsAccountHelper.payCharge((Integer) savingsChargeForPay.get("id"), savingsId,
+                ((Float) savingsChargeForPay.get("amount")).toString(), sdf.format(cal.getTime()));
+        paidCharge = this.savingsAccountHelper.getSavingsCharge(savingsId, (Integer) savingsChargeForPay.get("id"));
 
         Integer inactivatedChargeId = (Integer) this.savingsAccountHelper.inactivateCharge(annualSavingsChargeId, savingsId,
                 CommonConstants.RESPONSE_RESOURCE_ID);
