@@ -23,7 +23,8 @@ public enum JobName {
     UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS("Update Deposit Accounts Maturity details"),
     TRANSFER_INTEREST_TO_SAVINGS("Transfer Interest To Savings"),
     ADD_PERIODIC_ACCRUAL_ENTRIES("Add Periodic Accrual Transactions"),
-    RECALCULATE_INTEREST_FOR_LOAN("Recalculate Interest For Loans");
+    RECALCULATE_INTEREST_FOR_LOAN("Recalculate Interest For Loans"),
+    GENERATE_RD_SCEHDULE("Generate Mandatory Savings Schedule");
 
     private final String name;
 

@@ -195,6 +195,11 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
         this.maturityAmount = this.depositAmount.add(interestPayable);
         this.maturityDate = maturityDate.toDate();
     }
+    
+    public void updateDepositAmount(final BigDecimal depositAmount) {
+        this.depositAmount = depositAmount;
+    }
+
 
     public LocalDate getMaturityLocalDate() {
         LocalDate maturityLocalDate = null;

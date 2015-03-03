@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.savings.service;
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.mifosplatform.infrastructure.core.data.PaginationParameters;
 import org.mifosplatform.infrastructure.core.service.Page;
@@ -38,4 +39,6 @@ public interface DepositAccountReadPlatformService {
     SavingsAccountTransactionData retrieveRecurringAccountDepositTransactionTemplate(final Long accountId);
 
     Collection<AccountTransferDTO> retrieveDataForInterestTransfer();
+
+    Collection<Map<String, Object>> retriveDataForRDScheduleCreation();
 }

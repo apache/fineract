@@ -5,17 +5,25 @@
  */
 package org.mifosplatform.scheduledjobs.service;
 
+import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSourceServiceFactory;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.exception.JobExecutionException;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
+import org.mifosplatform.portfolio.savings.DepositAccountUtils;
 import org.mifosplatform.portfolio.savings.data.DepositAccountData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountAnnualFeeData;
 import org.mifosplatform.portfolio.savings.service.DepositAccountReadPlatformService;
@@ -33,6 +41,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService {
 
     private final static Logger logger = LoggerFactory.getLogger(ScheduledJobRunnerServiceImpl.class);
+    private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
+    private final DateTimeFormatter formatterWithTime = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
     private final RoutingDataSourceServiceFactory dataSourceServiceFactory;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
@@ -283,6 +293,62 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         }
 
         logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Deposit accounts affected by update: " + depositAccounts.size());
+    }
+
+    @Override
+    @CronTarget(jobName = JobName.GENERATE_RD_SCEHDULE)
+    public void generateRDSchedule() {
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
+        final Collection<Map<String, Object>> scheduleDetails = this.depositAccountReadPlatformService.retriveDataForRDScheduleCreation();
+        String insertSql = "INSERT INTO `m_mandatory_savings_schedule` (`savings_account_id`, `duedate`, `installment`, `deposit_amount`, `completed_derived`, `created_date`, `lastmodified_date`) VALUES ";
+        StringBuilder sb = new StringBuilder();
+        String currentDate = formatterWithTime.print(DateUtils.getLocalDateTimeOfTenant());
+        int iterations = 0;
+        for (Map<String, Object> details : scheduleDetails) {
+            Long count = (Long) details.get("futureInstallemts");
+            if (count == null) {
+                count = 0l;
+            }
+            final Long savingsId = (Long) details.get("savingsId");
+            final BigDecimal amount = (BigDecimal) details.get("amount");
+            final String recurrence = (String) details.get("recurrence");
+            Date date = (Date) details.get("dueDate");
+            LocalDate lastDepositDate = new LocalDate(date);
+            Integer installmentNumber = (Integer) details.get("installment");
+            while (count < DepositAccountUtils.GENERATE_MINIMUM_NUMBER_OF_FUTURE_INSTALMENTS) {
+                count++;
+                installmentNumber++;
+                lastDepositDate = DepositAccountUtils.calculateNextDepositDate(lastDepositDate, recurrence);
+
+                if (sb.length() > 0) {
+                    sb.append(", ");
+                }
+                sb.append("(");
+                sb.append(savingsId);
+                sb.append(",'");
+                sb.append(formatter.print(lastDepositDate));
+                sb.append("',");
+                sb.append(installmentNumber);
+                sb.append(",");
+                sb.append(amount);
+                sb.append(", b'0','");
+                sb.append(currentDate);
+                sb.append("','");
+                sb.append(currentDate);
+                sb.append("')");
+                iterations++;
+                if (iterations > 200) {
+                    jdbcTemplate.update(insertSql + sb.toString());
+                    sb = new StringBuilder();
+                }
+
+            }
+        }
+
+        if (sb.length() > 0) {
+            jdbcTemplate.update(insertSql + sb.toString());
+        }
+
     }
 
 }
