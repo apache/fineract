@@ -8545,6 +8545,9 @@ Request Body:
 						<tr class=alt>
 							<td>approvedLoanAmount</td>
 						</tr>
+						<tr class=alt>
+							<td>expectedDisbursementDate</td>
+						</tr>	
 					</table>
 				</div>
 				<div class="method-example">
@@ -8559,7 +8562,10 @@ Request Body:
     "locale": "en",
     "dateFormat": "dd MMMM yyyy",
     "approvedOnDate": "20 September 2011",
-    "note": "Loan approval note"
+    "expectedDisbursementDate" : "20 September 2011",
+    "note": "Loan approval note",
+    "disbursementData" : [{ id=226, principal="5", expectedDisbursementDate="20 September 2011"},
+    { id=227, principal="91", expectedDisbursementDate="21 September 2011"}]
 }
 </code>
 					<code class="method-response">

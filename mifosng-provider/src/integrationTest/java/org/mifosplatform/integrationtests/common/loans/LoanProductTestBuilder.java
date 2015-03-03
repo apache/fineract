@@ -77,7 +77,7 @@ public class LoanProductTestBuilder {
 
     private Boolean multiDisburseLoan = false;
     private final String outstandingLoanBalance = "35000";
-    private final String maxTrancheCount = "35000";
+    private final String maxTrancheCount = "3";
 
     private Boolean isInterestRecalculationEnabled = false;
     private String daysInYearType = "1";

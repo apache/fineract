@@ -78,7 +78,7 @@ public interface LoanWritePlatformService {
 
     CommandProcessingResult undoWriteOff(Long loanId);
 
-    CommandProcessingResult updateDisbursementDateForTranche(Long loanId, Long disbursementId, JsonCommand command);
+    CommandProcessingResult updateDisbursementDateAndAmountForTranche(Long loanId, Long disbursementId, JsonCommand command);
 
     void recalculateInterest();
 
@@ -87,5 +87,7 @@ public interface LoanWritePlatformService {
     void applyMeetingDateChanges(Calendar calendar, Collection<CalendarInstance> loanCalendarInstances);
 
     CommandProcessingResult makeLoanRefund(Long loanId, JsonCommand command);
+
+	CommandProcessingResult addAndDeleteLoanDisburseDetails(Long loanId, JsonCommand command);
 
 }

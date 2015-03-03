@@ -14,19 +14,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class UpdateLoanDisbuseDateCommandHandler implements NewCommandSourceHandler {
+public class AddAndDeleteLoanDisburseDetailsCommandHandler implements NewCommandSourceHandler {
 
     private final LoanWritePlatformService writePlatformService;
 
     @Autowired
-    public UpdateLoanDisbuseDateCommandHandler(final LoanWritePlatformService writePlatformService) {
+    public AddAndDeleteLoanDisburseDetailsCommandHandler(final LoanWritePlatformService writePlatformService) {
         this.writePlatformService = writePlatformService;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-    	 
-        return this.writePlatformService.updateDisbursementDateAndAmountForTranche(command.getLoanId(), command.entityId(), command);
+
+        return this.writePlatformService.addAndDeleteLoanDisburseDetails(command.getLoanId(), command);
     }
 }

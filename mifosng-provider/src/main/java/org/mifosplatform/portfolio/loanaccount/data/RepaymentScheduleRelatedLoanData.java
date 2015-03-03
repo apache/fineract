@@ -19,18 +19,16 @@ public class RepaymentScheduleRelatedLoanData {
     private final LocalDate actualDisbursementDate;
     private final CurrencyData currency;
     private final BigDecimal principal;
-    private final BigDecimal approvedPrincipal;
     private final BigDecimal inArrearsTolerance;
     private final BigDecimal totalFeeChargesAtDisbursement;
 
     public RepaymentScheduleRelatedLoanData(final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate,
-            final CurrencyData currency, final BigDecimal principal, final BigDecimal approvedPrincipal,
+            final CurrencyData currency, final BigDecimal principal,
             final BigDecimal inArrearsTolerance, final BigDecimal totalFeeChargesAtDisbursement) {
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.actualDisbursementDate = actualDisbursementDate;
         this.currency = currency;
         this.principal = principal;
-        this.approvedPrincipal = approvedPrincipal;
         this.inArrearsTolerance = inArrearsTolerance;
         this.totalFeeChargesAtDisbursement = totalFeeChargesAtDisbursement;
     }
@@ -64,7 +62,6 @@ public class RepaymentScheduleRelatedLoanData {
     }
 
     public DisbursementData disbursementData() {
-        return new DisbursementData(null, this.expectedDisbursementDate, this.actualDisbursementDate, this.principal,
-                this.approvedPrincipal);
+        return new DisbursementData(null, this.expectedDisbursementDate, this.actualDisbursementDate, this.principal);
     }
 }

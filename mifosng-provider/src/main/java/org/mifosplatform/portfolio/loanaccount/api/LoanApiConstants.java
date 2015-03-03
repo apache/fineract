@@ -12,6 +12,8 @@ public interface LoanApiConstants {
     public static final String disbursementDataParameterName = "disbursementData";
     public static final String disbursementDateParameterName = "expectedDisbursementDate";
     public static final String disbursementPrincipalParameterName = "principal";
+    public static final String updatedDisbursementDateParameterName = "updatedExpectedDisbursementDate";
+    public static final String updatedDisbursementPrincipalParameterName = "updatedPrincipal";
     public static final String disbursementIdParameterName = "id";
     public static final String principalDisbursedParameterName = "transactionAmount";
 
@@ -37,5 +39,9 @@ public interface LoanApiConstants {
     public static final String PRINCIPAL_AMOUNT_SHOULD_BE_SAME = "sum.of.multi.disburse.amounts.must.equal.with.total.principal";
     public static final String DISBURSEMENT_DATE_UNIQUE_ERROR = "disbursement.date.must.be.unique.for.tranches";
     public static final String ALREADY_DISBURSED = "can.not.change.disbursement.date";
+    public static final String APPROVED_AMOUNT_IS_LESS_THAN_SUM_OF_TRANCHES = "sum.of.multi.disburse.amounts.must.be.equal.to.or.lesser.than.approved.principal";
+    public static final String DISBURSEMENT_DATES_NOT_IN_ORDER = "disbursements.should.be.ordered.based.on.their.disbursement.dates";
+    public static final String DISBURSEMENT_DATE_BEFORE_ERROR = "disbursement.date.of.tranche.cannot.be.before.expected.disbursement.date";
+
 
 }
