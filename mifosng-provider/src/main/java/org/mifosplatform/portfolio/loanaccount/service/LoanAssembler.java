@@ -298,6 +298,7 @@ public class LoanAssembler {
                 do {
                     final JsonObject jsonObject = disbursementDataArray.get(i).getAsJsonObject();
                     Date expectedDisbursementDate = null;
+                    Date actualDisbursementDate = null;
                     BigDecimal principal = null;
 
                     if (jsonObject.has(LoanApiConstants.disbursementDateParameterName)) {
@@ -312,7 +313,8 @@ public class LoanAssembler {
                             && StringUtils.isNotBlank((jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).getAsString()))) {
                         principal = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementPrincipalParameterName).getAsBigDecimal();
                     }
-                    disbursementDatas.add(new LoanDisbursementDetails(expectedDisbursementDate, null, principal));
+                    
+                    disbursementDatas.add(new LoanDisbursementDetails(expectedDisbursementDate, actualDisbursementDate, principal));
                     i++;
                 } while (i < disbursementDataArray.size());
             }
