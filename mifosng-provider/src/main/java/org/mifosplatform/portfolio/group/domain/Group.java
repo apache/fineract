@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -118,6 +119,9 @@ public final class Group extends AbstractPersistable<Long> {
     @JoinColumn(name = "submittedon_userid", nullable = true)
     private AppUser submittedBy;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "center", orphanRemoval = true)
+    private Set<StaffAssignmentHistory> staffHistory;
+
     // JPA default constructor for entity
     protected Group() {
         this.name = null;
@@ -174,6 +178,7 @@ public final class Group extends AbstractPersistable<Long> {
 
         this.submittedOnDate = submittedOnDate.toDate();
         this.submittedBy = currentUser;
+        this.staffHistory = null;
 
         associateClients(clientMembers);
 
@@ -372,10 +377,18 @@ public final class Group extends AbstractPersistable<Long> {
     }
 
     public void updateStaff(final Staff staff) {
+        if (this.isCenter() && this.isActive()) {
+            LocalDate updatedDate = DateUtils.getLocalDateOfTenant();
+            reassignStaff(staff, updatedDate);
+        }
         this.staff = staff;
     }
 
     public void unassignStaff() {
+        if (this.isCenter() && this.isActive()) {
+            LocalDate dateOfStaffUnassigned = DateUtils.getLocalDateOfTenant();
+            removeStaff(dateOfStaffUnassigned);
+        }
         this.staff = null;
     }
 
@@ -619,5 +632,44 @@ public final class Group extends AbstractPersistable<Long> {
 
     public Set<Client> getClientMembers() {
         return this.clientMembers;
+    }
+
+    // StaffAssignmentHistory[during center creation]
+    public void caputreStaffHistoryDuringCenterCreation(final Staff newStaff, final LocalDate assignmentDate) {
+        if (this.isCenter() && this.isActive() && staff != null) {
+            this.staff = newStaff;
+            final StaffAssignmentHistory staffAssignmentHistory = StaffAssignmentHistory.createNew(this, this.staff, assignmentDate);
+            if (staffAssignmentHistory != null) {
+                staffHistory = new HashSet<>();
+                this.staffHistory.add(staffAssignmentHistory);
+            }
+        }
+    }
+
+    // StaffAssignmentHistory[assign staff]
+    public void reassignStaff(final Staff newStaff, final LocalDate assignmentDate) {
+        this.staff = newStaff;
+        final StaffAssignmentHistory staffAssignmentHistory = StaffAssignmentHistory.createNew(this, this.staff, assignmentDate);
+        this.staffHistory.add(staffAssignmentHistory);
+    }
+
+    // StaffAssignmentHistory[unassign staff]
+    public void removeStaff(final LocalDate unassignDate) {
+        final StaffAssignmentHistory latestHistoryRecord = findLatestIncompleteHistoryRecord();
+        if (latestHistoryRecord != null) {
+            latestHistoryRecord.updateEndDate(unassignDate);
+        }
+    }
+
+    private StaffAssignmentHistory findLatestIncompleteHistoryRecord() {
+
+        StaffAssignmentHistory latestRecordWithNoEndDate = null;
+        for (final StaffAssignmentHistory historyRecord : this.staffHistory) {
+            if (historyRecord.isCurrentRecord()) {
+                latestRecordWithNoEndDate = historyRecord;
+                break;
+            }
+        }
+        return latestRecordWithNoEndDate;
     }
 }
