@@ -189,7 +189,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             newGroup.generateHierarchy();
 
             this.groupRepository.saveAndFlush(newGroup);
-
+            newGroup.caputreStaffHistoryDuringCenterCreation(staff, activationDate);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withOfficeId(groupOffice.getId()) //
@@ -404,9 +404,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
         this.fromApiJsonDeserializer.validateForUnassignStaff(command.json());
-
         final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(grouptId);
-
         final Staff presentStaff = groupForUpdate.getStaff();
         Long presentStaffId = null;
         if (presentStaff == null) { throw new GroupHasNoStaffException(grouptId); }
@@ -442,7 +440,6 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         Staff staff = null;
         final Long staffId = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
-
         final boolean inheritStaffForClientAccounts = command
                 .booleanPrimitiveValueOfParameterNamed(GroupingTypesApiConstants.inheritStaffForClientAccounts);
         staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, groupForUpdate.getOffice().getHierarchy());
@@ -476,7 +473,6 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 }
             }
         }
-
         this.groupRepository.saveAndFlush(groupForUpdate);
 
         actualChanges.put(GroupingTypesApiConstants.staffIdParamName, staffId);

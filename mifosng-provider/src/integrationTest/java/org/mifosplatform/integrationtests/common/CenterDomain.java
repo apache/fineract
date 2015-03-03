@@ -8,25 +8,27 @@ package org.mifosplatform.integrationtests.common;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.mifosplatform.infrastructure.core.service.DateUtils;
+
 import com.google.gson.Gson;
 
 public class CenterDomain implements Comparable<CenterDomain> {
 
     public static class Builder {
 
-        private int id;
+        private Integer id;
         private HashMap status;
         private boolean active;
         private String name;
         private String externalId;
-        private int staffId;
-        private int officeId;
+        private Integer staffId;
+        private Integer officeId;
         private String officeName;
         private String hierarchy;
         private ArrayList<HashMap> groupMembers;
 
-        private Builder(final int id, final int statusid, final String statuscode, final String statusvalue, final boolean active,
-                final String name, final String externalId, final int staffId, final int officeID, final String officeName,
+        private Builder(final Integer id, final Integer statusid, final String statuscode, final String statusvalue, final boolean active,
+                final String name, final String externalId, final Integer staffId, final int officeID, final String officeName,
                 final String hierarchy, final ArrayList<HashMap> groupMembers) {
             this.id = id;
             this.status = new HashMap();
@@ -48,25 +50,26 @@ public class CenterDomain implements Comparable<CenterDomain> {
                     (String) this.status.get("value"), this.active, this.name, this.externalId, this.staffId, this.officeId,
                     this.officeName, this.hierarchy, groupMembers);
         }
+
     }
 
-    private int id;
+    private Integer id;
     private HashMap status;
     private boolean active;
     private String name;
     private String externalId;
-    private int staffId;
-    private int officeId;
+    private Integer staffId;
+    private Integer officeId;
     private String officeName;
     private String hierarchy;
     private ArrayList<HashMap> groupMembers;
 
     CenterDomain() {
-        super();
+        /* super(); */
     }
 
-    private CenterDomain(final int id, final int statusid, final String statuscode, final String statusvalue, final boolean active,
-            final String name, final String externalId, final int staffId, final int officeID, final String officeName,
+    private CenterDomain(final Integer id, final Integer statusid, final String statuscode, final String statusvalue, final boolean active,
+            final String name, final String externalId, final Integer staffId, final Integer officeID, final String officeName,
             final String hierarchy, final ArrayList<HashMap> groupMembers) {
         this.id = id;
         this.status = new HashMap();
@@ -91,22 +94,66 @@ public class CenterDomain implements Comparable<CenterDomain> {
         return new Gson().fromJson(jsonData, CurrencyDomain.class);
     }
 
-    public static Builder create(final int id, final int statusid, final String statuscode, final String statusvalue, final boolean active,
-            final String name, final String externalId, final int staffId, final int officeID, final String officeName,
-            final String hierarchy, final ArrayList<HashMap> groupMembers) {
+    public static Builder create(final Integer id, final Integer statusid, final String statuscode, final String statusvalue,
+            final boolean active, final String name, final String externalId, final Integer staffId, final Integer officeID,
+            final String officeName, final String hierarchy, final ArrayList<HashMap> groupMembers) {
         return new Builder(id, statusid, statuscode, statusvalue, active, name, externalId, staffId, officeID, officeName, hierarchy,
                 groupMembers);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static String jsonRequestToCreateCenter(Integer id, Integer statusId, String statusCode, String statusValue, Boolean active,
+            String activationDate, String submittedDate, String name, String externalId, Integer staffId, Integer officeID,
+            String officeName, String hierarchy, final int[] groupMembers) {
+        // String ids = String.valueOf(id);
+        final HashMap map = new HashMap<>();
+        if (id != null) map.put("id", id);
+        if (statusId != null) map.put("statusId", statusId);
+        if (statusCode != null) map.put("statusCode", statusCode);
+        if (statusValue != null) map.put("statusValue", statusValue);
+        map.put("officeId", "1");
+        map.put("name", randomNameGenerator("Center_Name_", 5));
+        map.put("externalId", randomIDGenerator("ID_", 7));
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("locale", "en");
+        if (staffId != null) {
+            map.put("staffId", String.valueOf(staffId));
+        }
+        if (active) {
+            map.put("active", "true");
+            map.put("locale", "en");
+            map.put("dateFormat", "dd MMM yyyy");
+            map.put("activationDate", activationDate);
+        } else {
+            map.put("active", "false");
+            if (submittedDate == null)
+                map.put("submittedOnDate", DateUtils.getDateOfTenant());
+            else
+                map.put("submittedOnDate", submittedDate);
+        }
+        if (externalId != null) map.put("externalId", externalId);
+        if (groupMembers != null) map.put("groupMembers", groupMembers);
+        System.out.println(map);
+        return new Gson().toJson(map);
+    }
+
+    public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
+        return Utils.randomStringGenerator(prefix, lenOfRandomSuffix);
+    }
+
+    private static String randomIDGenerator(final String prefix, final int lenOfRandomSuffix) {
+        return Utils.randomStringGenerator(prefix, lenOfRandomSuffix, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     }
 
     public String getExternalId() {
         return this.externalId;
     }
 
-    public int getStaffId() {
+    public Integer getStaffId() {
         return this.staffId;
     }
 
-    public int getId() {
+    public Integer getId() {
         return this.id;
     }
 
@@ -122,7 +169,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         return this.name;
     }
 
-    public int getOfficeId() {
+    public Integer getOfficeId() {
         return this.officeId;
     }
 
