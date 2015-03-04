@@ -189,7 +189,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             newGroup.generateHierarchy();
 
             this.groupRepository.saveAndFlush(newGroup);
-            newGroup.caputreStaffHistoryDuringCenterCreation(staff, activationDate);
+            newGroup.captureStaffHistoryDuringCenterCreation(staff, activationDate);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withOfficeId(groupOffice.getId()) //
