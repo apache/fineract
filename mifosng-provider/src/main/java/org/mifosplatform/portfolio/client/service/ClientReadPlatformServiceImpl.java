@@ -21,6 +21,7 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
@@ -33,7 +34,6 @@ import org.mifosplatform.portfolio.client.domain.ClientEnumerations;
 import org.mifosplatform.portfolio.client.domain.ClientStatus;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
-import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 import org.mifosplatform.portfolio.savings.service.SavingsProductReadPlatformService;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -274,8 +274,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         public ClientMembersOfGroupMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(200);
 
-            sqlBuilder.append("c.id as id, c.account_no as accountNo, c.external_id as externalId, c.status_enum as statusEnum,c.sub_status as subStatus, ");
-            sqlBuilder.append("cvSubStatus.code_value as subStatusValue,cvSubStatus.code_description as subStatusDesc,c.office_id as officeId, o.name as officeName, ");
+            sqlBuilder
+                    .append("c.id as id, c.account_no as accountNo, c.external_id as externalId, c.status_enum as statusEnum,c.sub_status as subStatus, ");
+            sqlBuilder
+                    .append("cvSubStatus.code_value as subStatusValue,cvSubStatus.code_description as subStatusDesc,c.office_id as officeId, o.name as officeName, ");
             sqlBuilder.append("c.transfer_to_office_id as transferToOfficeId, transferToOffice.name as transferToOfficeName, ");
             sqlBuilder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, ");
             sqlBuilder.append("c.fullname as fullname, c.display_name as displayName, ");
@@ -335,7 +337,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             final Integer statusEnum = JdbcSupport.getInteger(rs, "statusEnum");
             final EnumOptionData status = ClientEnumerations.status(statusEnum);
-            
+
             final Long subStatusId = JdbcSupport.getLong(rs, "subStatus");
             final String subStatusValue = rs.getString("subStatusValue");
             final String subStatusDesc = rs.getString("subStatusDesc");
@@ -396,9 +398,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                     submittedByLastname, activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate,
                     closedByUsername, closedByFirstname, closedByLastname);
 
-            return ClientData.instance(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
-                    middlename, lastname, fullname, displayName, externalId, mobileNo, dateOfBirth, gender, activationDate, imageId,
-                    staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId, clienttype, classification);
+            return ClientData.instance(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id,
+                    firstname, middlename, lastname, fullname, displayName, externalId, mobileNo, dateOfBirth, gender, activationDate,
+                    imageId, staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId, clienttype,
+                    classification);
 
         }
     }
@@ -490,7 +493,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String subStatusValue = rs.getString("subStatusValue");
             final String subStatusDesc = rs.getString("subStatusDesc");
             final CodeValueData subStatus = CodeValueData.instance(subStatusId, subStatusValue, subStatusDesc);
-            
+
             final Long officeId = JdbcSupport.getLong(rs, "officeId");
             final String officeName = rs.getString("officeName");
 
@@ -545,9 +548,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                     submittedByLastname, activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate,
                     closedByUsername, closedByFirstname, closedByLastname);
 
-            return ClientData.instance(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
-                    middlename, lastname, fullname, displayName, externalId, mobileNo, dateOfBirth, gender, activationDate, imageId,
-                    staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId, clienttype, classification);
+            return ClientData.instance(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id,
+                    firstname, middlename, lastname, fullname, displayName, externalId, mobileNo, dateOfBirth, gender, activationDate,
+                    imageId, staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId, clienttype,
+                    classification);
 
         }
     }
@@ -616,11 +620,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private static final class ClientIdentifierMapper implements RowMapper<ClientData> {
 
         public String clientLookupByIdentifierSchema() {
-            return "c.id as id, c.account_no as accountNo, c.status_enum as statusEnum, c.sub_status as subStatus, c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, "
-                    + "c.fullname as fullname, c.display_name as displayName,"
-                    + "c.office_id as officeId, o.name as officeName "
-                    + " from m_client c, m_office o, m_client_identifier ci "
-                    + "where o.id = c.office_id and c.id=ci.client_id "
+            return "c.id as id, c.account_no as accountNo, c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, "
+                    + "c.fullname as fullname, c.display_name as displayName," + "c.office_id as officeId, o.name as officeName "
+                    + " from m_client c, m_office o, m_client_identifier ci " + "where o.id = c.office_id and c.id=ci.client_id "
                     + "and ci.document_type_id= ? and ci.document_key like ?";
         }
 
@@ -629,14 +631,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             final Long id = rs.getLong("id");
             final String accountNo = rs.getString("accountNo");
-
-            final Integer statusEnum = JdbcSupport.getInteger(rs, "statusEnum");
-            final EnumOptionData status = ClientEnumerations.status(statusEnum);
-            
-            final Long subStatusId = JdbcSupport.getLong(rs, "subStatus");
-            final String subStatusValue = rs.getString("subStatusValue");
-            final String subStatusDesc = rs.getString("subStatusDesc");
-            final CodeValueData subStatus = CodeValueData.instance(subStatusId, subStatusValue, subStatusDesc);
 
             final String firstname = rs.getString("firstname");
             final String middlename = rs.getString("middlename");
@@ -647,8 +641,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final Long officeId = rs.getLong("officeId");
             final String officeName = rs.getString("officeName");
 
-            return ClientData.clientIdentifier(id, accountNo, status,subStatus, firstname, middlename, lastname, fullname, displayName, officeId,
-                    officeName);
+            return ClientData.clientIdentifier(id, accountNo, firstname, middlename, lastname, fullname, displayName, officeId, officeName);
         }
     }
 
@@ -662,8 +655,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     @Override
     public ClientData retrieveAllNarrations(final String clientNarrations) {
-        final List<CodeValueData> narrations = new ArrayList<>(
-                this.codeValueReadPlatformService.retrieveCodeValuesByCode(clientNarrations));
+        final List<CodeValueData> narrations = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode(clientNarrations));
         final Collection<CodeValueData> clientTypeOptions = null;
         final Collection<CodeValueData> clientClassificationOptions = null;
         return ClientData.template(null, null, null, null, narrations, null, null, clientTypeOptions, clientClassificationOptions);

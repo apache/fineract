@@ -154,9 +154,8 @@ final public class ClientData implements Comparable<ClientData> {
 
     }
 
-    public static ClientData clientIdentifier(final Long id, final String accountNo, final EnumOptionData status,
-            final CodeValueData subStatus, final String firstname, final String middlename, final String lastname, final String fullname,
-            final String displayName, final Long officeId, final String officeName) {
+    public static ClientData clientIdentifier(final Long id, final String accountNo, final String firstname, final String middlename,
+            final String lastname, final String fullname, final String displayName, final Long officeId, final String officeName) {
 
         final Long transferToOfficeId = null;
         final String transferToOfficeName = null;
@@ -183,6 +182,8 @@ final public class ClientData implements Comparable<ClientData> {
         final CodeValueData clientClassification = null;
         final Collection<CodeValueData> clientTypeOptions = null;
         final Collection<CodeValueData> clientClassificationOptions = null;
+        final EnumOptionData status = null;
+        final CodeValueData subStatus = null;
         return new ClientData(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
                 middlename, lastname, fullname, displayName, externalId, mobileNo, dateOfBirth, gender, activationDate, imageId, staffId,
                 staffName, allowedOffices, groups, staffOptions, closureReasons, genderOptions, timeline, savingProductOptions,
