@@ -16,6 +16,8 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.closure.domain.GLClosure;
 import org.mifosplatform.accounting.closure.domain.GLClosureRepository;
+import org.mifosplatform.accounting.financialactivityaccount.domain.FinancialActivityAccount;
+import org.mifosplatform.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
 import org.mifosplatform.accounting.glaccount.data.GLAccountDataForLookup;
 import org.mifosplatform.accounting.glaccount.domain.GLAccount;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountRepository;
@@ -80,7 +82,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private final OrganisationCurrencyRepositoryWrapper organisationCurrencyRepository;
     private final PlatformSecurityContext context;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
-    private final ConfigurationDomainService configurationDomainService;
+    private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper;
 
     @Autowired
     public JournalEntryWritePlatformServiceJpaRepositoryImpl(final GLClosureRepository glClosureRepository,
@@ -91,8 +93,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             final AccountingProcessorForSavingsFactory accountingProcessorForSavingsFactory,
             final GLAccountReadPlatformService glAccountReadPlatformService,
             final OrganisationCurrencyRepositoryWrapper organisationCurrencyRepository, final PlatformSecurityContext context,
-            final PaymentDetailWritePlatformService paymentDetailWritePlatformService,
-            final ConfigurationDomainService configurationDomainService) {
+            final PaymentDetailWritePlatformService paymentDetailWritePlatformService,final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper) {
         this.glClosureRepository = glClosureRepository;
         this.officeRepository = officeRepository;
         this.glJournalEntryRepository = glJournalEntryRepository;
@@ -106,7 +107,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         this.organisationCurrencyRepository = organisationCurrencyRepository;
         this.context = context;
         this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
-        this.configurationDomainService = configurationDomainService;
+        this.financialActivityAccountRepositoryWrapper = financialActivityAccountRepositoryWrapper;
     }
 
     @Transactional
@@ -450,16 +451,12 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             final JournalEntryCommand journalEntryCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
             journalEntryCommand.validateForCreate();
 
-            /**
-             * Global configuration 'office-opening-balances-contra-account'
-             * property value must not be null and it should be a equity
-             * account.
-             */
-            final Long contraId = this.configurationDomainService.retrieveOpeningBalancesContraAccount();
-            if (contraId == null) { throw new GeneralPlatformDomainRuleException(
-                    "error.msg.configuration.opening.balance.contra.account.cannot.be.null",
-                    "Configuration property 'office-opening-balances-contra-account' value can not be null",
-                    "office-opening-balances-contra-account"); }
+            final FinancialActivityAccount financialActivityAccountId = this.financialActivityAccountRepositoryWrapper.findByFinancialActivityTypeWithNotFoundDetection(300);
+        	final Long contraId = financialActivityAccountId.getGlAccount().getId();
+        	if (contraId == null) { throw new GeneralPlatformDomainRuleException(
+                    "error.msg.financial.activity.mapping.opening.balance.contra.account.cannot.be.null",
+                    "office-opening-balances-contra-account value can not be null",
+                    "office-opening-balances-contra-account");}
 
             validateJournalEntriesArePostedBefore(contraId);
 
