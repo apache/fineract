@@ -25,7 +25,6 @@ public class CommandWrapperBuilder {
     private String transactionId;
     private Long productId;
     private Long templateId;
-    private Long tellerId;
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
@@ -59,11 +58,6 @@ public class CommandWrapperBuilder {
 
     public CommandWrapperBuilder withSubEntityId(final Long withSubEntityId) {
         this.subentityId = withSubEntityId;
-        return this;
-    }
-
-    public CommandWrapperBuilder withTellerId(final Long withTellerId) {
-        this.tellerId = withTellerId;
         return this;
     }
 
@@ -744,7 +738,7 @@ public class CommandWrapperBuilder {
         this.actionName = "UPDATE";
         this.entityName = "DISBURSEMENTDETAIL";
         this.entityId = null;
-        this.loanId = loanId;    
+        this.loanId = loanId;
         this.href = "/loans/" + loanId + "/editdisbursementdetails/";
         return this;
     }

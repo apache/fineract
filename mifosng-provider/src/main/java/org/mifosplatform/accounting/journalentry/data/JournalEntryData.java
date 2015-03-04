@@ -36,7 +36,6 @@ public class JournalEntryData {
     private final BigDecimal amount;
     @SuppressWarnings("unused")
     private final CurrencyData currency;
-    @SuppressWarnings("unused")
     private final String transactionId;
     @SuppressWarnings("unused")
     private final Boolean manualEntry;

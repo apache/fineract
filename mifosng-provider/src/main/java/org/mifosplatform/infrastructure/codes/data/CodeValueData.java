@@ -14,7 +14,6 @@ public class CodeValueData implements Serializable {
 
     private final Long id;
 
-    @SuppressWarnings("unused")
     private final String name;
 
     @SuppressWarnings("unused")
@@ -53,7 +52,7 @@ public class CodeValueData implements Serializable {
     public Long getId() {
         return this.id;
     }
-    
+
     public String getName() {
         return this.name;
     }
