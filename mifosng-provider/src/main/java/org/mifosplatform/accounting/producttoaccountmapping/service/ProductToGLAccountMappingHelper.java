@@ -185,7 +185,7 @@ public class ProductToGLAccountMappingHelper {
          * Accounts in the system
          **/
         final Set<Long> existingCharges = new HashSet<>();
-        if (chargeToIncomeAccountMappingArray != null && chargeToIncomeAccountMappingArray.size() > 0) {
+        if (chargeToIncomeAccountMappingArray != null) {
             if (changes != null) {
                 changes.put(arrayFragmentName, command.jsonFragment(arrayFragmentName));
             }
