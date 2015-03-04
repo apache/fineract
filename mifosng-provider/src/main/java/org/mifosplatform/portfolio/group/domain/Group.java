@@ -217,6 +217,10 @@ public final class Group extends AbstractPersistable<Long> {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         activate(currentUser, activationLocalDate, dataValidationErrors);
+        if (this.isCenter() && this.hasStaff()) {
+            Staff staff = this.getStaff();
+            this.reassignStaff(staff, activationLocalDate);
+        }
         throwExceptionIfErrors(dataValidationErrors);
 
     }
@@ -492,6 +496,11 @@ public final class Group extends AbstractPersistable<Long> {
         return this.groupMembers.contains(group);
     }
 
+    public boolean hasStaff() {
+        if (this.staff != null) { return true; }
+        return false;
+    }
+
     public List<String> associateGroups(final Set<Group> groupMembersSet) {
 
         final List<String> differences = new ArrayList<>();
@@ -635,7 +644,7 @@ public final class Group extends AbstractPersistable<Long> {
     }
 
     // StaffAssignmentHistory[during center creation]
-    public void caputreStaffHistoryDuringCenterCreation(final Staff newStaff, final LocalDate assignmentDate) {
+    public void captureStaffHistoryDuringCenterCreation(final Staff newStaff, final LocalDate assignmentDate) {
         if (this.isCenter() && this.isActive() && staff != null) {
             this.staff = newStaff;
             final StaffAssignmentHistory staffAssignmentHistory = StaffAssignmentHistory.createNew(this, this.staff, assignmentDate);
