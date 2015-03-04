@@ -18,6 +18,8 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.common.AccountingEnumerations;
+import org.mifosplatform.accounting.financialactivityaccount.domain.FinancialActivityAccount;
+import org.mifosplatform.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
 import org.mifosplatform.accounting.glaccount.service.GLAccountReadPlatformService;
@@ -28,7 +30,6 @@ import org.mifosplatform.accounting.journalentry.data.TransactionDetailData;
 import org.mifosplatform.accounting.journalentry.data.TransactionTypeEnumData;
 import org.mifosplatform.accounting.journalentry.exception.JournalEntriesNotFoundException;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.exception.GeneralPlatformDomainRuleException;
@@ -58,20 +59,19 @@ import org.springframework.util.CollectionUtils;
 public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-    private final ConfigurationDomainService configurationDomainService;
     private final GLAccountReadPlatformService glAccountReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
+    private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper;
 
     private final PaginationHelper<JournalEntryData> paginationHelper = new PaginationHelper<>();
 
     @Autowired
-    public JournalEntryReadPlatformServiceImpl(final RoutingDataSource dataSource,
-            final ConfigurationDomainService configurationDomainService, final GLAccountReadPlatformService glAccountReadPlatformService,
-            final OfficeReadPlatformService officeReadPlatformService) {
+    public JournalEntryReadPlatformServiceImpl(final RoutingDataSource dataSource, final GLAccountReadPlatformService glAccountReadPlatformService,
+            final OfficeReadPlatformService officeReadPlatformService, final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.configurationDomainService = configurationDomainService;
         this.glAccountReadPlatformService = glAccountReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
+        this.financialActivityAccountRepositoryWrapper = financialActivityAccountRepositoryWrapper;
     }
 
     private static final class GLJournalEntryMapper implements RowMapper<JournalEntryData> {
@@ -356,15 +356,12 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
     @Override
     public OfficeOpeningBalancesData retrieveOfficeOpeningBalances(final Long officeId) {
 
-        /**
-         * Global configuration 'office-opening-balances-contra-account'
-         * property value must not be null and it should be a equity account.
-         */
-        final Long contraId = this.configurationDomainService.retrieveOpeningBalancesContraAccount();
-        if (contraId == null) { throw new GeneralPlatformDomainRuleException(
-                "error.msg.configuration.opening.balance.contra.account.cannot.be.null",
-                "Configuration property 'office-opening-balances-contra-account' value can not be null",
-                "office-opening-balances-contra-account"); }
+    	final FinancialActivityAccount financialActivityAccountId = this.financialActivityAccountRepositoryWrapper.findByFinancialActivityTypeWithNotFoundDetection(300);
+    	final Long contraId = financialActivityAccountId.getGlAccount().getId();
+    	if (contraId == null) { throw new GeneralPlatformDomainRuleException(
+                "error.msg.financial.activity.mapping.opening.balance.contra.account.cannot.be.null",
+                "office-opening-balances-contra-account value can not be null",
+                "office-opening-balances-contra-account");}
 
         final JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData();
         final GLAccountData contraAccount = this.glAccountReadPlatformService.retrieveGLAccountById(contraId, associationParametersData);
