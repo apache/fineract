@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.commands.service;
 
+import java.util.Random;
+
 import org.joda.time.DateTime;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.domain.CommandSourceRepository;
@@ -19,6 +21,8 @@ import org.mifosplatform.infrastructure.jobs.service.SchedulerJobRunnerReadServi
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,16 +68,34 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
 
         final String json = wrapper.getJson();
         CommandProcessingResult result = null;
+        JsonCommand command = null;
+        Integer numberOfRetries = 1;
+        Integer maxNumberOfRetries = 10;
         try {
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
-            final JsonCommand command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(),
-                    wrapper.getEntityId(), wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(),
-                    wrapper.getSavingsId(), wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId());
+            command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(), wrapper.getEntityId(),
+                    wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getSavingsId(),
+                    wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId());
 
             result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
         } catch (final RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
 
             result = this.processAndLogCommandService.logCommand(e.getCommandSourceResult());
+        } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
+            System.out.println("Number of times this transaction has been retried " + numberOfRetries);
+            if (numberOfRetries >= maxNumberOfRetries) {
+                System.out.println("This transaction is done for");
+                throw (exception);
+            }
+            try {
+                Random random = new Random();
+                int randomNum = random.nextInt(10) + 1;
+                Thread.sleep(1000 + (randomNum * 1000));
+                numberOfRetries = numberOfRetries + 1;
+            } catch (InterruptedException e) {
+                throw (exception);
+            }
+            this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
         }
 
         return result;
