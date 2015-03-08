@@ -110,7 +110,7 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
                     transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
 
                     final Money principalPortion = Money.zero(currency);
-                    loanTransaction.updateComponents(principalPortion, interestPortion, Money.zero(currency), Money.zero(currency));
+                    loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion,penaltyChargesPortion);
                 }
             }
 

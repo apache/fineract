@@ -6,7 +6,10 @@
 package org.mifosplatform.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.MathContext;
+import java.util.Map;
 
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 
@@ -42,14 +45,48 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
             final double interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
             @SuppressWarnings("unused") final Money totalCumulativeInterest,
             @SuppressWarnings("unused") final Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
-            final int daysInPeriodApplicableForInterest, final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms,
-            final int periodNumber, final MathContext mc) {
+            final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms, final int periodNumber, final MathContext mc,
+            final Map<LocalDate, Money> principalVariation, final LocalDate periodStartDate, final LocalDate periodEndDate,
+            final int daysForInterestInFullPeriod) {
+
+        LocalDate interestStartDate = periodStartDate;
+        Money interestForThisInstallment = totalCumulativePrincipal.zero();
+        Money balanceForInterestCalculation = outstandingBalance;
+        Money cumulatingInterestDueToGrace = cumulatingInterestPaymentDueToGrace;
+        final int daysInPeriodApplicableForInterest = Days.daysBetween(periodStartDate, periodEndDate).getDays();
+        if(principalVariation != null){
+        for (Map.Entry<LocalDate, Money> principal : principalVariation.entrySet()) {
+            if (!principal.getKey().isAfter(periodEndDate)) {
+                int interestForDays = Days.daysBetween(interestStartDate, principal.getKey()).getDays();
+                if (interestForDays > 0) {
+                    final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
+                            interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestDueToGrace,
+                            interestForDays, balanceForInterestCalculation);
+                    if (loanApplicationTerms.getInterestCalculationPeriodMethod().isDaily()) {
+                        interestForThisInstallment = interestForThisInstallment.plus(result.interest());
+                    } else {
+                        interestForThisInstallment = interestForThisInstallment.plus(calculateInterestForDays(daysForInterestInFullPeriod,
+                                result.interest().getAmount(), interestForDays));
+                    }
+                    cumulatingInterestDueToGrace = result.interestPaymentDueToGrace();
+                    interestStartDate = principal.getKey();
+                }
+                balanceForInterestCalculation = balanceForInterestCalculation.plus(principal.getValue());
+            }
+
+        }
+        }
+        int interestForDays = Days.daysBetween(interestStartDate, periodEndDate).getDays();
 
         final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
-                interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestPaymentDueToGrace,
-                daysInPeriodApplicableForInterest, outstandingBalance);
-
-        final Money interestForThisInstallment = result.interest();
+                interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestDueToGrace, interestForDays,
+                balanceForInterestCalculation);
+        if (loanApplicationTerms.getInterestCalculationPeriodMethod().isDaily()) {
+            interestForThisInstallment = interestForThisInstallment.plus(result.interest());
+        } else {
+            interestForThisInstallment = interestForThisInstallment.plus(calculateInterestForDays(daysForInterestInFullPeriod, result
+                    .interest().getAmount(), interestForDays));
+        }
 
         Money principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator,
                 daysInPeriodApplicableForInterest, outstandingBalance, periodNumber, mc);

@@ -6,7 +6,10 @@
 package org.mifosplatform.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.MathContext;
+import java.util.Map;
 
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.monetary.domain.Money;
 
 public class FlatInterestLoanScheduleGenerator extends AbstractLoanScheduleGenerator {
@@ -15,9 +18,10 @@ public class FlatInterestLoanScheduleGenerator extends AbstractLoanScheduleGener
     public PrincipalInterest calculatePrincipalInterestComponentsForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
             final double interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
             final Money totalCumulativeInterest, final Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
-            final int daysInPeriodApplicableForInterest, final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms,
-            final int periodNumber, final MathContext mc) {
-
+            final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms, final int periodNumber, final MathContext mc,
+            @SuppressWarnings("unused") Map<LocalDate, Money> principalVariation, LocalDate periodStartDate, LocalDate periodEndDate,
+            @SuppressWarnings("unused") int daysForInterestInFullPeriod) {
+        final int daysInPeriodApplicableForInterest = Days.daysBetween(periodStartDate, periodEndDate).getDays();
         Money principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator,
                 daysInPeriodApplicableForInterest, outstandingBalance, periodNumber, mc);
 

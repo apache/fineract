@@ -6,55 +6,32 @@
 package org.mifosplatform.portfolio.loanaccount.loanschedule.domain;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 
 public class RecalculationDetail {
 
-    private boolean isLatePayment;
-    private boolean isInterestompound;
-    private LocalDate startDate;
-    private LocalDate toDate;
-    private Money amount;
+    private LocalDate transactionDate;
+    private boolean isProcessed;
+    private LoanTransaction transaction;
 
-    public RecalculationDetail(final boolean isLatePayment, final LocalDate startDate, final LocalDate toDate, final Money amount,
-            final boolean isInterestompound) {
-        this.isLatePayment = isLatePayment;
-        this.startDate = startDate;
-        this.toDate = toDate;
-        this.amount = amount;
-        this.isInterestompound = isInterestompound;
+    public RecalculationDetail(final LocalDate transactionDate, final LoanTransaction transaction) {
+        this.transactionDate = transactionDate;
+        this.transaction = transaction;
     }
 
-    public boolean isLatePayment() {
-        return this.isLatePayment;
+    public LocalDate getTransactionDate() {
+        return this.transactionDate;
     }
 
-    public LocalDate getStartDate() {
-        return this.startDate;
+    public LoanTransaction getTransaction() {
+        return this.transaction;
     }
 
-    public LocalDate getToDate() {
-        return this.toDate;
+    public boolean isProcessed() {
+        return this.isProcessed;
     }
 
-    public Money getAmount() {
-        return this.amount;
-    }
-
-    public boolean isOverlapping(LocalDate startDate, LocalDate endDate) {
-        return !this.startDate.isAfter(endDate) && !startDate.isAfter(this.toDate);
-    }
-
-    public void updateAmount(Money amount) {
-        this.amount = amount;
-    }
-
-    public boolean isInterestompound() {
-        return this.isInterestompound;
-    }
-
-    
-    public void updateStartDate(LocalDate startDate) {
-        this.startDate = startDate;
+    public void setProcessed(boolean isProcessed) {
+        this.isProcessed = isProcessed;
     }
 }

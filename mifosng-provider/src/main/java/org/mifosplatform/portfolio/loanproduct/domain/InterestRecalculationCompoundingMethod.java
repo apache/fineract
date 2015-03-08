@@ -57,4 +57,13 @@ public enum InterestRecalculationCompoundingMethod {
         return this.getValue().equals(InterestRecalculationCompoundingMethod.FEE.getValue())
                 || this.getValue().equals(InterestRecalculationCompoundingMethod.INTEREST_AND_FEE.getValue());
     }
+
+    public boolean isCompoundingEnabled() {
+        return !this.getValue().equals(InterestRecalculationCompoundingMethod.NONE.getValue());
+    }
+
+    public boolean isInterestCompoundingEnabled() {
+        return this.getValue().equals(InterestRecalculationCompoundingMethod.INTEREST.getValue())
+                || this.getValue().equals(InterestRecalculationCompoundingMethod.INTEREST_AND_FEE.getValue());
+    }
 }

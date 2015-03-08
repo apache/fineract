@@ -33,20 +33,20 @@ public class LoanRepaymentScheduleProcessingWrapper {
         for (final LoanRepaymentScheduleInstallment period : repaymentPeriods) {
 
             final Money feeChargesDueForRepaymentPeriod = cumulativeFeeChargesDueWithin(startDate, period.getDueDate(), loanCharges,
-                    currency, period, repaymentPeriods.size(), totalPrincipal, totalInterest, !period.isRecalculatedInterestComponent(),
+                    currency, period, repaymentPeriods.size(), totalPrincipal, totalInterest, true,
                     lastTransactionDate);
             final Money feeChargesWaivedForRepaymentPeriod = cumulativeFeeChargesWaivedWithin(startDate, period.getDueDate(), loanCharges,
-                    currency, !period.isRecalculatedInterestComponent());
+                    currency, true);
             final Money feeChargesWrittenOffForRepaymentPeriod = cumulativeFeeChargesWrittenOffWithin(startDate, period.getDueDate(),
-                    loanCharges, currency, !period.isRecalculatedInterestComponent());
+                    loanCharges, currency, true);
 
             final Money penaltyChargesDueForRepaymentPeriod = cumulativePenaltyChargesDueWithin(startDate, period.getDueDate(),
                     loanCharges, currency, period, repaymentPeriods.size(), totalPrincipal, totalInterest,
-                    !period.isRecalculatedInterestComponent(), lastTransactionDate);
+                    true, lastTransactionDate);
             final Money penaltyChargesWaivedForRepaymentPeriod = cumulativePenaltyChargesWaivedWithin(startDate, period.getDueDate(),
-                    loanCharges, currency, !period.isRecalculatedInterestComponent());
+                    loanCharges, currency, true);
             final Money penaltyChargesWrittenOffForRepaymentPeriod = cumulativePenaltyChargesWrittenOffWithin(startDate,
-                    period.getDueDate(), loanCharges, currency, !period.isRecalculatedInterestComponent());
+                    period.getDueDate(), loanCharges, currency, true);
 
             period.updateChargePortion(feeChargesDueForRepaymentPeriod, feeChargesWaivedForRepaymentPeriod,
                     feeChargesWrittenOffForRepaymentPeriod, penaltyChargesDueForRepaymentPeriod, penaltyChargesWaivedForRepaymentPeriod,

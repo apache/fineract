@@ -42,4 +42,9 @@ public enum InterestCalculationPeriodMethod {
         }
         return repaymentMethod;
     }
+
+    public boolean isDaily() {
+        return this.value.equals(InterestCalculationPeriodMethod.DAILY.getValue());
+    }
+
 }

@@ -18,6 +18,9 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyReposit
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
+import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
+import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
+import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistory;
@@ -41,19 +44,22 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
     private final HolidayRepository holidayRepository;
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
     private final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService;
+    private final CalendarInstanceRepository calendarInstanceRepository;
 
     @Autowired
     public LoanReschedulePreviewPlatformServiceImpl(final LoanRescheduleRequestRepository loanRescheduleRequestRepository,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
             final ConfigurationDomainService configurationDomainService, final HolidayRepository holidayRepository,
             final WorkingDaysRepositoryWrapper workingDaysRepository,
-            final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService) {
+            final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService,
+            final CalendarInstanceRepository calendarInstanceRepository) {
         this.loanRescheduleRequestRepository = loanRescheduleRequestRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
         this.configurationDomainService = configurationDomainService;
         this.holidayRepository = holidayRepository;
         this.workingDaysRepository = workingDaysRepository;
         this.loanScheduleHistoryWritePlatformService = loanScheduleHistoryWritePlatformService;
+        this.calendarInstanceRepository = calendarInstanceRepository;
     }
 
     @Override
@@ -78,8 +84,14 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
         List<LoanRepaymentScheduleHistory> oldPeriods = this.loanScheduleHistoryWritePlatformService.createLoanScheduleArchive(
                 loan.getRepaymentScheduleInstallments(), loan, loanRescheduleRequest);
         HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
+        CalendarInstance restCalendarInstance = null;
+        if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+            restCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(loan.loanInterestRecalculationDetailId(),
+                    CalendarEntityType.LOAN_RECALCULATION_DETAIL.getValue());
+        }
+
         LoanRescheduleModel loanRescheduleModel = new DefaultLoanReschedulerFactory().reschedule(mathContext, interestMethod,
-                loanRescheduleRequest, applicationCurrency, holidayDetailDTO);
+                loanRescheduleRequest, applicationCurrency, holidayDetailDTO, restCalendarInstance);
         LoanRescheduleModel loanRescheduleModelWithOldPeriods = LoanRescheduleModel.createWithSchedulehistory(loanRescheduleModel,
                 oldPeriods);
         return loanRescheduleModelWithOldPeriods;
