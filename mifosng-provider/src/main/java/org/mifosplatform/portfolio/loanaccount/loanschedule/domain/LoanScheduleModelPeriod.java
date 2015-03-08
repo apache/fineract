@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.loanaccount.loanschedule.domain;
 import java.math.BigDecimal;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 
 public interface LoanScheduleModelPeriod {
@@ -33,4 +34,6 @@ public interface LoanScheduleModelPeriod {
     void addLoanCharges(BigDecimal feeCharge, BigDecimal penaltyCharge);
     
     boolean isRecalculatedInterestComponent();
+
+    void addPrincipalAmount(Money principalDue);
 }

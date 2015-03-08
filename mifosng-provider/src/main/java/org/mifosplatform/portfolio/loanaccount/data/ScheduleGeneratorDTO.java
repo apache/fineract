@@ -22,12 +22,13 @@ public class ScheduleGeneratorDTO {
     LocalDate lastTransactionDate;
 
     public ScheduleGeneratorDTO(final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency applicationCurrency,
-            final LocalDate calculatedRepaymentsStartingFromDate, final HolidayDetailDTO holidayDetailDTO) {
+            final LocalDate calculatedRepaymentsStartingFromDate, final HolidayDetailDTO holidayDetailDTO,
+            final CalendarInstance calendarInstanceForInterestRecalculation) {
 
         this.loanScheduleFactory = loanScheduleFactory;
         this.applicationCurrency = applicationCurrency;
         this.calculatedRepaymentsStartingFromDate = calculatedRepaymentsStartingFromDate;
-        this.calendarInstanceForInterestRecalculation = null;
+        this.calendarInstanceForInterestRecalculation = calendarInstanceForInterestRecalculation;
         this.recalculateFrom = null;
         this.overdurPenaltyWaitPeriod = null;
         this.lastTransactionDate = null;

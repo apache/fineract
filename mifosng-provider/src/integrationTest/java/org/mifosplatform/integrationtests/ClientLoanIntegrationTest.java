@@ -3389,18 +3389,20 @@ public class ClientLoanIntegrationTest {
         expectedvalues = new ArrayList<>();
         todaysDate = Calendar.getInstance();
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2482.55", "46.36", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2482.54", "46.37", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2505.67", "23.24", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2517.24", "11.67", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "11.79", "0.05", "0.0", "0.0");
 
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
         loanSchedule = this.loanTransactionHelper.getLoanFutureRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         expectedvalues = new ArrayList<>();
         todaysDate = Calendar.getInstance();
-        addRepaymentValues(expectedvalues, todaysDate, 0, "4965.31", "92.51", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 0, "4965.3", "92.52", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2505.67", "23.24", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2517.24", "11.67", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "11.79", "0.05", "0.0", "0.0");
 
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues, 0);
 
@@ -3495,9 +3497,10 @@ public class ClientLoanIntegrationTest {
         List<Map<String, Object>> expectedvalues = new ArrayList<>();
         todaysDate = Calendar.getInstance();
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "100.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2494.22", "34.69", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2505.73", "23.18", "200", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.29", "11.62", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2486.04", "42.87", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2497.5", "31.41", "200", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2508.98", "19.93", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "24.72", "8.38", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
         System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------");
@@ -3513,9 +3516,10 @@ public class ClientLoanIntegrationTest {
         expectedvalues = new ArrayList<>();
         todaysDate = Calendar.getInstance();
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "100.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2490.75", "38.16", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2505.71", "23.2", "200", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.28", "11.63", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2482.57", "46.34", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2497.49", "31.42", "200", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2508.96", "19.95", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "28.22", "8.4", "0.0", "0.0");
 
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
@@ -3529,9 +3533,10 @@ public class ClientLoanIntegrationTest {
         expectedvalues = new ArrayList<>();
         todaysDate = Calendar.getInstance();
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "100.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2494.22", "34.69", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2505.73", "23.18", "200", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.29", "11.62", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2486.04", "42.87", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2497.5", "31.41", "200", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2508.98", "19.93", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "24.72", "8.38", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
         Float earlyPayment = new Float("5100");
@@ -3544,9 +3549,10 @@ public class ClientLoanIntegrationTest {
         expectedvalues = new ArrayList<>();
         todaysDate = Calendar.getInstance();
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "100.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "5100", "27.96", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "0", "11.16", "200", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2417.24", "11.16", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "5057.13", "42.87", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "0", "19.55", "200", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2349.13", "11.35", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "110.98", "8.26", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
         HashMap prepayDetail = this.loanTransactionHelper.getPrepayAmount(this.requestSpec, this.responseSpec, loanID);
@@ -3614,11 +3620,14 @@ public class ClientLoanIntegrationTest {
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         expectedvalues = new ArrayList<>();
         todaysDate = Calendar.getInstance();
+        
+        
         addRepaymentValues(expectedvalues, todaysDate, -2, "2482.76", "46.15", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2482.55", "46.36", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2482.54", "46.37", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2482.33", "46.58", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2517.13", "11.78", "0.0", "0.0");
-
+        addRepaymentValues(expectedvalues, todaysDate, 1, "35.24", "0.16", "0.0", "0.0");
+        
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
         String JobName = "Apply penalty to overdue loans";
@@ -3813,9 +3822,10 @@ public class ClientLoanIntegrationTest {
         expectedvalues = new ArrayList<>();
         todaysDate = Calendar.getInstance();
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2482.55", "46.36", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2482.54", "46.37", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2505.67", "23.24", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2517.24", "11.67", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "11.79", "0.05", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
         todaysDate = Calendar.getInstance();
@@ -3889,9 +3899,10 @@ public class ClientLoanIntegrationTest {
         expectedvalues = new ArrayList<>();
         todaysDate = Calendar.getInstance();
         addRepaymentValues(expectedvalues, todaysDate, -1, "2482.76", "46.15", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2482.55", "46.36", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2482.54", "46.37", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2505.67", "23.24", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, "2517.24", "11.67", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "11.79", "0.05", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
         todaysDate = Calendar.getInstance();
