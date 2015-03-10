@@ -11,7 +11,7 @@ along with all the other source files inside a (sub-folder of) the "apps" folder
 directory from where runmifosx.bat/.sh is launched.  The web UI front-end is then accessible
 under mifosng-provider/apps - for example:
 
-    https://localhost:8443/mifosng-provider/apps/community-app/index.html
+    https://localhost:8443/mifosng-provider/apps/community-app/dist/community-app/index.html?baseApiUrl=https://localhost:8443&tenantIdentifier=default#/home
 
 We hope you'll have an amazing experience working with MifosX!
 
@@ -21,3 +21,10 @@ the Mifos X distribution ZIP package will (currently) have to be built using
 the Gradle 'dev' environment profile - e.g. using this command:
 
     ./gradlew -Penv=dev clean war dist
+
+We now also have a script which convenently prepares both the
+UI front-end and the API back-end together into a ZIP:
+
+    git clone --recursive  https://github.com/openMF/mifosx/
+    git submodule update --init --recursive; git submodule status
+    ./build.sh
