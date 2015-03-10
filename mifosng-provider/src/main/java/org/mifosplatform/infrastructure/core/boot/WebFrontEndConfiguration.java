@@ -16,9 +16,9 @@ public class WebFrontEndConfiguration extends WebMvcConfigurerAdapter {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/web/**").addResourceLocations("file:" +
+        registry.addResourceHandler("/apps/**").addResourceLocations("file:" +
                 System.getProperty("user.dir") + System.getProperty("file.separator") +
-                "web" + System.getProperty("file.separator"));
+                "apps" + System.getProperty("file.separator"));
     }
 
 }
