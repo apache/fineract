@@ -923,6 +923,12 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
+        } else if(wrapper.isWorkingDaysResource()) {
+            if(wrapper.isUpdate()){
+                handler = this.applicationContext.getBean("updateWorkingDaysCommandHandler",NewCommandSourceHandler.class);
+            }else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
         } else {
 
             throw new UnsupportedCommandException(wrapper.commandName());

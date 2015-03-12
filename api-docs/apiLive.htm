@@ -1846,11 +1846,17 @@
 							</tr>
 							<tr>
 								<td><a href="#workingdays">Working days</a></td>
+								<td>workingdays</td>
+								<td><a href="#workingdays_list">List workingdays</a></td>
+							    <td><a href="#workingdays_template">Working days template</a></td>
 								<td></td>
 								<td></td>
+							</tr>
+							<tr>
 								<td></td>
+								<td>workingdays/{workingdaysId}</td>
 								<td></td>
-								<td></td>
+								<td><a href="#workingdays_update">Update a workingdays</a></td>
 							</tr>
 							<tr>
 								<td><a href="#templates">User Generated Documents</a></td>
@@ -13737,6 +13743,31 @@ Request Body:
 					<p>
 						Allow transactions on non-working days is configurable by enabling/disbaling the allow-transactions-on-non_workingday parameter in <a href="#configs_global">Global configurations</a>.
 					</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandotory Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>recurrence</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Recurrence pattern</td>
+						</tr>
+						<tr class=alt>
+							<td>repaymentRescheduleType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>repayment reschedule type .Options listed on the schedule for repayments on non-working days
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>locale</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>locale must be provided.</td>
+						</tr>
+		
+					</table>
 				<table id="nw_repayment_schedule_rule" class=matrixHeading>
 					<tr class="matrixHeadingBG">
 						<td><div class="mifosXHeading2">Schedule for repayments on non-working day</div></td>
@@ -13770,6 +13801,111 @@ Request Body:
 						</td>
 					</tr>
 				</table>
+			</div>
+		</div>
+					<a id="workingdays_template" name="workingdays_template"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Working Days Template</h4>
+					<p>This is a convenience resource. It can be useful when
+						building maintenance user interface screens for working days.
+					</p>
+					<p>Example Request:</p>
+					<div class=apiClick>workingdays/template</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/workingdays/template
+					</code>
+					<code class="method-response">
+{
+    "repaymentRescheduleOptions": [
+        {
+            "id": 1,
+            "code": "RepaymentRescheduleType.same.day",
+            "value": "same day"
+        },
+        {
+            "id": 4,
+            "code": "RepaymentRescheduleType.move.to.previous.working.day",
+            "value": "move to previous working day"
+        },
+        {
+            "id": 3,
+            "code": "RepaymentRescheduleType.move.to.next.repayment.meeting.day",
+            "value": "move to next repayment meeting day"
+        },
+        {
+            "id": 2,
+            "code": "RepaymentRescheduleType.move.to.next.working.day",
+            "value": "move to next working day"
+        }
+    ]
+}
+					</code>
+				</div>
+			</div>
+		<a id="workingdays_list" name="workingdays_list" class="old-syle-anchor">&nbsp;</a>
+		<div class="method-section">
+			<div class="method-description">
+				<h4>List Working days</h4>
+				<p>Example Requests:</p>
+				<div class=apiClick>workingdays</div>
+				<br>
+				<br>
+			</div>
+			<div class="method-example">
+				<code class="method-declaration">
+GET https://DomainName/api/v1/workingdays
+				</code>
+				<code class="method-response">
+[
+    {
+        "id": 1,
+        "recurrence": "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR",
+        "repaymentRescheduleType": {
+            "id": 4,
+            "code": "RepaymentRescheduleType.move.to.next.working.day",
+            "value": "move to next working day"
+        }
+    }
+]
+				</code>
+			</div>
+		</div>
+				<a id="workingdays_update" name="workingdays_update" class="old-syle-anchor">&nbsp;</a>
+		<div class="method-section">
+			<div class="method-description">
+				<h4>Update a Working Day</h4>
+				<table class=matrixHeading>
+					<tr class="matrixHeadingBG">
+						<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+					</tr>
+					<tr class=alt>
+						<td>recurrence,repaymentRescheduleType,locale</td>
+					</tr>
+				</table>
+			</div>
+			<div class="method-example">
+				<code class="method-declaration">
+PUT https://DomainName/api/v1/Workingdays/1
+				</code>
+				<code class="method-request">
+PUT holidays
+Content-Type: application/json
+Request Body:
+{
+"recurrence": "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,SU",
+"locale": "en",
+"repaymentsRescheduledType": 4
+}
+				</code>
+				<code class="method-response">
+{
+"resourceId": 1
+}
+				</code>
 			</div>
 		</div>
 
