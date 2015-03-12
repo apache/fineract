@@ -5,16 +5,6 @@
  */
 package org.mifosplatform.accounting.journalentry.service;
 
-import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.common.AccountingEnumerations;
@@ -23,25 +13,17 @@ import org.mifosplatform.accounting.financialactivityaccount.domain.FinancialAct
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
 import org.mifosplatform.accounting.glaccount.service.GLAccountReadPlatformService;
-import org.mifosplatform.accounting.journalentry.data.JournalEntryAssociationParametersData;
-import org.mifosplatform.accounting.journalentry.data.JournalEntryData;
-import org.mifosplatform.accounting.journalentry.data.OfficeOpeningBalancesData;
-import org.mifosplatform.accounting.journalentry.data.TransactionDetailData;
-import org.mifosplatform.accounting.journalentry.data.TransactionTypeEnumData;
+import org.mifosplatform.accounting.journalentry.data.*;
 import org.mifosplatform.accounting.journalentry.exception.JournalEntriesNotFoundException;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.exception.GeneralPlatformDomainRuleException;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
-import org.mifosplatform.infrastructure.core.service.Page;
-import org.mifosplatform.infrastructure.core.service.PaginationHelper;
-import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.*;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
-import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.portfolio.note.data.NoteData;
@@ -54,6 +36,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 @Service
 public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlatformService {
@@ -315,6 +307,22 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             }
         }
 
+        if (searchParameters.isLoanIdPassed()) {
+            sqlBuilder.append(whereClose + " journalEntry.loan_transaction_id  in (select id from m_loan_transaction where loan_id = ?)");
+            objectArray[arrayPos] = searchParameters.getLoanId();
+            arrayPos = arrayPos + 1;
+
+            whereClose = " and ";
+        }
+        if (searchParameters.isSavingsIdPassed()) {
+            sqlBuilder.append(whereClose + " journalEntry.savings_transaction_id in (select id from m_savings_account_transaction where savings_account_id = ?)");
+            objectArray[arrayPos] = searchParameters.getSavingsId();
+            arrayPos = arrayPos + 1;
+
+            whereClose = " and ";
+        }
+
+
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
 
@@ -465,7 +473,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         final Date toDate = null;
         final JournalEntryAssociationParametersData associationParametersData = null;
 
-        final SearchParameters searchParameters = SearchParameters.forJournalEntries(officeId, offset, limit, orderBy, sortOrder);
+        final SearchParameters searchParameters = SearchParameters.forJournalEntries(officeId, offset, limit, orderBy, sortOrder,null,null);
         return retrieveAll(searchParameters, contraId, onlyManualEntries, fromDate, toDate, transactionId, entityType,
                 associationParametersData);
 
