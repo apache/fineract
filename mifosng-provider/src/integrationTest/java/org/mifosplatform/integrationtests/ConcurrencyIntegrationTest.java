@@ -61,7 +61,7 @@ public class ConcurrencyIntegrationTest {
         Calendar date = Calendar.getInstance();
         date.set(2011, 9, 20);
         Float repaymentAmount = 100.0f;
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             System.out.println("Starting concurrent transaction number " + i);
             date.add(Calendar.DAY_OF_MONTH, 1);
             repaymentAmount = repaymentAmount + 100;
