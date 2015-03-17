@@ -1,0 +1,4 @@
+[submodule "apps/community-app"]
+	path = apps/community-app
+	url = https://github.com/openMF/community-app.git
+	branch = develop

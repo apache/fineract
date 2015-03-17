@@ -3,6 +3,20 @@ Mifos Platform Apps
 
 Community created apps built on top of mifosplatform are stored in source control repository @ https://github.com/openMF/
 
+To get the Git sub modules from here, use "--recursive" in your original git clone, or, if already cloned, do:
+
+    git submodule update --init --recursive; git submodule status
+
+Later to update both this main repo but also get the latest from the submodule(s), do:
+
+    git pull; git submodule update --remote
+
+Here is how a new Git submodule can (was originally) added here:
+
+    git submodule add -b develop https://github.com/openMF/community-app.git
+    git submodule init
+
+
 The Community App (AngularJS-based)
 ===============
 https://github.com/openMF/community-app

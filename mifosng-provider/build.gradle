@@ -78,7 +78,7 @@ task dist(type:Zip){
     }
 	from('../apps') {
 		fileMode = 0755
-		include '*.md'
+        include '**/*'
 		into('apps')
 	}
 	from('src/main/pentahoReports/') {
