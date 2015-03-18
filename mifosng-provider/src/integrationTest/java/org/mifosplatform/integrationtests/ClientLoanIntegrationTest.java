@@ -3652,10 +3652,10 @@ public class ClientLoanIntegrationTest {
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         expectedvalues = new ArrayList<>();
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        addRepaymentValues(expectedvalues, todaysDate, -2, "2482.76", "46.15", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2494.22", "34.69", "0.0", "252.89");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2492.89", "36.02", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.23", "11.68", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, -2, "2482.76", "46.15", "0.0", "252.89");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2493.05", "35.86", "0.0", "252.89");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2491.72", "37.19", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.22", "11.69", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
         repaymentDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -3667,10 +3667,10 @@ public class ClientLoanIntegrationTest {
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         expectedvalues = new ArrayList<>();
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        addRepaymentValues(expectedvalues, todaysDate, -2, "2482.76", "46.15", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2494.22", "34.69", "0.0", "252.89");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2498.39", "30.52", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.26", "11.65", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, -2, "2482.76", "46.15", "0.0", "252.89");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2493.05", "35.86", "0.0", "252.89");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2491.72", "37.19", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, todaysDate, 1, "2517.22", "11.69", "0.0", "0.0");
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
     }
