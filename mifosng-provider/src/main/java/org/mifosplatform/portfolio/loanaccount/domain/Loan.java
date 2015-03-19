@@ -2380,7 +2380,7 @@ public class Loan extends AbstractPersistable<Long> {
                 getExpectedFirstRepaymentOnDate(), scheduleGeneratorDTO.getCalculatedRepaymentsStartingFromDate(), getInArrearsTolerance(),
                 this.loanRepaymentScheduleDetail, this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount, disbursementData,
                 this.maxOutstandingLoanBalance, loanVariationTermsData, getInterestChargedFromDate(),
-                this.loanProduct.getPrincipalThresholdForLastInstalment(), this.loanProduct.getInstallmentAmountInMultiplesOf(),
+                this.loanProduct.getPrincipalThresholdForLastInstallment(), this.loanProduct.getInstallmentAmountInMultiplesOf(),
                 recalculationFrequencyType, restCalendarInstance, compoundingMethod);
 
         final LoanScheduleModel loanSchedule = loanScheduleGenerator.generate(mc, loanApplicationTerms, charges(),
@@ -4729,7 +4729,7 @@ public class Loan extends AbstractPersistable<Long> {
                 this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount, disbursementData, this.maxOutstandingLoanBalance,
                 loanVariationTermsData, getInterestChargedFromDate(), this.loanInterestRecalculationDetails,
                 calendarInstanceForInterestRecalculation, recalculationFrequencyType,
-                this.loanProduct.getPrincipalThresholdForLastInstalment(), this.loanProduct.getInstallmentAmountInMultiplesOf());
+                this.loanProduct.getPrincipalThresholdForLastInstallment(), this.loanProduct.getInstallmentAmountInMultiplesOf());
         return loanApplicationTerms;
     }
 
@@ -4782,7 +4782,7 @@ public class Loan extends AbstractPersistable<Long> {
                     loanTermPeriodFrequencyType, nthDayType, dayOfWeekType, getDisbursementDate(), getExpectedFirstRepaymentOnDate(), null,
                     getInArrearsTolerance(), this.loanRepaymentScheduleDetail, this.loanProduct.isMultiDisburseLoan(), this.fixedEmiAmount,
                     disbursementData, this.maxOutstandingLoanBalance, loanVariationTermsData, getInterestChargedFromDate(),
-                    this.loanProduct.getPrincipalThresholdForLastInstalment(), this.loanProduct.getInstallmentAmountInMultiplesOf(),
+                    this.loanProduct.getPrincipalThresholdForLastInstallment(), this.loanProduct.getInstallmentAmountInMultiplesOf(),
                     recalculationFrequencyType, restCalendarInstance, compoundingMethod);
 
             installment = loanScheduleGenerator.calculatePrepaymentAmount(this.repaymentScheduleInstallments, getCurrency(),
@@ -4996,7 +4996,7 @@ public class Loan extends AbstractPersistable<Long> {
                 dayOfWeekType, expectedDisbursementDate, repaymentsStartingFromDate, calculatedRepaymentsStartingFromDate,
                 inArrearsToleranceMoney, this.loanRepaymentScheduleDetail, loanProduct.isMultiDisburseLoan(), emiAmount, disbursementData,
                 maxOutstandingBalance, loanVariationTermsData, interestChargedFromDate,
-                this.loanProduct.getPrincipalThresholdForLastInstalment(), this.loanProduct.getInstallmentAmountInMultiplesOf(),
+                this.loanProduct.getPrincipalThresholdForLastInstallment(), this.loanProduct.getInstallmentAmountInMultiplesOf(),
                 recalculationFrequencyType, restCalendarInstance, compoundingMethod);
     }
 
