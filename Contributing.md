@@ -6,6 +6,10 @@ Before sending out a pull request, please ensure that the following pre-requisit
 
 1. API documentation has been updated to reflect any changes made to the API (new API's, adding new Fields or Options to existing API etc)
 
+1. Any relevant database changes are encapsulated in an SQL file with the next avilable version number at https://github.com/openMF/mifosx/tree/develop/mifosng-provider/src/main/resources/sql/migrations/core_db. These patches are automatically applied by Flyway on server startup. 
+
+For any modifications to the schema which affects data on existing installations (Ex: moving columns to new table etc), ensure that the upgrade scripts are also accompanied by data migration scripts in the same patch file
+
 1. An integration test is added/updated to test the new feature developed/bug-fix being made
 
 1. The pull request has a Jira issue associated with it. Details for creating issues on Jira are located at https://mifosforge.jira.com/wiki/display/MIFOSX/Getting+started+-+Contributing+to+MifosX#Gettingstarted-ContributingtoMifosX-CreateIssues
