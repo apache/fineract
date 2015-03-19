@@ -137,7 +137,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     private LoanProductGuaranteeDetails loanProductGuaranteeDetails;
 
     @Column(name = "principal_threshold_for_last_instalment", scale = 2, precision = 5, nullable = false)
-    private BigDecimal principalThresholdForLastInstalment;
+    private BigDecimal principalThresholdForLastInstallment;
 
     @Column(name = "account_moves_out_of_npa_only_on_arrears_completion")
     private boolean accountMovesOutOfNPAOnlyOnArrearsCompletion;
@@ -237,11 +237,11 @@ public class LoanProduct extends AbstractPersistable<Long> {
             loanProductGuaranteeDetails = LoanProductGuaranteeDetails.createFrom(command);
         }
 
-        BigDecimal principalThresholdForLastInstalment = command
-                .bigDecimalValueOfParameterNamed(LoanProductConstants.principalThresholdForLastInstalmentParamName);
+        BigDecimal principalThresholdForLastInstallment = command
+                .bigDecimalValueOfParameterNamed(LoanProductConstants.principalThresholdForLastInstallmentParamName);
 
-        if (principalThresholdForLastInstalment == null) {
-            principalThresholdForLastInstalment = multiDisburseLoan ? LoanProductConstants.DEFAULT_PRINCIPAL_THRESHOLD_FOR_MULTI_DISBURSE_LOAN
+        if (principalThresholdForLastInstallment == null) {
+            principalThresholdForLastInstallment = multiDisburseLoan ? LoanProductConstants.DEFAULT_PRINCIPAL_THRESHOLD_FOR_MULTI_DISBURSE_LOAN
                     : LoanProductConstants.DEFAULT_PRINCIPAL_THRESHOLD_FOR_SINGLE_DISBURSE_LOAN;
         }
         final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = command
@@ -258,7 +258,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 startDate, closeDate, externalId, useBorrowerCycle, loanProductBorrowerCycleVariations, multiDisburseLoan, maxTrancheCount,
                 outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment,
-                holdGuarantorFunds, loanProductGuaranteeDetails, principalThresholdForLastInstalment,
+                holdGuarantorFunds, loanProductGuaranteeDetails, principalThresholdForLastInstallment,
                 accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineEmiAmount, installmentAmountInMultiplesOf);
 
     }
@@ -484,7 +484,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final boolean isInterestRecalculationEnabled,
             final LoanProductInterestRecalculationDetails productInterestRecalculationDetails,
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final boolean holdGuarantorFunds,
-            final LoanProductGuaranteeDetails loanProductGuaranteeDetails, final BigDecimal principalThresholdForLastInstalment,
+            final LoanProductGuaranteeDetails loanProductGuaranteeDetails, final BigDecimal principalThresholdForLastInstallment,
             final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion, final boolean canDefineEmiAmount,
             final Integer installmentAmountInMultiplesOf) {
         this.fund = fund;
@@ -538,7 +538,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         this.minimumDaysBetweenDisbursalAndFirstRepayment = minimumDaysBetweenDisbursalAndFirstRepayment;
         this.holdGuaranteeFunds = holdGuarantorFunds;
         this.loanProductGuaranteeDetails = loanProductGuaranteeDetails;
-        this.principalThresholdForLastInstalment = principalThresholdForLastInstalment;
+        this.principalThresholdForLastInstallment = principalThresholdForLastInstallment;
         this.accountMovesOutOfNPAOnlyOnArrearsCompletion = accountMovesOutOfNPAOnlyOnArrearsCompletion;
         this.canDefineInstallmentAmount = canDefineEmiAmount;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
@@ -769,12 +769,12 @@ public class LoanProduct extends AbstractPersistable<Long> {
             this.loanProductGuaranteeDetails.update(command, actualChanges);
         }
 
-        if (command.isChangeInBigDecimalParameterNamed(LoanProductConstants.principalThresholdForLastInstalmentParamName,
-                this.principalThresholdForLastInstalment)) {
+        if (command.isChangeInBigDecimalParameterNamed(LoanProductConstants.principalThresholdForLastInstallmentParamName,
+                this.principalThresholdForLastInstallment)) {
             BigDecimal newValue = command
-                    .bigDecimalValueOfParameterNamed(LoanProductConstants.principalThresholdForLastInstalmentParamName);
-            actualChanges.put(LoanProductConstants.principalThresholdForLastInstalmentParamName, newValue);
-            this.principalThresholdForLastInstalment = newValue;
+                    .bigDecimalValueOfParameterNamed(LoanProductConstants.principalThresholdForLastInstallmentParamName);
+            actualChanges.put(LoanProductConstants.principalThresholdForLastInstallmentParamName, newValue);
+            this.principalThresholdForLastInstallment = newValue;
         }
         if (command.isChangeInBooleanParameterNamed(LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName,
                 this.accountMovesOutOfNPAOnlyOnArrearsCompletion)) {
@@ -1049,8 +1049,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return this.shortName;
     }
 
-    public BigDecimal getPrincipalThresholdForLastInstalment() {
-        return this.principalThresholdForLastInstalment;
+    public BigDecimal getPrincipalThresholdForLastInstallment() {
+        return this.principalThresholdForLastInstallment;
     }
 
     public boolean isArrearsBasedOnOriginalSchedule() {

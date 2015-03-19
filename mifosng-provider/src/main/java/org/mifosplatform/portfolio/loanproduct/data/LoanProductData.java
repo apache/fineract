@@ -136,7 +136,7 @@ public class LoanProductData {
     private final Boolean multiDisburseLoan;
     private final Integer maxTrancheCount;
     private final BigDecimal outstandingLoanBalance;
-    private final BigDecimal principalThresholdForLastInstalment;
+    private final BigDecimal principalThresholdForLastInstallment;
 
     private final Boolean holdGuaranteeFunds;
     private final LoanProductGuaranteeData productGuaranteeData;
@@ -191,7 +191,7 @@ public class LoanProductData {
         final BigDecimal outstandingLoanBalance = null;
         final LoanProductGuaranteeData productGuaranteeData = null;
         final Boolean holdGuaranteeFunds = false;
-        final BigDecimal principalThresholdForLastInstalment = null;
+        final BigDecimal principalThresholdForLastInstallment = null;
         final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = false;
 
         final EnumOptionData daysInMonthType = null;
@@ -211,7 +211,7 @@ public class LoanProductData {
                 interestRateVariations, numberOfRepaymentVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
                 graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds, productGuaranteeData,
-                principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount,
+                principalThresholdForLastInstallment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount,
                 installmentAmountInMultiplesOf);
     }
 
@@ -268,7 +268,7 @@ public class LoanProductData {
         final Integer minimumDaysBetweenDisbursalAndFirstRepayment = null;
         final Boolean holdGuaranteeFunds = false;
         final LoanProductGuaranteeData productGuaranteeData = null;
-        final BigDecimal principalThresholdForLastInstalment = null;
+        final BigDecimal principalThresholdForLastInstallment = null;
         final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = false;
         final boolean canDefineInstallmentAmount = false;
         final Integer installmentAmountInMultiplesOf = null;
@@ -282,7 +282,7 @@ public class LoanProductData {
                 interestRateVariations, numberOfRepaymentVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
                 graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds, productGuaranteeData,
-                principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount,
+                principalThresholdForLastInstallment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount,
                 installmentAmountInMultiplesOf);
     }
 
@@ -346,7 +346,7 @@ public class LoanProductData {
         final Integer minimumDaysBetweenDisbursalAndFirstRepayment = null;
         final Boolean holdGuaranteeFunds = false;
         final LoanProductGuaranteeData productGuaranteeData = null;
-        final BigDecimal principalThresholdForLastInstalment = null;
+        final BigDecimal principalThresholdForLastInstallment = null;
         final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = false;
         final boolean canDefineInstallmentAmount = false;
         final Integer installmentAmountInMultiplesOf = null;
@@ -360,8 +360,8 @@ public class LoanProductData {
                 principalVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle, numberOfRepaymentVariationsForBorrowerCycle,
                 multiDisburseLoan, maxTrancheCount, outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType,
                 daysInYearType, isInterestRecalculationEnabled, interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment,
-                holdGuaranteeFunds, productGuaranteeData, principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion,
-                canDefineInstallmentAmount, installmentAmountInMultiplesOf);
+                holdGuaranteeFunds, productGuaranteeData, principalThresholdForLastInstallment,
+                accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount, installmentAmountInMultiplesOf);
     }
 
     public static LoanProductData withAccountingDetails(final LoanProductData productData, final Map<String, Object> accountingMappings,
@@ -393,7 +393,7 @@ public class LoanProductData {
             final Integer overdueDaysForNPA, final EnumOptionData daysInMonthType, final EnumOptionData daysInYearType,
             final boolean isInterestRecalculationEnabled, final LoanProductInterestRecalculationData interestRecalculationData,
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment, boolean holdGuaranteeFunds,
-            final LoanProductGuaranteeData loanProductGuaranteeData, final BigDecimal principalThresholdForLastInstalment,
+            final LoanProductGuaranteeData loanProductGuaranteeData, final BigDecimal principalThresholdForLastInstallment,
             final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion, boolean canDefineInstallmentAmount,
             Integer installmentAmountInMultiplesOf) {
         this.id = id;
@@ -468,7 +468,7 @@ public class LoanProductData {
         this.interestRecalculationData = interestRecalculationData;
         this.holdGuaranteeFunds = holdGuaranteeFunds;
         this.productGuaranteeData = loanProductGuaranteeData;
-        this.principalThresholdForLastInstalment = principalThresholdForLastInstalment;
+        this.principalThresholdForLastInstallment = principalThresholdForLastInstallment;
         this.accountMovesOutOfNPAOnlyOnArrearsCompletion = accountMovesOutOfNPAOnlyOnArrearsCompletion;
 
         this.daysInMonthTypeOptions = null;
@@ -576,7 +576,7 @@ public class LoanProductData {
         this.interestRecalculationData = productData.interestRecalculationData;
         this.holdGuaranteeFunds = productData.holdGuaranteeFunds;
         this.productGuaranteeData = productData.productGuaranteeData;
-        this.principalThresholdForLastInstalment = productData.principalThresholdForLastInstalment;
+        this.principalThresholdForLastInstallment = productData.principalThresholdForLastInstallment;
         this.accountMovesOutOfNPAOnlyOnArrearsCompletion = productData.accountMovesOutOfNPAOnlyOnArrearsCompletion;
 
         this.daysInMonthTypeOptions = daysInMonthTypeOptions;

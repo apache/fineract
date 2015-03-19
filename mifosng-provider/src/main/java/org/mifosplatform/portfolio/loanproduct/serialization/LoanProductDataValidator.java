@@ -74,7 +74,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.isArrearsBasedOnOriginalScheduleParamName,
             LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment, LoanProductConstants.mandatoryGuaranteeParamName,
             LoanProductConstants.holdGuaranteeFundsParamName, LoanProductConstants.minimumGuaranteeFromGuarantorParamName,
-            LoanProductConstants.minimumGuaranteeFromOwnFundsParamName, LoanProductConstants.principalThresholdForLastInstalmentParamName,
+            LoanProductConstants.minimumGuaranteeFromOwnFundsParamName, LoanProductConstants.principalThresholdForLastInstallmentParamName,
             LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName, LoanProductConstants.canDefineEmiAmountParamName,
             LoanProductConstants.installmentAmountInMultiplesOfParamName));
 
@@ -335,10 +335,10 @@ public final class LoanProductDataValidator {
             }
         }
 
-        BigDecimal principalThresholdForLastInstalment = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                LoanProductConstants.principalThresholdForLastInstalmentParamName, element);
-        baseDataValidator.reset().parameter(LoanProductConstants.principalThresholdForLastInstalmentParamName)
-                .value(principalThresholdForLastInstalment).notLessThanMin(BigDecimal.ZERO).notGreaterThanMax(BigDecimal.valueOf(100));
+        BigDecimal principalThresholdForLastInstallment = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                LoanProductConstants.principalThresholdForLastInstallmentParamName, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.principalThresholdForLastInstallmentParamName)
+                .value(principalThresholdForLastInstallment).notLessThanMin(BigDecimal.ZERO).notGreaterThanMax(BigDecimal.valueOf(100));
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.canDefineEmiAmountParamName, element)) {
             final Boolean canDefineInstallmentAmount = this.fromApiJsonHelper.extractBooleanNamed(
                     LoanProductConstants.canDefineEmiAmountParamName, element);
@@ -789,11 +789,11 @@ public final class LoanProductDataValidator {
             }
         }
 
-        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.principalThresholdForLastInstalmentParamName, element)) {
-            BigDecimal principalThresholdForLastInstalment = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
-                    LoanProductConstants.principalThresholdForLastInstalmentParamName, element);
-            baseDataValidator.reset().parameter(LoanProductConstants.principalThresholdForLastInstalmentParamName)
-                    .value(principalThresholdForLastInstalment).notNull().notLessThanMin(BigDecimal.ZERO)
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.principalThresholdForLastInstallmentParamName, element)) {
+            BigDecimal principalThresholdForLastInstallment = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                    LoanProductConstants.principalThresholdForLastInstallmentParamName, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.principalThresholdForLastInstallmentParamName)
+                    .value(principalThresholdForLastInstallment).notNull().notLessThanMin(BigDecimal.ZERO)
                     .notGreaterThanMax(BigDecimal.valueOf(100));
         }
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.canDefineEmiAmountParamName, element)) {
