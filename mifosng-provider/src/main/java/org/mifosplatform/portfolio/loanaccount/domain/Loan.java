@@ -502,8 +502,7 @@ public class Loan extends AbstractPersistable<Long> {
         this.accountNumberRequiresAutoGeneration = accountNumberRequiresAutoGeneration;
     }
 
-    public ChangedTransactionDetail addLoanCharge(final LoanCharge loanCharge) {
-        ChangedTransactionDetail changedTransactionDetail = null;
+    public void addLoanCharge(final LoanCharge loanCharge) {
 
         validateLoanIsNotClosed(loanCharge);
 
@@ -554,27 +553,29 @@ public class Loan extends AbstractPersistable<Long> {
         }
         this.charges.add(loanCharge);
         this.summary = updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
-                .determineProcessor(this.transactionProcessingStrategy);
 
         // store Id's of existing loan transactions and existing reversed loan
         // transactions
         final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
         wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, charges(),
                 getLastUserTransactionForChargeCalc());
-        if (!loanCharge.isDueAtDisbursement()) {
-            final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
-            changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(),
-                    allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, charges(),
-                    getLastUserTransactionForChargeCalc());
-            for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
-                mapEntry.getValue().updateLoan(this);
-            }
-            // this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
-        }
-
         updateLoanSummaryDerivedFields();
 
+    }
+
+    public ChangedTransactionDetail reprocessTransactions() {
+        ChangedTransactionDetail changedTransactionDetail = null;
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
+                .determineProcessor(this.transactionProcessingStrategy);
+        final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
+        changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(),
+                allNonContraTransactionsPostDisbursement, getCurrency(), this.repaymentScheduleInstallments, charges(),
+                getLastUserTransactionForChargeCalc());
+        for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+            mapEntry.getValue().updateLoan(this);
+        }
+        this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
+        updateLoanSummaryDerivedFields();
         return changedTransactionDetail;
     }
 
