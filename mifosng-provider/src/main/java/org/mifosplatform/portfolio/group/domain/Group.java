@@ -348,16 +348,24 @@ public final class Group extends AbstractPersistable<Long> {
         return this.clientMembers.contains(client);
     }
 
-    public void generateHierarchy() {
-        if (this.parent != null) {
-            this.hierarchy = this.parent.hierarchyOf(getId());
-        } else {
-            this.hierarchy = "." + getId() + ".";
-        }
-    }
-
+	public void generateHierarchy() {
+		if (this.parent != null) {
+			this.hierarchy = this.parent.hierarchyOf(getId());
+		} else {
+			this.hierarchy = "." + getId() + ".";
+			for (Group group : this.groupMembers) {
+				group.setParent(this);
+				group.generateHierarchy();
+			}
+		}
+	}
+    
+	public void resetHierarchy() {
+			this.hierarchy = "." + this.getId();
+	}
+    
     private String hierarchyOf(final Long id) {
-        return this.hierarchy + id.toString() + ".";
+    	return this.hierarchy + id.toString() + ".";
     }
 
     public boolean isOfficeIdentifiedBy(final Long officeId) {
@@ -375,7 +383,7 @@ public final class Group extends AbstractPersistable<Long> {
         }
         return staffId;
     }
-
+   
     private void addChild(final Group group) {
         this.groupMembers.add(group);
     }
@@ -522,6 +530,8 @@ public final class Group extends AbstractPersistable<Long> {
 
             this.groupMembers.add(group);
             differences.add(group.getId().toString());
+            group.setParent(this);
+    		group.generateHierarchy();
         }
 
         return differences;
@@ -534,6 +544,7 @@ public final class Group extends AbstractPersistable<Long> {
             if (hasGroupAsMember(group)) {
                 this.groupMembers.remove(group);
                 differences.add(group.getId().toString());
+    			group.resetHierarchy();
             } else {
                 throw new GroupNotExistsInCenterException(group.getId(), getId());
             }
