@@ -349,15 +349,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             totalOutstandingInterestPaymentDueToGrace = principalInterestForThisPeriod.interestPaymentDueToGrace();
             Money principalForThisPeriod = principalInterestForThisPeriod.principal();
-
-            if (loanApplicationTerms.getAmortizationMethod().isEqualInstallment() && loanApplicationTerms.getFixedEmiAmount() != null) {
-                Money principalToBeAdjust = Money.of(currency, loanApplicationTerms.getFixedEmiAmount()).minus(principalForThisPeriod)
-                        .minus(interestForThisinstallment);
-                principalForThisPeriod = principalForThisPeriod.plus(principalToBeAdjust);
+            
+            if(principalForThisPeriod.isZero()){
+                loanApplicationTerms.resetFixedEmiAmount();
             }
-            principalForThisPeriod = loanApplicationTerms.adjustPrincipalIfLastRepaymentPeriod(principalForThisPeriod,
-                    totalCumulativePrincipal.plus(principalForThisPeriod), periodNumber);
-
+            
             // applies early payments on principal portion
             if (principalForThisPeriod.isGreaterThan(reducePrincipal)) {
                 principalForThisPeriod = principalForThisPeriod.minus(reducePrincipal);

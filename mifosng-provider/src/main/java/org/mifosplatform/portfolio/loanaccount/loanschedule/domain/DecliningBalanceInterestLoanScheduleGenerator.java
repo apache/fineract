@@ -98,7 +98,7 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
         // adjust if needed
         principalForThisInstallment = loanApplicationTerms.adjustPrincipalIfLastRepaymentPeriod(principalForThisInstallment,
                 totalCumulativePrincipalToDate, periodNumber);
-
+       
         return new PrincipalInterest(principalForThisInstallment, interestForThisInstallment, interestBroughtFowardDueToGrace);
     }
 }
