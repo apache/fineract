@@ -79,11 +79,19 @@ public class DepositAccountOnHoldTransactionReadPlatformServiceImpl implements D
         public DepositAccountOnHoldTransactionsMapper() {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
-            sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
-            sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
-            sqlBuilder.append("tr.is_reversed as reversed ");
-            sqlBuilder.append("from m_deposit_account_on_hold_transaction tr ");
+            sqlBuilder.append(" tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
+            sqlBuilder.append(" tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
+            sqlBuilder.append(" tr.is_reversed as reversed, sa.account_no as savingsAccNum, ");
+            sqlBuilder.append("sc.display_name as savingsClientName, ml.id as loanid, sa.id as savingid, ");
+            sqlBuilder.append(" ml.account_no as loanAccountNum, lc.display_name as loanClientName");
+            sqlBuilder.append(" from m_savings_account sa  ");
+            sqlBuilder.append(" join m_deposit_account_on_hold_transaction tr on sa.id = tr.savings_account_id ");
+            sqlBuilder.append(" join m_client sc on sc.id = sa.client_id");
             sqlBuilder.append(" left join m_guarantor_transaction gt on gt.deposit_on_hold_transaction_id = tr.id ");
+            sqlBuilder.append(" left join m_guarantor_funding_details mgfd on mgfd.id=gt.guarantor_fund_detail_id");
+            sqlBuilder.append(" left join m_portfolio_account_associations  pa on pa.id=mgfd.account_associations_id");
+            sqlBuilder.append(" left join m_loan ml on ml.id = pa.loan_account_id");
+            sqlBuilder.append(" left join m_client lc on lc.id = ml.client_id");
 
             this.schemaSql = sqlBuilder.toString();
         }
@@ -102,7 +110,14 @@ public class DepositAccountOnHoldTransactionReadPlatformServiceImpl implements D
             final LocalDate date = JdbcSupport.getLocalDate(rs, "transactionDate");
             final BigDecimal amount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "transactionAmount");
             final boolean reversed = rs.getBoolean("reversed");
-            return DepositAccountOnHoldTransactionData.instance(id, amount, transactionType, date, reversed);
+            final String savingsAccountNum = rs.getString("savingsAccNum");
+            final Long savingsId = rs.getLong("savingid");
+            final String savingsClientName = rs.getString("savingsClientName");
+            final String loanAccountNum = rs.getString("loanAccountNum");
+            final Long loanId = rs.getLong("loanid");
+            final String loanClientName = rs.getString("loanClientName");
+            return DepositAccountOnHoldTransactionData.instance(id, amount, transactionType, date, reversed, savingsId, savingsAccountNum,
+                    savingsClientName, loanId, loanAccountNum, loanClientName);
         }
     }
 
