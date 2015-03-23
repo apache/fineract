@@ -129,6 +129,7 @@ public class SavingsAccountTransactionDataValidator {
 
     private void validatePaymentTypeDetails(final DataValidatorBuilder baseDataValidator, JsonElement element) {
         // Validate all string payment detail fields for max length
+        boolean checkPaymentTypeDetails = false;
         final Integer paymentTypeId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
         baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).ignoreIfNull().integerGreaterThanZero();
         final Set<String> paymentDetailParameters = new HashSet<>(Arrays.asList(transactionAccountNumberParamName, checkNumberParamName,
@@ -137,6 +138,12 @@ public class SavingsAccountTransactionDataValidator {
             final String paymentDetailParameterValue = this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
             baseDataValidator.reset().parameter(paymentDetailParameterName).value(paymentDetailParameterValue).ignoreIfNull()
                     .notExceedingLengthOf(50);
+            if(paymentDetailParameterValue != null && !paymentDetailParameterValue.equals("")){
+                checkPaymentTypeDetails = true;
+            }
+        }
+        if(checkPaymentTypeDetails){
+            baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).notBlank().integerGreaterThanZero();
         }
 
     }
