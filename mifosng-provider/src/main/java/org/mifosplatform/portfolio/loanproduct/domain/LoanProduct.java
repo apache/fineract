@@ -136,7 +136,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
     private LoanProductGuaranteeDetails loanProductGuaranteeDetails;
 
-    @Column(name = "principal_threshold_for_last_instalment", scale = 2, precision = 5, nullable = false)
+    @Column(name = "principal_threshold_for_last_installment", scale = 2, precision = 5, nullable = false)
     private BigDecimal principalThresholdForLastInstallment;
 
     @Column(name = "account_moves_out_of_npa_only_on_arrears_completion")
