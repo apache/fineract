@@ -226,9 +226,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                 // date
                                 PrincipalInterest principalInterestForThisPeriod = calculatePrincipalInterestComponentsForPeriod(
                                         this.paymentPeriodsInOneYearCalculator, interestCalculationGraceOnRepaymentPeriodFraction,
-                                        totalCumulativePrincipal, totalCumulativeInterest, totalInterestChargedForFullLoanTerm,
-                                        totalOutstandingInterestPaymentDueToGrace, outstandingBalanceAsPerRest, loanApplicationTerms,
-                                        periodNumber, mc, mergeLateAndPaymentMaps(principalPortionMap, latePaymentMap, disburseDetailMap),
+                                        totalCumulativePrincipal.minus(reducePrincipal), totalCumulativeInterest,
+                                        totalInterestChargedForFullLoanTerm, totalOutstandingInterestPaymentDueToGrace,
+                                        outstandingBalanceAsPerRest, loanApplicationTerms, periodNumber, mc,
+                                        mergeLateAndPaymentMaps(principalPortionMap, latePaymentMap, disburseDetailMap),
                                         periodStartDateApplicableForInterest, detail.getTransactionDate(),
                                         daysInPeriodApplicableForInterest);
                                 interestForThisinstallment = principalInterestForThisPeriod.interest();
@@ -331,9 +332,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             // 5 determine principal,interest of repayment period
             PrincipalInterest principalInterestForThisPeriod = calculatePrincipalInterestComponentsForPeriod(
-                    this.paymentPeriodsInOneYearCalculator, interestCalculationGraceOnRepaymentPeriodFraction, totalCumulativePrincipal,
-                    totalCumulativeInterest, totalInterestChargedForFullLoanTerm, totalOutstandingInterestPaymentDueToGrace,
-                    outstandingBalanceAsPerRest, loanApplicationTerms, periodNumber, mc,
+                    this.paymentPeriodsInOneYearCalculator, interestCalculationGraceOnRepaymentPeriodFraction,
+                    totalCumulativePrincipal.minus(reducePrincipal), totalCumulativeInterest, totalInterestChargedForFullLoanTerm,
+                    totalOutstandingInterestPaymentDueToGrace, outstandingBalanceAsPerRest, loanApplicationTerms, periodNumber, mc,
                     mergeLateAndPaymentMaps(principalPortionMap, latePaymentMap, disburseDetailMap), periodStartDateApplicableForInterest,
                     scheduledDueDate, daysInPeriodApplicableForInterest);
 
@@ -349,11 +350,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             totalOutstandingInterestPaymentDueToGrace = principalInterestForThisPeriod.interestPaymentDueToGrace();
             Money principalForThisPeriod = principalInterestForThisPeriod.principal();
-            
-            if(principalForThisPeriod.isZero()){
+
+            if (principalForThisPeriod.isZero()) {
                 loanApplicationTerms.resetFixedEmiAmount();
             }
-            
+
             // applies early payments on principal portion
             if (principalForThisPeriod.isGreaterThan(reducePrincipal)) {
                 principalForThisPeriod = principalForThisPeriod.minus(reducePrincipal);

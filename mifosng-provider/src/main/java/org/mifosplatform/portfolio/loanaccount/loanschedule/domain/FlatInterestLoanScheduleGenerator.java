@@ -23,7 +23,7 @@ public class FlatInterestLoanScheduleGenerator extends AbstractLoanScheduleGener
             @SuppressWarnings("unused") int daysForInterestInFullPeriod) {
         final int daysInPeriodApplicableForInterest = Days.daysBetween(periodStartDate, periodEndDate).getDays();
         Money principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator,
-                daysInPeriodApplicableForInterest, outstandingBalance, periodNumber, mc);
+                daysInPeriodApplicableForInterest, outstandingBalance, periodNumber, mc, null);
 
         final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
                 interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestPaymentDueToGrace,

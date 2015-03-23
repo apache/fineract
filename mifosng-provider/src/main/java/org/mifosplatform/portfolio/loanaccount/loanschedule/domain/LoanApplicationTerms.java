@@ -422,7 +422,7 @@ public final class LoanApplicationTerms {
     }
 
     public Money calculateTotalPrincipalForPeriod(final PaymentPeriodsInOneYearCalculator calculator, final int daysInPeriod,
-            final Money outstandingBalance, final int periodNumber, final MathContext mc) {
+            final Money outstandingBalance, final int periodNumber, final MathContext mc, Money interestForThisInstallment) {
 
         Money principalForInstallment = this.principal.zero();
 
@@ -444,8 +444,8 @@ public final class LoanApplicationTerms {
                                 DaysInMonthType.DAYS_30, DaysInYearType.DAYS_365);
                         Money totalPmtForThisInstallment = calculateTotalDueForEqualInstallmentRepaymentPeriod(
                                 periodicInterestRateForRepaymentPeriod, outstandingBalance, periodsElapsed);
-                        principalForInstallment = calculatePrincipalDueForInstallment(calculator, mc, periodNumber,
-                                totalPmtForThisInstallment, daysInPeriod, outstandingBalance);
+                        principalForInstallment = calculatePrincipalDueForInstallment(periodNumber, totalPmtForThisInstallment,
+                                interestForThisInstallment);
                     break;
                     case EQUAL_PRINCIPAL:
                         principalForInstallment = calculateEqualPrincipalDueForInstallment(mc, periodNumber);
@@ -882,13 +882,9 @@ public final class LoanApplicationTerms {
         return principal;
     }
 
-    private Money calculatePrincipalDueForInstallment(final PaymentPeriodsInOneYearCalculator calculator, final MathContext mc,
-            final int periodNumber, final Money totalDuePerInstallment, final int daysInPeriod, final Money outstandingBalance) {
+    private Money calculatePrincipalDueForInstallment(final int periodNumber, final Money totalDuePerInstallment, final Money periodInterest) {
 
-        final Money interestForThisInstallmentBeforeGrace = calculateDecliningInterestDueForInstallmentBeforeApplyingGrace(calculator, mc,
-                daysInPeriod, outstandingBalance);
-
-        Money principal = totalDuePerInstallment.minus(interestForThisInstallmentBeforeGrace);
+        Money principal = totalDuePerInstallment.minus(periodInterest);
         if (isPrincipalGraceApplicableForThisPeriod(periodNumber)) {
             principal = principal.zero();
         }

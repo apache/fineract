@@ -54,27 +54,27 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
         Money balanceForInterestCalculation = outstandingBalance;
         Money cumulatingInterestDueToGrace = cumulatingInterestPaymentDueToGrace;
         final int daysInPeriodApplicableForInterest = Days.daysBetween(periodStartDate, periodEndDate).getDays();
-        if(principalVariation != null){
-        for (Map.Entry<LocalDate, Money> principal : principalVariation.entrySet()) {
-            if (!principal.getKey().isAfter(periodEndDate)) {
-                int interestForDays = Days.daysBetween(interestStartDate, principal.getKey()).getDays();
-                if (interestForDays > 0) {
-                    final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
-                            interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestDueToGrace,
-                            interestForDays, balanceForInterestCalculation);
-                    if (loanApplicationTerms.getInterestCalculationPeriodMethod().isDaily()) {
-                        interestForThisInstallment = interestForThisInstallment.plus(result.interest());
-                    } else {
-                        interestForThisInstallment = interestForThisInstallment.plus(calculateInterestForDays(daysForInterestInFullPeriod,
-                                result.interest().getAmount(), interestForDays));
+        if (principalVariation != null) {
+            for (Map.Entry<LocalDate, Money> principal : principalVariation.entrySet()) {
+                if (!principal.getKey().isAfter(periodEndDate)) {
+                    int interestForDays = Days.daysBetween(interestStartDate, principal.getKey()).getDays();
+                    if (interestForDays > 0) {
+                        final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
+                                interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestDueToGrace,
+                                interestForDays, balanceForInterestCalculation);
+                        if (loanApplicationTerms.getInterestCalculationPeriodMethod().isDaily()) {
+                            interestForThisInstallment = interestForThisInstallment.plus(result.interest());
+                        } else {
+                            interestForThisInstallment = interestForThisInstallment.plus(calculateInterestForDays(
+                                    daysForInterestInFullPeriod, result.interest().getAmount(), interestForDays));
+                        }
+                        cumulatingInterestDueToGrace = result.interestPaymentDueToGrace();
+                        interestStartDate = principal.getKey();
                     }
-                    cumulatingInterestDueToGrace = result.interestPaymentDueToGrace();
-                    interestStartDate = principal.getKey();
+                    balanceForInterestCalculation = balanceForInterestCalculation.plus(principal.getValue());
                 }
-                balanceForInterestCalculation = balanceForInterestCalculation.plus(principal.getValue());
-            }
 
-        }
+            }
         }
         int interestForDays = Days.daysBetween(interestStartDate, periodEndDate).getDays();
 
@@ -88,8 +88,14 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
                     .interest().getAmount(), interestForDays));
         }
 
+        Money interestForPeriod = interestForThisInstallment;
+        if (interestForPeriod.isGreaterThanZero()) {
+            interestForPeriod = interestForPeriod.minus(cumulatingInterestPaymentDueToGrace);
+        }else{
+            interestForPeriod = result.interestPaymentDueToGrace().minus(cumulatingInterestPaymentDueToGrace);
+        }
         Money principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator,
-                daysInPeriodApplicableForInterest, outstandingBalance, periodNumber, mc);
+                daysInPeriodApplicableForInterest, outstandingBalance, periodNumber, mc, interestForPeriod);
 
         // update cumulative fields for principal & interest
         final Money interestBroughtFowardDueToGrace = result.interestPaymentDueToGrace();
@@ -98,7 +104,7 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
         // adjust if needed
         principalForThisInstallment = loanApplicationTerms.adjustPrincipalIfLastRepaymentPeriod(principalForThisInstallment,
                 totalCumulativePrincipalToDate, periodNumber);
-       
+
         return new PrincipalInterest(principalForThisInstallment, interestForThisInstallment, interestBroughtFowardDueToGrace);
     }
 }
