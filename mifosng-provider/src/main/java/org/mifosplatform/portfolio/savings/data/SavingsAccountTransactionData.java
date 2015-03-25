@@ -14,6 +14,7 @@ import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.account.data.AccountTransferData;
 import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
+import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
 import org.mifosplatform.portfolio.savings.SavingsAccountTransactionType;
 import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 
@@ -37,13 +38,13 @@ public class SavingsAccountTransactionData {
     private final LocalDate submittedOnDate;
 
     // templates
-    final Collection<CodeValueData> paymentTypeOptions;
+    final Collection<PaymentTypeData> paymentTypeOptions;
 
     public static SavingsAccountTransactionData create(final Long id, final SavingsAccountTransactionEnumData transactionType,
             final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
             final CurrencyData currency, final BigDecimal amount, final BigDecimal runningBalance, final boolean reversed,
             final AccountTransferData transfer) {
-        final Collection<CodeValueData> paymentTypeOptions = null;
+        final Collection<PaymentTypeData> paymentTypeOptions = null;
         return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, date, currency,
                 amount, runningBalance, reversed, transfer, paymentTypeOptions);
     }
@@ -52,7 +53,7 @@ public class SavingsAccountTransactionData {
                                                        final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
                                                        final CurrencyData currency, final BigDecimal amount, final BigDecimal runningBalance, final boolean reversed,
                                                        final AccountTransferData transfer,final LocalDate submittedOnDate) {
-        final Collection<CodeValueData> paymentTypeOptions = null;
+        final Collection<PaymentTypeData> paymentTypeOptions = null;
         return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, date, currency,
                 amount, runningBalance, reversed, transfer, paymentTypeOptions,submittedOnDate);
     }
@@ -71,7 +72,7 @@ public class SavingsAccountTransactionData {
     }
 
     public static SavingsAccountTransactionData templateOnTop(final SavingsAccountTransactionData savingsAccountTransactionData,
-            final Collection<CodeValueData> paymentTypeOptions) {
+            final Collection<PaymentTypeData> paymentTypeOptions) {
         return new SavingsAccountTransactionData(savingsAccountTransactionData.id, savingsAccountTransactionData.transactionType,
                 savingsAccountTransactionData.paymentDetailData, savingsAccountTransactionData.accountId,
                 savingsAccountTransactionData.accountNo, savingsAccountTransactionData.date, savingsAccountTransactionData.currency,
@@ -82,7 +83,7 @@ public class SavingsAccountTransactionData {
     private SavingsAccountTransactionData(final Long id, final SavingsAccountTransactionEnumData transactionType,
             final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
             final CurrencyData currency, final BigDecimal amount, final BigDecimal runningBalance, final boolean reversed,
-            final AccountTransferData transfer, final Collection<CodeValueData> paymentTypeOptions) {
+            final AccountTransferData transfer, final Collection<PaymentTypeData> paymentTypeOptions) {
 
         this(id,transactionType,paymentDetailData,savingsId, savingsAccountNo,date,
         currency,amount,runningBalance, reversed,
@@ -93,7 +94,7 @@ public class SavingsAccountTransactionData {
     private SavingsAccountTransactionData(final Long id, final SavingsAccountTransactionEnumData transactionType,
                                           final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
                                           final CurrencyData currency, final BigDecimal amount, final BigDecimal runningBalance, final boolean reversed,
-                                          final AccountTransferData transfer, final Collection<CodeValueData> paymentTypeOptions,final LocalDate submittedOnDate) {
+                                          final AccountTransferData transfer, final Collection<PaymentTypeData> paymentTypeOptions,final LocalDate submittedOnDate) {
         this.id = id;
         this.transactionType = transactionType;
         this.paymentDetailData = paymentDetailData;

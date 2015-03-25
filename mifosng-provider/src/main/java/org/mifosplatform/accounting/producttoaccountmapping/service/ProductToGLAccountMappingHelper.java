@@ -23,13 +23,13 @@ import org.mifosplatform.accounting.producttoaccountmapping.domain.ProductToGLAc
 import org.mifosplatform.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
 import org.mifosplatform.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingInvalidException;
 import org.mifosplatform.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingNotFoundException;
-import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
-import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
+import org.mifosplatform.portfolio.paymenttype.domain.PaymentType;
+import org.mifosplatform.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,18 +46,20 @@ public class ProductToGLAccountMappingHelper {
     protected final FromJsonHelper fromApiJsonHelper;
     private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
     private final ChargeRepositoryWrapper chargeRepositoryWrapper;
+    private final PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper;
 
     @Autowired
     public ProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,
             final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper,
             final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final ChargeRepositoryWrapper chargeRepositoryWrapper,
-            final GLAccountRepositoryWrapper accountRepositoryWrapper) {
+            final GLAccountRepositoryWrapper accountRepositoryWrapper, PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper) {
         this.accountRepository = glAccountRepository;
         this.accountMappingRepository = glAccountMappingRepository;
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
         this.chargeRepositoryWrapper = chargeRepositoryWrapper;
         this.accountRepositoryWrapper = accountRepositoryWrapper;
+        this.paymentTypeRepositoryWrapper = paymentTypeRepositoryWrapper;
 
     }
 
@@ -332,8 +334,7 @@ public class ProductToGLAccountMappingHelper {
      */
     private void savePaymentChannelToFundSourceMapping(final Long productId, final Long paymentTypeId,
             final Long paymentTypeSpecificFundAccountId, final PortfolioProductType portfolioProductType) {
-        final CodeValue paymentType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
-                PaymentDetailConstants.paymentTypeCodeName, paymentTypeId);
+        final PaymentType paymentType = this.paymentTypeRepositoryWrapper.findOneWithNotFoundDetection(paymentTypeId);
         final GLAccount glAccount = getAccountByIdAndType(LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), GLAccountType.ASSET,
                 paymentTypeSpecificFundAccountId);
         final ProductToGLAccountMapping accountMapping = new ProductToGLAccountMapping(glAccount, productId,

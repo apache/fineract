@@ -10,13 +10,13 @@ import static org.mifosplatform.portfolio.savings.DepositsApiConstants.closedOnD
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
+import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
+import org.mifosplatform.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.mifosplatform.portfolio.savings.DepositAccountOnClosureType;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.data.DepositAccountData;
@@ -43,19 +43,21 @@ public class DepositAccountPreMatureCalculationPlatformServiceImpl implements De
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
+    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
 
     @Autowired
     public DepositAccountPreMatureCalculationPlatformServiceImpl(final FromJsonHelper fromJsonHelper,
             final DepositAccountTransactionDataValidator depositAccountTransactionDataValidator,
             final DepositAccountAssembler depositAccountAssembler, final CodeValueReadPlatformService codeValueReadPlatformService,
             final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
-            final ConfigurationDomainService configurationDomainService) {
+            final ConfigurationDomainService configurationDomainService, PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
         this.fromJsonHelper = fromJsonHelper;
         this.depositAccountTransactionDataValidator = depositAccountTransactionDataValidator;
         this.depositAccountAssembler = depositAccountAssembler;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
         this.configurationDomainService = configurationDomainService;
+        this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
 
     }
 
@@ -63,12 +65,11 @@ public class DepositAccountPreMatureCalculationPlatformServiceImpl implements De
     @Override
     public DepositAccountData calculatePreMatureAmount(final Long accountId, final JsonQuery query,
             final DepositAccountType depositAccountType) {
-    	
-    	final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
-				.isSavingsInterestPostingAtCurrentPeriodEnd();
-    	final Integer financialYearBeginningMonth = this.configurationDomainService
-    			.retrieveFinancialYearBeginningMonth();
-    	
+
+        final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
+                .isSavingsInterestPostingAtCurrentPeriodEnd();
+        final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
+
         this.depositAccountTransactionDataValidator.validatePreMatureAmountCalculation(query.json(), depositAccountType);
         final SavingsAccount account = this.depositAccountAssembler.assembleFrom(accountId, depositAccountType);
 
@@ -76,8 +77,7 @@ public class DepositAccountPreMatureCalculationPlatformServiceImpl implements De
         Collection<EnumOptionData> onAccountClosureOptions = SavingsEnumerations
                 .depositAccountOnClosureType(new DepositAccountOnClosureType[] { DepositAccountOnClosureType.WITHDRAW_DEPOSIT,
                         DepositAccountOnClosureType.TRANSFER_TO_SAVINGS });
-        final Collection<CodeValueData> paymentTypeOptions = this.codeValueReadPlatformService
-                .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
+        final Collection<PaymentTypeData> paymentTypeOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
         final Collection<SavingsAccountData> savingsAccountDatas = this.savingsAccountReadPlatformService.retrieveActiveForLookup(
                 account.clientId(), DepositAccountType.SAVINGS_DEPOSIT);
         final JsonElement element = this.fromJsonHelper.parse(query.json());
@@ -88,16 +88,14 @@ public class DepositAccountPreMatureCalculationPlatformServiceImpl implements De
 
         if (depositAccountType.isFixedDeposit()) {
             final FixedDepositAccount fd = (FixedDepositAccount) account;
-            accountData = FixedDepositAccountData.preClosureDetails(account.getId(),
-                    fd.calculatePreMatureAmount(interestCalculatedToDate, isPreMatureClosure,
-                    		isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth),
-                    		onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas);
+            accountData = FixedDepositAccountData.preClosureDetails(account.getId(), fd.calculatePreMatureAmount(interestCalculatedToDate,
+                    isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth), onAccountClosureOptions,
+                    paymentTypeOptions, savingsAccountDatas);
         } else if (depositAccountType.isRecurringDeposit()) {
             final RecurringDepositAccount rd = (RecurringDepositAccount) account;
-            accountData = RecurringDepositAccountData.preClosureDetails(account.getId(),
-                    rd.calculatePreMatureAmount(interestCalculatedToDate, isPreMatureClosure,
-                    		isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth),
-                    		onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas);
+            accountData = RecurringDepositAccountData.preClosureDetails(account.getId(), rd.calculatePreMatureAmount(
+                    interestCalculatedToDate, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth),
+                    onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas);
         }
 
         return accountData;

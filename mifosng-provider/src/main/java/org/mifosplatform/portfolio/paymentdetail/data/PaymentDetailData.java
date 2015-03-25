@@ -5,7 +5,7 @@
  */
 package org.mifosplatform.portfolio.paymentdetail.data;
 
-import org.mifosplatform.infrastructure.codes.data.CodeValueData;
+import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
 
 /**
  * Immutable data object representing a payment.
@@ -15,7 +15,7 @@ public class PaymentDetailData {
     @SuppressWarnings("unused")
     private final Long id;
     @SuppressWarnings("unused")
-    private final CodeValueData paymentType;
+    private final PaymentTypeData paymentType;
     @SuppressWarnings("unused")
     private final String accountNumber;
     @SuppressWarnings("unused")
@@ -27,7 +27,7 @@ public class PaymentDetailData {
     @SuppressWarnings("unused")
     private final String bankNumber;
 
-    public PaymentDetailData(final Long id, final CodeValueData paymentType, final String accountNumber, final String checkNumber,
+    public PaymentDetailData(final Long id, final PaymentTypeData paymentType, final String accountNumber, final String checkNumber,
             final String routingCode, final String receiptNumber, final String bankNumber) {
         this.id = id;
         this.paymentType = paymentType;
@@ -37,5 +37,7 @@ public class PaymentDetailData {
         this.receiptNumber = receiptNumber;
         this.bankNumber = bankNumber;
     }
+    
+    
 
 }

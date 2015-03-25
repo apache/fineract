@@ -2353,4 +2353,29 @@ public class CommandWrapperBuilder {
         this.href = "/entitytoentitymapping/" + mapId;
         return this;
     }
+
+    public CommandWrapperBuilder createPaymentType() {
+        this.actionName = "CREATE";
+        this.entityName = "PAYMENTTYPE";
+        this.entityId = null;
+        this.href = "/paymenttype";
+        return this;
+    }
+
+    public CommandWrapperBuilder updatePaymentType(final Long paymentTypeId) {
+        this.actionName = "UPDATE";
+        this.entityName = "PAYMENTTYPE";
+        this.entityId = paymentTypeId;
+        this.href = "/paymenttype/" + paymentTypeId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deletePaymentType(final Long paymentTypeId) {
+        this.actionName = "DELETE";
+        this.entityName = "PAYMENTTYPE";
+        this.entityId = paymentTypeId;
+        this.href = "/paymenttype/" + paymentTypeId;
+        return this;
+    }
+    
 }

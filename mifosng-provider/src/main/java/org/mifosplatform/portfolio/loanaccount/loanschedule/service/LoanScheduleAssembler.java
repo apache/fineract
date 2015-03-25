@@ -271,6 +271,7 @@ public class LoanScheduleAssembler {
         }
 
         final BigDecimal principalThresholdForLastInstalment = loanProduct.getPrincipalThresholdForLastInstallment();
+
         final Integer installmentAmountInMultiplesOf = loanProduct.getInstallmentAmountInMultiplesOf();
 
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
@@ -463,6 +464,7 @@ public class LoanScheduleAssembler {
 
         return loanScheduleGenerator.calculatePrepaymentAmount(installments, currency, onDate, loanApplicationTerms, mc, loanCharges,
                 holidayDetailDTO);
+
     }
 
     private void validateDisbursementDateIsOnNonWorkingDay(final LocalDate disbursementDate, final WorkingDays workingDays) {

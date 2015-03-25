@@ -14,8 +14,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.mifosplatform.accounting.glaccount.domain.GLAccount;
-import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.portfolio.charge.domain.Charge;
+import org.mifosplatform.portfolio.paymenttype.domain.PaymentType;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -32,7 +32,7 @@ public class ProductToGLAccountMapping extends AbstractPersistable<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_type", nullable = true)
-    private CodeValue paymentType;
+    private PaymentType paymentType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "charge_id", nullable = true)
@@ -63,12 +63,12 @@ public class ProductToGLAccountMapping extends AbstractPersistable<Long> {
     }
 
     public ProductToGLAccountMapping(final GLAccount glAccount, final Long productId, final int productType,
-            final int financialAccountType, final CodeValue paymentType) {
+            final int financialAccountType, final PaymentType paymentType) {
         this(glAccount, productId, productType, financialAccountType, paymentType, null);
     }
 
     private ProductToGLAccountMapping(final GLAccount glAccount, final Long productId, final int productType,
-            final int financialAccountType, final CodeValue paymentType, final Charge charge) {
+            final int financialAccountType, final PaymentType paymentType, final Charge charge) {
         this.glAccount = glAccount;
         this.productId = productId;
         this.productType = productType;
@@ -109,11 +109,11 @@ public class ProductToGLAccountMapping extends AbstractPersistable<Long> {
         this.financialAccountType = financialAccountType;
     }
 
-    public CodeValue getPaymentType() {
+    public PaymentType getPaymentType() {
         return this.paymentType;
     }
 
-    public void setPaymentType(final CodeValue paymentType) {
+    public void setPaymentType(final PaymentType paymentType) {
         this.paymentType = paymentType;
     }
 

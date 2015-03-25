@@ -9,10 +9,10 @@ import java.math.BigDecimal;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.account.data.AccountTransferData;
 import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
+import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
 
 /**
  * Immutable data object representing a loan transaction.
@@ -47,10 +47,10 @@ public class LoanTransactionData {
     private final boolean manuallyReversed;
 
     // templates
-    final Collection<CodeValueData> paymentTypeOptions;
+    final Collection<PaymentTypeData> paymentTypeOptions;
 
     public static LoanTransactionData templateOnTop(final LoanTransactionData loanTransactionData,
-            final Collection<CodeValueData> paymentTypeOptions) {
+            final Collection<PaymentTypeData> paymentTypeOptions) {
         return new LoanTransactionData(loanTransactionData.id, loanTransactionData.officeId, loanTransactionData.officeName,
                 loanTransactionData.type, loanTransactionData.paymentDetailData, loanTransactionData.currency, loanTransactionData.date,
                 loanTransactionData.amount, loanTransactionData.principalPortion, loanTransactionData.interestPortion,
@@ -76,7 +76,7 @@ public class LoanTransactionData {
             final PaymentDetailData paymentDetailData, final CurrencyData currency, final LocalDate date, final BigDecimal amount,
             final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
             final BigDecimal penaltyChargesPortion, final BigDecimal overpaymentPortion, BigDecimal unrecognizedIncomePortion,
-            final Collection<CodeValueData> paymentTypeOptions, final String externalId, final AccountTransferData transfer,
+            final Collection<PaymentTypeData> paymentTypeOptions, final String externalId, final AccountTransferData transfer,
             final BigDecimal fixedEmiAmount, BigDecimal outstandingLoanBalance,boolean manuallyReversed) {
         this(id, officeId, officeName, transactionType, paymentDetailData, currency, date, amount, principalPortion, interestPortion,
                 feeChargesPortion, penaltyChargesPortion, overpaymentPortion, unrecognizedIncomePortion, paymentTypeOptions, externalId,
@@ -98,7 +98,7 @@ public class LoanTransactionData {
             final PaymentDetailData paymentDetailData, final CurrencyData currency, final LocalDate date, final BigDecimal amount,
             final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
             final BigDecimal penaltyChargesPortion, final BigDecimal overpaymentPortion, final BigDecimal unrecognizedIncomePortion,
-            final Collection<CodeValueData> paymentTypeOptions, final String externalId, final AccountTransferData transfer,
+            final Collection<PaymentTypeData> paymentTypeOptions, final String externalId, final AccountTransferData transfer,
             final BigDecimal fixedEmiAmount, BigDecimal outstandingLoanBalance, final LocalDate submittedOnDate,final boolean manuallyReversed) {
         this.id = id;
         this.officeId = officeId;

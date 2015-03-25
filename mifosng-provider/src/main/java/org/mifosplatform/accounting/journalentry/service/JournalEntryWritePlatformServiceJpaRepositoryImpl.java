@@ -39,7 +39,6 @@ import org.mifosplatform.accounting.journalentry.serialization.JournalEntryComma
 import org.mifosplatform.accounting.rule.domain.AccountingRule;
 import org.mifosplatform.accounting.rule.domain.AccountingRuleRepository;
 import org.mifosplatform.accounting.rule.exception.AccountingRuleNotFoundException;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;

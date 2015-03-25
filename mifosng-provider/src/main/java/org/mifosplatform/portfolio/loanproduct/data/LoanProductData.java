@@ -17,7 +17,6 @@ import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
 import org.mifosplatform.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.mifosplatform.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
-import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
@@ -32,6 +31,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
+import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -103,7 +103,7 @@ public class LoanProductData {
     // template related
     private final Collection<FundData> fundOptions;
     @SuppressWarnings("unused")
-    private final Collection<CodeValueData> paymentTypeOptions;
+    private final Collection<PaymentTypeData> paymentTypeOptions;
     @SuppressWarnings("unused")
     private final Collection<CurrencyData> currencyOptions;
     private final List<EnumOptionData> repaymentFrequencyTypeOptions;
@@ -483,7 +483,7 @@ public class LoanProductData {
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
-            final Collection<ChargeData> penaltyOptions, final Collection<CodeValueData> paymentTypeOptions,
+            final Collection<ChargeData> penaltyOptions, final Collection<PaymentTypeData> paymentTypeOptions,
             final Collection<CurrencyData> currencyOptions, final List<EnumOptionData> amortizationTypeOptions,
             final List<EnumOptionData> interestTypeOptions, final List<EnumOptionData> interestCalculationPeriodTypeOptions,
             final List<EnumOptionData> repaymentFrequencyTypeOptions, final List<EnumOptionData> interestRateFrequencyTypeOptions,

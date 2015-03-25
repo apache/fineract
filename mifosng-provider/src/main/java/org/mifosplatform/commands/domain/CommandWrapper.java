@@ -1016,4 +1016,8 @@ public class CommandWrapper {
     public boolean isEntityMappingResource() {
         return this.entityName.equalsIgnoreCase("ENTITYMAPPING");
     }
+    
+    public boolean isPaymentTypeResource() {
+        return this.entityName.equalsIgnoreCase("PAYMENTTYPE");
+    }
 }

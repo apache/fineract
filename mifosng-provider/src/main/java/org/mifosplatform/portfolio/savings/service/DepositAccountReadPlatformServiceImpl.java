@@ -15,7 +15,6 @@ import java.util.Map;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.data.PaginationParameters;
@@ -51,6 +50,8 @@ import org.mifosplatform.portfolio.interestratechart.data.InterestRateChartData;
 import org.mifosplatform.portfolio.interestratechart.service.InterestRateChartReadPlatformService;
 import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
 import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
+import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
+import org.mifosplatform.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.mifosplatform.portfolio.savings.DepositAccountOnClosureType;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.DepositsApiConstants;
@@ -109,6 +110,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     private final DropdownReadPlatformService dropdownReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
+    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
 
     @Autowired
     public DepositAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -122,7 +124,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final InterestRateChartReadPlatformService productChartReadPlatformService,
             final CodeValueReadPlatformService codeValueReadPlatformService,
             final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
-            final DropdownReadPlatformService dropdownReadPlatformService, final CalendarReadPlatformService calendarReadPlatformService) {
+            final DropdownReadPlatformService dropdownReadPlatformService, final CalendarReadPlatformService calendarReadPlatformService,
+            PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.accountChartReadPlatformService = chartReadPlatformService;
@@ -141,6 +144,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         this.rdTransactionTemplateMapper = new RecurringAccountDepositTransactionTemplateMapper();
         this.dropdownReadPlatformService = dropdownReadPlatformService;
         this.calendarReadPlatformService = calendarReadPlatformService;
+        this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
     }
 
     @Override
@@ -250,8 +254,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     accountId, depositAccountType.getValue() });
             Collection<EnumOptionData> onAccountClosureOptions = SavingsEnumerations
                     .depositAccountOnClosureType(DepositAccountOnClosureType.values());
-            final Collection<CodeValueData> paymentTypeOptions = this.codeValueReadPlatformService
-                    .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
+            final Collection<PaymentTypeData> paymentTypeOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
             final Collection<SavingsAccountData> savingsAccountDatas = this.savingsAccountReadPlatformService.retrieveActiveForLookup(
                     account.clientId(), DepositAccountType.SAVINGS_DEPOSIT);
             if (depositAccountType.isFixedDeposit()) {
@@ -941,20 +944,20 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append("totran.transaction_date as toTransferDate, totran.amount as toTransferAmount,");
             sqlBuilder.append("totran.description as toTransferDescription,");
             sqlBuilder.append("sa.id as savingsId, sa.account_no as accountNo,");
-            sqlBuilder.append("pd.payment_type_cv_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, ");
+            sqlBuilder.append("pd.payment_type_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, ");
             sqlBuilder.append("pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode, ");
             sqlBuilder
                     .append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf, ");
             sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
             sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
-            sqlBuilder.append("cv.code_value as paymentTypeName ");
+            sqlBuilder.append("pt.value as paymentTypeName ");
             sqlBuilder.append("from m_savings_account sa ");
             sqlBuilder.append("join m_savings_account_transaction tr on tr.savings_account_id = sa.id ");
             sqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
             sqlBuilder.append("left join m_account_transfer_transaction fromtran on fromtran.from_savings_transaction_id = tr.id ");
             sqlBuilder.append("left join m_account_transfer_transaction totran on totran.to_savings_transaction_id = tr.id ");
             sqlBuilder.append("left join m_payment_detail pd on tr.payment_detail_id = pd.id ");
-            sqlBuilder.append("left join m_code_value cv on pd.payment_type_cv_id = cv.id ");
+            sqlBuilder.append("left join m_payment_type pt on pd.payment_type_id = pt.id ");
 
             this.schemaSql = sqlBuilder.toString();
         }
@@ -982,7 +985,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                 final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentType");
                 if (paymentTypeId != null) {
                     final String typeName = rs.getString("paymentTypeName");
-                    final CodeValueData paymentType = CodeValueData.instance(paymentTypeId, typeName);
+                    final PaymentTypeData paymentType = PaymentTypeData.instance(paymentTypeId, typeName);
                     final String accountNumber = rs.getString("accountNumber");
                     final String checkNumber = rs.getString("checkNumber");
                     final String routingCode = rs.getString("routingCode");
