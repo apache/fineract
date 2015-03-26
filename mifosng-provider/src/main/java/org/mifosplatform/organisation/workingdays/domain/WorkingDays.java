@@ -6,11 +6,14 @@
 
 package org.mifosplatform.organisation.workingdays.domain;
 
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.springframework.data.jpa.domain.AbstractPersistable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Entity
 @Table(name = "m_working_days")
@@ -43,6 +46,26 @@ public class WorkingDays extends AbstractPersistable<Long> {
      */
     public Integer getRepaymentReschedulingType() {
         return this.repaymentReschedulingType;
+    }
+
+
+    public Map<String, Object> update(final JsonCommand command) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
+
+        final String recurrenceParamName = "recurrence";
+        if (command.isChangeInStringParameterNamed(recurrenceParamName, this.recurrence)) {
+            final String newValue = command.stringValueOfParameterNamed(recurrenceParamName);
+            actualChanges.put(recurrenceParamName, newValue);
+            this.recurrence = newValue;
+        }
+
+        final String repaymentRescheduleTypeParamName = "repaymentRescheduleType";
+        if (command.isChangeInIntegerParameterNamed(repaymentRescheduleTypeParamName, this.repaymentReschedulingType)) {
+            final Integer newValue =command.integerValueOfParameterNamed(repaymentRescheduleTypeParamName);
+            actualChanges.put(repaymentRescheduleTypeParamName,  WorkingDaysEnumerations.workingDaysStatusType(newValue));
+            this.repaymentReschedulingType = RepaymentRescheduleType.fromInt(newValue).getValue();
+        }
+        return actualChanges;
     }
 
 }

@@ -1012,8 +1012,13 @@ public class CommandWrapper {
     public boolean isEnableOperation() {
         return this.actionName.equalsIgnoreCase("ENABLE");
     }
-    
+
     public boolean isEntityMappingResource() {
         return this.entityName.equalsIgnoreCase("ENTITYMAPPING");
     }
+
+    public boolean isWorkingDaysResource() {
+        return this.entityName.equalsIgnoreCase("WORKINGDAYS");
+    }
+
 }
