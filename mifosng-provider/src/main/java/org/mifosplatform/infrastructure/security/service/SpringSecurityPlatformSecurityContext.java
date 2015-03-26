@@ -5,6 +5,11 @@
  */
 package org.mifosplatform.infrastructure.security.service;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -13,18 +18,11 @@ import org.mifosplatform.infrastructure.security.exception.NoAuthorizationExcept
 import org.mifosplatform.infrastructure.security.exception.ResetPasswordException;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.useradministration.exception.UnAuthenticatedUserException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
 /**
  * Wrapper around spring security's {@link SecurityContext} for extracted the
@@ -34,7 +32,8 @@ import java.util.List;
 @Service
 public class SpringSecurityPlatformSecurityContext implements PlatformSecurityContext {
 
-    private final static Logger logger = LoggerFactory.getLogger(SpringSecurityPlatformSecurityContext.class);
+    // private final static Logger logger =
+    // LoggerFactory.getLogger(SpringSecurityPlatformSecurityContext.class);
 
     private final ConfigurationDomainService configurationDomainService;
 
@@ -128,7 +127,7 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
     @Override
     public boolean doesPasswordHasToBeRenewed(AppUser currentUser) {
 
-        if (this.configurationDomainService.isPasswordForcedResetEnable() && !currentUser.getPasswordNeverExpire()) {
+        if (this.configurationDomainService.isPasswordForcedResetEnable() && !currentUser.getPasswordNeverExpires()) {
 
             Long passwordDurationDays = this.configurationDomainService.retrievePasswordLiveTime();
             final Date passWordLastUpdateDate = currentUser.getLastTimePasswordUpdated();

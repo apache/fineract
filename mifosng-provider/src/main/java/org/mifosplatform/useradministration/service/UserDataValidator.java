@@ -32,7 +32,7 @@ public final class UserDataValidator {
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("username", "firstname", "lastname", "password",
-            "repeatPassword", "email", "officeId", "notSelectedRoles", "roles", "sendPasswordToEmail", "staffId","passwordNeverExpire"));
+            "repeatPassword", "email", "officeId", "notSelectedRoles", "roles", "sendPasswordToEmail", "staffId", "passwordNeverExpires"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -86,8 +86,9 @@ public final class UserDataValidator {
             baseDataValidator.reset().parameter("staffId").value(staffId).notNull().integerGreaterThanZero();
         }
 
-        if (this.fromApiJsonHelper.parameterExists("passwordNeverExpire", element)) {
-            final boolean passwordNeverExpire = this.fromApiJsonHelper.extractBooleanNamed("passwordNeverExpire", element);
+        if (this.fromApiJsonHelper.parameterExists(AppUserConstants.PASSWORD_NEVER_EXPIRES, element)) {
+            final boolean passwordNeverExpire = this.fromApiJsonHelper
+                    .extractBooleanNamed(AppUserConstants.PASSWORD_NEVER_EXPIRES, element);
             baseDataValidator.reset().parameter("passwordNeverExpire").value(passwordNeverExpire).validateForBooleanValue();
         }
 
