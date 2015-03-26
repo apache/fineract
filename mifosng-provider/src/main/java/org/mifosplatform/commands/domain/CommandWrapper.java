@@ -200,7 +200,7 @@ public class CommandWrapper {
     public boolean isUpdate() {
         // permissions resource has special update which involves no resource.
         return isPermissionResource() && isUpdateOperation() || isCurrencyResource() && isUpdateOperation() || isCacheResource()
-                && isUpdateOperation() || isUpdateOperation() && this.entityId != null;
+                && isUpdateOperation() || isWorkingDaysResource() && isUpdateOperation() || isUpdateOperation() && this.entityId != null;
     }
 
     public boolean isUpdateOperation() {
@@ -258,7 +258,7 @@ public class CommandWrapper {
     public boolean isAccountNumberFormatResource() {
         return this.entityName.equals(AccountNumberFormatConstants.ENTITY_NAME.toUpperCase());
     }
-    
+
     public boolean isApprove() {
         return this.actionName.equalsIgnoreCase("APPROVE");
     }
@@ -394,19 +394,19 @@ public class CommandWrapper {
     public boolean isLoanResource() {
         return this.entityName.equalsIgnoreCase("LOAN");
     }
-    
+
     public boolean isTellerResource() {
         return this.entityName.equalsIgnoreCase("TELLER");
     }
-    
+
     public boolean isAllocateCashier() {
         return this.actionName.equalsIgnoreCase("ALLOCATECASHIER");
     }
-    
+
     public boolean isUpdateCashierAllocation() {
         return this.actionName.equalsIgnoreCase("UPDATECASHIERALLOCATION");
     }
-    
+
     public boolean isDeleteCashierAllocation() {
         return this.actionName.equalsIgnoreCase("DELETECASHIERALLOCATION");
     }
@@ -414,7 +414,7 @@ public class CommandWrapper {
     public boolean isAllocateCashToCashier() {
         return this.actionName.equalsIgnoreCase("ALLOCATECASHTOCASHIER");
     }
-    
+
     public boolean isSettleCashFromCashier() {
         return this.actionName.equalsIgnoreCase("SETTLECASHFROMCASHIER");
     }
@@ -488,13 +488,15 @@ public class CommandWrapper {
     }
 
     public boolean isUpdateDisbursementDate() {
-        return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL") && this.entityId != null;
+        return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL")
+                && this.entityId != null;
     }
-    
+
     public boolean addAndDeleteDisbursementDetails() {
-        return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL") && this.entityId == null;
+        return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL")
+                && this.entityId == null;
     }
-    
+
     public boolean isStandingInstruction() {
         return this.entityName.equalsIgnoreCase("STANDINGINSTRUCTION");
     }
@@ -701,11 +703,10 @@ public class CommandWrapper {
     public boolean isCollectionSheetResource() {
         return this.entityName.equals("COLLECTIONSHEET");
     }
-    
+
     public boolean isSaveIndividualCollectionSheet() {
         return isCollectionSheetResource() && this.actionName.equalsIgnoreCase("SAVE");
     }
-
 
     public boolean isCenterResource() {
         return this.entityName.equalsIgnoreCase("CENTER");

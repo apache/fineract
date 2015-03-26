@@ -5,15 +5,11 @@
  */
 package org.mifosplatform.organisation.workingdays.service;
 
-
 import org.mifosplatform.organisation.workingdays.data.WorkingDaysData;
-
-import java.util.Collection;
 
 public interface WorkingDaysReadPlatformService {
 
-    Collection<WorkingDaysData> retrieveAll();
-    WorkingDaysData retrieveOne(Long id);
+    WorkingDaysData retrieve();
 
     WorkingDaysData repaymentRescheduleType();
 }

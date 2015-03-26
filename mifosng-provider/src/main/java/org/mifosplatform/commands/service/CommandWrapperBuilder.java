@@ -2353,11 +2353,11 @@ public class CommandWrapperBuilder {
         this.href = "/entitytoentitymapping/" + mapId;
         return this;
     }
-    public CommandWrapperBuilder updateWorkingDays(final Long workingDaysId) {
+
+    public CommandWrapperBuilder updateWorkingDays() {
         this.actionName = "UPDATE";
         this.entityName = "WORKINGDAYS";
-        this.entityId = workingDaysId;
-        this.href = "/workingdays/" + workingDaysId;
+        this.href = "/workingdays/";
         return this;
     }
 
