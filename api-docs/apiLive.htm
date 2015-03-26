@@ -31825,6 +31825,18 @@ No Request Body:
                         <dd>Flag determines whether running balances
                         	to be returned
                         </dd>
+                        <dt>loanId</dt>
+                        <dd>
+                            Integer <span>optional</span>
+                        </dd>
+                        <dd>Provides ability to restrict journal entries based on the loan they are associated with
+                        </dd>
+                        <dt>savingsId</dt>
+                        <dd>
+                            Integer <span>optional</span>
+                        </dd>
+                        <dd>Provides ability to restrict journal entries based on the savings account they are associated with
+                        </dd>
 					</dl>
 					<p>Example Requests:</p>
 					<div class=apiClick>journalentries</div>
@@ -31842,6 +31854,10 @@ No Request Body:
 					<div class=apiClick>journalentries?runningBalance=true</div>
 					<br>
 					<div class=apiClick>journalentries?transactionDetails=true</div>
+					<br>
+					<div class=apiClick>journalentries?loanId=12</div>
+					<br>
+					<div class=apiClick>journalentries?savingsId=24</div>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">

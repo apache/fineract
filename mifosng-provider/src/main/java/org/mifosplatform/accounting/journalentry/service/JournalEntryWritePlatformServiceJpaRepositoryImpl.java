@@ -39,7 +39,6 @@ import org.mifosplatform.accounting.journalentry.serialization.JournalEntryComma
 import org.mifosplatform.accounting.rule.domain.AccountingRule;
 import org.mifosplatform.accounting.rule.domain.AccountingRuleRepository;
 import org.mifosplatform.accounting.rule.exception.AccountingRuleNotFoundException;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -93,7 +92,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             final AccountingProcessorForSavingsFactory accountingProcessorForSavingsFactory,
             final GLAccountReadPlatformService glAccountReadPlatformService,
             final OrganisationCurrencyRepositoryWrapper organisationCurrencyRepository, final PlatformSecurityContext context,
-            final PaymentDetailWritePlatformService paymentDetailWritePlatformService,final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper) {
+            final PaymentDetailWritePlatformService paymentDetailWritePlatformService,
+            final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper) {
         this.glClosureRepository = glClosureRepository;
         this.officeRepository = officeRepository;
         this.glJournalEntryRepository = glJournalEntryRepository;
@@ -451,12 +451,12 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             final JournalEntryCommand journalEntryCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
             journalEntryCommand.validateForCreate();
 
-            final FinancialActivityAccount financialActivityAccountId = this.financialActivityAccountRepositoryWrapper.findByFinancialActivityTypeWithNotFoundDetection(300);
-        	final Long contraId = financialActivityAccountId.getGlAccount().getId();
-        	if (contraId == null) { throw new GeneralPlatformDomainRuleException(
+            final FinancialActivityAccount financialActivityAccountId = this.financialActivityAccountRepositoryWrapper
+                    .findByFinancialActivityTypeWithNotFoundDetection(300);
+            final Long contraId = financialActivityAccountId.getGlAccount().getId();
+            if (contraId == null) { throw new GeneralPlatformDomainRuleException(
                     "error.msg.financial.activity.mapping.opening.balance.contra.account.cannot.be.null",
-                    "office-opening-balances-contra-account value can not be null",
-                    "office-opening-balances-contra-account");}
+                    "office-opening-balances-contra-account value can not be null", "office-opening-balances-contra-account"); }
 
             validateJournalEntriesArePostedBefore(contraId);
 

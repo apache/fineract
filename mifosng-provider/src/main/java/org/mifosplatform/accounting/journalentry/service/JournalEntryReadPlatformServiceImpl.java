@@ -5,6 +5,16 @@
  */
 package org.mifosplatform.accounting.journalentry.service;
 
+import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.common.AccountingEnumerations;
@@ -13,13 +23,21 @@ import org.mifosplatform.accounting.financialactivityaccount.domain.FinancialAct
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
 import org.mifosplatform.accounting.glaccount.service.GLAccountReadPlatformService;
-import org.mifosplatform.accounting.journalentry.data.*;
+import org.mifosplatform.accounting.journalentry.data.JournalEntryAssociationParametersData;
+import org.mifosplatform.accounting.journalentry.data.JournalEntryData;
+import org.mifosplatform.accounting.journalentry.data.OfficeOpeningBalancesData;
+import org.mifosplatform.accounting.journalentry.data.TransactionDetailData;
+import org.mifosplatform.accounting.journalentry.data.TransactionTypeEnumData;
 import org.mifosplatform.accounting.journalentry.exception.JournalEntriesNotFoundException;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.exception.GeneralPlatformDomainRuleException;
-import org.mifosplatform.infrastructure.core.service.*;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.infrastructure.core.service.PaginationHelper;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
@@ -37,16 +55,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
 @Service
 public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlatformService {
 
@@ -58,8 +66,9 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
     private final PaginationHelper<JournalEntryData> paginationHelper = new PaginationHelper<>();
 
     @Autowired
-    public JournalEntryReadPlatformServiceImpl(final RoutingDataSource dataSource, final GLAccountReadPlatformService glAccountReadPlatformService,
-            final OfficeReadPlatformService officeReadPlatformService, final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper) {
+    public JournalEntryReadPlatformServiceImpl(final RoutingDataSource dataSource,
+            final GLAccountReadPlatformService glAccountReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
+            final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.glAccountReadPlatformService = glAccountReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
@@ -229,7 +238,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(rm.schema());
 
-        final Object[] objectArray = new Object[5];
+        final Object[] objectArray = new Object[15];
         int arrayPos = 0;
         String whereClose = " where ";
 
@@ -315,13 +324,14 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             whereClose = " and ";
         }
         if (searchParameters.isSavingsIdPassed()) {
-            sqlBuilder.append(whereClose + " journalEntry.savings_transaction_id in (select id from m_savings_account_transaction where savings_account_id = ?)");
+            sqlBuilder
+                    .append(whereClose
+                            + " journalEntry.savings_transaction_id in (select id from m_savings_account_transaction where savings_account_id = ?)");
             objectArray[arrayPos] = searchParameters.getSavingsId();
             arrayPos = arrayPos + 1;
 
             whereClose = " and ";
         }
-
 
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
@@ -364,12 +374,12 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
     @Override
     public OfficeOpeningBalancesData retrieveOfficeOpeningBalances(final Long officeId) {
 
-    	final FinancialActivityAccount financialActivityAccountId = this.financialActivityAccountRepositoryWrapper.findByFinancialActivityTypeWithNotFoundDetection(300);
-    	final Long contraId = financialActivityAccountId.getGlAccount().getId();
-    	if (contraId == null) { throw new GeneralPlatformDomainRuleException(
+        final FinancialActivityAccount financialActivityAccountId = this.financialActivityAccountRepositoryWrapper
+                .findByFinancialActivityTypeWithNotFoundDetection(300);
+        final Long contraId = financialActivityAccountId.getGlAccount().getId();
+        if (contraId == null) { throw new GeneralPlatformDomainRuleException(
                 "error.msg.financial.activity.mapping.opening.balance.contra.account.cannot.be.null",
-                "office-opening-balances-contra-account value can not be null",
-                "office-opening-balances-contra-account");}
+                "office-opening-balances-contra-account value can not be null", "office-opening-balances-contra-account"); }
 
         final JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData();
         final GLAccountData contraAccount = this.glAccountReadPlatformService.retrieveGLAccountById(contraId, associationParametersData);
@@ -456,7 +466,8 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         final String transactionId = "";
         final Page<JournalEntryData> contraJournalEntries = retrieveContraTransactions(officeId, contraId, transactionId);
         if (!CollectionUtils.isEmpty(contraJournalEntries.getPageItems())) {
-            final JournalEntryData contraTransaction = contraJournalEntries.getPageItems().get(contraJournalEntries.getPageItems().size()-1);
+            final JournalEntryData contraTransaction = contraJournalEntries.getPageItems().get(
+                    contraJournalEntries.getPageItems().size() - 1);
             return contraTransaction.getTransactionId();
         }
         return transactionId;
@@ -472,8 +483,11 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         final Date fromDate = null;
         final Date toDate = null;
         final JournalEntryAssociationParametersData associationParametersData = null;
+        final Long loanId = null;
+        final Long savingsId = null;
 
-        final SearchParameters searchParameters = SearchParameters.forJournalEntries(officeId, offset, limit, orderBy, sortOrder,null,null);
+        final SearchParameters searchParameters = SearchParameters.forJournalEntries(officeId, offset, limit, orderBy, sortOrder, loanId,
+                savingsId);
         return retrieveAll(searchParameters, contraId, onlyManualEntries, fromDate, toDate, transactionId, entityType,
                 associationParametersData);
 
