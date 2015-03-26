@@ -1022,4 +1022,8 @@ public class CommandWrapper {
         return this.entityName.equalsIgnoreCase("WORKINGDAYS");
     }
 
+    public boolean isPasswordValidationPolicyResource() {
+        return this.entityName.equalsIgnoreCase("PASSWORD_VALIDATION_POLICY");
+    }
+
 }

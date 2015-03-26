@@ -923,10 +923,17 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
-        } else if(wrapper.isWorkingDaysResource()) {
-            if(wrapper.isUpdate()){
-                handler = this.applicationContext.getBean("updateWorkingDaysCommandHandler",NewCommandSourceHandler.class);
-            }else {
+        } else if (wrapper.isWorkingDaysResource()) {
+            if (wrapper.isUpdate()) {
+                handler = this.applicationContext.getBean("updateWorkingDaysCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
+        } else if (wrapper.isPasswordValidationPolicyResource()) {
+            if (wrapper.isUpdate()) {
+                handler = this.applicationContext.getBean("updatePasswordValidationPolicyCommandHandler", NewCommandSourceHandler.class);
+
+            } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
         } else {
