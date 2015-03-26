@@ -30112,6 +30112,7 @@ GET https://DomainName/api/v1/users
         "firstname": "App",
         "lastname": "Administrator",
         "email": "demomfi@mifos.org",
+        "passwordNeverExpire": false,
         "staff": {
 		   "id": 1,
 		   "firstname": "Test",
@@ -30203,6 +30204,7 @@ GET https://DomainName/api/v1/users/{userId}
     "firstname": "App",
     "lastname": "Administrator",
     "email": "demomfi@mifos.org",
+    "passwordNeverExpire": true,
     "staff": {
 	 "id": 1,
 	 "firstname": "Test",
@@ -30252,7 +30254,7 @@ GET https://DomainName/api/v1/users/{userId}
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr>
-							<td>staffId</td>
+							<td>staffId,passwordNeverExpire</td>
 						</tr>
 					</table>
 				</div>
