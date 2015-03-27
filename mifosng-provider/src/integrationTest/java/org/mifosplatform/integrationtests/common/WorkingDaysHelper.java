@@ -33,7 +33,7 @@ public class WorkingDaysHelper {
 
     public static String updateWorkingDaysAsJson() {
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("recurrence", "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH");
+        map.put("recurrence", "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU");
         map.put("locale", "en");
         map.put("repaymentRescheduleType", randomInt(1, 4));
         System.out.println("map : " + map);

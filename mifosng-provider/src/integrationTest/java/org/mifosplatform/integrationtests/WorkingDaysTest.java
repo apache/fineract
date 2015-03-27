@@ -5,11 +5,11 @@
  */
 package org.mifosplatform.integrationtests;
 
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import static org.junit.Assert.assertEquals;
+
+import java.util.HashMap;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,10 +17,11 @@ import org.mifosplatform.integrationtests.common.CommonConstants;
 import org.mifosplatform.integrationtests.common.Utils;
 import org.mifosplatform.integrationtests.common.WorkingDaysHelper;
 
-import java.util.HashMap;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class WorkingDaysTest {
@@ -30,7 +31,7 @@ public class WorkingDaysTest {
     private ResponseSpecification generalResponseSpec;
 
     @Before
-    public  void setUp(){
+    public void setUp() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
@@ -40,16 +41,17 @@ public class WorkingDaysTest {
     }
 
     @Test
-    public void updateWorkingDays(){
-        HashMap response = (HashMap)WorkingDaysHelper.updateWorkingDays(requestSpec, responseSpec);
+    public void updateWorkingDays() {
+        HashMap response = (HashMap) WorkingDaysHelper.updateWorkingDays(requestSpec, responseSpec);
         Assert.assertNotNull(response.get("resourceId"));
     }
 
     @Test
-    public void updateWorkingDaysWithWrongRecurrencePattern(){
-        final  List<HashMap> error = (List) WorkingDaysHelper.updateWorkingDaysWithWrongRecurrence(requestSpec, generalResponseSpec, CommonConstants.RESPONSE_ERROR);
-        assertEquals("Verify wrong recurrence pattern error", "error.msg.recurring.rule.parsing.error", error.get(0).get("userMessageGlobalisationCode"));
+    public void updateWorkingDaysWithWrongRecurrencePattern() {
+        final List<HashMap> error = (List) WorkingDaysHelper.updateWorkingDaysWithWrongRecurrence(requestSpec, generalResponseSpec,
+                CommonConstants.RESPONSE_ERROR);
+        assertEquals("Verify wrong recurrence pattern error", "error.msg.recurring.rule.parsing.error",
+                error.get(0).get("userMessageGlobalisationCode"));
     }
-
 
 }
