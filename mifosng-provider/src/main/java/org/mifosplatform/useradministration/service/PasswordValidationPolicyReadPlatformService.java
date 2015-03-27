@@ -5,12 +5,13 @@
  */
 package org.mifosplatform.useradministration.service;
 
-import org.mifosplatform.useradministration.data.PasswordValidationPolicyData;
-
 import java.util.Collection;
+
+import org.mifosplatform.useradministration.data.PasswordValidationPolicyData;
 
 public interface PasswordValidationPolicyReadPlatformService {
 
     Collection<PasswordValidationPolicyData> retrieveAll();
 
+    PasswordValidationPolicyData retrieveActiveValidationPolicy();
 }

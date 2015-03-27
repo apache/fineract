@@ -5,17 +5,19 @@
  */
 package org.mifosplatform.useradministration.service;
 
-import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
-import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
-import org.mifosplatform.useradministration.data.PasswordValidationPolicyData;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+
+import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
+import org.mifosplatform.useradministration.data.PasswordValidationPolicyData;
+import org.mifosplatform.useradministration.exception.PasswordValidationPolicyNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Service;
 
 @Service
 public class PasswordValidationPolicyReadPlatformServiceImpl implements PasswordValidationPolicyReadPlatformService {
@@ -36,7 +38,15 @@ public class PasswordValidationPolicyReadPlatformServiceImpl implements Password
         return this.jdbcTemplate.query(sql, this.passwordValidationPolicyMapper);
     }
 
-
+    @Override
+    public PasswordValidationPolicyData retrieveActiveValidationPolicy() {
+        try {
+            final String sql = "select " + this.passwordValidationPolicyMapper.schema() + " where pvp.active = true";
+            return this.jdbcTemplate.queryForObject(sql, this.passwordValidationPolicyMapper);
+        } catch (final EmptyResultDataAccessException e) {
+            throw new PasswordValidationPolicyNotFoundException();
+        }
+    }
 
     protected static final class PasswordValidationPolicyMapper implements RowMapper<PasswordValidationPolicyData> {
 
@@ -54,6 +64,5 @@ public class PasswordValidationPolicyReadPlatformServiceImpl implements Password
             return " pvp.id as id, pvp.active as active, pvp.description as description from m_password_validation_policy pvp";
         }
     }
-
 
 }

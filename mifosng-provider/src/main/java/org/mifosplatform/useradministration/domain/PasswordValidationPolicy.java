@@ -5,22 +5,21 @@
  */
 package org.mifosplatform.useradministration.domain;
 
-import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.util.LinkedHashMap;
-import java.util.Map;
+
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_password_validation_policy")
 public class PasswordValidationPolicy extends AbstractPersistable<Long> {
 
-    private final static Logger logger = LoggerFactory.getLogger(PasswordValidationPolicy.class);
+    // private final static Logger logger =
+    // LoggerFactory.getLogger(PasswordValidationPolicy.class);
 
     @Column(name = "regex", nullable = false)
     private String regex;
@@ -29,18 +28,17 @@ public class PasswordValidationPolicy extends AbstractPersistable<Long> {
     private String description;
 
     @Column(name = "active", nullable = false)
-    private boolean active ;
+    private boolean active;
 
-    public PasswordValidationPolicy(final String regex, final String description, final boolean active ) {
+    public PasswordValidationPolicy(final String regex, final String description, final boolean active) {
         this.description = description;
         this.regex = regex;
         this.active = active;
     }
 
-    public PasswordValidationPolicy(){
+    public PasswordValidationPolicy() {
         this.active = false;
     }
-
 
     public String getDescription() {
         return description;
@@ -54,12 +52,12 @@ public class PasswordValidationPolicy extends AbstractPersistable<Long> {
         return this.active;
     }
 
-    public Map<String, Object> active(){
+    public Map<String, Object> activate() {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(1);
 
         final String active = "active";
 
-        if(!this.active){
+        if (!this.active) {
 
             actualChanges.put(active, true);
             this.active = true;
@@ -68,14 +66,12 @@ public class PasswordValidationPolicy extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
-    public boolean isActive(){
+    public boolean isActive() {
         return this.active;
     }
 
-    public void deActive(){
-            this.active = false;
+    public void deActivate() {
+        this.active = false;
     }
-
-
 
 }

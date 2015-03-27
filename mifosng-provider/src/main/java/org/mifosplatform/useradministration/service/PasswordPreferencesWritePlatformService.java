@@ -8,9 +8,8 @@ package org.mifosplatform.useradministration.service;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
-public interface PasswordValidationPolicyWritePlatformService {
+public interface PasswordPreferencesWritePlatformService {
 
+    CommandProcessingResult updatePreferences(JsonCommand command);
 
-    CommandProcessingResult activate(Long validationPolicyId, JsonCommand command);
-
- }
+}

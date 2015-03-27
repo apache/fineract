@@ -13,6 +13,10 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
 public class PasswordValidationPolicyNotFoundException extends AbstractPlatformResourceNotFoundException {
 
     public PasswordValidationPolicyNotFoundException(final Long id) {
-        super("error.msg.validation.policy.id.invalid", "Password Validation Policy with identifier " + id + " does not exist", id);
+        super("error.msg.password.validation.policy.id.invalid", "Password Validation Policy with identifier " + id + " does not exist", id);
+    }
+
+    public PasswordValidationPolicyNotFoundException() {
+        super("error.msg.password.validation.policy.not.found", "An active password validation policy was not found");
     }
 }

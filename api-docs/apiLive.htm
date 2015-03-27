@@ -2033,11 +2033,11 @@
 								<td></td>
 							</tr>
 							<tr>
-								<td><a href="#password_validation_policy">Password Validation Policy</a></td>
-								<td>paswordValidationPolicy</td>
+								<td><a href="#password_preferences">Password preferences</a></td>
+								<td>passwordpreferences</td>
 								<td><a href=""></a></td>
-								<td><a href="#password_validation_policy_list">List validation Policy</a></td>
-								<td><a href="#password_validation_policy_update">Activate policy</a></td>
+								<td><a href="#password_preferences_list">Get Password Preferences</a></td>
+								<td><a href="#password_preferences_update">Update Password Preferences</a></td>
 								<td></td>
 							</tr>
 						</table>
@@ -30862,17 +30862,17 @@ Request Body:
 			</div>
 
 			<!-- start of password validation policy api docs -->
-			<a id="password_validation_policy" name="passwordValidationPolicy" class="old-syle-anchor">&nbsp;</a>
+			<a id="password_preferences" name="passwordpreferences" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h3>Password validation policy</h3>
-					<p>An API capability to support management of application password validation policy for user administration.</p>
-					<p>There is no Mifos X functionality for creating or validation policy.  The validation policies come pre-installed.</p>
-					<p>Validation policies are not updated, except in the case of enabling them</p>
+					<h3>Password preferences</h3>
+					<p>This API enables management of password policy for user administration.</p>
+					<p>There is no Mifos X functionality for creating a validation policy.  The validation policies come pre-installed.</p>
+					<p>Validation policies may be updated</p>
 				</div>
 			</div>
 
-			<a id="password_validation_policy_list" name="passwordValidationPolicy_list"
+			<a id="password_preferences_list" name="passwordValidationPolicy_list"
 			   class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -30883,11 +30883,11 @@ Request Body:
 						</dd>
 					</dl>
 					<p>Example Requests:</p>
-					<div class=apiClick>passwordValidationPolicy</div><br><br>
+					<div class=apiClick>passwordpreferences</div><br><br>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-						GET https://DomainName/api/v1/passwordValidationPolicy
+						GET https://DomainName/api/v1/passwordpreferences
 					</code>
 					<code class="method-response">
 						[
@@ -30906,21 +30906,22 @@ Request Body:
 				</div>
 			</div>
 
-			<a id="password_validation_policy_update" name="passwordValidationPolicy_update" class="old-syle-anchor">&nbsp;</a>
+			<a id="password_preferences_update" name="passwordValidationPolicy_update" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Enable Password validation policy</h4>
+					<h4>Update password preferences</h4>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-						PUT https://DomainName/api/v1/passwordValidationPolicy/{validationPolicyId}
+						PUT https://DomainName/api/v1/passwordpreferences/
 					</code>
 					<code class="method-request">
-						PUT passwordValidationPolicy
+						PUT passwordpreferences
 						Content-Type: application/json
 						Request Body:
 						{
-
+							"validationPolicyId" : 1,
+							"locale" : "en"
 						}
 					</code>
 				</div>

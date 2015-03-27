@@ -8,26 +8,24 @@ package org.mifosplatform.useradministration.handler;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.useradministration.service.PasswordValidationPolicyWritePlatformService;
+import org.mifosplatform.useradministration.service.PasswordPreferencesWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class UpdatePasswordValidationPolicyCommandHandler implements NewCommandSourceHandler {
+public class UpdatePasswordPreferencesCommandHandler implements NewCommandSourceHandler {
 
-    private final PasswordValidationPolicyWritePlatformService writePlatformService;
+    private final PasswordPreferencesWritePlatformService writePlatformService;
 
     @Autowired
-    public UpdatePasswordValidationPolicyCommandHandler(final PasswordValidationPolicyWritePlatformService writePlatformService) {
+    public UpdatePasswordPreferencesCommandHandler(final PasswordPreferencesWritePlatformService writePlatformService) {
         this.writePlatformService = writePlatformService;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-
-        final Long validationPolicyId = command.entityId();
-        return this.writePlatformService.activate(validationPolicyId, command);
+        return this.writePlatformService.updatePreferences(command);
     }
 }

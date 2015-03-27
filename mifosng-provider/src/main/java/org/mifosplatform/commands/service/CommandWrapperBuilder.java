@@ -8,6 +8,7 @@ package org.mifosplatform.commands.service;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.infrastructure.accountnumberformat.service.AccountNumberFormatConstants;
 import org.mifosplatform.portfolio.savings.DepositsApiConstants;
+import org.mifosplatform.useradministration.api.PasswordPreferencesApiConstants;
 
 public class CommandWrapperBuilder {
 
@@ -2361,11 +2362,10 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder activatePasswordValidationPolicy(final Long validationPolicyId) {
+    public CommandWrapperBuilder updatePasswordPreferences() {
         this.actionName = "UPDATE";
-        this.entityName = "PASSWORD_VALIDATION_POLICY";
-        this.entityId = validationPolicyId;
-        this.href = "/passwordValidationPolicy/" + validationPolicyId;
+        this.entityName = PasswordPreferencesApiConstants.ENTITY_NAME;
+        this.href = "/" + PasswordPreferencesApiConstants.RESOURCE_NAME;
         return this;
     }
 

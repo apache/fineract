@@ -929,9 +929,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
-        } else if (wrapper.isPasswordValidationPolicyResource()) {
+        } else if (wrapper.isPasswordPreferencesResource()) {
             if (wrapper.isUpdate()) {
-                handler = this.applicationContext.getBean("updatePasswordValidationPolicyCommandHandler", NewCommandSourceHandler.class);
+                handler = this.applicationContext.getBean("updatePasswordPreferencesCommandHandler", NewCommandSourceHandler.class);
 
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());

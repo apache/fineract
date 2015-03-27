@@ -5,6 +5,17 @@
  */
 package org.mifosplatform.useradministration.api;
 
+import java.util.Collection;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
+
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -14,37 +25,15 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.data.PasswordValidationPolicyData;
-import org.mifosplatform.useradministration.data.RoleData;
-import org.mifosplatform.useradministration.data.RolePermissionsData;
 import org.mifosplatform.useradministration.service.PasswordValidationPolicyReadPlatformService;
-import org.mifosplatform.useradministration.service.PermissionReadPlatformService;
-import org.mifosplatform.useradministration.service.RoleReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-@Path("/passwordValidationPolicy")
+@Path("/" + PasswordPreferencesApiConstants.RESOURCE_NAME)
 @Component
 @Scope("singleton")
-public class PasswordValidationPolicyApiResource {
-
-    /**
-     * The set of parameters that are supported in response for {@link org.mifosplatform.useradministration.data.RoleData}
-     */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "description",
-            "active"));
-
-
-    private final String resourceNameForPermissions = "Password_Validation_Policy";
+public class PasswordPreferencesApiResource {
 
     private final PlatformSecurityContext context;
     private final PasswordValidationPolicyReadPlatformService passwordValidationPolicyReadPlatformService;
@@ -53,10 +42,11 @@ public class PasswordValidationPolicyApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
-    public PasswordValidationPolicyApiResource(final PlatformSecurityContext context, final PasswordValidationPolicyReadPlatformService readPlatformService,
-                                               final DefaultToApiJsonSerializer<PasswordValidationPolicyData> toApiJsonSerializer,
-                                               final ApiRequestParameterHelper apiRequestParameterHelper,
-                                               final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+    public PasswordPreferencesApiResource(final PlatformSecurityContext context,
+            final PasswordValidationPolicyReadPlatformService readPlatformService,
+            final DefaultToApiJsonSerializer<PasswordValidationPolicyData> toApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper,
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.passwordValidationPolicyReadPlatformService = readPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
@@ -67,30 +57,43 @@ public class PasswordValidationPolicyApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllPolicy(@Context final UriInfo uriInfo) {
+    public String retrieve(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(PasswordPreferencesApiConstants.ENTITY_NAME);
 
-        final Collection<PasswordValidationPolicyData> validationPolicies = this.passwordValidationPolicyReadPlatformService.retrieveAll();
+        final PasswordValidationPolicyData passwordValidationPolicyData = this.passwordValidationPolicyReadPlatformService
+                .retrieveActiveValidationPolicy();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize( settings,validationPolicies ,this.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, passwordValidationPolicyData,
+                PasswordPreferencesApiConstants.RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT
-    @Path("{validationPolicyId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String activate(@PathParam("validationPolicyId") final Long validationPolicyId, final String apiRequestBodyAsJson) {
+    public String update(final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .activatePasswordValidationPolicy(validationPolicyId) //
                 .withJson(apiRequestBodyAsJson) //
                 .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @GET
+    @Path("/template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String template(@Context final UriInfo uriInfo) {
+        this.context.authenticatedUser().validateHasReadPermission(PasswordPreferencesApiConstants.ENTITY_NAME);
+
+        final Collection<PasswordValidationPolicyData> validationPolicies = this.passwordValidationPolicyReadPlatformService.retrieveAll();
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, validationPolicies, PasswordPreferencesApiConstants.RESPONSE_DATA_PARAMETERS);
     }
 
 }

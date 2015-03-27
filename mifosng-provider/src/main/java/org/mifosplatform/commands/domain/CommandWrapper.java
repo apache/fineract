@@ -8,6 +8,7 @@ package org.mifosplatform.commands.domain;
 import org.mifosplatform.infrastructure.accountnumberformat.service.AccountNumberFormatConstants;
 import org.mifosplatform.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
 import org.mifosplatform.portfolio.savings.DepositsApiConstants;
+import org.mifosplatform.useradministration.api.PasswordPreferencesApiConstants;
 
 public class CommandWrapper {
 
@@ -200,7 +201,8 @@ public class CommandWrapper {
     public boolean isUpdate() {
         // permissions resource has special update which involves no resource.
         return isPermissionResource() && isUpdateOperation() || isCurrencyResource() && isUpdateOperation() || isCacheResource()
-                && isUpdateOperation() || isWorkingDaysResource() && isUpdateOperation() || isUpdateOperation() && this.entityId != null;
+                && isUpdateOperation() || isWorkingDaysResource() && isUpdateOperation() || isPasswordPreferencesResource()
+                && isUpdateOperation() || isUpdateOperation() && this.entityId != null;
     }
 
     public boolean isUpdateOperation() {
@@ -1022,8 +1024,8 @@ public class CommandWrapper {
         return this.entityName.equalsIgnoreCase("WORKINGDAYS");
     }
 
-    public boolean isPasswordValidationPolicyResource() {
-        return this.entityName.equalsIgnoreCase("PASSWORD_VALIDATION_POLICY");
+    public boolean isPasswordPreferencesResource() {
+        return this.entityName.equalsIgnoreCase(PasswordPreferencesApiConstants.ENTITY_NAME);
     }
 
 }
