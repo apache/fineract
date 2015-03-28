@@ -261,7 +261,7 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
             this.email = newValue;
         }
 
-        final String passwordNeverExpire = "passwordNeverExpire";
+        final String passwordNeverExpire = "passwordNeverExpires";
 
         if (command.hasParameter(passwordNeverExpire)) {
             if (command.isChangeInBooleanParameterNamed(passwordNeverExpire, this.passwordNeverExpires)) {
