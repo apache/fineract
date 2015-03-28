@@ -75,6 +75,7 @@ public class PasswordPreferencesApiResource {
     public String update(final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+                .updatePasswordPreferences() //
                 .withJson(apiRequestBodyAsJson) //
                 .build();
 
