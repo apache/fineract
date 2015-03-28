@@ -5,20 +5,28 @@
  */
 package org.mifosplatform.organisation.teller.domain;
 
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
+
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.glaccount.domain.GLAccount;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.organisation.office.domain.Office;
-import org.mifosplatform.organisation.office.exception.RootOfficeParentCannotBeUpdated;
 import org.springframework.data.jpa.domain.AbstractPersistable;
-
-import javax.persistence.*;
-
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
 
 @Entity
 @Table(name = "m_tellers", uniqueConstraints = {
