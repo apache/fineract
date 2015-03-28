@@ -1028,4 +1028,7 @@ public class CommandWrapper {
         return this.entityName.equalsIgnoreCase(PasswordPreferencesApiConstants.ENTITY_NAME);
     }
 
+    public boolean isPaymentTypeResource() {
+        return this.entityName.equalsIgnoreCase("PAYMENTTYPE");
+    }
 }

@@ -22,7 +22,6 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -30,7 +29,8 @@ import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamExc
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
+import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
+import org.mifosplatform.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.DepositsApiConstants;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
@@ -53,6 +53,7 @@ public class RecurringDepositAccountTransactionsApiResource {
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
     private final DepositAccountReadPlatformService depositAccountReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
+    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
 
     @Autowired
     public RecurringDepositAccountTransactionsApiResource(final PlatformSecurityContext context,
@@ -61,7 +62,7 @@ public class RecurringDepositAccountTransactionsApiResource {
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
             final DepositAccountReadPlatformService depositAccountReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService) {
+            final CodeValueReadPlatformService codeValueReadPlatformService, PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
         this.context = context;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
@@ -69,6 +70,7 @@ public class RecurringDepositAccountTransactionsApiResource {
         this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
         this.depositAccountReadPlatformService = depositAccountReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
+        this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
     }
 
     private boolean is(final String commandParam, final String commandValue) {
@@ -105,8 +107,7 @@ public class RecurringDepositAccountTransactionsApiResource {
             savingsAccount = SavingsAccountTransactionData.withWithDrawalTransactionDetails(savingsAccount);
         }
 
-        final Collection<CodeValueData> paymentTypeOptions = this.codeValueReadPlatformService
-                .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
+        final Collection<PaymentTypeData> paymentTypeOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
         savingsAccount = SavingsAccountTransactionData.templateOnTop(savingsAccount, paymentTypeOptions);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -126,8 +127,7 @@ public class RecurringDepositAccountTransactionsApiResource {
                 recurringDepositAccountId, transactionId, DepositAccountType.RECURRING_DEPOSIT);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
-            final Collection<CodeValueData> paymentTypeOptions = this.codeValueReadPlatformService
-                    .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
+            final Collection<PaymentTypeData> paymentTypeOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
             transactionData = SavingsAccountTransactionData.templateOnTop(transactionData, paymentTypeOptions);
         }
 

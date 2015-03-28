@@ -14,11 +14,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.infrastructure.codes.data.CodeValueData;
-import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
 import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
+import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
+import org.mifosplatform.portfolio.paymenttype.domain.PaymentType;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -26,8 +26,8 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 public final class PaymentDetail extends AbstractPersistable<Long> {
 
     @ManyToOne
-    @JoinColumn(name = "payment_type_cv_id", nullable = false)
-    private CodeValue paymentType;
+    @JoinColumn(name = "payment_type_id", nullable = false)
+    private PaymentType paymentType;
 
     @Column(name = "account_number", length = 50)
     private String accountNumber;
@@ -48,7 +48,7 @@ public final class PaymentDetail extends AbstractPersistable<Long> {
 
     }
 
-    public static PaymentDetail generatePaymentDetail(final CodeValue paymentType, final JsonCommand command,
+    public static PaymentDetail generatePaymentDetail(final PaymentType paymentType, final JsonCommand command,
             final Map<String, Object> changes) {
         final String accountNumber = command.stringValueOfParameterNamed(PaymentDetailConstants.accountNumberParamName);
         final String checkNumber = command.stringValueOfParameterNamed(PaymentDetailConstants.checkNumberParamName);
@@ -76,12 +76,12 @@ public final class PaymentDetail extends AbstractPersistable<Long> {
         return paymentDetail;
     }
 
-    public static PaymentDetail instance(final CodeValue paymentType, final String accountNumber, final String checkNumber,
+    public static PaymentDetail instance(final PaymentType paymentType, final String accountNumber, final String checkNumber,
             final String routingCode, final String receiptNumber, final String bankNumber) {
         return new PaymentDetail(paymentType, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber);
     }
 
-    private PaymentDetail(final CodeValue paymentType, final String accountNumber, final String checkNumber, final String routingCode,
+    private PaymentDetail(final PaymentType paymentType, final String accountNumber, final String checkNumber, final String routingCode,
             final String receiptNumber, final String bankNumber) {
         this.paymentType = paymentType;
         this.accountNumber = accountNumber;
@@ -92,13 +92,13 @@ public final class PaymentDetail extends AbstractPersistable<Long> {
     }
 
     public PaymentDetailData toData() {
-        final CodeValueData paymentTypeData = this.paymentType.toData();
+        final PaymentTypeData paymentTypeData = this.paymentType.toData();
         final PaymentDetailData paymentDetailData = new PaymentDetailData(getId(), paymentTypeData, this.accountNumber, this.checkNumber,
                 this.routingCode, this.receiptNumber, this.bankNumber);
         return paymentDetailData;
     }
 
-    public CodeValue getPaymentType() {
+    public PaymentType getPaymentType() {
         return this.paymentType;
     }
 

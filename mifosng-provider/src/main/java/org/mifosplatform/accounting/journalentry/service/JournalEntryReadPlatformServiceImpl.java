@@ -29,7 +29,6 @@ import org.mifosplatform.accounting.journalentry.data.OfficeOpeningBalancesData;
 import org.mifosplatform.accounting.journalentry.data.TransactionDetailData;
 import org.mifosplatform.accounting.journalentry.data.TransactionTypeEnumData;
 import org.mifosplatform.accounting.journalentry.exception.JournalEntriesNotFoundException;
-import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.exception.GeneralPlatformDomainRuleException;
@@ -46,6 +45,7 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.portfolio.note.data.NoteData;
 import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
+import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,8 +107,8 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             }
             if (associationParametersData.isTransactionDetailsRequired()) {
                 sb.append(" ,pd.receipt_number as receiptNumber, ").append(" pd.check_number as checkNumber, ")
-                        .append(" pd.account_number as accountNumber, ").append(" cdv.code_value as paymentTypeName, ")
-                        .append(" pd.payment_type_cv_id as paymentTypeId,").append(" pd.bank_number as bankNumber, ")
+                        .append(" pd.account_number as accountNumber, ").append(" pt.value as paymentTypeName, ")
+                        .append(" pd.payment_type_id as paymentTypeId,").append(" pd.bank_number as bankNumber, ")
                         .append(" pd.routing_code as routingCode, ").append(" note.id as noteId, ")
                         .append(" note.note as transactionNote, ").append(" lt.transaction_type_enum as loanTransactionType, ")
                         .append(" st.transaction_type_enum as savingsTransactionType ");
@@ -122,7 +122,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 sb.append(" left join m_loan_transaction as lt on journalEntry.loan_transaction_id = lt.id ")
                         .append(" left join m_savings_account_transaction as st on journalEntry.savings_transaction_id = st.id ")
                         .append(" left join m_payment_detail as pd on lt.payment_detail_id = pd.id or st.payment_detail_id = pd.id")
-                        .append(" left join m_code_value as cdv on cdv.id = pd.payment_type_cv_id ")
+                        .append(" left join m_payment_type as pt on pt.id = pd.payment_type_id ")
                         .append(" left join m_note as note on lt.id = note.loan_transaction_id or st.id = note.savings_account_transaction_id ");
             }
             return sb.toString();
@@ -185,7 +185,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentTypeId");
                 if (paymentTypeId != null) {
                     final String typeName = rs.getString("paymentTypeName");
-                    final CodeValueData paymentType = CodeValueData.instance(paymentTypeId, typeName);
+                    final PaymentTypeData paymentType = PaymentTypeData.instance(paymentTypeId, typeName);
                     final String accountNumber = rs.getString("accountNumber");
                     final String checkNumber = rs.getString("checkNumber");
                     final String routingCode = rs.getString("routingCode");

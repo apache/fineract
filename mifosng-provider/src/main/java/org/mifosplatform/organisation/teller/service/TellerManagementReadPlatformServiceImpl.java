@@ -417,9 +417,9 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             startDate = cashierData.getStartDate();
             endDate = cashierData.getEndDate();
         }
-        //Fetching all currency type from m_organisation_currency table
+        // Fetching all currency type from m_organisation_currency table
         final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
-        
+
         return CashierTransactionData.template(cashierId, tellerId, tellerName, officeId, officeName, cashierName, cashierData, startDate,
                 endDate, currencyOptions);
     }

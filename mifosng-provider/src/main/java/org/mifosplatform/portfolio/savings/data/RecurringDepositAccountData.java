@@ -11,11 +11,11 @@ import java.util.Collection;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
+import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 
@@ -59,7 +59,7 @@ public class RecurringDepositAccountData extends DepositAccountData {
 
     // for account close
     private final Collection<EnumOptionData> onAccountClosureOptions;
-    private final Collection<CodeValueData> paymentTypeOptions;
+    private final Collection<PaymentTypeData> paymentTypeOptions;
 
     public static RecurringDepositAccountData instance(final DepositAccountData depositAccountData,
             final boolean preClosurePenalApplicable, final BigDecimal preClosurePenalInterest,
@@ -77,7 +77,7 @@ public class RecurringDepositAccountData extends DepositAccountData {
 
         final EnumOptionData depositType = SavingsEnumerations.depositType(DepositAccountType.FIXED_DEPOSIT.getValue());
         final Collection<EnumOptionData> onAccountClosureOptions = null;
-        final Collection<CodeValueData> paymentTypeOptions = null;
+        final Collection<PaymentTypeData> paymentTypeOptions = null;
         final Collection<SavingsAccountData> savingsAccountDatas = null;
         final Integer recurringFrequency = null;
         final EnumOptionData recurringFrequencyType = null;
@@ -270,7 +270,7 @@ public class RecurringDepositAccountData extends DepositAccountData {
 
         final EnumOptionData depositType = SavingsEnumerations.depositType(DepositAccountType.RECURRING_DEPOSIT.getValue());
         final Collection<EnumOptionData> onAccountClosureOptions = null;
-        final Collection<CodeValueData> paymentTypeOptions = null;
+        final Collection<PaymentTypeData> paymentTypeOptions = null;
         final Collection<SavingsAccountData> savingsAccountDatas = null;
         final LocalDate expectedFirstDepositOnDate = null;
 
@@ -300,7 +300,7 @@ public class RecurringDepositAccountData extends DepositAccountData {
     }
 
     public static RecurringDepositAccountData preClosureDetails(final Long accountId, final BigDecimal maturityAmount,
-            final Collection<EnumOptionData> onAccountClosureOptions, final Collection<CodeValueData> paymentTypeOptions,
+            final Collection<EnumOptionData> onAccountClosureOptions, final Collection<PaymentTypeData> paymentTypeOptions,
             final Collection<SavingsAccountData> savingsAccountDatas) {
 
         final String accountNo = null;
@@ -389,7 +389,7 @@ public class RecurringDepositAccountData extends DepositAccountData {
     }
 
     public static RecurringDepositAccountData withClosureTemplateDetails(final RecurringDepositAccountData account,
-            final Collection<EnumOptionData> onAccountClosureOptions, final Collection<CodeValueData> paymentTypeOptions,
+            final Collection<EnumOptionData> onAccountClosureOptions, final Collection<PaymentTypeData> paymentTypeOptions,
             final Collection<SavingsAccountData> savingsAccountDatas) {
 
         return new RecurringDepositAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
@@ -439,7 +439,7 @@ public class RecurringDepositAccountData extends DepositAccountData {
             final LocalDate maturityDate, final Integer depositPeriod, final EnumOptionData depositPeriodFrequency,
             final BigDecimal mandatoryRecommendedDepositAmount, final Collection<EnumOptionData> periodFrequencyTypeOptions,
             final EnumOptionData depositType, final EnumOptionData onAccountClosure,
-            final Collection<EnumOptionData> onAccountClosureOptions, final Collection<CodeValueData> paymentTypeOptions,
+            final Collection<EnumOptionData> onAccountClosureOptions, final Collection<PaymentTypeData> paymentTypeOptions,
             final Collection<SavingsAccountData> savingsAccountDatas, final LocalDate expectedFirstDepositOnDate,
             final BigDecimal totalOverdueAmount, final Integer noOfOverdueInstallments, final boolean isMandatoryDeposit,
             final boolean allowWithdrawal, final boolean adjustAdvanceTowardsFuturePayments, final boolean isCalendarInherited,

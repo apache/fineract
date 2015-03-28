@@ -14,13 +14,13 @@ import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.staff.data.StaffData;
@@ -32,8 +32,8 @@ import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
-import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
+import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
@@ -660,20 +660,20 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("totran.transaction_date as toTransferDate, totran.amount as toTransferAmount,");
             sqlBuilder.append("totran.description as toTransferDescription,");
             sqlBuilder.append("sa.id as savingsId, sa.account_no as accountNo,");
-            sqlBuilder.append("pd.payment_type_cv_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, ");
+            sqlBuilder.append("pd.payment_type_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, ");
             sqlBuilder.append("pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode, ");
             sqlBuilder
                     .append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf, ");
             sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
             sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
-            sqlBuilder.append("cv.code_value as paymentTypeName ");
+            sqlBuilder.append("pt.value as paymentTypeName ");
             sqlBuilder.append("from m_savings_account sa ");
             sqlBuilder.append("join m_savings_account_transaction tr on tr.savings_account_id = sa.id ");
             sqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
             sqlBuilder.append("left join m_account_transfer_transaction fromtran on fromtran.from_savings_transaction_id = tr.id ");
             sqlBuilder.append("left join m_account_transfer_transaction totran on totran.to_savings_transaction_id = tr.id ");
             sqlBuilder.append("left join m_payment_detail pd on tr.payment_detail_id = pd.id ");
-            sqlBuilder.append("left join m_code_value cv on pd.payment_type_cv_id = cv.id ");
+            sqlBuilder.append("left join m_payment_type pt on pd.payment_type_id = pt.id ");
 
             this.schemaSql = sqlBuilder.toString();
         }
@@ -702,7 +702,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentType");
                 if (paymentTypeId != null) {
                     final String typeName = rs.getString("paymentTypeName");
-                    final CodeValueData paymentType = CodeValueData.instance(paymentTypeId, typeName);
+                    final PaymentTypeData paymentType = PaymentTypeData.instance(paymentTypeId, typeName);
                     final String accountNumber = rs.getString("accountNumber");
                     final String checkNumber = rs.getString("checkNumber");
                     final String routingCode = rs.getString("routingCode");

@@ -11,12 +11,12 @@ import java.util.Collection;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.account.data.PortfolioAccountData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
+import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
 import org.mifosplatform.portfolio.savings.DepositAccountType;
 import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 
@@ -52,7 +52,7 @@ public class FixedDepositAccountData extends DepositAccountData {
 
     // for account close
     private Collection<EnumOptionData> onAccountClosureOptions;
-    private Collection<CodeValueData> paymentTypeOptions;
+    private Collection<PaymentTypeData> paymentTypeOptions;
 
     public static FixedDepositAccountData instance(final DepositAccountData depositAccountData, final boolean preClosurePenalApplicable,
             final BigDecimal preClosurePenalInterest, final EnumOptionData preClosurePenalInterestOnType, final Integer minDepositTerm,
@@ -67,7 +67,7 @@ public class FixedDepositAccountData extends DepositAccountData {
 
         final EnumOptionData depositType = SavingsEnumerations.depositType(DepositAccountType.FIXED_DEPOSIT.getValue());
         final Collection<EnumOptionData> onAccountClosureOptions = null;
-        final Collection<CodeValueData> paymentTypeOptions = null;
+        final Collection<PaymentTypeData> paymentTypeOptions = null;
         final Collection<SavingsAccountData> savingsAccountDatas = null;
 
         return new FixedDepositAccountData(depositAccountData.id, depositAccountData.accountNo, depositAccountData.externalId,
@@ -230,7 +230,7 @@ public class FixedDepositAccountData extends DepositAccountData {
 
         final EnumOptionData depositType = SavingsEnumerations.depositType(DepositAccountType.FIXED_DEPOSIT.getValue());
         final Collection<EnumOptionData> onAccountClosureOptions = null;
-        final Collection<CodeValueData> paymentTypeOptions = null;
+        final Collection<PaymentTypeData> paymentTypeOptions = null;
         final Collection<SavingsAccountData> savingsAccountDatas = null;
 
         return new FixedDepositAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
@@ -248,7 +248,7 @@ public class FixedDepositAccountData extends DepositAccountData {
     }
 
     public static FixedDepositAccountData preClosureDetails(final Long accountId, BigDecimal maturityAmount,
-            final Collection<EnumOptionData> onAccountClosureOptions, final Collection<CodeValueData> paymentTypeOptions,
+            final Collection<EnumOptionData> onAccountClosureOptions, final Collection<PaymentTypeData> paymentTypeOptions,
             final Collection<SavingsAccountData> savingsAccountDatas) {
 
         final Long groupId = null;
@@ -327,7 +327,7 @@ public class FixedDepositAccountData extends DepositAccountData {
     }
 
     public static FixedDepositAccountData withClosureTemplateDetails(final FixedDepositAccountData account,
-            final Collection<EnumOptionData> onAccountClosureOptions, final Collection<CodeValueData> paymentTypeOptions,
+            final Collection<EnumOptionData> onAccountClosureOptions, final Collection<PaymentTypeData> paymentTypeOptions,
             final Collection<SavingsAccountData> savingsAccountDatas) {
 
         return new FixedDepositAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
@@ -375,7 +375,7 @@ public class FixedDepositAccountData extends DepositAccountData {
             final LocalDate maturityDate, final Integer depositPeriod, final EnumOptionData depositPeriodFrequency,
             final Collection<EnumOptionData> periodFrequencyTypeOptions, final EnumOptionData depositType,
             final EnumOptionData onAccountClosure, final Collection<EnumOptionData> onAccountClosureOptions,
-            final Collection<CodeValueData> paymentTypeOptions, final Collection<SavingsAccountData> savingsAccountDatas,
+            final Collection<PaymentTypeData> paymentTypeOptions, final Collection<SavingsAccountData> savingsAccountDatas,
             final PortfolioAccountData linkedAccount, final Boolean transferInterestToSavings) {
 
         super(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName, fieldofficerId,

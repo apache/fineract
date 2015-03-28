@@ -21,6 +21,7 @@ import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.mifosplatform.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,9 +34,9 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
     public LoanProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,
             final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper,
             final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final ChargeRepositoryWrapper chargeRepositoryWrapper,
-            final GLAccountRepositoryWrapper accountRepositoryWrapper) {
+            final GLAccountRepositoryWrapper accountRepositoryWrapper, final PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper) {
         super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, codeValueRepositoryWrapper, chargeRepositoryWrapper,
-                accountRepositoryWrapper);
+                accountRepositoryWrapper, paymentTypeRepositoryWrapper);
     }
 
     /*** Set of abstractions for saving Loan Products to GL Account Mappings ***/

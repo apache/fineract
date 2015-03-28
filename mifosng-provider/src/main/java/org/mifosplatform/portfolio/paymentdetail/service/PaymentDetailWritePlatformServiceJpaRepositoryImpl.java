@@ -7,12 +7,12 @@ package org.mifosplatform.portfolio.paymentdetail.service;
 
 import java.util.Map;
 
-import org.mifosplatform.infrastructure.codes.domain.CodeValue;
-import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetailRepository;
+import org.mifosplatform.portfolio.paymenttype.domain.PaymentType;
+import org.mifosplatform.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,13 +21,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class PaymentDetailWritePlatformServiceJpaRepositoryImpl implements PaymentDetailWritePlatformService {
 
     private final PaymentDetailRepository paymentDetailRepository;
-    private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
+    // private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
+    private final PaymentTypeRepositoryWrapper paymentTyperepositoryWrapper;
 
     @Autowired
     public PaymentDetailWritePlatformServiceJpaRepositoryImpl(final PaymentDetailRepository paymentDetailRepository,
-            final CodeValueRepositoryWrapper codeValueRepositoryWrapper) {
+            final PaymentTypeRepositoryWrapper paymentTyperepositoryWrapper) {
         this.paymentDetailRepository = paymentDetailRepository;
-        this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
+        this.paymentTyperepositoryWrapper = paymentTyperepositoryWrapper;
     }
 
     @Override
@@ -35,8 +36,7 @@ public class PaymentDetailWritePlatformServiceJpaRepositoryImpl implements Payme
         final Long paymentTypeId = command.longValueOfParameterNamed(PaymentDetailConstants.paymentTypeParamName);
         if (paymentTypeId == null) { return null; }
 
-        final CodeValue paymentType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
-                PaymentDetailConstants.paymentTypeCodeName, paymentTypeId);
+        final PaymentType paymentType = this.paymentTyperepositoryWrapper.findOneWithNotFoundDetection(paymentTypeId);
         final PaymentDetail paymentDetail = PaymentDetail.generatePaymentDetail(paymentType, command, changes);
         return paymentDetail;
 

@@ -91,7 +91,7 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
         Money interestForPeriod = interestForThisInstallment;
         if (interestForPeriod.isGreaterThanZero()) {
             interestForPeriod = interestForPeriod.minus(cumulatingInterestPaymentDueToGrace);
-        }else{
+        } else {
             interestForPeriod = result.interestPaymentDueToGrace().minus(cumulatingInterestPaymentDueToGrace);
         }
         Money principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator,

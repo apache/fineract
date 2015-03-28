@@ -14,10 +14,10 @@ import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
 import org.mifosplatform.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.mifosplatform.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
-import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
+import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
 
 /**
  * Immutable data object represent a savings product.
@@ -62,7 +62,7 @@ public class SavingsProductData {
     private final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions;
     private final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions;
     private final Collection<EnumOptionData> withdrawalFeeTypeOptions;
-    private final Collection<CodeValueData> paymentTypeOptions;
+    private final Collection<PaymentTypeData> paymentTypeOptions;
     private final Collection<EnumOptionData> accountingRuleOptions;
     private final Map<String, List<GLAccountData>> accountingMappingOptions;
     private final Collection<ChargeData> chargeOptions;
@@ -76,7 +76,7 @@ public class SavingsProductData {
             final Collection<EnumOptionData> interestCalculationTypeOptions,
             final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
-            final Collection<CodeValueData> paymentTypeOptions, final Collection<EnumOptionData> accountingRuleOptions,
+            final Collection<PaymentTypeData> paymentTypeOptions, final Collection<EnumOptionData> accountingRuleOptions,
             final Map<String, List<GLAccountData>> accountingMappingOptions, final Collection<ChargeData> chargeOptions,
             final Collection<ChargeData> penaltyOptions) {
 
@@ -135,7 +135,7 @@ public class SavingsProductData {
             final Collection<EnumOptionData> interestCalculationTypeOptions,
             final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
-            final Collection<CodeValueData> paymentTypeOptions, final Collection<EnumOptionData> accountingRuleOptions,
+            final Collection<PaymentTypeData> paymentTypeOptions, final Collection<EnumOptionData> accountingRuleOptions,
             final Map<String, List<GLAccountData>> accountingMappingOptions, final Collection<ChargeData> chargeOptions,
             final Collection<ChargeData> penaltyOptions) {
 
@@ -167,7 +167,7 @@ public class SavingsProductData {
         final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
         final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
         final Collection<EnumOptionData> withdrawalFeeTypeOptions = null;
-        final Collection<CodeValueData> paymentTypeOptions = null;
+        final Collection<PaymentTypeData> paymentTypeOptions = null;
         final Collection<EnumOptionData> accountingRuleOptions = null;
         final Map<String, List<GLAccountData>> accountingMappingOptions = null;
         final Collection<ChargeData> chargeOptions = null;
@@ -206,7 +206,7 @@ public class SavingsProductData {
         final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
         final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
         final Collection<EnumOptionData> withdrawalFeeTypeOptions = null;
-        final Collection<CodeValueData> paymentTypeOptions = null;
+        final Collection<PaymentTypeData> paymentTypeOptions = null;
         final Collection<EnumOptionData> accountingRuleOptions = null;
         final Map<String, List<GLAccountData>> accountingMappingOptions = null;
         final Collection<ChargeData> chargeOptions = null;
@@ -256,7 +256,7 @@ public class SavingsProductData {
         final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
         final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
         final Collection<EnumOptionData> withdrawalFeeTypeOptions = null;
-        final Collection<CodeValueData> paymentTypeOptions = null;
+        final Collection<PaymentTypeData> paymentTypeOptions = null;
         final Collection<EnumOptionData> accountingRuleOptions = null;
         final Map<String, List<GLAccountData>> accountingMappingOptions = null;
         final Collection<ChargeData> charges = null;
@@ -288,7 +288,7 @@ public class SavingsProductData {
             final Collection<EnumOptionData> interestCalculationTypeOptions,
             final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
-            final Collection<CodeValueData> paymentTypeOptions, final Collection<EnumOptionData> accountingRuleOptions,
+            final Collection<PaymentTypeData> paymentTypeOptions, final Collection<EnumOptionData> accountingRuleOptions,
             final Map<String, List<GLAccountData>> accountingMappingOptions, final Collection<ChargeData> charges,
             final Collection<ChargeData> chargeOptions, final Collection<ChargeData> penaltyOptions,
             final Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings,

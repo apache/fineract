@@ -5,10 +5,10 @@
  */
 package org.mifosplatform.portfolio.paymentdetail.domain;
 
-import org.mifosplatform.infrastructure.codes.domain.CodeValue;
-import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
+import org.mifosplatform.portfolio.paymenttype.domain.PaymentType;
+import org.mifosplatform.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,20 +18,19 @@ import com.google.gson.JsonObject;
 public class PaymentDetailAssembler {
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
+    private final PaymentTypeRepositoryWrapper repositoryWrapper;
 
     @Autowired
-    public PaymentDetailAssembler(final FromJsonHelper fromApiJsonHelper, final CodeValueRepositoryWrapper codeValueRepositoryWrapper) {
+    public PaymentDetailAssembler(final FromJsonHelper fromApiJsonHelper, final PaymentTypeRepositoryWrapper repositoryWrapper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
-        this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
+        this.repositoryWrapper = repositoryWrapper;
     }
 
     public PaymentDetail fetchPaymentDetail(final JsonObject json) {
         final Long paymentTypeId = this.fromApiJsonHelper.extractLongNamed(PaymentDetailConstants.paymentTypeParamName, json);
         if (paymentTypeId == null) { return null; }
 
-        final CodeValue paymentType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
-                PaymentDetailConstants.paymentTypeCodeName, paymentTypeId);
+        final PaymentType paymentType = this.repositoryWrapper.findOneWithNotFoundDetection(paymentTypeId);
 
         final String accountNumber = this.fromApiJsonHelper.extractStringNamed(PaymentDetailConstants.accountNumberParamName, json);
         final String checkNumber = this.fromApiJsonHelper.extractStringNamed(PaymentDetailConstants.checkNumberParamName, json);

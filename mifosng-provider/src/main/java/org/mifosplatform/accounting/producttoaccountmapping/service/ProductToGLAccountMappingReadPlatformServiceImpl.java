@@ -22,10 +22,10 @@ import org.mifosplatform.accounting.glaccount.data.GLAccountData;
 import org.mifosplatform.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.mifosplatform.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 import org.mifosplatform.accounting.producttoaccountmapping.domain.PortfolioProductType;
-import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
+import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -46,11 +46,11 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         public String schema() {
             return " mapping.id as id, mapping.gl_account_id as glAccountId,glaccount.name as name,glaccount.gl_code as code,"
                     + " mapping.product_id as productId, mapping.product_type as productType,mapping.financial_account_type as financialAccountType, "
-                    + " mapping.payment_type as paymentTypeId,cv.code_value codeValue, mapping.charge_id as chargeId, charge.is_penalty as penalty, "
+                    + " mapping.payment_type as paymentTypeId,pt.value as paymentTypeValue, mapping.charge_id as chargeId, charge.is_penalty as penalty, "
                     + " charge.name as chargeName "
                     + " from acc_product_mapping mapping left join m_charge charge on mapping.charge_id=charge.id "
                     + " left join acc_gl_account as  glaccount on mapping.gl_account_id = glaccount.id"
-                    + " left join m_code_value cv on mapping.payment_type=cv.id" + " where mapping.product_type= ? ";
+                    + " left join m_payment_type pt on mapping.payment_type=pt.id" + " where mapping.product_type= ? ";
         }
 
         @Override
@@ -62,7 +62,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
             final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentTypeId");
             final Long chargeId = rs.getLong("chargeId");
             final Integer productType = rs.getInt("productType");
-            final String paymentTypeValue = rs.getString("codeValue");
+            final String paymentTypeValue = rs.getString("paymentTypeValue");
             final Integer financialAccountType = rs.getInt("financialAccountType");
             final String glAccountName = rs.getString("name");
             final String glCode = rs.getString("code");
@@ -249,13 +249,14 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
             }
             final Long paymentTypeId = (Long) productToGLAccountMap.get("paymentTypeId");
             final String paymentTypeValue = (String) productToGLAccountMap.get("paymentTypeValue");
-            final CodeValueData codeValueData = CodeValueData.instance(paymentTypeId, paymentTypeValue);
+            final PaymentTypeData paymentTypeData = PaymentTypeData.instance(paymentTypeId, paymentTypeValue);
             final Long glAccountId = (Long) productToGLAccountMap.get("glAccountId");
             final String glAccountName = (String) productToGLAccountMap.get("glAccountName");
             final String glCode = (String) productToGLAccountMap.get("glCode");
             final GLAccountData gLAccountData = new GLAccountData(glAccountId, glAccountName, glCode);
 
-            final PaymentTypeToGLAccountMapper paymentTypeToGLAccountMapper = new PaymentTypeToGLAccountMapper(codeValueData, gLAccountData);
+            final PaymentTypeToGLAccountMapper paymentTypeToGLAccountMapper = new PaymentTypeToGLAccountMapper(paymentTypeData,
+                    gLAccountData);
             paymentTypeToGLAccountMappers.add(paymentTypeToGLAccountMapper);
         }
         return paymentTypeToGLAccountMappers;

@@ -32,7 +32,6 @@ import org.mifosplatform.accounting.producttoaccountmapping.service.ProductToGLA
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -44,7 +43,8 @@ import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
-import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
+import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
+import org.mifosplatform.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
@@ -75,6 +75,7 @@ public class SavingsProductsApiResource {
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService;
     private final ChargeReadPlatformService chargeReadPlatformService;
+    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
 
     @Autowired
     public SavingsProductsApiResource(final SavingsProductReadPlatformService savingProductReadPlatformService,
@@ -85,7 +86,7 @@ public class SavingsProductsApiResource {
             final ApiRequestParameterHelper apiRequestParameterHelper, final CodeValueReadPlatformService codeValueReadPlatformService,
             final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
             final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService,
-            final ChargeReadPlatformService chargeReadPlatformService) {
+            final ChargeReadPlatformService chargeReadPlatformService, PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
         this.savingProductReadPlatformService = savingProductReadPlatformService;
         this.dropdownReadPlatformService = dropdownReadPlatformService;
         this.currencyReadPlatformService = currencyReadPlatformService;
@@ -97,6 +98,7 @@ public class SavingsProductsApiResource {
         this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
         this.accountMappingReadPlatformService = accountMappingReadPlatformService;
         this.chargeReadPlatformService = chargeReadPlatformService;
+        this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
     }
 
     @POST
@@ -229,8 +231,8 @@ public class SavingsProductsApiResource {
 
         final Collection<EnumOptionData> withdrawalFeeTypeOptions = this.dropdownReadPlatformService.retrievewithdrawalFeeTypeOptions();
 
-        final Collection<CodeValueData> paymentTypeOptions = this.codeValueReadPlatformService
-                .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
+        final Collection<PaymentTypeData> paymentTypeOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
+
         final Collection<EnumOptionData> accountingRuleOptions = this.accountingDropdownReadPlatformService
                 .retrieveAccountingRuleTypeOptions();
         final Map<String, List<GLAccountData>> accountingMappingOptions = this.accountingDropdownReadPlatformService
