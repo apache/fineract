@@ -23,21 +23,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class PaymentTypeWriteServiceImpl implements PaymentTypeWriteService {
 
-    // private final static Logger logger =
-    // LoggerFactory.getLogger(MifosEntityAccessWriteServiceImpl.class);
     private final PaymentTypeRepository repository;
     private final PaymentTypeRepositoryWrapper repositoryWrapper;
-
-    /*
-     * private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
-     * private final MifosEntityAccessRepository entityAccessRepository; private
-     * final MifosEntityRelationRepositoryWrapper
-     * mifosEntityRelationRepositoryWrapper; private final
-     * MifosEntityToEntityMappingRepository
-     * mifosEntityToEntityMappingRepository; private final
-     * MifosEntityToEntityMappingRepositoryWrapper
-     * mifosEntityToEntityMappingRepositoryWrapper;
-     */
     private final PaymentTypeDataValidator fromApiJsonDeserializer;
 
     @Autowired
@@ -64,7 +51,7 @@ public class PaymentTypeWriteServiceImpl implements PaymentTypeWriteService {
 
     @Override
     public CommandProcessingResult updatePaymentType(Long paymentTypeId, JsonCommand command) {
-        // TODO Auto-generated method stub
+
         this.fromApiJsonDeserializer.validateForUpdate(command.json());
         final PaymentType paymentType = this.repositoryWrapper.findOneWithNotFoundDetection(paymentTypeId);
         final Map<String, Object> changes = paymentType.update(command);
@@ -78,15 +65,26 @@ public class PaymentTypeWriteServiceImpl implements PaymentTypeWriteService {
 
     @Override
     public CommandProcessingResult deletePaymentType(Long paymentTypeId) {
-        // TODO Auto-generated method stub
         final PaymentType paymentType = this.repositoryWrapper.findOneWithNotFoundDetection(paymentTypeId);
         try {
             this.repository.delete(paymentType);
+            this.repository.flush();
         } catch (final DataIntegrityViolationException e) {
-            throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause());
+            handleDataIntegrityIssues(e);
         }
         return new CommandProcessingResultBuilder().withEntityId(paymentType.getId()).build();
     }
 
+    private void handleDataIntegrityIssues(final DataIntegrityViolationException dve) {
+
+        final Throwable realCause = dve.getMostSpecificCause();
+        if (realCause.getMessage().contains("acc_product_mapping")) {
+            throw new PlatformDataIntegrityException("error.msg.payment.type.association.exist",
+                    "cannot.delete.payment.type.with.association");
+        } else if (realCause.getMessage().contains("payment_type_id")) { throw new PlatformDataIntegrityException(
+                "error.msg.payment.type.association.exist", "cannot.delete.payment.type.with.association"); }
+
+        throw new PlatformDataIntegrityException("error.msg.paymenttypes.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource.");
+    }
 }
