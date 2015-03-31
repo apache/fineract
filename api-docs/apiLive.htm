@@ -30887,21 +30887,34 @@ Request Body:
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-						GET https://DomainName/api/v1/passwordpreferences
+GET https://DomainName/api/v1/passwordpreferences/template
 					</code>
 					<code class="method-response">
-						[
-						{
-						"id": 1,
-						"description": "Password most be at least 1 character and not more that 50 characters long",
-						"active": true
-						},
-						{
-						"id": 2,
-						"description": "Password must be at least 6 characters, no more than 50 characters long, must include at least one upper case letter, one lower case letter, one numeric digit and no space",
-						"active": false
-						}
-						]
+[
+{
+"id": 1,
+"description": "Password most be at least 1 character and not more that 50 characters long",
+"active": true
+},
+{
+"id": 2,
+"description": "Password must be at least 6 characters, no more than 50 characters long, must include at least one upper case letter, one lower case letter, one numeric digit and no space",
+"active": false
+}
+]
+					</code>
+				</div>
+			
+							<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/passwordpreferences/
+					</code>
+					<code class="method-response">
+{
+"id": 1,
+"description": "Password most be at least 1 character and not more that 50 characters long",
+"active": true
+}
 					</code>
 				</div>
 			</div>
@@ -30913,16 +30926,15 @@ Request Body:
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-						PUT https://DomainName/api/v1/passwordpreferences/
+PUT https://DomainName/api/v1/passwordpreferences/
 					</code>
 					<code class="method-request">
-						PUT passwordpreferences
-						Content-Type: application/json
-						Request Body:
-						{
-							"validationPolicyId" : 1,
-							"locale" : "en"
-						}
+PUT passwordpreferences
+Content-Type: application/json
+Request Body:
+{
+	"validationPolicyId" : 1,
+}
 					</code>
 				</div>
 			</div>
