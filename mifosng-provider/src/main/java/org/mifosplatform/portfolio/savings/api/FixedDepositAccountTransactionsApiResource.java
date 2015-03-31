@@ -22,7 +22,6 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -50,7 +49,6 @@ public class FixedDepositAccountTransactionsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
-    private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
 
     @Autowired
@@ -59,13 +57,12 @@ public class FixedDepositAccountTransactionsApiResource {
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService, PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
+            PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
         this.context = context;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
     }
 

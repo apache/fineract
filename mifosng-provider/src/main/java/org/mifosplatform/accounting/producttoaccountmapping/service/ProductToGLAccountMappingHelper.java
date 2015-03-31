@@ -23,7 +23,6 @@ import org.mifosplatform.accounting.producttoaccountmapping.domain.ProductToGLAc
 import org.mifosplatform.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
 import org.mifosplatform.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingInvalidException;
 import org.mifosplatform.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingNotFoundException;
-import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.charge.domain.Charge;
@@ -44,19 +43,17 @@ public class ProductToGLAccountMappingHelper {
     protected final GLAccountRepositoryWrapper accountRepositoryWrapper;
     protected final ProductToGLAccountMappingRepository accountMappingRepository;
     protected final FromJsonHelper fromApiJsonHelper;
-    private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
     private final ChargeRepositoryWrapper chargeRepositoryWrapper;
     private final PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper;
 
     @Autowired
     public ProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,
             final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper,
-            final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final ChargeRepositoryWrapper chargeRepositoryWrapper,
-            final GLAccountRepositoryWrapper accountRepositoryWrapper, PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper) {
+            final ChargeRepositoryWrapper chargeRepositoryWrapper, final GLAccountRepositoryWrapper accountRepositoryWrapper,
+            PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper) {
         this.accountRepository = glAccountRepository;
         this.accountMappingRepository = glAccountMappingRepository;
         this.fromApiJsonHelper = fromApiJsonHelper;
-        this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
         this.chargeRepositoryWrapper = chargeRepositoryWrapper;
         this.accountRepositoryWrapper = accountRepositoryWrapper;
         this.paymentTypeRepositoryWrapper = paymentTypeRepositoryWrapper;

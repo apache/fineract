@@ -32,7 +32,6 @@ import org.mifosplatform.accounting.producttoaccountmapping.service.ProductToGLA
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -72,7 +71,6 @@ public class SavingsProductsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
-    private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService;
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
@@ -83,7 +81,7 @@ public class SavingsProductsApiResource {
             final CurrencyReadPlatformService currencyReadPlatformService, final PlatformSecurityContext context,
             final DefaultToApiJsonSerializer<SavingsProductData> toApiJsonSerializer,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper, final CodeValueReadPlatformService codeValueReadPlatformService,
+            final ApiRequestParameterHelper apiRequestParameterHelper,
             final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
             final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService,
             final ChargeReadPlatformService chargeReadPlatformService, PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
@@ -94,7 +92,6 @@ public class SavingsProductsApiResource {
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
         this.accountMappingReadPlatformService = accountMappingReadPlatformService;
         this.chargeReadPlatformService = chargeReadPlatformService;

@@ -5,12 +5,12 @@
  */
 package org.mifosplatform.organisation.workingdays.data;
 
-
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 import java.util.Collection;
 
 public class WorkingDaysData {
+
     @SuppressWarnings("unused")
     private final Long id;
     @SuppressWarnings("unused")
@@ -19,9 +19,9 @@ public class WorkingDaysData {
     @SuppressWarnings("unused")
     private final EnumOptionData repaymentRescheduleType;
 
-    //template date
+    // template date
+    @SuppressWarnings("unused")
     private final Collection<EnumOptionData> repaymentRescheduleOptions;
-
 
     public WorkingDaysData(Long id, String recurrence, EnumOptionData repaymentRescheduleType) {
         this.id = id;
@@ -30,10 +30,11 @@ public class WorkingDaysData {
         this.repaymentRescheduleOptions = null;
     }
 
-    public WorkingDaysData(Long id, String recurrence, EnumOptionData repaymentRescheduleType, Collection<EnumOptionData> repaymentRescheduleOptions) {
-        this.id = null;
-        this.recurrence = null;
-        this.repaymentRescheduleType = null;
+    public WorkingDaysData(Long id, String recurrence, EnumOptionData repaymentRescheduleType,
+            Collection<EnumOptionData> repaymentRescheduleOptions) {
+        this.id = id;
+        this.recurrence = recurrence;
+        this.repaymentRescheduleType = repaymentRescheduleType;
         this.repaymentRescheduleOptions = repaymentRescheduleOptions;
     }
 }

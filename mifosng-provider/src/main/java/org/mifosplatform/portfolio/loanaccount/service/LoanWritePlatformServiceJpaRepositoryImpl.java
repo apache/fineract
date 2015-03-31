@@ -2893,7 +2893,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
         checkIfLoanIsPaidInAdvance(loanId, transactionAmount);
 
-        final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+        final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
         changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
         changes.put("locale", command.locale());

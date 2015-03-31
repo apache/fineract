@@ -22,7 +22,6 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -52,7 +51,6 @@ public class SavingsAccountTransactionsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
-    private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
 
     @Autowired
@@ -61,13 +59,12 @@ public class SavingsAccountTransactionsApiResource {
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService,PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
+            PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
         this.context = context;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
     }
 
@@ -89,8 +86,7 @@ public class SavingsAccountTransactionsApiResource {
         // both deposit/withdrawal templates
         SavingsAccountTransactionData savingsAccount = this.savingsAccountReadPlatformService.retrieveDepositTransactionTemplate(savingsId,
                 DepositAccountType.SAVINGS_DEPOSIT);
-        final Collection<PaymentTypeData> paymentTypeOptions = this.paymentTypeReadPlatformService
-                .retrieveAllPaymentTypes();
+        final Collection<PaymentTypeData> paymentTypeOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
         savingsAccount = SavingsAccountTransactionData.templateOnTop(savingsAccount, paymentTypeOptions);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -110,7 +106,7 @@ public class SavingsAccountTransactionsApiResource {
                 transactionId, DepositAccountType.SAVINGS_DEPOSIT);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
-            final Collection<PaymentTypeData> paymentTypeOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();       
+            final Collection<PaymentTypeData> paymentTypeOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
             transactionData = SavingsAccountTransactionData.templateOnTop(transactionData, paymentTypeOptions);
         }
 

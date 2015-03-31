@@ -15,7 +15,6 @@ import java.util.Map;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.data.PaginationParameters;
 import org.mifosplatform.infrastructure.core.data.PaginationParametersDataValidator;
@@ -48,7 +47,6 @@ import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.interestratechart.data.InterestRateChartData;
 import org.mifosplatform.portfolio.interestratechart.service.InterestRateChartReadPlatformService;
-import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
 import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
 import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
 import org.mifosplatform.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
@@ -104,7 +102,6 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
     private final DepositsDropdownReadPlatformService depositsDropdownReadPlatformService;
-    private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
     private final RecurringAccountDepositTransactionTemplateMapper rdTransactionTemplateMapper;
     private final DropdownReadPlatformService dropdownReadPlatformService;
@@ -122,7 +119,6 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final ChargeReadPlatformService chargeReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
             final DepositsDropdownReadPlatformService depositsDropdownReadPlatformService,
             final InterestRateChartReadPlatformService productChartReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService,
             final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
             final DropdownReadPlatformService dropdownReadPlatformService, final CalendarReadPlatformService calendarReadPlatformService,
             PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
@@ -139,7 +135,6 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         this.staffReadPlatformService = staffReadPlatformService;
         this.depositsDropdownReadPlatformService = depositsDropdownReadPlatformService;
         this.productChartReadPlatformService = productChartReadPlatformService;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
         this.rdTransactionTemplateMapper = new RecurringAccountDepositTransactionTemplateMapper();
         this.dropdownReadPlatformService = dropdownReadPlatformService;

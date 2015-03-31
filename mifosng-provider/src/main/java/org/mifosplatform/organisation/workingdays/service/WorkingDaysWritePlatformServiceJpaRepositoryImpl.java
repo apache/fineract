@@ -33,8 +33,7 @@ public class WorkingDaysWritePlatformServiceJpaRepositoryImpl implements Working
 
     @Autowired
     public WorkingDaysWritePlatformServiceJpaRepositoryImpl(final WorkingDaysRepositoryWrapper daysRepositoryWrapper,
-            final ConfigurationDomainService configurationDomainService,
-            final WorkingDayValidator fromApiJsonDeserializer) {
+            final ConfigurationDomainService configurationDomainService, final WorkingDayValidator fromApiJsonDeserializer) {
         this.daysRepositoryWrapper = daysRepositoryWrapper;
         this.configurationDomainService = configurationDomainService;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -56,25 +55,25 @@ public class WorkingDaysWritePlatformServiceJpaRepositoryImpl implements Working
     public CommandProcessingResult updateWorkingDays(JsonCommand command) {
         String recurrence = "";
         RRule rrule = null;
-       try{
-           this.fromApiJsonDeserializer.validateForUpdate(command.json());
-           final WorkingDays workingDays = this.daysRepositoryWrapper.findOne();
+        try {
+            this.fromApiJsonDeserializer.validateForUpdate(command.json());
+            final WorkingDays workingDays = this.daysRepositoryWrapper.findOne();
 
-           recurrence = command.stringValueOfParameterNamed(WorkingDaysApiConstants.recurrence);
-           rrule = new RRule(recurrence);
-           rrule.validate();
+            recurrence = command.stringValueOfParameterNamed(WorkingDaysApiConstants.recurrence);
+            rrule = new RRule(recurrence);
+            rrule.validate();
 
-           Map<String, Object> changes = workingDays.update(command);
-           this.daysRepositoryWrapper.saveAndFlush(workingDays);
-           return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(workingDays.getId()).build();
-       }catch (final ValidationException e) {
+            Map<String, Object> changes = workingDays.update(command);
+            this.daysRepositoryWrapper.saveAndFlush(workingDays);
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(workingDays.getId()).with(changes)
+                    .build();
+        } catch (final ValidationException e) {
             throw new PlatformDataIntegrityException("error.msg.invalid.recurring.rule", "The Recurring Rule value: " + recurrence
                     + " is not valid.", "recurrence", recurrence);
-       } catch (final IllegalArgumentException|ParseException e) {
+        } catch (final IllegalArgumentException | ParseException e) {
             throw new PlatformDataIntegrityException("error.msg.recurring.rule.parsing.error",
                     "Error in passing the Recurring Rule value: " + recurrence, "recurrence", e.getMessage());
-       }
+        }
     }
-
 
 }

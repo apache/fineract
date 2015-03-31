@@ -10,7 +10,6 @@ import static org.mifosplatform.portfolio.savings.DepositsApiConstants.closedOnD
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -40,7 +39,6 @@ public class DepositAccountPreMatureCalculationPlatformServiceImpl implements De
     private final FromJsonHelper fromJsonHelper;
     private final DepositAccountTransactionDataValidator depositAccountTransactionDataValidator;
     private final DepositAccountAssembler depositAccountAssembler;
-    private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
@@ -48,13 +46,12 @@ public class DepositAccountPreMatureCalculationPlatformServiceImpl implements De
     @Autowired
     public DepositAccountPreMatureCalculationPlatformServiceImpl(final FromJsonHelper fromJsonHelper,
             final DepositAccountTransactionDataValidator depositAccountTransactionDataValidator,
-            final DepositAccountAssembler depositAccountAssembler, final CodeValueReadPlatformService codeValueReadPlatformService,
+            final DepositAccountAssembler depositAccountAssembler,
             final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
             final ConfigurationDomainService configurationDomainService, PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
         this.fromJsonHelper = fromJsonHelper;
         this.depositAccountTransactionDataValidator = depositAccountTransactionDataValidator;
         this.depositAccountAssembler = depositAccountAssembler;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
         this.configurationDomainService = configurationDomainService;
         this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;

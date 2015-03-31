@@ -215,7 +215,7 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
             final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed) {
 
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
-        final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
+        //final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
         Money transactionAmountRemaining = transactionAmountUnprocessed;
         Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
         Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());

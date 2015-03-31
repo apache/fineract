@@ -12,16 +12,17 @@ import java.io.Serializable;
  */
 public class PasswordValidationPolicyData implements Serializable {
 
+    @SuppressWarnings("unused")
     private final Long id;
+    @SuppressWarnings("unused")
     private final String description;
+    @SuppressWarnings("unused")
     private final boolean active;
 
-
-     public PasswordValidationPolicyData(final Long id, final Boolean active, final String description) {
+    public PasswordValidationPolicyData(final Long id, final Boolean active, final String description) {
         this.id = id;
         this.active = active;
         this.description = description;
     }
-
 
 }

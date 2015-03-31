@@ -137,13 +137,14 @@ public class EarlyPaymentLoanRepaymentScheduleTransactionProcessor extends Abstr
 
         return transactionAmountRemaining;
     }
-    
+
     @Override
     protected Money handleRefundTransactionPaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed) {
 
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
-        final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
+        // final MonetaryCurrency currency =
+        // transactionAmountUnprocessed.getCurrency();
         Money transactionAmountRemaining = transactionAmountUnprocessed;
         Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
         Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());

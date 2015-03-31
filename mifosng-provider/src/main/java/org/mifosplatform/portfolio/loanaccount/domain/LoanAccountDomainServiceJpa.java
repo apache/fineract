@@ -572,8 +572,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         checkClientOrGroupActive(loan);
         this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.LOAN_REFUND,
                 constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
-        final List<Long> existingTransactionIds = new ArrayList<Long>();
-        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        final List<Long> existingTransactionIds = new ArrayList<>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<>();
         AppUser currentUser = getAppUserIfPresent();
 
         final Money refundAmount = Money.of(loan.getCurrency(), transactionAmount);
@@ -585,9 +585,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
 
-        final ChangedTransactionDetail changedTransactionDetail = loan.makeRefundForActiveLoan(newRefundTransaction,
-                defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds, allowTransactionsOnHoliday,
-                holidays, workingDays, allowTransactionsOnNonWorkingDay);
+        loan.makeRefundForActiveLoan(newRefundTransaction, defaultLoanLifecycleStateMachine(), existingTransactionIds,
+                existingReversedTransactionIds, allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay);
 
         this.loanTransactionRepository.save(newRefundTransaction);
         this.loanRepository.save(loan);

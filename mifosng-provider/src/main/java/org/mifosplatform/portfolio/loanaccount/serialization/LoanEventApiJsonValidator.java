@@ -31,9 +31,7 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 @Component
@@ -411,14 +409,14 @@ public final class LoanEventApiJsonValidator {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Set<String> transactionParameters = new HashSet<String>(Arrays.asList("transactionDate", "transactionAmount", "externalId",
+        final Set<String> transactionParameters = new HashSet<>(Arrays.asList("transactionDate", "transactionAmount", "externalId",
                 "note", "locale", "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber",
                 "bankNumber"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);

@@ -32,7 +32,6 @@ import org.mifosplatform.accounting.producttoaccountmapping.service.ProductToGLA
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -91,7 +90,6 @@ public class LoanProductsApiResource {
     private final LoanDropdownReadPlatformService dropdownReadPlatformService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService;
-    private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
     private final DefaultToApiJsonSerializer<ProductMixData> productMixDataApiJsonSerializer;
     private final ProductMixReadPlatformService productMixReadPlatformService;
@@ -106,7 +104,6 @@ public class LoanProductsApiResource {
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService,
             final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
             final DefaultToApiJsonSerializer<ProductMixData> productMixDataApiJsonSerializer,
             final ProductMixReadPlatformService productMixReadPlatformService,
@@ -122,7 +119,6 @@ public class LoanProductsApiResource {
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.accountMappingReadPlatformService = accountMappingReadPlatformService;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
         this.productMixDataApiJsonSerializer = productMixDataApiJsonSerializer;
         this.productMixReadPlatformService = productMixReadPlatformService;
