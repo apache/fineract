@@ -14,6 +14,7 @@ import org.mifosplatform.integrationtests.common.Utils;
 import org.mifosplatform.integrationtests.common.accounting.Account;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 public class LoanProductTestBuilder {
 
@@ -93,7 +94,10 @@ public class LoanProductTestBuilder {
     private String minimumGuaranteeFromOwnFunds = null;
     private String minimumGuaranteeFromGuarantor = null;
     private String isArrearsBasedOnOriginalSchedule = null;
-
+    private String graceOnPrincipalPayment = "1";
+    private String graceOnInterestPayment = "1";
+    private JsonObject allowAttributeOverrides = null;
+    
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<>();
 
@@ -160,6 +164,11 @@ public class LoanProductTestBuilder {
                 map.put("minimumGuaranteeFromGuarantor", this.minimumGuaranteeFromGuarantor);
                 map.put("minimumGuaranteeFromOwnFunds", this.minimumGuaranteeFromOwnFunds);
             }
+        }
+        map.put("graceOnPrincipalPayment", graceOnPrincipalPayment);
+        map.put("graceOnInterestPayment", graceOnInterestPayment);
+        if(allowAttributeOverrides != null){
+        	map.put("allowAttributeOverrides", this.allowAttributeOverrides);
         }
         return new Gson().toJson(map);
     }
@@ -416,4 +425,14 @@ public class LoanProductTestBuilder {
         return this;
     }
 
+    public LoanProductTestBuilder withMoratorium(String principal, String interest) {
+        this.graceOnPrincipalPayment = principal;
+        this.graceOnInterestPayment = interest;
+        return this;
+    }
+
+    public LoanProductTestBuilder withLoanProductConfiguration(JsonObject loanProductConfigurableAttributes) {
+        this.allowAttributeOverrides = loanProductConfigurableAttributes;
+        return this;
+    }   
 }

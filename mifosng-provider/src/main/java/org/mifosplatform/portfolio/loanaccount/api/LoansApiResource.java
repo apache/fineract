@@ -452,6 +452,7 @@ public class LoansApiResource {
         }
 
         Collection<LoanProductData> productOptions = null;
+        LoanProductData product = null;
         Collection<EnumOptionData> loanTermFrequencyTypeOptions = null;
         Collection<EnumOptionData> repaymentFrequencyTypeOptions = null;
         Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = null;
@@ -472,6 +473,8 @@ public class LoansApiResource {
         final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
         if (template) {
             productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
+            product = this.loanProductReadPlatformService.retrieveLoanProduct(loanBasicDetails.loanProductId());
+            loanBasicDetails.setProduct(product);
             loanTermFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
             repaymentFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
             interestRateFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveInterestRateFrequencyTypeOptions();

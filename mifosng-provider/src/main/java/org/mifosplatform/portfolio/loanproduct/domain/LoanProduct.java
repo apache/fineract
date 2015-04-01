@@ -46,6 +46,7 @@ import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
 import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductConfigurableAttributes;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -135,6 +136,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
     private LoanProductGuaranteeDetails loanProductGuaranteeDetails;
+    
+    
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
+    private LoanProductConfigurableAttributes loanConfigurableAttributes; 
 
     @Column(name = "principal_threshold_for_last_installment", scale = 2, precision = 5, nullable = false)
     private BigDecimal principalThresholdForLastInstallment;
@@ -236,6 +241,17 @@ public class LoanProduct extends AbstractPersistable<Long> {
         if (holdGuarantorFunds) {
             loanProductGuaranteeDetails = LoanProductGuaranteeDetails.createFrom(command);
         }
+        
+		LoanProductConfigurableAttributes loanConfigurableAttributes = null;
+		if (command
+				.parameterExists(LoanProductConstants.allowAttributeOverridesParamName)) {
+			loanConfigurableAttributes = LoanProductConfigurableAttributes
+					.createFrom(command);
+		} else {
+			loanConfigurableAttributes = LoanProductConfigurableAttributes
+					.populateDefaultsForConfigurableAttributes();
+		}
+        
 
         BigDecimal principalThresholdForLastInstallment = command
                 .bigDecimalValueOfParameterNamed(LoanProductConstants.principalThresholdForLastInstallmentParamName);
@@ -259,7 +275,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment,
                 holdGuarantorFunds, loanProductGuaranteeDetails, principalThresholdForLastInstallment,
-                accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineEmiAmount, installmentAmountInMultiplesOf);
+                accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineEmiAmount, installmentAmountInMultiplesOf, loanConfigurableAttributes);
 
     }
 
@@ -486,7 +502,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final boolean holdGuarantorFunds,
             final LoanProductGuaranteeDetails loanProductGuaranteeDetails, final BigDecimal principalThresholdForLastInstallment,
             final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion, final boolean canDefineEmiAmount,
-            final Integer installmentAmountInMultiplesOf) {
+            final Integer installmentAmountInMultiplesOf, final LoanProductConfigurableAttributes loanProductConfigurableAttributes) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -532,6 +548,11 @@ public class LoanProduct extends AbstractPersistable<Long> {
         for (LoanProductBorrowerCycleVariations borrowerCycleVariations : this.borrowerCycleVariations) {
             borrowerCycleVariations.updateLoanProduct(this);
         }
+        if (loanProductConfigurableAttributes != null) {
+            this.loanConfigurableAttributes = loanProductConfigurableAttributes;
+            loanConfigurableAttributes.updateLoanProduct(this);
+        }
+        
         this.loanProducTrancheDetails = new LoanProductTrancheDetails(multiDisburseLoan, maxTrancheCount, outstandingLoanBalance);
         this.overdueDaysForNPA = overdueDaysForNPA;
         this.productInterestRecalculationDetails = productInterestRecalculationDetails;
@@ -556,6 +577,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
         this.transactionProcessingStrategy = strategy;
     }
 
+    public LoanTransactionProcessingStrategy getRepaymentStrategy(){
+    	return this.transactionProcessingStrategy;
+    }
+    
     public boolean hasCurrencyCodeOf(final String currencyCode) {
         return this.loanProductRelatedDetail.hasCurrencyCodeOf(currencyCode);
     }
@@ -583,6 +608,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return this.accountingRule;
     }
 
+    public void update(final LoanProductConfigurableAttributes loanConfigurableAttributes) {
+        this.loanConfigurableAttributes = loanConfigurableAttributes;
+    }
+    
+    public LoanProductConfigurableAttributes getLoanProductConfigurableAttributes() {
+        return this.loanConfigurableAttributes;
+    }
     public Map<String, Object> update(final JsonCommand command, final AprCalculator aprCalculator) {
 
         final Map<String, Object> actualChanges = this.loanProductRelatedDetail.update(command, aprCalculator);
@@ -751,6 +783,71 @@ public class LoanProduct extends AbstractPersistable<Long> {
             this.holdGuaranteeFunds = newValue;
         }
 
+        final String configurableAttributesChanges = LoanProductConstants.allowAttributeOverridesParamName;
+        if (command.hasParameter(configurableAttributesChanges)) {
+            if (!command.parsedJson().getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName).isJsonNull()) {
+                actualChanges.put(configurableAttributesChanges, command.jsonFragment(configurableAttributesChanges));
+
+                if (command.parsedJson().getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
+                        .getAsJsonPrimitive(LoanProductConstants.amortizationTypeParamName).getAsBoolean() != this.loanConfigurableAttributes.getAmortizationBoolean()) {
+                    this.loanConfigurableAttributes.setAmortizationType(command.parsedJson().getAsJsonObject()
+                            .getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName).getAsJsonPrimitive(LoanProductConstants.amortizationTypeParamName).getAsBoolean());
+                }
+
+                if (command.parsedJson().getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName).getAsJsonPrimitive(LoanProductConstants.interestTypeParamName)
+                        .getAsBoolean() != this.loanConfigurableAttributes.getInterestMethodBoolean()) {
+                    this.loanConfigurableAttributes.setInterestType(command.parsedJson().getAsJsonObject()
+                            .getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName).getAsJsonPrimitive(LoanProductConstants.interestTypeParamName).getAsBoolean());
+                }
+
+                if (command.parsedJson().getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
+                        .getAsJsonPrimitive(LoanProductConstants.transactionProcessingStrategyIdParamName).getAsBoolean() != this.loanConfigurableAttributes
+                        .getTransactionProcessingStrategyBoolean()) {
+                    this.loanConfigurableAttributes.setTransactionProcessingStrategyId(command.parsedJson().getAsJsonObject()
+                            .getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName).getAsJsonPrimitive(LoanProductConstants.transactionProcessingStrategyIdParamName)
+                            .getAsBoolean());
+                }
+
+                if (command.parsedJson().getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
+                        .getAsJsonPrimitive(LoanProductConstants.interestCalculationPeriodTypeParamName).getAsBoolean() != this.loanConfigurableAttributes
+                        .getInterestCalcPeriodBoolean()) {
+                    this.loanConfigurableAttributes.setInterestCalculationPeriodType(command.parsedJson().getAsJsonObject()
+                            .getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName).getAsJsonPrimitive(LoanProductConstants.interestCalculationPeriodTypeParamName).getAsBoolean());
+                }
+
+                if (command.parsedJson().getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
+                        .getAsJsonPrimitive(LoanProductConstants.inArrearsToleranceParamName).getAsBoolean() != this.loanConfigurableAttributes
+                        .getArrearsToleranceBoolean()) {
+                    this.loanConfigurableAttributes.setInArrearsTolerance(command.parsedJson().getAsJsonObject()
+                            .getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName).getAsJsonPrimitive(LoanProductConstants.inArrearsToleranceParamName).getAsBoolean());
+                }
+
+                if (command.parsedJson().getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName).getAsJsonPrimitive(LoanProductConstants.repaymentEveryParamName)
+                        .getAsBoolean() != this.loanConfigurableAttributes.getRepaymentEveryBoolean()) {
+                    this.loanConfigurableAttributes.setRepaymentEvery(command.parsedJson().getAsJsonObject()
+                            .getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName).getAsJsonPrimitive(LoanProductConstants.repaymentEveryParamName).getAsBoolean());
+                }
+
+                if (command.parsedJson().getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
+                        .getAsJsonPrimitive(LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName).getAsBoolean() != this.loanConfigurableAttributes
+                        .getGraceOnPrincipalAndInterestPaymentBoolean()) {
+                    this.loanConfigurableAttributes.setGraceOnPrincipalAndInterestPayment(command.parsedJson().getAsJsonObject()
+                            .getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName).getAsJsonPrimitive(LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName)
+                            .getAsBoolean());
+                }
+
+                if (command.parsedJson().getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
+                        .getAsJsonPrimitive(LoanProductConstants.graceOnArrearsAgeingParameterName).getAsBoolean() != this.loanConfigurableAttributes
+                        .getGraceOnArrearsAgingBoolean()) {
+                    this.loanConfigurableAttributes.setGraceOnArrearsAgeing(command.parsedJson().getAsJsonObject()
+                            .getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName).getAsJsonPrimitive(LoanProductConstants.graceOnArrearsAgeingParameterName).getAsBoolean());
+                }
+            } else {
+                this.loanConfigurableAttributes = LoanProductConfigurableAttributes.populateDefaultsForConfigurableAttributes();
+                this.loanConfigurableAttributes.updateLoanProduct(this);
+            }
+        }
+               
         if (actualChanges.containsKey(LoanProductConstants.holdGuaranteeFundsParamName)) {
             if (this.holdGuaranteeFunds) {
                 this.loanProductGuaranteeDetails = LoanProductGuaranteeDetails.createFrom(command);
@@ -799,6 +896,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
         return actualChanges;
     }
+    
 
     public boolean isAccountingDisabled() {
         return AccountingRuleType.NONE.getValue().equals(this.accountingRule);
@@ -916,7 +1014,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     public boolean isInterestRecalculationEnabled() {
         return this.loanProductRelatedDetail.isInterestRecalculationEnabled();
     }
-
+    
     public Integer getMinimumDaysBetweenDisbursalAndFirstRepayment() {
         return this.minimumDaysBetweenDisbursalAndFirstRepayment == null ? 0 : this.minimumDaysBetweenDisbursalAndFirstRepayment;
     }
@@ -1069,4 +1167,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return this.installmentAmountInMultiplesOf;
     }
 
+	public LoanProductRelatedDetail getLoanProductRelatedDetail() {
+		return loanProductRelatedDetail;
+	}
 }
