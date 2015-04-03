@@ -235,8 +235,8 @@ public class SavingsEnumerations {
                         isTransferOnHold);
             break;
             case TRANSFER_ON_HOLD:
-                optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.TRANSFER_IN_PROGRESS.getValue().longValue(),
-                        SavingsAccountStatusType.TRANSFER_ON_HOLD.getCode(), "Transfer in progress", submittedAndPendingApproval,
+                optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.TRANSFER_ON_HOLD.getValue().longValue(),
+                        SavingsAccountStatusType.TRANSFER_ON_HOLD.getCode(), "Transfer on hold", submittedAndPendingApproval,
                         isApproved, isRejected, isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress,
                         isTransferOnHold);
             break;
