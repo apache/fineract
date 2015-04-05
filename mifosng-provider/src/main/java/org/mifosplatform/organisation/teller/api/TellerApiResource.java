@@ -231,10 +231,9 @@ public class TellerApiResource {
 
     @GET
     @Path("{tellerId}/cashiers/{cashierId}/transactions")
-    @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
+    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    public String getTransactionsForCashier(@PathParam("tellerId") final Long tellerId, @PathParam("cashierId") final Long cashierId,
-            final String fromDateStr, final String toDateStr) {
+    public String getTransactionsForCashier(@PathParam("tellerId") final Long tellerId, @PathParam("cashierId") final Long cashierId) {
         final TellerData teller = this.readPlatformService.findTeller(tellerId);
         final CashierData cashier = this.readPlatformService.findCashier(cashierId);
 
@@ -249,10 +248,10 @@ public class TellerApiResource {
 
     @GET
     @Path("{tellerId}/cashiers/{cashierId}/summaryandtransactions")
-    @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
+    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     public String getTransactionsWtihSummaryForCashier(@PathParam("tellerId") final Long tellerId,
-            @PathParam("cashierId") final Long cashierId, final String fromDateStr, final String toDateStr) {
+            @PathParam("cashierId") final Long cashierId) {
         final TellerData teller = this.readPlatformService.findTeller(tellerId);
         final CashierData cashier = this.readPlatformService.findCashier(cashierId);
 
