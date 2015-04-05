@@ -38,5 +38,7 @@ public interface LoanDropdownReadPlatformService {
     List<EnumOptionData> retrieveRescheduleStrategyTypeOptions();
     
     List<EnumOptionData> retrieveInterestRecalculationFrequencyTypeOptions();
+    
+    List<EnumOptionData> retrivePreCloseInterestCalculationStrategyOptions();
 
 }

@@ -36,4 +36,6 @@ public interface LoanScheduleModelPeriod {
     boolean isRecalculatedInterestComponent();
 
     void addPrincipalAmount(Money principalDue);
+    
+    void addInterestAmount(Money interestDue);
 }

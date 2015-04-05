@@ -31,6 +31,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_product_loan_recalculation_details")
 public class LoanProductInterestRecalculationDetails extends AbstractPersistable<Long> {
 
+    @SuppressWarnings("unused")
     @OneToOne
     @JoinColumn(name = "product_id", nullable = false)
     private LoanProduct loanProduct;
@@ -59,6 +60,9 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
 
     @Column(name = "arrears_based_on_original_schedule")
     private boolean isArrearsBasedOnOriginalSchedule;
+
+    @Column(name = "pre_close_interest_calculation_strategy")
+    private Integer preCloseInterestCalculationStrategy;
 
     protected LoanProductInterestRecalculationDetails() {
         //
@@ -91,19 +95,27 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
             recurrenceInterval = 0;
         }
 
+        Integer preCloseInterestCalculationStrategy = command
+                .integerValueOfParameterNamed(LoanProductConstants.preCloseInterestCalculationStrategyParamName);
+        if (preCloseInterestCalculationStrategy == null) {
+            preCloseInterestCalculationStrategy = LoanPreCloseInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue();
+        }
+
         return new LoanProductInterestRecalculationDetails(interestRecalculationCompoundingMethod, loanRescheduleStrategyMethod,
-                recurrenceFrequency, recurrenceInterval, recurrenceOnDate, isArrearsBasedOnOriginalSchedule);
+                recurrenceFrequency, recurrenceInterval, recurrenceOnDate, isArrearsBasedOnOriginalSchedule,
+                preCloseInterestCalculationStrategy);
     }
 
     private LoanProductInterestRecalculationDetails(final Integer interestRecalculationCompoundingMethod,
             final Integer rescheduleStrategyMethod, final Integer restFrequencyType, final Integer restInterval,
-            final Date restFrequencyDate, final boolean isArrearsBasedOnOriginalSchedule) {
+            final Date restFrequencyDate, final boolean isArrearsBasedOnOriginalSchedule, final Integer preCloseInterestCalculationStrategy) {
         this.interestRecalculationCompoundingMethod = interestRecalculationCompoundingMethod;
         this.rescheduleStrategyMethod = rescheduleStrategyMethod;
         this.restFrequencyType = restFrequencyType;
         this.restInterval = restInterval;
         this.restFrequencyDate = restFrequencyDate;
         this.isArrearsBasedOnOriginalSchedule = isArrearsBasedOnOriginalSchedule;
+        this.preCloseInterestCalculationStrategy = preCloseInterestCalculationStrategy;
     }
 
     public void updateProduct(final LoanProduct loanProduct) {
@@ -183,6 +195,16 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
             this.isArrearsBasedOnOriginalSchedule = newValue;
         }
 
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.preCloseInterestCalculationStrategyParamName,
+                this.preCloseInterestCalculationStrategy)) {
+            Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.preCloseInterestCalculationStrategyParamName);
+            if (newValue == null) {
+                newValue = LoanPreCloseInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue();
+            }
+            actualChanges.put(LoanProductConstants.preCloseInterestCalculationStrategyParamName, newValue);
+            this.preCloseInterestCalculationStrategy = newValue;
+        }
+
     }
 
     public LocalDate getRestFrequencyLocalDate() {
@@ -201,8 +223,11 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
         return this.restInterval;
     }
 
-    
     public boolean isArrearsBasedOnOriginalSchedule() {
         return this.isArrearsBasedOnOriginalSchedule;
+    }
+
+    public LoanPreCloseInterestCalculationStrategy preCloseInterestCalculationStrategy() {
+        return LoanPreCloseInterestCalculationStrategy.fromInt(this.preCloseInterestCalculationStrategy);
     }
 }

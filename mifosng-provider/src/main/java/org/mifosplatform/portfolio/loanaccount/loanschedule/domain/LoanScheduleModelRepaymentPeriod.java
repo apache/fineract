@@ -22,7 +22,7 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
     private final LocalDate dueDate;
     private Money principalDue;
     private final Money outstandingLoanBalance;
-    private final Money interestDue;
+    private Money interestDue;
     private Money feeChargesDue;
     private Money penaltyChargesDue;
     private Money totalDue;
@@ -134,5 +134,11 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
     @Override
     public boolean isRecalculatedInterestComponent() {
         return this.recalculatedInterestComponent;
+    }
+
+    @Override
+    public void addInterestAmount(Money interestDue) {
+        this.interestDue = this.interestDue.plus(interestDue);
+        this.totalDue = this.totalDue.plus(principalDue);
     }
 }

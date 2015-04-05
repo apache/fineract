@@ -129,6 +129,8 @@ public class LoanProductData {
     private final List<EnumOptionData> interestRecalculationCompoundingTypeOptions;
     @SuppressWarnings("unused")
     private final List<EnumOptionData> rescheduleStrategyTypeOptions;
+    @SuppressWarnings("unused")
+    private final List<EnumOptionData> preCloseInterestCalculationStrategyOptions;
 
     @SuppressWarnings("unused")
     private final List<EnumOptionData> interestRecalculationFrequencyTypeOptions;
@@ -479,6 +481,7 @@ public class LoanProductData {
 
         this.canDefineInstallmentAmount = canDefineInstallmentAmount;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
+        this.preCloseInterestCalculationStrategyOptions = null;
 
     }
 
@@ -491,7 +494,8 @@ public class LoanProductData {
             final Map<String, List<GLAccountData>> accountingMappingOptions, final List<EnumOptionData> accountingRuleOptions,
             final List<EnumOptionData> valueConditionTypeOptions, final List<EnumOptionData> daysInMonthTypeOptions,
             final List<EnumOptionData> daysInYearTypeOptions, final List<EnumOptionData> interestRecalculationCompoundingTypeOptions,
-            final List<EnumOptionData> rescheduleStrategyTypeOptions, final List<EnumOptionData> interestRecalculationFrequencyTypeOptions) {
+            final List<EnumOptionData> rescheduleStrategyTypeOptions, final List<EnumOptionData> interestRecalculationFrequencyTypeOptions,
+            final List<EnumOptionData> preCloseInterestCalculationStrategyOptions) {
         this.id = productData.id;
         this.name = productData.name;
         this.shortName = productData.shortName;
@@ -592,6 +596,7 @@ public class LoanProductData {
 
         this.canDefineInstallmentAmount = productData.canDefineInstallmentAmount;
         this.installmentAmountInMultiplesOf = productData.installmentAmountInMultiplesOf;
+        this.preCloseInterestCalculationStrategyOptions = preCloseInterestCalculationStrategyOptions;
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {

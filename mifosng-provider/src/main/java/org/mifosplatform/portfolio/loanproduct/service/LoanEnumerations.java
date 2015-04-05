@@ -20,6 +20,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanPreCloseInterestCalculationStrategy;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductParamType;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductValueConditionType;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
@@ -595,4 +596,24 @@ public class LoanEnumerations {
         }
         return optionData;
     }
+
+    public static EnumOptionData preCloseInterestCalculationStrategy(final int id) {
+        return preCloseInterestCalculationStrategy(LoanPreCloseInterestCalculationStrategy.fromInt(id));
+    }
+
+    public static EnumOptionData preCloseInterestCalculationStrategy(final LoanPreCloseInterestCalculationStrategy type) {
+        EnumOptionData optionData = null;
+        switch (type) {
+            case TILL_PRE_CLOSURE_DATE:
+                optionData = new EnumOptionData(LoanPreCloseInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue().longValue(),
+                        LoanPreCloseInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getCode(), "Till preclose Date");
+            break;
+            case TILL_REST_FREQUENCY_DATE:
+                optionData = new EnumOptionData(LoanPreCloseInterestCalculationStrategy.TILL_REST_FREQUENCY_DATE.getValue().longValue(),
+                        LoanPreCloseInterestCalculationStrategy.TILL_REST_FREQUENCY_DATE.getCode(), "Till rest Frequency Date");
+            break;
+        }
+        return optionData;
+    }
+
 }
