@@ -277,12 +277,15 @@ public class LoanProductsApiResource {
         final List<EnumOptionData> rescheduleStrategyTypeOptions = dropdownReadPlatformService.retrieveRescheduleStrategyTypeOptions();
         final List<EnumOptionData> interestRecalculationFrequencyTypeOptions = dropdownReadPlatformService
                 .retrieveInterestRecalculationFrequencyTypeOptions();
+        final List<EnumOptionData> preCloseInterestCalculationStrategyOptions = dropdownReadPlatformService
+                .retrivePreCloseInterestCalculationStrategyOptions();
 
         return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions,
                 amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions,
                 interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions, accountOptions,
                 accountingRuleTypeOptions, loanCycleValueConditionTypeOptions, daysInMonthTypeOptions, daysInYearTypeOptions,
-                interestRecalculationCompoundingTypeOptions, rescheduleStrategyTypeOptions, interestRecalculationFrequencyTypeOptions);
+                interestRecalculationCompoundingTypeOptions, rescheduleStrategyTypeOptions, interestRecalculationFrequencyTypeOptions,
+                preCloseInterestCalculationStrategyOptions);
     }
 
 }

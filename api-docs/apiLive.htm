@@ -11567,6 +11567,13 @@ An enumeration that indicates the type of transaction processing strategy to be 
 							<td class=fielddesc>Specifies rest frequency start date for interest recalculation.<br>
 						</tr>
 						<tr class=alt>
+							<td>preCloseInterestCalculationStrategy</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies applicable days for interest calculation on pre close of a loan.<br>
+							<span>Example Values:</span>1=Calculate till pre closure date, 2=Calculate till rest frequency date</td>
+						</tr>
+						<tr class=alt>
 							<td>isArrearsBasedOnOriginalSchedule</td>
 						</tr>
 						<tr>
@@ -11687,6 +11694,11 @@ GET https://DomainName/api/v1/loanproducts
 			"code":"interestRecalculationFrequencyType.same.as.repayment.period",
 			"value":"Same as repayment period"
 		},
+		"preCloseInterestCalculationStrategy": {
+		    "id":1,
+			"code":"loanPreCloseInterestCalculationStrategy.tillPreClosureDate",
+			"value":"Till preclose Date"
+		},
 		"isArrearsBasedOnOriginalSchedule" : true
     },
     "accountingRule": {
@@ -11789,7 +11801,11 @@ GET https://DomainName/api/v1/loanproducts/template
             "id": 3,
             "code": "loanRescheduleStrategyMethod.reduce.emi.amount",
             "value": "Reduce EMI amount"
-        }
+        },"preCloseInterestCalculationStrategy": {
+		    "id":1,
+			"code":"loanPreCloseInterestCalculationStrategy.tillPreClosureDate",
+			"value":"Till preclose Date"
+		}
     },
   "paymentTypeOptions": [
     {
@@ -11825,6 +11841,18 @@ GET https://DomainName/api/v1/loanproducts/template
       "value": "Months"
     }
   ],
+  "preCloseInterestCalculationStrategyOptions": [
+		{
+		    "id":1,
+			"code":"loanPreCloseInterestCalculationStrategy.tillPreClosureDate",
+			"value":"Till preclose Date"
+		},
+		{
+		    "id":2,
+			"code":"loanPreCloseInterestCalculationStrategy.tillRestFrequencyDate",
+			"value":"Till rest Frequency Date"
+		}
+	],
   "interestRateFrequencyTypeOptions": [
     {
       "id": 2,
@@ -12855,7 +12883,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td><div class="mifosXHeading2">Additional Optional Fields if interest recalculation is enabled(true) </div></td>
 						</tr>
 						<tr class=alt>
-							<td>isArrearsBasedOnOriginalSchedule</td>
+							<td>isArrearsBasedOnOriginalSchedule, preCloseInterestCalculationStrategy</td>
 						</tr>
 					</table>
 					<table class=matrixHeading>						
@@ -12981,6 +13009,7 @@ Request Body:
     "interestRecalculationCompoundingMethod":"0",
     "rescheduleStrategyMethod":"3",
 	"recalculationRestFrequencyType":"1",
+	"preCloseInterestCalculationStrategy":1,
     "accountingRule":"2",
     "fundSourceAccountId":"4",
     "loanPortfolioAccountId":"8",

@@ -104,4 +104,9 @@ public final class LoanScheduleModelDisbursementPeriod implements LoanScheduleMo
     public void addPrincipalAmount(@SuppressWarnings("unused") Money principalDue) {
         return;
     }
+
+    @Override
+    public void addInterestAmount(@SuppressWarnings("unused") Money principalDue) {
+        return;
+    }
 }
