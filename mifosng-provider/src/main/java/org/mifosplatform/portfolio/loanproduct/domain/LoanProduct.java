@@ -1069,8 +1069,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return this.installmentAmountInMultiplesOf;
     }
 
-    public LoanPreCloseInterestCalculationStrategy preCloseInterestCalculationStrategy() {
-        LoanPreCloseInterestCalculationStrategy preCloseInterestCalculationStrategy = LoanPreCloseInterestCalculationStrategy.NONE;
+    public LoanPreClosureInterestCalculationStrategy preCloseInterestCalculationStrategy() {
+        LoanPreClosureInterestCalculationStrategy preCloseInterestCalculationStrategy = LoanPreClosureInterestCalculationStrategy.NONE;
         if (this.isInterestRecalculationEnabled()) {
             preCloseInterestCalculationStrategy = getProductInterestRecalculationDetails().preCloseInterestCalculationStrategy();
         }

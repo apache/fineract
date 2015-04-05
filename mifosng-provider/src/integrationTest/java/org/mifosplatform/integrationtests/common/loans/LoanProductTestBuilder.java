@@ -51,7 +51,7 @@ public class LoanProductTestBuilder {
     private static final String CASH_BASED = "2";
     private static final String ACCRUAL_PERIODIC = "3";
     private static final String ACCRUAL_UPFRONT = "4";
-    
+
     public static final String INTEREST_APPLICABLE_STRATEGY_REST_DATE = "2";
     public static final String INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE = "1";
 
@@ -153,7 +153,7 @@ public class LoanProductTestBuilder {
             map.put("recalculationRestFrequencyType", recalculationRestFrequencyType);
             map.put("recalculationRestFrequencyInterval", recalculationRestFrequencyInterval);
             map.put("recalculationRestFrequencyDate", recalculationRestFrequencyDate);
-            map.put("preCloseInterestCalculationStrategy", preCloseInterestCalculationStrategy);
+            map.put("preClosureInterestCalculationStrategy", preCloseInterestCalculationStrategy);
             if (isArrearsBasedOnOriginalSchedule != null) {
                 map.put("isArrearsBasedOnOriginalSchedule", isArrearsBasedOnOriginalSchedule);
             }

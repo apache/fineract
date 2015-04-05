@@ -130,7 +130,7 @@ public class LoanProductData {
     @SuppressWarnings("unused")
     private final List<EnumOptionData> rescheduleStrategyTypeOptions;
     @SuppressWarnings("unused")
-    private final List<EnumOptionData> preCloseInterestCalculationStrategyOptions;
+    private final List<EnumOptionData> preClosureInterestCalculationStrategyOptions;
 
     @SuppressWarnings("unused")
     private final List<EnumOptionData> interestRecalculationFrequencyTypeOptions;
@@ -481,7 +481,7 @@ public class LoanProductData {
 
         this.canDefineInstallmentAmount = canDefineInstallmentAmount;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
-        this.preCloseInterestCalculationStrategyOptions = null;
+        this.preClosureInterestCalculationStrategyOptions = null;
 
     }
 
@@ -596,7 +596,7 @@ public class LoanProductData {
 
         this.canDefineInstallmentAmount = productData.canDefineInstallmentAmount;
         this.installmentAmountInMultiplesOf = productData.installmentAmountInMultiplesOf;
-        this.preCloseInterestCalculationStrategyOptions = preCloseInterestCalculationStrategyOptions;
+        this.preClosureInterestCalculationStrategyOptions = preCloseInterestCalculationStrategyOptions;
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {

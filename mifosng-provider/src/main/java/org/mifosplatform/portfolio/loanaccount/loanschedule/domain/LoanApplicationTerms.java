@@ -31,7 +31,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
-import org.mifosplatform.portfolio.loanproduct.domain.LoanPreCloseInterestCalculationStrategy;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.RecalculationFrequencyType;
@@ -138,7 +138,7 @@ public final class LoanApplicationTerms {
     private final BigDecimal principalThresholdForLastInstalment;
     private final Integer installmentAmountInMultiplesOf;
 
-    private final LoanPreCloseInterestCalculationStrategy preCloseInterestCalculationStrategy;
+    private final LoanPreClosureInterestCalculationStrategy preClosureInterestCalculationStrategy;
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
@@ -155,7 +155,7 @@ public final class LoanApplicationTerms {
             final DaysInMonthType daysInMonthType, final DaysInYearType daysInYearType, final boolean isInterestRecalculationEnabled,
             final RecalculationFrequencyType recalculationFrequencyType, final CalendarInstance restCalendarInstance,
             final BigDecimal principalThresholdForLastInstalment, final Integer installmentAmountInMultiplesOf,
-            final LoanPreCloseInterestCalculationStrategy preCloseInterestCalculationStrategy) {
+            final LoanPreClosureInterestCalculationStrategy preClosureInterestCalculationStrategy) {
 
         final LoanRescheduleStrategyMethod rescheduleStrategyMethod = null;
         final InterestRecalculationCompoundingMethod interestRecalculationCompoundingMethod = null;
@@ -167,7 +167,7 @@ public final class LoanApplicationTerms {
                 disbursementDatas, maxOutstandingBalance, emiAmountVariations, graceOnArrearsAgeing, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, rescheduleStrategyMethod, interestRecalculationCompoundingMethod, restCalendarInstance,
                 recalculationFrequencyType, principalThresholdForLastInstalment, installmentAmountInMultiplesOf,
-                preCloseInterestCalculationStrategy);
+                preClosureInterestCalculationStrategy);
     }
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency applicationCurrency, final Integer loanTermFrequency,
@@ -180,7 +180,7 @@ public final class LoanApplicationTerms {
             final BigDecimal principalThresholdForLastInstalment, final Integer installmentAmountInMultiplesOf,
             final RecalculationFrequencyType recalculationFrequencyType, final CalendarInstance restCalendarInstance,
             final InterestRecalculationCompoundingMethod compoundingMethod,
-            final LoanPreCloseInterestCalculationStrategy loanPreCloseInterestCalculationStrategy) {
+            final LoanPreClosureInterestCalculationStrategy loanPreClosureInterestCalculationStrategy) {
 
         final Integer numberOfRepayments = loanProductRelatedDetail.getNumberOfRepayments();
         final Integer repaymentEvery = loanProductRelatedDetail.getRepayEvery();
@@ -213,7 +213,7 @@ public final class LoanApplicationTerms {
                 multiDisburseLoan, emiAmount, disbursementDatas, maxOutstandingBalance, emiAmountVariations,
                 loanProductRelatedDetail.getGraceOnDueDate(), daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 rescheduleStrategyMethod, compoundingMethod, restCalendarInstance, recalculationFrequencyType,
-                principalThresholdForLastInstalment, installmentAmountInMultiplesOf, loanPreCloseInterestCalculationStrategy);
+                principalThresholdForLastInstalment, installmentAmountInMultiplesOf, loanPreClosureInterestCalculationStrategy);
     }
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency applicationCurrency, final Integer loanTermFrequency,
@@ -224,7 +224,8 @@ public final class LoanApplicationTerms {
             final List<LoanTermVariationsData> emiAmountVariations, final LocalDate interestChargedFromDate,
             final LoanInterestRecalculationDetails interestRecalculationDetails, final CalendarInstance restCalendarInstance,
             final RecalculationFrequencyType recalculationFrequencyType, final BigDecimal principalThresholdForLastInstalment,
-            Integer installmentAmountInMultiplesOf, final LoanPreCloseInterestCalculationStrategy loanPreCloseInterestCalculationStrategy) {
+            Integer installmentAmountInMultiplesOf,
+            final LoanPreClosureInterestCalculationStrategy loanPreClosureInterestCalculationStrategy) {
 
         final Integer numberOfRepayments = loanProductRelatedDetail.getNumberOfRepayments();
         final Integer repaymentEvery = loanProductRelatedDetail.getRepayEvery();
@@ -262,7 +263,7 @@ public final class LoanApplicationTerms {
                 disbursementDatas, maxOutstandingBalance, emiAmountVariations, loanProductRelatedDetail.getGraceOnDueDate(),
                 daysInMonthType, daysInYearType, isInterestRecalculationEnabled, rescheduleStrategyMethod,
                 interestRecalculationCompoundingMethod, restCalendarInstance, recalculationFrequencyType,
-                principalThresholdForLastInstalment, installmentAmountInMultiplesOf, loanPreCloseInterestCalculationStrategy);
+                principalThresholdForLastInstalment, installmentAmountInMultiplesOf, loanPreClosureInterestCalculationStrategy);
     }
 
     public static LoanApplicationTerms assembleFrom(final Integer repaymentEvery, final PeriodFrequencyType repaymentPeriodFrequencyType,
@@ -281,7 +282,7 @@ public final class LoanApplicationTerms {
                 applicationTerms.interestRecalculationEnabled, applicationTerms.rescheduleStrategyMethod,
                 applicationTerms.interestRecalculationCompoundingMethod, applicationTerms.restCalendarInstance,
                 applicationTerms.recalculationFrequencyType, applicationTerms.principalThresholdForLastInstalment,
-                applicationTerms.installmentAmountInMultiplesOf, applicationTerms.preCloseInterestCalculationStrategy);
+                applicationTerms.installmentAmountInMultiplesOf, applicationTerms.preClosureInterestCalculationStrategy);
     }
 
     private LoanApplicationTerms(final ApplicationCurrency currency, final Integer loanTermFrequency,
@@ -300,7 +301,7 @@ public final class LoanApplicationTerms {
             final InterestRecalculationCompoundingMethod interestRecalculationCompoundingMethod,
             final CalendarInstance restCalendarInstance, final RecalculationFrequencyType recalculationFrequencyType,
             final BigDecimal principalThresholdForLastInstalment, final Integer installmentAmountInMultiplesOf,
-            final LoanPreCloseInterestCalculationStrategy preCloseInterestCalculationStrategy) {
+            final LoanPreClosureInterestCalculationStrategy preClosureInterestCalculationStrategy) {
         this.currency = currency;
         this.loanTermFrequency = loanTermFrequency;
         this.loanTermPeriodFrequencyType = loanTermPeriodFrequencyType;
@@ -344,7 +345,7 @@ public final class LoanApplicationTerms {
         this.recalculationFrequencyType = recalculationFrequencyType;
         this.principalThresholdForLastInstalment = principalThresholdForLastInstalment;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
-        this.preCloseInterestCalculationStrategy = preCloseInterestCalculationStrategy;
+        this.preClosureInterestCalculationStrategy = preClosureInterestCalculationStrategy;
     }
 
     public Money adjustPrincipalIfLastRepaymentPeriod(final Money principalForPeriod, final Money totalCumulativePrincipalToDate,
@@ -1179,8 +1180,7 @@ public final class LoanApplicationTerms {
         return this.interestCalculationPeriodMethod;
     }
 
-    
-    public LoanPreCloseInterestCalculationStrategy getPreCloseInterestCalculationStrategy() {
-        return this.preCloseInterestCalculationStrategy;
+    public LoanPreClosureInterestCalculationStrategy getPreClosureInterestCalculationStrategy() {
+        return this.preClosureInterestCalculationStrategy;
     }
 }

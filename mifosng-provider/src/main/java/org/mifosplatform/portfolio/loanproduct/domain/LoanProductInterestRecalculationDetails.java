@@ -62,7 +62,7 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
     private boolean isArrearsBasedOnOriginalSchedule;
 
     @Column(name = "pre_close_interest_calculation_strategy")
-    private Integer preCloseInterestCalculationStrategy;
+    private Integer preClosureInterestCalculationStrategy;
 
     protected LoanProductInterestRecalculationDetails() {
         //
@@ -96,9 +96,9 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
         }
 
         Integer preCloseInterestCalculationStrategy = command
-                .integerValueOfParameterNamed(LoanProductConstants.preCloseInterestCalculationStrategyParamName);
+                .integerValueOfParameterNamed(LoanProductConstants.preClosureInterestCalculationStrategyParamName);
         if (preCloseInterestCalculationStrategy == null) {
-            preCloseInterestCalculationStrategy = LoanPreCloseInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue();
+            preCloseInterestCalculationStrategy = LoanPreClosureInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue();
         }
 
         return new LoanProductInterestRecalculationDetails(interestRecalculationCompoundingMethod, loanRescheduleStrategyMethod,
@@ -115,7 +115,7 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
         this.restInterval = restInterval;
         this.restFrequencyDate = restFrequencyDate;
         this.isArrearsBasedOnOriginalSchedule = isArrearsBasedOnOriginalSchedule;
-        this.preCloseInterestCalculationStrategy = preCloseInterestCalculationStrategy;
+        this.preClosureInterestCalculationStrategy = preCloseInterestCalculationStrategy;
     }
 
     public void updateProduct(final LoanProduct loanProduct) {
@@ -195,14 +195,14 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
             this.isArrearsBasedOnOriginalSchedule = newValue;
         }
 
-        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.preCloseInterestCalculationStrategyParamName,
-                this.preCloseInterestCalculationStrategy)) {
-            Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.preCloseInterestCalculationStrategyParamName);
+        if (command.isChangeInIntegerParameterNamed(LoanProductConstants.preClosureInterestCalculationStrategyParamName,
+                this.preClosureInterestCalculationStrategy)) {
+            Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.preClosureInterestCalculationStrategyParamName);
             if (newValue == null) {
-                newValue = LoanPreCloseInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue();
+                newValue = LoanPreClosureInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue();
             }
-            actualChanges.put(LoanProductConstants.preCloseInterestCalculationStrategyParamName, newValue);
-            this.preCloseInterestCalculationStrategy = newValue;
+            actualChanges.put(LoanProductConstants.preClosureInterestCalculationStrategyParamName, newValue);
+            this.preClosureInterestCalculationStrategy = newValue;
         }
 
     }
@@ -227,7 +227,7 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
         return this.isArrearsBasedOnOriginalSchedule;
     }
 
-    public LoanPreCloseInterestCalculationStrategy preCloseInterestCalculationStrategy() {
-        return LoanPreCloseInterestCalculationStrategy.fromInt(this.preCloseInterestCalculationStrategy);
+    public LoanPreClosureInterestCalculationStrategy preCloseInterestCalculationStrategy() {
+        return LoanPreClosureInterestCalculationStrategy.fromInt(this.preClosureInterestCalculationStrategy);
     }
 }

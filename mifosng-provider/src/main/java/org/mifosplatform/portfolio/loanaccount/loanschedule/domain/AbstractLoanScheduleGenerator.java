@@ -301,7 +301,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                     currency, installments);
                             if (unprocessed.isGreaterThanZero()) {
 
-                                if (loanApplicationTerms.getPreCloseInterestCalculationStrategy().calculateTillRestFrequencyEnabled()) {
+                                if (loanApplicationTerms.getPreClosureInterestCalculationStrategy().calculateTillRestFrequencyEnabled()) {
                                     LocalDate applicableDate = getNextRestScheduleDate(detail.getTransactionDate().minusDays(1),
                                             loanApplicationTerms, holidayDetailDTO);
                                     checkForOutstanding = detail.getTransactionDate().isEqual(applicableDate);
@@ -355,7 +355,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                     // apply interest calculation as per
                                     // configuration
                                     if (!outstandingBalance.isGreaterThan(unprocessed)
-                                            && !loanApplicationTerms.getPreCloseInterestCalculationStrategy()
+                                            && !loanApplicationTerms.getPreClosureInterestCalculationStrategy()
                                                     .calculateTillRestFrequencyEnabled()) {
 
                                         LocalDate calculateTill = detail.getTransactionDate();
@@ -516,7 +516,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                             if (outstandingBalance.isLessThan(interestForThisinstallment)
                                     && !scheduledDueDate.equals(detail.getTransactionDate())) {
                                 LocalDate calculateTill = detail.getTransactionDate();
-                                if (loanApplicationTerms.getPreCloseInterestCalculationStrategy().calculateTillRestFrequencyEnabled()) {
+                                if (loanApplicationTerms.getPreClosureInterestCalculationStrategy().calculateTillRestFrequencyEnabled()) {
                                     calculateTill = getNextRestScheduleDate(calculateTill.minusDays(1), loanApplicationTerms,
                                             holidayDetailDTO);
                                 }
@@ -1603,7 +1603,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 calculateInterestFrom = periodStartDateApplicableForInterest;
             }
             LocalDate calculateTill = onDate;
-            if (loanApplicationTerms.getPreCloseInterestCalculationStrategy().calculateTillRestFrequencyEnabled()) {
+            if (loanApplicationTerms.getPreClosureInterestCalculationStrategy().calculateTillRestFrequencyEnabled()) {
                 LocalDate applicableDate = getNextRestScheduleDate(onDate.minusDays(1), loanApplicationTerms, holidayDetailDTO);
                 calculateTill = applicableDate;
             }

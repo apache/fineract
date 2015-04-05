@@ -8,24 +8,24 @@ package org.mifosplatform.portfolio.loanproduct.domain;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum LoanPreCloseInterestCalculationStrategy {
+public enum LoanPreClosureInterestCalculationStrategy {
 
-    NONE(0, "loanPreCloseInterestCalculationStrategy.none"), //
-    TILL_PRE_CLOSURE_DATE(1, "loanPreCloseInterestCalculationStrategy.tillPreClosureDate"), //
-    TILL_REST_FREQUENCY_DATE(2, "loanPreCloseInterestCalculationStrategy.tillRestFrequencyDate");
+    NONE(0, "loanPreClosureInterestCalculationStrategy.none"), //
+    TILL_PRE_CLOSURE_DATE(1, "loanPreClosureInterestCalculationStrategy.tillPreClosureDate"), //
+    TILL_REST_FREQUENCY_DATE(2, "loanPreClosureInterestCalculationStrategy.tillRestFrequencyDate");
 
     // REPAYMENT_PERIOD_DATE(3,
-    // "loanPreCloseInterestCalculationStrategy.repaymentPeriodDate")
+    // "loanPreClosureInterestCalculationStrategy.repaymentPeriodDate")
 
     private Integer value;
     private String code;
 
-    private static final Map<Integer, LoanPreCloseInterestCalculationStrategy> intToEnumMap = new HashMap<>();
+    private static final Map<Integer, LoanPreClosureInterestCalculationStrategy> intToEnumMap = new HashMap<>();
     private static int minValue;
     private static int maxValue;
     static {
         int i = 0;
-        for (final LoanPreCloseInterestCalculationStrategy type : LoanPreCloseInterestCalculationStrategy.values()) {
+        for (final LoanPreClosureInterestCalculationStrategy type : LoanPreClosureInterestCalculationStrategy.values()) {
             if (i == 0) {
                 minValue = type.value;
             }
@@ -40,12 +40,12 @@ public enum LoanPreCloseInterestCalculationStrategy {
         }
     }
 
-    public static LoanPreCloseInterestCalculationStrategy fromInt(final Integer ruleTypeValue) {
-        final LoanPreCloseInterestCalculationStrategy type = intToEnumMap.get(ruleTypeValue);
+    public static LoanPreClosureInterestCalculationStrategy fromInt(final Integer ruleTypeValue) {
+        final LoanPreClosureInterestCalculationStrategy type = intToEnumMap.get(ruleTypeValue);
         return type;
     }
 
-    private LoanPreCloseInterestCalculationStrategy(final Integer value, final String code) {
+    private LoanPreClosureInterestCalculationStrategy(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }
@@ -67,10 +67,10 @@ public enum LoanPreCloseInterestCalculationStrategy {
     }
 
     public boolean calculateTillRestFrequencyEnabled() {
-        return this.getValue().equals(LoanPreCloseInterestCalculationStrategy.TILL_REST_FREQUENCY_DATE.getValue());
+        return this.getValue().equals(LoanPreClosureInterestCalculationStrategy.TILL_REST_FREQUENCY_DATE.getValue());
     }
 
     public boolean calculateTillPreClosureDateEnabled() {
-        return this.getValue().equals(LoanPreCloseInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue());
+        return this.getValue().equals(LoanPreClosureInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE.getValue());
     }
 }
