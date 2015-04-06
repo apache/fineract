@@ -707,7 +707,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             if (checkforStaffId) {
                 sb.append("ln.loan_officer_id = :staffId and ");
             }
-            sb.append("(ln.loan_status_id = 200 or ln.loan_status_id = 300) ");
+            sb.append("(ln.loan_status_id = 300) ");
             sb.append("and ln.group_id is null GROUP BY cl.id , ln.id ORDER BY cl.id , ln.id ) loandata ");
             sb.append("LEFT JOIN m_loan_charge lc ON lc.loan_id = loandata.loanId AND lc.is_paid_derived = 0 AND lc.is_active = 1 AND ( lc.due_for_collection_as_of_date  <= :dueDate OR lc.charge_time_enum = 1) ");
             sb.append("GROUP BY loandata.clientId, loandata.loanId ORDER BY loandata.clientId, loandata.loanId ");
