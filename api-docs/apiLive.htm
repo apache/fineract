@@ -1906,6 +1906,103 @@
 								<td><a href="#interestrateslab_update">Update a Slab</a></td>
 								<td><a href="#interestrateslab_delete">Delete a Slab</a></td>
 							</tr>
+							<tr>
+								<td><a href="#tellercashmgmt">Teller Cash Management</a></td>
+								<td>tellers</td>
+								<td><a href="#createtellers">Create Teller</a></td>
+								<td><a href="#listtellers">List Tellers</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>tellers/{tellerId}</td>
+								<td></td>
+								<td><a href="#findtellers">Find Teller</a></td>
+								<td><a href="#updatetellers">Update Teller</a></td>
+								<td><a href="#deletetellers">Delete Teller</a></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>tellers/{tellerId}/cashiers</td>
+								<td><a href="#createcashier">Create Cashier</a></td>
+								<td><a href="#findallcashiers">Retrieve Cashier</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>tellers/{tellerId}/cashiers/{cashierId}</td>
+								<td></td>
+								<td><a href="#findaonecashier">Find Cashier</a></td>
+								<td><a href="#updatecashier">Update Cashier</a></td>
+								<td><a href="#deletecashier">Delete Cashier</a></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>tellers/{tellerId}/cashiers/template</td>
+								<td></td>
+								<td><a href="#updatecashier">Retrieve Cashier Template</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>tellers/{tellerId}/cashiers/{cashierId}/allocate</td>
+								<td><a href="#allocateCashToCashier">Allocate Cash To Cashier</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>tellers/{tellerId}/cashiers/{cashierId}/settle</td>
+								<td><a href="#settleCashFromCashier">Settle Cash From Cashier</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>tellers/{tellerId}/cashiers/{cashierId}/transactions</td>
+								<td></td>
+								<td><a href="#transactionsForCashier">Retrieve Cashier Transactions</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>tellers/{tellerId}/cashiers/{cashierId}/summaryandtransactions</td>
+								<td></td>
+								<td><a href="#getTransactionsWtihSummaryForCashier">Retrieve Cashier Transactions With Summary</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>tellers/{tellerId}/cashiers/{cashierId}/transactions/template</td>
+								<td></td>
+								<td><a href="#retrieveCashierTxnTemplate">Retrieve Cashier Transaction Template</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+
+							<tr>
+								<td><a href="#paymenttype">Payment Type</a></td>
+								<td>paymenttypes</td>
+								<td><a href="#create_paymenttype">Create Payment Type</a></td>
+								<td><a href="#paymenttype_list">List Payment Types</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>paymenttypes/{paymentTypeId}</td>
+								<td></td>
+								<td><a href="#paymenttype_retrieve">Retrieve Payment Type</a></td>
+								<td><a href="#paymenttype_update">Update Payment Type</a></td>
+								<td><a href="#paymnettype_delete">Delete Payment Type</a></td>
+							</tr>
 
 						</table>
 					</div>
@@ -33721,6 +33818,1104 @@ No Request Body:
 			</div>
 
 		<!-- end of interest rate slabs API docs-->
+
+		<!-- start of Teller Cash Management API docs -->
+			<a id="tellercashmgmt" name="tellercashmgmt" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Teller Cash Management</h3>
+					<p>Teller cash management which will allow an organization to manage their cash transactions at branches or head office more effectively.</p>
+				</div>
+			</div>
+			<a id="listtellers" name="listtellers"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List all tellers</h4>
+					<p>Retrieves list tellers.</p><br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+						GET https://DomainName/api/v1/tellers
+					</code>
+					<code class="method-response">
+						[
+						{
+						"id": 3,
+						"officeId": 1,
+						"debitAccountId": 0,
+						"creditAccountId": 0,
+						"name": "Teller3",
+						"description": "cash handling",
+						"startDate": [
+						2015,
+						2,
+						1
+						],
+						"status": "ACTIVE",
+						"officeName": "Head Office"
+						},
+						{
+						"id": 2,
+						"officeId": 1,
+						"debitAccountId": 0,
+						"creditAccountId": 0,
+						"name": "Teller2",
+						"description": "abcc",
+						"startDate": [
+						2015,
+						2,
+						19
+						],
+						"endDate": [
+						2015,
+						3,
+						30
+						],
+						"status": "ACTIVE",
+						"officeName": "Head Office"
+						},
+						{
+						"id": 1,
+						"officeId": 1,
+						"debitAccountId": 0,
+						"creditAccountId": 0,
+						"name": "Teller1",
+						"description": "abc",
+						"startDate": [
+						2015,
+						2,
+						20
+						],
+						"status": "ACTIVE",
+						"officeName": "Head Office"
+						},
+						{
+						"id": 4,
+						"officeId": 2,
+						"debitAccountId": 0,
+						"creditAccountId": 0,
+						"name": "Teller4",
+						"description": "cash handling",
+						"startDate": [
+						2015,
+						2,
+						1
+						],
+						"status": "ACTIVE",
+						"officeName": "Office1"
+						}
+						]
+					</code>
+				</div>
+			</div>
+
+			<a id="createtellers" name="createtellers"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create teller</h4>
+					<p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>Teller name, OfficeId, Description, Start Date, Status</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>End Date</td>
+						</tr>
+					</table>
+					</p><br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+						POST https://DomainName/api/v1/tellers
+					</code>
+					<code class="method-request">
+						POST tellers
+						Content-Type: application/json
+						Request Body:
+						{
+						"officeId":2,
+						"name":"Teller4",
+						"description":"cash handling",
+						"status":300,
+						"locale":"en",
+						"dateFormat":"dd MMMM yyyy",
+						"startDate":"01 February 2015"
+						}
+					</code>
+					<code class="method-response">
+						{
+						"officeId": 2,
+						"resourceId": 5
+						}
+					</code>
+				</div>
+			</div>
+
+			<a id="findtellers" name="findtellers"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve tellers</h4>
+					<p></p><br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+						GET https://DomainName/api/v1/tellers/5
+					</code>
+					<code class="method-response">
+						{
+						"id": 5,
+						"officeId": 2,
+						"debitAccountId": 0,
+						"creditAccountId": 0,
+						"name": "Teller5",
+						"description": "cash handling",
+						"startDate": [
+						2015,
+						2,
+						1
+						],
+						"status": "ACTIVE",
+						"officeName": "Office1"
+						}
+					</code>
+				</div>
+			</div>
+
+			<a id="updatetellers" name="updatetellers"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update teller</h4>
+					<p></p><br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+						PUT https://DomainName/api/v1/tellers/{tellerId}
+					</code>
+					<code class="method-request">
+						PUT tellers/5
+						Content-Type: application/json
+						Request Body:
+						{
+						"name":"Teller5",
+						"officeId":2,
+						"description":"teller cash handling",
+						"status":300,
+						"endDate":"28 February 2015",
+						"startDate":"01 February 2015",
+						"locale":"en",
+						"dateFormat":"dd MMMM yyyy"
+						}
+					</code>
+					<code class="method-response">
+						{
+						"officeId":2,
+						"resourceId":5,
+						"changes":{
+						"description":"teller cash handling",
+						"endDate":"28 February 2015",
+						"dateFormat":"dd MMMM yyyy",
+						"locale":"en"
+						}
+						}
+					</code>
+				</div>
+			</div>
+
+			<!--<a id="deletetellers" name="deletetellers"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete Teller</h4>
+					<p></p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/interestratecharts/{chartId}/chartslabs/{slabId}
+					</code>
+					<code class="method-request">
+DELETE interestratecharts/1/chartslabs/1
+Content-Type: application/json
+No Request Body:
+					</code>
+					<code class="method-response">
+						{
+						"resourceId": 1
+						}
+					</code>
+				</div>
+			</div>
+-->
+			<a id="findallcashiers" name="findallcashiers"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Cashiers</h4>
+					<p></p><br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+						GET https://DomainName/api/v1/tellers/{tellerId}/cashiers
+					</code>
+					<code class="method-response">
+						{
+						"tellerId": 1,
+						"tellerName": "Teller1",
+						"officeId": 1,
+						"officeName": "Head Office",
+						"cashiers": [
+						{
+						"id": 1,
+						"tellerId": 1,
+						"staffId": 1,
+						"description": "",
+						"startDate": "Feb 20, 2015 12:00:00 AM",
+						"endDate": "Feb 27, 2015 12:00:00 AM",
+						"isFullDay": true,
+						"startTime": "",
+						"endTime": "",
+						"tellerName": "Teller1",
+						"staffName": "Staff1, Test"
+						}
+						]
+						}
+					</code>
+				</div>
+			</div>
+
+			<a id="createcashier" name="createcashier"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create Cashiers</h4>
+					<p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>Cashier/staff, Fromm Date, To Date, Full Day or From time and To time</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>Description/Notes</td>
+						</tr>
+					</table>
+					</p><br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+						POST https://DomainName/api/v1/tellers/{tellerId}/cashiers
+					</code>
+					<code class="method-request">
+						POST tellers/1/cashiers
+						{
+						"endDate":"28 February 2015",
+						"description":"Cashier created",
+						"isFullDay":true,
+						"staffId":3,
+						"locale":"en",
+						"dateFormat":"dd MMMM yyyy",
+						"startDate":"01 February 2015"
+						}
+					</code>
+					<code class="method-response">
+						{
+						"resourceId":1,
+						"subResourceId":2
+						}
+					</code>
+				</div>
+			</div>
+
+			<a id="findaonecashier" name="findonecashier"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a cashier</h4>
+					<p></p><br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+						GET https://DomainName/api/v1/tellers/{tellerId}/cashiers/{cashierId}
+					</code>
+					<code class="method-response">
+						{
+						"id": 1,
+						"tellerId": 1,
+						"staffId": 1,
+						"description": "",
+						"startDate": "Feb 20, 2015 12:00:00 AM",
+						"endDate": "Feb 27, 2015 12:00:00 AM",
+						"isFullDay": true,
+						"startTime": "",
+						"endTime": "",
+						"tellerName": "Teller1",
+						"staffName": "Staff1, Test"
+						}
+					</code>
+				</div>
+			</div>
+
+
+			<a id="updatecashier" name="updatecashier"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update Cashier</h4>
+					<p></p><br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+						PUT https://DomainName/api/v1/tellers/{tellerId}/cashiers/{cashierId}
+					</code>
+
+					</code>
+					<code class="method-request">
+						PUT tellers/1/cashiers/1
+						{
+						"endDate":"25 February 2015",
+						"description":"Cashier updated.",
+						"isFullDay":true,
+						"staffId":4,
+						"locale":"en",
+						"dateFormat":"dd MMMM yyyy",
+						"startDate":"01 February 2015"
+						}
+					</code>
+					<code class="method-response">
+						{
+						"resourceId": 1,
+						"subResourceId": 1,
+						"changes": {
+						"description": "Cashier updated.",
+						"endDate": "25 February 2015",
+						"dateFormat": "dd MMMM yyyy",
+						"locale": "en"
+						}
+						}
+					</code>
+				</div>
+			</div>
+
+			<a id="deletecashier" name="deletecashier"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete Cashier</h4>
+					<p></p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+						DELETE tellers/{tellerId}/cashiers/{cashierId}
+					</code>
+					<code class="method-request">
+						DELETE tellers/1/cashiers/3
+						Content-Type: application/json
+						Request Body:
+						{
+						}
+					</code>
+					<code class="method-response">
+						{
+						"resourceId": 3
+						}
+					</code>
+				</div>
+			</div>
+
+			<a id="cashiertemplate" name="cashiertemplate"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Find Cashiers</h4>
+					<p></p><br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+						GET https://DomainName/api/v1/tellers/{tellerId}/cashiers/template
+					</code>
+					<code class="method-response">
+						{
+						"tellerId":1,
+						"officeId":1,
+						"officeName":"Head Office",
+						"tellerName":"Teller1",
+						"staffOptions":[
+						{
+						"id":1,
+						"displayName":"Staff1, Test"
+						},
+						{
+						"id":2,
+						"displayName":"Staff, 2"
+						},
+						{
+						"id":3,
+						"displayName":"Staff, 3"
+						}
+						]
+						}
+					</code>
+				</div>
+			</div>
+
+
+			<a id="transactionsForCashier" name="transactionsForCashier"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Cashier Transaction</h4>
+					<p></p><br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+						GET https://DomainName/api/v1/tellers/{tellerId}/cashiers/{cashierId}/transactions
+					</code>
+					<code class="method-response">
+						[
+						{
+						"id": 8,
+						"cashierId": 15,
+						"txnType": {
+						"id": 104,
+						"value": "Cash Out"
+						},
+						"txnAmount": 10000,
+						"txnDate": "Feb 25, 2015 12:00:00 AM",
+						"entityId": 2,
+						"entityType": "loans",
+						"txnNote": "Disbursement, Loan:2-000000002,Client:1-Test 1",
+						"createdDate": "Feb 25, 2015 12:00:00 AM",
+						"officeId": 1,
+						"officeName": "Head Office",
+						"tellerId": 0,
+						"cashierName": "B, Ramesh"
+						},
+						{
+						"id": 10,
+						"cashierId": 15,
+						"txnType": {
+						"id": 104,
+						"value": "Cash Out"
+						},
+						"txnAmount": 8500,
+						"txnDate": "Feb 25, 2015 12:00:00 AM",
+						"entityId": 3,
+						"entityType": "loans",
+						"txnNote": "Disbursement, Loan:3-000000003,Client:3-Client 1",
+						"createdDate": "Feb 25, 2015 12:00:00 AM",
+						"officeId": 1,
+						"officeName": "Head Office",
+						"tellerId": 0,
+						"cashierName": "B, Ramesh"
+						},
+						{
+						"id": 12,
+						"cashierId": 15,
+						"txnType": {
+						"id": 104,
+						"value": "Cash Out"
+						},
+						"txnAmount": 10000,
+						"txnDate": "Feb 1, 2015 12:00:00 AM",
+						"entityId": 4,
+						"entityType": "loans",
+						"txnNote": "Disbursement, Loan:4-000000004,Client:4-Client 2",
+						"createdDate": "Feb 25, 2015 12:00:00 AM",
+						"officeId": 1,
+						"officeName": "Head Office",
+						"tellerId": 0,
+						"cashierName": "B, Ramesh"
+						},
+						{
+						"id": 14,
+						"cashierId": 15,
+						"txnType": {
+						"id": 103,
+						"value": "Cash In"
+						},
+						"txnAmount": 1266.52,
+						"txnDate": "Feb 1, 2015 12:00:00 AM",
+						"entityId": 4,
+						"entityType": "loans",
+						"txnNote": "Repayment, Loan:4-000000004,Client:4-Client 2",
+						"createdDate": "Feb 25, 2015 12:00:00 AM",
+						"officeId": 1,
+						"officeName": "Head Office",
+						"tellerId": 0,
+						"cashierName": "B, Ramesh"
+						},
+						{
+						"id": 13,
+						"cashierId": 15,
+						"txnType": {
+						"id": 101,
+						"value": "Allocate Cash"
+						},
+						"txnAmount": 50000,
+						"txnDate": "Feb 1, 2015 12:00:00 AM",
+						"entityId": 0,
+						"entityType": "",
+						"txnNote": "cash allocated on 1st Feb 2015",
+						"createdDate": "Feb 25, 2015 12:00:00 AM",
+						"officeId": 1,
+						"officeName": "Head Office",
+						"tellerId": 10,
+						"tellerName": "Ramesh(Teller/Cashier)",
+						"cashierName": "B, Ramesh"
+						},
+						{
+						"id": 15,
+						"cashierId": 15,
+						"txnType": {
+						"id": 104,
+						"value": "Cash Out"
+						},
+						"txnAmount": 10000,
+						"txnDate": "Feb 1, 2015 12:00:00 AM",
+						"entityId": 5,
+						"entityType": "loans",
+						"txnNote": "Disbursement, Loan:5-000000005,Client:5-Suresh D",
+						"createdDate": "Feb 25, 2015 12:00:00 AM",
+						"officeId": 1,
+						"officeName": "Head Office",
+						"tellerId": 0,
+						"cashierName": "B, Ramesh"
+						},
+						{
+						"id": 17,
+						"cashierId": 15,
+						"txnType": {
+						"id": 103,
+						"value": "Cash In"
+						},
+						"txnAmount": 1266.52,
+						"txnDate": "Feb 1, 2015 12:00:00 AM",
+						"entityId": 5,
+						"entityType": "loans",
+						"txnNote": "Repayment, Loan:5-000000005,Client:5-Suresh D",
+						"createdDate": "Feb 25, 2015 12:00:00 AM",
+						"officeId": 1,
+						"officeName": "Head Office",
+						"tellerId": 0,
+						"cashierName": "B, Ramesh"
+						},
+						{
+						"id": 14,
+						"cashierId": 15,
+						"txnType": {
+						"id": 102,
+						"value": "Settle Cash"
+						},
+						"txnAmount": 10000,
+						"txnDate": "Feb 1, 2015 12:00:00 AM",
+						"entityId": 0,
+						"entityType": "",
+						"txnNote": "cash settlement on 1 feb  with 10k",
+						"createdDate": "Feb 25, 2015 12:00:00 AM",
+						"officeId": 1,
+						"officeName": "Head Office",
+						"tellerId": 10,
+						"tellerName": "Ramesh(Teller/Cashier)",
+						"cashierName": "B, Ramesh"
+						}
+						]
+					</code>
+				</div>
+			</div>
+
+			<!--
+                        <a id="cashiertemplate" name="cashiertemplate"
+                           class="old-syle-anchor">&nbsp;</a>
+                        <div class="method-section">
+                            <div class="method-description">
+                                <h4>Find Cashiers</h4>
+                                <p></p><br>
+                            </div>
+                            <div class="method-example">
+                                <code class="method-declaration">
+            GET https://DomainName/api/v1/tellers/{tellerId}/cashiers/template
+                                </code>
+                                <code class="method-response">
+            {
+            "tellerId":1,
+            "officeId":1,
+            "officeName":"Head Office",
+            "tellerName":"Teller1",
+            "staffOptions":[
+            {
+            "id":1,
+            "displayName":"Staff1, Test"
+            },
+            {
+            "id":2,
+            "displayName":"Staff, 2"
+            },
+            {
+            "id":3,
+            "displayName":"Staff, 3"
+            }
+            ]
+            }
+                                </code>
+                            </div>
+                        </div>-->
+
+			<a id="allocateCashToCashier" name="allocateCashToCashier"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Allocate Cash To Cashier</h4>
+					<p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>Date, Amount, Currency, Notes/Comments</td>
+						</tr>
+					</table>
+					</p><br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+						POST https://DomainName/api/v1/tellers/{tellerId}/cashiers/{cashierId}/allocate
+					</code>
+					<code class="method-request">
+						POST tellers/1/cashiers/1/allocate?command=allocate
+						{
+						"currencyCode":"USD",
+						"txnAmount":"5000",
+						"txnNote":"allocating cash",
+						"locale":"en",
+						"dateFormat":"dd MMMM yyyy",
+						"txnDate":"01 February 2015"
+						}
+					</code>
+					<code class="method-response">
+						{
+						"resourceId":1,
+						"subResourceId":4
+						}
+					</code>
+				</div>
+			</div>
+
+
+			<a id="settleCashFromCashier" name="settleCashFromCashier"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Settle Cash From Cashier</h4>
+					<p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>Date, Amount, Currency, Notes/Comments</td>
+						</tr>
+					</table>
+					</p><br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+						POST https://DomainName/api/v1/tellers/{tellerId}/cashiers/{cashierId}/settle
+					</code>
+					<code class="method-request">
+						POST tellers/1/cashiers/1/settle?command=settle
+						{
+						"currencyCode":"USD",
+						"txnAmount":"2000",
+						"txnNote":"cash settlement",
+						"locale":"en",
+						"dateFormat":"dd MMMM yyyy",
+						"txnDate":"20 February 2015"
+						}
+					</code>
+					<code class="method-response">
+						{
+						"resourceId":1,
+						"subResourceId":5
+						}
+					</code>
+				</div>
+			</div>
+
+			<a id="getTransactionsWtihSummaryForCashier" name="getTransactionsWtihSummaryForCashier"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Transactions Wtih Summary For Cashier</h4>
+					<p></p><br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+						GET https://DomainName/api/v1/tellers/{tellerId}/cashiers/{cashierId}/summaryandtransactions
+					</code>
+					<code class="method-response">
+						{
+						"sumCashAllocation":7000.000000,
+						"sumInwardCash":0,
+						"sumOutwardCash":0,
+						"sumCashSettlement":50.000000,
+						"netCash":6950.000000,
+						"officeName":"Head Office",
+						"tellerId":1,
+						"tellerName":"Teller1",
+						"cashierId":1,
+						"cashierName":"Staff1, Test",
+						"cashierTransactions":[
+						{
+						"id":2,
+						"cashierId":1,
+						"txnType":{
+						"id":101,
+						"value":"Allocate Cash"
+						},
+						"txnAmount":2000.000000,
+						"txnDate":"Feb 20, 2015 12:00:00 AM",
+						"entityId":0,
+						"entityType":"",
+						"txnNote":"aaaa",
+						"createdDate":"Feb 20, 2015 12:00:00 AM",
+						"officeId":1,
+						"officeName":"Head Office",
+						"tellerId":1,
+						"tellerName":"Teller1",
+						"cashierName":"Staff1, Test"
+						},
+						{
+						"id":3,
+						"cashierId":1,
+						"txnType":{
+						"id":102,
+						"value":"Settle Cash"
+						},
+						"txnAmount":50.000000,
+						"txnDate":"Feb 20, 2015 12:00:00 AM",
+						"entityId":0,
+						"entityType":"",
+						"txnNote":"bbbbbb",
+						"createdDate":"Feb 20, 2015 12:00:00 AM",
+						"officeId":1,
+						"officeName":"Head Office",
+						"tellerId":1,
+						"tellerName":"Teller1",
+						"cashierName":"Staff1, Test"
+						},
+						{
+						"id":4,
+						"cashierId":1,
+						"txnType":{
+						"id":101,
+						"value":"Allocate Cash"
+						},
+						"txnAmount":5000.000000,
+						"txnDate":"Feb 1, 2015 12:00:00 AM",
+						"entityId":0,
+						"entityType":"",
+						"txnNote":"allocating cash",
+						"createdDate":"Feb 23, 2015 12:00:00 AM",
+						"officeId":1,
+						"officeName":"Head Office",
+						"tellerId":1,
+						"tellerName":"Teller1",
+						"cashierName":"Staff1, Test"
+						}
+						]
+						}
+					</code>
+				</div>
+			</div>
+
+
+			<a id="retrieveCashierTxnTemplate" name="retrieveCashierTxnTemplate"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Cashier Transaction Template</h4>
+					<p></p><br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+						GET https://DomainName/api/v1/tellers/{tellerId}/cashiers/{cashierId}/transactions/template
+					</code>
+					<code class="method-response">
+						{
+						"cashierId":1,
+						"officeName":"Head Office",
+						"tellerId":1,
+						"tellerName":"Teller1",
+						"cashierName":"Staff1, Test",
+						"cashierData":{
+						"id":1,
+						"tellerId":1,
+						"staffId":1,
+						"description":"",
+						"startDate":"Feb 20, 2015 12:00:00 AM",
+						"endDate":"Feb 27, 2015 12:00:00 AM",
+						"isFullDay":true,
+						"startTime":"",
+						"endTime":"",
+						"tellerName":"Teller1",
+						"staffName":"Staff1, Test"
+						},
+						"startDate":"Feb 20, 2015 12:00:00 AM",
+						"endDate":"Feb 27, 2015 12:00:00 AM",
+						"currencyOptions":[
+						{
+						"code":"USD",
+						"name":"US Dollar",
+						"decimalPlaces":2,
+						"displaySymbol":"$",
+						"nameCode":"currency.USD",
+						"displayLabel":"US Dollar ($)"
+						}
+						]
+						}
+					</code>
+				</div>
+			</div>
+
+
+
+
+			<!-- end of Teller Cash Management API docs -->
+			<!--Start of Payment type API docs-->
+			<a id="paymenttype" name="paymenttype" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Payment Type</h3>
+					<p>This defines the payment type
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Name the payment type
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>description</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Description of payment type
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>isCashPayment</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Determines weather the payment type is cash or not.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>position</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Can set the order in which the payment type should be displayed.
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<a id="create_paymenttype" name="create_paymenttype"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create a Payment Type</h4>
+					<p>Creates a new Payment type</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>Description, isCashPayment,Position</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					POST https://DomainName/api/v1/paymenttype
+					</code>
+					<code class="method-request">
+					POST paymenttype
+					Content-Type: application/json
+					Request Body:
+					{
+					"name":"cash",
+					"description":"cash payment type",
+					"isCashPayment":true,
+					"position":1
+					}
+					</code>
+					<code class="method-response">
+					{
+					"resourceId": 1
+					}
+					</code>
+				</div>
+			</div>
+			<a id="paymenttype_list" name="paymenttype_list"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve all Payment Types</h4>
+					<p>Retrieve list of payment types </p>
+
+
+					<br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					GET https://DomainName/api/v1/paymenttype
+					</code>
+					<code class="method-response">
+					[
+					{
+					"id": 24,
+					"name": "PTC",
+					"description": "Cash",
+					"isCashPayment": true,
+					"position": 0
+					},
+					{
+					"id": 25,
+					"name": "mPay",
+					"description": "not chash payment",
+					"isCashPayment": false,
+					"position": 0
+					},
+					{
+					"id": 26,
+					"name": "mPesa",
+					"description": "non cash payment",
+					"isCashPayment": false,
+					"position": 0
+					},
+					{
+					"id": 27,
+					"name": "Mobile Money",
+					"description": "money transferred through mobile",
+					"isCashPayment": false,
+					"position": 0
+					},
+					{
+					"id": 13,
+					"name": "cash",
+					"description": "cash Payment",
+					"isCashPayment": true,
+					"position": 1
+					}
+					]
+					</code>
+				</div>
+			</div>
+			<a id="paymenttype_retrieve" name="paymenttype_retrieve"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Payment Type</h4>
+					<p>Retrieves a payment type </p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					GET https://DomainName/api/v1/paymenttype/{paymentTypeId}
+					</code>
+					<code class="method-response">
+					{
+					"id": 13,
+					"name": "cash",
+					"description": "cash Payment",
+					"isCashPayment": true,
+					"position": 1
+					}
+					</code>
+				</div>
+			</div>
+			<a id="paymenttype_update" name="paymenttype_update"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Payment Type</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					PUT https://DomainName/api/v1/paymenttype/{paymnetTypeId}
+					</code>
+					<code class="method-request">
+					PUT interestratecharts/1/paymenttype/13
+					{
+					"name":"mPay",
+					"description":"not a cash payment type",
+					"isCashPayment":false,
+					"position":3
+					}
+					</code>
+					<code class="method-response">
+					{
+					"resourceId": 13
+					}
+					</code>
+				</div>
+			</div>
+			<a id="paymnettype_delete" name="paymnettype_delete"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete a Payment Type</h4>
+					<p>Deletes payment type</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					DELETE https://DomainName/api/v1/paymenttype/{paymentTypeId}
+					</code>
+					<code class="method-request">
+					DELETE paymnettype/13
+					Content-Type: application/json
+					No Request Body:
+					</code>
+					<code class="method-response">
+					{
+					"resourceId": 13
+					}
+					</code>
+				</div>
+			</div>
+		<!--End of Payment Type API docs-->
+
+
 
 		<!-- start of clients api docs -->
 		<a id="templates" name="clients" class="old-syle-anchor">&nbsp;</a>

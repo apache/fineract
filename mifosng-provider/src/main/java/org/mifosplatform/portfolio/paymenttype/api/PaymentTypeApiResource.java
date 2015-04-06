@@ -31,11 +31,12 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
+import org.mifosplatform.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.mifosplatform.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Path("/paymenttype")
+@Path("/paymenttypes")
 @Component
 public class PaymentTypeApiResource {
 
@@ -44,17 +45,21 @@ public class PaymentTypeApiResource {
     private final PaymentTypeReadPlatformService readPlatformService;
     private final PortfolioCommandSourceWritePlatformService commandWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final String resourceNameForPermissions = "PAYMENT_TYPE";
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "value", "description", "isCashPayment"));
+    // private final String resourceNameForPermissions = "PAYMENT_TYPE";
+    private final PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper;
+
+    // private final Set<String> RESPONSE_DATA_PARAMETERS = new
+    // HashSet<>(Arrays.asList("id", "value", "description", "isCashPayment"));
 
     @Autowired
     public PaymentTypeApiResource(PlatformSecurityContext securityContext, DefaultToApiJsonSerializer<PaymentTypeData> jsonSerializer,
-            PaymentTypeReadPlatformService readPlatformService, ApiRequestParameterHelper apiRequestParameterHelper,
-            PortfolioCommandSourceWritePlatformService commandWritePlatformService) {
+            PaymentTypeReadPlatformService readPlatformService, PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper,
+            ApiRequestParameterHelper apiRequestParameterHelper, PortfolioCommandSourceWritePlatformService commandWritePlatformService) {
         super();
         this.securityContext = securityContext;
         this.jsonSerializer = jsonSerializer;
         this.readPlatformService = readPlatformService;
+        this.paymentTypeRepositoryWrapper = paymentTypeRepositoryWrapper;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandWritePlatformService = commandWritePlatformService;
     }
@@ -63,22 +68,22 @@ public class PaymentTypeApiResource {
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     public String getAllPaymentTypes(@Context final UriInfo uriInfo) {
-        this.securityContext.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.securityContext.authenticatedUser().validateHasReadPermission(PaymentTypeApiResourceConstants.resourceNameForPermissions);
         final Collection<PaymentTypeData> paymentTypes = this.readPlatformService.retrieveAllPaymentTypes();
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.jsonSerializer.serialize(settings, paymentTypes, this.RESPONSE_DATA_PARAMETERS);
+        return this.jsonSerializer.serialize(settings, paymentTypes, PaymentTypeApiResourceConstants.RESPONSE_DATA_PARAMETERS);
     }
-    
-    
+
     @GET
     @Path("{paymentTypeId}")
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    public String retrieveOnePaymentType(@PathParam("paymentTypeId") final Long paymentTypeId,@Context final UriInfo uriInfo) {
-        this.securityContext.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+    public String retrieveOnePaymentType(@PathParam("paymentTypeId") final Long paymentTypeId, @Context final UriInfo uriInfo) {
+        this.securityContext.authenticatedUser().validateHasReadPermission(PaymentTypeApiResourceConstants.resourceNameForPermissions);
+        this.paymentTypeRepositoryWrapper.findOneWithNotFoundDetection(paymentTypeId);
         final PaymentTypeData paymentTypes = this.readPlatformService.retrieveOne(paymentTypeId);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.jsonSerializer.serialize(settings, paymentTypes, this.RESPONSE_DATA_PARAMETERS);
+        return this.jsonSerializer.serialize(settings, paymentTypes, PaymentTypeApiResourceConstants.RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
