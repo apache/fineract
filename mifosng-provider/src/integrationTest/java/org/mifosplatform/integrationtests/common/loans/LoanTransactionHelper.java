@@ -233,6 +233,7 @@ public class LoanTransactionHelper {
         if (transactionAmount != null) {
             map.put("transactionAmount", transactionAmount);
         }
+        System.out.println("Loan Application disburse request : " + map);
         return new Gson().toJson(map);
     }
 

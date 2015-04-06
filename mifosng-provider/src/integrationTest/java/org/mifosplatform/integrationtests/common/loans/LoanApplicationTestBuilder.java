@@ -100,7 +100,7 @@ public class LoanApplicationTestBuilder {
         if (recalculationRestFrequencyDate != null) {
             map.put("recalculationRestFrequencyDate", recalculationRestFrequencyDate);
         }
-
+        System.out.println("Loan Application request : " + map);
         return new Gson().toJson(map);
     }
 
