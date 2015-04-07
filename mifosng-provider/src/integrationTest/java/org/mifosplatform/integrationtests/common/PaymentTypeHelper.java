@@ -17,8 +17,8 @@ import com.jayway.restassured.specification.ResponseSpecification;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class PaymentTypeHelper {
 
-    private static final String CREATE_PAYMENTTYPE_URL = "/mifosng-provider/api/v1/paymenttype?" + Utils.TENANT_IDENTIFIER;
-    private static final String PAYMENTTYPE_URL = "/mifosng-provider/api/v1/paymenttype";
+    private static final String CREATE_PAYMENTTYPE_URL = "/mifosng-provider/api/v1/paymenttypes?" + Utils.TENANT_IDENTIFIER;
+    private static final String PAYMENTTYPE_URL = "/mifosng-provider/api/v1/paymenttypes";
 
     public static Integer createPaymentType(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String name, final String description, final Boolean isCashPayment, final Integer position) {
@@ -42,14 +42,14 @@ public class PaymentTypeHelper {
     public static void verifyPaymentTypeCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedPaymentTypeID) {
         System.out.println("------------------------------CHECK PAYMENT DETAILS------------------------------------\n");
-        final String PAYMENTTYPE_URL = "/mifosng-provider/api/v1/paymenttype/" + generatedPaymentTypeID + "?" + Utils.TENANT_IDENTIFIER;
-        final Integer responsePaymentTypeID = Utils.performServerGet(requestSpec, responseSpec, PAYMENTTYPE_URL, "id");
+        final String GET_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "/" + generatedPaymentTypeID + "?" + Utils.TENANT_IDENTIFIER;
+        final Integer responsePaymentTypeID = Utils.performServerGet(requestSpec, responseSpec, GET_PAYMENTTYPE_URL, "id");
         assertEquals("ERROR IN CREATING THE PAYMENT TYPE", generatedPaymentTypeID, responsePaymentTypeID);
     }
 
     public static PaymentTypeDomain retrieveById(RequestSpecification requestSpec, ResponseSpecification responseSpec,
             final Integer paymentTypeId) {
-        final String GET_PAYMENTTYPE_URL = "/mifosng-provider/api/v1/paymenttype/" + paymentTypeId + "?" + Utils.TENANT_IDENTIFIER;
+        final String GET_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "/" + paymentTypeId + "?" + Utils.TENANT_IDENTIFIER;
         System.out.println("---------------------------------GET PAYMENT TYPE---------------------------------------------");
         final String jsonData = new Gson().toJson(Utils.performServerGet(requestSpec, responseSpec, GET_PAYMENTTYPE_URL, ""));
         return new Gson().fromJson(jsonData, new TypeToken<PaymentTypeDomain>() {}.getType());

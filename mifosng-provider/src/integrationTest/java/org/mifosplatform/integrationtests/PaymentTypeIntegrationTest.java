@@ -72,7 +72,7 @@ public class PaymentTypeIntegrationTest {
         // Delete
         Integer deletedPaymentTypeId = PaymentTypeHelper.deletePaymentType(paymentTypeId, requestSpec, responseSpec);
         Assert.assertEquals(paymentTypeId, deletedPaymentTypeId);
-        ResponseSpecification responseSpecification = new ResponseSpecBuilder().expectStatusCode(403).build();
+        ResponseSpecification responseSpecification = new ResponseSpecBuilder().expectStatusCode(404).build();
         PaymentTypeHelper.retrieveById(requestSpec, responseSpecification, paymentTypeId);
 
     }
