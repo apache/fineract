@@ -22,6 +22,7 @@ import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.portfolio.loanaccount.guarantor.command.GuarantorCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -54,7 +55,7 @@ public final class AccrualAccountingDataValidator {
                 .resource(PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME);
 
         final LocalDate date = this.fromApiJsonHelper.extractLocalDateNamed(accrueTillParamName, element);
-        baseDataValidator.reset().parameter(accrueTillParamName).value(date).notNull().validateDateBefore(LocalDate.now());
+        baseDataValidator.reset().parameter(accrueTillParamName).value(date).notNull().validateDateBefore(DateUtils.getLocalDateOfTenant());
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 

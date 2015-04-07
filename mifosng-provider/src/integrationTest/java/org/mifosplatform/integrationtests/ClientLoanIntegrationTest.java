@@ -3882,6 +3882,7 @@ public class ClientLoanIntegrationTest {
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -3983,6 +3984,7 @@ public class ClientLoanIntegrationTest {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         todaysDate.add(Calendar.DAY_OF_MONTH, -14);
@@ -4060,6 +4062,7 @@ public class ClientLoanIntegrationTest {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         System.out.println("----timeeeeeeeeeeeeee------>" + dateFormat.format(todaysDate.getTime()));
@@ -4139,7 +4142,7 @@ public class ClientLoanIntegrationTest {
         } else {
             values.put("dueDate", getDateAsArray(todaysDate, addPeriod * 7));
         }
-        System.out.println("Updated date " + ((Calendar) values.get("dueDate")).getTime());
+        System.out.println("Updated date " + values.get("dueDate"));
         values.put("principalDue", principalDue);
         values.put("interestDue", interestDue);
         values.put("feeChargesDue", feeChargesDue);
@@ -4148,9 +4151,7 @@ public class ClientLoanIntegrationTest {
     }
 
     private List getDateAsArray(Calendar todaysDate, int addPeriod) {
-        getDateAsArray(todaysDate, addPeriod, Calendar.DAY_OF_MONTH);
-        return new ArrayList<>(Arrays.asList(todaysDate.get(Calendar.YEAR), todaysDate.get(Calendar.MONTH) + 1,
-                todaysDate.get(Calendar.DAY_OF_MONTH)));
+        return getDateAsArray(todaysDate, addPeriod, Calendar.DAY_OF_MONTH);
     }
 
     private List getDateAsArray(Calendar todaysDate, int addvalue, int type) {
