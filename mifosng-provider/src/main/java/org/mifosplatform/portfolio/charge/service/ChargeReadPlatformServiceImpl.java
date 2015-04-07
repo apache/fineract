@@ -309,7 +309,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public Collection<ChargeData> retrieveSavingsApplicableCharges(final boolean feeChargesOnly) {
+    public Collection<ChargeData> retrieveSavingsProductApplicableCharges(final boolean feeChargesOnly) {
         final ChargeMapper rm = new ChargeMapper();
 
         String sql = "select " + rm.chargeSchema()
@@ -345,5 +345,17 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { savingsProductId });
     }
+    
+    @Override
+    public Collection<ChargeData> retrieveSavingsAccountApplicableCharges(Long savingsAccountId) {
+
+        final ChargeMapper rm = new ChargeMapper();
+
+        String sql = "select " + rm.chargeSchema() + " join m_savings_account sa on sa.currency_code = c.currency_code"
+                + " where c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=? " + " and sa.account_no = ?";
+        
+        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SAVINGS.getValue(), savingsAccountId });
+
+    }  
 
 }
