@@ -3662,7 +3662,7 @@ public class ClientLoanIntegrationTest {
                 preCloseInterestStrategy, preCloseAmount);
 
     }
-    
+
     @Test
     public void testLoanScheduleWithInterestRecalculation_WITH_REST_WEEKLY_INTEREST_COMPOUND_INTEREST_FEE_STRATEGY_REDUCE_NEXT_INSTALLMENTS_PRE_CLOSE_INTEREST_REST_DATE() {
         String preCloseInterestStrategy = LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_REST_DATE;
@@ -3889,6 +3889,7 @@ public class ClientLoanIntegrationTest {
         final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
+        System.out.println("Disbursal Date Calendar " + todaysDate.getTime());
         todaysDate.add(Calendar.DAY_OF_MONTH, -14);
         final String LOAN_DISBURSEMENT_DATE = dateFormat.format(todaysDate.getTime());
 
@@ -3911,6 +3912,7 @@ public class ClientLoanIntegrationTest {
         ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         List<Map<String, Object>> expectedvalues = new ArrayList<>();
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
+        System.out.println("Date during repayment schedule" + todaysDate.getTime());
         addRepaymentValues(expectedvalues, todaysDate, -1, false, "2482.76", "46.15", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, false, "2494.22", "34.69", "0.0", "0.0");
         addRepaymentValues(expectedvalues, todaysDate, 1, false, "2505.73", "23.18", "0.0", "0.0");
@@ -4137,6 +4139,7 @@ public class ClientLoanIntegrationTest {
         } else {
             values.put("dueDate", getDateAsArray(todaysDate, addPeriod * 7));
         }
+        System.out.println("Updated date " + ((Calendar) values.get("dueDate")).getTime());
         values.put("principalDue", principalDue);
         values.put("interestDue", interestDue);
         values.put("feeChargesDue", feeChargesDue);
@@ -4239,7 +4242,6 @@ public class ClientLoanIntegrationTest {
             index++;
         }
     }
-
 
     /***
      * Test case to verify Mifos Style payment strategy
@@ -4774,7 +4776,7 @@ public class ClientLoanIntegrationTest {
                 .withMinimumOpenningBalance(minOpenningBalance).build();
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
     }
-    
+
     @Test
     public void testLoanProductConfiguration() {
         final String proposedAmount = "5000";
