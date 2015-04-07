@@ -4737,7 +4737,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public LoanRepaymentScheduleInstallment fetchPrepaymentDetail(final LoanScheduleGeneratorFactory loanScheduleFactory,
-            CalendarInstance restCalendarInstance, HolidayDetailDTO holidayDetailDTO) {
+            CalendarInstance restCalendarInstance, HolidayDetailDTO holidayDetailDTO, LocalDate onDate) {
         LoanRepaymentScheduleInstallment installment = null;
 
         if (this.loanRepaymentScheduleDetail.isInterestRecalculationEnabled()) {
@@ -4790,7 +4790,7 @@ public class Loan extends AbstractPersistable<Long> {
                     this.loanProduct.preCloseInterestCalculationStrategy());
 
             installment = loanScheduleGenerator.calculatePrepaymentAmount(this.repaymentScheduleInstallments, getCurrency(),
-                    DateUtils.getLocalDateOfTenant(), loanApplicationTerms, mc, charges(), holidayDetailDTO);
+                    onDate, loanApplicationTerms, mc, charges(), holidayDetailDTO);
         } else {
             installment = this.getTotalOutstandingOnLoan();
         }

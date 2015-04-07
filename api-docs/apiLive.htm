@@ -1053,6 +1053,14 @@
                                 <td></td>
                                 <td></td>
                             </tr>
+							 <tr>
+                                <td></td>
+                                <td>loans/{loanId}/transactions?command=prepayLoan</td>
+                                <td><a href="#loans_transaction_pre_close_loan">Loan Pre-Closure transaction template</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
 							<tr>
                                 <td></td>
                                 <td>loans/{loanId}/transactions?command=recoverypayment</td>
@@ -9531,7 +9539,39 @@ Request Body:
                     </code>
                 </div>
             </div>
+			
+			
+			<a id="loans_transaction_pre_close_loan" name="loans_transaction_pre_close_loan" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+					<h4> Pre-Close template</h4>
+                    <p>This Api retrieves pre closure details of loan</p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+                        POST https://DomainName/api/v1/loans/{loanId}/transactions?command=prepayLoan   <b>or</b><br/>
+						
+						https://DomainName/api/v1/loans/{loanId}/transactions?command=prepayLoan&dateFormat=dd+MMMM+yyyy&locale=en&transactionDate=02+April+2015
+                    </code>
+                    <code class="method-request">
+                        POST loans/70/transactions?command=prepayLoan
+                        Content-Type: application/json
+                        Request Body:
+                        { }
+                    </code>
+                    <code class="method-response">
 
+		        {
+		          "amount":7765.28,
+				  "principalPortion":7573.76,
+				  "interestPortion":191.52,
+				  "feeChargesPortion":0.00,
+				  "penaltyChargesPortion":0.00
+		        }
+                    </code>
+                </div>
+            </div>
+			
             <a id="loans_transaction_retrieve" name="loans_transaction_retrieve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">

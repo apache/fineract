@@ -398,7 +398,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-    public LoanTransactionData retrieveLoanPrePaymentTemplate(final Long loanId) {
+    public LoanTransactionData retrieveLoanPrePaymentTemplate(final Long loanId, LocalDate onDate) {
 
         this.context.authenticatedUser();
 
@@ -425,7 +425,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
 
         final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loan.fetchPrepaymentDetail(this.loanScheduleFactory,
-                restCalendarInstance, holidayDetailDTO);
+                restCalendarInstance, holidayDetailDTO, onDate);
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.REPAYMENT);
         final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
         final BigDecimal outstandingLoanBalance = loanRepaymentScheduleInstallment.getPrincipalOutstanding(currency).getAmount();
