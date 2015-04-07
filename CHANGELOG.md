@@ -73,9 +73,13 @@ Releases
 15.03.RELEASE
 =============
 
-This feature release ships new functionality like Collection sheets for Individual loans,  improvements to the the loans module (including the ability to round off installments, ability to fix EMI's for non-tranche loans, improved flexility for pre-closure, ability to configure the loan attributes which may be overridden at the loan product level and greater flexibility around edits to tranche definitions during loan approval and disbursal) , Client fees, performance improvements around batch jobs and various enhancements to the community app.
+This feature release ships new functionality like Collection sheets for Individual loans, Client fees along with performance improvements around batch jobs and various enhancements to the community app.
 
-Note that this release moves "Payments types" from Code Values to thier own tables, custom reports and queries might be affected as a result of the same
+Improvements to the the loans module include the ability to round off installments, fix EMI's for non-tranche loans, improved flexility for pre-closure, ability to specify which loan product attributes may be overridden at indivdual account level and greater flexibility around editing tranche definitions during loan approval and disbursal.
+
+Recurring deposits have been enhanced to support open-ended products (no Maturity amount or period)
+
+Note that this release moves "Payments types" from Code values to thier own tables, custom reports and queries might be affected as a result of the same
 
 
 Platform & API
