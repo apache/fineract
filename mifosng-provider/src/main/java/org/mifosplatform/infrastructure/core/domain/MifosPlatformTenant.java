@@ -30,13 +30,16 @@ public class MifosPlatformTenant {
     private final int suspectTimeout;
     private final int timeBetweenEvictionRunsMillis;
     private final int minEvictableIdleTimeMillis;
+    private final int maxRetriesOnDeadlock;
+    private final int maxIntervalBetweenRetries;
 
     public MifosPlatformTenant(final Long id, final String tenantIdentifier, final String name, final String schemaName,
             final String schemaServer, final String schemaServerPort, final String schemaUsername, final String schemaPassword,
             final String timezoneId, final boolean autoUpdateEnabled, final int initialSize, final boolean testOnBorrow,
             final long validationInterval, final boolean removeAbandoned, final int removeAbandonedTimeout, final boolean logAbandoned,
             final int abandonWhenPercentageFull, final int maxActive, final int minIdle, final int maxIdle, final int suspectTimeout,
-            final int timeBetweenEvictionRunsMillis, final int minEvictableIdleTimeMillis) {
+            final int timeBetweenEvictionRunsMillis, final int minEvictableIdleTimeMillis, final int maxRetriesOnDeadlock,
+            final int maxIntervalBetweenRetries) {
         this.id = id;
         this.tenantIdentifier = tenantIdentifier;
         this.name = name;
@@ -60,6 +63,8 @@ public class MifosPlatformTenant {
         this.suspectTimeout = suspectTimeout;
         this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
         this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
+        this.maxIntervalBetweenRetries = maxIntervalBetweenRetries;
+        this.maxRetriesOnDeadlock = maxRetriesOnDeadlock;
     }
 
     public String databaseURL() {
@@ -150,6 +155,14 @@ public class MifosPlatformTenant {
 
     public int getSuspectTimeout() {
         return this.suspectTimeout;
+    }
+
+    public int getMaxRetriesOnDeadlock() {
+        return maxRetriesOnDeadlock;
+    }
+
+    public int getMaxIntervalBetweenRetries() {
+        return maxIntervalBetweenRetries;
     }
 
 }

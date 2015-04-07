@@ -17,6 +17,7 @@ import org.mifosplatform.commands.exception.RollbackTransactionAsCommandIsNotApp
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.jobs.service.SchedulerJobRunnerReadService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -72,18 +73,19 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         final String json = wrapper.getJson();
         CommandProcessingResult result = null;
         JsonCommand command = null;
-        Integer numberOfRetries = 1;
-        Integer maxNumberOfRetries = 10;
+        Integer numberOfRetries = 0;
+        Integer maxNumberOfRetries = ThreadLocalContextUtil.getTenant().getMaxRetriesOnDeadlock();
+        Integer maxIntervalBetweenRetries = ThreadLocalContextUtil.getTenant().getMaxIntervalBetweenRetries();
         final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
         command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(), wrapper.getEntityId(),
                 wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getSavingsId(),
                 wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId());
-        while (numberOfRetries < maxNumberOfRetries) {
+        while (numberOfRetries <= maxNumberOfRetries) {
             try {
                 result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
-                numberOfRetries = maxNumberOfRetries;
+                numberOfRetries = maxNumberOfRetries + 1;
             } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
-                logger.warn("The following command " + command.json() + " has been retried for the " + numberOfRetries + " time");
+                logger.info("The following command " + command.json() + " has been retried  " + numberOfRetries + " time(s)");
                 /***
                  * Fail if the transaction has been retired for
                  * maxNumberOfRetries
@@ -99,14 +101,14 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                  **/
                 try {
                     Random random = new Random();
-                    int randomNum = random.nextInt(10) + 1;
+                    int randomNum = random.nextInt(maxIntervalBetweenRetries + 1);
                     Thread.sleep(1000 + (randomNum * 1000));
                     numberOfRetries = numberOfRetries + 1;
                 } catch (InterruptedException e) {
                     throw (exception);
                 }
             } catch (final RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
-
+                numberOfRetries = maxNumberOfRetries + 1;
                 result = this.processAndLogCommandService.logCommand(e.getCommandSourceResult());
             }
         }

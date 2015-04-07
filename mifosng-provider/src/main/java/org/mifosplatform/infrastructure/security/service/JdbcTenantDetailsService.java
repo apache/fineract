@@ -44,7 +44,9 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
                 .append(" pool_log_abandoned as logAbandoned, pool_abandon_when_percentage_full as abandonedWhenPercentageFull, pool_test_on_borrow as testOnBorrow,  ")//
                 .append(" pool_max_active as poolMaxActive, pool_min_idle as poolMinIdle, pool_max_idle as poolMaxIdle, ")//
                 .append(" pool_suspect_timeout as poolSuspectTimeout, pool_time_between_eviction_runs_millis as poolTimeBetweenEvictionRunsMillis, ")//
-                .append(" pool_min_evictable_idle_time_millis as poolMinEvictableIdleTimeMillis ")//
+                .append(" pool_min_evictable_idle_time_millis as poolMinEvictableIdleTimeMillis, ")//
+                .append(" deadlock_max_retries as maxRetriesOnDeadlock, ")//
+                .append(" deadlock_max_retry_interval as maxIntervalBetweenRetries ")//
                 .append(" from tenants t");//
 
         public String schema() {
@@ -77,11 +79,23 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
             final int suspectTimeout = rs.getInt("poolSuspectTimeout");
             final int timeBetweenEvictionRunsMillis = rs.getInt("poolTimeBetweenEvictionRunsMillis");
             final int minEvictableIdleTimeMillis = rs.getInt("poolMinEvictableIdleTimeMillis");
+            int maxRetriesOnDeadlock = rs.getInt("maxRetriesOnDeadlock");
+            int maxIntervalBetweenRetries = rs.getInt("maxIntervalBetweenRetries");
+
+            maxRetriesOnDeadlock = bindValueInMinMaxRange(maxRetriesOnDeadlock, 0, 15);
+            maxIntervalBetweenRetries = bindValueInMinMaxRange(maxIntervalBetweenRetries, 1, 15);
 
             return new MifosPlatformTenant(id, tenantIdentifier, name, schemaName, schemaServer, schemaServerPort, schemaUsername,
                     schemaPassword, timezoneId, autoUpdateEnabled, initialSize, testOnBorrow, validationInterval, removeAbandoned,
                     removeAbandonedTimeout, logAbandoned, abandonWhenPercentageFull, maxActive, minIdle, maxIdle, suspectTimeout,
-                    timeBetweenEvictionRunsMillis, minEvictableIdleTimeMillis);
+                    timeBetweenEvictionRunsMillis, minEvictableIdleTimeMillis, maxRetriesOnDeadlock, maxIntervalBetweenRetries);
+        }
+
+        private int bindValueInMinMaxRange(final int value, int min, int max) {
+            if (value < min) {
+                return min;
+            } else if (value > max) { return max; }
+            return value;
         }
     }
 
