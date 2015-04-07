@@ -1272,7 +1272,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     }
 
     protected double calculateInterestForDays(int daysInPeriodApplicableForInterest, BigDecimal interest, int days) {
-        if (interest.doubleValue() == 0) { return 0; }
+        if (interest.doubleValue() == 0 || days == 0) { return 0; }
         return ((interest.doubleValue()) / daysInPeriodApplicableForInterest) * days;
     }
 
