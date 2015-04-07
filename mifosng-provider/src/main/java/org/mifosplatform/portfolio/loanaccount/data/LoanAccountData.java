@@ -35,6 +35,7 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleDat
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductBorrowerCycleVariationData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductConfigurableAttributes;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductValueConditionType;
 import org.mifosplatform.portfolio.note.data.NoteData;
 import org.springframework.util.CollectionUtils;
@@ -162,7 +163,7 @@ public class LoanAccountData {
 
     private final Collection<LoanTermVariationsData> emiAmountVariations;
 
-    private final LoanProductData product;
+    private LoanProductData product;
 
     private final Map<Long, LoanBorrowerCycleData> memberVariations;
 
@@ -300,6 +301,7 @@ public class LoanAccountData {
                 emiAmountVariations, memberVariations, product, inArrears, graceOnArrearsAgeing, overdueCharges, isNPA, daysInMonthType,
                 daysInYearType, isInterestRecalculationEnabled, interestRecalculationData, originalSchedule,
                 createStandingInstructionAtDisbursement, paidInAdvance);
+
     }
 
     /**
@@ -420,6 +422,7 @@ public class LoanAccountData {
                 emiAmountVariations, memberVariations, product, inArrears, graceOnArrearsAgeing, overdueCharges, isNPA, daysInMonthType,
                 daysInYearType, isInterestRecalculationEnabled, interestRecalculationData, originalSchedule,
                 createStandingInstructionAtDisbursement, paidInAdvance);
+
     }
 
     public static LoanAccountData populateClientDefaults(final LoanAccountData acc, final LoanAccountData clientAcc) {
@@ -566,6 +569,7 @@ public class LoanAccountData {
                 memberVariations, product, inArrears, graceOnArrearsAgeing, overdueCharges, isNPA, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, interestRecalculationData, originalSchedule, createStandingInstructionAtDisbursement,
                 paidInAdvance);
+
     }
 
     public static LoanAccountData populateGroupDefaults(final LoanAccountData acc, final LoanAccountData groupAcc) {
@@ -591,6 +595,7 @@ public class LoanAccountData {
                 acc.graceOnArrearsAgeing, acc.overdueCharges, acc.isNPA, acc.daysInMonthType, acc.daysInYearType,
                 acc.isInterestRecalculationEnabled, acc.interestRecalculationData, acc.originalSchedule,
                 acc.createStandingInstructionAtDisbursement, acc.paidInAdvance);
+                
     }
 
     public static LoanAccountData loanProductWithTemplateDefaults(final LoanProductData product,
@@ -783,6 +788,7 @@ public class LoanAccountData {
                 acc.memberVariations, product, acc.inArrears, product.getGraceOnArrearsAgeing(), product.overdueFeeCharges(), acc.isNPA,
                 product.getDaysInMonthType(), product.getDaysInYearType(), product.isInterestRecalculationEnabled(),
                 product.toLoanInterestRecalculationData(), acc.originalSchedule, acc.createStandingInstructionAtDisbursement, paidInAdvance);
+
     }
 
     /*
@@ -883,6 +889,10 @@ public class LoanAccountData {
             final PortfolioAccountData linkedAccount, final Collection<DisbursementData> disbursementDetails,
             final Collection<LoanTermVariationsData> emiAmountVariations, final Collection<ChargeData> overdueCharges,
             final PaidInAdvanceData paidInAdvance) {
+            LoanProductConfigurableAttributes loanProductConfigurableAttributes = null;
+            if (acc.product != null) {
+                loanProductConfigurableAttributes = acc.product.getloanProductConfigurableAttributes();
+            }
 
         return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientName, acc.clientOfficeId,
                 acc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription, acc.fundId, acc.fundName,
@@ -1001,6 +1011,7 @@ public class LoanAccountData {
                 acc.graceOnArrearsAgeing, acc.overdueCharges, acc.isNPA, acc.daysInMonthType, acc.daysInYearType,
                 acc.isInterestRecalculationEnabled, acc.interestRecalculationData, acc.originalSchedule,
                 acc.createStandingInstructionAtDisbursement, acc.paidInAdvance);
+
     }
 
     public static LoanAccountData withInterestRecalculationCalendarData(final LoanAccountData acc, final CalendarData calendarData) {
@@ -1114,6 +1125,7 @@ public class LoanAccountData {
             final EnumOptionData daysInMonthType, final EnumOptionData daysInYearType, final boolean isInterestRecalculationEnabled,
             final LoanInterestRecalculationData interestRecalculationData, final LoanScheduleData originalSchedule,
             final Boolean createStandingInstructionAtDisbursement, final PaidInAdvanceData paidInAdvance) {
+
         this.id = id;
         this.accountNo = accountNo;
         this.status = status;
@@ -1273,6 +1285,9 @@ public class LoanAccountData {
         this.originalSchedule = originalSchedule;
         this.createStandingInstructionAtDisbursement = createStandingInstructionAtDisbursement;
         this.paidInAdvance = paidInAdvance;
+        if(this.product != null){
+            this.product.setloanProductConfigurableAttributes(product.getloanProductConfigurableAttributes());
+        }
     }
 
     public RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData() {
@@ -1342,6 +1357,10 @@ public class LoanAccountData {
         return this.product;
     }
 
+    public void setProduct(LoanProductData product){
+    	this.product = product;
+    }
+    
     public GroupGeneralData groupData() {
         return this.group;
     }

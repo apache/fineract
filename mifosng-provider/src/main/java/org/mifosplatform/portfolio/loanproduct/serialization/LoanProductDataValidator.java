@@ -32,6 +32,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.LoanProductValueConditionT
 import org.mifosplatform.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductConfigurableAttributes;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -78,7 +79,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.minimumGuaranteeFromOwnFundsParamName, LoanProductConstants.principalThresholdForLastInstallmentParamName,
             LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName, LoanProductConstants.canDefineEmiAmountParamName,
             LoanProductConstants.installmentAmountInMultiplesOfParamName,
-            LoanProductConstants.preClosureInterestCalculationStrategyParamName));
+            LoanProductConstants.preClosureInterestCalculationStrategyParamName, LoanProductConstants.allowAttributeOverridesParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -441,7 +442,37 @@ public final class LoanProductDataValidator {
 
         validateMultiDisburseLoanData(baseDataValidator, element);
 
+        // validateLoanConfigurableAttributes(baseDataValidator,element);
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validateLoanConfigurableAttributes(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.allowAttributeOverridesParamName, element)) {
+
+            final JsonObject object = element.getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName);
+
+            Integer length = LoanProductConfigurableAttributes.supportedloanConfigurableAttributes.length;
+
+            Boolean bool[] = new Boolean[length];
+
+            for (int i = 0; i < length; i++) {
+                /* Validate the attribute names */
+                if (!this.fromApiJsonHelper.parameterExists(LoanProductConfigurableAttributes.supportedloanConfigurableAttributes[i],
+                        object)) {
+                    baseDataValidator.reset().parameter(LoanProductConstants.allowAttributeOverridesParamName)
+                            .failWithCode("invalid.loan.configuration.attribute.passed");
+                } else {
+                    bool[i] = this.fromApiJsonHelper.extractBooleanNamed(
+                            LoanProductConfigurableAttributes.supportedloanConfigurableAttributes[i], object);
+                    /* Validate the boolean value */
+                    baseDataValidator.reset().parameter(LoanProductConstants.allowAttributeOverridesParamName).value(bool[i])
+                            .ignoreIfNull().validateForBooleanValue();
+                }
+
+            }
+        }
     }
 
     private void validateMultiDisburseLoanData(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
@@ -900,6 +931,8 @@ public final class LoanProductDataValidator {
         }
 
         validateMultiDisburseLoanData(baseDataValidator, element);
+
+        // validateLoanConfigurableAttributes(baseDataValidator,element);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

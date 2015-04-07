@@ -110,7 +110,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             		MifosEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, 
             		MifosEntityType.LOAN_PRODUCT, 
             		loanproduct.getId());
-
+            
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withEntityId(loanproduct.getId()) //

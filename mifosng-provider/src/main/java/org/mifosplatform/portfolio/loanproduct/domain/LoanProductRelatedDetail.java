@@ -514,4 +514,57 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public void updateNumberOfRepayments(Integer numberOfRepayments) {
         this.numberOfRepayments = numberOfRepayments;
     }
+
+    public Integer getGraceOnPrincipalPayment() {
+        return graceOnPrincipalPayment;
+    }
+
+    public void setGraceOnPrincipalPayment(Integer graceOnPrincipalPayment) {
+        this.graceOnPrincipalPayment = graceOnPrincipalPayment;
+    }
+
+    public Integer getGraceOnInterestPayment() {
+        return graceOnInterestPayment;
+    }
+
+    public void setGraceOnInterestPayment(Integer graceOnInterestPayment) {
+        this.graceOnInterestPayment = graceOnInterestPayment;
+    }
+
+    public Integer getGraceOnArrearsAgeing() {
+        return graceOnArrearsAgeing;
+    }
+
+    public void setGraceOnArrearsAgeing(Integer graceOnArrearsAgeing) {
+        this.graceOnArrearsAgeing = graceOnArrearsAgeing;
+    }
+
+    public void setInterestMethod(InterestMethod interestMethod) {
+        this.interestMethod = interestMethod;
+    }
+
+    public void setInterestCalculationPeriodMethod(InterestCalculationPeriodMethod interestCalculationPeriodMethod) {
+        this.interestCalculationPeriodMethod = interestCalculationPeriodMethod;
+    }
+
+    public void setRepayEvery(Integer repayEvery) {
+        this.repayEvery = repayEvery;
+    }
+
+    public void setRepaymentPeriodFrequencyType(PeriodFrequencyType repaymentPeriodFrequencyType) {
+        this.repaymentPeriodFrequencyType = repaymentPeriodFrequencyType;
+    }
+
+    public void setAmortizationMethod(AmortizationMethod amortizationMethod) {
+        this.amortizationMethod = amortizationMethod;
+    }
+
+    public void setInArrearsTolerance(BigDecimal inArrearsTolerance) {
+        this.inArrearsTolerance = inArrearsTolerance;
+    }
+
+    public BigDecimal getArrearsTolerance() {
+        return this.inArrearsTolerance;
+    }
+
 }

@@ -74,8 +74,9 @@ public class LoanApplicationTestBuilder {
         map.put("expectedDisbursementDate", this.expectedDisbursmentDate);
         map.put("submittedOnDate", this.submittedOnDate);
         map.put("loanType", this.loanType);
-        map.put("repaymentsStartingFromDate", this.repaymentsStartingFromDate);
-        
+        if(repaymentsStartingFromDate != null){
+            map.put("repaymentsStartingFromDate", this.repaymentsStartingFromDate);
+        }
         if (charges != null) {
             map.put("charges", charges);
         }
