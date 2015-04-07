@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 06 Apr 2015 - 15.03.RELEASE
 1. 22 Dec 2014 - 1.26.0.RELEASE
 1. 1 Nov 2014 - 1.25.1.RELEASE
 1. 12 Oct 2014 - 1.25.0.RELEASE
@@ -69,11 +70,114 @@ Releases
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
 
+15.03.RELEASE
+=============
+
+This feature release ships new functionality like Collection sheets for Individual loans,  improvements to the the loans module (including the ability to round off installments, ability to fix EMI's for non-tranche loans, improved flexility for pre-closure, ability to configure the loan attributes which may be overridden at the loan product level and greater flexibility around edits to tranche definitions during loan approval and disbursal) , Client fees, performance improvements around batch jobs and various enhancements to the community app.
+
+Note that this release moves "Payments types" from Code Values to thier own tables, custom reports and queries might be affected as a result of the same
+
+
+Platform & API
+
+New Features & Improvements
+
+ - [MIFOSX-1742] - Collection Sheet facility for individual loans.
+ - [MIFOSX-1464] - Loan repayment - Rounding off
+ - [MIFOSX-1844] - Last installment amount should not exceed the specified EMI amount.
+ - [MIFOSX-1667] - As a system Administrator, I must be able to decide which attributes of a loan product may be overridden by the loan account
+ - [MIFOSX-1918] - Allow full installment interest to be collected at time of pre-closure of loan
+ - [MIFOSX-1868] - Ability to have user passwords never expire
+ - [MIFOSX-1823] - Add facility to print receipts for all transactions for Savings
+ - [MIFOSX-1875] - Enforce strict password policies in the system
+ - [MIFOSX-1824] - Ability to allow user to change Tranche amount during loan approval stage.
+ - [MIFOSX-1897] - As an accountant I want to be able to see all journals related to a specific loan or savings
+ - [MIFOSX-1670] - Require modification/deleting of created Role
+ - [MIFOSX-1817] - Teller Cash Management - capture Currency for Settle and Allocate transactions
+ - [MIFOSX-1624] - Ability to writeoff loan on the same date of last transaction.
+ - [MIFOSX-1904] - Move Payment Types to their own table
+ - [MIFOSX-1846] - Feature to display and print Loan Transaction Receipt
+ - [MIFOSX-1786] - Allow usage of UGD (Templates) for Hooks
+ - [MIFOSX-1758] - Make the dist ZIP include the community-app in apps/ so that it works OOB
+ - [MIFOSX-1908] - Configurable retries on CannotAcquireLockException or ObjectOptimisticLockingFailureException
+ - [MIFOSX-1613] - The overdue status of a loan should appear only when the principal outstanding from the running schedule is greater than the principal outstanding from the original schedule when compared on current date.
+
+Bugs
+
+ - [MIFOSX-1116] - Wrong maturity amount is shown when closing recurring deposit account
+ - [MIFOSX-1481] - you cannot write off a loan after making a repayment
+ - [MIFOSX-1729] - Installment amount exceeds the specified emi amount if there are multiple disbursals before the first repayment date.
+ - [MIFOSX-1776] - Group loan application synk repayment with meeting is not working as expected
+ - [MIFOSX-1808] - After moving the group from one center to another "Center Summary" is not geting updated
+ - [MIFOSX-1809] - Closure reason created for Group is displaying in Closure reason for Centers while closing the Center.
+ - [MIFOSX-1830] - Print report icon is not visible in UI for savings transaction receipt and receipt is coming for reverse transaction
+ - [MIFOSX-1836] - Can't Transfer Clients between Groups
+ - [MIFOSX-1839] - Issue related to Show Payment Details in Loans and Savings account Transactions
+ - [MIFOSX-1847] - Data tables - can be deleted - even if data exists
+ - [MIFOSX-1859] - no error indication while doing duplicate entry of one client identifier's Unique ID in another client's identifier's ID
+ - [MIFOSX-1860] - Not able to disburse Second Tranche loan if First repayment date is defined.
+ - [MIFOSX-1864] - cannot remove all Mappping Fees,Penalties to Income Accounts
+ - [MIFOSX-1866] - Guarantor Release funds causes 500 error
+ - [MIFOSX-1878] - Savings account timeline does not include the data of the user that activated the account
+ - [MIFOSX-1884] - Unable to create a loan account with given loan product definition (tranche loan)
+ - [MIFOSX-1885] - Not able to disassociate a Client from attached Group even if he is not having any active JLG loans under that Group
+ - [MIFOSX-1892] - Issues related to Teller/Cashier Management
+ - [MIFOSX-1905] - Consistency w.r.t spelling "principalThresholdForLastInstalment" for loan products
+ - [MIFOSX-1914] - Not able to create loan product with "Principal Threshold (%) for Last Instalment" field added
+ - [MIFOSX-1915] - Repayment schedule is not getting generated as per loan term, rather displaying more term with principal due
+ - [MIFOSX-1926] - https://github.com/openMF/community-app/issues/1285
+ - [MIFOSX-1940] - Accounting running balance job hangs when updating 400,000 or more entries
+ - [MIFOSX-1942] - Edit Tranche option in community app takes you to the wrong page
+ - [MIFOSX-1943] - UI issue in Loan Tranche Details tab - Edit tranche icon is not displayed
+ - [MIFOSX-451] - Not able to close the loan earlier than its scheduled date.
+
+
+Community app
+
+ - [MIFOSX-1888] - Allow a UI configuration to specify which fields should be editable/read only/hidden on the loan account creation page
+ - [MIFOSX-1139] - Cleaner error message when Community app tries to connect to an Invalid Platform URL
+ - [MIFOSX-1825] - Add feature to bulk create loans (group wise)
+ - [MIFOSX-1232] - Inconsistent terminology in Loan Product creation regarding loan cycle / borrower cycle
+ - [MIFOSX-1293] - Add select all option to Pending Tasks in Checker Inbox and Tasks
+ - [MIFOSX-1312] - When viewing a group loan, the group name does not display
+ - [MIFOSX-1903] - Enable easier view of Journal entries created by loan transactions on the Community Application
+ - [MIFOSX-1555] - UI updates to Group screen and applying number formats across the community app
+ - [MIFOSX-1787] - Audit trails - Advanced search is not working as expected
+ - [MIFOSX-1685] - Improve browser-back navigation
+ - [MIFOSX-1690] - Huge dropdown list during account transfers
+ - [MIFOSX-1693] - Chart of Accounts - display improvements
+ - [MIFOSX-1605] - In Edit Recurring deposit product page not able "For Pre-mature Closure: on" field is not working
+ - [MIFOSX-1617] - Better pagination service
+ - [MIFOSX-1621] - Manage Members on group profile does not behave properly when adding first client to a group
+ - [MIFOSX-1754] - Typo in Create Loan Product >> Accounting >> Cash (should be losses written off)
+ - [MIFOSX-1583] - "Help" menu choice on mifos menu should be renamed or linked to the User Manual
+ - [MIFOSX-1590] - Moving icons on Accounting Menu page distracting
+ - [MIFOSX-1602] - Including Mifos X release details in Community-App as about info
+ - [MIFOSX-1793] - Typo's in index.html
+ - [MIFOSX-1833] - In the Add journal entry - Drop down accounts should be sorted with respect to gl code
+ - [MIFOSX-1920] - Hiding Of Deleted Guarantors
+ - [MIFOSX-1777] - Add tooltips for Fixed and Recurring Deposit product labels
+ - [MIFOSX-1778] - Add tooltips for Loan Product Field labels Pt. 1
+ - [MIFOSX-1779] - Add tooltips for Loan Product Field labels Pt. 2
+ - [MIFOSX-1780] - Add tooltips for Loan Product Field labels Pt. 3
+ - [MIFOSX-1781] - Add tooltips for New Loan Account labels
+ - [MIFOSX-1783] - Add tooltips for Savings Product labels
+ - [MIFOSX-1785] - Add tooltips and glossary entires for global configuration and savings accounting labels
+ - [MIFOSX-1849] - Parse Error in Console while viewing a Group
+ - [MIFOSX-1696] - UI Improvements to Manage Roles and Permissions
+ - [MIFOSX-1911] - Deposit Account On Hold Transactions
+ - [MIFOSX-1858] - Smoother sidebar transition on mouseout
+ - [MIFOSX-1872] - Drop down for Account Transfers is not working
+ - [MIFOSX-1640] - Provide select-all checkbox when managing permissions for role
+ - [MIFOSX-1912] - Chrome browser - Language issue(Date format)
+ - [MIFOSX-1544] - While creating a Group under center should not allowed to ask for office again
+ - [MIFOSX-1822] - Create Sub ledger account is not working as expected
+ - [MIFOSX-1900] - List Keyboard shortcuts
+
 1.26.0.RELEASE
 =============
 This feature release adds support for capturing guarantee requirements for loans and blocking/holding funds in guarantor accounts. It also includes various enhancements like the addition of new statuses for client life cycle, ability to map liability accounts to fees, ability to update deposit amounts for active recurring deposits and the ability to capture client images from a linked webcam along with a number of other improvements and bug fixes
 
-New Features & Improvements
 
 Platform & API
 
