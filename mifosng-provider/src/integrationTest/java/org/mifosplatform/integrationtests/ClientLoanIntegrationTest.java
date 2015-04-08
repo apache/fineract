@@ -22,6 +22,7 @@ import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.integrationtests.common.ClientHelper;
 import org.mifosplatform.integrationtests.common.SchedulerJobHelper;
 import org.mifosplatform.integrationtests.common.Utils;
@@ -4259,7 +4260,7 @@ public class ClientLoanIntegrationTest {
     public void testLoanRefundByCashCashBasedAccounting() {
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
 
-        Calendar fourMonthsfromNowCalendar = Calendar.getInstance();
+        Calendar fourMonthsfromNowCalendar = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         fourMonthsfromNowCalendar.add(Calendar.MONTH, -4);
 
         String fourMonthsfromNow = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
@@ -4414,7 +4415,7 @@ public class ClientLoanIntegrationTest {
     public void testLoanRefundByCashAccrualBasedAccounting() {
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
 
-        Calendar fourMonthsfromNowCalendar = Calendar.getInstance();
+        Calendar fourMonthsfromNowCalendar = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         fourMonthsfromNowCalendar.add(Calendar.MONTH, -4);
 
         String fourMonthsfromNow = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
@@ -4572,7 +4573,7 @@ public class ClientLoanIntegrationTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
 
-        Calendar fourMonthsfromNowCalendar = Calendar.getInstance();
+        Calendar fourMonthsfromNowCalendar = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         fourMonthsfromNowCalendar.add(Calendar.MONTH, -4);
 
         String fourMonthsfromNow = Utils.convertDateToURLFormat(fourMonthsfromNowCalendar);
