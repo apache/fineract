@@ -49,7 +49,7 @@ public class LoanProductConfigurableAttributes extends AbstractPersistable<Long>
 
     public static String[] supportedloanConfigurableAttributes = { "amortizationType", "interestType", "transactionProcessingStrategyId",
             "interestCalculationPeriodType", "inArrearsTolerance", "repaymentEvery", "graceOnPrincipalAndInterestPayment",
-            "graceOnArrearsAging" };
+            "graceOnArrearsAgeing" };
 
     public static LoanProductConfigurableAttributes createFrom(JsonCommand command) {
 

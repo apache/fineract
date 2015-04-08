@@ -98,6 +98,31 @@ public class FromJsonHelper {
         if (!unsupportedParameterList.isEmpty()) { throw new UnsupportedParameterException(unsupportedParameterList); }
     }
 
+    /**
+     * @param parentPropertyName
+     *            The full json path to this property,the value is appended to
+     *            the parameter name while generating an error message <br/>
+     *            Ex: property "name" in Object "person" would be named as
+     *            "person.name"
+     * @param object
+     * @param supportedParams
+     */
+    public void checkForUnsupportedNestedParameters(final String parentPropertyName, final JsonObject object,
+            final Set<String> supportedParams) {
+        try {
+            checkForUnsupportedParameters(object, supportedParams);
+        } catch (UnsupportedParameterException exception) {
+            List<String> unsupportedParameters = exception.getUnsupportedParameters();
+            List<String> updatedUnsupportedParameters = new ArrayList<>();
+            for (String unsupportedParameter : unsupportedParameters) {
+                String updatedUnsupportedParameter = parentPropertyName + "." + unsupportedParameter;
+                updatedUnsupportedParameters.add(updatedUnsupportedParameter);
+            }
+            throw new UnsupportedParameterException(updatedUnsupportedParameters);
+        }
+
+    }
+
     public JsonElement parse(final String json) {
 
         JsonElement parsedElement = null;
