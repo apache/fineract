@@ -22,7 +22,6 @@ import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.integrationtests.common.ClientHelper;
 import org.mifosplatform.integrationtests.common.SchedulerJobHelper;
 import org.mifosplatform.integrationtests.common.Utils;
@@ -45,6 +44,7 @@ import com.google.gson.JsonObject;
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
 import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
@@ -4824,32 +4824,15 @@ public class ClientLoanIntegrationTest {
     }
 
     private void validateIfValuesAreNotOverridden(Integer loanID, Integer loanProductID) {
-        assertEquals(
-                this.loanTransactionHelper.getLoanProductDetail(this.requestSpec, this.responseSpec, loanProductID, "amortizationType"),
-                this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "amortizationType"));
-        assertEquals(this.loanTransactionHelper.getLoanProductDetail(this.requestSpec, this.responseSpec, loanProductID, "interestType"),
-                this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "interestType"));
-        assertEquals(this.loanTransactionHelper.getLoanProductDetail(this.requestSpec, this.responseSpec, loanProductID,
-                "transactionProcessingStrategyId"), this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID,
-                "transactionProcessingStrategyId"));
-        assertEquals(this.loanTransactionHelper.getLoanProductDetail(this.requestSpec, this.responseSpec, loanProductID,
-                "interestCalculationPeriodType"), this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID,
-                "interestCalculationPeriodType"));
-        assertEquals(this.loanTransactionHelper.getLoanProductDetail(this.requestSpec, this.responseSpec, loanProductID,
-                "repaymentFrequencyType"), this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID,
-                "repaymentFrequencyType"));
-        assertEquals(this.loanTransactionHelper.getLoanProductDetail(this.requestSpec, this.responseSpec, loanProductID,
-                "graceOnPrincipalPayment"), this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID,
-                "graceOnPrincipalPayment"));
-        assertEquals(this.loanTransactionHelper.getLoanProductDetail(this.requestSpec, this.responseSpec, loanProductID,
-                "graceOnInterestPayment"), this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID,
-                "graceOnInterestPayment"));
-        assertEquals(
-                this.loanTransactionHelper.getLoanProductDetail(this.requestSpec, this.responseSpec, loanProductID, "inArrearsTolerance"),
-                this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "inArrearsTolerance"));
-        assertEquals(
-                this.loanTransactionHelper.getLoanProductDetail(this.requestSpec, this.responseSpec, loanProductID, "graceOnArrearsAgeing"),
-                this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "graceOnArrearsAgeing"));
+        String loanProductDetails = this.loanTransactionHelper.getLoanProductDetails(this.requestSpec, this.responseSpec, loanProductID);
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
+        List<String> comparisonAttributes = Arrays.asList("amortizationType", "interestType", "transactionProcessingStrategyId",
+                "interestCalculationPeriodType", "repaymentFrequencyType", "graceOnPrincipalPayment", "graceOnInterestPayment",
+                "inArrearsTolerance", "graceOnArrearsAgeing");
+
+        for (String comparisonAttribute : comparisonAttributes) {
+            assertEquals(JsonPath.from(loanProductDetails).get(comparisonAttribute), JsonPath.from(loanDetails).get(comparisonAttribute));
+        }
     }
 
     private JsonObject createLoanProductConfigurationDetail(JsonObject loanProductConfiguration, Boolean bool) {

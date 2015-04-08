@@ -68,6 +68,7 @@ public class Utils {
     public static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String getURL, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
+        if (jsonAttributeToGetBack == null) { return (T) json; }
         return (T) from(json).get(jsonAttributeToGetBack);
     }
 
