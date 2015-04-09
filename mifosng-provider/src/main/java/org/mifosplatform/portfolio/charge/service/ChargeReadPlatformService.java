@@ -77,7 +77,7 @@ public interface ChargeReadPlatformService {
      * @param feeChargesOnly
      * @return
      */
-    Collection<ChargeData> retrieveSavingsApplicableCharges(boolean feeChargesOnly);
+    Collection<ChargeData> retrieveSavingsProductApplicableCharges(boolean feeChargesOnly);
 
     /**
      * Returns all penalties applicable for savings
@@ -93,5 +93,8 @@ public interface ChargeReadPlatformService {
      * @return
      */
     Collection<ChargeData> retrieveSavingsProductCharges(Long savingsProductId);
+    
+    /** Retrieve savings account charges **/
+    Collection<ChargeData> retrieveSavingsAccountApplicableCharges(Long savingsId);
 
 }
