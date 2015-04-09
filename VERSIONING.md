@@ -1,54 +1,45 @@
 Versioning
 =====
+For releases, we follow a simplified date versioning scheme
+Prior to 15.03.RELEASE, we followed a semantic versioning approach. (http://semver.org/)
 
-For releases we will follow semantic versioning approach. (http://semver.org/)
-
-Semantic Versioning
+Date Versioning
 ===================
 
-Semantic versioning is a very simple scheme built around the X.Y.Z-buildNo concept (for example 2.6.0-x or 2.6.0-BUILD-SNAPSHOT):
+Our date versioning scheme is built around the YY.MM.{PATCH}.{release_type} concept (for example 15.06.RELEASE or 15.06.1.BUILD-SNAPSHOT) where
 
-    Increment Z when you fix something
-    Increment Y when you add a new feature
-    Increment X when you break backwards-compatibility or add major features
-    Use the buildNo to differentiate different builds off the same branch, and to differentiate between development, test and production builds.
+    YY represents the year of the release
+    MM represents the month of the release (we follow a time based release cycle with major releases published every quarter)
+    PATCH (optional) gets incremented whenever a new release is made from an existing major release (between our quarterly release cycle) 
+    release_type differentiates different builds off the same branch, and also differentiates between development, test and production builds.
     
 Version structure
 
 {number}.{release_type}
 
-where {number} is further broken down as {major}.{minor}.{micro}.
+where {number} is further broken down as YY.MM.{PATCH}.
 
 Examples:
 
-    1.0.0.BUILD-SNAPSHOT
-    1.0.0.M1
-    1.0.0.RC1
-    1.0.0.RELEASE
+    15.03.BUILD-SNAPSHOT
+    15.03.M1
+    15.03.RC1
+    15.03.RELEASE
+    15.03.1.RC1
+    15.03.1.RELEASE
 
 Number semantics
 
-major/minor/micro semantics may have some variance across projects but in general this is what we mean.
-
 In general:
 
-    a major version suggests many significant new features, an associated marketing campaign, and possible breaking of backward compatibility.
-    a minor version may also contain serious new features, but should not break compatibility. You can expect minor releases every 1-3 months.
-    a micro version typically contains many bug fixes and improvements and perhaps several smaller new features. You can expect micro version approximately every 5-20 days (depending on bugs or suggested improvements).
+    a major version (Ex:15.03) does not have a patch number and suggests many significant new features, an associated marketing campaign, and possible breaking of backward compatibility. You can expect major releases every 3 months
+    a minor version (Ex:15.03.1)  may also contain serious new features, but typically contains many bug fixes and improvements and does not break compatibility. You can expect minor releases between the quarterly major release cycle.
 
-Order matters
-
-Notice that the following sequence of versions is in ordered ascending both alphabetically and toward GA:
-
-    1.0.0.BUILD-SNAPSHOT
-    1.0.0.M1
-    1.0.0.RC1
-    1.0.0.RELEASE
     
 What You Should Install Where
 
-As a rule of thumb …
+As a rule of thumb â€¦
 
-    Snapshot or Milestone versions should only be installed on dev boxes and integration environments. They shouldn’t be deployed to any of the dedicated test environments.
+    Snapshot or Milestone versions should only be installed on dev boxes and integration environments. They shouldnâ€™t be deployed to any of the dedicated test environments.
     Release candidates should be installed in the dedicated test environments. In an emergency, a release candidate can be installed into the production environment.
     Production releases can be installed anywhere - and they are the only kind of build that should be installed into the production environment.
