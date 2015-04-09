@@ -50,7 +50,7 @@ public final class TellerCommandFromApiJsonDeserializer {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
-    public void validateForCreate(final String json) {
+    public void validateForCreateAndUpdateTeller(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -74,13 +74,13 @@ public final class TellerCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter("startDate").value(startDate).notNull();
 
         final LocalDate endDate = this.fromApiJsonHelper.extractLocalDateNamed("endDate", element);
-        baseDataValidator.reset().parameter("startDate").value(endDate).ignoreIfNull();
+        baseDataValidator.reset().parameter("endDate").value(endDate).ignoreIfNull();
 
         final String status = this.fromApiJsonHelper.extractStringNamed("status", element);
         baseDataValidator.reset().parameter("status").value(status).notBlank().notExceedingLengthOf(50);
 
         if (endDate != null) {
-            if (endDate.isAfter(startDate)) { throw new InvalidDateInputException(startDate.toString(), endDate.toString()); }
+            if (endDate.isBefore(startDate)) { throw new InvalidDateInputException(startDate.toString(), endDate.toString()); }
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -88,32 +88,6 @@ public final class TellerCommandFromApiJsonDeserializer {
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
-    }
-
-    public void validateForUpdate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("teller");
-
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
-
-        final String name = this.fromApiJsonHelper.extractStringNamed("name", element);
-        baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(50);
-
-        final String description = this.fromApiJsonHelper.extractStringNamed("description", element);
-        baseDataValidator.reset().parameter("description").value(description).notBlank().notExceedingLengthOf(100);
-
-        final LocalDate startDate = this.fromApiJsonHelper.extractLocalDateNamed("startDate", element);
-        baseDataValidator.reset().parameter("startDate").value(startDate).notNull();
-
-        final String status = this.fromApiJsonHelper.extractStringNamed("status", element);
-        baseDataValidator.reset().parameter("status").value(status).notBlank().notExceedingLengthOf(50);
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     public void validateForAllocateCashier(final String json) {

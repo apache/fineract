@@ -90,7 +90,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
             final Long officeId = command.longValueOfParameterNamed("officeId");
 
-            this.fromApiJsonDeserializer.validateForCreate(command.json());
+            this.fromApiJsonDeserializer.validateForCreateAndUpdateTeller(command.json());
 
             // final Office parent =
             // validateUserPriviledgeOnOfficeAndRetrieve(currentUser, officeId);
@@ -124,7 +124,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
             final AppUser currentUser = this.context.authenticatedUser();
 
-            this.fromApiJsonDeserializer.validateForUpdate(command.json());
+            this.fromApiJsonDeserializer.validateForCreateAndUpdateTeller(command.json());
 
             final Teller teller = validateUserPriviledgeOnTellerAndRetrieve(currentUser, tellerId);
 
