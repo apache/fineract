@@ -1,17 +1,18 @@
 Versioning
 =====
-For releases, we follow a simplified date versioning scheme
+For releases, we follow a simplified date versioning scheme which ties in nicely with our time based release cycle (with stables releases being promoted on a three month cycle)
+
 Prior to 15.03.RELEASE, we followed a semantic versioning approach. (http://semver.org/)
 
 Date Versioning
 ===================
 
-Our date versioning scheme is built around the YY.MM.{PATCH}.{release_type} concept (for example 15.06.RELEASE or 15.06.1.BUILD-SNAPSHOT) where
+Our date versioning scheme is built around the YY.MM.{PATCH}.{release_type} concept (for example 15.06.RELEASE or 15.06.1.BUILD-SNAPSHOT)  where
 
     YY represents the year of the release
-    MM represents the month of the release (we follow a time based release cycle with major releases published every quarter)
-    PATCH (optional) gets incremented whenever a new release is made from an existing major release (between our quarterly release cycle) 
-    release_type differentiates different builds off the same branch, and also differentiates between development, test and production builds.
+    MM represents the month of the major release 
+    PATCH (optional) gets incremented whenever a new release is made from an existing major release 
+    release_type differentiates different builds off the same branch. It also differentiates between development, test and production builds.
     
 Version structure
 
