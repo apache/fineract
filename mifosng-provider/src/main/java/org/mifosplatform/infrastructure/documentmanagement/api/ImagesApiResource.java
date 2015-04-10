@@ -7,16 +7,7 @@ package org.mifosplatform.infrastructure.documentmanagement.api;
 
 import java.io.InputStream;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -70,9 +61,9 @@ public class ImagesApiResource {
     @POST
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String addNewClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") final Long fileSize,
-            @FormDataParam("file") final InputStream inputStream, @FormDataParam("file") final FormDataContentDisposition fileDetails,
-            @FormDataParam("file") final FormDataBodyPart bodyPart) {
+    public String addNewClientImage(@PathParam("clients") final String clientName, @PathParam("clientId") final Long clientId,
+            @HeaderParam("Content-Length") final Long fileSize, @FormDataParam("file") final InputStream inputStream,
+            @FormDataParam("file") final FormDataContentDisposition fileDetails, @FormDataParam("file") final FormDataBodyPart bodyPart) {
 
         // TODO: vishwas might need more advances validation (like reading magic
         // number) for handling malicious clients
@@ -80,8 +71,8 @@ public class ImagesApiResource {
         ContentRepositoryUtils.validateClientImageNotEmpty(fileDetails.getFileName());
         ContentRepositoryUtils.validateImageMimeType(bodyPart.getMediaType().toString());
 
-        final CommandProcessingResult result = this.imageWritePlatformService.saveOrUpdateClientImage(clientId, fileDetails.getFileName(),
-                inputStream, fileSize);
+        final CommandProcessingResult result = this.imageWritePlatformService.saveOrUpdateImage(clientName, clientId,
+                fileDetails.getFileName(), inputStream, fileSize);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -92,11 +83,12 @@ public class ImagesApiResource {
     @POST
     @Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String addNewClientImage(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
+    public String addNewClientImage(@PathParam("clients") final String clientName, @PathParam("clientId") final Long clientId,
+            final String jsonRequestBody) {
 
         final Base64EncodedImage base64EncodedImage = ContentRepositoryUtils.extractImageFromDataURL(jsonRequestBody);
 
-        final CommandProcessingResult result = this.imageWritePlatformService.saveOrUpdateClientImage(clientId, base64EncodedImage);
+        final CommandProcessingResult result = this.imageWritePlatformService.saveOrUpdateImage(clientName, clientId, base64EncodedImage);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -107,14 +99,15 @@ public class ImagesApiResource {
     @GET
     @Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces({ MediaType.TEXT_PLAIN })
-    public Response retrieveClientImage(@PathParam("clientId") final Long clientId, @QueryParam("maxWidth") final Integer maxWidth,
-            @QueryParam("maxHeight") final Integer maxHeight, @QueryParam("output") final String output) {
-        if (output != null && (output.equals("octet") || output.equals("inline_octet"))) { return downloadClientImage(clientId, maxWidth,
-                maxHeight, output); }
+    public Response retrieveImage(@PathParam("clients") final String clientName, @PathParam("clientId") final Long clientId,
+            @QueryParam("maxWidth") final Integer maxWidth, @QueryParam("maxHeight") final Integer maxHeight,
+            @QueryParam("output") final String output) {
+        if (output != null && (output.equals("octet") || output.equals("inline_octet"))) { return downloadClientImage(clientName, clientId,
+                maxWidth, maxHeight, output); }
 
         this.context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
 
-        final ImageData imageData = this.imageReadPlatformService.retrieveClientImage(clientId);
+        final ImageData imageData = this.imageReadPlatformService.retrieveImage(clientName, clientId);
 
         // TODO: Need a better way of determining image type
         String imageDataURISuffix = ContentRepositoryUtils.IMAGE_DATA_URI_SUFFIX.JPEG.getValue();
@@ -131,11 +124,12 @@ public class ImagesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_OCTET_STREAM })
-    public Response downloadClientImage(@PathParam("clientId") final Long clientId, @QueryParam("maxWidth") final Integer maxWidth,
-            @QueryParam("maxHeight") final Integer maxHeight, @QueryParam("output") String output) {
+    public Response downloadClientImage(@PathParam("clients") final String clientName, @PathParam("clientId") final Long clientId,
+            @QueryParam("maxWidth") final Integer maxWidth, @QueryParam("maxHeight") final Integer maxHeight,
+            @QueryParam("output") String output) {
 
         this.context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
-        final ImageData imageData = this.imageReadPlatformService.retrieveClientImage(clientId);
+        final ImageData imageData = this.imageReadPlatformService.retrieveImage(clientName, clientId);
 
         final ResponseBuilder response = Response.ok(imageData.getContentOfSize(maxWidth, maxHeight));
         String dispositionType = "inline_octet".equals(output) ? "inline" : "attachment";
@@ -155,10 +149,10 @@ public class ImagesApiResource {
     @PUT
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") final Long fileSize,
-            @FormDataParam("file") final InputStream inputStream, @FormDataParam("file") final FormDataContentDisposition fileDetails,
-            @FormDataParam("file") final FormDataBodyPart bodyPart) {
-        return addNewClientImage(clientId, fileSize, inputStream, fileDetails, bodyPart);
+    public String updateClientImage(@PathParam("clients") final String clientName, @PathParam("clientId") final Long clientId,
+            @HeaderParam("Content-Length") final Long fileSize, @FormDataParam("file") final InputStream inputStream,
+            @FormDataParam("file") final FormDataContentDisposition fileDetails, @FormDataParam("file") final FormDataBodyPart bodyPart) {
+        return addNewClientImage(clientName, clientId, fileSize, inputStream, fileDetails, bodyPart);
     }
 
     /**
@@ -170,15 +164,16 @@ public class ImagesApiResource {
     @PUT
     @Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateClientImage(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
-        return addNewClientImage(clientId, jsonRequestBody);
+    public String updateClientImage(@PathParam("clients") final String clientName, @PathParam("clientId") final Long clientId,
+            final String jsonRequestBody) {
+        return addNewClientImage(clientName, clientId, jsonRequestBody);
     }
 
     @DELETE
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteClientImage(@PathParam("clientId") final Long clientId) {
-        this.imageWritePlatformService.deleteClientImage(clientId);
+    public String deleteClientImage(@PathParam("clients") final String clientName, @PathParam("clientId") final Long clientId) {
+        this.imageWritePlatformService.deleteImage(clientName, clientId);
         return this.toApiJsonSerializer.serialize(new CommandProcessingResult(clientId));
     }
 

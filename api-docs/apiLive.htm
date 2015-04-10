@@ -16766,6 +16766,252 @@ Request Body:
 					</code>
 				</div>
 			</div>
+			
+			<a id="staff_images" name="staff_images" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Staff Images</h3>
+					<p>The current API provides support for the addition of a single
+					image for a Staff Member<br/>
+					Allowed formats: JPEG (.jpg or .jpeg), GIF (.gif) and PNG (.png)
+					</p>
+					<p> The API supports two different Approaches for manipulating Staff Images
+					 <ul>
+					 	<li><a href="http://en.wikipedia.org/wiki/Data_URI_scheme" target="_blank"> Data URI's: </a>
+					  For easier manipulation by Javascript clients etc in supported Browsers.
+					 	</li>
+					 	<li><a href="http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.2">
+						Multi-part form data:</a>
+					  Images can be uploaded using Multi part forms and downloaded as regular binary files
+					 	</li>
+					 <br/>
+				</div>
+			</div>
+			<a id="staff_images_create" name="staff_images_create" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Upload an Image for a Staff (Data URI)</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/staff/{staffId}/images
+					</code>
+					<code class="method-request">
+POST staff/1/images
+Content-Type: text/plain
+Request Body:
+data:image/png;base64,iVBORw0KGgoAA
+AANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD///+l2Z/dAAAAM0l
+EQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4Ug9C9zwz3gVLMDA/A6
+P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 1,
+  "changes": {},
+  "resourceIdentifier": "1"
+}
+					</code>
+				</div>
+			</div>		
+			
+			<a id="staff_images_create_form" name="staff_images_create_form" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Upload an Image for a Staff Member (Multi-part Form data)</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>file
+							</td>
+						</tr>
+					</table>
+					<p>
+						The form should contain a required named body part with the
+						name "file". <br/> <br/>
+						If you are using a HTML form, a snippet like
+						<small> &lt;input type="file" name="file"&gt;&lt;/input&gt; </small>
+						can be used for uploading the image file
+					</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/staff/{staffId}/images
+					</code>
+					<code class="method-request">
+POST staff/1/images
+Content-Type: multipart/form-data
+Request Body: <i>Not shown</i>
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 1,
+  "changes": {},
+  "resourceIdentifier": "1"
+}
+					</code>
+				</div>
+			</div>
+			
+<a id="staff_images_retrieve" name="staff_images_retrieve"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Get Staff Image (DATA URI)</h4>
+					<p>Optional arguments are identical to those of <a href="#client_images_retrieve_binary">Get Staff Image (Binary file)</a></p>
+					<p>Example Requests:</p>
+					<div class=apiClick>staff/1/images</div>
+					<br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/staff/{staffId}/images
+Accept: text/plain
+
+					</code>
+					<code class="method-response">
+data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJ
+bWFnZVJlYWR5ccllPAAAAJ1JREFUeNpi+P//PwMIA4E9EG8E4idQDGLbw+WhiiqA+D8OXAFVAzbp
+DxBvB2JLIGaGYkuoGEjOhhFIHAbij0BdPgxYACMj42ogJQpifwBiXSDeC8JIbt4LxSC5DyxQjTeB
++BeaYb+Q5EBOAVutCzMJHUNNPADzzDokiYdAfAmJvwLkGeTgWQfyKZICS6hYBTwc0QL8ORSjBDhA
+gAEAOg13B6R/SAgAAAAASUVORK5CYII=
+					</code>
+				</div>
+			</div>		
+
+<a id="staff_images_retrieve_binary" name="staff_images_retrieve_binary"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Get Staff Image (Binary file)</h4>
+					<h5>Optional Arguments</h5>
+					<dl class="argument-list">
+						<dt>output</dt>
+						<dd>
+							String <span>optional</span> one of <span>octet or inline_octet</span>
+						</dd>
+						<dd>The query parameter overrides the <span>"Accept" Header</span> and sets the Media Type to "application/octet-stream" <br/>
+						<span><b>octet :</b></span> Returns the image binary file as an attachment. The <span>Content-Disposition</span> header is set to <span>attachment;filename=somefile.ext</span> <br/>
+						<span><b>inline_octet :</b></span>The <span>Content-Disposition</span> header is set to <span>inline;filename=somefile.ext</span>
+						</dd>
+						<dt>maxWidth</dt>
+						<dd>
+							Integer <span>optional</span>
+						</dd>
+						<dd>Triggers resizing of the image to the defined width</dd>
+
+						<dt>maxHeight</dt>
+						<dd>
+						<dd>
+							Integer <span>optional</span>
+						</dd>
+						</dd>
+						<dd>Triggers resizing of the image to the defined height</dd>
+
+
+					</dl>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/staff/{staffId}/images
+Accept: application/octet-stream
+					</code>
+					<code class="method-request">
+POST staff/1/images
+Accept: application/octet-stream
+					</code>
+					<code class="method-response">
+<i>Not shown</i>: The corresponding binary (image) file
+					</code>
+				</div>
+			</div>
+			
+			<a id="staff_images_update" name="staff_images_update" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Staff Image (Data URI)</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/staff/{staffId}/images
+					</code>
+					<code class="method-request">
+PUT staff/1/images
+Content-Type: text/plain
+Request Body:
+data:image/png;base64,iVBORw0KGgoAA
+AANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD///+l2Z/dAAAAM0l
+EQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4Ug9C9zwz3gVLMDA/A6
+P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 1,
+  "changes": {},
+  "resourceIdentifier": "1"
+}
+					</code>
+				</div>
+			</div>
+			
+			<a id="staff_images_update_form" name="staff_images_update_form" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Staff Member Image (Multi-part Form data)</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>file
+							</td>
+						</tr>
+					</table>
+					<p>
+						The form should contain a required named body part with the
+						name "file". <br/> <br/>
+						If you are using a HTML form, a snippet like
+						<small> &lt;input type="file" name="file"&gt;&lt;/input&gt; </small>
+						can be used for uploading the image file
+					</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/staff/{staffId}/images
+					</code>
+					<code class="method-request">
+PUT staff/1/images
+Content-Type: multipart/form-data
+Request Body: <i>Not shown</i>
+					</code>
+				</div>
+			</div>
+			
+			<a id="staff_images_delete" name="staff_images_delete" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete a Staff Image</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/staff/{staffId}/images
+					</code>
+					<code class="method-request">
+DELETE staff/1/images
+Content-Type: application/json
+No Request Body:
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 1,
+  "changes": {},
+  "resourceIdentifier": "1"
+}
+					</code>
+				</div>
+			</div>
 
 <!--Charges section starts here-->
 <a id="charges" name="charges" class="old-syle-anchor">&nbsp;</a>
@@ -36249,6 +36495,26 @@ No Request Body:
 					<td></td>
 					<td><a href="#staff_retrieve">Retrieve a Staff Member</a></td>
 					<td><a href="#staff_update">Update a Staff Member</a></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td><a href="#staff_images">Staff Images</a></td>
+					<td>staff/{staffId}/images</td>
+					<td><a href="#staff_images_create">Upload an Image for a Staff Member (as  DATA URI)</a></td>
+					<td><a href="#staff_images_retrieve">Get Staff Image (DATA URI)</a></td>
+					<td><a href="#staff_images_update">Update Staff Image (DATA URI)</a></td>
+					<td><a href="#staff_images_delete">Delete Staff Image</a></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td><a href="#staff_images_create_form">
+						Upload an Image for a Staff Member (Multi-part form data)</a>
+					</td>
+					<td><a href="#staff_images_retrieve_binary">Get Staff Image (Binary file)</a></td>
+					<td><a href="#staff_images_update_form">
+						Update Staff Image (Multi-part form data)</a>
+					</td>
 					<td></td>
 				</tr>
 				<tr>

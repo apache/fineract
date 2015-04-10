@@ -9,19 +9,13 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.infrastructure.documentmanagement.domain.Image;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
@@ -66,6 +60,10 @@ public class Staff extends AbstractPersistable<Long> {
     @ManyToOne
     @JoinColumn(name = "organisational_role_parent_staff_id", nullable = true)
     private Staff organisationalRoleParentStaff;
+
+    @OneToOne(optional = true)
+    @JoinColumn(name = "image_id", nullable = true)
+    private Image image;
 
     public static Staff fromJson(final Office staffOffice, final JsonCommand command) {
 
@@ -196,6 +194,12 @@ public class Staff extends AbstractPersistable<Long> {
             this.joiningDate = newValue.toDate();
         }
 
+        final String imageIdParamName = "imageId";
+        if (command.isChangeInLongParameterNamed(imageIdParamName, this.image.getId())) {
+            final Long newValue = command.longValueOfParameterNamed(officeIdParamName);
+            actualChanges.put(officeIdParamName, newValue);
+        }
+
         return actualChanges;
     }
 
@@ -241,5 +245,13 @@ public class Staff extends AbstractPersistable<Long> {
 
     public Office office() {
         return this.office;
+    }
+
+    public void setImage(Image image) {
+        this.image = image;
+    }
+
+    public Image getImage() {
+        return this.image;
     }
 }

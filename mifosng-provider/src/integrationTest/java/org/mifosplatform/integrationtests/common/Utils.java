@@ -11,6 +11,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -70,6 +74,16 @@ public class Utils {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
         if (jsonAttributeToGetBack == null) { return (T) json; }
         return (T) from(json).get(jsonAttributeToGetBack);
+    }
+
+    public static String performGetTextResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+                                                final String getURL){
+        return given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
+    }
+
+    public static byte[] performGetBinaryResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+                                                final String getURL){
+        return given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asByteArray();
     }
 
     public static <T> T performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
