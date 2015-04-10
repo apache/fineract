@@ -118,6 +118,12 @@ public class SchedulerJobHelper {
 
                 ArrayList<HashMap> jobHistoryData = getSchedulerJobHistory(this.requestSpec, this.responseSpec, jobId.toString());
 
+                // print error associated with recent job failure (if any)
+                System.out.println("Job run error message (printed only if the job fails: "
+                        + jobHistoryData.get(jobHistoryData.size() - 1).get("jobRunErrorMessage"));
+                System.out.println("Job failure error log (printed only if the job fails: "
+                        + jobHistoryData.get(jobHistoryData.size() - 1).get("jobRunErrorLog"));
+
                 // Verifying the Status of the Recently executed Scheduler Job
                 Assert.assertEquals("Verifying Last Scheduler Job Status", "success",
                         jobHistoryData.get(jobHistoryData.size() - 1).get("status"));
