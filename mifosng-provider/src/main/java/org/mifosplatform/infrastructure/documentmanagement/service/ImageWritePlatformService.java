@@ -14,11 +14,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface ImageWritePlatformService {
 
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CREATE_CLIENTIMAGE')")
-    CommandProcessingResult saveOrUpdateClientImage(Long clientId, String imageName, InputStream inputStream, Long fileSize);
+    CommandProcessingResult saveOrUpdateImage(String clientName, Long clientId, String imageName, InputStream inputStream, Long fileSize);
 
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CREATE_CLIENTIMAGE')")
-    CommandProcessingResult saveOrUpdateClientImage(Long clientId, Base64EncodedImage encodedImage);
+    CommandProcessingResult saveOrUpdateImage(String clientName, Long clientId, Base64EncodedImage encodedImage);
 
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'DELETE_CLIENTIMAGE')")
-    CommandProcessingResult deleteClientImage(Long clientId);
+    CommandProcessingResult deleteImage(String clientName, Long clientId);
 }

@@ -44,4 +44,7 @@ public class StaffRepositoryWrapper {
         if (!hierarchy.startsWith(staffhierarchy)) { throw new StaffNotFoundException(staffId); }
         return staff;
     }
+    public void save(final Staff staff){
+        this.repository.save(staff);
+    }
 }

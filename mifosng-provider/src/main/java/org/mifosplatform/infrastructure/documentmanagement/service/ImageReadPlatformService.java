@@ -9,6 +9,6 @@ import org.mifosplatform.infrastructure.documentmanagement.data.ImageData;
 
 public interface ImageReadPlatformService {
 
-    ImageData retrieveClientImage(Long clientId);
+    ImageData retrieveImage(String clientName, Long clientId);
 
 }
