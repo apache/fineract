@@ -11,10 +11,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,7 +23,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
 
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.path.json.JsonPath;

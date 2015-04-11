@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -23,6 +24,25 @@ import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidation
 
 public class DateUtils {
 
+    public static DateTimeZone getDateTimeZoneOfTenant() {
+        final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+        DateTimeZone zone = null;
+        if (tenant != null) {
+            zone = DateTimeZone.forID(tenant.getTimezoneId());
+            TimeZone.getTimeZone(tenant.getTimezoneId());
+        }
+        return zone;
+    }
+
+    public static TimeZone getTimeZoneOfTenant() {
+        final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+        TimeZone zone = null;
+        if (tenant != null) {
+            zone = TimeZone.getTimeZone(tenant.getTimezoneId());
+        }
+        return zone;
+    }
+
     public static Date getDateOfTenant() {
         return getLocalDateOfTenant().toDateTimeAtStartOfDay().toDate();
     }
@@ -31,39 +51,31 @@ public class DateUtils {
 
         LocalDate today = new LocalDate();
 
-        final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
-
-        if (tenant != null) {
-            final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
-            if (zone != null) {
-                today = new LocalDate(zone);
-            }
+        final DateTimeZone zone = getDateTimeZoneOfTenant();
+        if (zone != null) {
+            today = new LocalDate(zone);
         }
 
         return today;
     }
-    
+
     public static LocalDateTime getLocalDateTimeOfTenant() {
-    	
-	    LocalDateTime today = new LocalDateTime();
-	
-	    final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
-	
-	    if (tenant != null) {
-	        final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
-	        if (zone != null) {
-	            today = new LocalDateTime(zone);
-	        }
-	    }
-	
-	    return today;
+
+        LocalDateTime today = new LocalDateTime();
+
+        final DateTimeZone zone = getDateTimeZoneOfTenant();
+        if (zone != null) {
+            today = new LocalDateTime(zone);
+        }
+
+        return today;
     }
-    	
 
     public static LocalDate parseLocalDate(final String stringDate, final String pattern) {
 
         try {
             final DateTimeFormatter dateStringFormat = DateTimeFormat.forPattern(pattern);
+            dateStringFormat.withZone(getDateTimeZoneOfTenant());
             final DateTime dateTime = dateStringFormat.parseDateTime(stringDate);
             return dateTime.toLocalDate();
         } catch (final IllegalArgumentException e) {
@@ -78,6 +90,7 @@ public class DateUtils {
 
     public static String formatToSqlDate(final Date date) {
         final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        df.setTimeZone(getTimeZoneOfTenant());
         final String formattedSqlDate = df.format(date);
         return formattedSqlDate;
     }
