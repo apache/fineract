@@ -9,12 +9,12 @@ import java.io.InputStream;
 
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
+import org.mifosplatform.infrastructure.documentmanagement.api.ImagesApiResource.ENTITY_TYPE_FOR_IMAGES;
 import org.mifosplatform.infrastructure.documentmanagement.contentrepository.ContentRepository;
 import org.mifosplatform.infrastructure.documentmanagement.contentrepository.ContentRepositoryFactory;
 import org.mifosplatform.infrastructure.documentmanagement.domain.Image;
 import org.mifosplatform.infrastructure.documentmanagement.domain.ImageRepository;
 import org.mifosplatform.infrastructure.documentmanagement.domain.StorageType;
-import org.mifosplatform.infrastructure.documentmanagement.exception.InvalidImageTypeException;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.Client;
@@ -33,7 +33,8 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
 
     @Autowired
     public ImageWritePlatformServiceJpaRepositoryImpl(final ContentRepositoryFactory documentStoreFactory,
-                                                      final ClientRepositoryWrapper clientRepositoryWrapper, final ImageRepository imageRepository, StaffRepositoryWrapper staffRepositoryWrapper) {
+            final ClientRepositoryWrapper clientRepositoryWrapper, final ImageRepository imageRepository,
+            StaffRepositoryWrapper staffRepositoryWrapper) {
         this.contentRepositoryFactory = documentStoreFactory;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
         this.imageRepository = imageRepository;
@@ -42,15 +43,9 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
 
     @Transactional
     @Override
-    public CommandProcessingResult saveOrUpdateImage(String clientName, final Long clientId, final String imageName, final InputStream inputStream,
-            final Long fileSize) {
-        Object owner = null;
-        if (IMAGE_TYPE.CLIENTS.toString().equals(clientName)){
-            owner =this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
-        } else if (IMAGE_TYPE.STAFF.toString().equals(clientName)) {
-            owner = this.staffRepositoryWrapper.findOneWithNotFoundDetection(clientId);
-        }
-        deletePreviousImage(owner);
+    public CommandProcessingResult saveOrUpdateImage(String entityName, final Long clientId, final String imageName,
+            final InputStream inputStream, final Long fileSize) {
+        Object owner = deletePreviousImage(entityName, clientId);
 
         final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository();
         final String imageLocation = contentRepository.saveImage(inputStream, clientId, imageName, fileSize);
@@ -59,15 +54,8 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
 
     @Transactional
     @Override
-    public CommandProcessingResult saveOrUpdateImage(String clientName, final Long clientId, final Base64EncodedImage encodedImage) {
-        Object owner = null;
-        if (IMAGE_TYPE.CLIENTS.toString().equals(clientName)){
-            owner =this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
-        } else if (IMAGE_TYPE.STAFF.toString().equals(clientName)) {
-            owner = this.staffRepositoryWrapper.findOneWithNotFoundDetection(clientId);
-        }
-        deletePreviousImage(owner);
-        validateImageType(clientName);
+    public CommandProcessingResult saveOrUpdateImage(String entityName, final Long clientId, final Base64EncodedImage encodedImage) {
+        Object owner = deletePreviousImage(entityName, clientId);
 
         final ContentRepository contenRepository = this.contentRepositoryFactory.getRepository();
         final String imageLocation = contenRepository.saveImage(encodedImage, clientId, "image");
@@ -77,18 +65,17 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
 
     @Transactional
     @Override
-    public CommandProcessingResult deleteImage(String clientName, final Long clientId) {
-
+    public CommandProcessingResult deleteImage(String entityName, final Long clientId) {
         Object owner = null;
         Image image = null;
-        if (IMAGE_TYPE.CLIENTS.toString().equals(clientName)){
-            owner =this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+        if (ENTITY_TYPE_FOR_IMAGES.CLIENTS.toString().equals(entityName)) {
+            owner = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
             Client client = (Client) owner;
             image = client.getImage();
             client.setImage(null);
             this.clientRepositoryWrapper.save(client);
 
-        } else if (IMAGE_TYPE.STAFF.toString().equals(clientName)) {
+        } else if (ENTITY_TYPE_FOR_IMAGES.STAFF.toString().equals(entityName)) {
             owner = this.staffRepositoryWrapper.findOneWithNotFoundDetection(clientId);
             Staff staff = (Staff) owner;
             image = staff.getImage();
@@ -107,36 +94,42 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
         return new CommandProcessingResult(clientId);
     }
 
-    private void deletePreviousImage(final Object owner) {
+    /**
+     * @param entityName
+     * @param entityId
+     * @return
+     */
+    private Object deletePreviousImage(String entityName, final Long entityId) {
+        Object owner = null;
         Image image = null;
-        Long clientId=null;
-        if (owner instanceof Client){
-            Client client = (Client) owner;
+        if (ENTITY_TYPE_FOR_IMAGES.CLIENTS.toString().equals(entityName)) {
+            Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId);
             image = client.getImage();
-            clientId = client.getId();
-        } else if (owner instanceof Staff){
-            Staff staff = (Staff) owner;
+            owner = client;
+        } else if (ENTITY_TYPE_FOR_IMAGES.STAFF.toString().equals(entityName)) {
+            Staff staff = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId);
             image = staff.getImage();
-            clientId = staff.getId();
+            owner = staff;
         }
         if (image != null) {
             final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(StorageType.fromInt(image
                     .getStorageType()));
-            contentRepository.deleteImage(clientId, image.getLocation());
+            contentRepository.deleteImage(entityId, image.getLocation());
         }
+        return owner;
     }
 
     private CommandProcessingResult updateImage(final Object owner, final String imageLocation, final StorageType storageType) {
         Image image = null;
-        Long clientId=null;
-        if (owner instanceof Client){
+        Long clientId = null;
+        if (owner instanceof Client) {
             Client client = (Client) owner;
             image = client.getImage();
             clientId = client.getId();
             image = createImage(image, imageLocation, storageType);
             client.setImage(image);
             this.clientRepositoryWrapper.save(client);
-        } else if (owner instanceof Staff){
+        } else if (owner instanceof Staff) {
             Staff staff = (Staff) owner;
             image = staff.getImage();
             clientId = staff.getId();
@@ -158,26 +151,5 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
         }
         return image;
     }
-
-    private void validateImageType(final String clientName) {
-        if (!checkValidEntityType(clientName)) { throw new InvalidImageTypeException(
-                clientName); }
-    }
-
-    private static boolean checkValidEntityType(final String entityType) {
-        for (final IMAGE_TYPE entities : IMAGE_TYPE.values()) {
-            if (entities.name().equalsIgnoreCase(entityType)) { return true; }
-        }
-        return false;
-    }
-
-    /*** Entities for document Management **/
-    public static enum IMAGE_TYPE {
-        STAFF,CLIENTS;
-
-        @Override
-        public String toString() {
-            return name().toString().toLowerCase();
-        }}
 
 }

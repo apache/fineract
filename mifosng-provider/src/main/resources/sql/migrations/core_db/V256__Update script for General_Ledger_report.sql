@@ -19,4 +19,10 @@ set report_parameter_name='branch'
 where report_id=(select stretchy_report.id from stretchy_report where report_name='GeneralLedgerReport')
 and parameter_id=(select p.id from stretchy_parameter p where parameter_name='OfficeIdSelectOne');
 
-INSERT INTO `m_permission` VALUES ('report', 'READ_GeneralLedgerReport', 'GeneralLedgerReport', 'READ', 0);
+INSERT INTO `m_permission` (
+`grouping` ,
+`code` ,
+`entity_name` ,
+`action_name` ,
+`can_maker_checker`
+) VALUES ('report', 'READ_General Ledger Report', 'General Ledger Report', 'READ', 0);

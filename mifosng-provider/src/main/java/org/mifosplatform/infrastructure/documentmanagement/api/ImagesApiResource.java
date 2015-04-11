@@ -7,7 +7,16 @@ package org.mifosplatform.infrastructure.documentmanagement.api;
 
 import java.io.InputStream;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -19,6 +28,7 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils;
 import org.mifosplatform.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils.IMAGE_FILE_EXTENSION;
 import org.mifosplatform.infrastructure.documentmanagement.data.ImageData;
+import org.mifosplatform.infrastructure.documentmanagement.exception.InvalidEntityTypeForImageManagementException;
 import org.mifosplatform.infrastructure.documentmanagement.service.ImageReadPlatformService;
 import org.mifosplatform.infrastructure.documentmanagement.service.ImageWritePlatformService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -32,11 +42,7 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
 
-/**
- * TODO Vishwas need to change the url to entity/entityId/images to make the
- * image management API's generic for other entities like staff etc
- **/
-@Path("{clients}/{clientId}/images")
+@Path("{entity}/{entityId}/images")
 @Component
 @Scope("singleton")
 public class ImagesApiResource {
@@ -61,17 +67,17 @@ public class ImagesApiResource {
     @POST
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String addNewClientImage(@PathParam("clients") final String clientName, @PathParam("clientId") final Long clientId,
+    public String addNewClientImage(@PathParam("entity") final String entityName, @PathParam("entityId") final Long entityId,
             @HeaderParam("Content-Length") final Long fileSize, @FormDataParam("file") final InputStream inputStream,
             @FormDataParam("file") final FormDataContentDisposition fileDetails, @FormDataParam("file") final FormDataBodyPart bodyPart) {
-
+        validateEntityTypeforImage(entityName);
         // TODO: vishwas might need more advances validation (like reading magic
         // number) for handling malicious clients
         // and clients not setting mime type
         ContentRepositoryUtils.validateClientImageNotEmpty(fileDetails.getFileName());
         ContentRepositoryUtils.validateImageMimeType(bodyPart.getMediaType().toString());
 
-        final CommandProcessingResult result = this.imageWritePlatformService.saveOrUpdateImage(clientName, clientId,
+        final CommandProcessingResult result = this.imageWritePlatformService.saveOrUpdateImage(entityName, entityId,
                 fileDetails.getFileName(), inputStream, fileSize);
 
         return this.toApiJsonSerializer.serialize(result);
@@ -83,12 +89,12 @@ public class ImagesApiResource {
     @POST
     @Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String addNewClientImage(@PathParam("clients") final String clientName, @PathParam("clientId") final Long clientId,
+    public String addNewClientImage(@PathParam("entity") final String entityName, @PathParam("entityId") final Long entityId,
             final String jsonRequestBody) {
-
+        validateEntityTypeforImage(entityName);
         final Base64EncodedImage base64EncodedImage = ContentRepositoryUtils.extractImageFromDataURL(jsonRequestBody);
 
-        final CommandProcessingResult result = this.imageWritePlatformService.saveOrUpdateImage(clientName, clientId, base64EncodedImage);
+        final CommandProcessingResult result = this.imageWritePlatformService.saveOrUpdateImage(entityName, entityId, base64EncodedImage);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -99,15 +105,20 @@ public class ImagesApiResource {
     @GET
     @Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces({ MediaType.TEXT_PLAIN })
-    public Response retrieveImage(@PathParam("clients") final String clientName, @PathParam("clientId") final Long clientId,
+    public Response retrieveImage(@PathParam("entity") final String entityName, @PathParam("entityId") final Long entityId,
             @QueryParam("maxWidth") final Integer maxWidth, @QueryParam("maxHeight") final Integer maxHeight,
             @QueryParam("output") final String output) {
-        if (output != null && (output.equals("octet") || output.equals("inline_octet"))) { return downloadClientImage(clientName, clientId,
+        validateEntityTypeforImage(entityName);
+        if (ENTITY_TYPE_FOR_IMAGES.CLIENTS.toString().equalsIgnoreCase(entityName)) {
+            this.context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
+        } else if (ENTITY_TYPE_FOR_IMAGES.STAFF.toString().equalsIgnoreCase(entityName)) {
+            this.context.authenticatedUser().validateHasReadPermission("STAFFIMAGE");
+        }
+
+        if (output != null && (output.equals("octet") || output.equals("inline_octet"))) { return downloadClientImage(entityName, entityId,
                 maxWidth, maxHeight, output); }
 
-        this.context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
-
-        final ImageData imageData = this.imageReadPlatformService.retrieveImage(clientName, clientId);
+        final ImageData imageData = this.imageReadPlatformService.retrieveImage(entityName, entityId);
 
         // TODO: Need a better way of determining image type
         String imageDataURISuffix = ContentRepositoryUtils.IMAGE_DATA_URI_SUFFIX.JPEG.getValue();
@@ -124,12 +135,17 @@ public class ImagesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_OCTET_STREAM })
-    public Response downloadClientImage(@PathParam("clients") final String clientName, @PathParam("clientId") final Long clientId,
+    public Response downloadClientImage(@PathParam("entity") final String entityName, @PathParam("entityId") final Long entityId,
             @QueryParam("maxWidth") final Integer maxWidth, @QueryParam("maxHeight") final Integer maxHeight,
             @QueryParam("output") String output) {
+        validateEntityTypeforImage(entityName);
+        if (ENTITY_TYPE_FOR_IMAGES.CLIENTS.toString().equalsIgnoreCase(entityName)) {
+            this.context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
+        } else if (ENTITY_TYPE_FOR_IMAGES.STAFF.toString().equalsIgnoreCase(entityName)) {
+            this.context.authenticatedUser().validateHasReadPermission("STAFFIMAGE");
+        }
 
-        this.context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
-        final ImageData imageData = this.imageReadPlatformService.retrieveImage(clientName, clientId);
+        final ImageData imageData = this.imageReadPlatformService.retrieveImage(entityName, entityId);
 
         final ResponseBuilder response = Response.ok(imageData.getContentOfSize(maxWidth, maxHeight));
         String dispositionType = "inline_octet".equals(output) ? "inline" : "attachment";
@@ -149,10 +165,10 @@ public class ImagesApiResource {
     @PUT
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateClientImage(@PathParam("clients") final String clientName, @PathParam("clientId") final Long clientId,
+    public String updateClientImage(@PathParam("entity") final String entityName, @PathParam("entityId") final Long entityId,
             @HeaderParam("Content-Length") final Long fileSize, @FormDataParam("file") final InputStream inputStream,
             @FormDataParam("file") final FormDataContentDisposition fileDetails, @FormDataParam("file") final FormDataBodyPart bodyPart) {
-        return addNewClientImage(clientName, clientId, fileSize, inputStream, fileDetails, bodyPart);
+        return addNewClientImage(entityName, entityId, fileSize, inputStream, fileDetails, bodyPart);
     }
 
     /**
@@ -164,17 +180,39 @@ public class ImagesApiResource {
     @PUT
     @Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateClientImage(@PathParam("clients") final String clientName, @PathParam("clientId") final Long clientId,
+    public String updateClientImage(@PathParam("entity") final String entityName, @PathParam("entityId") final Long entityId,
             final String jsonRequestBody) {
-        return addNewClientImage(clientName, clientId, jsonRequestBody);
+        return addNewClientImage(entityName, entityId, jsonRequestBody);
     }
 
     @DELETE
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteClientImage(@PathParam("clients") final String clientName, @PathParam("clientId") final Long clientId) {
-        this.imageWritePlatformService.deleteImage(clientName, clientId);
-        return this.toApiJsonSerializer.serialize(new CommandProcessingResult(clientId));
+    public String deleteClientImage(@PathParam("entity") final String entityName, @PathParam("entityId") final Long entityId) {
+        validateEntityTypeforImage(entityName);
+        this.imageWritePlatformService.deleteImage(entityName, entityId);
+        return this.toApiJsonSerializer.serialize(new CommandProcessingResult(entityId));
+    }
+
+    /*** Entities for document Management **/
+    public static enum ENTITY_TYPE_FOR_IMAGES {
+        STAFF, CLIENTS;
+
+        @Override
+        public String toString() {
+            return name().toString().toLowerCase();
+        }
+    }
+
+    private void validateEntityTypeforImage(final String entityName) {
+        if (!checkValidEntityType(entityName)) { throw new InvalidEntityTypeForImageManagementException(entityName); }
+    }
+
+    private static boolean checkValidEntityType(final String entityType) {
+        for (final ENTITY_TYPE_FOR_IMAGES entities : ENTITY_TYPE_FOR_IMAGES.values()) {
+            if (entities.name().equalsIgnoreCase(entityType)) { return true; }
+        }
+        return false;
     }
 
 }
