@@ -194,12 +194,6 @@ public class Staff extends AbstractPersistable<Long> {
             this.joiningDate = newValue.toDate();
         }
 
-        final String imageIdParamName = "imageId";
-        if (command.isChangeInLongParameterNamed(imageIdParamName, this.image.getId())) {
-            final Long newValue = command.longValueOfParameterNamed(officeIdParamName);
-            actualChanges.put(officeIdParamName, newValue);
-        }
-
         return actualChanges;
     }
 
