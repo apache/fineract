@@ -1,1 +1,0 @@
-ALTER TABLE `m_staff` ADD COLUMN `image_id` BIGINT(20) NULL;
