@@ -18,3 +18,5 @@ update stretchy_report_parameter
 set report_parameter_name='branch'
 where report_id=(select stretchy_report.id from stretchy_report where report_name='GeneralLedgerReport')
 and parameter_id=(select p.id from stretchy_parameter p where parameter_name='OfficeIdSelectOne');
+
+INSERT INTO `m_permission` VALUES ('report', 'READ_GeneralLedgerReport', 'GeneralLedgerReport', 'READ', 0);
