@@ -1020,7 +1020,7 @@ public class ClientLoanIntegrationTest {
             List<HashMap> charges, final String savingsId, String principal, final String repaymentStrategy, final int month) {
         System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
 
-        Calendar fourMonthsfromNowCalendar = Calendar.getInstance();
+        Calendar fourMonthsfromNowCalendar = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         fourMonthsfromNowCalendar.add(Calendar.MONTH, month);
         DateFormat dateFormat = new SimpleDateFormat("dd MMMMMM yyyy");
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());

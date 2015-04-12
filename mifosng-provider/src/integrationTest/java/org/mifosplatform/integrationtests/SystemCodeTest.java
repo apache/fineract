@@ -160,7 +160,7 @@ public class SystemCodeTest {
     @Test
     public void testCodeValuesNotAssignedToTable() {
 
-        final String codeName = "Marital Status1";
+        final String codeName = Utils.randomNameGenerator("Marital Status1", 10);
 
         final String codeValue1 = "Married1";
         final String codeValue2 = "Unmarried1";
