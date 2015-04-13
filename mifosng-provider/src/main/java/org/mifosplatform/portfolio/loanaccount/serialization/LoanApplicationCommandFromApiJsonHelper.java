@@ -840,18 +840,23 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         if (variationArray != null) {
             for (int i = 0; i < variationArray.size(); i++) {
                 final JsonObject jsonObject1 = variationArray.get(i).getAsJsonObject();
-                LocalDate date1 = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName, jsonObject1,
-                        dateFormat, locale);
+                if(jsonObject1.has(LoanApiConstants.disbursementDateParameterName)){
+                    LocalDate date1 = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName, jsonObject1,
+                            dateFormat, locale);
 
-                for (int j = i + 1; j < variationArray.size(); j++) {
-                    final JsonObject jsonObject2 = variationArray.get(j).getAsJsonObject();
-                    LocalDate date2 = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName,
-                            jsonObject2, dateFormat, locale);
-                    if (date1.isAfter(date2)) {
-                        baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
-                                .failWithCode(LoanApiConstants.DISBURSEMENT_DATES_NOT_IN_ORDER);
+                    for (int j = i + 1; j < variationArray.size(); j++) {
+                        final JsonObject jsonObject2 = variationArray.get(j).getAsJsonObject();
+                        if(jsonObject2.has(LoanApiConstants.disbursementDateParameterName)){
+                            LocalDate date2 = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName,
+                                    jsonObject2, dateFormat, locale);
+                            if (date1.isAfter(date2)) {
+                                baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
+                                        .failWithCode(LoanApiConstants.DISBURSEMENT_DATES_NOT_IN_ORDER);
+                            }
+                        }                        
                     }
                 }
+                
             }
         }
     }
@@ -875,33 +880,37 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 int i = 0;
                 do {
                     final JsonObject jsonObject = variationArray.get(i).getAsJsonObject();
-                    LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                            LoanApiConstants.disbursementDateParameterName, jsonObject, dateFormat, locale);
-                    if (expectedDisbursementDates.contains(expectedDisbursementDate)) {
-                        baseDataValidator.reset().parameter(LoanApiConstants.disbursementDateParameterName)
-                                .failWithCode(LoanApiConstants.DISBURSEMENT_DATE_UNIQUE_ERROR);
-                    }
-                    if (expectedDisbursementDate.isBefore(expectedDisbursement)) {
+                    if (jsonObject.has(LoanApiConstants.disbursementDateParameterName)
+                            && jsonObject.has(LoanApiConstants.disbursementPrincipalParameterName)) {
+                        LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(
+                                LoanApiConstants.disbursementDateParameterName, jsonObject, dateFormat, locale);
+                        if (expectedDisbursementDates.contains(expectedDisbursementDate)) {
+                            baseDataValidator.reset().parameter(LoanApiConstants.disbursementDateParameterName)
+                                    .failWithCode(LoanApiConstants.DISBURSEMENT_DATE_UNIQUE_ERROR);
+                        }
+                        if (expectedDisbursementDate.isBefore(expectedDisbursement)) {
+                            baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
+                                    .failWithCode(LoanApiConstants.DISBURSEMENT_DATE_BEFORE_ERROR);
+                        }
+                        expectedDisbursementDates.add(expectedDisbursementDate);
+
+                        BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalNamed(
+                                LoanApiConstants.disbursementPrincipalParameterName, jsonObject, locale);
                         baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
-                                .failWithCode(LoanApiConstants.DISBURSEMENT_DATE_BEFORE_ERROR);
-                    }
-                    expectedDisbursementDates.add(expectedDisbursementDate);
-                    BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalNamed(
-                            LoanApiConstants.disbursementPrincipalParameterName, jsonObject, locale);
-                    baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
-                            .parameterAtIndexArray(LoanApiConstants.disbursementPrincipalParameterName, i).value(principal).notBlank();
-                    if (principal != null) {
-                        tatalDisbursement = tatalDisbursement.add(principal);
-                    }
+                                .parameterAtIndexArray(LoanApiConstants.disbursementPrincipalParameterName, i).value(principal).notBlank();
+                        if (principal != null) {
+                            tatalDisbursement = tatalDisbursement.add(principal);
+                        }
 
-                    baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
-                            .parameterAtIndexArray(LoanApiConstants.disbursementDateParameterName, i).value(expectedDisbursementDate)
-                            .notNull();
+                        baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
+                                .parameterAtIndexArray(LoanApiConstants.disbursementDateParameterName, i).value(expectedDisbursementDate)
+                                .notNull();
 
-                    if (expectedDisbursement.equals(expectedDisbursementDate)) {
-                        isFirstinstallmentOnExpectedDisbursementDate = true;
-                    }
-                    i++;
+                        if (expectedDisbursement.equals(expectedDisbursementDate)) {
+                            isFirstinstallmentOnExpectedDisbursementDate = true;
+                        }
+                        
+                    }i++;
                 } while (i < variationArray.size());
                 if (!isFirstinstallmentOnExpectedDisbursementDate) {
                     baseDataValidator.reset().parameter(LoanApiConstants.disbursementDateParameterName)

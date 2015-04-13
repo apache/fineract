@@ -1564,56 +1564,60 @@ public class Loan extends AbstractPersistable<Long> {
                 int i = 0;
                 do {
                     final JsonObject jsonObject = disbursementDataArray.get(i).getAsJsonObject();
-                    Date expectedDisbursementDate = null;
-                    BigDecimal principal = null;
-                    LocalDate date = null;
-                    Long id = null;
                     if (jsonObject.has(LoanApiConstants.disbursementDateParameterName)
-                            && jsonObject.get(LoanApiConstants.disbursementDateParameterName) != null
-                            && jsonObject.get(LoanApiConstants.disbursementDateParameterName).isJsonPrimitive()) {
+                            && jsonObject.has(LoanApiConstants.disbursementPrincipalParameterName)) {
+                        Date expectedDisbursementDate = null;
+                        BigDecimal principal = null;
+                        LocalDate date = null;
+                        Long id = null;
+                        if (jsonObject.get(LoanApiConstants.disbursementDateParameterName) != null
+                                && jsonObject.get(LoanApiConstants.disbursementDateParameterName).isJsonPrimitive()) {
 
-                        final JsonPrimitive primitive = jsonObject.get(LoanApiConstants.disbursementDateParameterName).getAsJsonPrimitive();
-                        final String valueAsString = primitive.getAsString();
-                        if (StringUtils.isNotBlank(valueAsString)) {
-                            date = JsonParserHelper.convertFrom(valueAsString, LoanApiConstants.disbursementDateParameterName, dateFormat,
-                                    locale);
+                            final JsonPrimitive primitive = jsonObject.get(LoanApiConstants.disbursementDateParameterName)
+                                    .getAsJsonPrimitive();
+                            final String valueAsString = primitive.getAsString();
+                            if (StringUtils.isNotBlank(valueAsString)) {
+                                date = JsonParserHelper.convertFrom(valueAsString, LoanApiConstants.disbursementDateParameterName,
+                                        dateFormat, locale);
+                            }
                         }
-                    }
-                    if (date != null) {
-                        expectedDisbursementDate = date.toDate();
-                    }
+                        if (date != null) {
+                            expectedDisbursementDate = date.toDate();
+                        }
 
-                    if (jsonObject.has(LoanApiConstants.disbursementPrincipalParameterName)
-                            && jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).isJsonPrimitive()
-                            && StringUtils.isNotBlank((jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).getAsString()))) {
-                        principal = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementPrincipalParameterName).getAsBigDecimal();
-                    }
-                    if (jsonObject.has(LoanApiConstants.disbursementIdParameterName)
-                            && jsonObject.get(LoanApiConstants.disbursementIdParameterName).isJsonPrimitive()
-                            && StringUtils.isNotBlank((jsonObject.get(LoanApiConstants.disbursementIdParameterName).getAsString()))) {
-                        id = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementIdParameterName).getAsLong();
-                    }
-                    if (id != null) {
-                        LoanDisbursementDetails loanDisbursementDetail = fetchLoanDisbursementsById(id);
-                        list.remove(id);
-                        if (loanDisbursementDetail.actualDisbursementDate() == null) {
+                        if (jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).isJsonPrimitive()
+                                && StringUtils.isNotBlank((jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName)
+                                        .getAsString()))) {
+                            principal = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementPrincipalParameterName)
+                                    .getAsBigDecimal();
+                        }
+                        if (jsonObject.has(LoanApiConstants.disbursementIdParameterName)
+                                && jsonObject.get(LoanApiConstants.disbursementIdParameterName).isJsonPrimitive()
+                                && StringUtils.isNotBlank((jsonObject.get(LoanApiConstants.disbursementIdParameterName).getAsString()))) {
+                            id = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementIdParameterName).getAsLong();
+                        }
+                        if (id != null) {
+                            LoanDisbursementDetails loanDisbursementDetail = fetchLoanDisbursementsById(id);
+                            list.remove(id);
+                            if (loanDisbursementDetail.actualDisbursementDate() == null) {
+                                Date actualDisbursementDate = null;
+                                LoanDisbursementDetails disbursementDetails = new LoanDisbursementDetails(expectedDisbursementDate,
+                                        actualDisbursementDate, principal);
+                                if (!loanDisbursementDetail.equals(disbursementDetails)) {
+                                    loanDisbursementDetail.copy(disbursementDetails);
+                                    actualChanges.put("disbursementDetailId", id);
+                                    actualChanges.put("recalculateLoanSchedule", true);
+                                }
+                            }
+                        } else {
                             Date actualDisbursementDate = null;
                             LoanDisbursementDetails disbursementDetails = new LoanDisbursementDetails(expectedDisbursementDate,
                                     actualDisbursementDate, principal);
-                            if (!loanDisbursementDetail.equals(disbursementDetails)) {
-                                loanDisbursementDetail.copy(disbursementDetails);
-                                actualChanges.put("disbursementDetailId", id);
-                                actualChanges.put("recalculateLoanSchedule", true);
-                            }
+                            disbursementDetails.updateLoan(this);
+                            this.disbursementDetails.add(disbursementDetails);
+                            actualChanges.put(LoanApiConstants.disbursementDataParameterName, expectedDisbursementDate + "-" + principal);
+                            actualChanges.put("recalculateLoanSchedule", true);
                         }
-                    } else {
-                        Date actualDisbursementDate = null;
-                        LoanDisbursementDetails disbursementDetails = new LoanDisbursementDetails(expectedDisbursementDate,
-                                actualDisbursementDate, principal);
-                        disbursementDetails.updateLoan(this);
-                        this.disbursementDetails.add(disbursementDetails);
-                        actualChanges.put(LoanApiConstants.disbursementDataParameterName, expectedDisbursementDate + "-" + principal);
-                        actualChanges.put("recalculateLoanSchedule", true);
                     }
                     i++;
                 } while (i < disbursementDataArray.size());
