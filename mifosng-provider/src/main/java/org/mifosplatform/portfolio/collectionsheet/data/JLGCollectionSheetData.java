@@ -12,6 +12,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
+import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 
 /**
@@ -25,11 +26,11 @@ public class JLGCollectionSheetData {
     private final Collection<SavingsProductData> savingsProducts;
     private final Collection<JLGGroupData> groups;
     private final List<EnumOptionData> attendanceTypeOptions;
-    private final Collection<CodeValueData> paymentTypeOptions;
+    private final Collection<PaymentTypeData> paymentTypeOptions;
 
     public static JLGCollectionSheetData instance(final LocalDate date, final Collection<LoanProductData> loanProducts,
             final Collection<JLGGroupData> groups, final List<EnumOptionData> attendanceTypeOptions,
-            final Collection<CodeValueData> paymentTypeOptions) {
+            final Collection<PaymentTypeData> paymentTypeOptions) {
         return new JLGCollectionSheetData(date, loanProducts, null, groups, attendanceTypeOptions, paymentTypeOptions);
     }
 
@@ -42,7 +43,7 @@ public class JLGCollectionSheetData {
 
     private JLGCollectionSheetData(LocalDate dueDate, Collection<LoanProductData> loanProducts,
             Collection<SavingsProductData> savingsProducts, Collection<JLGGroupData> groups, List<EnumOptionData> attendanceTypeOptions,
-            final Collection<CodeValueData> paymentTypeOptions) {
+            final Collection<PaymentTypeData> paymentTypeOptions) {
         this.dueDate = dueDate;
         this.loanProducts = loanProducts;
         this.savingsProducts = savingsProducts;
