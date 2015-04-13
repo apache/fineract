@@ -52,6 +52,8 @@ import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.meeting.attendance.service.AttendanceDropdownReadPlatformService;
 import org.mifosplatform.portfolio.meeting.attendance.service.AttendanceEnumerations;
 import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
+import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
+import org.mifosplatform.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +77,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     private final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService;
     private final MandatorySavingsCollectionsheetExtractor mandatorySavingsExtractor = new MandatorySavingsCollectionsheetExtractor();
     private final CodeValueReadPlatformService codeValueReadPlatformService;
+    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
 
     @Autowired
     public CollectionSheetReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -82,7 +85,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final CollectionSheetGenerateCommandFromApiJsonDeserializer collectionSheetGenerateCommandFromApiJsonDeserializer,
             final CalendarRepositoryWrapper calendarRepositoryWrapper,
             final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService) {
+            final CodeValueReadPlatformService codeValueReadPlatformService, final PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
         this.context = context;
         this.centerReadPlatformService = centerReadPlatformService;
         this.namedParameterjdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
@@ -91,6 +94,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         this.calendarRepositoryWrapper = calendarRepositoryWrapper;
         this.attendanceDropdownReadPlatformService = attendanceDropdownReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
+        this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
     }
 
     /*
@@ -105,8 +109,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         boolean firstTime = true;
         Long prevGroupId = null;
         Long prevClientId = null;
-        final Collection<CodeValueData> paymentOptions = this.codeValueReadPlatformService
-                .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
+        final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
+                
 
         final List<JLGGroupData> jlgGroupsData = new ArrayList<>();
         List<JLGClientData> clientsData = new ArrayList<>();

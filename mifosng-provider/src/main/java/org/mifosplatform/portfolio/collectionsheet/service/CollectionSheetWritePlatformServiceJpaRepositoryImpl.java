@@ -24,6 +24,7 @@ import org.mifosplatform.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.mifosplatform.portfolio.meeting.service.MeetingWritePlatformService;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetailAssembler;
+import org.mifosplatform.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.mifosplatform.portfolio.savings.domain.DepositAccountAssembler;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransaction;
@@ -42,6 +43,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
     private final DepositAccountAssembler accountAssembler;
     private final DepositAccountWritePlatformService accountWritePlatformService;
     private final PaymentDetailAssembler paymentDetailAssembler;
+    private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
 
     @Autowired
     public CollectionSheetWritePlatformServiceJpaRepositoryImpl(final LoanWritePlatformService loanWritePlatformService,
@@ -49,7 +51,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
             final CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer bulkDisbursalCommandFromApiJsonDeserializer,
             final CollectionSheetTransactionDataValidator transactionDataValidator,
             final MeetingWritePlatformService meetingWritePlatformService, final DepositAccountAssembler accountAssembler,
-            final DepositAccountWritePlatformService accountWritePlatformService, final PaymentDetailAssembler paymentDetailAssembler) {
+            final DepositAccountWritePlatformService accountWritePlatformService, final PaymentDetailAssembler paymentDetailAssembler, final PaymentDetailWritePlatformService paymentDetailWritePlatformService) {
         this.loanWritePlatformService = loanWritePlatformService;
         this.bulkRepaymentCommandFromApiJsonDeserializer = bulkRepaymentCommandFromApiJsonDeserializer;
         this.bulkDisbursalCommandFromApiJsonDeserializer = bulkDisbursalCommandFromApiJsonDeserializer;
@@ -58,6 +60,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
         this.accountAssembler = accountAssembler;
         this.accountWritePlatformService = accountWritePlatformService;
         this.paymentDetailAssembler = paymentDetailAssembler;
+        this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
     }
 
     @Override
@@ -74,7 +77,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
             changes.put("note", noteText);
         }
 
-        final PaymentDetail paymentDetail = this.paymentDetailAssembler.fetchPaymentDetail(command.parsedJson().getAsJsonObject());
+        final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         changes.putAll(updateBulkReapayments(command, paymentDetail));
 
         changes.putAll(updateBulkDisbursals(command));
