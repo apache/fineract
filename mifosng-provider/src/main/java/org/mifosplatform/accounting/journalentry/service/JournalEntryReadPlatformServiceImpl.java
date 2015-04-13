@@ -121,7 +121,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             if (associationParametersData.isTransactionDetailsRequired()) {
                 sb.append(" left join m_loan_transaction as lt on journalEntry.loan_transaction_id = lt.id ")
                         .append(" left join m_savings_account_transaction as st on journalEntry.savings_transaction_id = st.id ")
-                        .append(" left join m_payment_detail as pd on lt.payment_detail_id = pd.id or st.payment_detail_id = pd.id")
+                        .append(" left join m_payment_detail as pd on lt.payment_detail_id = pd.id or st.payment_detail_id = pd.id or journalEntry.payment_details_id = pd.id")
                         .append(" left join m_payment_type as pt on pt.id = pd.payment_type_id ")
                         .append(" left join m_note as note on lt.id = note.loan_transaction_id or st.id = note.savings_account_transaction_id ");
             }
