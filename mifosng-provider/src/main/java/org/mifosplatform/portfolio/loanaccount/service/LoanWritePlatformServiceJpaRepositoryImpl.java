@@ -130,6 +130,7 @@ import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentEx
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerUnassignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
+import org.mifosplatform.portfolio.loanaccount.exception.LoanMultiDisbursementException;
 import org.mifosplatform.portfolio.loanaccount.guarantor.service.GuarantorDomainService;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
@@ -2584,6 +2585,21 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
+    private void validateForAddAndDeleteTranche(final Loan loan){
+        
+        BigDecimal totalDisbursedAmount = BigDecimal.ZERO;
+        Collection<LoanDisbursementDetails> loanDisburseDetails = loan.getDisbursementDetails();
+        for (LoanDisbursementDetails disbursementDetails : loanDisburseDetails) {
+            if(disbursementDetails.actualDisbursementDate() != null){
+                totalDisbursedAmount = totalDisbursedAmount.add(disbursementDetails.principal());
+            }
+        }
+        if(totalDisbursedAmount.compareTo(loan.getApprovedPrincipal()) == 0){
+            final String errorMessage = "loan.disbursement.cannot.be.a.edited";
+            throw new LoanMultiDisbursementException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+        }    
+    }
+    
     @Override
     @Transactional
     public CommandProcessingResult addAndDeleteLoanDisburseDetails(Long loanId, JsonCommand command) {
@@ -2592,7 +2608,17 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         checkClientOrGroupActive(loan);
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
         LocalDate expectedDisbursementDate = loan.getExpectedDisbursedOnLocalDate();
+        if(!loan.loanProduct().isMultiDisburseLoan()){
+            final String errorMessage = "loan.product.does.not.support.multiple.disbursals";
+            throw new LoanMultiDisbursementException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+        }
+        if(loan.isSubmittedAndPendingApproval()){
+            final String errorMessage = "loan.account.should.be.approved";
+            throw new LoanMultiDisbursementException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+        }
         validateMultiDisbursementData(command, expectedDisbursementDate);
+        
+        this.validateForAddAndDeleteTranche(loan);
 
         loan.updateDisbursementDetails(command, actualChanges);
 
