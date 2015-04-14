@@ -2612,8 +2612,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final String errorMessage = "loan.product.does.not.support.multiple.disbursals";
             throw new LoanMultiDisbursementException(LoanApiConstants.disbursementDataParameterName, errorMessage);
         }
-        if(loan.isSubmittedAndPendingApproval()){
-            final String errorMessage = "loan.account.should.be.approved";
+        if(loan.isSubmittedAndPendingApproval() || loan.isClosed() || loan.isClosedWrittenOff() || loan.status().isClosedObligationsMet() ||
+                loan.status().isOverpaid()){
+            final String errorMessage = "cannot.modify.tranches.if.loan.is.pendingapproval.closed.overpaid.writtenoff";
             throw new LoanMultiDisbursementException(LoanApiConstants.disbursementDataParameterName, errorMessage);
         }
         validateMultiDisbursementData(command, expectedDisbursementDate);

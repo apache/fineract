@@ -885,7 +885,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
             }
 
-            this.loanRepository.save(loan);
+            saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
