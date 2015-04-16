@@ -26,3 +26,7 @@ INSERT INTO `m_permission` (
 `action_name` ,
 `can_maker_checker`
 ) VALUES ('report', 'READ_General Ledger Report', 'General Ledger Report', 'READ', 0);
+
+update `stretchy_parameter` 
+set `parameter_sql` = 'select id aid,name aname\r\nfrom acc_gl_account'
+where stretchy_parameter.parameter_name='SelectGLAccountNO';
