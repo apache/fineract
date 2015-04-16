@@ -73,7 +73,7 @@ Releases
 15.03.RELEASE
 =============
 
-This feature release ships new functionality like Collection sheets for Individual loans and Client fees along with performance improvements around batch jobs and various enhancements to the community app.
+This feature release ships new functionality like Collection sheets for Individual loans along with performance improvements around batch jobs and various enhancements to the community app.
 
 Enhamcements to the the loans module include the ability to round off installments, fix EMI's for non-tranche loans, improved flexility for pre-closure, ability to specify which loan product attributes may be overridden at an indivdual account level and greater flexibility around editing tranche definitions during loan approval and disbursal.
 
@@ -98,6 +98,13 @@ New Features & Improvements
  - [MIFOSX-1875] - Enforce strict password policies in the system
  - [MIFOSX-1824] - Ability to allow user to change Tranche amount during loan approval stage.
  - [MIFOSX-1897] - As an accountant I want to be able to see all journals related to a specific loan or savings
+ - [MIFOSX-1850] - Recurring deposits without maturity date/amount
+ - [MIFOSX-916] - Ability for Client Loan repayments rounding off to the multiples of 10s or 100s
+ - [MIFOSX-1159] - Allow Opening Balances to be set for GL (General Ledger) Accounts
+ - [MIFOSX-1842] - Improvements to disbursal of tranche loans
+ - [MIFOSX-1480] - Create an API for associating and diassociating groups from centers
+ - [MIFOSX-1877] - Allow end-user to reconfigure working-days for the institution
+ - [MIFOSX-1947] - Add API to allow capturing Staff images
  - [MIFOSX-1670] - Require modification/deleting of created Role
  - [MIFOSX-1817] - Teller Cash Management - capture Currency for Settle and Allocate transactions
  - [MIFOSX-1624] - Ability to writeoff loan on the same date of last transaction.
@@ -136,6 +143,10 @@ Bugs
  - [MIFOSX-1942] - Edit Tranche option in community app takes you to the wrong page
  - [MIFOSX-1943] - UI issue in Loan Tranche Details tab - Edit tranche icon is not displayed
  - [MIFOSX-451] - Not able to close the loan earlier than its scheduled date.
+ - [MIFOSX-1759] - Manage Group under center and Manage member under Group pages are not working as expected
+ - [MIFOSX-1766] - Issues related to Assign and Unassign staff for Savings account
+ - [MIFOSX-1941] - Incorrect GL Account running balance figures
+ - [MIFOSX-1948] - Period accruals jobs does not handle Timezones correctly
 
 
 Community app
@@ -179,6 +190,13 @@ Community app
  - [MIFOSX-1544] - While creating a Group under center should not allowed to ask for office again
  - [MIFOSX-1822] - Create Sub ledger account is not working as expected
  - [MIFOSX-1900] - List Keyboard shortcuts
+ - [MIFOSX-1960] - Add ID and External ID in Center Listing page
+ - [MIFOSX-1256] - Filter charge and overdue charges drop-down lists to display only valid charges (matching currency)
+ - [MIFOSX-1899] - Payment Details for "Frequent Postings" are not stored in the database.
+ - [MIFOSX-1876] - Client attendance details submitted in collection sheet is not getting updated in database
+ - [MIFOSX-1954] - Start date and end date got interchanged while creating the teller
+ - [MIFOSX-1958] - Payment details is not getting displayed if any transaction detail is viewed from Search Journal entry screen
+
 
 1.26.0.RELEASE
 =============
