@@ -53,7 +53,7 @@ public class ServerWithMariaDB4jApplication {
 					System.getProperty("file.separator") + "community-app" +
 					System.getProperty("file.separator") + "index.html");
 			URI distURI = URI.create("https://localhost:8443/mifosng-provider" +
-					"/apps/community-app/dist/community-app/index.html?baseApiUrl=https://localhost:8443" +
+					"/apps/community-app/index.html?baseApiUrl=https://localhost:8443" +
 					"&tenantIdentifier=default#/");
 
 			// apps/community-app/app/index.html
