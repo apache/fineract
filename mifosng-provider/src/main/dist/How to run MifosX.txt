@@ -11,7 +11,7 @@ along with all the other source files inside a (sub-folder of) the "apps" folder
 directory from where runmifosx.bat/.sh is launched.  The web UI front-end is then accessible
 under mifosng-provider/apps - for example:
 
-    https://localhost:8443/mifosng-provider/apps/community-app/dist/community-app/index.html?baseApiUrl=https://localhost:8443&tenantIdentifier=default#/home
+    https://localhost:8443/mifosng-provider/apps/community-app/index.html?baseApiUrl=https://localhost:8443&tenantIdentifier=default#/home
 
 We hope you'll have an amazing experience working with MifosX!
 
