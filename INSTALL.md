@@ -49,7 +49,7 @@ $ ./runmifosx.sh
 
 ## 2. Amazon Public AMI
 
-  Use AWS Wizard to launch instance by using this link: <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=ap-southeast-1#launchAmi=ami-909bb3c2" title="Latest Mifos Platform Public AMI">Mifos Platform AMI (ami-909bb3c2)</a>
+  Use AWS Wizard to launch instance by using this link: <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=ap-southeast-1#launchAmi=ami-145d6046" title="Latest Mifos Platform Public AMI">Mifos Platform AMI (ami-145d6046)</a>
 
   *Note:* Read through the following as you step through the AWS Wizard
   
