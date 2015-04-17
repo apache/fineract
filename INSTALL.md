@@ -35,7 +35,7 @@ The three ways to get up and running with mifos platform is:
 
 ## 1. Launch script automatic out-of-the box setup
 
-Important : Automatic setup is currently broken due, please follow the instructions for **Manual Installation** instead. Fore details of the issue, refer comments at https://mifosforge.jira.com/browse/MIFOSX-1756
+Important : Automatic setup is currently broken due, please follow the instructions for **Manual Installation** instead. For details of the issue, refer comments at https://mifosforge.jira.com/browse/MIFOSX-1756
 
 The Mifos release artifact contains two launch scripts with names starting with "**runmifosx**". One of them (the one with the *.bat* file extension) is used to launch the platform on a Windows machine while the other (which has the *.sh* file extension) is used to launch the platform on Mac OS X and Linux. Just double-click on the respective script (depending on your OS) and voila! you have your own Mifos X platform running locally on your computer. 
 
