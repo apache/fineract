@@ -23,8 +23,10 @@ import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.organisation.workingdays.domain.RepaymentRescheduleType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
+import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
 import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
@@ -145,13 +147,24 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         final Map<LocalDate, Money> latePaymentMap = new HashMap<>();
         final List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>();
         LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+        Boolean extendTermForDailyRepayments = false;
+        if(holidayDetailDTO.getWorkingDays().getExtendTermForDailyRepayments() == true &&
+                loanApplicationTerms.getRepaymentPeriodFrequencyType() == PeriodFrequencyType.DAYS &&
+                loanApplicationTerms.getRepaymentEvery() == 1){
+            holidayDetailDTO.getWorkingDays().setRepaymentReschedulingType(RepaymentRescheduleType.MOVE_TO_NEXT_WORKING_DAY.getValue());
+            extendTermForDailyRepayments = true;
+        }
         while (!outstandingBalance.isZero() || !disburseDetailMap.isEmpty()) {
 
             actualRepaymentDate = this.scheduledDateGenerator.generateNextRepaymentDate(actualRepaymentDate, loanApplicationTerms,
                     isFirstRepayment);
-            isFirstRepayment = false;
+            isFirstRepayment = false;            
             LocalDate scheduledDueDate = this.scheduledDateGenerator.adjustRepaymentDate(actualRepaymentDate, loanApplicationTerms,
                     holidayDetailDTO);
+
+            if(extendTermForDailyRepayments){
+                actualRepaymentDate = scheduledDueDate;
+            }
 
             // calculated interest start date for the period
             periodStartDateApplicableForInterest = calculateInterestStartDateForPeriod(loanApplicationTerms, periodStartDate,

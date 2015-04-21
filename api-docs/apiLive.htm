@@ -13972,6 +13972,12 @@ Request Body:
 							</td>
 						</tr>
 						<tr class=alt>
+							<td>extendTermForDailyRepayments</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Extend the term for loans following a daily repayment schedule.Expects boolean value true/false</td>
+						</tr>
+						<tr class=alt>
 							<td>locale</td>
 						</tr>
 						<tr>
@@ -14080,6 +14086,7 @@ GET https://DomainName/api/v1/workingdays
             "code": "RepaymentRescheduleType.move.to.next.working.day",
             "value": "move to next working day"
         }
+        "extendTermForDailyRepayments" : true
     }
 ]
 				</code>
@@ -14094,7 +14101,7 @@ GET https://DomainName/api/v1/workingdays
 						<td><div class="mifosXHeading2">Mandatory Fields</div></td>
 					</tr>
 					<tr class=alt>
-						<td>recurrence,repaymentRescheduleType,locale</td>
+						<td>recurrence,repaymentRescheduleType,extendTermForDailyRepayments,locale</td>
 					</tr>
 				</table>
 			</div>
@@ -14109,7 +14116,8 @@ Request Body:
 {
 "recurrence": "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,SU",
 "locale": "en",
-"repaymentsRescheduledType": 4
+"repaymentsRescheduledType": 4,
+"extendTermForDailyRepayments": false
 }
 				</code>
 				<code class="method-response">

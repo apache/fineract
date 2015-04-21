@@ -39,7 +39,8 @@ public class WorkingDaysReadPlatformServiceImpl implements WorkingDaysReadPlatfo
 
         public WorkingDaysMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(100);
-            sqlBuilder.append("w.id as id,w.recurrence as recurrence,w.repayment_rescheduling_enum as status_enum  ");
+            sqlBuilder.append("w.id as id,w.recurrence as recurrence,w.repayment_rescheduling_enum as status_enum,");
+            sqlBuilder.append("w.extend_term_daily_repayments as extendTermForDailyRepayments ");
             sqlBuilder.append("from m_working_days w");
 
             this.schema = sqlBuilder.toString();
@@ -55,8 +56,9 @@ public class WorkingDaysReadPlatformServiceImpl implements WorkingDaysReadPlatfo
             final String recurrence = rs.getString("recurrence");
             final Integer statusEnum = JdbcSupport.getInteger(rs, "status_enum");
             final EnumOptionData status = WorkingDaysEnumerations.workingDaysStatusType(statusEnum);
+            final Boolean extendTermForDailyRepayments = rs.getBoolean("extendTermForDailyRepayments");
 
-            return new WorkingDaysData(id, recurrence, status);
+            return new WorkingDaysData(id, recurrence, status,extendTermForDailyRepayments);
         }
     }
 
@@ -78,6 +80,6 @@ public class WorkingDaysReadPlatformServiceImpl implements WorkingDaysReadPlatfo
                 WorkingDaysEnumerations.repaymentRescheduleType(RepaymentRescheduleType.MOVE_TO_NEXT_WORKING_DAY),
                 WorkingDaysEnumerations.repaymentRescheduleType(RepaymentRescheduleType.MOVE_TO_NEXT_REPAYMENT_MEETING_DAY),
                 WorkingDaysEnumerations.repaymentRescheduleType(RepaymentRescheduleType.MOVE_TO_PREVIOUS_WORKING_DAY));
-        return new WorkingDaysData(null, null, null, repaymentRescheduleOptions);
+        return new WorkingDaysData(null, null, null, repaymentRescheduleOptions, null);
     }
 }
