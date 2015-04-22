@@ -370,7 +370,8 @@ public class LoanProductData {
                 multiDisburseLoan, maxTrancheCount, outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType,
                 daysInYearType, isInterestRecalculationEnabled, interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment,
                 holdGuaranteeFunds, productGuaranteeData, principalThresholdForLastInstallment,
-                accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount, installmentAmountInMultiplesOf, loanProductConfigurableAttributes);
+                accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount, installmentAmountInMultiplesOf,
+                loanProductConfigurableAttributes);
 
     }
 
@@ -827,9 +828,11 @@ public class LoanProductData {
         final Long id = null;
         final Long loanId = null;
         final CalendarData calendarData = null;
+        final CalendarData compoundingCalendarData = null;
         return new LoanInterestRecalculationData(id, loanId, getInterestRecalculationCompoundingType(), getRescheduleStrategyType(),
                 calendarData, getRecalculationRestFrequencyType(), getRecalculationRestFrequencyInterval(),
-                getRecalculationRestFrequencyDate());
+                getRecalculationRestFrequencyDate(), compoundingCalendarData, getRecalculationCompoundingFrequencyType(),
+                getRecalculationCompoundingFrequencyInterval(), getRecalculationCompoundingFrequencyDate());
     }
 
     private EnumOptionData getRescheduleStrategyType() {
@@ -847,20 +850,35 @@ public class LoanProductData {
         return null;
     }
 
-    public EnumOptionData getRecalculationRestFrequencyType() {
+    private EnumOptionData getRecalculationRestFrequencyType() {
         if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationRestFrequencyType(); }
         return null;
     }
 
-    public Integer getRecalculationRestFrequencyInterval() {
+    private Integer getRecalculationRestFrequencyInterval() {
         if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationRestFrequencyInterval(); }
+        return null;
+    }
+
+    private LocalDate getRecalculationCompoundingFrequencyDate() {
+        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationCompoundingFrequencyDate(); }
+        return null;
+    }
+
+    private EnumOptionData getRecalculationCompoundingFrequencyType() {
+        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationCompoundingFrequencyType(); }
+        return null;
+    }
+
+    private Integer getRecalculationCompoundingFrequencyInterval() {
+        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationCompoundingFrequencyInterval(); }
         return null;
     }
 
     public boolean canDefineInstallmentAmount() {
         return this.canDefineInstallmentAmount;
     }
-    
+
     public LoanProductConfigurableAttributes getloanProductConfigurableAttributes() {
         return this.allowAttributeOverrides;
     }

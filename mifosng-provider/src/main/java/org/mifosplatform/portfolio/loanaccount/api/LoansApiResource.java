@@ -226,8 +226,7 @@ public class LoansApiResource {
     public String template(@QueryParam("clientId") final Long clientId, @QueryParam("groupId") final Long groupId,
             @QueryParam("productId") final Long productId, @QueryParam("templateType") final String templateType,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
-            @DefaultValue("false") @QueryParam("activeOnly") final boolean onlyActive,
-            @Context final UriInfo uriInfo) {
+            @DefaultValue("false") @QueryParam("activeOnly") final boolean onlyActive, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
@@ -336,13 +335,23 @@ public class LoansApiResource {
 
         LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveOne(loanId);
         if (loanBasicDetails.isInterestRecalculationEnabled()) {
-            Collection<CalendarData> interestRecalculationCalendarDatas = this.calendarReadPlatformService.retrieveCalendarsByEntity(
-                    loanBasicDetails.getInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_DETAIL.getValue(), null);
+            Collection<CalendarData> interestRecalculationCalendarDatas = this.calendarReadPlatformService
+                    .retrieveCalendarsByEntity(loanBasicDetails.getInterestRecalculationDetailId(),
+                            CalendarEntityType.LOAN_RECALCULATION_REST_DETAIL.getValue(), null);
             CalendarData calendarData = null;
             if (!CollectionUtils.isEmpty(interestRecalculationCalendarDatas)) {
                 calendarData = interestRecalculationCalendarDatas.iterator().next();
             }
-            loanBasicDetails = LoanAccountData.withInterestRecalculationCalendarData(loanBasicDetails, calendarData);
+
+            Collection<CalendarData> interestRecalculationCompoundingCalendarDatas = this.calendarReadPlatformService
+                    .retrieveCalendarsByEntity(loanBasicDetails.getInterestRecalculationDetailId(),
+                            CalendarEntityType.LOAN_RECALCULATION_COMPOUNDING_DETAIL.getValue(), null);
+            CalendarData compoundingCalendarData = null;
+            if (!CollectionUtils.isEmpty(interestRecalculationCompoundingCalendarDatas)) {
+                compoundingCalendarData = interestRecalculationCompoundingCalendarDatas.iterator().next();
+            }
+            loanBasicDetails = LoanAccountData.withInterestRecalculationCalendarData(loanBasicDetails, calendarData,
+                    compoundingCalendarData);
         }
 
         Collection<LoanTransactionData> loanRepayments = null;

@@ -20,11 +20,18 @@ public class LoanInterestRecalculationData {
     private final EnumOptionData recalculationRestFrequencyType;
     private final Integer recalculationRestFrequencyInterval;
     private final LocalDate recalculationRestFrequencyDate;
+    private final EnumOptionData recalculationCompoundingFrequencyType;
+    private final Integer recalculationCompoundingFrequencyInterval;
+    private final LocalDate recalculationCompoundingFrequencyDate;
+    @SuppressWarnings("unused")
+    private final CalendarData compoundingCalendarData;
 
     public LoanInterestRecalculationData(final Long id, final Long loanId, final EnumOptionData interestRecalculationCompoundingType,
             final EnumOptionData rescheduleStrategyType, final CalendarData calendarData,
             final EnumOptionData recalculationRestFrequencyType, final Integer recalculationRestFrequencyInterval,
-            final LocalDate recalculationRestFrequencyDate) {
+            final LocalDate recalculationRestFrequencyDate, final CalendarData compoundingCalendarData,
+            final EnumOptionData recalculationCompoundingFrequencyType, final Integer recalculationCompoundingFrequencyInterval,
+            final LocalDate recalculationCompoundingFrequencyDate) {
         this.id = id;
         this.loanId = loanId;
         this.interestRecalculationCompoundingType = interestRecalculationCompoundingType;
@@ -33,14 +40,20 @@ public class LoanInterestRecalculationData {
         this.recalculationRestFrequencyType = recalculationRestFrequencyType;
         this.recalculationRestFrequencyInterval = recalculationRestFrequencyInterval;
         this.recalculationRestFrequencyDate = recalculationRestFrequencyDate;
+        this.recalculationCompoundingFrequencyType = recalculationCompoundingFrequencyType;
+        this.recalculationCompoundingFrequencyInterval = recalculationCompoundingFrequencyInterval;
+        this.recalculationCompoundingFrequencyDate = recalculationCompoundingFrequencyDate;
+        this.compoundingCalendarData = compoundingCalendarData;
     }
 
     public static LoanInterestRecalculationData withCalendarData(final LoanInterestRecalculationData recalculationData,
-            final CalendarData calendarData) {
+            final CalendarData calendarData, CalendarData compoundingCalendarData) {
         return new LoanInterestRecalculationData(recalculationData.id, recalculationData.loanId,
                 recalculationData.interestRecalculationCompoundingType, recalculationData.rescheduleStrategyType, calendarData,
                 recalculationData.recalculationRestFrequencyType, recalculationData.recalculationRestFrequencyInterval,
-                recalculationData.recalculationRestFrequencyDate);
+                recalculationData.recalculationRestFrequencyDate, compoundingCalendarData,
+                recalculationData.recalculationCompoundingFrequencyType, recalculationData.recalculationCompoundingFrequencyInterval,
+                recalculationData.recalculationCompoundingFrequencyDate);
     }
 
     public Long getId() {

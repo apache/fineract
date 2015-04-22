@@ -252,7 +252,7 @@ public class MeetingsApiResource {
             break;
             case INVALID:
             break;
-            case LOAN_RECALCULATION_DETAIL:
+            case LOAN_RECALCULATION_REST_DETAIL:
             break;
             default:
             break;

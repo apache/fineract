@@ -16,7 +16,8 @@ public enum CalendarEntityType {
     LOANS(3, "calendarEntityType.loans"), //
     CENTERS(4, "calendarEntityType.centers"), //
     SAVINGS(5, "calendarEntityType.savings"), //
-    LOAN_RECALCULATION_DETAIL(6, "calendarEntityType.loan.recalculation.detail");
+    LOAN_RECALCULATION_REST_DETAIL(6, "calendarEntityType.loan.recalculation.rest.detail"), //
+    LOAN_RECALCULATION_COMPOUNDING_DETAIL(7, "calendarEntityType.loan.recalculation.compounding.detail");
 
     private final Integer value;
     private final String code;

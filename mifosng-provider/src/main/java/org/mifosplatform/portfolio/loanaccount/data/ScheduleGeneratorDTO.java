@@ -17,37 +17,37 @@ public class ScheduleGeneratorDTO {
     final LocalDate calculatedRepaymentsStartingFromDate;
     final HolidayDetailDTO holidayDetailDTO;
     final CalendarInstance calendarInstanceForInterestRecalculation;
+    final CalendarInstance compoundingCalendarInstance;
     LocalDate recalculateFrom;
     final Long overdurPenaltyWaitPeriod;
-    LocalDate lastTransactionDate;
 
     public ScheduleGeneratorDTO(final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency applicationCurrency,
             final LocalDate calculatedRepaymentsStartingFromDate, final HolidayDetailDTO holidayDetailDTO,
-            final CalendarInstance calendarInstanceForInterestRecalculation) {
+            final CalendarInstance calendarInstanceForInterestRecalculation, final CalendarInstance compoundingCalendarInstance) {
 
         this.loanScheduleFactory = loanScheduleFactory;
         this.applicationCurrency = applicationCurrency;
         this.calculatedRepaymentsStartingFromDate = calculatedRepaymentsStartingFromDate;
         this.calendarInstanceForInterestRecalculation = calendarInstanceForInterestRecalculation;
+        this.compoundingCalendarInstance = compoundingCalendarInstance;
         this.recalculateFrom = null;
         this.overdurPenaltyWaitPeriod = null;
-        this.lastTransactionDate = null;
         this.holidayDetailDTO = holidayDetailDTO;
 
     }
 
     public ScheduleGeneratorDTO(final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency applicationCurrency,
             final LocalDate calculatedRepaymentsStartingFromDate, final HolidayDetailDTO holidayDetailDTO,
-            final CalendarInstance calendarInstanceForInterestRecalculation, final LocalDate recalculateFrom,
-            final Long overdurPenaltyWaitPeriod, final LocalDate lastTransactionDate) {
+            final CalendarInstance calendarInstanceForInterestRecalculation, final CalendarInstance compoundingCalendarInstance,
+            final LocalDate recalculateFrom, final Long overdurPenaltyWaitPeriod) {
 
         this.loanScheduleFactory = loanScheduleFactory;
         this.applicationCurrency = applicationCurrency;
         this.calculatedRepaymentsStartingFromDate = calculatedRepaymentsStartingFromDate;
         this.calendarInstanceForInterestRecalculation = calendarInstanceForInterestRecalculation;
+        this.compoundingCalendarInstance = compoundingCalendarInstance;
         this.recalculateFrom = recalculateFrom;
         this.overdurPenaltyWaitPeriod = overdurPenaltyWaitPeriod;
-        this.lastTransactionDate = lastTransactionDate;
         this.holidayDetailDTO = holidayDetailDTO;
 
     }
@@ -84,10 +84,6 @@ public class ScheduleGeneratorDTO {
         return penaltyWaitPeriod;
     }
 
-    public LocalDate getLastTransactionDate() {
-        return this.lastTransactionDate;
-    }
-
     public HolidayDetailDTO getHolidayDetailDTO() {
         return this.holidayDetailDTO;
     }
@@ -96,8 +92,8 @@ public class ScheduleGeneratorDTO {
         this.recalculateFrom = recalculateFrom;
     }
 
-    public void setLastTransactionDate(LocalDate lastTransactionDate) {
-        this.lastTransactionDate = lastTransactionDate;
+    public CalendarInstance getCompoundingCalendarInstance() {
+        return this.compoundingCalendarInstance;
     }
 
 }

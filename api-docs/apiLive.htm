@@ -7474,6 +7474,13 @@ An enumeration that indicates the type of transaction processing strategy to be 
 							<td class=fielddesc>Specifies rest frequency start date for interest recalculation. This date must be before or equal to disbursement date
 							</td>
 						</tr>
+						<tr class=alt>
+							<td>recalculationCompoundingFrequencyDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies compounding frequency start date for interest recalculation. This date must be equal to disbursement date
+							</td>
+						</tr>
 					</table>
 				</div>
 			</div>
@@ -7649,6 +7656,11 @@ GET https://DomainName/api/v1/loans/template?templateType=individual&clientId=1&
       "code": "interestRecalculationCompoundingMethod.fee",
       "value": "Fee"
     },
+	"recalculationCompoundingFrequencyType": {
+		    "id":1,
+			"code":"interestRecalculationFrequencyType.same.as.repayment.period",
+			"value":"Same as repayment period"
+	},
     "rescheduleStrategyType": {
       "id": 2,
       "code": "loanRescheduleStrategyMethod.reduce.number.of.installments",
@@ -8606,6 +8618,14 @@ Request Body:
 						</tr>
 						<tr class=alt>
 							<td>recalculationRestFrequencyDate</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Additional Mandatory Fields if interest recalculation with interest/fee compounding is enabled for product and compounding frequency not same as repayment period</div></td>
+						</tr>
+						<tr class=alt>
+							<td>recalculationCompoundingFrequencyDate</td>
 						</tr>
 					</table>
 					<br/>
@@ -11706,6 +11726,26 @@ An enumeration that indicates the type of transaction processing strategy to be 
 							<span>Example Values:</span>1=Reschedule next repayments, 2=Reduce number of installments, 3=Reduce EMI amount</td>
 						</tr>
 						<tr class=alt>
+							<td>recalculationCompoundingFrequencyType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies effective date from which the compounding of interest or fee amounts will be considered in recalculation on late payment.<br>
+							<span>Example Values:</span>1=Same as repayment period, 2=Daily, 3=Weekly, 4=Monthly</td>
+						</tr>
+						<tr class=alt>
+							<td>recalculationCompoundingFrequencyInterval</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies compounding frequency interval for interest recalculation.<br>
+						</tr>
+						<tr class=alt>
+							<td>recalculationCompoundingFrequencyDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies compounding frequency start date for interest recalculation.<br>
+						</tr>
+						
+						<tr class=alt>
 							<td>recalculationRestFrequencyType</td>
 						</tr>
 						<tr>
@@ -11848,6 +11888,11 @@ GET https://DomainName/api/v1/loanproducts
             "code": "interestRecalculationCompoundingMethod.fee",
             "value": "Fee"
         },
+		"recalculationCompoundingFrequencyType": {
+		    "id":1,
+			"code":"interestRecalculationFrequencyType.same.as.repayment.period",
+			"value":"Same as repayment period"
+		},
         "rescheduleStrategyType": {
             "id": 2,
             "code": "loanRescheduleStrategyMethod.reduce.number.of.installments",
@@ -13056,6 +13101,23 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 						</tr>
 						<tr class=alt>
 							<td>recalculationRestFrequencyInterval, recalculationRestFrequencyDate</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>						
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Additional Optional Fields if interest recalculation is enabled(true) and interestRecalculationCompoundingMethod is enabled</div></td>
+						</tr>
+						<tr class=alt>
+							<td>recalculationCompoundingFrequencyType</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>						
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Additional Optional Fields if interest recalculation is enabled(true) and interestRecalculationCompoundingMethod is enabled and 
+							recalculationCompoundingFrequencyType is not same as repayment period</div></td>
+						</tr>
+						<tr class=alt>
+							<td>recalculationCompoundingFrequencyInterval, recalculationCompoundingFrequencyDate</td>
 						</tr>
 					</table>
 					<table class=matrixHeading>

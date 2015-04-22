@@ -27,6 +27,7 @@ import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.loanaccount.api.LoanApiConstants;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanInterestRecalculationDetails;
 import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
@@ -47,9 +48,15 @@ public final class LoanApplicationCommandFromApiJsonHelper {
      */
     final Set<String> supportedParameters = new HashSet<>(Arrays.asList("dateFormat", "locale", "id", "clientId", "groupId", "loanType",
             "productId", "principal", "loanTermFrequency", "loanTermFrequencyType", "numberOfRepayments", "repaymentEvery",
-            "repaymentFrequencyType", "repaymentFrequencyNthDayType", "repaymentFrequencyDayOfWeekType", "interestRatePerPeriod",
-            "amortizationType", "interestType", "interestCalculationPeriodType", "expectedDisbursementDate", "repaymentsStartingFromDate",
-            "graceOnPrincipalPayment", "graceOnInterestPayment",
+            "repaymentFrequencyType", "repaymentFrequencyNthDayType", "repaymentFrequencyDayOfWeekType",
+            "interestRatePerPeriod",
+            "amortizationType",
+            "interestType",
+            "interestCalculationPeriodType",
+            "expectedDisbursementDate",
+            "repaymentsStartingFromDate",
+            "graceOnPrincipalPayment",
+            "graceOnInterestPayment",
             "graceOnInterestCharged",
             "interestChargedFromDate", //
             "submittedOnDate",
@@ -67,7 +74,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             "syncDisbursementWithMeeting",// optional
             "linkAccountId", LoanApiConstants.disbursementDataParameterName, LoanApiConstants.emiAmountParameterName,
             LoanApiConstants.maxOutstandingBalanceParameterName, LoanProductConstants.graceOnArrearsAgeingParameterName,
-            LoanProductConstants.recalculationRestFrequencyDateParamName, "createStandingInstructionAtDisbursement"));
+            LoanProductConstants.recalculationRestFrequencyDateParamName,
+            LoanProductConstants.recalculationCompoundingFrequencyDateParamName, "createStandingInstructionAtDisbursement"));
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
@@ -933,11 +941,11 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     }
 
     public void validateRecalcuationFrequency(final LocalDate recalculationFrequencyDate, final LocalDate expectedDisbursementDate,
-            final List<ApiParameterError> dataValidationErrors) {
+            final List<ApiParameterError> dataValidationErrors, final String paramName) {
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
-        baseDataValidator.reset().parameter(LoanProductConstants.recalculationRestFrequencyDateParamName).value(recalculationFrequencyDate)
-                .notNull().validateDateBeforeOrEqual(expectedDisbursementDate);
+        baseDataValidator.reset().parameter(paramName).value(recalculationFrequencyDate).notNull()
+                .validateDateBeforeOrEqual(expectedDisbursementDate);
     }
 
     public void validateLoanCharges(final Set<LoanCharge> charges, final List<ApiParameterError> dataValidationErrors) {
@@ -974,12 +982,32 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         }
     }
 
-    public void validateLoanForInterestRecalculation(final LocalDate recalculationFrequencyDate, final LocalDate expectedDisbursementDate,
-            final Set<LoanCharge> charges) {
+    public void validateLoanForInterestRecalculation(final Loan loan) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        validateRecalcuationFrequency(recalculationFrequencyDate, expectedDisbursementDate, dataValidationErrors);
-        validateLoanCharges(charges, dataValidationErrors);
+        LoanInterestRecalculationDetails interestRecalculationDetails = loan.loanInterestRecalculationDetails();
+        if (!interestRecalculationDetails.getRestFrequencyType().isSameAsRepayment()) {
+            String paramName = LoanProductConstants.recalculationRestFrequencyDateParamName;
+            validateRecalcuationFrequency(interestRecalculationDetails.getRestFrequencyLocalDate(), loan.getExpectedDisbursedOnLocalDate(),
+                    dataValidationErrors, paramName);
+        }
+
+        if (interestRecalculationDetails.getInterestRecalculationCompoundingMethod().isCompoundingEnabled()
+                && !interestRecalculationDetails.getCompoundingFrequencyType().isSameAsRepayment()) {
+            String paramName = LoanProductConstants.recalculationCompoundingFrequencyDateParamName;
+            validateCompoundingFrequency(interestRecalculationDetails.getCompoundingFrequencyLocalDate(),
+                    loan.getExpectedDisbursedOnLocalDate(), dataValidationErrors, paramName);
+        }
+
+        validateLoanCharges(loan.charges(), dataValidationErrors);
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    }
+
+    public void validateCompoundingFrequency(final LocalDate recalculationFrequencyDate, final LocalDate expectedDisbursementDate,
+            final List<ApiParameterError> dataValidationErrors, final String paramName) {
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
+        baseDataValidator.reset().parameter(paramName).value(recalculationFrequencyDate).notNull()
+                .validateDateForEqual(expectedDisbursementDate);
     }
 
 }

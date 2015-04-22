@@ -76,6 +76,9 @@ public interface LoanProductConstants {
     public static final String recalculationRestFrequencyDateParamName = "recalculationRestFrequencyDate";
     public static final String isArrearsBasedOnOriginalScheduleParamName = "isArrearsBasedOnOriginalSchedule";
     public static final String preClosureInterestCalculationStrategyParamName = "preClosureInterestCalculationStrategy";
+    public static final String recalculationCompoundingFrequencyTypeParameterName = "recalculationCompoundingFrequencyType";
+    public static final String recalculationCompoundingFrequencyIntervalParameterName = "recalculationCompoundingFrequencyInterval";
+    public static final String recalculationCompoundingFrequencyDateParamName = "recalculationCompoundingFrequencyDate";
 
     // Guarantee related
     public static final String holdGuaranteeFundsParamName = "holdGuaranteeFunds";

@@ -25,8 +25,10 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
+import org.mifosplatform.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductConfigurableAttributes;
@@ -74,6 +76,9 @@ public final class LoanProductDataValidator {
             LoanProductConstants.recalculationRestFrequencyDateParamName,
             LoanProductConstants.recalculationRestFrequencyIntervalParameterName,
             LoanProductConstants.recalculationRestFrequencyTypeParameterName,
+            LoanProductConstants.recalculationCompoundingFrequencyDateParamName,
+            LoanProductConstants.recalculationCompoundingFrequencyIntervalParameterName,
+            LoanProductConstants.recalculationCompoundingFrequencyTypeParameterName,
             LoanProductConstants.isArrearsBasedOnOriginalScheduleParamName,
             LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment, LoanProductConstants.mandatoryGuaranteeParamName,
             LoanProductConstants.holdGuaranteeFundsParamName, LoanProductConstants.minimumGuaranteeFromGuarantorParamName,
@@ -510,6 +515,8 @@ public final class LoanProductDataValidator {
         /**
          * { @link InterestRecalculationCompoundingMethod }
          */
+        InterestRecalculationCompoundingMethod compoundingMethod = null;
+
         if (loanProduct == null
                 || this.fromApiJsonHelper
                         .parameterExists(LoanProductConstants.interestRecalculationCompoundingMethodParameterName, element)) {
@@ -517,7 +524,20 @@ public final class LoanProductDataValidator {
                     LoanProductConstants.interestRecalculationCompoundingMethodParameterName, element, Locale.getDefault());
             baseDataValidator.reset().parameter(LoanProductConstants.interestRecalculationCompoundingMethodParameterName)
                     .value(interestRecalculationCompoundingMethod).notNull().inMinMaxRange(0, 3);
+            if (interestRecalculationCompoundingMethod != null) {
+                compoundingMethod = InterestRecalculationCompoundingMethod.fromInt(interestRecalculationCompoundingMethod);
+            }
         }
+
+        if (compoundingMethod == null) {
+            if (loanProduct == null) {
+                compoundingMethod = InterestRecalculationCompoundingMethod.NONE;
+            } else {
+                compoundingMethod = InterestRecalculationCompoundingMethod.fromInt(loanProduct.getProductInterestRecalculationDetails()
+                        .getInterestRecalculationCompoundingMethod());
+            }
+        }
+
         /**
          * { @link LoanRescheduleStrategyMethod }
          */
@@ -537,7 +557,9 @@ public final class LoanProductDataValidator {
                     LoanProductConstants.recalculationRestFrequencyTypeParameterName, element, Locale.getDefault());
             baseDataValidator.reset().parameter(LoanProductConstants.recalculationRestFrequencyTypeParameterName)
                     .value(recalculationRestFrequencyType).notNull().inMinMaxRange(1, 4);
-            frequencyType = RecalculationFrequencyType.fromInt(recalculationRestFrequencyType);
+            if (recalculationRestFrequencyType != null) {
+                frequencyType = RecalculationFrequencyType.fromInt(recalculationRestFrequencyType);
+            }
         }
 
         if (frequencyType == null) {
@@ -563,6 +585,70 @@ public final class LoanProductDataValidator {
                         LoanProductConstants.recalculationRestFrequencyIntervalParameterName, element, Locale.getDefault());
                 baseDataValidator.reset().parameter(LoanProductConstants.recalculationRestFrequencyIntervalParameterName)
                         .value(recurrenceInterval).notNull();
+            }
+        }
+
+        if (compoundingMethod.isCompoundingEnabled()) {
+            RecalculationFrequencyType compoundingfrequencyType = null;
+
+            if (loanProduct == null
+                    || this.fromApiJsonHelper.parameterExists(LoanProductConstants.recalculationCompoundingFrequencyTypeParameterName,
+                            element)) {
+                final Integer recalculationCompoundingFrequencyType = this.fromApiJsonHelper.extractIntegerNamed(
+                        LoanProductConstants.recalculationCompoundingFrequencyTypeParameterName, element, Locale.getDefault());
+                baseDataValidator.reset().parameter(LoanProductConstants.recalculationCompoundingFrequencyTypeParameterName)
+                        .value(recalculationCompoundingFrequencyType).notNull().inMinMaxRange(1, 4);
+                if (recalculationCompoundingFrequencyType != null) {
+                    compoundingfrequencyType = RecalculationFrequencyType.fromInt(recalculationCompoundingFrequencyType);
+                    if (!compoundingfrequencyType.isSameAsRepayment()) {
+                        PeriodFrequencyType repaymentFrequencyType = null;
+                        if (loanProduct == null) {
+                            Integer repaymentFrequencyTypeVal = this.fromApiJsonHelper.extractIntegerNamed("repaymentFrequencyType",
+                                    element, Locale.getDefault());
+                            repaymentFrequencyType = PeriodFrequencyType.fromInt(repaymentFrequencyTypeVal);
+                        } else {
+                            repaymentFrequencyType = loanProduct.getLoanProductRelatedDetail().getRepaymentPeriodFrequencyType();
+                        }
+                        if (!compoundingfrequencyType.isSameFrequency(repaymentFrequencyType)) {
+                            baseDataValidator.reset().parameter(LoanProductConstants.recalculationCompoundingFrequencyTypeParameterName)
+                                    .value(recalculationCompoundingFrequencyType).failWithCode("must.be.same.as.repayment.frequency");
+                        }
+                    }
+                }
+            }
+
+            if (compoundingfrequencyType == null) {
+                if (loanProduct == null) {
+                    compoundingfrequencyType = RecalculationFrequencyType.INVALID;
+                } else {
+                    compoundingfrequencyType = loanProduct.getProductInterestRecalculationDetails().getCompoundingFrequencyType();
+                }
+            }
+
+            if (!compoundingfrequencyType.isSameAsRepayment()) {
+                if (loanProduct == null
+                        || this.fromApiJsonHelper.parameterExists(LoanProductConstants.recalculationCompoundingFrequencyDateParamName,
+                                element)) {
+                    final LocalDate recurrenceOnLocalDate = this.fromApiJsonHelper.extractLocalDateNamed(
+                            LoanProductConstants.recalculationCompoundingFrequencyDateParamName, element);
+                    baseDataValidator.reset().parameter(LoanProductConstants.recalculationCompoundingFrequencyDateParamName)
+                            .value(recurrenceOnLocalDate).notNull();
+                }
+                if (loanProduct == null
+                        || this.fromApiJsonHelper.parameterExists(
+                                LoanProductConstants.recalculationCompoundingFrequencyIntervalParameterName, element)) {
+                    final Integer recurrenceInterval = this.fromApiJsonHelper.extractIntegerNamed(
+                            LoanProductConstants.recalculationCompoundingFrequencyIntervalParameterName, element, Locale.getDefault());
+                    Integer repaymentEvery =  null;
+                    if (loanProduct == null) {
+                        repaymentEvery = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentEvery", element);
+                    } else {
+                        repaymentEvery = loanProduct.getLoanProductRelatedDetail().getRepayEvery();
+                    }
+                    
+                    baseDataValidator.reset().parameter(LoanProductConstants.recalculationCompoundingFrequencyIntervalParameterName)
+                            .value(recurrenceInterval).notNull().integerInMultiplesOfNumber(repaymentEvery);
+                }
             }
         }
 
