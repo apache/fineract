@@ -2186,11 +2186,15 @@ public class Loan extends AbstractPersistable<Long> {
             if (this.loanProduct().isMultiDisburseLoan()) {
                 Collection<LoanDisbursementDetails> loanDisburseDetails = this.getDisbursementDetails();
                 BigDecimal setPrincipalAmount = BigDecimal.ZERO;
+                BigDecimal totalAmount = BigDecimal.ZERO;
                 for (LoanDisbursementDetails disbursementDetails : loanDisburseDetails) {
-                    setPrincipalAmount = setPrincipalAmount.add(disbursementDetails.principal());
+                    if(disbursementDetails.actualDisbursementDate() != null){
+                        setPrincipalAmount = setPrincipalAmount.add(disbursementDetails.principal());
+                    }
+                    totalAmount = totalAmount.add(disbursementDetails.principal());
                 }
                 this.loanRepaymentScheduleDetail.setPrincipal(setPrincipalAmount);
-                if (setPrincipalAmount.compareTo(this.approvedPrincipal) == 1) {
+                if (totalAmount.compareTo(this.approvedPrincipal) == 1) {
                     final String errorMsg = "Loan can't be disbursed,disburse amount is exceeding approved principal ";
                     throw new LoanDisbursalException(errorMsg, "disburse.amount.must.be.less.than.approved.principal", principalDisbursed,
                             this.approvedPrincipal);

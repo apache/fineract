@@ -2680,7 +2680,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             Collection<LoanDisbursementDetails> loanDisburseDetails = loan.getDisbursementDetails();
             BigDecimal setAmount = BigDecimal.ZERO;
             for (LoanDisbursementDetails details : loanDisburseDetails) {
-                setAmount = setAmount.add(details.principal());
+                if(details.actualDisbursementDate() != null){
+                    setAmount = setAmount.add(details.principal());
+                }
             }
 
             loan.repaymentScheduleDetail().setPrincipal(setAmount);
