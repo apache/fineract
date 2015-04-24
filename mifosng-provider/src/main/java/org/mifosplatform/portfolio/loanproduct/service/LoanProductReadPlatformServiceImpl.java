@@ -77,7 +77,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         final String sql = "select " + rm.schema() + " where bc.loan_product_id=?  order by bc.borrower_cycle_number,bc.value_condition";
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId });
     }
-    
+
     @Override
     public Collection<LoanProductData> retrieveAllLoanProducts() {
 
@@ -166,6 +166,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lpr.id as lprId, lpr.product_id as productId, lpr.compound_type_enum as compoundType, lpr.reschedule_strategy_enum as rescheduleStrategy, "
                     + "lpr.rest_frequency_type_enum as restFrequencyEnum, lpr.rest_frequency_interval as restFrequencyInterval, "
                     + "lpr.rest_freqency_date as restFrequencyDate, lpr.arrears_based_on_original_schedule as isArrearsBasedOnOriginalSchedule, "
+                    + "lpr.compounding_frequency_type_enum as compoundingFrequencyTypeEnum, lpr.compounding_frequency_interval as compoundingInterval, "
+                    + "lpr.compounding_freqency_date as compoundingFrequencyDate,  "
                     + "lp.hold_guarantee_funds as holdGuaranteeFunds, "
                     + "lp.principal_threshold_for_last_installment as principalThresholdForLastInstallment, "
                     + "lpg.id as lpgId, lpg.mandatory_guarantee as mandatoryGuarantee, "
@@ -287,7 +289,6 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final boolean canDefineInstallmentAmount = rs.getBoolean("canDefineInstallmentAmount");
             final boolean isInterestRecalculationEnabled = rs.getBoolean("isInterestRecalculationEnabled");
 
-
             LoanProductInterestRecalculationData interestRecalculationData = null;
             if (isInterestRecalculationEnabled) {
 
@@ -302,6 +303,14 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                 final EnumOptionData restFrequencyType = LoanEnumerations.interestRecalculationFrequencyType(restFrequencyEnumValue);
                 final int restFrequencyInterval = JdbcSupport.getInteger(rs, "restFrequencyInterval");
                 final LocalDate restFrequencyDate = JdbcSupport.getLocalDate(rs, "restFrequencyDate");
+                final Integer compoundingFrequencyEnumValue = JdbcSupport.getInteger(rs, "compoundingFrequencyTypeEnum");
+                EnumOptionData compoundingFrequencyType = null;
+                if (compoundingFrequencyEnumValue != null) {
+                    compoundingFrequencyType = LoanEnumerations
+                            .interestRecalculationFrequencyType(compoundingFrequencyEnumValue);
+                }
+                final Integer compoundingInterval = JdbcSupport.getInteger(rs, "compoundingInterval");
+                final LocalDate compoundingFrequencyDate = JdbcSupport.getLocalDate(rs, "compoundingFrequencyDate");
                 final boolean isArrearsBasedOnOriginalSchedule = rs.getBoolean("isArrearsBasedOnOriginalSchedule");
                 final int preCloseInterestCalculationStrategyEnumValue = JdbcSupport.getInteger(rs, "preCloseInterestCalculationStrategy");
                 final EnumOptionData preCloseInterestCalculationStrategy = LoanEnumerations
@@ -309,7 +318,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
                 interestRecalculationData = new LoanProductInterestRecalculationData(lprId, productId,
                         interestRecalculationCompoundingType, rescheduleStrategyType, restFrequencyType, restFrequencyInterval,
-                        restFrequencyDate, isArrearsBasedOnOriginalSchedule, preCloseInterestCalculationStrategy);
+                        restFrequencyDate, compoundingFrequencyType, compoundingInterval, compoundingFrequencyDate,
+                        isArrearsBasedOnOriginalSchedule, preCloseInterestCalculationStrategy);
             }
 
             final boolean amortization = rs.getBoolean("amortizationBoolean");

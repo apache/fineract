@@ -19,19 +19,20 @@ public class DefaultLoanReschedulerFactory implements LoanReschedulerFactory {
     @Override
     public LoanRescheduleModel reschedule(final MathContext mathContext, final InterestMethod interestMethod,
             final LoanRescheduleRequest loanRescheduleRequest, final ApplicationCurrency applicationCurrency,
-            final HolidayDetailDTO holidayDetailDTO,final CalendarInstance restCalendarInstance) {
+            final HolidayDetailDTO holidayDetailDTO, final CalendarInstance restCalendarInstance,
+            final CalendarInstance compoundingCalendarInstance) {
 
         LoanRescheduleModel loanRescheduleModel = null;
 
         switch (interestMethod) {
             case DECLINING_BALANCE:
                 loanRescheduleModel = new DecliningBalanceInterestLoanScheduleGenerator().reschedule(mathContext, loanRescheduleRequest,
-                        applicationCurrency, holidayDetailDTO, restCalendarInstance);
+                        applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance);
             break;
 
             case FLAT:
                 loanRescheduleModel = new FlatInterestLoanScheduleGenerator().reschedule(mathContext, loanRescheduleRequest,
-                        applicationCurrency, holidayDetailDTO, restCalendarInstance);
+                        applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance);
             break;
 
             case INVALID:

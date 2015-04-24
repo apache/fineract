@@ -47,6 +47,7 @@ public class LoanApplicationTestBuilder {
     private List<HashMap> disbursementData = null;
     private List<HashMap> charges = new ArrayList<HashMap>();
     private String recalculationRestFrequencyDate = null;
+    private String recalculationCompoundingFrequencyDate = null;
     private String repaymentsStartingFromDate = null;
 
     public String build(final String ID, final String loanProductId, final String savingsID) {
@@ -74,7 +75,7 @@ public class LoanApplicationTestBuilder {
         map.put("expectedDisbursementDate", this.expectedDisbursmentDate);
         map.put("submittedOnDate", this.submittedOnDate);
         map.put("loanType", this.loanType);
-        if(repaymentsStartingFromDate != null){
+        if (repaymentsStartingFromDate != null) {
             map.put("repaymentsStartingFromDate", this.repaymentsStartingFromDate);
         }
         if (charges != null) {
@@ -100,6 +101,9 @@ public class LoanApplicationTestBuilder {
         }
         if (recalculationRestFrequencyDate != null) {
             map.put("recalculationRestFrequencyDate", recalculationRestFrequencyDate);
+        }
+        if (recalculationCompoundingFrequencyDate != null) {
+            map.put("recalculationCompoundingFrequencyDate", recalculationCompoundingFrequencyDate);
         }
         System.out.println("Loan Application request : " + map);
         return new Gson().toJson(map);
@@ -244,7 +248,12 @@ public class LoanApplicationTestBuilder {
         this.recalculationRestFrequencyDate = recalculationRestFrequencyDate;
         return this;
     }
-    
+
+    public LoanApplicationTestBuilder withCompoundingFrequencyDate(final String recalculationCompoundingFrequencyDate) {
+        this.recalculationCompoundingFrequencyDate = recalculationCompoundingFrequencyDate;
+        return this;
+    }
+
     public LoanApplicationTestBuilder withFirstRepaymentDate(final String firstRepaymentDate) {
         this.repaymentsStartingFromDate = firstRepaymentDate;
         return this;

@@ -92,6 +92,9 @@ public class LoanProductTestBuilder {
     private String recalculationRestFrequencyType = "1";
     private String recalculationRestFrequencyInterval = "0";
     private String recalculationRestFrequencyDate = null;
+    private String recalculationCompoundingFrequencyType = null;
+    private String recalculationCompoundingFrequencyInterval = null;
+    private String recalculationCompoundingFrequencyDate = null;
     private String minimumDaysBetweenDisbursalAndFirstRepayment = null;
     private Boolean holdGuaranteeFunds = null;
     private String mandatoryGuarantee = null;
@@ -101,7 +104,7 @@ public class LoanProductTestBuilder {
     private String graceOnPrincipalPayment = "1";
     private String graceOnInterestPayment = "1";
     private JsonObject allowAttributeOverrides = null;
-    
+
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<>();
 
@@ -157,6 +160,11 @@ public class LoanProductTestBuilder {
             map.put("recalculationRestFrequencyType", recalculationRestFrequencyType);
             map.put("recalculationRestFrequencyInterval", recalculationRestFrequencyInterval);
             map.put("recalculationRestFrequencyDate", recalculationRestFrequencyDate);
+            if (!RECALCULATION_COMPOUNDING_METHOD_NONE.equals(this.interestRecalculationCompoundingMethod)) {
+                map.put("recalculationCompoundingFrequencyType", recalculationCompoundingFrequencyType);
+                map.put("recalculationCompoundingFrequencyInterval", recalculationCompoundingFrequencyInterval);
+                map.put("recalculationCompoundingFrequencyDate", recalculationCompoundingFrequencyDate);
+            }
             map.put("preClosureInterestCalculationStrategy", preCloseInterestCalculationStrategy);
             if (isArrearsBasedOnOriginalSchedule != null) {
                 map.put("isArrearsBasedOnOriginalSchedule", isArrearsBasedOnOriginalSchedule);
@@ -172,8 +180,8 @@ public class LoanProductTestBuilder {
         }
         map.put("graceOnPrincipalPayment", graceOnPrincipalPayment);
         map.put("graceOnInterestPayment", graceOnInterestPayment);
-        if(allowAttributeOverrides != null){
-        	map.put("allowAttributeOverrides", this.allowAttributeOverrides);
+        if (allowAttributeOverrides != null) {
+            map.put("allowAttributeOverrides", this.allowAttributeOverrides);
         }
         return new Gson().toJson(map);
     }
@@ -411,6 +419,15 @@ public class LoanProductTestBuilder {
         this.recalculationRestFrequencyDate = recalculationRestFrequencyDate;
         return this;
     }
+    
+    public LoanProductTestBuilder withInterestRecalculationCompoundingFrequencyDetails(final String recalculationCompoundingFrequencyType,
+            final String recalculationCompoundingFrequencyInterval, final String recalculationCompoundingFrequencyDate) {
+        this.isInterestRecalculationEnabled = true;
+        this.recalculationCompoundingFrequencyType = recalculationCompoundingFrequencyType;
+        this.recalculationCompoundingFrequencyInterval = recalculationCompoundingFrequencyInterval;
+        this.recalculationCompoundingFrequencyDate = recalculationCompoundingFrequencyDate;
+        return this;
+    }
 
     public LoanProductTestBuilder withMinimumDaysBetweenDisbursalAndFirstRepayment(final String minimumDaysBetweenDisbursalAndFirstRepayment) {
         this.minimumDaysBetweenDisbursalAndFirstRepayment = minimumDaysBetweenDisbursalAndFirstRepayment;
@@ -440,5 +457,5 @@ public class LoanProductTestBuilder {
     public LoanProductTestBuilder withLoanProductConfiguration(JsonObject loanProductConfigurableAttributes) {
         this.allowAttributeOverrides = loanProductConfigurableAttributes;
         return this;
-    }   
+    }
 }

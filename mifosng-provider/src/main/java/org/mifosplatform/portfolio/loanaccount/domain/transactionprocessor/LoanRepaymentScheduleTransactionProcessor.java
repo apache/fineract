@@ -22,8 +22,7 @@ public interface LoanRepaymentScheduleTransactionProcessor {
             Set<LoanCharge> charges);
 
     ChangedTransactionDetail handleTransaction(LocalDate disbursementDate, List<LoanTransaction> repaymentsOrWaivers,
-            MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Set<LoanCharge> charges,
-            LocalDate recalculateChargesFrom);
+            MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, Set<LoanCharge> charges);
 
     void handleWriteOff(LoanTransaction loanTransaction, MonetaryCurrency loanCurrency,
             List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments);
@@ -39,7 +38,7 @@ public interface LoanRepaymentScheduleTransactionProcessor {
 
     ChangedTransactionDetail populateDerivedFeildsWithoutReprocess(LocalDate disbursementDate,
             List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges, LocalDate recalculateChargesFrom);
+            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges);
 
     void handleRefund(LoanTransaction loanTransaction, MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
             final Set<LoanCharge> charges);

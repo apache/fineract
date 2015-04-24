@@ -207,10 +207,8 @@ public final class LoanSummary {
         this.totalInterestWaived = summaryWrapper.calculateTotalInterestWaived(repaymentScheduleInstallments, currency).getAmount();
         this.totalInterestWrittenOff = summaryWrapper.calculateTotalInterestWrittenOff(repaymentScheduleInstallments, currency).getAmount();
 
-        if (totalInterestCharged.isGreaterThanZero()) {
-            this.totalInterestOutstanding = totalInterestCharged.minus(this.totalInterestRepaid).minus(this.totalInterestWaived)
-                    .minus(this.totalInterestWrittenOff).getAmount();
-        }
+        this.totalInterestOutstanding = totalInterestCharged.minus(this.totalInterestRepaid).minus(this.totalInterestWaived)
+                .minus(this.totalInterestWrittenOff).getAmount();
 
         final Money totalFeeChargesCharged = summaryWrapper.calculateTotalFeeChargesCharged(repaymentScheduleInstallments, currency).plus(
                 this.totalFeeChargesDueAtDisbursement);
@@ -226,10 +224,8 @@ public final class LoanSummary {
         this.totalFeeChargesWrittenOff = summaryWrapper.calculateTotalFeeChargesWrittenOff(repaymentScheduleInstallments, currency)
                 .getAmount();
 
-        if (totalFeeChargesCharged.isGreaterThanZero()) {
-            this.totalFeeChargesOutstanding = totalFeeChargesCharged.minus(this.totalFeeChargesRepaid).minus(this.totalFeeChargesWaived)
-                    .minus(this.totalFeeChargesWrittenOff).getAmount();
-        }
+        this.totalFeeChargesOutstanding = totalFeeChargesCharged.minus(this.totalFeeChargesRepaid).minus(this.totalFeeChargesWaived)
+                .minus(this.totalFeeChargesWrittenOff).getAmount();
 
         final Money totalPenaltyChargesCharged = summaryWrapper
                 .calculateTotalPenaltyChargesCharged(repaymentScheduleInstallments, currency);
@@ -241,10 +237,8 @@ public final class LoanSummary {
         this.totalPenaltyChargesWrittenOff = summaryWrapper.calculateTotalPenaltyChargesWrittenOff(repaymentScheduleInstallments, currency)
                 .getAmount();
 
-        if (totalPenaltyChargesCharged.isGreaterThanZero()) {
-            this.totalPenaltyChargesOutstanding = totalPenaltyChargesCharged.minus(this.totalPenaltyChargesRepaid)
-                    .minus(this.totalPenaltyChargesWaived).minus(this.totalPenaltyChargesWrittenOff).getAmount();
-        }
+        this.totalPenaltyChargesOutstanding = totalPenaltyChargesCharged.minus(this.totalPenaltyChargesRepaid)
+                .minus(this.totalPenaltyChargesWaived).minus(this.totalPenaltyChargesWrittenOff).getAmount();
 
         final Money totalExpectedRepayment = Money.of(currency, this.totalPrincipalDisbursed).plus(this.totalInterestCharged)
                 .plus(this.totalFeeChargesCharged).plus(this.totalPenaltyChargesCharged);
@@ -286,48 +280,42 @@ public final class LoanSummary {
     public BigDecimal getTotalWrittenOff() {
         return this.totalWrittenOff;
     }
-    
-    /** 
-     * @return total interest repaid 
+
+    /**
+     * @return total interest repaid
      **/
     public BigDecimal getTotalInterestRepaid() {
-    	return this.totalInterestRepaid;
-    }
-    
-    public BigDecimal getTotalFeeChargesCharged() {
-    	return this.totalFeeChargesCharged;
-    }
-    
-    public BigDecimal getTotalPenaltyChargesCharged() {
-    	return this.totalPenaltyChargesCharged;
+        return this.totalInterestRepaid;
     }
 
-    
+    public BigDecimal getTotalFeeChargesCharged() {
+        return this.totalFeeChargesCharged;
+    }
+
+    public BigDecimal getTotalPenaltyChargesCharged() {
+        return this.totalPenaltyChargesCharged;
+    }
+
     public BigDecimal getTotalPrincipalWrittenOff() {
         return this.totalPrincipalWrittenOff;
     }
 
-    
     public BigDecimal getTotalInterestWaived() {
         return this.totalInterestWaived;
     }
 
-    
     public BigDecimal getTotalFeeChargesRepaid() {
         return this.totalFeeChargesRepaid;
     }
 
-    
     public BigDecimal getTotalFeeChargesWaived() {
         return this.totalFeeChargesWaived;
     }
 
-    
     public BigDecimal getTotalPenaltyChargesRepaid() {
         return this.totalPenaltyChargesRepaid;
     }
 
-    
     public BigDecimal getTotalPenaltyChargesWaived() {
         return this.totalPenaltyChargesWaived;
     }

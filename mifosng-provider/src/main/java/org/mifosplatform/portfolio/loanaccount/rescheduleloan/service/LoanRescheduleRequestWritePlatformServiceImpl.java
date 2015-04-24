@@ -322,12 +322,15 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
                 HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
                 CalendarInstance restCalendarInstance = null;
+                CalendarInstance compoundingCalendarInstance = null;
                 if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
                     restCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(
-                            loan.loanInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_DETAIL.getValue());
+                            loan.loanInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_REST_DETAIL.getValue());
+                    compoundingCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(
+                            loan.loanInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_COMPOUNDING_DETAIL.getValue());
                 }
                 LoanRescheduleModel loanRescheduleModel = new DefaultLoanReschedulerFactory().reschedule(mathContext, interestMethod,
-                        loanRescheduleRequest, applicationCurrency, holidayDetailDTO, restCalendarInstance);
+                        loanRescheduleRequest, applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance);
 
                 final Collection<LoanRescheduleModelRepaymentPeriod> periods = loanRescheduleModel.getPeriods();
                 List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();
@@ -450,6 +453,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 final List<Long> existingTransactionIds = new ArrayList<>();
                 final List<Long> existingReversedTransactionIds = new ArrayList<>();
                 CalendarInstance restCalendarInstance = null;
+                CalendarInstance compoundingCalendarInstance = null;
                 ApplicationCurrency applicationCurrency = null;
                 LocalDate calculatedRepaymentsStartingFromDate = null;
                 List<Holiday> holidays = null;
@@ -460,8 +464,9 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 Long overdurPenaltyWaitPeriod = null;
                 if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
                     restCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(
-                            loan.loanInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_DETAIL.getValue());
-
+                            loan.loanInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_REST_DETAIL.getValue());
+                    compoundingCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(
+                            loan.loanInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_COMPOUNDING_DETAIL.getValue());
                     final MonetaryCurrency currency = loan.getCurrency();
                     applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
                     final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
@@ -478,8 +483,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
                 HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
                 ScheduleGeneratorDTO scheduleGeneratorDTO = new ScheduleGeneratorDTO(loanScheduleFactory, applicationCurrency,
-                        calculatedRepaymentsStartingFromDate, holidayDetailDTO, restCalendarInstance, recalculateFrom,
-                        overdurPenaltyWaitPeriod, lastTransactionDate);
+                        calculatedRepaymentsStartingFromDate, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance,
+                        recalculateFrom, overdurPenaltyWaitPeriod);
 
                 Money accruedCharge = Money.zero(loan.getCurrency());
                 if (loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
