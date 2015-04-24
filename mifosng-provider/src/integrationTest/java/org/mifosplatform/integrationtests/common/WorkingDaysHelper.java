@@ -36,6 +36,7 @@ public class WorkingDaysHelper {
         map.put("recurrence", "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU");
         map.put("locale", "en");
         map.put("repaymentRescheduleType", randomInt(1, 4));
+        map.put("extendTermForDailyRepayments", false);
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }
@@ -45,6 +46,7 @@ public class WorkingDaysHelper {
         map.put("recurrence", "FREQ=WEEKLY;INTERVAL=1;BYDAY=MP,TI,TE,TH");
         map.put("locale", "en");
         map.put("repaymentRescheduleType", randomInt(1, 4));
+        map.put("extendTermForDailyRepayments", false);
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }

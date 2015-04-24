@@ -18,23 +18,28 @@ public class WorkingDaysData {
 
     @SuppressWarnings("unused")
     private final EnumOptionData repaymentRescheduleType;
+    
+    @SuppressWarnings("unused")
+    private final Boolean extendTermForDailyRepayments;
 
     // template date
     @SuppressWarnings("unused")
     private final Collection<EnumOptionData> repaymentRescheduleOptions;
 
-    public WorkingDaysData(Long id, String recurrence, EnumOptionData repaymentRescheduleType) {
+    public WorkingDaysData(Long id, String recurrence, EnumOptionData repaymentRescheduleType, Boolean extendTermForDailyRepayments) {
         this.id = id;
         this.recurrence = recurrence;
         this.repaymentRescheduleType = repaymentRescheduleType;
         this.repaymentRescheduleOptions = null;
+        this.extendTermForDailyRepayments = extendTermForDailyRepayments;
     }
 
     public WorkingDaysData(Long id, String recurrence, EnumOptionData repaymentRescheduleType,
-            Collection<EnumOptionData> repaymentRescheduleOptions) {
+            Collection<EnumOptionData> repaymentRescheduleOptions, Boolean extendTermForDailyRepayments) {
         this.id = id;
         this.recurrence = recurrence;
         this.repaymentRescheduleType = repaymentRescheduleType;
         this.repaymentRescheduleOptions = repaymentRescheduleOptions;
+        this.extendTermForDailyRepayments = extendTermForDailyRepayments;
     }
 }
