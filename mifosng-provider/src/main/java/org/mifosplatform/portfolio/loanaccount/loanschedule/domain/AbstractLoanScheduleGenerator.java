@@ -483,7 +483,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             // update cumulative fields for principal & interest
             Money interestForThisinstallment = principalInterestForThisPeriod.interest();
-
+            Money lastTotalOutstandingInterestPaymentDueToGrace = totalOutstandingInterestPaymentDueToGrace;
             totalOutstandingInterestPaymentDueToGrace = principalInterestForThisPeriod.interestPaymentDueToGrace();
             Money principalForThisPeriod = principalInterestForThisPeriod.principal();
 
@@ -576,7 +576,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                 PrincipalInterest interestTillDate = calculatePrincipalInterestComponentsForPeriod(
                                         this.paymentPeriodsInOneYearCalculator, interestCalculationGraceOnRepaymentPeriodFraction,
                                         totalCumulativePrincipal, totalCumulativeInterest, totalInterestChargedForFullLoanTerm,
-                                        totalOutstandingInterestPaymentDueToGrace, outstandingBalanceAsPerRest, loanApplicationTerms,
+                                        lastTotalOutstandingInterestPaymentDueToGrace, outstandingBalanceAsPerRest, loanApplicationTerms,
                                         periodNumber, mc,
                                         mergeVariationsToMap(principalPortionMap, latePaymentMap, disburseDetailMap, compoundingMap),
                                         compoundingMap, periodStartDateApplicableForInterest, calculateTill,
@@ -595,6 +595,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                             detail.getTransactionDate(), principalForThisPeriod, outstandingBalance,
                                             interestForThisinstallment, feeChargesForInstallment, penaltyChargesForInstallment, totalDue,
                                             false);
+                                    totalOutstandingInterestPaymentDueToGrace = interestTillDate.interestPaymentDueToGrace();
                                 }
 
                             }
@@ -649,6 +650,16 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             instalmentNumber++;
             periodNumber++;
             compoundingDateVariations.clear();
+        }
+
+        // this condition is to add the interest from grace period if not
+        // already applied.
+        if (totalOutstandingInterestPaymentDueToGrace.isGreaterThanZero()) {
+            LoanScheduleModelPeriod installment = ((List<LoanScheduleModelPeriod>) periods).get(periods.size() - 1);
+            installment.addInterestAmount(totalOutstandingInterestPaymentDueToGrace);
+            totalRepaymentExpected = totalRepaymentExpected.add(totalOutstandingInterestPaymentDueToGrace.getAmount());
+            totalCumulativeInterest = totalCumulativeInterest.plus(totalOutstandingInterestPaymentDueToGrace);
+            totalOutstandingInterestPaymentDueToGrace = totalOutstandingInterestPaymentDueToGrace.zero();
         }
 
         // 7. determine fees and penalties for charges which depends on total
