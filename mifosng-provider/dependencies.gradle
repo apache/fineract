@@ -81,7 +81,9 @@ dependencies {
 
                 // Although Mifos (at the time of writing) doesn't have any compile time dep. on this,
                 // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
-                [group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.3.5']
+                [group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.3.5'],
+                // Once we've switched to Java 8 this dep can be removed.
+                [group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0']
      )
      testCompile 'junit:junit:4.11',
                  'junit:junit-dep:4.11',

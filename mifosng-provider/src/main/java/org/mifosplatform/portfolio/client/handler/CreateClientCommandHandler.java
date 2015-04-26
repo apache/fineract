@@ -5,7 +5,9 @@
  */
 package org.mifosplatform.portfolio.client.handler;
 
+import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
+import org.mifosplatform.commands.provider.CommandHandlerProvider;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.portfolio.client.service.ClientWritePlatformService;
@@ -14,13 +16,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@CommandType(entity = "CLIENT", action = "CREATE")
 public class CreateClientCommandHandler implements NewCommandSourceHandler {
 
     private final ClientWritePlatformService clientWritePlatformService;
 
     @Autowired
-    public CreateClientCommandHandler(final ClientWritePlatformService clientWritePlatformService) {
+    public CreateClientCommandHandler(final ClientWritePlatformService clientWritePlatformService,
+                                      final CommandHandlerProvider commandHandlerProvider) {
         this.clientWritePlatformService = clientWritePlatformService;
+        commandHandlerProvider.registerHandler(this);
     }
 
     @Transactional
