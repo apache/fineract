@@ -7,12 +7,24 @@ package org.mifosplatform.commands.provider;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
+import org.mifosplatform.infrastructure.configuration.spring.TestsWithoutDatabaseAndNoJobsConfiguration;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@WebAppConfiguration
+@ContextConfiguration(classes = TestsWithoutDatabaseAndNoJobsConfiguration.class)
 public class CommandHandlerProviderTest {
+
+    @Autowired
+    private CommandHandlerProvider commandHandlerProvider;
 
     public CommandHandlerProviderTest() {
         super();
@@ -20,17 +32,10 @@ public class CommandHandlerProviderTest {
 
     @Test
     public void shouldRegisterHandler() {
-        final CommandHandlerProvider provider = new CommandHandlerProvider();
-        try {
-            new ValidCommandHandler(provider);
-        } catch (NullPointerException pex) {
-            Assert.fail();
-        }
-
         try {
             final Long testCommandId = 815L;
 
-            final NewCommandSourceHandler registeredHandler = provider.getHandler("HUMAN", "UPDATE");
+            final NewCommandSourceHandler registeredHandler = this.commandHandlerProvider.getHandler("HUMAN", "UPDATE");
 
             final CommandProcessingResult result =
                     registeredHandler.processCommand(
@@ -41,16 +46,8 @@ public class CommandHandlerProviderTest {
         }
     }
 
-    @Test(expected = NullPointerException.class)
-    public void shouldNotRegisterHandlerAndThrowNullPointerException() {
-        final CommandHandlerProvider provider = new CommandHandlerProvider();
-        new InvalidCommandHandler(provider);
-    }
-
     @Test(expected = UnsupportedCommandException.class)
     public void shouldThrowUnsupportedCommandException() {
-        final CommandHandlerProvider provider = new CommandHandlerProvider();
-        provider.getHandler("WHATEVER", "DOSOMETHING");
-
+        this.commandHandlerProvider.getHandler("WHATEVER", "DOSOMETHING");
     }
 }

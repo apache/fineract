@@ -6,10 +6,14 @@
 package org.mifosplatform.commands.provider;
 
 import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -30,28 +34,17 @@ import java.util.HashMap;
  */
 @Component
 @Scope("singleton")
-public class CommandHandlerProvider {
+public class CommandHandlerProvider implements ApplicationContextAware {
 
-    private final HashMap<String, NewCommandSourceHandler> registeredHandlers = new HashMap<>();
+    private ApplicationContext applicationContext;
+    private HashMap<String, String> registeredHandlers;
 
     CommandHandlerProvider() {
         super();
     }
 
     /**
-     * Registers a {@link NewCommandSourceHandler} using the annotation {@link CommandType} to register the handler.<br/>
-     * <br/>
-     * @param handler the {@link NewCommandSourceHandler} to be added, must be given
-     */
-    public <C extends NewCommandSourceHandler> void registerHandler(@Nonnull final C handler) {
-        Preconditions.checkArgument(handler != null, "A handler must be given!");
-
-        final CommandType commandType = handler.getClass().getAnnotation(CommandType.class);
-        this.registeredHandlers.put(commandType.entity() + "|" + commandType.action(), handler);
-    }
-
-    /**
-     * Returns a handler gor the given entity and action.<br/>
+     * Returns a handler for the given entity and action.<br/>
      * <br/>
      * Throws an {@link UnsupportedCommandException} if no handler
      * for the given entity, action combination can be found.
@@ -67,6 +60,26 @@ public class CommandHandlerProvider {
         if (!this.registeredHandlers.containsKey(key)) {
             throw new UnsupportedCommandException(key);
         }
-        return this.registeredHandlers.get(entity + "|" + action);
+        return (NewCommandSourceHandler)this.applicationContext.getBean(this.registeredHandlers.get(key));
+    }
+
+    private void initializeHandlerRegistry() {
+        if (this.registeredHandlers == null) {
+            this.registeredHandlers = new HashMap<>();
+
+            final String[] commandHandlerBeans = this.applicationContext.getBeanNamesForAnnotation(CommandType.class);
+            if (ArrayUtils.isNotEmpty(commandHandlerBeans)) {
+                for (final String commandHandlerName : commandHandlerBeans) {
+                    final CommandType commandType = this.applicationContext.getType(commandHandlerName).getAnnotation(CommandType.class);
+                    this.registeredHandlers.put(commandType.entity() + "|" + commandType.action(), commandHandlerName);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+        this.initializeHandlerRegistry();
     }
 }

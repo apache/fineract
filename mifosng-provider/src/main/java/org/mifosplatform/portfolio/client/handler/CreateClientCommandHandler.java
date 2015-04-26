@@ -22,10 +22,8 @@ public class CreateClientCommandHandler implements NewCommandSourceHandler {
     private final ClientWritePlatformService clientWritePlatformService;
 
     @Autowired
-    public CreateClientCommandHandler(final ClientWritePlatformService clientWritePlatformService,
-                                      final CommandHandlerProvider commandHandlerProvider) {
+    public CreateClientCommandHandler(final ClientWritePlatformService clientWritePlatformService) {
         this.clientWritePlatformService = clientWritePlatformService;
-        commandHandlerProvider.registerHandler(this);
     }
 
     @Transactional

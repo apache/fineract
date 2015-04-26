@@ -9,13 +9,14 @@ import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.springframework.stereotype.Component;
 
+@Component
 @CommandType(entity = "HUMAN", action = "UPDATE")
 public class ValidCommandHandler implements NewCommandSourceHandler {
 
-    public ValidCommandHandler(final CommandHandlerProvider commandHandlerProvider) {
+    public ValidCommandHandler() {
         super();
-        commandHandlerProvider.registerHandler(this);
     }
 
     @Override
