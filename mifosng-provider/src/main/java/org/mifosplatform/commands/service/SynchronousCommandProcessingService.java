@@ -14,6 +14,7 @@ import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.exception.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
+import org.mifosplatform.commands.provider.CommandHandlerProvider;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -38,12 +39,14 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer;
     private CommandSourceRepository commandSourceRepository;
     private final ConfigurationDomainService configurationDomainService;
+    private final CommandHandlerProvider commandHandlerProvider;
 
     @Autowired
     public SynchronousCommandProcessingService(final PlatformSecurityContext context, final ApplicationContext applicationContext,
             final ToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer,
             final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer,
-            final CommandSourceRepository commandSourceRepository, final ConfigurationDomainService configurationDomainService) {
+            final CommandSourceRepository commandSourceRepository, final ConfigurationDomainService configurationDomainService,
+            final CommandHandlerProvider commandHandlerProvider) {
         this.context = context;
         this.context = context;
         this.applicationContext = applicationContext;
@@ -52,6 +55,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         this.commandSourceRepository = commandSourceRepository;
         this.commandSourceRepository = commandSourceRepository;
         this.configurationDomainService = configurationDomainService;
+        this.commandHandlerProvider = commandHandlerProvider;
     }
 
     @Transactional
@@ -62,6 +66,10 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         final boolean rollbackTransaction = this.configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName());
 
         final NewCommandSourceHandler handler = findCommandHandler(wrapper);
+
+        // TODO remove line 64 and uncomment following statement once all handlers are refactored
+        // final NewCommandSourceHandler handler = this.commandHandlerProvider.getHandler(wrapper.entityName(), wrapper.actionName());
+
         final CommandProcessingResult result = handler.processCommand(command);
 
         final AppUser maker = this.context.authenticatedUser(wrapper);
@@ -124,6 +132,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 .withEntityId(commandSourceResult.getResourceId()).build();
     }
 
+    // TODO remove this method once all handlers are refactored
+    @Deprecated
     private NewCommandSourceHandler findCommandHandler(final CommandWrapper wrapper) {
         NewCommandSourceHandler handler = null;
 
