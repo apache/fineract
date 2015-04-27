@@ -1953,8 +1953,10 @@ public class ClientLoanIntegrationTest {
         System.out.println("----------Make over payment for repayment 4 ------------");
         this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("3220.60"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012", new JournalEntry(
-                Float.valueOf("3139.68"), JournalEntry.TransactionType.DEBIT), new JournalEntry(Float.valueOf("50.00"),
+                Float.valueOf("3220.60"), JournalEntry.TransactionType.DEBIT), new JournalEntry(Float.valueOf("50.00"),
                 JournalEntry.TransactionType.CREDIT), new JournalEntry(Float.valueOf("3089.68"), JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, "20 January 2012", new JournalEntry(80.92f,
+                JournalEntry.TransactionType.CREDIT));
         loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "status");
         LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
     }
@@ -2147,8 +2149,10 @@ public class ClientLoanIntegrationTest {
         System.out.println("----------Make over payment for repayment 4 ------------");
         this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("3220.58"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012", new JournalEntry(
-                Float.valueOf("3120.58"), JournalEntry.TransactionType.DEBIT), new JournalEntry(Float.valueOf("30.90"),
+                Float.valueOf("3220.58"), JournalEntry.TransactionType.DEBIT), new JournalEntry(Float.valueOf("30.90"),
                 JournalEntry.TransactionType.CREDIT), new JournalEntry(Float.valueOf("3089.68"), JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, "20 January 2012", new JournalEntry(100f,
+                JournalEntry.TransactionType.CREDIT));
         loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "status");
         LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
     }
@@ -2356,8 +2360,10 @@ public class ClientLoanIntegrationTest {
         System.out.println("----------Make over payment for repayment 4 ------------");
         this.loanTransactionHelper.makeRepayment("20 January 2012", Float.valueOf("3221.61"), loanID);
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "20 January 2012", new JournalEntry(
-                Float.valueOf("3121.19"), JournalEntry.TransactionType.DEBIT), new JournalEntry(Float.valueOf("31.51"),
+                Float.valueOf("3221.61"), JournalEntry.TransactionType.DEBIT), new JournalEntry(Float.valueOf("31.51"),
                 JournalEntry.TransactionType.CREDIT), new JournalEntry(Float.valueOf("3089.68"), JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, "20 January 2012", new JournalEntry(100.42f,
+                JournalEntry.TransactionType.CREDIT));
         loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "status");
         LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
     }
