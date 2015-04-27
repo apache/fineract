@@ -659,6 +659,64 @@ public class AccountingScenarioIntegrationTest {
     }
 
     @Test
+    public void checkPeriodicAccrualAccountingFlow_OVER_PAYMENT() {
+        final Account assetAccount = this.accountHelper.createAssetAccount();
+        final Account incomeAccount = this.accountHelper.createIncomeAccount();
+        final Account expenseAccount = this.accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+
+        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingEnabled(assetAccount, incomeAccount, expenseAccount,
+                overpaymentAccount);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, this.DATE_OF_JOINING);
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID);
+
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan(this.EXPECTED_DISBURSAL_DATE, loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(this.EXPECTED_DISBURSAL_DATE, loanID);
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+        // CHECK ACCOUNT ENTRIES
+        System.out.println("Entries ......");
+        final float PRINCIPAL_VALUE_FOR_EACH_PERIOD = 2000.0f;
+        final float TOTAL_INTEREST = 1000.0f;
+        final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(this.LP_PRINCIPAL, JournalEntry.TransactionType.CREDIT),
+                new JournalEntry(this.LP_PRINCIPAL, JournalEntry.TransactionType.DEBIT), };
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.EXPECTED_DISBURSAL_DATE, assetAccountInitialEntry);
+
+        final String jobName = "Add Accrual Transactions";
+        try {
+            this.schedulerJobHelper.executeJob(jobName);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // MAKE 1
+        System.out.println("Repayment 1 ......");
+        final float FIRST_INTEREST = 200.0f;
+        final float FIRST_PRINCIPAL = 2000.0f;
+        final float FEE_PORTION = 0.0f;
+        final float PENALTY_PORTION = 0.0f;
+        this.loanTransactionHelper.checkAccrualTransactionForRepayment(getDateAsLocalDate(this.REPAYMENT_DATE[1]), FIRST_INTEREST,
+                FEE_PORTION, PENALTY_PORTION, loanID);
+        this.loanTransactionHelper.makeRepayment(this.REPAYMENT_DATE[1], 15000f, loanID);
+        float expected_value = this.LP_PRINCIPAL - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
+        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, expected_value, loanID);
+        final JournalEntry[] assetAccountEntry = { new JournalEntry(15000f, JournalEntry.TransactionType.DEBIT),
+                new JournalEntry(1000f, JournalEntry.TransactionType.CREDIT), new JournalEntry(10000f, JournalEntry.TransactionType.CREDIT) };
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.REPAYMENT_DATE[1], assetAccountEntry);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, this.REPAYMENT_DATE[1], new JournalEntry(4000f,
+                JournalEntry.TransactionType.CREDIT));
+        System.out.println("Repayment  Done......");
+
+    }
+
+    @Test
     public void checkPeriodicAccrualAccountingTillCurrentDateFlow() {
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
