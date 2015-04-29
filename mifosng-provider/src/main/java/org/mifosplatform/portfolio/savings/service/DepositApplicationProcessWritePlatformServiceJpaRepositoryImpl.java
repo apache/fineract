@@ -364,7 +364,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             // Save linked account information
             final Long savingsAccountId = command.longValueOfParameterNamed(DepositsApiConstants.linkedAccountParamName);
-            AccountAssociations accountAssociations = this.accountAssociationsRepository.findBySavingsId(accountId);
+            AccountAssociations accountAssociations = this.accountAssociationsRepository.findBySavingsIdAndType(accountId,
+                    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
             if (savingsAccountId == null) {
                 if (accountAssociations != null) {
                     if (this.fromJsonHelper.parameterExists(DepositsApiConstants.linkedAccountParamName, command.parsedJson())) {

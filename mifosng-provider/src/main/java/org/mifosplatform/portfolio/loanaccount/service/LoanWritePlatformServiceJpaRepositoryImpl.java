@@ -50,6 +50,7 @@ import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWr
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.mifosplatform.portfolio.account.data.AccountTransferDTO;
 import org.mifosplatform.portfolio.account.data.PortfolioAccountData;
+import org.mifosplatform.portfolio.account.domain.AccountAssociationType;
 import org.mifosplatform.portfolio.account.domain.AccountAssociations;
 import org.mifosplatform.portfolio.account.domain.AccountAssociationsRepository;
 import org.mifosplatform.portfolio.account.domain.AccountTransferDetailRepository;
@@ -436,7 +437,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private void createStandingInstruction(Loan loan) {
 
         if (loan.shouldCreateStandingInstructionAtDisbursement()) {
-            AccountAssociations accountAssociations = this.accountAssociationRepository.findByLoanId(loan.getId());
+            AccountAssociations accountAssociations = this.accountAssociationRepository.findByLoanIdAndType(loan.getId(),
+                    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
 
             if (accountAssociations != null) {
 
@@ -2607,21 +2609,21 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
-    private void validateForAddAndDeleteTranche(final Loan loan){
-        
+    private void validateForAddAndDeleteTranche(final Loan loan) {
+
         BigDecimal totalDisbursedAmount = BigDecimal.ZERO;
         Collection<LoanDisbursementDetails> loanDisburseDetails = loan.getDisbursementDetails();
         for (LoanDisbursementDetails disbursementDetails : loanDisburseDetails) {
-            if(disbursementDetails.actualDisbursementDate() != null){
+            if (disbursementDetails.actualDisbursementDate() != null) {
                 totalDisbursedAmount = totalDisbursedAmount.add(disbursementDetails.principal());
             }
         }
-        if(totalDisbursedAmount.compareTo(loan.getApprovedPrincipal()) == 0){
+        if (totalDisbursedAmount.compareTo(loan.getApprovedPrincipal()) == 0) {
             final String errorMessage = "loan.disbursement.cannot.be.a.edited";
             throw new LoanMultiDisbursementException(LoanApiConstants.disbursementDataParameterName, errorMessage);
-        }    
+        }
     }
-    
+
     @Override
     @Transactional
     public CommandProcessingResult addAndDeleteLoanDisburseDetails(Long loanId, JsonCommand command) {
@@ -2630,17 +2632,17 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         checkClientOrGroupActive(loan);
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
         LocalDate expectedDisbursementDate = loan.getExpectedDisbursedOnLocalDate();
-        if(!loan.loanProduct().isMultiDisburseLoan()){
+        if (!loan.loanProduct().isMultiDisburseLoan()) {
             final String errorMessage = "loan.product.does.not.support.multiple.disbursals";
             throw new LoanMultiDisbursementException(LoanApiConstants.disbursementDataParameterName, errorMessage);
         }
-        if(loan.isSubmittedAndPendingApproval() || loan.isClosed() || loan.isClosedWrittenOff() || loan.status().isClosedObligationsMet() ||
-                loan.status().isOverpaid()){
+        if (loan.isSubmittedAndPendingApproval() || loan.isClosed() || loan.isClosedWrittenOff() || loan.status().isClosedObligationsMet()
+                || loan.status().isOverpaid()) {
             final String errorMessage = "cannot.modify.tranches.if.loan.is.pendingapproval.closed.overpaid.writtenoff";
             throw new LoanMultiDisbursementException(LoanApiConstants.disbursementDataParameterName, errorMessage);
         }
         validateMultiDisbursementData(command, expectedDisbursementDate);
-        
+
         this.validateForAddAndDeleteTranche(loan);
 
         loan.updateDisbursementDetails(command, actualChanges);
@@ -2704,7 +2706,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             Collection<LoanDisbursementDetails> loanDisburseDetails = loan.getDisbursementDetails();
             BigDecimal setAmount = BigDecimal.ZERO;
             for (LoanDisbursementDetails details : loanDisburseDetails) {
-                if(details.actualDisbursementDate() != null){
+                if (details.actualDisbursementDate() != null) {
                     setAmount = setAmount.add(details.principal());
                 }
             }
