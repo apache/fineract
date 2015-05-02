@@ -115,8 +115,8 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
         public String schema() {
             return " h.id, s.name as name, h.name as display_name, h.is_active, h.created_date,"
                     + " h.lastmodified_date, h.ugd_template_id, tp.name as ugd_template_name, "
-                    + "h.ugd_template_id from m_hook h inner join m_hook_templates s on h.template_id = s.id"
-                    + " inner join m_template tp on h.ugd_template_id = tp.id";
+                    + "h.ugd_template_id from m_hook h left join m_hook_templates s on h.template_id = s.id"
+                    + " left join m_template tp on h.ugd_template_id = tp.id";
         }
 
         @Override
