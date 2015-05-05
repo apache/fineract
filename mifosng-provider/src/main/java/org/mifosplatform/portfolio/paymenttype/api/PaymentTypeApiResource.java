@@ -5,10 +5,7 @@
  */
 package org.mifosplatform.portfolio.paymenttype.api;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;

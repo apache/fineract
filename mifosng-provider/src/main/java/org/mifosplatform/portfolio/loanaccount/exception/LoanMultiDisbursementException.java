@@ -9,9 +9,8 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
 
 public class LoanMultiDisbursementException extends AbstractPlatformDomainRuleException {
 
-    public LoanMultiDisbursementException(final String entity, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
-        super("error.msg." + defaultUserMessage,defaultUserMessage);
+    public LoanMultiDisbursementException(final String defaultUserMessage, final Object... defaultUserMessageArgs) {
+        super("error.msg." + defaultUserMessage, defaultUserMessage, defaultUserMessageArgs);
     }
 
 }

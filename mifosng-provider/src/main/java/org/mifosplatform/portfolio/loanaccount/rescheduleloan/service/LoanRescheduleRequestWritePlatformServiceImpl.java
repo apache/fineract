@@ -460,7 +460,6 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 boolean isHolidayEnabled = false;
                 WorkingDays workingDays = null;
                 LocalDate recalculateFrom = null;
-                LocalDate lastTransactionDate = null;
                 Long overdurPenaltyWaitPeriod = null;
                 if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
                     restCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(

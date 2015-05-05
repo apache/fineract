@@ -2309,7 +2309,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public Set<SavingsAccountCharge> charges() {
-        return (this.charges == null) ? new HashSet<SavingsAccountCharge>() : this.charges;
+        return (this.charges == null) ? new HashSet<>() : this.charges;
     }
 
     public void validateAccountValuesWithProduct() {
