@@ -74,14 +74,15 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
 
             final String union = " union ";
             final String clientExactMatchSql = " (select 'CLIENT' as entityType, c.id as entityId, c.display_name as entityName, c.external_id as entityExternalId, c.account_no as entityAccountNo "
-                    + " , c.office_id as parentId, o.name as parentName, c.status_enum as entityStatusEnum "
-                    + " from m_client c join m_office o on o.id = c.office_id where o.hierarchy like :hierarchy and (c.account_no like :search or c.display_name like :search or c.external_id like :search)) ";
+                    + " , c.office_id as parentId, o.name as parentName, c.mobile_no as entityMobileNo,c.status_enum as entityStatusEnum "
+                    + " from m_client c join m_office o on o.id = c.office_id where o.hierarchy like :hierarchy and (c.account_no like :search or c.display_name like :search or c.external_id like :search or c.mobile_no like :search)) ";
 
             final String clientMatchSql = " (select 'CLIENT' as entityType, c.id as entityId, c.display_name as entityName, c.external_id as entityExternalId, c.account_no as entityAccountNo "
-                    + " , c.office_id as parentId, o.name as parentName, c.status_enum as entityStatusEnum  "
+                    + " , c.office_id as parentId, o.name as parentName,c.mobile_no as entityMobileNo, c.status_enum as entityStatusEnum  "
                     + " from m_client c join m_office o on o.id = c.office_id where o.hierarchy like :hierarchy and (c.account_no like :partialSearch and c.account_no not like :search) or "
                     + "(c.display_name like :partialSearch and c.display_name not like :search) or "
-                    + "(c.external_id like :partialSearch and c.external_id not like :search))";
+                    + "(c.external_id like :partialSearch and c.external_id not like :search)or"
+                    + "(c.mobile_no like :partialSearch and c.mobile_no not like :search))";
 
             final String loanExactMatchSql = " (select 'LOAN' as entityType, l.id as entityId, pl.name as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
                     + " , c.id as parentId, c.display_name as parentName, l.loan_status_id as entityStatusEnum "
@@ -104,22 +105,22 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                     + "(s.external_id like :partialSearch and s.external_id not like :search)) ";
 
             final String clientIdentifierExactMatchSql = " (select 'CLIENTIDENTIFIER' as entityType, ci.id as entityId, ci.document_key as entityName, "
-                    + " null as entityExternalId, null as entityAccountNo, c.id as parentId, c.display_name as parentName, c.status_enum as entityStatusEnum "
+                    + " null as entityExternalId, null as entityAccountNo, c.id as parentId, c.display_name as parentName,null as entityMobileNo, c.status_enum as entityStatusEnum "
                     + " from m_client_identifier ci join m_client c on ci.client_id=c.id join m_office o on o.id = c.office_id "
-                    + " where o.hierarchy like :hierarchy and ci.document_key like :search) ";
+                    + " where o.hierarchy like :hierarchy and ci.document_key like :search ) ";
 
             final String clientIdentifierMatchSql = " (select 'CLIENTIDENTIFIER' as entityType, ci.id as entityId, ci.document_key as entityName, "
-                    + " null as entityExternalId, null as entityAccountNo, c.id as parentId, c.display_name as parentName, c.status_enum as entityStatusEnum "
+                    + " null as entityExternalId, null as entityAccountNo, c.id as parentId, c.display_name as parentName,null as entityMobileNo ,c.status_enum as entityStatusEnum "
                     + " from m_client_identifier ci join m_client c on ci.client_id=c.id join m_office o on o.id = c.office_id "
-                    + " where o.hierarchy like :hierarchy and ci.document_key like :partialSearch and ci.document_key not like :search) ";
+                    + " where o.hierarchy like :hierarchy and (ci.document_key like :partialSearch and ci.document_key not like :search))";
 
             final String groupExactMatchSql = " (select IF(g.level_id=1,'CENTER','GROUP') as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, NULL as entityAccountNo "
                     + " , g.office_id as parentId, o.name as parentName, g.status_enum as entityStatusEnum "
-                    + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and (g.display_name like :search or g.external_id like :search)) ";
+                    + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and (g.display_name like :search or g.external_id like :search or g.id like :search )) ";
 
             final String groupMatchSql = " (select IF(g.level_id=1,'CENTER','GROUP') as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, NULL as entityAccountNo "
                     + " , g.office_id as parentId, o.name as parentName, g.status_enum as entityStatusEnum "
-                    + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and (g.display_name like :partialSearch and g.display_name not like :search) or (g.external_id like :partialSearch and g.external_id not like :search)) ";
+                    + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and (g.display_name like :partialSearch and g.display_name not like :search) or(g.external_id like :partialSearch and g.external_id not like :search) or (g.id like :partialSearch and g.id not like :search)) ";
 
             final StringBuffer sql = new StringBuffer();
 
@@ -180,6 +181,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
             final String entityType = rs.getString("entityType");
             final Long parentId = JdbcSupport.getLong(rs, "parentId");
             final String parentName = rs.getString("parentName");
+            final String entityMobileNo=rs.getString("entityMobileNo");
             final Integer entityStatusEnum = JdbcSupport.getInteger(rs, "entityStatusEnum");
 
             EnumOptionData entityStatus = new EnumOptionData(0L, "", "");
@@ -198,7 +200,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                 entityStatus = LoanEnumerations.status(loanStatusEnumData);
             }
 
-            return new SearchData(entityId, entityAccountNo, entityExternalId, entityName, entityType, parentId, parentName, entityStatus);
+            return new SearchData(entityId, entityAccountNo, entityExternalId, entityName, entityType, parentId, parentName,entityMobileNo, entityStatus);
         }
 
     }
