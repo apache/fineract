@@ -469,6 +469,6 @@ public class SavingsAccountData {
     }
 
     public Collection<SavingsAccountChargeData> charges() {
-        return (this.charges == null) ? new HashSet<>() : this.charges;
+        return (this.charges == null) ? new HashSet<SavingsAccountChargeData>() : this.charges;
     }
 }
