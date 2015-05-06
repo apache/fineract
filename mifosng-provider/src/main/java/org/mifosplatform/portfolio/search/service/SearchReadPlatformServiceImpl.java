@@ -85,21 +85,21 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                     + "(c.mobile_no like :partialSearch and c.mobile_no not like :search))";
 
             final String loanExactMatchSql = " (select 'LOAN' as entityType, l.id as entityId, pl.name as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
-                    + " , c.id as parentId, c.display_name as parentName, l.loan_status_id as entityStatusEnum "
+                    + " , c.id as parentId, c.display_name as parentName, null as entityMobileNo, l.loan_status_id as entityStatusEnum "
                     + " from m_loan l join m_client c on l.client_id = c.id join m_office o on o.id = c.office_id join m_product_loan pl on pl.id=l.product_id where o.hierarchy like :hierarchy and (l.account_no like :search or l.external_id like :search)) ";
 
             final String loanMatchSql = " (select 'LOAN' as entityType, l.id as entityId, pl.name as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
-                    + " , c.id as parentId, c.display_name as parentName, l.loan_status_id as entityStatusEnum "
+                    + " , c.id as parentId, c.display_name as parentName, null as entityMobileNo, l.loan_status_id as entityStatusEnum "
                     + " from m_loan l join m_client c on l.client_id = c.id join m_office o on o.id = c.office_id join m_product_loan pl on pl.id=l.product_id where o.hierarchy like :hierarchy and "
                     + " ((l.account_no like :partialSearch and l.account_no not like :search) or (l.external_id like :partialSearch and l.external_id not like :search))) ";
 
             final String savingExactMatchSql = " (select 'SAVING' as entityType, s.id as entityId, sp.name as entityName, s.external_id as entityExternalId, s.account_no as entityAccountNo "
-                    + " , c.id as parentId, c.display_name as parentName, s.status_enum as entityStatusEnum "
+                    + " , c.id as parentId, c.display_name as parentName, null as entityMobileNo, s.status_enum as entityStatusEnum "
                     + " from m_savings_account s join m_client c on s.client_id = c.id join m_office o on o.id = c.office_id join m_savings_product sp on sp.id=s.product_id "
                     + " where o.hierarchy like :hierarchy and (s.account_no like :search or s.external_id like :search)) ";
 
             final String savingMatchSql = " (select 'SAVING' as entityType, s.id as entityId, sp.name as entityName, s.external_id as entityExternalId, s.account_no as entityAccountNo "
-                    + " , c.id as parentId, c.display_name as parentName, s.status_enum as entityStatusEnum "
+                    + " , c.id as parentId, c.display_name as parentName, null as entityMobileNo, s.status_enum as entityStatusEnum "
                     + " from m_savings_account s join m_client c on s.client_id = c.id join m_office o on o.id = c.office_id join m_savings_product sp on sp.id=s.product_id "
                     + " where o.hierarchy like :hierarchy and (s.account_no like :partialSearch and s.account_no not like :search) or "
                     + "(s.external_id like :partialSearch and s.external_id not like :search)) ";
@@ -115,11 +115,11 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                     + " where o.hierarchy like :hierarchy and (ci.document_key like :partialSearch and ci.document_key not like :search))";
 
             final String groupExactMatchSql = " (select IF(g.level_id=1,'CENTER','GROUP') as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, NULL as entityAccountNo "
-                    + " , g.office_id as parentId, o.name as parentName, g.status_enum as entityStatusEnum "
+                    + " , g.office_id as parentId, o.name as parentName, null as entityMobileNo, g.status_enum as entityStatusEnum "
                     + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and (g.display_name like :search or g.external_id like :search or g.id like :search )) ";
 
             final String groupMatchSql = " (select IF(g.level_id=1,'CENTER','GROUP') as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, NULL as entityAccountNo "
-                    + " , g.office_id as parentId, o.name as parentName, g.status_enum as entityStatusEnum "
+                    + " , g.office_id as parentId, o.name as parentName, null as entityMobileNo, g.status_enum as entityStatusEnum "
                     + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and (g.display_name like :partialSearch and g.display_name not like :search) or(g.external_id like :partialSearch and g.external_id not like :search) or (g.id like :partialSearch and g.id not like :search)) ";
 
             final StringBuffer sql = new StringBuffer();
@@ -181,7 +181,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
             final String entityType = rs.getString("entityType");
             final Long parentId = JdbcSupport.getLong(rs, "parentId");
             final String parentName = rs.getString("parentName");
-            final String entityMobileNo=rs.getString("entityMobileNo");
+            final String entityMobileNo = rs.getString("entityMobileNo");
             final Integer entityStatusEnum = JdbcSupport.getInteger(rs, "entityStatusEnum");
 
             EnumOptionData entityStatus = new EnumOptionData(0L, "", "");
@@ -200,7 +200,8 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                 entityStatus = LoanEnumerations.status(loanStatusEnumData);
             }
 
-            return new SearchData(entityId, entityAccountNo, entityExternalId, entityName, entityType, parentId, parentName,entityMobileNo, entityStatus);
+            return new SearchData(entityId, entityAccountNo, entityExternalId, entityName, entityType, parentId, parentName,
+                    entityMobileNo, entityStatus);
         }
 
     }
