@@ -6,6 +6,7 @@
 package org.mifosplatform.accounting.journalentry.handler;
 
 import org.mifosplatform.accounting.journalentry.service.JournalEntryWritePlatformService;
+import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@CommandType(entity = "JOURNALENTRY", action = "REVERSE")
 public class ReverseJournalEntryCommandHandler implements NewCommandSourceHandler {
 
     private final JournalEntryWritePlatformService writePlatformService;

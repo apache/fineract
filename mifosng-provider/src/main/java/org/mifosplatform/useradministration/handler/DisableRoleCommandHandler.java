@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.useradministration.handler;
 
+import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@CommandType(entity = "ROLE", action = "DISABLE")
 public class DisableRoleCommandHandler implements NewCommandSourceHandler {
 
     private final RoleWritePlatformService writePlatformService;

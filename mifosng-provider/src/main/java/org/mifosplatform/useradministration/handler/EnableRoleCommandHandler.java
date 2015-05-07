@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.useradministration.handler;
 
+import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@CommandType(entity = "ROLE", action = "ENABLE")
 public class EnableRoleCommandHandler implements NewCommandSourceHandler {
 
     private final RoleWritePlatformService writePlatformService;

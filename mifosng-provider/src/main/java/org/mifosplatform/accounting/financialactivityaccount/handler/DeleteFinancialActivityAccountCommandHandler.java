@@ -6,6 +6,7 @@
 package org.mifosplatform.accounting.financialactivityaccount.handler;
 
 import org.mifosplatform.accounting.financialactivityaccount.service.FinancialActivityAccountWritePlatformService;
+import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@CommandType(entity = "FINANCIALACTIVITYACCOUNT", action = "DELETE")
 public class DeleteFinancialActivityAccountCommandHandler implements NewCommandSourceHandler {
 
     private final FinancialActivityAccountWritePlatformService writePlatformService;

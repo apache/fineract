@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.infrastructure.survey.handler;
 
+import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 
 @Service
+@CommandType(entity = "LIKELIHOOD", action = "UPDATE")
 public class UpdateLikelihoodCommandHandler implements NewCommandSourceHandler {
 
 

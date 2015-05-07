@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.group.handler;
 
+import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@CommandType(entity = "CENTER", action = "DISASSOCIATEGROUPS")
 public class DisassociateGroupsFromCenterCommandHandler implements NewCommandSourceHandler {
 
     private final GroupingTypesWritePlatformService writePlatformService;

@@ -7,6 +7,7 @@ package org.mifosplatform.infrastructure.accountnumberformat.handler;
 
 import javax.transaction.Transactional;
 
+import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.accountnumberformat.service.AccountNumberFormatWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@CommandType(entity = "ACCOUNTNUMBERFORMAT", action = "DELETE")
 public class DeleteAccountNumberFormatCommandHandler implements NewCommandSourceHandler {
 
     private final AccountNumberFormatWritePlatformService accountNumberFormatWritePlatformService;

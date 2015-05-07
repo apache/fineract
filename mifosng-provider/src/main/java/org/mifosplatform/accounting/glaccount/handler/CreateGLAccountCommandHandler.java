@@ -6,6 +6,7 @@
 package org.mifosplatform.accounting.glaccount.handler;
 
 import org.mifosplatform.accounting.glaccount.service.GLAccountWritePlatformService;
+import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@CommandType(entity = "GLACCOUNT", action = "CREATE")
 public class CreateGLAccountCommandHandler implements NewCommandSourceHandler {
 
     private final GLAccountWritePlatformService writePlatformService;
