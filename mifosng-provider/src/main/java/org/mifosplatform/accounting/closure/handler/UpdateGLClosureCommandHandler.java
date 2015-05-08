@@ -6,6 +6,7 @@
 package org.mifosplatform.accounting.closure.handler;
 
 import org.mifosplatform.accounting.closure.service.GLClosureWritePlatformService;
+import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@CommandType(entity = "GLCLOSURE", action = "UPDATE")
 public class UpdateGLClosureCommandHandler implements NewCommandSourceHandler {
 
     private final GLClosureWritePlatformService writePlatformService;

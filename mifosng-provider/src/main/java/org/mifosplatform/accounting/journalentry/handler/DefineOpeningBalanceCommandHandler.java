@@ -6,6 +6,7 @@
 package org.mifosplatform.accounting.journalentry.handler;
 
 import org.mifosplatform.accounting.journalentry.service.JournalEntryWritePlatformService;
+import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@CommandType(entity = "JOURNALENTRY", action = "DEFINEOPENINGBALANCE")
 public class DefineOpeningBalanceCommandHandler implements NewCommandSourceHandler {
     
     private final JournalEntryWritePlatformService writePlatformService;

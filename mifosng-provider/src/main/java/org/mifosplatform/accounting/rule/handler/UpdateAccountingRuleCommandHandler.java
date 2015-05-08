@@ -6,6 +6,7 @@
 package org.mifosplatform.accounting.rule.handler;
 
 import org.mifosplatform.accounting.rule.service.AccountingRuleWritePlatformService;
+import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@CommandType(entity = "ACCOUNTINGRULE", action = "UPDATE")
 public class UpdateAccountingRuleCommandHandler implements NewCommandSourceHandler {
 
     private final AccountingRuleWritePlatformService writePlatformService;

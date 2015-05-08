@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.infrastructure.codes.handler;
 
+import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.codes.service.CodeWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@CommandType(entity = "CODE", action = "DELETE")
 public class DeleteCodeCommandHandler implements NewCommandSourceHandler {
 
     private final CodeWritePlatformService writePlatformService;

@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.infrastructure.configuration.handler;
 
+import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.configuration.service.GlobalConfigurationWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@CommandType(entity = "CONFIGURATION", action = "UPDATE")
 public class UpdateGlobalConfigurationCommandHandler implements NewCommandSourceHandler {
 
     private final GlobalConfigurationWritePlatformService writePlatformService;
