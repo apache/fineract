@@ -157,14 +157,15 @@ public class GroupsApiResource {
             @QueryParam("externalId") final String externalId, @QueryParam("name") final String name,
             @QueryParam("underHierarchy") final String hierarchy, @QueryParam("paged") final Boolean paged,
             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
+            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder, 
+            @QueryParam("orphansOnly") final Boolean orphansOnly) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
         final PaginationParameters parameters = PaginationParameters.instance(paged, offset, limit, orderBy, sortOrder);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         final SearchParameters searchParameters = SearchParameters.forGroups(sqlSearch, officeId, staffId, externalId, name, hierarchy,
-                offset, limit, orderBy, sortOrder);
+                offset, limit, orderBy, sortOrder, orphansOnly);
         if (parameters.isPaged()) {
             final Page<GroupGeneralData> groups = this.groupReadPlatformService.retrievePagedAll(searchParameters, parameters);
             return this.toApiJsonSerializer.serialize(settings, groups, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
