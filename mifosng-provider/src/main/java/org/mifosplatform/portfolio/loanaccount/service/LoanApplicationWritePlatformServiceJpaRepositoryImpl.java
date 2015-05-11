@@ -685,7 +685,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             // Save linked account information
             final String linkAccountIdParamName = "linkAccountId";
             final Long savingsAccountId = command.longValueOfParameterNamed(linkAccountIdParamName);
-            AccountAssociations accountAssociations = this.accountAssociationsRepository.findByLoanId(loanId);
+            AccountAssociations accountAssociations = this.accountAssociationsRepository.findByLoanIdAndType(loanId,
+                    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
             boolean isLinkedAccPresent = false;
             if (savingsAccountId == null) {
                 if (accountAssociations != null) {

@@ -50,6 +50,7 @@ import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWr
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.mifosplatform.portfolio.account.data.AccountTransferDTO;
 import org.mifosplatform.portfolio.account.data.PortfolioAccountData;
+import org.mifosplatform.portfolio.account.domain.AccountAssociationType;
 import org.mifosplatform.portfolio.account.domain.AccountAssociations;
 import org.mifosplatform.portfolio.account.domain.AccountAssociationsRepository;
 import org.mifosplatform.portfolio.account.domain.AccountTransferDetailRepository;
@@ -436,7 +437,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private void createStandingInstruction(Loan loan) {
 
         if (loan.shouldCreateStandingInstructionAtDisbursement()) {
-            AccountAssociations accountAssociations = this.accountAssociationRepository.findByLoanId(loan.getId());
+            AccountAssociations accountAssociations = this.accountAssociationRepository.findByLoanIdAndType(loan.getId(),
+                    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
 
             if (accountAssociations != null) {
 
