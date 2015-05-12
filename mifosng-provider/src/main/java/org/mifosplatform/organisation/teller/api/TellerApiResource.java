@@ -233,15 +233,16 @@ public class TellerApiResource {
     @Path("{tellerId}/cashiers/{cashierId}/transactions")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    public String getTransactionsForCashier(@PathParam("tellerId") final Long tellerId, @PathParam("cashierId") final Long cashierId) {
+    public String getTransactionsForCashier(@PathParam("tellerId") final Long tellerId, @PathParam("cashierId") final Long cashierId,
+            @QueryParam("currencyCode") final String currencyCode) {
         final TellerData teller = this.readPlatformService.findTeller(tellerId);
         final CashierData cashier = this.readPlatformService.findCashier(cashierId);
 
         final Date fromDate = null;
         final Date toDate = null;
 
-        final Collection<CashierTransactionData> cashierTxns = this.readPlatformService.retrieveCashierTransactions(cashierId, true,
-                fromDate, toDate);
+        final Collection<CashierTransactionData> cashierTxns = this.readPlatformService.retrieveCashierTransactions(cashierId, false,
+                fromDate, toDate, currencyCode);
 
         return this.jsonSerializer.serialize(cashierTxns);
     }
@@ -251,7 +252,7 @@ public class TellerApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     public String getTransactionsWtihSummaryForCashier(@PathParam("tellerId") final Long tellerId,
-            @PathParam("cashierId") final Long cashierId) {
+            @PathParam("cashierId") final Long cashierId, @QueryParam("currencyCode") final String currencyCode) {
         final TellerData teller = this.readPlatformService.findTeller(tellerId);
         final CashierData cashier = this.readPlatformService.findCashier(cashierId);
 
@@ -259,7 +260,7 @@ public class TellerApiResource {
         final Date toDate = null;
 
         final CashierTransactionsWithSummaryData cashierTxnWithSummary = this.readPlatformService.retrieveCashierTransactionsWithSummary(
-                cashierId, true, fromDate, toDate);
+                cashierId, false, fromDate, toDate, currencyCode);
 
         return this.jsonSerializer.serialize(cashierTxnWithSummary);
     }

@@ -426,20 +426,24 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     @Override
     public CashierTransactionsWithSummaryData retrieveCashierTransactionsWithSummary(final Long cashierId, final boolean includeAllTellers,
-            final Date fromDate, final Date toDate) {
-        final AppUser currentUser = this.context.authenticatedUser();
-        final String hierarchy = currentUser.getOffice().getHierarchy();
+            final Date fromDate, final Date toDate, final String currencyCode) {
+        CashierData cashierData = findCashier(cashierId);
+        Long staffId = cashierData.getStaffId();
+        StaffData staffData = staffReadPlatformService.retrieveStaff(staffId);
+        OfficeData officeData = officeReadPlatformService.retrieveOffice(staffData.getOfficeId());
+        final String hierarchy = officeData.getHierarchy();
         String hierarchySearchString = null;
         if (includeAllTellers) {
             hierarchySearchString = "." + "%";
         } else {
-            hierarchySearchString = hierarchy + "%";
+            hierarchySearchString = hierarchy;
         }
         final CashierTransactionSummaryMapper ctsm = new CashierTransactionSummaryMapper();
         final String sql = "select " + ctsm.cashierTxnSummarySchema() + " limit 1000";
 
         Collection<CashierTransactionTypeTotalsData> cashierTxnTypeTotals = this.jdbcTemplate.query(sql, ctsm, new Object[] { cashierId,
-                hierarchySearchString, cashierId, hierarchySearchString, cashierId, hierarchySearchString });
+                currencyCode, hierarchySearchString, cashierId, currencyCode, hierarchySearchString, cashierId, currencyCode,
+                hierarchySearchString });
 
         Iterator<CashierTransactionTypeTotalsData> itr = cashierTxnTypeTotals.iterator();
         BigDecimal allocAmount = new BigDecimal(0);
@@ -463,7 +467,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         }
 
         final Collection<CashierTransactionData> cashierTransactions = retrieveCashierTransactions(cashierId, includeAllTellers, fromDate,
-                toDate);
+                toDate, currencyCode);
 
         CashierTransactionData cashierTxnTemplate = retrieveCashierTxnTemplate(cashierId);
 
@@ -475,30 +479,35 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     @Override
     public Collection<CashierTransactionData> retrieveCashierTransactions(final Long cashierId, final boolean includeAllTellers,
-            final Date fromDate, final Date toDate) {
-        final AppUser currentUser = this.context.authenticatedUser();
-        final String hierarchy = currentUser.getOffice().getHierarchy();
+            final Date fromDate, final Date toDate, final String currencyCode) {
+        CashierData cashierData = findCashier(cashierId);
+        Long staffId = cashierData.getStaffId();
+        StaffData staffData = staffReadPlatformService.retrieveStaff(staffId);
+        OfficeData officeData = officeReadPlatformService.retrieveOffice(staffData.getOfficeId());
+        final String hierarchy = officeData.getHierarchy();
         String hierarchySearchString = null;
         if (includeAllTellers) {
             hierarchySearchString = "." + "%";
         } else {
-            hierarchySearchString = hierarchy + "%";
+            hierarchySearchString = hierarchy;
         }
 
         final CashierTransactionMapper ctm = new CashierTransactionMapper();
 
         final String sql = "select * from (select " + ctm.cashierTxnSchema()
-                + " where txn.cashier_id = ? and o.hierarchy like ? ) cashier_txns " + " union (select " + ctm.savingsTxnSchema()
-                + " where sav_txn.is_reversed = 0 and c.id = ? and o.hierarchy like ? and "
-                + " created_date between c.start_date and date_add(c.end_date, interval 1 day) "
+                + " where txn.cashier_id = ? and txn.currency_code = ? and o.hierarchy like ? ) cashier_txns " + " union (select "
+                + ctm.savingsTxnSchema()
+                + " where sav_txn.is_reversed = 0 and c.id = ? and sav.currency_code = ? and o.hierarchy like ? and "
+                + " sav_txn.transaction_date between c.start_date and date_add(c.end_date, interval 1 day) "
                 + " and renum.enum_value in ('deposit','withdrawal fee', 'Pay Charge', 'withdrawal') ) " + " union (select "
-                + ctm.loansTxnSchema() + " where loan_txn.is_reversed = 0 and c.id = ? and o.hierarchy like ? and "
-                + " created_date between c.start_date and date_add(c.end_date, interval 1 day) "
+                + ctm.loansTxnSchema()
+                + " where loan_txn.is_reversed = 0 and c.id = ? and loan.currency_code = ? and o.hierarchy like ? and "
+                + " loan_txn.transaction_date between c.start_date and date_add(c.end_date, interval 1 day) "
                 + " and renum.enum_value in ('Repayment At Disbursement','Repayment', 'Recovery Payment','Disbursement') ) "
                 + " order by created_date ";
 
-        return this.jdbcTemplate.query(sql, ctm, new Object[] { cashierId, hierarchySearchString, cashierId, hierarchySearchString,
-                cashierId, hierarchySearchString });
+        return this.jdbcTemplate.query(sql, ctm, new Object[] { cashierId, currencyCode, hierarchySearchString, cashierId, currencyCode,
+                hierarchySearchString, cashierId, currencyCode, hierarchySearchString });
     }
 
     private static final class CashierMapper implements RowMapper<CashierData> {
@@ -682,6 +691,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append("	left join m_office o on o.id = t.office_id ");
             sqlBuilder.append("	left join m_staff s on s.id = c.staff_id ");
             sqlBuilder.append("	where txn.cashier_id = ? ");
+            sqlBuilder.append(" and   txn.currency_code = ? ");
             sqlBuilder.append("	and o.hierarchy like ?  ) cashier_txns ");
             sqlBuilder.append("	UNION ");
             sqlBuilder.append("	(select sav_txn.id as txn_id, c.id as cashier_id, ");
@@ -709,8 +719,9 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append("	left join m_staff staff on user.staff_id = staff.id ");
             sqlBuilder.append("	left join m_cashiers c on c.staff_id = staff.id ");
             sqlBuilder.append("	where sav_txn.is_reversed = 0 and c.id = ? ");
-            sqlBuilder.append("	and o.hierarchy like ? and ");
-            sqlBuilder.append("	created_date between c.start_date and date_add(c.end_date, interval 1 day) ");
+            sqlBuilder.append(" and sav.currency_code = ? ");
+            sqlBuilder.append("	and o.hierarchy like ? ");
+            sqlBuilder.append("	and sav_txn.transaction_date between c.start_date and date_add(c.end_date, interval 1 day) ");
             sqlBuilder.append("	) ");
             sqlBuilder.append("	UNION ");
             sqlBuilder.append("	( ");
@@ -739,8 +750,9 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append("	left join m_staff staff on user.staff_id = staff.id ");
             sqlBuilder.append("	left join m_cashiers c on c.staff_id = staff.id ");
             sqlBuilder.append("	where loan_txn.is_reversed = 0 and c.id = ? ");
+            sqlBuilder.append(" and loan.currency_code = ? ");
             sqlBuilder.append("	and o.hierarchy like ? ");
-            sqlBuilder.append("	and created_date between c.start_date and date_add(c.end_date, interval 1 day) ");
+            sqlBuilder.append("	and loan_txn.transaction_date between c.start_date and date_add(c.end_date, interval 1 day) ");
             sqlBuilder.append("	) ");
             sqlBuilder.append("	) txns ");
             sqlBuilder.append("	group by cash_txn_type ");
