@@ -11,6 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -35,6 +37,8 @@ import java.util.HashMap;
 @Component
 @Scope("singleton")
 public class CommandHandlerProvider implements ApplicationContextAware {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandHandlerProvider.class);
 
     private ApplicationContext applicationContext;
     private HashMap<String, String> registeredHandlers;
@@ -70,8 +74,13 @@ public class CommandHandlerProvider implements ApplicationContextAware {
             final String[] commandHandlerBeans = this.applicationContext.getBeanNamesForAnnotation(CommandType.class);
             if (ArrayUtils.isNotEmpty(commandHandlerBeans)) {
                 for (final String commandHandlerName : commandHandlerBeans) {
+                    LOGGER.info("Register command handler '" + commandHandlerName + "' ...");
                     final CommandType commandType = this.applicationContext.getType(commandHandlerName).getAnnotation(CommandType.class);
-                    this.registeredHandlers.put(commandType.entity() + "|" + commandType.action(), commandHandlerName);
+                    try {
+                        this.registeredHandlers.put(commandType.entity() + "|" + commandType.action(), commandHandlerName);
+                    } catch (final Throwable th) {
+                        LOGGER.error("Unable to register command handler '" + commandHandlerName + "'!", th);
+                    }
                 }
             }
         }
