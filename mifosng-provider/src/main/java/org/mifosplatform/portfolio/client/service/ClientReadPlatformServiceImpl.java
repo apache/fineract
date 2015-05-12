@@ -190,6 +190,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         if (searchParameters.isScopedByOfficeHierarchy()) {
             extraCriteria += " and o.hierarchy like " + ApiParameterHelper.sqlEncodeString(searchParameters.getHierarchy() + "%");
         }
+        
+        if(searchParameters.isOrphansOnly()){
+        	extraCriteria += " and c.id NOT IN (select client_id from m_group_client) ";
+        }
 
         if (StringUtils.isNotBlank(extraCriteria)) {
             extraCriteria = extraCriteria.substring(4);
