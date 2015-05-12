@@ -68,9 +68,6 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     // data mappers
-    private final AllGroupTypesDataMapper allGroupTypesDataMapper = new AllGroupTypesDataMapper();
-
-    // data mappers
     private final CenterDataMapper centerMapper = new CenterDataMapper();
     private final GroupDataMapper groupDataMapper = new GroupDataMapper();
 
@@ -411,31 +408,12 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         if (CollectionUtils.isEmpty(staffOptions)) {
             staffOptions = null;
         }
-
-        Collection<GroupGeneralData> groupMembersOptions = retrieveAllGroupsForCenterDropdown(officeIdDefaulted);
-        if (CollectionUtils.isEmpty(groupMembersOptions)) {
-            groupMembersOptions = null;
-        }
+        final Collection<GroupGeneralData> groupMembersOptions = null;
 
         // final boolean clientPendingApprovalAllowed =
         // this.configurationDomainService.isClientPendingApprovalAllowedEnabled();
 
         return CenterData.template(officeIdDefaulted, new LocalDate(), officeOptions, staffOptions, groupMembersOptions);
-    }
-
-    private Collection<GroupGeneralData> retrieveAllGroupsForCenterDropdown(final Long officeId) {
-
-        final Long defaultOfficeId = defaultToUsersOfficeIfNull(officeId);
-
-        final AppUser currentUser = this.context.authenticatedUser();
-        final String hierarchy = currentUser.getOffice().getHierarchy();
-        final String hierarchySearchString = hierarchy + "%";
-
-        final String sql = "select " + this.allGroupTypesDataMapper.schema()
-                + " where g.office_id = ? and g.parent_id is null and g.level_Id = ? and o.hierarchy like ? order by g.hierarchy";
-
-        return this.jdbcTemplate.query(sql, this.allGroupTypesDataMapper, new Object[] { defaultOfficeId, GroupTypes.GROUP.getId(),
-                hierarchySearchString });
     }
 
     private Long defaultToUsersOfficeIfNull(final Long officeId) {
