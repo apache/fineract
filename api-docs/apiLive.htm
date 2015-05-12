@@ -4227,6 +4227,11 @@ GET https://DomainName/api/v1/clients/{clientId}
 							String <span>optional</span>
 						</dd>
 						<dd>Use an sql fragment valid for the underlying client schema to filter results. e.g. display_name like %K%</dd>
+						<dt>orphansOnly</dt>
+						<dd>
+							Boolean <span>optional</span>, defaults to false
+						</dd>
+						<dd>Use orphansOnly as true to list clients which are not associated to any group/parent.</dd>
 					</dl>
 					<p>Example Requests:</p>
 					<div class=apiClick>clients</div>
@@ -7191,6 +7196,11 @@ DELETE groups/2
 							String <span>optional</span>
 						</dd>
 						<dd>Use an sql fragment valid for the underlying group schema to filter results. e.g. display_name like %K%</dd>
+						<dt>orphansOnly</dt>
+						<dd>
+							Boolean <span>optional</span>, defaults to false
+						</dd>
+						<dd>Use orphansOnly as true to list groups which are not associated to any center/parent.</dd>
 					</dl>
 					<p>Example Requests:</p>
 					<div class=apiClick>groups</div>
