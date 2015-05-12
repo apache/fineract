@@ -237,6 +237,10 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         if (staffId != null) {
             extraCriteria.append(" and g.staff_id = ").append(staffId);
         }
+        
+        if(searchCriteria.isOrphansOnly()){
+        	extraCriteria.append(" and g.parent_id IS NULL");
+        }
 
         return extraCriteria.toString();
     }
