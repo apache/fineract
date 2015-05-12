@@ -268,6 +268,14 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             whereClose = " and ";
         }
 
+        if (searchParameters.isCurrencyCodePassed()) {
+            sqlBuilder.append(whereClose + " journalEntry.currency_code = ?");
+            objectArray[arrayPos] = searchParameters.getCurrencyCode();
+            arrayPos = arrayPos + 1;
+
+            whereClose = " and ";
+        }
+
         if (glAccountId != null && glAccountId != 0) {
             sqlBuilder.append(whereClose + " journalEntry.account_id = ?");
             objectArray[arrayPos] = glAccountId;
@@ -372,7 +380,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
     }
 
     @Override
-    public OfficeOpeningBalancesData retrieveOfficeOpeningBalances(final Long officeId) {
+    public OfficeOpeningBalancesData retrieveOfficeOpeningBalances(final Long officeId, String currencyCode) {
 
         final FinancialActivityAccount financialActivityAccountId = this.financialActivityAccountRepositoryWrapper
                 .findByFinancialActivityTypeWithNotFoundDetection(300);
@@ -389,11 +397,11 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
         final OfficeData officeData = this.officeReadPlatformService.retrieveOffice(officeId);
         final List<JournalEntryData> allOpeningTransactions = populateAllTransactionsFromGLAccounts(contraId);
-        final String contraTransactionId = retrieveContraAccountTransactionId(officeId, contraId);
+        final String contraTransactionId = retrieveContraAccountTransactionId(officeId, contraId, currencyCode);
 
         List<JournalEntryData> existingOpeningBalanceTransactions = new ArrayList<>();
         if (StringUtils.isNotBlank(contraTransactionId)) {
-            existingOpeningBalanceTransactions = retrieveOfficeBalanceTransactions(officeId, contraTransactionId);
+            existingOpeningBalanceTransactions = retrieveOfficeBalanceTransactions(officeId, contraTransactionId, currencyCode);
         }
         final List<JournalEntryData> transactions = populateOpeningBalances(existingOpeningBalanceTransactions, allOpeningTransactions);
         final List<JournalEntryData> assetAccountOpeningBalances = new ArrayList<>();
@@ -457,14 +465,15 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         return openingBalanceTransactions;
     }
 
-    private List<JournalEntryData> retrieveOfficeBalanceTransactions(final Long officeId, final String transactionId) {
+    private List<JournalEntryData> retrieveOfficeBalanceTransactions(final Long officeId, final String transactionId,
+            final String currencyCode) {
         final Long contraId = null;
-        return retrieveContraTransactions(officeId, contraId, transactionId).getPageItems();
+        return retrieveContraTransactions(officeId, contraId, transactionId, currencyCode).getPageItems();
     }
 
-    private String retrieveContraAccountTransactionId(final Long officeId, final Long contraId) {
+    private String retrieveContraAccountTransactionId(final Long officeId, final Long contraId, final String currencyCode) {
         final String transactionId = "";
-        final Page<JournalEntryData> contraJournalEntries = retrieveContraTransactions(officeId, contraId, transactionId);
+        final Page<JournalEntryData> contraJournalEntries = retrieveContraTransactions(officeId, contraId, transactionId, currencyCode);
         if (!CollectionUtils.isEmpty(contraJournalEntries.getPageItems())) {
             final JournalEntryData contraTransaction = contraJournalEntries.getPageItems().get(
                     contraJournalEntries.getPageItems().size() - 1);
@@ -473,7 +482,8 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         return transactionId;
     }
 
-    private Page<JournalEntryData> retrieveContraTransactions(final Long officeId, final Long contraId, final String transactionId) {
+    private Page<JournalEntryData> retrieveContraTransactions(final Long officeId, final Long contraId, final String transactionId,
+            final String currencyCode) {
         final Integer offset = 0;
         final Integer limit = null;
         final String orderBy = "journalEntry.id";
@@ -487,7 +497,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         final Long savingsId = null;
 
         final SearchParameters searchParameters = SearchParameters.forJournalEntries(officeId, offset, limit, orderBy, sortOrder, loanId,
-                savingsId);
+                savingsId, currencyCode);
         return retrieveAll(searchParameters, contraId, onlyManualEntries, fromDate, toDate, transactionId, entityType,
                 associationParametersData);
 
