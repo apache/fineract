@@ -18,11 +18,13 @@ public class PasswordValidationPolicyData implements Serializable {
     private final String description;
     @SuppressWarnings("unused")
     private final boolean active;
+    private final String key;
 
-    public PasswordValidationPolicyData(final Long id, final Boolean active, final String description) {
+    public PasswordValidationPolicyData(final Long id, final Boolean active, final String description, final String key) {
         this.id = id;
         this.active = active;
         this.description = description;
+        this.key = key;
     }
 
 }

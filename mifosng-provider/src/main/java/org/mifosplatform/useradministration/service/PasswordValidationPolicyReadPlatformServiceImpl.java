@@ -56,12 +56,14 @@ public class PasswordValidationPolicyReadPlatformServiceImpl implements Password
             final Long id = JdbcSupport.getLong(rs, "id");
             final Boolean active = rs.getBoolean("active");
             final String description = rs.getString("description");
+            final String key = rs.getString("key");
 
-            return new PasswordValidationPolicyData(id, active, description);
+            return new PasswordValidationPolicyData(id, active, description, key);
         }
 
         public String schema() {
-            return " pvp.id as id, pvp.active as active, pvp.description as description from m_password_validation_policy pvp";
+            return " pvp.id as id, pvp.active as active, pvp.description as description, pvp.`key` as `key`"
+            		+ " from m_password_validation_policy pvp";
         }
     }
 
