@@ -7,6 +7,7 @@ package org.mifosplatform.integrationtests.common;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 import com.google.gson.Gson;
@@ -70,10 +71,28 @@ public class GlobalConfigurationHelper {
         return Utils.performServerPut(requestSpec, responseSpec, IS_CACHE_GLOBAL_CONFIG_UPDATE_URL,
                 updateIsCacheEnabledGlobalConfigUpdateAsJSON(cacheType), "changes");
     }
+    
+    public static Object updatePasswordResetDaysForGlobalConfiguration(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer configId, final String value, final String enabled, final String jsonAttributeToGetBack) {
+        final String UPDATE_URL = "/mifosng-provider/api/v1/configurations/" + configId + "?" + Utils.TENANT_IDENTIFIER;
+        System.out.println("------------------UPDATE GLOBAL CONFIG FOR FORCE PASSWORD RESET DAYS----------------------");
+        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_URL,
+                updatePasswordResetDaysGlobalConfigAsJSON(value, enabled), jsonAttributeToGetBack);
+    }
 
     public static String updateGlobalConfigUpdateValueAsJSON(final String value) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("value", value);
+        System.out.println("map : " + map);
+        return new Gson().toJson(map);
+    }
+    
+    public static String updatePasswordResetDaysGlobalConfigAsJSON(final String value, final String enabled) {
+        final HashMap<String, String> map = new HashMap<>();
+        if(value != null){
+            map.put("value", value);
+        }
+        map.put("enabled", enabled);
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }

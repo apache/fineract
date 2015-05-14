@@ -13,6 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.security.exception.ForcePasswordResetException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -72,12 +73,21 @@ public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
         }
 
         final String valueParamName = "value";
+        final Long previousValue = this.value;
         if (command.isChangeInLongParameterNamed(valueParamName, this.value)) {
             final Long newValue = command.longValueOfParameterNamed(valueParamName);
             actualChanges.put(valueParamName, newValue);
             this.value = newValue;
         }
-
+        
+        final String passwordPropertyName = "force-password-reset-days";
+        if(this.name.equalsIgnoreCase(passwordPropertyName)){
+        	if(this.enabled == true && command.hasParameter(valueParamName) && this.value == 0 ||
+            		this.enabled == true && !command.hasParameter(valueParamName) && previousValue == 0){
+                throw new ForcePasswordResetException();
+            }
+        }   
+        
         return actualChanges;
 
     }
