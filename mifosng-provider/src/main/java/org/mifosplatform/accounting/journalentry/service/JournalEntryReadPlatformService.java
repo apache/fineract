@@ -20,6 +20,6 @@ public interface JournalEntryReadPlatformService {
     Page<JournalEntryData> retrieveAll(SearchParameters searchParameters, Long glAccountId, Boolean onlyManualEntries, Date fromDate,
             Date toDate, String transactionId, Integer entityType, JournalEntryAssociationParametersData associationParametersData);
 
-    OfficeOpeningBalancesData retrieveOfficeOpeningBalances(Long officeId);
+    OfficeOpeningBalancesData retrieveOfficeOpeningBalances(Long officeId, String currencyCode);
 
 }

@@ -166,11 +166,12 @@ public class JournalEntriesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("openingbalance")
-    public String retrieveOpeningBalance(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId) {
+    public String retrieveOpeningBalance(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId,
+            @QueryParam("currencyCode") final String currencyCode) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
-        final OfficeOpeningBalancesData officeOpeningBalancesData = this.journalEntryReadPlatformService
-                .retrieveOfficeOpeningBalances(officeId);
+        final OfficeOpeningBalancesData officeOpeningBalancesData = this.journalEntryReadPlatformService.retrieveOfficeOpeningBalances(
+                officeId, currencyCode);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, officeOpeningBalancesData);
     }
