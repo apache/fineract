@@ -82,8 +82,12 @@ public class StaffData {
     public String getOfficeName() {
         return this.officeName;
     }
-    
+
     public LocalDate getJoiningDate() {
-    	return this.joiningDate;
+        return this.joiningDate;
+    }
+
+    public Long getOfficeId() {
+        return this.officeId;
     }
 }

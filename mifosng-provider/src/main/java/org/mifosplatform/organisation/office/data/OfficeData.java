@@ -60,4 +60,8 @@ public class OfficeData implements Serializable {
     public String name() {
         return this.name;
     }
+
+    public String getHierarchy() {
+        return this.hierarchy;
+    }
 }
