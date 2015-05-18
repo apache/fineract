@@ -673,9 +673,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         // merge savings data into loan data
         mergeLoanData(collectionSheetFlatDatas, (List<IndividualClientData>) clientData);
-
-        Collection<CodeValueData> paymentOptions = this.codeValueReadPlatformService
-                .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
+        
+        final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
 
         return IndividualCollectionSheetData.instance(transactionDate, clientData, paymentOptions);
 
