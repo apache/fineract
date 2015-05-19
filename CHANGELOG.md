@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 18 May 2015 - 15.03.1.RELEASE
 1. 06 Apr 2015 - 15.03.RELEASE
 1. 22 Dec 2014 - 1.26.0.RELEASE
 1. 1 Nov 2014 - 1.25.1.RELEASE
@@ -69,6 +70,60 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+15.03.1.RELEASE
+=============
+This minor release ships new functionality like the ability to create loans products whose interest compounding periods may be different from their rest periods and
+allowing extension of repayment schedule for daily loans when repayments fall on holidays along with a number of bug fixes and improvements to the Community app.
+
+Important note on API breaking changes for app developers:  As a part of the changes made for MIFOSX-2036, Group and center template API's no longer return details of "clientOptions" and "groupMemberOptions".
+You are requested to use /clients and /groups API's with the newly introduced query parameter "orphansOnly" for retrieving details of Clients and Groups which may be associated with particular Groups and Centers respectively.
+Sample usage of the same can be found on the "manage members" section on the Group profile screen and "Manage Groups" section of the Center profile screen
+
+Platform & API
+
+New Features & Improvements
+
+ - [MIFOSX-1951] - As a operations manager, I want to define loan products that allows interest compounding period to be different from rest period
+ - [MIFOSX-1983] - Allow extending repayment schedule for Daily loans when repayments fall on holidays
+ - [MIFOSX-2035] - Add new boolean parameter orphansOnly to retrieve all clients API
+ - [MIFOSX-2002] - allow search client by mobile_no
+
+Bugs 
+ - [MIFOSX-1831] - Journal entries for "Overpayment Liability" is not getting created for Periodic and Upfront accounting
+ - [MIFOSX-1955] - Cashier transaction beyond specified date should not be displayed for particular cashier in Teller cash management
+ - [MIFOSX-2004] - Not Able to modify Loan Application After Undo Disbursal And Undo Approval with Guarantor Attached
+ - [MIFOSX-1988] - Tranche loan Summary displays entire approved amount as disbursed amount even though the second and higher tranches are not yet disbursed.
+ - [MIFOSX-1995] - Prepay of loan with Grace on Interest is not working as expected
+ - [MIFOSX-1891] - Problem with scheduling day loan repayments
+ - [MIFOSX-1668] - Non-working day's repayment activity
+ - [MIFOSX-2007] - Unable to list Hooks defined in the system
+ - [MIFOSX-2032] - Teller Cash Management not handling multiple currencies accurately
+ - [MIFOSX-2037] - Payment type is not getting displayed in Individual collection sheet
+ - [MIFOSX-2043] - Password preferences API does not support Localization
+ - [MIFOSX-2046] - overpaid loans don't get transferred along when transferring of clients
+ - [MIFOSX-1956] - Accounting multi-currency opening balance
+ - [MIFOSX-2036] - Refactoring Groups and Centers API - removing clientOptions and groupMemberOptions for template true
+
+Community App
+ - [MIFOSX-1596] - If a stretchy report's query is modified and submitted, it does not save the modified query. It shows the previously defined query.
+ - [MIFOSX-1982] - Formatting issues with Stretchy reports
+ - [MIFOSX-1985] - Unable to create weekly meetings with recurrence of every 4 weeks
+ - [MIFOSX-1986] - Editing a meeting redirects to home page
+ - [MIFOSX-1991] - Client Transfer - should allow selecting any group in the particular office
+ - [MIFOSX-2008] - Enable Vietnamese (tiếng Việt) on the community App
+ - [MIFOSX-2028] - Dynamic Typeahead for Manage Members and Groups
+ - [MIFOSX-1979] - Introduce Better pagination for Groups and centers
+ - [MIFOSX-1980] - Display Account Id and External ID for groups on Group search screen
+ - [MIFOSX-1993] - Create GL Account - improve order of fields
+ - [MIFOSX-1286] - Expand the scope of the "Filter by name/account#/staff/office" filter to filter all data rather than just the data visible on a page.
+ - [MIFOSX-1996] - Issues with search in Client listing page
+ - [MIFOSX-1999] - Issues related to Working days functionality
+ - [MIFOSX-2000] - Not able to edit loan product when recalculate interest is enabled and Frequency of compounding != None
+ - [MIFOSX-2022] - Force password reset days is not working as expected
+ - [MIFOSX-2023] - Force password reset - issue 2
+ - [MIFOSX-2026] - Issues with editing system reports
+ - [MIFOSX-2029] - Small typo on passwordpreferences screen
 
 15.03.RELEASE
 =============
