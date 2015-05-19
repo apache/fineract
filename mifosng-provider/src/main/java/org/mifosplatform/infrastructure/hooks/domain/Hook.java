@@ -47,28 +47,22 @@ public class Hook extends AbstractAuditableCustom<AppUser, Long> {
     private HookTemplate template;
 
     @ManyToOne(optional = true)
-    @JoinColumn(name = "ugd_template_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "ugd_template_id", referencedColumnName = "id", nullable = true)
     private Template ugdTemplate;
 
     protected Hook() {
         //
     }
 
-    public static Hook fromJson(final JsonCommand command,
-            final HookTemplate template, final Set<HookConfiguration> config,
+    public static Hook fromJson(final JsonCommand command, final HookTemplate template, final Set<HookConfiguration> config,
             final Set<HookResource> events, final Template ugdTemplate) {
-        final String displayName = command
-                .stringValueOfParameterNamed(displayNameParamName);
-        Boolean isActive = command
-                .booleanObjectValueOfParameterNamed(isActiveParamName);
-        if (isActive == null)
-            isActive = false;
-        return new Hook(template, displayName, isActive, config, events,
-                ugdTemplate);
+        final String displayName = command.stringValueOfParameterNamed(displayNameParamName);
+        Boolean isActive = command.booleanObjectValueOfParameterNamed(isActiveParamName);
+        if (isActive == null) isActive = false;
+        return new Hook(template, displayName, isActive, config, events, ugdTemplate);
     }
 
-    private Hook(final HookTemplate template, final String displayName,
-            final Boolean isActive, final Set<HookConfiguration> config,
+    private Hook(final HookTemplate template, final String displayName, final Boolean isActive, final Set<HookConfiguration> config,
             final Set<HookResource> events, final Template ugdTemplate) {
 
         this.template = template;
@@ -89,16 +83,14 @@ public class Hook extends AbstractAuditableCustom<AppUser, Long> {
         this.ugdTemplate = ugdTemplate;
     }
 
-    private Set<HookConfiguration> associateConfigWithThisHook(
-            final Set<HookConfiguration> config) {
+    private Set<HookConfiguration> associateConfigWithThisHook(final Set<HookConfiguration> config) {
         for (final HookConfiguration hookConfiguration : config) {
             hookConfiguration.update(this);
         }
         return config;
     }
 
-    private Set<HookResource> associateEventsWithThisHook(
-            final Set<HookResource> events) {
+    private Set<HookResource> associateEventsWithThisHook(final Set<HookResource> events) {
         for (final HookResource hookResource : events) {
             hookResource.update(this);
         }
@@ -114,7 +106,11 @@ public class Hook extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public Long getUgdTemplateId() {
-        return this.ugdTemplate.getId();
+        Long templateId = null;
+        if (this.ugdTemplate != null) {
+            templateId = this.ugdTemplate.getId();
+        }
+        return templateId;
     }
 
     public Set<HookConfiguration> getHookConfig() {
@@ -125,33 +121,26 @@ public class Hook extends AbstractAuditableCustom<AppUser, Long> {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
 
-        if (command.isChangeInStringParameterNamed(displayNameParamName,
-                this.name)) {
-            final String newValue = command
-                    .stringValueOfParameterNamed(displayNameParamName);
+        if (command.isChangeInStringParameterNamed(displayNameParamName, this.name)) {
+            final String newValue = command.stringValueOfParameterNamed(displayNameParamName);
             actualChanges.put(displayNameParamName, newValue);
             this.name = newValue;
         }
 
-        if (command.isChangeInBooleanParameterNamed(isActiveParamName,
-                this.isActive)) {
-            final Boolean newValue = command
-                    .booleanObjectValueOfParameterNamed(isActiveParamName);
+        if (command.isChangeInBooleanParameterNamed(isActiveParamName, this.isActive)) {
+            final Boolean newValue = command.booleanObjectValueOfParameterNamed(isActiveParamName);
             actualChanges.put(isActiveParamName, newValue);
             this.isActive = newValue;
         }
 
-        if (command.isChangeInLongParameterNamed(templateIdParamName,
-                getUgdTemplateId())) {
-            final Long newValue = command
-                    .longValueOfParameterNamed(templateIdParamName);
+        if (command.isChangeInLongParameterNamed(templateIdParamName, getUgdTemplateId())) {
+            final Long newValue = command.longValueOfParameterNamed(templateIdParamName);
             actualChanges.put(templateIdParamName, newValue);
         }
 
         // events
         if (command.hasParameter(eventsParamName)) {
-            final JsonArray jsonArray = command
-                    .arrayOfParameterNamed(eventsParamName);
+            final JsonArray jsonArray = command.arrayOfParameterNamed(eventsParamName);
             if (jsonArray != null) {
                 actualChanges.put(eventsParamName, jsonArray);
             }
@@ -159,8 +148,7 @@ public class Hook extends AbstractAuditableCustom<AppUser, Long> {
 
         // config
         if (command.hasParameter(configParamName)) {
-            final JsonElement element = command.parsedJson().getAsJsonObject()
-                    .get(configParamName);
+            final JsonElement element = command.parsedJson().getAsJsonObject().get(configParamName);
             if (element != null) {
                 actualChanges.put(configParamName, element);
             }
@@ -170,9 +158,7 @@ public class Hook extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public boolean updateEvents(final Set<HookResource> newHookEvents) {
-        if (newHookEvents == null) {
-            return false;
-        }
+        if (newHookEvents == null) { return false; }
 
         if (this.events == null) {
             this.events = new HashSet<>();
@@ -183,9 +169,7 @@ public class Hook extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public boolean updateConfig(final Set<HookConfiguration> newHookConfig) {
-        if (newHookConfig == null) {
-            return false;
-        }
+        if (newHookConfig == null) { return false; }
 
         if (this.config == null) {
             this.config = new HashSet<>();

@@ -197,7 +197,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl
     private Hook retrieveHookBy(final Long hookId) {
         final Hook hook = this.hookRepository.findOne(hookId);
         if (hook == null) {
-            throw new HookNotFoundException(hookId.toString());
+            throw new HookNotFoundException(hookId);
         }
         return hook;
     }
