@@ -5,7 +5,8 @@
  */
 package org.mifosplatform.integrationtests;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Assert;
+
 import static org.junit.Assert.fail;
 
 import java.util.concurrent.TimeUnit;
@@ -62,7 +63,7 @@ public class HookIntegrationTest {
                 try {
                     final String json = RestAssured.get(payloadURL.replace("?", "")).asString();
                     final Integer notificationOfficeId = JsonPath.with(json).get("officeId");
-                    assertEquals("Equality check for created officeId and hook received payload officeId", createdOfficeID,
+                    Assert.assertEquals("Equality check for created officeId and hook received payload officeId", createdOfficeID,
                             notificationOfficeId);
                     System.out.println("Notification Office Id - " + notificationOfficeId);
                     i = 6;
@@ -78,6 +79,24 @@ public class HookIntegrationTest {
             }
             throw new RuntimeException(e);
         }
+
+    }
+    
+    @Test
+    public void createUpdateAndDeleteHook(){
+    	final String payloadURL = "http://echo-webhook.herokuapp.com:80/Z7RXoCBdLSFMDrpn?";
+    	final String updateURL = "http://localhost";
+
+        Long hookId = this.hookHelper.createHook(payloadURL).longValue();
+        Assert.assertNotNull(hookId);
+        this.hookHelper.verifyHookCreatedOnServer(hookId);
+    	System.out.println("---------------------SUCCESSFULLY CREATED AND VERIFIED HOOK-------------------------"+hookId);
+    	this.hookHelper.updateHook(updateURL, hookId);
+    	this.hookHelper.verifyUpdateHook(updateURL, hookId);
+    	System.out.println("---------------------SUCCESSFULLY UPDATED AND VERIFIED HOOK-------------------------"+hookId);
+    	this.hookHelper.deleteHook(hookId);
+    	this.hookHelper.verifyDeleteHook(hookId);
+    	System.out.println("---------------------SUCCESSFULLY DELETED AND VERIFIED HOOK-------------------------"+hookId);
 
     }
 }
