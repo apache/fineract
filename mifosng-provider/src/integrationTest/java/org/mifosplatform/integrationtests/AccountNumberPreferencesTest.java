@@ -5,14 +5,19 @@
  */
 package org.mifosplatform.integrationtests;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mifosplatform.integrationtests.common.CenterDomain;
+import org.mifosplatform.integrationtests.common.CenterHelper;
 import org.mifosplatform.integrationtests.common.ClientHelper;
 import org.mifosplatform.integrationtests.common.CommonConstants;
+import org.mifosplatform.integrationtests.common.GroupHelper;
+import org.mifosplatform.integrationtests.common.OfficeHelper;
 import org.mifosplatform.integrationtests.common.Utils;
 import org.mifosplatform.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.mifosplatform.integrationtests.common.loans.LoanProductTestBuilder;
@@ -53,6 +58,8 @@ public class AccountNumberPreferencesTest {
     private Integer clientAccountNumberPreferenceId;
     private Integer loanAccountNumberPreferenceId;
     private Integer savingsAccountNumberPreferenceId;
+    private Integer groupsAccountNumberPreferenceId;
+    private Integer centerAccountNumberPreferenceId;
     private final String MINIMUM_OPENING_BALANCE = "1000.0";
     private final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
     private Boolean isAccountPreferenceSetUp = false;
@@ -63,7 +70,10 @@ public class AccountNumberPreferencesTest {
     private final String officeName = "OFFICE_NAME";
     private final String loanShortName = "LOAN_PRODUCT_SHORT_NAME";
     private final String savingsShortName = "SAVINGS_PRODUCT_SHORT_NAME";
-
+    private Integer groupID;
+    private Integer centerId;
+    private String groupAccountNo;
+    
     @Before
     public void setup() {
         Utils.initializeRESTAssured();
@@ -143,6 +153,8 @@ public class AccountNumberPreferencesTest {
         this.createAndValidateClientEntity(this.isAccountPreferenceSetUp);
         this.createAndValidateLoanEntity(this.isAccountPreferenceSetUp);
         this.createAndValidateSavingsEntity(this.isAccountPreferenceSetUp);
+        this.createAndValidateGroup(this.isAccountPreferenceSetUp);
+        this.createAndValidateCenter(this.isAccountPreferenceSetUp);
     }
 
     private void validateAccountNumberGenerationWithPreferences() {
@@ -150,6 +162,8 @@ public class AccountNumberPreferencesTest {
         this.createAndValidateClientEntity(this.isAccountPreferenceSetUp);
         this.createAndValidateLoanEntity(this.isAccountPreferenceSetUp);
         this.createAndValidateSavingsEntity(this.isAccountPreferenceSetUp);
+        this.createAndValidateGroup(this.isAccountPreferenceSetUp);
+        this.createAndValidateCenter(this.isAccountPreferenceSetUp);
     }
 
     private void createAccountNumberPreference() {
@@ -164,9 +178,18 @@ public class AccountNumberPreferencesTest {
         this.savingsAccountNumberPreferenceId = (Integer) this.accountNumberPreferencesHelper.createSavingsAccountNumberPreference(
                 this.responseSpec, "resourceId");
         System.out.println("Successfully created account number preferences for Savings (ID: " + this.savingsAccountNumberPreferenceId);
+        
+        this.groupsAccountNumberPreferenceId = (Integer) this.accountNumberPreferencesHelper.createGroupsAccountNumberPreference(
+                this.responseSpec, "resourceId");
+        System.out.println("Successfully created account number preferences for Groups (ID: " + this.groupsAccountNumberPreferenceId);
+        
+        this.centerAccountNumberPreferenceId = (Integer) this.accountNumberPreferencesHelper.createCenterAccountNumberPreference(
+                this.responseSpec, "resourceId");
+        System.out.println("Successfully created account number preferences for Center (ID: " + this.centerAccountNumberPreferenceId);
 
         this.accountNumberPreferencesHelper.verifyCreationOfAccountNumberPreferences(this.clientAccountNumberPreferenceId,
-                this.loanAccountNumberPreferenceId, this.savingsAccountNumberPreferenceId, this.responseSpec, this.requestSpec);
+                this.loanAccountNumberPreferenceId, this.savingsAccountNumberPreferenceId, this.groupsAccountNumberPreferenceId, 
+                this.centerAccountNumberPreferenceId, this.responseSpec, this.requestSpec);
 
         this.createAccountNumberPreferenceInvalidData("1000", "1001");
         this.createAccountNumberPreferenceDuplicateData("1", "101");
@@ -242,6 +265,58 @@ public class AccountNumberPreferencesTest {
             this.createAndValidateClientWithoutAccountPreference();
         }
     }
+    
+    private void createAndValidateGroup(Boolean isAccountPreferenceSetUp) {
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec);
+        GroupHelper.verifyGroupCreatedOnServer(this.requestSpec, this.responseSpec, groupID);
+
+        this.groupID = GroupHelper.activateGroup(this.requestSpec, this.responseSpec, groupID.toString());
+        GroupHelper.verifyGroupActivatedOnServer(this.requestSpec, this.responseSpec, groupID, true);
+        
+        final String GROUP_URL = "/mifosng-provider/api/v1/groups/" + this.groupID + "?" + Utils.TENANT_IDENTIFIER;
+        this.groupAccountNo = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "accountNo");
+        
+        if (isAccountPreferenceSetUp) {
+        	String groupsPrefixName = (String) this.accountNumberPreferencesHelper.getAccountNumberPreference(
+                    this.groupsAccountNumberPreferenceId, "prefixType.value");
+        	
+            if (groupsPrefixName.equals(this.officeName)) {
+            	
+                final String groupOfficeName = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "officeName");
+                
+                this.validateAccountNumberLengthAndStartsWithPrefix(this.groupAccountNo, groupOfficeName);
+            }
+        } else {
+            validateAccountNumberLengthAndStartsWithPrefix(this.groupAccountNo, null);
+        }
+    }
+    
+    private void createAndValidateCenter(Boolean isAccountPreferenceSetUp) {
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        Integer officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
+
+        String name = "CenterCreation" + new Timestamp(new java.util.Date().getTime());
+        this.centerId = CenterHelper.createCenter(name, officeId, requestSpec, responseSpec);
+        CenterDomain center = CenterHelper.retrieveByID(centerId, requestSpec, responseSpec);
+        Assert.assertNotNull(center);
+        Assert.assertTrue(center.getName().equals(name));
+        
+        if (isAccountPreferenceSetUp) {
+        	String centerPrefixName = (String) this.accountNumberPreferencesHelper.getAccountNumberPreference(
+                    this.centerAccountNumberPreferenceId, "prefixType.value");
+            final String CENTER_URL = "/mifosng-provider/api/v1/groups/" + this.centerId + "?" + Utils.TENANT_IDENTIFIER;
+        	
+            if (centerPrefixName.equals(this.officeName)) {
+                final String centerOfficeName = Utils.performServerGet(requestSpec, responseSpec, CENTER_URL, "officeName");
+                
+                this.validateAccountNumberLengthAndStartsWithPrefix(center.getAccountNo(), centerOfficeName);
+            }
+        } else {	
+            validateAccountNumberLengthAndStartsWithPrefix(center.getAccountNo(), null);
+        }
+    }
+    
 
     private void createAndValidateClientWithoutAccountPreference() {
         this.clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);

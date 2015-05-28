@@ -25,7 +25,7 @@ public final class AllGroupTypesDataMapper implements RowMapper<GroupGeneralData
 
     public AllGroupTypesDataMapper() {
         final StringBuilder sqlBuilder = new StringBuilder(400);
-        sqlBuilder.append("g.id as id, g.external_id as externalId, g.display_name as name, ");
+        sqlBuilder.append("g.id as id, g.account_no as accountNumber, g.external_id as externalId, g.display_name as name, ");
         sqlBuilder.append("g.office_id as officeId, o.name as officeName, ");
         sqlBuilder.append("g.parent_id as centerId, pg.display_name as centerName, ");
         sqlBuilder.append("g.staff_id as staffId, s.display_name as staffName, ");
@@ -65,6 +65,7 @@ public final class AllGroupTypesDataMapper implements RowMapper<GroupGeneralData
     public GroupGeneralData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
         final Long id = rs.getLong("id");
+        final String accountNo = rs.getString("accountNumber");
         final String name = rs.getString("name");
         final String externalId = rs.getString("externalId");
 
@@ -98,7 +99,7 @@ public final class AllGroupTypesDataMapper implements RowMapper<GroupGeneralData
                 submittedByLastname, activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate,
                 closedByUsername, closedByFirstname, closedByLastname);
 
-        return GroupGeneralData.instance(id, name, externalId, status, activationDate, officeId, officeName, centerId, centerName, staffId,
+        return GroupGeneralData.instance(id, accountNo, name, externalId, status, activationDate, officeId, officeName, centerId, centerName, staffId,
                 staffName, hierarchy, timeline);
     }
 }

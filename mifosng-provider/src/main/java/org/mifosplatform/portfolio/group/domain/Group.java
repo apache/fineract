@@ -26,6 +26,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
@@ -36,6 +37,7 @@ import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.domain.Client;
@@ -121,6 +123,12 @@ public final class Group extends AbstractPersistable<Long> {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "center", orphanRemoval = true)
     private Set<StaffAssignmentHistory> staffHistory;
+    
+    @Column(name = "account_no", length = 20, unique = true, nullable = false)
+    private String accountNumber;
+    
+    @Transient
+    private boolean accountNumberRequiresAutoGeneration = false;
 
     // JPA default constructor for entity
     protected Group() {
@@ -131,7 +139,8 @@ public final class Group extends AbstractPersistable<Long> {
 
     public static Group newGroup(final Office office, final Staff staff, final Group parent, final GroupLevel groupLevel,
             final String name, final String externalId, final boolean active, final LocalDate activationDate,
-            final Set<Client> clientMembers, final Set<Group> groupMembers, final LocalDate submittedOnDate, final AppUser currentUser) {
+            final Set<Client> clientMembers, final Set<Group> groupMembers, final LocalDate submittedOnDate, final AppUser currentUser,
+            final String accountNo) {
 
         // By default new group is created in PENDING status, unless explicitly
         // status is set to active
@@ -141,14 +150,14 @@ public final class Group extends AbstractPersistable<Long> {
             status = GroupingTypeStatus.ACTIVE;
             groupActivationDate = activationDate;
         }
-
+        
         return new Group(office, staff, parent, groupLevel, name, externalId, status, groupActivationDate, clientMembers, groupMembers,
-                submittedOnDate, currentUser);
+                submittedOnDate, currentUser, accountNo);
     }
 
     private Group(final Office office, final Staff staff, final Group parent, final GroupLevel groupLevel, final String name,
             final String externalId, final GroupingTypeStatus status, final LocalDate activationDate, final Set<Client> clientMembers,
-            final Set<Group> groupMembers, final LocalDate submittedOnDate, final AppUser currentUser) {
+            final Set<Group> groupMembers, final LocalDate submittedOnDate, final AppUser currentUser, final String accountNo) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
@@ -159,6 +168,13 @@ public final class Group extends AbstractPersistable<Long> {
 
         if (parent != null) {
             this.parent.addChild(this);
+        }
+        
+        if (StringUtils.isBlank(accountNo)) {
+            this.accountNumber = new RandomPasswordGenerator(19).generate();
+            this.accountNumberRequiresAutoGeneration = true;
+        } else {
+            this.accountNumber = accountNo;
         }
 
         if (StringUtils.isNotBlank(name)) {
@@ -302,6 +318,12 @@ public final class Group extends AbstractPersistable<Long> {
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
             this.activationDate = newValue.toDate();
+        }
+        
+        if (command.isChangeInStringParameterNamed(GroupingTypesApiConstants.accountNoParamName, this.accountNumber)) {
+            final String newValue = command.stringValueOfParameterNamed(GroupingTypesApiConstants.accountNoParamName);
+            actualChanges.put(GroupingTypesApiConstants.accountNoParamName, newValue);
+            this.accountNumber = StringUtils.defaultIfEmpty(newValue, null);
         }
 
         return actualChanges;
@@ -691,5 +713,18 @@ public final class Group extends AbstractPersistable<Long> {
             }
         }
         return latestRecordWithNoEndDate;
+    }
+    
+    public boolean isAccountNumberRequiresAutoGeneration() {
+        return this.accountNumberRequiresAutoGeneration;
+    }
+
+    public void setAccountNumberRequiresAutoGeneration(final boolean accountNumberRequiresAutoGeneration) {
+        this.accountNumberRequiresAutoGeneration = accountNumberRequiresAutoGeneration;
+    }
+    
+    public void updateAccountNo(final String accountIdentifier) {
+        this.accountNumber = accountIdentifier;
+        this.accountNumberRequiresAutoGeneration = false;
     }
 }

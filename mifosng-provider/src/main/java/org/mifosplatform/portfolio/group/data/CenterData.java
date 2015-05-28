@@ -20,6 +20,7 @@ import org.mifosplatform.portfolio.calendar.data.CalendarData;
 public class CenterData {
 
     private final Long id;
+    private String accountNo;
     private final String name;
     private final String externalId;
     private final Long officeId;
@@ -44,23 +45,23 @@ public class CenterData {
     private final Collection<OfficeData> officeOptions;
     private final Collection<StaffData> staffOptions;
 
-    public static CenterData template(final Long officeId, final LocalDate activationDate, final Collection<OfficeData> officeOptions,
+    public static CenterData template(final Long officeId, final String accountNo, final LocalDate activationDate, final Collection<OfficeData> officeOptions,
             final Collection<StaffData> staffOptions, final Collection<GroupGeneralData> groupMembersOptions) {
         final CalendarData collectionMeetingCalendar = null;
         final Collection<CodeValueData> closureReasons = null;
         final GroupTimelineData timeline = null;
-        return new CenterData(null, null, null, null, activationDate, officeId, null, null, null, null, null, officeOptions, staffOptions,
+        return new CenterData(null, accountNo, null, null, null, activationDate, officeId, null, null, null, null, null, officeOptions, staffOptions,
                 groupMembersOptions, collectionMeetingCalendar, closureReasons, timeline);
     }
 
     public static CenterData withTemplate(final CenterData templateCenter, final CenterData center) {
-        return new CenterData(center.id, center.name, center.externalId, center.status, center.activationDate, center.officeId,
+        return new CenterData(center.id, center.accountNo, center.name, center.externalId, center.status, center.activationDate, center.officeId,
                 center.officeName, center.staffId, center.staffName, center.hierarchy, center.groupMembers, templateCenter.officeOptions,
                 templateCenter.staffOptions, templateCenter.groupMembersOptions, templateCenter.collectionMeetingCalendar,
                 templateCenter.closureReasons, center.timeline);
     }
 
-    public static CenterData instance(final Long id, final String name, final String externalId, final EnumOptionData status,
+    public static CenterData instance(final Long id, final String accountNo, final String name, final String externalId, final EnumOptionData status,
             final LocalDate activationDate, final Long officeId, final String officeName, final Long staffId, final String staffName,
             final String hierarchy, final GroupTimelineData timeline, final CalendarData collectionMeetingCalendar) {
 
@@ -70,13 +71,13 @@ public class CenterData {
         final Collection<GroupGeneralData> groupMembersOptions = null;
         final Collection<CodeValueData> closureReasons = null;
 
-        return new CenterData(id, name, externalId, status, activationDate, officeId, officeName, staffId, staffName, hierarchy,
+        return new CenterData(id, accountNo, name, externalId, status, activationDate, officeId, officeName, staffId, staffName, hierarchy,
                 groupMembers, officeOptions, staffOptions, groupMembersOptions, collectionMeetingCalendar, closureReasons, timeline);
     }
 
     public static CenterData withAssociations(final CenterData centerData, final Collection<GroupGeneralData> groupMembers,
             final CalendarData collectionMeetingCalendar) {
-        return new CenterData(centerData.id, centerData.name, centerData.externalId, centerData.status, centerData.activationDate,
+        return new CenterData(centerData.id, centerData.accountNo, centerData.name, centerData.externalId, centerData.status, centerData.activationDate,
                 centerData.officeId, centerData.officeName, centerData.staffId, centerData.staffName, centerData.hierarchy, groupMembers,
                 centerData.officeOptions, centerData.staffOptions, centerData.groupMembersOptions, collectionMeetingCalendar,
                 centerData.closureReasons, centerData.timeline);
@@ -84,6 +85,7 @@ public class CenterData {
 
     public static CenterData withClosureReasons(final Collection<CodeValueData> closureReasons) {
         final Long id = null;
+        final String accountNo = null;
         final String name = null;
         final String externalId = null;
         final EnumOptionData status = null;
@@ -99,16 +101,17 @@ public class CenterData {
         final Collection<GroupGeneralData> groupMembersOptions = null;
         final CalendarData collectionMeetingCalendar = null;
         final GroupTimelineData timeline = null;
-        return new CenterData(id, name, externalId, status, activationDate, officeId, officeName, staffId, staffName, hierarchy,
+        return new CenterData(id, accountNo, name, externalId, status, activationDate, officeId, officeName, staffId, staffName, hierarchy,
                 groupMembers, officeOptions, staffOptions, groupMembersOptions, collectionMeetingCalendar, closureReasons, timeline);
     }
 
-    private CenterData(final Long id, final String name, final String externalId, final EnumOptionData status,
+    private CenterData(final Long id, final String accountNo, final String name, final String externalId, final EnumOptionData status,
             final LocalDate activationDate, final Long officeId, final String officeName, final Long staffId, final String staffName,
             final String hierarchy, final Collection<GroupGeneralData> groupMembers, final Collection<OfficeData> officeOptions,
             final Collection<StaffData> staffOptions, final Collection<GroupGeneralData> groupMembersOptions,
             final CalendarData collectionMeetingCalendar, final Collection<CodeValueData> closureReasons, final GroupTimelineData timeline) {
         this.id = id;
+        this.accountNo = accountNo;
         this.name = name;
         this.externalId = externalId;
         this.status = status;
@@ -145,6 +148,10 @@ public class CenterData {
 
     public Long getId() {
         return this.id;
+    }
+    
+    public String getAccountNo(){
+    	return this.accountNo;
     }
 
     public String getName() {

@@ -544,7 +544,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " lp.allow_multiple_disbursals as multiDisburseLoan,"
                     + " lp.can_define_fixed_emi_amount as canDefineInstallmentAmount,"
                     + " c.id as clientId, c.display_name as clientName, c.office_id as clientOfficeId,"
-                    + " g.id as groupId, g.display_name as groupName,"
+                    + " g.id as groupId, g.account_no as groupAccountNo, g.display_name as groupName,"
                     + " g.office_id as groupOfficeId, g.staff_id As groupStaffId , g.parent_id as groupParentId, "
                     + " g.hierarchy As groupHierarchy , g.external_id As groupExternalId, "
                     + " g.status_enum as statusEnum, g.activation_date as activationDate, "
@@ -652,6 +652,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             final Long groupId = JdbcSupport.getLong(rs, "groupId");
             final String groupName = rs.getString("groupName");
+            final String groupAccountNo = rs.getString("groupAccountNo");
             final String groupExternalId = rs.getString("groupExternalId");
             final Long groupOfficeId = JdbcSupport.getLong(rs, "groupOfficeId");
             final Long groupStaffId = JdbcSupport.getLong(rs, "groupStaffId");
@@ -836,7 +837,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 final Integer groupStatusEnum = JdbcSupport.getInteger(rs, "statusEnum");
                 final EnumOptionData groupStatus = ClientEnumerations.status(groupStatusEnum);
                 final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
-                groupData = GroupGeneralData.instance(groupId, groupName, groupExternalId, groupStatus, activationDate, groupOfficeId,
+                groupData = GroupGeneralData.instance(groupId, groupAccountNo, groupName, groupExternalId, groupStatus, activationDate, groupOfficeId,
                         null, groupParentId, null, groupStaffId, null, groupHierarchy, null);
             }
 
