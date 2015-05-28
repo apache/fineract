@@ -532,6 +532,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 principalForThisPeriod = principalForThisPeriod.plus(outstandingBalance);
                 outstandingBalance = outstandingBalance.zero();
             }
+            
+            if(!isNextRepaymentAvailable){
+            	disburseDetailMap.clear();
+            }
 
             // applies charges for the period
             PrincipalInterest principalInterest = new PrincipalInterest(principalForThisPeriod, interestForThisinstallment, null);
