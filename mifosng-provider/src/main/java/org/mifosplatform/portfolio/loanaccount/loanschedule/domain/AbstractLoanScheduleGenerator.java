@@ -229,6 +229,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         // updates actual outstanding balance with new
                         // disbursement detail
                         outstandingBalance = outstandingBalance.plus(disburseDetail.getValue());
+                        outstandingBalanceAsPerRest = outstandingBalanceAsPerRest.plus(disburseDetail.getValue());
                         principalDisbursed = principalDisbursed.plus(disburseDetail.getValue());
                         loanApplicationTerms.setPrincipal(loanApplicationTerms.getPrincipal().plus(disburseDetail.getValue()));
                     }
@@ -484,13 +485,13 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             PrincipalInterest principalInterestForThisPeriod = calculatePrincipalInterestComponentsForPeriod(
                     this.paymentPeriodsInOneYearCalculator, interestCalculationGraceOnRepaymentPeriodFraction,
                     totalCumulativePrincipal.minus(reducePrincipal), totalCumulativeInterest, totalInterestChargedForFullLoanTerm,
-                    totalOutstandingInterestPaymentDueToGrace, outstandingBalance, loanApplicationTerms, periodNumber, mc,
+                    totalOutstandingInterestPaymentDueToGrace, outstandingBalanceAsPerRest, loanApplicationTerms, periodNumber, mc,
                     mergeVariationsToMap(principalPortionMap, latePaymentMap, disburseDetailMap, compoundingMap), compoundingMap,
                     periodStartDateApplicableForInterest, scheduledDueDate, daysInPeriodApplicableForInterest);
 
             if (loanApplicationTerms.getFixedEmiAmount() != null
                     && loanApplicationTerms.getFixedEmiAmount().compareTo(principalInterestForThisPeriod.interest().getAmount()) != 1) {
-                String errorMsg = "EMI amount must be greter than : " + principalInterestForThisPeriod.interest().getAmount();
+                String errorMsg = "EMI amount must be greater than : " + principalInterestForThisPeriod.interest().getAmount();
                 throw new MultiDisbursementEmiAmountException(errorMsg, principalInterestForThisPeriod.interest().getAmount(),
                         loanApplicationTerms.getFixedEmiAmount());
             }
