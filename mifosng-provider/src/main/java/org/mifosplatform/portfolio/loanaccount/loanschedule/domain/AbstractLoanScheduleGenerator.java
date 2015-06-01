@@ -229,7 +229,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         // updates actual outstanding balance with new
                         // disbursement detail
                         outstandingBalance = outstandingBalance.plus(disburseDetail.getValue());
-                        outstandingBalanceAsPerRest = outstandingBalanceAsPerRest.plus(disburseDetail.getValue());
                         principalDisbursed = principalDisbursed.plus(disburseDetail.getValue());
                         loanApplicationTerms.setPrincipal(loanApplicationTerms.getPrincipal().plus(disburseDetail.getValue()));
                     }
