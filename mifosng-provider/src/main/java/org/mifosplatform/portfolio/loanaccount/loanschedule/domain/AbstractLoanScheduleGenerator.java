@@ -484,7 +484,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             PrincipalInterest principalInterestForThisPeriod = calculatePrincipalInterestComponentsForPeriod(
                     this.paymentPeriodsInOneYearCalculator, interestCalculationGraceOnRepaymentPeriodFraction,
                     totalCumulativePrincipal.minus(reducePrincipal), totalCumulativeInterest, totalInterestChargedForFullLoanTerm,
-                    totalOutstandingInterestPaymentDueToGrace, outstandingBalanceAsPerRest, loanApplicationTerms, periodNumber, mc,
+                    totalOutstandingInterestPaymentDueToGrace, outstandingBalance, loanApplicationTerms, periodNumber, mc,
                     mergeVariationsToMap(principalPortionMap, latePaymentMap, disburseDetailMap, compoundingMap), compoundingMap,
                     periodStartDateApplicableForInterest, scheduledDueDate, daysInPeriodApplicableForInterest);
 
