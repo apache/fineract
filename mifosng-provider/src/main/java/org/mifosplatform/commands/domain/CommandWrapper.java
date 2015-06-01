@@ -292,4 +292,18 @@ public class CommandWrapper {
         return this.actionName + "_" + this.entityName;
     }
     
+    public boolean isLoanDisburseDetailResource() {
+        return this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL");
+    }
+    
+    public boolean isUpdateDisbursementDate() {
+        return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL")
+                && this.entityId != null;
+    }
+
+    public boolean addAndDeleteDisbursementDetails() {
+        return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL")
+                && this.entityId == null;
+    }
+    
 }
