@@ -362,7 +362,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             logger.info("db URL:" + tenantUrl + "      userhierarchy:" + userhierarchy);
             rptParamValues.put("userhierarchy", userhierarchy);
 			
-            final String userid = currentUser.getId().toString();
+            final Long userid = currentUser.getId();
             logger.info("db URL:" + tenantUrl + "      userid:" + userid);
             rptParamValues.put("userid", userid);
 
