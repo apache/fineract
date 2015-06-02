@@ -123,14 +123,20 @@ public class SavingsProductAssembler {
             allowOverdraft = command.booleanPrimitiveValueOfParameterNamed(allowOverdraftParamName);
         }
 
-        final BigDecimal overdraftLimit = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(overdraftLimitParamName);
+        BigDecimal overdraftLimit = BigDecimal.ZERO;
+        if(command.parameterExists(overdraftLimitParamName)){
+            overdraftLimit = command.bigDecimalValueOfParameterNamed(overdraftLimitParamName);
+        }
 
         boolean enforceMinRequiredBalance = false;
         if (command.parameterExists(enforceMinRequiredBalanceParamName)) {
             enforceMinRequiredBalance = command.booleanPrimitiveValueOfParameterNamed(enforceMinRequiredBalanceParamName);
         }
 
-        final BigDecimal minRequiredBalance = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(minRequiredBalanceParamName);
+        BigDecimal minRequiredBalance = BigDecimal.ZERO;
+        if(command.parameterExists(minRequiredBalanceParamName)){
+            minRequiredBalance = command.bigDecimalValueOfParameterNamed(minRequiredBalanceParamName);
+        }
         final BigDecimal minBalanceForInterestCalculation = command
                 .bigDecimalValueOfParameterNamedDefaultToNullIfZero(minBalanceForInterestCalculationParamName);
 
