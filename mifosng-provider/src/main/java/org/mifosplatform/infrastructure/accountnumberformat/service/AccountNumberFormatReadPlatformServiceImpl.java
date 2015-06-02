@@ -127,6 +127,12 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
             case SAVINGS:
                 accountNumberPrefixTypesSet = AccountNumberFormatEnumerations.accountNumberPrefixesForSavingsAccounts;
             break;
+            case CENTER :
+                accountNumberPrefixTypesSet = AccountNumberFormatEnumerations.accountNumberPrefixesForCenters;
+            break;
+            case GROUP :
+                accountNumberPrefixTypesSet = AccountNumberFormatEnumerations.accountNumberPrefixesForGroups;
+            break;
         }
 
         Object[] array = accountNumberPrefixTypesSet.toArray();

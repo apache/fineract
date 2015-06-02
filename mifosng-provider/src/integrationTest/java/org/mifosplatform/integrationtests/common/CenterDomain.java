@@ -17,6 +17,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
     public static class Builder {
 
         private Integer id;
+        private String accountNo;
         private HashMap status;
         private boolean active;
         private String name;
@@ -31,6 +32,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
                 final String name, final String externalId, final Integer staffId, final int officeID, final String officeName,
                 final String hierarchy, final ArrayList<HashMap> groupMembers) {
             this.id = id;
+            this.accountNo = accountNo;
             this.status = new HashMap();
             this.status.put("id", statusid);
             this.status.put("code", statuscode);
@@ -46,7 +48,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         }
 
         public CenterDomain build() {
-            return new CenterDomain(this.id, (int) this.status.get("id"), (String) this.status.get("code"),
+            return new CenterDomain(this.id, this.accountNo, (int) this.status.get("id"), (String) this.status.get("code"),
                     (String) this.status.get("value"), this.active, this.name, this.externalId, this.staffId, this.officeId,
                     this.officeName, this.hierarchy, groupMembers);
         }
@@ -54,6 +56,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
     }
 
     private Integer id;
+    private String accountNo;
     private HashMap status;
     private boolean active;
     private String name;
@@ -68,10 +71,11 @@ public class CenterDomain implements Comparable<CenterDomain> {
         /* super(); */
     }
 
-    private CenterDomain(final Integer id, final Integer statusid, final String statuscode, final String statusvalue, final boolean active,
+    private CenterDomain(final Integer id, final String accountNo, final Integer statusid, final String statuscode, final String statusvalue, final boolean active,
             final String name, final String externalId, final Integer staffId, final Integer officeID, final String officeName,
             final String hierarchy, final ArrayList<HashMap> groupMembers) {
         this.id = id;
+        this.accountNo = accountNo;
         this.status = new HashMap();
         this.status.put("id", statusid);
         this.status.put("code", statuscode);
@@ -179,6 +183,10 @@ public class CenterDomain implements Comparable<CenterDomain> {
 
     public String getHierarchy() {
         return this.hierarchy;
+    }
+    
+    public String getAccountNo(){
+    	return this.accountNo;
     }
 
     public int[] getGroupMembers() {

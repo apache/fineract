@@ -104,12 +104,13 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
                 .retrieveCodeValuesByCode(GroupingTypesApiConstants.GROUP_ROLE_NAME);
 
         final Long centerId = null;
+        final String accountNo = null;
         final String centerName = null;
         final Long staffId = null;
         final String staffName = null;
         final Collection<ClientData> clientOptions = null;
         
-        return GroupGeneralData.template(defaultOfficeId, centerId, centerName, staffId, staffName, centerOptions, officeOptions,
+        return GroupGeneralData.template(defaultOfficeId, centerId, accountNo, centerName, staffId, staffName, centerOptions, officeOptions,
                 staffOptions, clientOptions, availableRoles);
     }
 
@@ -264,14 +265,15 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private static final class GroupLookupDataMapper implements RowMapper<GroupGeneralData> {
 
         public final String schema() {
-            return "g.id as id, g.display_name as displayName from m_group g where g.level_id = 2 ";
+            return "g.id as id, g.account_no as accountNo, g.display_name as displayName from m_group g where g.level_id = 2 ";
         }
 
         @Override
         public GroupGeneralData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final Long id = JdbcSupport.getLong(rs, "id");
+            final String accountNo = rs.getString("accountNo");
             final String displayName = rs.getString("displayName");
-            return GroupGeneralData.lookup(id, displayName);
+            return GroupGeneralData.lookup(id, accountNo, displayName);
         }
     }
 

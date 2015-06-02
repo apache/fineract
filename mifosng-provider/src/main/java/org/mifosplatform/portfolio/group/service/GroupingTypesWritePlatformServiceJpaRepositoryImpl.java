@@ -17,6 +17,9 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandProcessingService;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
+import org.mifosplatform.infrastructure.accountnumberformat.domain.AccountNumberFormat;
+import org.mifosplatform.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
+import org.mifosplatform.infrastructure.accountnumberformat.domain.EntityAccountType;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -37,6 +40,7 @@ import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.mifosplatform.portfolio.calendar.domain.CalendarType;
+import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.service.LoanStatusMapper;
@@ -91,6 +95,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     private final ConfigurationDomainService configurationDomainService;
     private final SavingsAccountRepository savingsAccountRepository;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
+    private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
+    private final AccountNumberGenerator accountNumberGenerator;
 
     @Autowired
     public GroupingTypesWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -100,7 +106,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final LoanRepository loanRepository, final SavingsAccountRepository savingsRepository,
             final CodeValueRepositoryWrapper codeValueRepository, final CommandProcessingService commandProcessingService,
             final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
-            final SavingsAccountRepository savingsAccountRepository, final LoanRepositoryWrapper loanRepositoryWrapper) {
+            final SavingsAccountRepository savingsAccountRepository, final LoanRepositoryWrapper loanRepositoryWrapper, 
+            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final AccountNumberGenerator accountNumberGenerator) {
         this.context = context;
         this.groupRepository = groupRepository;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
@@ -117,10 +124,13 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         this.configurationDomainService = configurationDomainService;
         this.savingsAccountRepository = savingsAccountRepository;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
+        this.accountNumberFormatRepository = accountNumberFormatRepository;
+        this.accountNumberGenerator = accountNumberGenerator;
     }
 
     private CommandProcessingResult createGroupingType(final JsonCommand command, final GroupTypes groupingType, final Long centerId) {
         try {
+            final String accountNo = command.stringValueOfParameterNamed(GroupingTypesApiConstants.accountNoParamName);
             final String name = command.stringValueOfParameterNamed(GroupingTypesApiConstants.nameParamName);
             final String externalId = command.stringValueOfParameterNamed(GroupingTypesApiConstants.externalIdParamName);
 
@@ -163,7 +173,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             }
 
             final Group newGroup = Group.newGroup(groupOffice, staff, parentGroup, groupLevel, name, externalId, active, activationDate,
-                    clientMembers, groupMembers, submittedOnDate, currentUser);
+                    clientMembers, groupMembers, submittedOnDate, currentUser, accountNo);
 
             boolean rollbackTransaction = false;
             if (newGroup.isActive()) {
@@ -194,6 +204,23 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
              * groups if they exist
              */
             newGroup.generateHierarchy();
+            
+            if (newGroup.isAccountNumberRequiresAutoGeneration()) {
+            	EntityAccountType entityAccountType = null;
+            	AccountNumberFormat accountNumberFormat = null;
+            	if(newGroup.isCenter()){
+                	entityAccountType = EntityAccountType.CENTER;
+                	accountNumberFormat = this.accountNumberFormatRepository
+                            .findByAccountType(entityAccountType);
+                    newGroup.updateAccountNo(this.accountNumberGenerator.generateCenterAccountNumber(newGroup, accountNumberFormat));
+            	}else {
+                	entityAccountType = EntityAccountType.GROUP;
+                	accountNumberFormat = this.accountNumberFormatRepository
+                            .findByAccountType(entityAccountType);
+                    newGroup.updateAccountNo(this.accountNumberGenerator.generateGroupAccountNumber(newGroup, accountNumberFormat));
+            	}
+                
+            }
 
             this.groupRepository.saveAndFlush(newGroup);
             newGroup.captureStaffHistoryDuringCenterCreation(staff, activationDate);

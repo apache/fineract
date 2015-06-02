@@ -28,6 +28,7 @@ public class GroupingTypesApiConstants {
     public static final String groupIdParamName = "groupId";
     public static final String clientIdParamName = "clientId";
     public static final String groupRolesParamName = "groupRoles";
+    public static final String accountNoParamName = "accountNo";
 
     // general
     public static final String localeParamName = "locale";
