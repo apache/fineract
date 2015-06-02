@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.mifosplatform.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.mifosplatform.infrastructure.accountnumberformat.domain.AccountNumberFormatEnumerations.AccountNumberPrefixType;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
+import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.springframework.stereotype.Component;
@@ -89,5 +90,20 @@ public class AccountNumberGenerator {
         }
         return accountNumber;
     }
+    
+    public String generateGroupAccountNumber(Group group, AccountNumberFormat accountNumberFormat) {
+    	Map<String, String> propertyMap = new HashMap<>();
+        propertyMap.put(ID, group.getId().toString());
+        propertyMap.put(OFFICE_NAME, group.getOffice().getName());        
+        return generateAccountNumber(propertyMap, accountNumberFormat);
+    }
+    
+    public String generateCenterAccountNumber(Group group, AccountNumberFormat accountNumberFormat) {
+    	Map<String, String> propertyMap = new HashMap<>();
+        propertyMap.put(ID, group.getId().toString());
+        propertyMap.put(OFFICE_NAME, group.getOffice().getName());        
+        return generateAccountNumber(propertyMap, accountNumberFormat);
+    }
+
 
 }

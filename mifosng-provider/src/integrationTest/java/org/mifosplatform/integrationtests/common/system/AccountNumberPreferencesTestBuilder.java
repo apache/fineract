@@ -16,6 +16,10 @@ public class AccountNumberPreferencesTestBuilder {
 	private String loanPrefixType = "1";
 	private String savingsAccountType = "3";
 	private String savingsPrefixType = "1";
+	private String centerAccountType = "4";
+	private String centerPrefixType = "1";
+	private String groupsAccountType = "5";
+	private String groupsPrefixType = "1";
 
 	public String clientBuild() {
 		final HashMap<String, Object> map = new HashMap<>();
@@ -40,7 +44,23 @@ public class AccountNumberPreferencesTestBuilder {
 
 		return new Gson().toJson(map);
 	}
+	
+	public String groupsBuild() {
+		final HashMap<String, Object> map = new HashMap<>();
+		map.put("accountType", groupsAccountType);
+		map.put("prefixType", groupsPrefixType);
 
+		return new Gson().toJson(map);
+	}
+
+	public String centerBuild() {
+		final HashMap<String, Object> map = new HashMap<>();
+		map.put("accountType", centerAccountType);
+		map.put("prefixType", centerPrefixType);
+
+		return new Gson().toJson(map);
+	}
+	
 	public String invalidDataBuild(String accountType, String prefixType) {
 		final HashMap<String, Object> map = new HashMap<>();
 		map.put("accountType", accountType);

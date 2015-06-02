@@ -86,23 +86,31 @@ public class AccountNumberFormatDataValidator {
 
     }
 
-    public Set<Integer> determineValidAccountNumberPrefixes(EntityAccountType entityAccountType) {
-        Set<AccountNumberPrefixType> validAccountNumberPrefixes = new HashSet<>();
+	public Set<Integer> determineValidAccountNumberPrefixes(
+			EntityAccountType entityAccountType) {
+		Set<AccountNumberPrefixType> validAccountNumberPrefixes = new HashSet<>();
 
-        switch (entityAccountType) {
-            case CLIENT:
-                validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForClientAccounts;
-            break;
+		switch (entityAccountType) {
+		case CLIENT:
+			validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForClientAccounts;
+			break;
 
-            case LOAN:
-                validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForLoanAccounts;
-            break;
+		case LOAN:
+			validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForLoanAccounts;
+			break;
 
-            case SAVINGS:
-                validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForSavingsAccounts;
-            break;
+		case SAVINGS:
+			validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForSavingsAccounts;
+			break;
 
-        }
+		case CENTER:
+			validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForCenters;
+			break;
+			
+		case GROUP:
+			validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForGroups;
+			break;
+		}
 
         Set<Integer> validAccountNumberPrefixValues = new HashSet<>();
         for (AccountNumberPrefixType validAccountNumberPrefix : validAccountNumberPrefixes) {
