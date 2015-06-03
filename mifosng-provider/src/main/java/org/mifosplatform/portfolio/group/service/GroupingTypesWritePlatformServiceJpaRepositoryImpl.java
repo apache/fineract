@@ -204,23 +204,9 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
              * groups if they exist
              */
             newGroup.generateHierarchy();
-            
-            if (newGroup.isAccountNumberRequiresAutoGeneration()) {
-            	EntityAccountType entityAccountType = null;
-            	AccountNumberFormat accountNumberFormat = null;
-            	if(newGroup.isCenter()){
-                	entityAccountType = EntityAccountType.CENTER;
-                	accountNumberFormat = this.accountNumberFormatRepository
-                            .findByAccountType(entityAccountType);
-                    newGroup.updateAccountNo(this.accountNumberGenerator.generateCenterAccountNumber(newGroup, accountNumberFormat));
-            	}else {
-                	entityAccountType = EntityAccountType.GROUP;
-                	accountNumberFormat = this.accountNumberFormatRepository
-                            .findByAccountType(entityAccountType);
-                    newGroup.updateAccountNo(this.accountNumberGenerator.generateGroupAccountNumber(newGroup, accountNumberFormat));
-            	}
-                
-            }
+
+            /* Generate account number if required */
+            generateAccountNumberIfRequired(newGroup);
 
             this.groupRepository.saveAndFlush(newGroup);
             newGroup.captureStaffHistoryDuringCenterCreation(staff, activationDate);
@@ -238,6 +224,24 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         }
     }
 
+    private void generateAccountNumberIfRequired(Group newGroup){
+    	if (newGroup.isAccountNumberRequiresAutoGeneration()) {
+        	EntityAccountType entityAccountType = null;
+        	AccountNumberFormat accountNumberFormat = null;
+        	if(newGroup.isCenter()){
+            	entityAccountType = EntityAccountType.CENTER;
+            	accountNumberFormat = this.accountNumberFormatRepository
+                        .findByAccountType(entityAccountType);
+                newGroup.updateAccountNo(this.accountNumberGenerator.generateCenterAccountNumber(newGroup, accountNumberFormat));
+        	}else {
+            	entityAccountType = EntityAccountType.GROUP;
+            	accountNumberFormat = this.accountNumberFormatRepository
+                        .findByAccountType(entityAccountType);
+                newGroup.updateAccountNo(this.accountNumberGenerator.generateGroupAccountNumber(newGroup, accountNumberFormat));
+        	}
+            
+        }
+    }
     @Transactional
     @Override
     public CommandProcessingResult createCenter(final JsonCommand command) {
