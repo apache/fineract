@@ -262,7 +262,8 @@ task migrateTenantDB<<{
 	
     flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
     flyway.locations= [filePath]
-
+    /**We use ${ as the prefix for strecthy reporting, do not want them to be interpreted by Flyway**/
+    flyway.placeholderPrefix = "\$\${"
     flywayMigrate.execute()
 }
 
