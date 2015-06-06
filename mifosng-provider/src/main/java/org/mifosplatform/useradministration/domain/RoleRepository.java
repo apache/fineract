@@ -11,8 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface RoleRepository extends JpaRepository<Role, Long>, JpaSpecificationExecutor<Role> {
-    
-    @Query("SELECT COUNT(*) FROM AppUser a JOIN a.roles r WHERE r.id = :roleId")
+
+    @Query("SELECT COUNT(*) FROM AppUser a JOIN a.roles r WHERE r.id = :roleId AND a.deleted = false")
     Integer getCountOfRolesAssociatedWithUsers(@Param("roleId") Long roleId);
   
 }

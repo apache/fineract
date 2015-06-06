@@ -6,6 +6,7 @@
 package org.mifosplatform.integrationtests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import java.util.HashMap;
 
@@ -13,7 +14,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mifosplatform.integrationtests.common.Utils;
+import org.mifosplatform.integrationtests.common.organisation.StaffHelper;
 import org.mifosplatform.integrationtests.useradministration.roles.RolesHelper;
+import org.mifosplatform.integrationtests.useradministration.users.UserHelper;
 
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
@@ -113,4 +116,39 @@ public class RolesTest {
         final Integer deleteRoleId = RolesHelper.deleteRole(this.requestSpec, this.responseSpec, roleId);
         assertEquals(deleteRoleId, roleId);
     }
+
+    @Test
+    public void testRoleShouldGetDeletedIfNoActiveUserExists() {
+        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(roleId);
+
+        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(staffId);
+
+        final Integer userId = UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId);
+        Assert.assertNotNull(userId);
+
+        final Integer deletedUserId = UserHelper.deleteUser(this.requestSpec, this.responseSpec, userId);
+        Assert.assertEquals(deletedUserId, userId);
+
+        final Integer deletedRoleId = RolesHelper.deleteRole(this.requestSpec, this.responseSpec, roleId);
+        assertEquals(deletedRoleId, roleId);
+    }
+
+    @Test
+    public void testRoleShouldNotGetDeletedIfActiveUserExists() {
+        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(roleId);
+
+        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(staffId);
+
+        final Integer userId = UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId);
+        Assert.assertNotNull(userId);
+
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(403).build();
+        final Integer deletedRoleId = RolesHelper.deleteRole(this.requestSpec, this.responseSpec, roleId);
+        assertNotEquals(deletedRoleId, roleId);
+    }
+
 }

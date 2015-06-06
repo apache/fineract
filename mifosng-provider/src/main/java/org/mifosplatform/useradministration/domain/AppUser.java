@@ -296,6 +296,7 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
         this.accountNonExpired = false;
         this.firstTimeLoginRemaining = true;
         this.username = getId() + "_DELETED_" + this.username;
+        this.roles.clear();
     }
 
     public boolean isDeleted() {
