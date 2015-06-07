@@ -42,7 +42,7 @@ public class SearchConstants {
     }
 
     public static enum SEARCH_SUPPORTED_PARAMETERS {
-        QUERY("query"), RESOURCE("resource");
+        QUERY("query"), RESOURCE("resource"),EXACTMATCH("exactMatch");
 
         private final String value;
 
