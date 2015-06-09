@@ -45,7 +45,8 @@ public final class AllGroupTypesDataMapper implements RowMapper<GroupGeneralData
         sqlBuilder.append("acu.firstname as activatedByFirstname, ");
         sqlBuilder.append("acu.lastname as activatedByLastname, ");
 
-        sqlBuilder.append("g.hierarchy as hierarchy ");
+        sqlBuilder.append("g.hierarchy as hierarchy, ");
+        sqlBuilder.append("g.level_id as groupLevel ");
         sqlBuilder.append("from m_group g ");
         sqlBuilder.append("join m_office o on o.id = g.office_id ");
         sqlBuilder.append("left join m_staff s on s.id = g.staff_id ");
@@ -80,6 +81,7 @@ public final class AllGroupTypesDataMapper implements RowMapper<GroupGeneralData
         final Long staffId = JdbcSupport.getLong(rs, "staffId");
         final String staffName = rs.getString("staffName");
         final String hierarchy = rs.getString("hierarchy");
+        final String groupLevel = rs.getString("groupLevel");
 
         final LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedOnDate");
         final String closedByUsername = rs.getString("closedByUsername");
@@ -100,6 +102,6 @@ public final class AllGroupTypesDataMapper implements RowMapper<GroupGeneralData
                 closedByUsername, closedByFirstname, closedByLastname);
 
         return GroupGeneralData.instance(id, accountNo, name, externalId, status, activationDate, officeId, officeName, centerId, centerName, staffId,
-                staffName, hierarchy, timeline);
+                staffName, hierarchy, groupLevel, timeline);
     }
 }
