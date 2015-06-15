@@ -288,7 +288,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
             if ("CSV".equalsIgnoreCase(outputType)) {
                 CSVReportUtil.createCSV(masterReport, baos, "UTF-8");
-                return Response.ok().entity(baos.toByteArray()).type("application/x-msdownload")
+                return Response.ok().entity(baos.toByteArray()).type("text/csv")
                         .header("Content-Disposition", "attachment;filename=" + reportName.replaceAll(" ", "") + ".csv").build();
             }
 
