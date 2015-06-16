@@ -53,6 +53,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             "amortizationType",
             "interestType",
             "interestCalculationPeriodType",
+            "interestRateFrequencyType",
             "expectedDisbursementDate",
             "repaymentsStartingFromDate",
             "graceOnPrincipalPayment",
