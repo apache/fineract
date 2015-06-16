@@ -458,14 +458,7 @@ public final class LoanApplicationTerms {
             case DECLINING_BALANCE:
                 switch (this.amortizationMethod) {
                     case EQUAL_INSTALLMENTS:
-                        // equal installments
-                        final int periodsElapsed = periodNumber - 1;
-                        // with periodic interest for default month and year for
-                        // equal installment
-                        final BigDecimal periodicInterestRateForRepaymentPeriod = periodicInterestRate(calculator, mc, daysInPeriod,
-                                DaysInMonthType.DAYS_30, DaysInYearType.DAYS_365);
-                        Money totalPmtForThisInstallment = calculateTotalDueForEqualInstallmentRepaymentPeriod(
-                                periodicInterestRateForRepaymentPeriod, outstandingBalance, periodsElapsed);
+                        Money totalPmtForThisInstallment = pmtForInstallment(calculator, daysInPeriod, outstandingBalance, periodNumber, mc);
                         principalForInstallment = calculatePrincipalDueForInstallment(periodNumber, totalPmtForThisInstallment,
                                 interestForThisInstallment);
                     break;
@@ -481,6 +474,19 @@ public final class LoanApplicationTerms {
         }
 
         return principalForInstallment;
+    }
+
+    public Money pmtForInstallment(final PaymentPeriodsInOneYearCalculator calculator, final int daysInPeriod,
+            final Money outstandingBalance, final int periodNumber, final MathContext mc) {
+        // equal installments
+        final int periodsElapsed = periodNumber - 1;
+        // with periodic interest for default month and year for
+        // equal installment
+        final BigDecimal periodicInterestRateForRepaymentPeriod = periodicInterestRate(calculator, mc, daysInPeriod,
+                DaysInMonthType.DAYS_30, DaysInYearType.DAYS_365);
+        Money totalPmtForThisInstallment = calculateTotalDueForEqualInstallmentRepaymentPeriod(periodicInterestRateForRepaymentPeriod,
+                outstandingBalance, periodsElapsed);
+        return totalPmtForThisInstallment;
     }
 
     public PrincipalInterest calculateTotalInterestForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
@@ -1203,5 +1209,10 @@ public final class LoanApplicationTerms {
 
     public RecalculationFrequencyType getCompoundingFrequencyType() {
         return this.compoundingFrequencyType;
+    }
+
+    
+    public BigDecimal getActualFixedEmiAmount() {
+        return this.actualFixedEmiAmount;
     }
 }

@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.loanproduct.domain;
 
+
 public enum InterestMethod {
     DECLINING_BALANCE(0, "interestType.declining.balance"), FLAT(1, "interestType.flat"), INVALID(2, "interestType.invalid");
 
@@ -39,5 +40,9 @@ public enum InterestMethod {
             break;
         }
         return repaymentMethod;
+    }
+
+    public boolean isDecliningBalnce() {
+        return this.value.equals(InterestMethod.DECLINING_BALANCE.getValue());
     }
 }
