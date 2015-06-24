@@ -1243,7 +1243,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             final LocalDate idealDisbursementDate, LocalDate periodStartDateApplicableForInterest) {
         if (periodStartDate.isBefore(idealDisbursementDate)) {
             if (loanApplicationTerms.getInterestChargedFromLocalDate() != null) {
-                periodStartDateApplicableForInterest = loanApplicationTerms.getInterestChargedFromLocalDate();
+                if (periodStartDate.isEqual(loanApplicationTerms.getExpectedDisbursementDate())
+                        || loanApplicationTerms.getCalculatedRepaymentsStartingFromLocalDate().isBefore(
+                                loanApplicationTerms.getInterestChargedFromLocalDate())) {
+                    periodStartDateApplicableForInterest = loanApplicationTerms.getInterestChargedFromLocalDate();
+                }
             } else {
                 periodStartDateApplicableForInterest = idealDisbursementDate;
             }
