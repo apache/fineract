@@ -9,8 +9,8 @@
 # Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
 DEFAULT_JVM_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,address=8005,server=y,suspend=n"
 
-CATALINA_OPTS="-Xms512m -Xmx512m"
-JAVA_OPTS="-Xms512m -Xmx512m -XX:PermSize=256m -XX:MaxPermSize=512m"
+CATALINA_OPTS="-Xms512m -Xmx2048m"
+JAVA_OPTS="-Xms512m -Xmx2048m -XX:PermSize=256m -XX:MaxPermSize=512m"
 
 APP_NAME="Gradle"
 APP_BASE_NAME=`basename "$0"`
