@@ -1320,7 +1320,8 @@ public class Loan extends AbstractPersistable<Long> {
             }
         }
 
-        if (getSubmittedOnDate().isAfter(new LocalDate())) {
+        // the comparison should be done with the tenant date (DateUtils.getLocalDateOfTenant()) and not the server date (new LocalDate())
+        if (getSubmittedOnDate().isAfter(DateUtils.getLocalDateOfTenant())) {
             final String errorMessage = "The date on which a loan is submitted cannot be in the future.";
             throw new InvalidLoanStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, getSubmittedOnDate());
         }
