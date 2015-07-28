@@ -29,7 +29,7 @@ The release artifact (.zip file) has the following structure:
 
 The three ways to get up and running with mifos platform is:
 
-1. The first (and the easiest) method is to just fire up the launch script provided in the release artifact and Mifos takes care of all the database, server-side and client-side setup for you. 
+~~1. The first (and the easiest) method is to just fire up the launch script provided in the release artifact and Mifos takes care of all the database, server-side and client-side setup for you.~~
 2. Use Amazon AWS and mifosplatform public AMI to spin up a new instance in the cloud
 3. Manually install the prerequisite software on your own machine, follow setup instructions and use release artifacts to get platform running yourself.
 
