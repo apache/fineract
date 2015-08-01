@@ -81,8 +81,9 @@ public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer ex
                     if (paymentDetail == null) {
                         detail = this.paymentDetailAssembler.fetchPaymentDetail(loanTransactionElement);
                     }
-
-                    loanRepaymentTransactions[i] = new SingleRepaymentCommand(loanId, transactionAmount, transactionDate, detail);
+                    if(transactionAmount != null && transactionAmount.intValue() > 0){
+                    	loanRepaymentTransactions[i] = new SingleRepaymentCommand(loanId, transactionAmount, transactionDate, detail);
+                    }
                 }
             }
         }
