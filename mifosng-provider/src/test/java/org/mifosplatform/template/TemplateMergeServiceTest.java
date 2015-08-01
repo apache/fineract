@@ -7,78 +7,101 @@ package org.mifosplatform.template;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.joda.time.LocalDate;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.loanaccount.LoanScheduleTestDataHelper;
 import org.mifosplatform.portfolio.loanaccount.MonetaryCurrencyBuilder;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.mifosplatform.template.domain.Template;
+import org.mifosplatform.template.domain.TemplateMapper;
 import org.mifosplatform.template.service.TemplateMergeService;
+
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 public class TemplateMergeServiceTest {
 
-    private Template template;
-    private final static String TEST_FILE = "src/test/resources/template.mustache";
-    private static TemplateMergeService tms;
+    private TemplateMergeService tms = new TemplateMergeService();
 
-    @BeforeClass
-    public static void init() {
-        tms = new TemplateMergeService(
-//                new FromJsonHelper()
-                );
-    }
-
-    @Ignore
     @Test
     public void compileHelloTemplate() throws Exception {
-        final String name = "TemplateName";
-        final String text = "Hello Test for Template {{template.name}}!";
+        String templateText = "Hello Test for Template {{file.name}}!";
 
-        this.template = new Template(name, text, null, null, null);
+        File file = new File("hello");
+        Map<String, Object> scopes = new HashMap<>();
+        scopes.put("file", file);
 
-        final HashMap<String, Object> scopes = new HashMap<>();
-        scopes.put("template", this.template);
-
-        String output = "";
-        output = tms.compile(this.template, scopes);
-        assertEquals("Hello Test for Template TemplateName!", output);
+        String output = compileTemplateText(templateText, scopes);
+        assertEquals("Hello Test for Template hello!", output);
     }
 
-    @Ignore
     @Test
     public void compileLoanSummary() throws IOException {
+        LocalDate july2nd = new LocalDate(2012, 7, 2);
+        MonetaryCurrency usDollars = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
+        List<LoanRepaymentScheduleInstallment> installments = LoanScheduleTestDataHelper.createSimpleLoanSchedule(july2nd, usDollars);
 
-        final LocalDate july2nd = new LocalDate(2012, 7, 2);
-        final MonetaryCurrency usDollars = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
-        final List<LoanRepaymentScheduleInstallment> installments = LoanScheduleTestDataHelper.createSimpleLoanSchedule(july2nd, usDollars);
-
-        final File file = new File(TEST_FILE);
-        final DataInputStream dis = new DataInputStream(new FileInputStream(file));
-        final byte[] bytes = new byte[(int) file.length()];
-        dis.readFully(bytes);
-        final String content = new String(bytes, "UTF-8");
-
-        this.template = new Template("TemplateName", content, null, null, null);
-
-        final HashMap<String, Object> scopes = new HashMap<>();
+        Map<String, Object> scopes = new HashMap<>();
         scopes.put("installments", installments);
 
-        final String output = tms.compile(this.template, scopes);
+        String templateText = Resources.toString(Resources.getResource("template.mustache"), Charsets.UTF_8);
+        String expectedOutput = Resources.toString(Resources.getResource("template-expected.html"), Charsets.UTF_8);
 
-        dis.close();
-
-        System.out.println(output);
-        dis.close();
+        String output = compileTemplateText(templateText, scopes);
+        // System.out.println(output);
+        assertEquals(expectedOutput, output);
     }
 
+    @Test
+    public void arrayUsingLoop() throws Exception {
+        String templateText = "Hello Test for Template{{#data.name}} {{.}}{{/data.name}}!";
+        String jsonData = "{\"name\": [ \"Michael\", \"Terence\" ] }";
+        String expectedOutput = "Hello Test for Template Michael Terence!";
+
+        Map<String, Object> scopes = new HashMap<>();
+        scopes.put("data", createMapFromJSON(jsonData));
+
+        String output = compileTemplateText(templateText, scopes);
+        assertEquals(expectedOutput, output);
+    }
+
+    @Test
+    public void arrayUsingIndex() throws Exception {
+        String templateText = "Hello Test for Template {{data.name#1}} & {{data.name#0}}!";
+        String jsonData = "{\"name\": [ \"Michael\", \"Terence\" ] }";
+        String expectedOutput = "Hello Test for Template Terence & Michael!";
+
+        Map<String, Object> scopes = new HashMap<>();
+        scopes.put("data", createMapFromJSON(jsonData));
+
+        String output = compileTemplateText(templateText, scopes);
+        assertEquals(expectedOutput, output);
+    }
+
+    protected String compileTemplateText(String templateText, Map<String, Object> scope) throws MalformedURLException, IOException {
+        List<TemplateMapper> mappers = new ArrayList<>();
+        Template template = new Template("TemplateName", templateText, null, null, mappers);
+        return tms.compile(template, scope);
+    }
+    
+    protected Map<String, Object> createMapFromJSON(String jsonText) {
+        Gson gson = new Gson();
+        Type ssMap = new TypeToken<Map<String, Object>>(){}.getType();
+        JsonElement json = new JsonParser().parse(jsonText);
+        return gson.fromJson(json, ssMap);
+    }
 }

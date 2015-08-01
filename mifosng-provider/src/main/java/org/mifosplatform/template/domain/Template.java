@@ -60,7 +60,6 @@ public class Template extends AbstractPersistable<Long> {
     }
 
     protected Template() {
-        //
     }
 
     public static Template fromJson(final JsonCommand command) {

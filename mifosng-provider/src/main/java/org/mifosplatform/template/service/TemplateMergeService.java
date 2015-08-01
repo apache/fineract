@@ -21,10 +21,13 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.mifosplatform.template.domain.Template;
 import org.mifosplatform.template.domain.TemplateFunctions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +37,7 @@ import com.github.mustachejava.MustacheFactory;
 
 @Service
 public class TemplateMergeService {
+	private final static Logger logger = LoggerFactory.getLogger(TemplateMergeService.class);
 
     // private final FromJsonHelper fromApiJsonHelper;
     private Map<String, Object> scopes;
@@ -49,7 +53,6 @@ public class TemplateMergeService {
     }
 
     public String compile(final Template template, final Map<String, Object> scopes) throws MalformedURLException, IOException {
-
         this.scopes = scopes;
         this.scopes.put("static", new TemplateFunctions());
 
@@ -59,19 +62,19 @@ public class TemplateMergeService {
         final Map<String, Object> mappers = getCompiledMapFromMappers(template.getMappersAsMap());
         this.scopes.putAll(mappers);
 
+        expandMapArrays(scopes);
+
         final StringWriter stringWriter = new StringWriter();
         mustache.execute(stringWriter, this.scopes);
 
         return stringWriter.toString();
     }
 
-    private Map<String, Object> getCompiledMapFromMappers(final Map<String, String> data) {
-
+	private Map<String, Object> getCompiledMapFromMappers(final Map<String, String> data) {
         final MustacheFactory mf = new DefaultMustacheFactory();
 
         if (data != null) {
             for (final Map.Entry<String, String> entry : data.entrySet()) {
-
                 final Mustache mappersMustache = mf.compile(new StringReader(entry.getValue()), "");
                 final StringWriter stringWriter = new StringWriter();
 
@@ -82,10 +85,8 @@ public class TemplateMergeService {
                 }
                 try {
                     this.scopes.put(entry.getKey(), getMapFromUrl(url));
-                } catch (final MalformedURLException e) {
-                    e.printStackTrace();
                 } catch (final IOException e) {
-                    e.printStackTrace();
+                	logger.error("getCompiledMapFromMappers() failed", e);
                 }
             }
         }
@@ -94,7 +95,6 @@ public class TemplateMergeService {
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> getMapFromUrl(final String url) throws MalformedURLException, IOException {
-
         final HttpURLConnection connection = getConnection(url);
 
         final String response = getStringFromInputStream(connection.getInputStream());
@@ -108,13 +108,11 @@ public class TemplateMergeService {
     }
 
     private HttpURLConnection getConnection(final String url) {
-
         if (this.authToken == null) {
             final String name = SecurityContextHolder.getContext().getAuthentication().getName();
             final String password = SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
 
             Authenticator.setDefault(new Authenticator() {
-
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
                     return new PasswordAuthentication(name, password.toCharArray());
@@ -132,23 +130,15 @@ public class TemplateMergeService {
 
             connection.setDoInput(true);
 
-        } catch (final MalformedURLException e) {
-            e.printStackTrace();
-        } catch (final IOException e) {
-            e.printStackTrace();
-        } catch (final KeyManagementException e) {
-            e.printStackTrace();
-        } catch (final NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (final KeyStoreException e) {
-            e.printStackTrace();
+        } catch (IOException | KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
+        	logger.error("getConnection() failed, return null", e);
         }
 
         return connection;
     }
 
+    // TODO Replace this with appropriate alternative available in Guava
     private static String getStringFromInputStream(final InputStream is) {
-
         BufferedReader br = null;
         final StringBuilder sb = new StringBuilder();
 
@@ -161,7 +151,7 @@ public class TemplateMergeService {
             }
 
         } catch (final IOException e) {
-            // FIXME - HANDLE THIS CASE
+        	logger.error("getStringFromInputStream() failed", e);
         } finally {
             if (br != null) {
                 try {
@@ -174,4 +164,27 @@ public class TemplateMergeService {
 
         return sb.toString();
     }
+    
+	@SuppressWarnings("unchecked")
+	private void expandMapArrays(Object value) {
+		if (value instanceof Map) {
+			Map<String, Object> valueAsMap = (Map<String, Object>) value;
+			for (Entry<String, Object> valueAsMapEntry : valueAsMap.entrySet()) {
+				Object valueAsMapEntryValue = valueAsMapEntry.getValue();
+				if (valueAsMapEntryValue instanceof Map) { // JSON Object
+					expandMapArrays(valueAsMapEntryValue);
+				} else if (valueAsMapEntryValue instanceof Iterable) { // JSON Array
+					Iterable<Object> valueAsMapEntryValueIterable = (Iterable<Object>) valueAsMapEntryValue;
+					String valueAsMapEntryKey = valueAsMapEntry.getKey();
+					int i = 0;
+					for (Object object : valueAsMapEntryValueIterable) {
+						valueAsMap.put(valueAsMapEntryKey + "#" + i, object);
+						++i;
+						expandMapArrays(object);
+					}
+				}
+			}
+		}		
+	}
+
 }
