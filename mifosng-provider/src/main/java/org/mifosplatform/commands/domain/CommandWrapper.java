@@ -106,7 +106,7 @@ public class CommandWrapper {
         this.transactionId = transactionId;
         this.productId = productId;
     }
-    
+
     public String getHref() {
         return this.href;
     }
@@ -114,9 +114,13 @@ public class CommandWrapper {
     public String getJson() {
         return this.json;
     }
-    
+
     public boolean isCreate() {
         return this.actionName.equalsIgnoreCase("CREATE");
+    }
+
+    public boolean isReverse() {
+        return this.actionName.equalsIgnoreCase("REVERSE");
     }
 
     public boolean isCreateDatatable() {
@@ -130,7 +134,7 @@ public class CommandWrapper {
     public boolean isUpdateDatatable() {
         return this.actionName.equalsIgnoreCase("UPDATE") && this.href.startsWith("/datatables/") && this.entityId == null;
     }
-    
+
     public boolean isDatatableResource() {
         return this.href.startsWith("/datatables/");
     }
@@ -151,11 +155,11 @@ public class CommandWrapper {
     public boolean isUpdateMultiple() {
         return isDatatableResource() && isUpdateOperation() && this.subentityId != null;
     }
-    
+
     public boolean isRegisterDatatable() {
         return this.actionName.equalsIgnoreCase("REGISTER") && this.href.startsWith("/datatables/") && this.entityId == null;
     }
-    
+
     public boolean isNoteResource() {
         boolean isnoteResource = false;
         if (this.entityName.equalsIgnoreCase("CLIENTNOTE") || this.entityName.equalsIgnoreCase("LOANNOTE")
@@ -165,25 +169,26 @@ public class CommandWrapper {
         }
         return isnoteResource;
     }
-    
+
     public boolean isUpdateOfOwnUserDetails(final Long loggedInUserId) {
         return isUserResource() && isUpdate() && loggedInUserId.equals(this.entityId);
     }
-    
+
     public boolean isUpdate() {
         // permissions resource has special update which involves no resource.
         return isPermissionResource() && isUpdateOperation() || isCurrencyResource() && isUpdateOperation() || isCacheResource()
                 && isUpdateOperation() || isWorkingDaysResource() && isUpdateOperation() || isPasswordPreferencesResource()
                 && isUpdateOperation() || isUpdateOperation() && this.entityId != null;
     }
-    
+
     public boolean isCacheResource() {
         return this.entityName.equalsIgnoreCase("CACHE");
     }
-    
+
     public Long getSubentityId() {
         return this.subentityId;
     }
+
     public String getTransactionId() {
         return this.transactionId;
     }
@@ -195,7 +200,7 @@ public class CommandWrapper {
     public Long getEntityId() {
         return this.entityId;
     }
-    
+
     public boolean isUpdateOperation() {
         return this.actionName.equalsIgnoreCase("UPDATE");
     }
@@ -207,9 +212,13 @@ public class CommandWrapper {
     public boolean isDeleteOperation() {
         return this.actionName.equalsIgnoreCase("DELETE");
     }
-    
+
     public boolean isSurveyResource() {
         return this.href.startsWith("/survey/");
+    }
+
+    public boolean isJournalEntryResource() {
+        return this.entityName.equalsIgnoreCase("JOURNALENTRY");
     }
 
     public boolean isRegisterSurvey() {
@@ -251,7 +260,7 @@ public class CommandWrapper {
     public String taskPermissionName() {
         return this.actionName + "_" + this.entityName;
     }
- 
+
     public String getTaskPermissionName() {
         return this.taskPermissionName;
     }
@@ -283,7 +292,7 @@ public class CommandWrapper {
     public boolean isUserResource() {
         return this.entityName.equalsIgnoreCase("USER");
     }
- 
+
     public boolean isCurrencyResource() {
         return this.entityName.equalsIgnoreCase("CURRENCY");
     }
@@ -291,11 +300,11 @@ public class CommandWrapper {
     public String commandName() {
         return this.actionName + "_" + this.entityName;
     }
-    
+
     public boolean isLoanDisburseDetailResource() {
         return this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL");
     }
-    
+
     public boolean isUpdateDisbursementDate() {
         return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL")
                 && this.entityId != null;
@@ -305,5 +314,5 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL")
                 && this.entityId == null;
     }
-    
+
 }
