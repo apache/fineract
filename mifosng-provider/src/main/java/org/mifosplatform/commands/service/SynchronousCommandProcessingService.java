@@ -164,7 +164,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
-        }  else if (wrapper.isSurveyResource()) {
+        } else if (wrapper.isSurveyResource()) {
             if (wrapper.isRegisterSurvey()) {
                 handler = this.applicationContext.getBean("registerSurveyCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isFullFilSurvey()) {
@@ -172,10 +172,15 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
-        }  
-        else {
+        } else if (wrapper.isJournalEntryResource()) {
+            if (wrapper.isCreate()) {
+                handler = this.applicationContext.getBean("createJournalEntryCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isReverse()) {
+                handler = this.applicationContext.getBean("reverseJournalEntryCommandHandler", NewCommandSourceHandler.class);
+            }
+        } else {
 
-        	 handler = this.commandHandlerProvider.getHandler(wrapper.entityName(), wrapper.actionName());
+            handler = this.commandHandlerProvider.getHandler(wrapper.entityName(), wrapper.actionName());
         }
 
         return handler;
