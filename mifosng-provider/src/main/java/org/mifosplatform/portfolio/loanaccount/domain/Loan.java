@@ -8,33 +8,9 @@ package org.mifosplatform.portfolio.loanaccount.domain;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
+import javax.persistence.*;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
@@ -82,32 +58,10 @@ import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.mifosplatform.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
-import org.mifosplatform.portfolio.loanaccount.exception.ExceedingTrancheCountException;
-import org.mifosplatform.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
-import org.mifosplatform.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
-import org.mifosplatform.portfolio.loanaccount.exception.InvalidRefundDateException;
-import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationDateException;
-import org.mifosplatform.portfolio.loanaccount.exception.LoanDisbursalException;
-import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentDateException;
-import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
-import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerUnassignmentDateException;
-import org.mifosplatform.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
+import org.mifosplatform.portfolio.loanaccount.exception.*;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.*;
 import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
-import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
-import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
-import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
-import org.mifosplatform.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
-import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
-import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
-import org.mifosplatform.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
-import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
-import org.mifosplatform.portfolio.loanproduct.domain.RecalculationFrequencyType;
+import org.mifosplatform.portfolio.loanproduct.domain.*;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -1320,7 +1274,9 @@ public class Loan extends AbstractPersistable<Long> {
             }
         }
 
-        // the comparison should be done with the tenant date (DateUtils.getLocalDateOfTenant()) and not the server date (new LocalDate())
+        // the comparison should be done with the tenant date
+        // (DateUtils.getLocalDateOfTenant()) and not the server date (new
+        // LocalDate())
         if (getSubmittedOnDate().isAfter(DateUtils.getLocalDateOfTenant())) {
             final String errorMessage = "The date on which a loan is submitted cannot be in the future.";
             throw new InvalidLoanStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, getSubmittedOnDate());
@@ -2204,7 +2160,7 @@ public class Loan extends AbstractPersistable<Long> {
                 BigDecimal setPrincipalAmount = BigDecimal.ZERO;
                 BigDecimal totalAmount = BigDecimal.ZERO;
                 for (LoanDisbursementDetails disbursementDetails : loanDisburseDetails) {
-                    if(disbursementDetails.actualDisbursementDate() != null){
+                    if (disbursementDetails.actualDisbursementDate() != null) {
                         setPrincipalAmount = setPrincipalAmount.add(disbursementDetails.principal());
                     }
                     totalAmount = totalAmount.add(disbursementDetails.principal());
@@ -3959,7 +3915,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         LocalDate newRepaymentDate = null;
         Boolean isFirstTime = true;
-
+        LocalDate latestRepaymentDate = null;
         for (final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : this.repaymentScheduleInstallments) {
 
             LocalDate oldDueDate = loanRepaymentScheduleInstallment.getDueDate();
@@ -3982,7 +3938,9 @@ public class Loan extends AbstractPersistable<Long> {
                 if (isHolidayEnabled) {
                     newRepaymentDate = HolidayUtil.getRepaymentRescheduleDateToIfHoliday(newRepaymentDate, holidays);
                 }
-
+                if (latestRepaymentDate == null || latestRepaymentDate.isBefore(newRepaymentDate)) {
+                    latestRepaymentDate = newRepaymentDate;
+                }
                 loanRepaymentScheduleInstallment.updateDueDate(newRepaymentDate);
                 // reset from date to get actual daysInPeriod
 
@@ -3995,6 +3953,9 @@ public class Loan extends AbstractPersistable<Long> {
             } else {
                 tmpFromDate = oldDueDate;
             }
+        }
+        if (latestRepaymentDate != null) {
+            this.expectedMaturityDate = latestRepaymentDate.toDate();
         }
     }
 
@@ -4009,7 +3970,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         LocalDate newRepaymentDate = null;
         LocalDate seedDate = meetingStartDate;
-
+        LocalDate latestRepaymentDate = null;
         for (final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : this.repaymentScheduleInstallments) {
 
             LocalDate oldDueDate = loanRepaymentScheduleInstallment.getDueDate();
@@ -4032,6 +3993,9 @@ public class Loan extends AbstractPersistable<Long> {
                 if (isHolidayEnabled) {
                     newRepaymentDate = HolidayUtil.getRepaymentRescheduleDateToIfHoliday(newRepaymentDate, holidays);
                 }
+                if (latestRepaymentDate == null || latestRepaymentDate.isBefore(newRepaymentDate)) {
+                    latestRepaymentDate = newRepaymentDate;
+                }
 
                 loanRepaymentScheduleInstallment.updateDueDate(newRepaymentDate);
                 // reset from date to get actual daysInPeriod
@@ -4041,6 +4005,9 @@ public class Loan extends AbstractPersistable<Long> {
             } else {
                 tmpFromDate = oldDueDate;
             }
+        }
+        if (latestRepaymentDate != null) {
+            this.expectedMaturityDate = latestRepaymentDate.toDate();
         }
     }
 
@@ -4929,8 +4896,6 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     /**
-     * @param loan
-     *            the Loan object
      * @return loan disbursement data
      **/
     public List<DisbursementData> getDisbursmentData() {
@@ -4963,13 +4928,13 @@ public class Loan extends AbstractPersistable<Long> {
      *            TODO
      * @param compoundingCalendarInstance
      *            TODO
-     * @param loan
-     *            the Loan object
+     * @param loanCalendarInstance
+     *            Used for accessing the loan's calendar object
      * @return application terms of the Loan object
      **/
     @SuppressWarnings({ "unused" })
     public LoanApplicationTerms getLoanApplicationTerms(final ApplicationCurrency applicationCurrency,
-            final CalendarInstance restCalendarInstance, CalendarInstance compoundingCalendarInstance) {
+            final CalendarInstance restCalendarInstance, CalendarInstance compoundingCalendarInstance, final Calendar loanCalendar) {
         LoanProduct loanProduct = loanProduct();
         // LoanProductRelatedDetail loanProductRelatedDetail =
         // getLoanRepaymentScheduleDetail();
@@ -5003,7 +4968,12 @@ public class Loan extends AbstractPersistable<Long> {
         // TODO get calender linked to loan if any exist. As of 17-07-2014,
         // could not find a link in the database.
         // skip for now and set the Calender object to null
-        Calendar calendar = null;
+        // Calendar loanCalendar = null;
+        // The calendar instance might be null if the loan is not connected
+        // To a calendar object
+        // if (loanCalendarInstance != null) {
+        // loanCalendar = loanCalendarInstance.getCalendar();
+        // }
 
         final Integer graceOnPrincipalPayment = this.loanRepaymentScheduleDetail.graceOnPrincipalPayment();
         final Integer graceOnInterestPayment = this.loanRepaymentScheduleDetail.graceOnInterestPayment();
@@ -5039,7 +5009,7 @@ public class Loan extends AbstractPersistable<Long> {
                 maxOutstandingBalance, loanVariationTermsData, interestChargedFromDate,
                 this.loanProduct.getPrincipalThresholdForLastInstallment(), this.loanProduct.getInstallmentAmountInMultiplesOf(),
                 recalculationFrequencyType, restCalendarInstance, compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType,
-                this.loanProduct.preCloseInterestCalculationStrategy(), rescheduleStrategyMethod);
+                this.loanProduct.preCloseInterestCalculationStrategy(), rescheduleStrategyMethod, loanCalendar);
     }
 
     /**
