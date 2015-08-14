@@ -29,8 +29,8 @@ public class CommandWrapperBuilder {
     private Long templateId;
 
     public CommandWrapper build() {
-        return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
-                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId);
+        return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName, this.entityName,
+                this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId);
     }
 
     public CommandWrapperBuilder withLoanId(final Long withLoanId) {
@@ -1813,7 +1813,8 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder saveOrUpdateAttendance(final Long entityId, final String supportedEntityType, final Long supportedEntityId) {
+    public CommandWrapperBuilder saveOrUpdateAttendance(final Long entityId, final String supportedEntityType,
+            final Long supportedEntityId) {
         this.actionName = "SAVEORUPDATEATTENDANCE";
         this.entityName = "MEETING";
         this.entityId = entityId;
@@ -2391,6 +2392,15 @@ public class CommandWrapperBuilder {
         this.entityName = "PAYMENTTYPE";
         this.entityId = paymentTypeId;
         this.href = "/" + PaymentTypeApiResourceConstants.RESOURCE_NAME + paymentTypeId;
+        return this;
+    }
+
+    public CommandWrapperBuilder updateExternalServiceProperties(final String externalServiceName) {
+        this.actionName = "UPDATE";
+        this.entityName = "EXTERNALSERVICES";
+        this.transactionId = externalServiceName;
+
+        this.href = "/externalservices/" + externalServiceName;
         return this;
     }
 

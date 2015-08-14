@@ -9,28 +9,41 @@ import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
+import org.mifosplatform.infrastructure.configuration.data.S3CredentialsData;
+import org.mifosplatform.infrastructure.configuration.data.SMTPCredentialsData;
+import org.mifosplatform.infrastructure.configuration.service.ExternalServicesPropertiesReadPlatformService;
 import org.mifosplatform.infrastructure.core.domain.EmailDetail;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GmailBackedPlatformEmailService implements PlatformEmailService {
+	
+	private final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService;
+	
+	@Autowired
+	public GmailBackedPlatformEmailService(final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService){
+		this.externalServicesReadPlatformService = externalServicesReadPlatformService;
+	}
 
     @Override
     public void sendToUserAccount(final EmailDetail emailDetail, final String unencodedPassword) {
         final Email email = new SimpleEmail();
+        final SMTPCredentialsData smtpCredentialsData = this.externalServicesReadPlatformService.getSMTPCredentials();
+        final String authuserName = smtpCredentialsData.getUsername();
 
-        final String authuserName = "support@cloudmicrofinance.com";
-
-        final String authuser = "support@cloudmicrofinance.com";
-        final String authpwd = "support80";
+        final String authuser = smtpCredentialsData.getUsername();
+        final String authpwd = smtpCredentialsData.getPassword();
 
         // Very Important, Don't use email.setAuthentication()
         email.setAuthenticator(new DefaultAuthenticator(authuser, authpwd));
         email.setDebug(false); // true if you want to debug
-        email.setHostName("smtp.gmail.com");
+        email.setHostName(smtpCredentialsData.getHost());
         try {
-            email.getMailSession().getProperties().put("mail.smtp.starttls.enable", "true");
-            email.setFrom(authuser, authuserName);
+        	if(smtpCredentialsData.isUseTLS()){
+        		email.getMailSession().getProperties().put("mail.smtp.starttls.enable", "true");
+        	}
+        	email.setFrom(authuser, authuserName);
 
             final StringBuilder subjectBuilder = new StringBuilder().append("MifosX Prototype Demo: ").append(emailDetail.getContactName())
                     .append(" user account creation.");

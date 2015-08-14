@@ -5,10 +5,10 @@
  */
 package org.mifosplatform.infrastructure.configuration.service;
 
-import org.mifosplatform.infrastructure.configuration.data.S3CredentialsData;
+import org.mifosplatform.infrastructure.configuration.data.ExternalServicesData;
 
 public interface ExternalServicesReadPlatformService {
 
-    S3CredentialsData getS3Credentials();
+    ExternalServicesData getExternalServiceDetailsByServiceName(String serviceName);
 
 }

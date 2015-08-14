@@ -7,7 +7,7 @@ package org.mifosplatform.infrastructure.documentmanagement.contentrepository;
 
 import org.mifosplatform.infrastructure.configuration.data.S3CredentialsData;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.mifosplatform.infrastructure.configuration.service.ExternalServicesReadPlatformService;
+import org.mifosplatform.infrastructure.configuration.service.ExternalServicesPropertiesReadPlatformService;
 import org.mifosplatform.infrastructure.documentmanagement.domain.StorageType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -17,11 +17,11 @@ import org.springframework.stereotype.Component;
 public class ContentRepositoryFactory {
 
     private final ApplicationContext applicationContext;
-    private final ExternalServicesReadPlatformService externalServicesReadPlatformService;
+    private final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService;
 
     @Autowired
     public ContentRepositoryFactory(final ApplicationContext applicationContext,
-            final ExternalServicesReadPlatformService externalServicesReadPlatformService) {
+            final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService) {
         this.applicationContext = applicationContext;
         this.externalServicesReadPlatformService = externalServicesReadPlatformService;
     }
