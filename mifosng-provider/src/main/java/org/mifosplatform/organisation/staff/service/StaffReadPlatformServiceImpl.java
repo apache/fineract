@@ -118,6 +118,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             final StringBuilder sqlBuilder = new StringBuilder(100);
             sqlBuilder.append("s.id as id, s.display_name as displayName ");
             sqlBuilder.append("from m_staff s ");
+            sqlBuilder.append("join m_office o on o.id = s.office_id ");
 
             this.schemaSql = sqlBuilder.toString();
         }
@@ -142,10 +143,13 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
     @Override
     public Collection<StaffData> retrieveAllStaffForDropdown(final Long officeId) {
+    	
+    	//adding the Authorization criteria so that a user cannot see an employee who does not belong to his office or 	a sub office for his office.
+        final String hierarchy = this.context.authenticatedUser().getOffice().getHierarchy();
 
         final Long defaultOfficeId = defaultToUsersOfficeIfNull(officeId);
 
-        final String sql = "select " + this.lookupMapper.schema() + " where s.office_id = ? and s.is_active=1 ";
+        final String sql = "select " + this.lookupMapper.schema() + " where s.office_id = ? and s.is_active=1 and o.hierarchy like '"+ hierarchy+ "%'";
 
         return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] { defaultOfficeId });
     }
@@ -160,10 +164,14 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
     @Override
     public StaffData retrieveStaff(final Long staffId) {
+    	
+        //adding the Authorization criteria so that a user cannot see an employee who does not belong to his office or 	a sub office for his office.
+        final String hierarchy = this.context.authenticatedUser().getOffice().getHierarchy();
+         
 
         try {
             final StaffMapper rm = new StaffMapper();
-            final String sql = "select " + rm.schema() + " where s.id = ?";
+            final String sql = "select " + rm.schema() + " where s.id = ? and o.hierarchy like '"+ hierarchy+ "%'" ;
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { staffId });
         } catch (final EmptyResultDataAccessException e) {
@@ -211,6 +219,10 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         } else if (status.equalsIgnoreCase("all")) {} else {
             throw new UnrecognizedQueryParamException("status", status, new Object[] { "all", "active", "inactive" });
         }
+        
+        //adding the Authorization criteria so that a user cannot see an employee who does not belong to his office or 	a sub office for his office.
+        final String hierarchy = this.context.authenticatedUser().getOffice().getHierarchy();
+        extraCriteria.append(" and o.hierarchy like '"+ hierarchy+ "%' ");
 
         if (StringUtils.isNotBlank(extraCriteria.toString())) {
             extraCriteria.delete(0, 4);
