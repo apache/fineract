@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mifosplatform.integrationtests.common.*;
 import org.mifosplatform.integrationtests.common.loans.*;
@@ -31,6 +32,7 @@ import com.jayway.restassured.specification.ResponseSpecification;
  * rescheduling
  **/
 @SuppressWarnings({ "rawtypes" })
+@Ignore
 public class DisbursalAndRepaymentScheduleTest {
 
     private ResponseSpecification responseSpec;
