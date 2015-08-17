@@ -12,6 +12,7 @@ import java.util.Set;
 import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
@@ -32,8 +33,10 @@ public interface LoanScheduleGenerator {
 
     LoanRepaymentScheduleInstallment calculatePrepaymentAmount(List<LoanRepaymentScheduleInstallment> installments,
             MonetaryCurrency currency, LocalDate onDate, LoanApplicationTerms loanApplicationTerms, MathContext mc,
-            Set<LoanCharge> charges, HolidayDetailDTO holidayDetailDTO, List<LoanTransaction> loanTransactions, LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor);
+            Set<LoanCharge> charges, HolidayDetailDTO holidayDetailDTO, List<LoanTransaction> loanTransactions,
+            LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor);
 
     LoanRescheduleModel reschedule(final MathContext mathContext, final LoanRescheduleRequest loanRescheduleRequest,
-            final ApplicationCurrency applicationCurrency, final HolidayDetailDTO holidayDetailDTO, CalendarInstance restCalendarInstance, CalendarInstance compoundingCalendarInstance);
+            final ApplicationCurrency applicationCurrency, final HolidayDetailDTO holidayDetailDTO, CalendarInstance restCalendarInstance,
+            CalendarInstance compoundingCalendarInstance, final Calendar loanCalendar);
 }

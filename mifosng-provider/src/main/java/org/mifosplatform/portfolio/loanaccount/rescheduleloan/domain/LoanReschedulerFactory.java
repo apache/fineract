@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.loanaccount.rescheduleloan.domain;
 import java.math.MathContext;
 
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
+import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
@@ -16,5 +17,6 @@ public interface LoanReschedulerFactory {
 
     public LoanRescheduleModel reschedule(final MathContext mathContext, final InterestMethod interestMethod,
             final LoanRescheduleRequest loanRescheduleRequest, final ApplicationCurrency applicationCurrency,
-            final HolidayDetailDTO holidayDetailDTO, CalendarInstance restCalendarInstance, CalendarInstance compoundingCalendarInstance);
+            final HolidayDetailDTO holidayDetailDTO, CalendarInstance restCalendarInstance, CalendarInstance compoundingCalendarInstance,
+            final Calendar loanCalendar);
 }
