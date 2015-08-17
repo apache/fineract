@@ -30,15 +30,15 @@ ALTER TABLE `c_external_service_properties`
 
 insert into `c_external_service` ( `name`) values( 'SMTP_Email_Account');
 
-insert into c_external_service_properties (`name`, `value`, `external_service_id`) values('username', 'support@cloudmicrofinance.com', (select id from c_external_service where name = 'Gmail_Email_Account'));
+insert into c_external_service_properties (`name`, `value`, `external_service_id`) values('username', 'support@cloudmicrofinance.com', (select id from c_external_service where name = 'SMTP_Email_Account'));
 
-insert into c_external_service_properties (`name`, `value`, `external_service_id`) values('password', 'support80', (select id from c_external_service where name = 'Gmail_Email_Account'));
+insert into c_external_service_properties (`name`, `value`, `external_service_id`) values('password', 'support80', (select id from c_external_service where name = 'SMTP_Email_Account'));
 
-insert into c_external_service_properties (`name`, `value`, `external_service_id`) values('host', 'smtp.gmail.com', (select id from c_external_service where name = 'Gmail_Email_Account'));
+insert into c_external_service_properties (`name`, `value`, `external_service_id`) values('host', 'smtp.gmail.com', (select id from c_external_service where name = 'SMTP_Email_Account'));
 
-insert into c_external_service_properties (`name`, `value`, `external_service_id`) values('port', '25', (select id from c_external_service where name = 'Gmail_Email_Account'));
+insert into c_external_service_properties (`name`, `value`, `external_service_id`) values('port', '25', (select id from c_external_service where name = 'SMTP_Email_Account'));
 
-insert into c_external_service_properties (`name`, `value`, `external_service_id`) values('useTLS', 'true', (select id from c_external_service where name = 'Gmail_Email_Account'));
+insert into c_external_service_properties (`name`, `value`, `external_service_id`) values('useTLS', 'true', (select id from c_external_service where name = 'SMTP_Email_Account'));
 
 insert into m_permission(grouping, code, entity_name, action_name, can_maker_checker) values('externalservices', 'UPDATE_EXTERNALSERVICES', 'EXTERNALSERVICES', 'UPDATE', 0);
 
