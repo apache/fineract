@@ -2395,6 +2395,16 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr>
+								<td><a href="#external_services">External Services</a></td>
+								<td>externalservice/{servicename}</td>
+								<td></td>
+								<td><a href="#configs_externalService_retrieve">Retrieve
+										a external service configuration</a></td>
+								<td><a href="#configs_externalService_update">Update
+										external service Configuration</a></td>
+								<td></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -16554,6 +16564,94 @@ POST https://DomainName/api/v1/scheduler?command=stop
 					<code class="method-request">
 POST scheduler?command=stop
 					</code>
+				</div>
+			</div>
+			
+			<a id="external_services" name="external_services" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>External Services</h3>
+					<p>External Services Configuration related to set of supported configurations for third party services like Amazon S3 and SMTP:</p>
+					<ol>
+						<li><b>S3 (Amazon S3):</b></li>
+						<li><b>s3_access_key</b> - </li>
+						<li><b>s3_bucket_name</b> - </li>
+						<li><b>s3_secret_key</b> - </li>
+						<br><br>
+						<li><b>SMTP (Email Service):</b></li>
+						<li><b>username</b> - </li>
+						<li><b>password</b> - </li>
+						<li><b>host</b> - </li>
+						<li><b>port</b> - </li>
+						<li><b>useTLS</b> - </li>
+						
+					</ol>
+				</div>
+			</div>
+			
+			<a id="configs_externalService_retrieve" name="configs_externalService_retrieve" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve External Services Configuration</h4>
+					<p>Returns a external Service configurations based on the Service Name.</p>
+					<p>Service Names supported are S3 and SMTP.</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>externalservice/SMTP</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/externalservice/{serviceName}
+					</code>
+					<code class="method-response">
+    
+
+    [
+        {
+            "name": "username",
+            "value": "test@mifos.com"
+        },
+        {
+            "name": "password",
+            "value": "XXXX"
+        },
+        {
+            "name": "host",
+            "value": "smtp.gmail.com"
+        },
+        {
+            "name": "port",
+            "value": "25"
+        },
+        {
+            "name": "useTLS",
+            "value": "true"
+        }
+    ]
+
+
+					</code>
+				</div>
+			</div>
+			
+			<a id="config_externalService_update" name="config_externalService_update"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update External Service</h4>
+					<p>Updates the external Service Configuration for a Service Name.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/externalservice/{serviceName}
+					</code>
+					<code class="method-request">
+PUT externalservice/S3
+Content-Type: application/json
+{
+	"username" : "test@mifos.org"
+	"password" : "XXXX"
+}				
+				</code>
 				</div>
 			</div>
 

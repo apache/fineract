@@ -8,7 +8,8 @@ package org.mifosplatform.infrastructure.configuration.domain;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface ExternalServiceRepository extends JpaRepository<ExternalService, Long>, JpaSpecificationExecutor<ExternalService> {
+public interface ExternalServicesPropertiesRepository extends JpaRepository<ExternalServicesProperties, ExternalServicePropertiesPK>,
+        JpaSpecificationExecutor<ExternalServicesProperties> {
 
-    ExternalService findOneByName(String name);
+    ExternalServicesProperties findOneByExternalServicePropertiesPK(ExternalServicePropertiesPK externalServicesProptiesPK);
 }

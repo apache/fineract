@@ -8,7 +8,8 @@ package org.mifosplatform.infrastructure.configuration.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.mifosplatform.infrastructure.configuration.data.S3CredentialsData;
+import org.mifosplatform.infrastructure.configuration.data.ExternalServicesData;
+import org.mifosplatform.infrastructure.configuration.exception.ExternalServiceConfigurationNotFoundException;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -26,31 +27,43 @@ public class ExternalServicesReadPlatformServiceImpl implements ExternalServices
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-    private static final class S3CredentialsDataExtractor implements ResultSetExtractor<S3CredentialsData> {
+    @Override
+    public ExternalServicesData getExternalServiceDetailsByServiceName(String serviceName) {
+        // TODO Auto-generated method stub
+        final ResultSetExtractor<ExternalServicesData> resultSetExtractor = new ExternalServicesDetailsDataExtractor();
+        String serviceNameToUse = null;
+        switch (serviceName) {
+            case "S3":
+                serviceNameToUse = ExternalServicesConstants.S3_SERVICE_NAME;
+            break;
+
+            case "SMTP":
+                serviceNameToUse = ExternalServicesConstants.SMTP_SERVICE_NAME;
+            break;
+
+            default:
+                throw new ExternalServiceConfigurationNotFoundException(serviceName);
+        }
+        final String sql = "SELECT es.name as name, es.id as id FROM c_external_service es where es.name='" + serviceNameToUse + "'";
+        final ExternalServicesData externalServicesData = this.jdbcTemplate.query(sql, resultSetExtractor, new Object[] {});
+        return externalServicesData;
+    }
+
+    private static final class ExternalServicesDetailsDataExtractor implements ResultSetExtractor<ExternalServicesData> {
 
         @Override
-        public S3CredentialsData extractData(final ResultSet rs) throws SQLException, DataAccessException {
-            String accessKey = null;
-            String bucketName = null;
-            String secretKey = null;
+        public ExternalServicesData extractData(ResultSet rs) throws SQLException, DataAccessException {
+            // TODO Auto-generated method stub
+            Long id = (long) 0;
+            String name = null;
             while (rs.next()) {
-                if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.S3_ACCESS_KEY)) {
-                    accessKey = rs.getString("value");
-                } else if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.S3_BUCKET_NAME)) {
-                    bucketName = rs.getString("value");
-                } else if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.S3_SECRET_KEY)) {
-                    secretKey = rs.getString("value");
-                }
+                name = rs.getString("name");
+                id = rs.getLong("id");
             }
-            return new S3CredentialsData(bucketName, accessKey, secretKey);
+
+            return new ExternalServicesData(id, name);
         }
+
     }
 
-    @Override
-    public S3CredentialsData getS3Credentials() {
-        final ResultSetExtractor<S3CredentialsData> resultSetExtractor = new S3CredentialsDataExtractor();
-        final String sql = "SELECT es.name, es.value FROM c_external_service es where es.name in('s3_bucket_name','s3_access_key','s3_secret_key')";
-        final S3CredentialsData s3CredentialsData = this.jdbcTemplate.query(sql, resultSetExtractor, new Object[] {});
-        return s3CredentialsData;
-    }
 }
