@@ -7,7 +7,9 @@ package org.mifosplatform.organisation.workingdays.domain;
 
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.workingdays.exception.WorkingDaysNotFoundException;
+import org.mifosplatform.organisation.workingdays.service.WorkingDaysUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,5 +46,10 @@ public class WorkingDaysRepositoryWrapper {
 
     public void delete(final WorkingDays workingDays) {
         this.repository.delete(workingDays);
+    }
+
+    public boolean isWorkingDay(LocalDate transactionDate) {
+        final WorkingDays workingDays = findOne();
+        return WorkingDaysUtil.isWorkingDay(workingDays, transactionDate);
     }
 }

@@ -8,7 +8,9 @@ package org.mifosplatform.organisation.holiday.domain;
 import java.util.Date;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.holiday.exception.HolidayNotFoundException;
+import org.mifosplatform.organisation.holiday.service.HolidayUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,5 +58,10 @@ public class HolidayRepositoryWrapper {
 
     public List<Holiday> findUnprocessed() {
         return this.repository.findUnprocessed(HolidayStatusType.ACTIVE.getValue());
+    }
+
+    public boolean isHoliday(Long officeId, LocalDate transactionDate) {
+        final List<Holiday> holidays = findByOfficeIdAndGreaterThanDate(officeId, transactionDate.toDate());
+        return HolidayUtil.isHoliday(transactionDate, holidays);
     }
 }

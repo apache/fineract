@@ -188,7 +188,8 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
 
         if (toDate.isBefore(fromDate)) {
             defaultUserMessage = "To Date date cannot be before the From Date.";
-            throw new HolidayDateException("to.date.cannot.be.before.from.date", defaultUserMessage, fromDate.toString(), toDate.toString());
+            throw new HolidayDateException("to.date.cannot.be.before.from.date", defaultUserMessage, fromDate.toString(),
+                    toDate.toString());
         }
 
         if (repaymentsRescheduledTo.isEqual(fromDate) || repaymentsRescheduledTo.isEqual(toDate)
@@ -221,17 +222,6 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
             throw new HolidayDateException("repayments.rescheduled.to.must.be.within.range", defaultUserMessage, fromDate.toString(),
                     toDate.toString(), repaymentsRescheduledTo.toString());
         }
-    }
-
-    @Override
-    public boolean isHoliday(Long officeId, LocalDate transactionDate) {
-        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId, transactionDate.toDate());
-        return HolidayUtil.isHoliday(transactionDate, holidays);
-    }
-
-    @Override
-    public boolean isTransactionAllowedOnHoliday() {
-        return this.configurationDomainService.allowTransactionsOnHolidayEnabled();
     }
 
 }
