@@ -55,7 +55,7 @@ import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.mifosplatform.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.mifosplatform.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
-import org.mifosplatform.portfolio.loanaccount.service.LoanAccrualWritePlatformService;
+import org.mifosplatform.portfolio.loanaccount.service.LoanAccrualPlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanAssembler;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.mifosplatform.portfolio.note.domain.Note;
@@ -85,7 +85,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
-    private final LoanAccrualWritePlatformService accrualWritePlatformService;
+    private final LoanAccrualPlatformService loanAccrualPlatformService;
     private final PlatformSecurityContext context;
     private final BusinessEventNotifierService businessEventNotifierService;
 
@@ -100,7 +100,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
             final CalendarInstanceRepository calendarInstanceRepository,
             final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository,
-            final LoanAccrualWritePlatformService accrualWritePlatformService, final PlatformSecurityContext context,
+            final LoanAccrualPlatformService loanAccrualPlatformService, final PlatformSecurityContext context,
             final BusinessEventNotifierService businessEventNotifierService) {
         this.loanAccountAssembler = loanAccountAssembler;
         this.loanRepository = loanRepository;
@@ -116,7 +116,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.applicationCurrencyRepository = applicationCurrencyRepository;
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
-        this.accrualWritePlatformService = accrualWritePlatformService;
+        this.loanAccrualPlatformService = loanAccrualPlatformService;
         this.context = context;
         this.businessEventNotifierService = businessEventNotifierService;
     }
@@ -514,7 +514,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         if (!loanScheduleAccrualDatas.isEmpty()) {
-            String error = this.accrualWritePlatformService.addPeriodicAccruals(accruedTill, loanScheduleAccrualDatas);
+            String error = this.loanAccrualPlatformService.addPeriodicAccruals(accruedTill, loanScheduleAccrualDatas);
             if (error.length() > 0) {
                 String globalisationMessageCode = "error.msg.accrual.exception";
                 throw new GeneralPlatformDomainRuleException(globalisationMessageCode, error, error);
