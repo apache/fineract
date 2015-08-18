@@ -121,7 +121,6 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
             }
 
             if (!changes.isEmpty()) {
-
                 this.chargeRepository.save(chargeForUpdate);
             }
 

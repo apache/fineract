@@ -1,7 +1,12 @@
 package org.mifosplatform.portfolio.client.domain;
 
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
+
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,11 +17,21 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.organisation.office.domain.OrganisationCurrency;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
 import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountCharge;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -72,6 +87,8 @@ public class ClientCharge extends AbstractPersistable<Long> {
     @Column(name = "inactivated_on_date")
     private Date inactivationDate;
 
+    private OrganisationCurrency currency;
+
     public static ClientCharge createNew(final Client client, final Charge charge, final JsonCommand command) {
         BigDecimal amount = command.bigDecimalValueOfParameterNamed(ClientApiConstants.amountParamName);
         final LocalDate dueDate = command.localDateValueOfParameterNamed(ClientApiConstants.dueAsOfDateParamName);
@@ -99,6 +116,17 @@ public class ClientCharge extends AbstractPersistable<Long> {
 
         this.paid = determineIfFullyPaid();
         this.status = status;
+    }
+
+    public Money pay(final MonetaryCurrency currency, final Money amountPaid) {
+        Money amountPaidToDate = Money.of(currency, this.amountPaid);
+        Money amountOutstanding = Money.of(currency, this.amountOutstanding);
+        amountPaidToDate = amountPaidToDate.plus(amountPaid);
+        amountOutstanding = amountOutstanding.minus(amountPaid);
+        this.amountPaid = amountPaidToDate.getAmount();
+        this.amountOutstanding = amountOutstanding.getAmount();
+        this.paid = determineIfFullyPaid();
+        return Money.of(currency, this.amountOutstanding);
     }
 
     private void populateDerivedFields(final BigDecimal amount) {
@@ -152,6 +180,14 @@ public class ClientCharge extends AbstractPersistable<Long> {
         return this.amount.subtract(totalAccountedFor);
     }
 
+    public LocalDate getDueLocalDate() {
+        LocalDate dueDate = null;
+        if (this.dueDate != null) {
+            dueDate = new LocalDate(this.dueDate);
+        }
+        return dueDate;
+    }
+
     public Client getClient() {
         return this.client;
     }
@@ -172,26 +208,6 @@ public class ClientCharge extends AbstractPersistable<Long> {
         return this.chargeCalculation;
     }
 
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
-
-    public BigDecimal getAmountPaid() {
-        return this.amountPaid;
-    }
-
-    public BigDecimal getAmountWaived() {
-        return this.amountWaived;
-    }
-
-    public BigDecimal getAmountWrittenOff() {
-        return this.amountWrittenOff;
-    }
-
-    public BigDecimal getAmountOutstanding() {
-        return this.amountOutstanding;
-    }
-
     public boolean isPenaltyCharge() {
         return this.penaltyCharge;
     }
@@ -204,8 +220,12 @@ public class ClientCharge extends AbstractPersistable<Long> {
         return this.waived;
     }
 
-    public boolean isStatus() {
+    public boolean isActive() {
         return this.status;
+    }
+
+    public boolean isNotActive() {
+        return !this.status;
     }
 
     public Date getInactivationDate() {
@@ -218,6 +238,39 @@ public class ClientCharge extends AbstractPersistable<Long> {
 
     public Long getOfficeId() {
         return this.client.getOffice().getId();
+    }
+
+    public void setCurrency(OrganisationCurrency currency) {
+        this.currency = currency;
+    }
+
+    public MonetaryCurrency getCurrency() {
+        return this.currency.toMonetaryCurrency();
+    }
+
+    public boolean isPaidOrPartiallyPaid(final MonetaryCurrency currency) {
+        final Money amountWaivedOrWrittenOff = getAmountWaived(currency).plus(getAmountWrittenOff(currency));
+        return Money.of(currency, this.amountPaid).plus(amountWaivedOrWrittenOff).isGreaterThanZero();
+    }
+
+    public Money getAmount(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amount);
+    }
+
+    public Money getAmountPaid(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amountPaid);
+    }
+
+    public Money getAmountWaived(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amountWaived);
+    }
+
+    public Money getAmountWrittenOff(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amountWrittenOff);
+    }
+
+    public Money getAmountOutstanding(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amountOutstanding);
     }
 
 }

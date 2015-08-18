@@ -28,6 +28,7 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientChargeData;
 import org.mifosplatform.portfolio.client.service.ClientChargeReadPlatformService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Path("/clients/{clientId}/charges")
@@ -41,6 +42,7 @@ public class ClientChargesApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
+    @Autowired
     public ClientChargesApiResource(final PlatformSecurityContext context, final ChargeReadPlatformService chargeReadPlatformService,
             final ClientChargeReadPlatformService clientChargeReadPlatformService,
             final DefaultToApiJsonSerializer<ClientChargeData> toApiJsonSerializer,

@@ -18,9 +18,10 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.office.domain.Office;
-import org.mifosplatform.portfolio.loanaccount.domain.Loan;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanChargePaidBy;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -41,16 +42,15 @@ public class ClientTransaction extends AbstractPersistable<Long> {
     @JoinColumn(name = "payment_detail_id", nullable = true)
     private PaymentDetail paymentDetail;
 
+    @Column(name = "currency_code", length = 3)
+    private String currencyCode;
+
     @Column(name = "transaction_type_enum", nullable = false)
-    private final Integer typeOf;
+    private Integer typeOf;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "transaction_date", nullable = false)
-    private final Date dateOf;
-
-    @Temporal(TemporalType.DATE)
-    @Column(name = "submitted_on_date", nullable = false)
-    private final Date submittedOnDate;
+    private Date dateOf;
 
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
@@ -63,13 +63,51 @@ public class ClientTransaction extends AbstractPersistable<Long> {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date", nullable = false)
-    private final Date createdDate;
+    private Date createdDate;
 
     @ManyToOne
     @JoinColumn(name = "appuser_id", nullable = true)
-    private final AppUser appUser;
+    private AppUser appUser;
 
     @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanTransaction", orphanRemoval = true)
-    private Set<LoanChargePaidBy> loanChargesPaid = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "clientTransaction", orphanRemoval = true)
+    private Set<ClientChargePaidBy> clientChargePaidByCollection = new HashSet<>();
+
+    public static ClientTransaction payCharge(final Client client, final Office office, PaymentDetail paymentDetail, final LocalDate date,
+            final Money amount, final String currencyCode, final AppUser appUser) {
+        final boolean isReversed = false;
+        final String externalId = null;
+        return new ClientTransaction(client, office, paymentDetail, ClientTransactionType.PAY_CHARGE.getValue(), date, amount, isReversed,
+                externalId, DateUtils.getDateOfTenant(), currencyCode, appUser);
+    }
+
+    public static ClientTransaction waiver(final Client client, final Office office, final LocalDate date, final Money amount,
+            final String currencyCode, final AppUser appUser) {
+        final boolean isReversed = false;
+        final String externalId = null;
+        final PaymentDetail paymentDetail = null;
+        return new ClientTransaction(client, office, paymentDetail, ClientTransactionType.PAY_CHARGE.getValue(), date, amount, isReversed,
+                externalId, DateUtils.getDateOfTenant(), currencyCode, appUser);
+    }
+
+    public ClientTransaction(Client client, Office office, PaymentDetail paymentDetail, Integer typeOf, LocalDate transactionLocalDate,
+            Money amount, boolean reversed, String externalId, Date createdDate, String currencyCode, AppUser appUser) {
+        super();
+        this.client = client;
+        this.office = office;
+        this.paymentDetail = paymentDetail;
+        this.typeOf = typeOf;
+        this.dateOf = transactionLocalDate.toDate();
+        this.amount = amount.getAmount();
+        this.reversed = reversed;
+        this.externalId = externalId;
+        this.createdDate = createdDate;
+        this.currencyCode = currencyCode;
+        this.appUser = appUser;
+    }
+
+    public Set<ClientChargePaidBy> getClientChargePaidByCollection() {
+        return this.clientChargePaidByCollection;
+    }
+
 }

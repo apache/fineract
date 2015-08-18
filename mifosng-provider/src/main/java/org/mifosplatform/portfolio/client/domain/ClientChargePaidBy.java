@@ -29,6 +29,11 @@ public class ClientChargePaidBy extends AbstractPersistable<Long> {
 
     }
 
+    public static ClientChargePaidBy instance(final ClientTransaction clientTransaction, final ClientCharge clientCharge,
+            final BigDecimal amount) {
+        return new ClientChargePaidBy(clientTransaction, clientCharge, amount);
+    }
+
     public ClientChargePaidBy(final ClientTransaction clientTransaction, final ClientCharge clientCharge, final BigDecimal amount) {
         this.clientTransaction = clientTransaction;
         this.clientCharge = clientCharge;

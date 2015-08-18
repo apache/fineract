@@ -5,11 +5,16 @@
  */
 package org.mifosplatform.portfolio.client.api;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.client.data.ClientData;
+import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
 
 public class ClientApiConstants {
 
@@ -74,6 +79,14 @@ public class ClientApiConstants {
     public static final String clientTypeParamName = "clientType";
     public static final String clientClassificationIdParamName = "clientClassificationId";
     public static final String clientClassificationParamName = "clientClassification";
+    // request parameters for payment details
+    public static final String paymentTypeIdParamName = "paymentTypeId";
+    public static final String transactionAccountNumberParamName = "accountNumber";
+    public static final String checkNumberParamName = "checkNumber";
+    public static final String routingCodeParamName = "routingCode";
+    public static final String receiptNumberParamName = "receiptNumber";
+    public static final String bankNumberParamName = "bankNumber";
+
     // response parameters
     public static final String statusParamName = "status";
     public static final String hierarchyParamName = "hierarchy";
@@ -106,6 +119,14 @@ public class ClientApiConstants {
     public static final String amountParamName = "amount";
     public static final String amountPaidParamName = "amountPaid";
     public static final String chargeOptionsParamName = "chargeOptions";
+
+    // client transactions response parameters
+    public static final String transactionAmountParamName = "transactionAmount";
+    public static final String paymentDetailDataParamName = "paymentDetailData";
+    public static final String reversedParamName = "reversed";
+    public static final String dateParamName = "date";
+    private static final String transactionTypeParamName = "type";
+    private static final String transactionCurrencyParamName = "currency";
 
     // associations related part of response
     public static final String groupsParamName = "groups";
@@ -160,7 +181,12 @@ public class ClientApiConstants {
     public static final Set<String> CLIENT_CHARGES_ADD_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(chargeIdParamName, amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName));
 
-    public static final Set<String> CLIENT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(amountParamName, transactionDateParamName, dateFormatParamName, localeParamName));
+    public static final Set<String> CLIENT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(amountParamName,
+            transactionDateParamName, dateFormatParamName, localeParamName, paymentTypeIdParamName, transactionAccountNumberParamName,
+            checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
+
+    public static final Set<String> CLIENT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
+            transactionAmountParamName, paymentDetailDataParamName, reversedParamName, dateParamName, officeIdParamName,
+            officeNameParamName, transactionTypeParamName, transactionCurrencyParamName, externalIdParamName, submittedOnDateParamName));
 
 }

@@ -17,6 +17,7 @@ import org.mifosplatform.portfolio.charge.service.ChargeEnumerations;
 import org.mifosplatform.portfolio.client.data.ClientChargeData;
 import org.mifosplatform.portfolio.client.exception.ClientChargeNotFoundException;
 import org.mifosplatform.portfolio.common.service.DropdownReadPlatformService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -30,6 +31,7 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
     private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;
     private final DropdownReadPlatformService dropdownReadPlatformService;
 
+    @Autowired
     public ClientChargeReadPlatformServiceImpl(final PlatformSecurityContext context,
             final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final RoutingDataSource dataSource,
             final DropdownReadPlatformService dropdownReadPlatformService) {

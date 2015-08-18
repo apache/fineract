@@ -2208,7 +2208,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
 
         if (DateUtils.isDateInTheFuture(transactionDate)) {
-            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(getSubmittedOnLocalDate().toString(formatter))
+            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(transactionDate.toString(formatter))
                     .failWithCodeNoParameterAddedToErrorCode("transaction.is.futureDate");
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }

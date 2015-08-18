@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.client.domain;
 
+import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,5 +42,11 @@ public class ClientRepositoryWrapper {
 
     public void delete(final Client client) {
         this.repository.delete(client);
+    }
+
+    public Client getActiveClient(Long clientId) {
+        final Client client = this.findOneWithNotFoundDetection(clientId);
+        if (client.isNotActive()) { throw new ClientNotActiveException(client.getId()); }
+        return client;
     }
 }
