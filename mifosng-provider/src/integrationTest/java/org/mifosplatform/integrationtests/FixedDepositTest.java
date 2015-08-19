@@ -7,6 +7,7 @@ package org.mifosplatform.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
