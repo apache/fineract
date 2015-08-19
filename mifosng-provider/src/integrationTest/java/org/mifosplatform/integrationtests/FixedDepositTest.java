@@ -1407,6 +1407,7 @@ public class FixedDepositTest {
         final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
 
+        System.out.println("Submitted Date:"+SUBMITTED_ON_DATE);
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
 
@@ -1450,10 +1451,8 @@ public class FixedDepositTest {
         principal = this.fixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod,
                 interestPerDay, DAILY_COMPOUNDING_INTERVAL, MONTHLY_INTERVAL);
 
-        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
-        decimalFormat.applyPattern(".");
-        principal = new Float(decimalFormat.format(principal));
-        maturityAmount = new Float(decimalFormat.format(maturityAmount));
+        principal = new BigDecimal(principal).setScale(0, BigDecimal.ROUND_FLOOR).floatValue();
+        maturityAmount = new BigDecimal(maturityAmount).setScale(0, BigDecimal.ROUND_FLOOR).floatValue();
         System.out.println(principal);
         Assert.assertEquals("Verifying Maturity amount for Fixed Deposit Account", principal, maturityAmount);
 
