@@ -24,6 +24,7 @@ import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.mifosplatform.portfolio.charge.exception.ChargeCannotBeAppliedToException;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.mifosplatform.portfolio.client.data.ClientChargeDataValidator;
 import org.mifosplatform.portfolio.client.domain.Client;
@@ -82,6 +83,12 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
         final Long chargeDefinitionId = command.longValueOfParameterNamed(ClientApiConstants.chargeIdParamName);
         final Charge charge = this.chargeRepository.findOneWithNotFoundDetection(chargeDefinitionId);
 
+        // validate for client charge
+        if (!charge.isClientCharge()) {
+            final String errorMessage = "Charge with identifier " + charge.getId() + " cannot be applied to a Client";
+            throw new ChargeCannotBeAppliedToException("client", errorMessage, charge.getId());
+        }
+
         final ClientCharge clientCharge = ClientCharge.createNew(client, charge, command);
 
         final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat());
@@ -98,7 +105,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
 
     @Override
     public CommandProcessingResult payCharge(Long clientId, Long clientChargeId, JsonCommand command) {
-        this.clientChargeDataValidator.validateAdd(command.json());
+        this.clientChargeDataValidator.validatePayCharge(command.json());
 
         final Client client = this.clientRepository.getActiveClient(clientId);
 

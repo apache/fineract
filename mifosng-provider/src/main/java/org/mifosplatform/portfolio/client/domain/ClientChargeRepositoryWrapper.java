@@ -3,7 +3,9 @@ package org.mifosplatform.portfolio.client.domain;
 import org.mifosplatform.organisation.office.domain.OrganisationCurrencyRepositoryWrapper;
 import org.mifosplatform.portfolio.charge.exception.ChargeNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class ClientChargeRepositoryWrapper {
 
     private final ClientChargeRepository repository;

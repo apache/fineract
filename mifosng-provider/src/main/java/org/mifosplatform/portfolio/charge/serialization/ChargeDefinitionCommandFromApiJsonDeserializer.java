@@ -116,8 +116,8 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
 
             if (ctt.isWeeklyFee()) {
                 final String monthDay = this.fromApiJsonHelper.extractStringNamed("feeOnMonthDay", element);
-                baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay)
-                        .mustBeBlankWhenParameterProvidedIs("chargeTimeType", chargeTimeType);
+                baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay).mustBeBlankWhenParameterProvidedIs("chargeTimeType",
+                        chargeTimeType);
             }
 
             if (ctt.isMonthlyFee()) {
@@ -131,6 +131,22 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                 final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed("feeOnMonthDay", element);
                 baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay).notNull();
             }
+
+            if (chargeCalculationType != null) {
+                baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
+                        .isOneOfTheseValues(ChargeCalculationType.validValuesForSavings());
+            }
+        } else if (appliesTo.isClientCharge()) {
+            // client applicable validation
+            final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
+            baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull();
+            if (chargeTimeType != null) {
+                baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType)
+                        .isOneOfTheseValues(ChargeTimeType.validClientValues());
+            }
+
+            // final ChargeTimeType ctt =
+            // ChargeTimeType.fromInt(chargeTimeType);
 
             if (chargeCalculationType != null) {
                 baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
@@ -217,9 +233,11 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
 
             final Collection<Object> validLoanValues = Arrays.asList(ChargeTimeType.validLoanValues());
             final Collection<Object> validSavingsValues = Arrays.asList(ChargeTimeType.validSavingsValues());
+            final Collection<Object> validClientValues = Arrays.asList(ChargeTimeType.validClientValues());
 
             final Collection<Object> allValidValues = new ArrayList<>(validLoanValues);
             allValidValues.addAll(validSavingsValues);
+            allValidValues.addAll(validClientValues);
 
             baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull()
                     .isOneOfTheseValues(allValidValues.toArray(new Object[allValidValues.size()]));

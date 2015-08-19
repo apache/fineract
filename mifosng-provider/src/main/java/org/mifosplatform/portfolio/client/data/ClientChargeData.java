@@ -54,6 +54,28 @@ public class ClientChargeData {
                 amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penalty, isActive, inactivationDate, chargeOptions);
     }
 
+    public static ClientChargeData template(final Collection<ChargeData> chargeOptions) {
+        final Long id = null;
+        final Long clientId = null;
+        final Long chargeId = null;
+        final String name = null;
+        final EnumOptionData chargeTimeType = null;
+        final LocalDate dueDate = null;
+        final EnumOptionData chargeCalculationType = null;
+        final CurrencyData currency = null;
+        final BigDecimal amount = null;
+        final BigDecimal amountPaid = null;
+        final BigDecimal amountWaived = null;
+        final BigDecimal amountWrittenOff = null;
+        final BigDecimal amountOutstanding = null;
+        final Boolean penalty = false;
+        final Boolean isActive = null;
+        final LocalDate inactivationDate = null;
+
+        return new ClientChargeData(id, clientId, chargeId, name, chargeTimeType, dueDate, chargeCalculationType, currency, amount,
+                amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penalty, isActive, inactivationDate, chargeOptions);
+    }
+
     private ClientChargeData(Long id, Long clientId, Long chargeId, String name, EnumOptionData chargeTimeType, LocalDate dueDate,
             EnumOptionData chargeCalculationType, CurrencyData currency, BigDecimal amount, BigDecimal amountPaid, BigDecimal amountWaived,
             BigDecimal amountWrittenOff, BigDecimal amountOutstanding, boolean penalty, Boolean isActive, LocalDate inactivationDate,

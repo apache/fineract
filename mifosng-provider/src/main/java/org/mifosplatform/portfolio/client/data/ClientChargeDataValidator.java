@@ -42,8 +42,6 @@ public class ClientChargeDataValidator {
                 .resource(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final Long chargeId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.chargeIdParamName, element);
-        baseDataValidator.reset().parameter(ClientApiConstants.chargeIdParamName).value(chargeId).notNull().integerGreaterThanZero();
 
         final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(ClientApiConstants.amountParamName, element);
         baseDataValidator.reset().parameter(ClientApiConstants.amountParamName).value(amount).notNull().positiveAmount();

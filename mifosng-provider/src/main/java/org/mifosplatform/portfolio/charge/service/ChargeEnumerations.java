@@ -49,9 +49,9 @@ public class ChargeEnumerations {
                         "Monthly Fee");
             break;
             case WEEKLY_FEE:
-            	optionData = new EnumOptionData(ChargeTimeType.WEEKLY_FEE.getValue().longValue(), ChargeTimeType.WEEKLY_FEE.getCode(),
-            			"Weekly Fee");
-            break;	
+                optionData = new EnumOptionData(ChargeTimeType.WEEKLY_FEE.getValue().longValue(), ChargeTimeType.WEEKLY_FEE.getCode(),
+                        "Weekly Fee");
+            break;
             case INSTALMENT_FEE:
                 optionData = new EnumOptionData(ChargeTimeType.INSTALMENT_FEE.getValue().longValue(),
                         ChargeTimeType.INSTALMENT_FEE.getCode(), "Installment Fee");
@@ -61,8 +61,8 @@ public class ChargeEnumerations {
                         ChargeTimeType.OVERDUE_INSTALLMENT.getCode(), "Overdue Fees");
             break;
             case OVERDRAFT_FEE:
-                optionData = new EnumOptionData(ChargeTimeType.OVERDRAFT_FEE.getValue().longValue(),
-                        ChargeTimeType.OVERDRAFT_FEE.getCode(), "Overdraft Fee");
+                optionData = new EnumOptionData(ChargeTimeType.OVERDRAFT_FEE.getValue().longValue(), ChargeTimeType.OVERDRAFT_FEE.getCode(),
+                        "Overdraft Fee");
             break;
             default:
                 optionData = new EnumOptionData(ChargeTimeType.INVALID.getValue().longValue(), ChargeTimeType.INVALID.getCode(), "Invalid");
@@ -84,6 +84,9 @@ public class ChargeEnumerations {
             case SAVINGS:
                 optionData = new EnumOptionData(ChargeAppliesTo.SAVINGS.getValue().longValue(), ChargeAppliesTo.SAVINGS.getCode(),
                         "Savings");
+            break;
+            case CLIENT:
+                optionData = new EnumOptionData(ChargeAppliesTo.CLIENT.getValue().longValue(), ChargeAppliesTo.CLIENT.getCode(), "Client");
             break;
             default:
                 optionData = new EnumOptionData(ChargeAppliesTo.INVALID.getValue().longValue(), ChargeAppliesTo.INVALID.getCode(),

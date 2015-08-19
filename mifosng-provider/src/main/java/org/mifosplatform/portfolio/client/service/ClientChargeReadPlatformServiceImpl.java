@@ -118,7 +118,7 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
 
             final ClientChargeMapper rm = new ClientChargeMapper();
 
-            final String sql = "select " + rm.schema() + " where sc.client_id=? and sc.id=? ";
+            final String sql = "select " + rm.schema() + " where cc.client_id=? and cc.id=? ";
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { clientId, clientChargeId });
         } catch (final EmptyResultDataAccessException e) {
