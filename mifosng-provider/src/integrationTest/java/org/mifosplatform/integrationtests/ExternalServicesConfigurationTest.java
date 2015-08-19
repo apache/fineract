@@ -52,6 +52,9 @@ public class ExternalServicesConfigurationTest {
             String value = null;
             if (name.equals(configName)) {
                 value = (String) externalServicesConfig.get(configIndex).get("value");
+                if(value == null){
+                    value = "testnull";
+                }
                 String newValue = "test";
                 System.out.println(name + ":" + value);
                 HashMap arrayListValue = this.externalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
@@ -77,6 +80,9 @@ public class ExternalServicesConfigurationTest {
             String value = null;
             if (name.equals(configName)) {
                 value = (String) externalServicesConfig.get(configIndex).get("value");
+                if(value == null){
+                    value = "testnull";
+                }
                 String newValue = "test";
                 System.out.println(name + ":" + value);
                 HashMap arrayListValue = this.externalServicesConfigurationHelper.updateValueForExternaServicesConfiguration(requestSpec,
