@@ -21,6 +21,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.organisation.monetary.domain.MoneyHelper;
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.mifosplatform.portfolio.account.data.AccountTransferDTO;
 import org.mifosplatform.portfolio.account.domain.AccountTransferDetails;
@@ -59,7 +60,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     private final BusinessEventNotifierService businessEventNotifierService;
     private final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository;
     private final Map<Long, Long> releaseLoanIds = new HashMap<>(2);
-    private final RoundingMode roundingMode = RoundingMode.HALF_EVEN;
+    
 
     @Autowired
     public GuarantorDomainServiceImpl(final GuarantorRepository guarantorRepository,
@@ -101,8 +102,8 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
             final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
             BigDecimal mandatoryAmount = principal.multiply(guaranteeData.getMandatoryGuarantee()).divide(BigDecimal.valueOf(100));
             BigDecimal minSelfAmount = principal.multiply(guaranteeData.getMinimumGuaranteeFromOwnFunds()).divide(BigDecimal.valueOf(100));
-            BigDecimal minExtGuarantee = principal.multiply(guaranteeData.getMinimumGuaranteeFromGuarantor()).divide(
-                    BigDecimal.valueOf(100));
+            BigDecimal minExtGuarantee = principal.multiply(guaranteeData.getMinimumGuaranteeFromGuarantor())
+                    .divide(BigDecimal.valueOf(100));
 
             BigDecimal actualAmount = BigDecimal.ZERO;
             BigDecimal actualSelfAmount = BigDecimal.ZERO;
@@ -113,11 +114,11 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                     if (guarantorFundingDetails.getStatus().isActive() || guarantorFundingDetails.getStatus().isWithdrawn()
                             || guarantorFundingDetails.getStatus().isCompleted()) {
                         if (guarantor.isSelfGuarantee()) {
-                            actualSelfAmount = actualSelfAmount.add(guarantorFundingDetails.getAmount()).subtract(
-                                    guarantorFundingDetails.getAmountTransfered());
+                            actualSelfAmount = actualSelfAmount.add(guarantorFundingDetails.getAmount())
+                                    .subtract(guarantorFundingDetails.getAmountTransfered());
                         } else {
-                            actualExtGuarantee = actualExtGuarantee.add(guarantorFundingDetails.getAmount()).subtract(
-                                    guarantorFundingDetails.getAmountTransfered());
+                            actualExtGuarantee = actualExtGuarantee.add(guarantorFundingDetails.getAmount())
+                                    .subtract(guarantorFundingDetails.getAmountTransfered());
                         }
                     }
                 }
@@ -238,12 +239,13 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                         BigDecimal remainingAmount = guarantorFundingDetails.getAmountRemaining();
                         if (loan.getGuaranteeAmount().compareTo(loan.getPrincpal().getAmount()) == 1) {
                             remainingAmount = remainingAmount.multiply(loan.getPrincpal().getAmount()).divide(loan.getGuaranteeAmount(),
-                                    roundingMode);
+                                    RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
                         }
                         AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, remainingAmount, fromAccountType,
                                 toAccountType, fromAccountId, toAccountId, description, locale, fmt, paymentDetail, fromTransferType,
                                 toTransferType, chargeId, loanInstallmentNumber, transferType, accountTransferDetails, noteText,
-                                txnExternalId, loan, toSavingsAccount, fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
+                                txnExternalId, loan, toSavingsAccount, fromSavingsAccount, isRegularTransaction,
+                                isExceptionForBalanceCheck);
                         transferAmount(accountTransferDTO);
                     } finally {
                         releaseLoanIds.remove(loanId);
@@ -378,16 +380,16 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
             BigDecimal amountForRelease = loanTransaction.getPrincipalPortion();
             BigDecimal totalGuaranteeAmount = loan.getGuaranteeAmount();
             BigDecimal principal = loan.getPrincpal().getAmount();
-            if((amountForRelease!=null)&&(totalGuaranteeAmount!=null))
-            {
-                amountForRelease = amountForRelease.multiply(totalGuaranteeAmount).divide(principal,this.roundingMode);
+            if ((amountForRelease != null) && (totalGuaranteeAmount != null)) {
+                amountForRelease = amountForRelease.multiply(totalGuaranteeAmount).divide(principal, RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
                 List<DepositAccountOnHoldTransaction> accountOnHoldTransactions = new ArrayList<>();
 
                 BigDecimal amountLeft = calculateAndRelaseGuarantorFunds(externalGuarantorList, guarantorGuarantee, amountForRelease,
-                    loanTransaction, accountOnHoldTransactions);
+                        loanTransaction, accountOnHoldTransactions);
 
                 if (amountLeft.compareTo(BigDecimal.ZERO) == 1) {
-                    calculateAndRelaseGuarantorFunds(selfGuarantorList, selfGuarantee, amountLeft, loanTransaction, accountOnHoldTransactions);
+                    calculateAndRelaseGuarantorFunds(selfGuarantorList, selfGuarantee, amountLeft, loanTransaction,
+                            accountOnHoldTransactions);
                     externalGuarantorList.addAll(selfGuarantorList);
                 }
 
@@ -465,7 +467,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         BigDecimal amountLeft = amountForRelease;
         for (GuarantorFundingDetails fundingDetails : guarantorList) {
             BigDecimal guarantorAmount = amountForRelease.multiply(fundingDetails.getAmountRemaining()).divide(totalGuaranteeAmount,
-                    roundingMode);
+                    RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
             if (fundingDetails.getAmountRemaining().compareTo(guarantorAmount) < 1) {
                 guarantorAmount = fundingDetails.getAmountRemaining();
             }

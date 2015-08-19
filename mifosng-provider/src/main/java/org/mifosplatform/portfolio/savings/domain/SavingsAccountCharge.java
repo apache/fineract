@@ -34,6 +34,7 @@ import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.organisation.monetary.domain.MoneyHelper;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
 import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
@@ -527,7 +528,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         BigDecimal percentageOf = BigDecimal.ZERO;
 
         if (isGreaterThanZero(value)) {
-            final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
+            final MathContext mc = new MathContext(8, RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
             final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100l), mc);
             percentageOf = value.multiply(multiplicand, mc);
         }

@@ -21,8 +21,7 @@ public class GlobalConfigurationPropertyData {
     @SuppressWarnings("unused")
     private final String description;
 
-    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value,
-    		final String description) {
+    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value, final String description) {
         this.name = name;
         this.enabled = enabled;
         this.value = value;
@@ -30,8 +29,8 @@ public class GlobalConfigurationPropertyData {
         this.description = description;
     }
 
-    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value,
-    		final Long id, final String description) {
+    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value, final Long id,
+            final String description) {
         this.name = name;
         this.enabled = enabled;
         this.value = value;

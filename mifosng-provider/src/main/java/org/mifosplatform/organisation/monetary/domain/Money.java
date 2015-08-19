@@ -76,7 +76,7 @@ public class Money implements Comparable<Money> {
             final double existingVal = amountScaled.doubleValue();
             amountScaled = BigDecimal.valueOf(roundToMultiplesOf(existingVal, inMultiplesOf));
         }
-        this.amount = amountScaled.setScale(this.currencyDigitsAfterDecimal, RoundingMode.HALF_EVEN);
+        this.amount = amountScaled.setScale(this.currencyDigitsAfterDecimal, RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
     }
 
     public static double roundToMultiplesOf(final double existingVal, final Integer inMultiplesOf) {
@@ -227,8 +227,8 @@ public class Money implements Comparable<Money> {
     @Override
     public int compareTo(final Money other) {
         final Money otherMoney = other;
-        if (this.currencyCode.equals(otherMoney.currencyCode) == false) { throw new UnsupportedOperationException(
-                "currencies arent different"); }
+        if (this.currencyCode
+                .equals(otherMoney.currencyCode) == false) { throw new UnsupportedOperationException("currencies arent different"); }
         return this.amount.compareTo(otherMoney.amount);
     }
 

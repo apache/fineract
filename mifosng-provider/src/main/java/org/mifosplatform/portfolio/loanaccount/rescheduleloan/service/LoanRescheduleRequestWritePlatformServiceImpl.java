@@ -28,6 +28,7 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.organisation.monetary.domain.MoneyHelper;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
@@ -270,8 +271,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final Map<String, Object> changes = new LinkedHashMap<>();
 
             LocalDate approvedOnDate = jsonCommand.localDateValueOfParameterNamed("approvedOnDate");
-            final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat()).withLocale(
-                    jsonCommand.extractLocale());
+            final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat())
+                    .withLocale(jsonCommand.extractLocale());
 
             changes.put("locale", jsonCommand.locale());
             changes.put("dateFormat", jsonCommand.dateFormat());
@@ -283,15 +284,15 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 final LoanSummary loanSummary = loan.getSummary();
 
                 final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
-                final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan
-                        .getDisbursementDate().toDate());
+                final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
+                        loan.getDisbursementDate().toDate());
                 final WorkingDays workingDays = this.workingDaysRepository.findOne();
                 final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail = loan.getLoanRepaymentScheduleDetail();
                 final MonetaryCurrency currency = loanProductRelatedDetail.getCurrency();
                 final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
 
                 final InterestMethod interestMethod = loan.getLoanRepaymentScheduleDetail().getInterestMethod();
-                final RoundingMode roundingMode = RoundingMode.HALF_EVEN;
+                final RoundingMode roundingMode = RoundingMode.valueOf(MoneyHelper.getRoundingMode());
                 final MathContext mathContext = new MathContext(8, roundingMode);
 
                 Collection<LoanRepaymentScheduleHistory> loanRepaymentScheduleHistoryList = this.loanScheduleHistoryWritePlatformService
@@ -454,12 +455,12 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
                     final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
                             CalendarEntityType.LOANS.getValue());
-                    calculatedRepaymentsStartingFromDate = this.loanAccountDomainService.getCalculatedRepaymentsStartingFromDate(
-                            loan.getDisbursementDate(), loan, calendarInstance);
+                    calculatedRepaymentsStartingFromDate = this.loanAccountDomainService
+                            .getCalculatedRepaymentsStartingFromDate(loan.getDisbursementDate(), loan, calendarInstance);
 
                     isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
-                    holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan.getDisbursementDate()
-                            .toDate());
+                    holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
+                            loan.getDisbursementDate().toDate());
                     workingDays = this.workingDaysRepository.findOne();
                     overdurPenaltyWaitPeriod = this.configurationDomainService.retrievePenaltyWaitPeriod();
                 }
@@ -471,8 +472,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
                 Money accruedCharge = Money.zero(loan.getCurrency());
                 if (loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
-                    Collection<LoanChargePaidByData> chargePaidByDatas = this.loanChargeReadPlatformService.retriveLoanChargesPaidBy(
-                            loanCharge.getId(), LoanTransactionType.ACCRUAL, loanInstallmentNumber);
+                    Collection<LoanChargePaidByData> chargePaidByDatas = this.loanChargeReadPlatformService
+                            .retriveLoanChargesPaidBy(loanCharge.getId(), LoanTransactionType.ACCRUAL, loanInstallmentNumber);
                     for (LoanChargePaidByData chargePaidByData : chargePaidByDatas) {
                         accruedCharge = accruedCharge.plus(chargePaidByData.getAmount());
                     }
@@ -522,8 +523,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final Map<String, Object> changes = new LinkedHashMap<>();
 
             LocalDate rejectedOnDate = jsonCommand.localDateValueOfParameterNamed("rejectedOnDate");
-            final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat()).withLocale(
-                    jsonCommand.extractLocale());
+            final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat())
+                    .withLocale(jsonCommand.extractLocale());
 
             changes.put("locale", jsonCommand.locale());
             changes.put("dateFormat", jsonCommand.dateFormat());

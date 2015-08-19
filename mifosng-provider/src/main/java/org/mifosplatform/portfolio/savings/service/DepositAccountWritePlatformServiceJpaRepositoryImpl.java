@@ -47,6 +47,7 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.organisation.monetary.domain.MoneyHelper;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
@@ -466,7 +467,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         checkClientOrGroupActive(account);
 
         final LocalDate today = DateUtils.getLocalDateOfTenant();
-        final MathContext mc = new MathContext(15, RoundingMode.HALF_EVEN);
+        final MathContext mc = new MathContext(15, RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
         boolean isInterestTransfer = false;
 
         account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
@@ -510,7 +511,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         final LocalDate today = DateUtils.getLocalDateOfTenant();
-        final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
+        final MathContext mc = new MathContext(10, RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
         boolean isInterestTransfer = false;
         account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
         this.savingAccountRepository.save(account);
@@ -659,7 +660,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final Map<String, Object> changes = new LinkedHashMap<>();
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
-        final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
+        final MathContext mc = new MathContext(10, RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
         account.undoTransaction(transactionId);
 
         SavingsAccountTransaction transaction = null;

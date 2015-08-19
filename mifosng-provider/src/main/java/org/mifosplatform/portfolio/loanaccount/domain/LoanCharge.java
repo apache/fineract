@@ -37,6 +37,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.organisation.monetary.domain.MoneyHelper;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
 import org.mifosplatform.portfolio.charge.domain.ChargePaymentMode;
@@ -143,8 +144,8 @@ public class LoanCharge extends AbstractPersistable<Long> {
             break;
             case PERCENT_OF_AMOUNT_AND_INTEREST:
                 if (command.hasParameter("principal") && command.hasParameter("interest")) {
-                    amountPercentageAppliedTo = command.bigDecimalValueOfParameterNamed("principal").add(
-                            command.bigDecimalValueOfParameterNamed("interest"));
+                    amountPercentageAppliedTo = command.bigDecimalValueOfParameterNamed("principal")
+                            .add(command.bigDecimalValueOfParameterNamed("interest"));
                 } else {
                     amountPercentageAppliedTo = loan.getPrincpal().getAmount().add(loan.getTotalInterest());
                 }
@@ -552,7 +553,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
         BigDecimal percentageOf = BigDecimal.ZERO;
 
         if (isGreaterThanZero(value)) {
-            final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
+            final MathContext mc = new MathContext(8, RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
             final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100l), mc);
             percentageOf = value.multiply(multiplicand, mc);
         }
@@ -763,9 +764,8 @@ public class LoanCharge extends AbstractPersistable<Long> {
     public LoanInstallmentCharge getUnpaidInstallmentLoanCharge() {
         LoanInstallmentCharge unpaidChargePerInstallment = null;
         for (final LoanInstallmentCharge loanChargePerInstallment : this.loanInstallmentCharge) {
-            if (loanChargePerInstallment.isPending()
-                    && (unpaidChargePerInstallment == null || unpaidChargePerInstallment.getRepaymentInstallment().getDueDate()
-                            .isAfter(loanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
+            if (loanChargePerInstallment.isPending() && (unpaidChargePerInstallment == null || unpaidChargePerInstallment
+                    .getRepaymentInstallment().getDueDate().isAfter(loanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
                 unpaidChargePerInstallment = loanChargePerInstallment;
             }
         }
@@ -781,7 +781,8 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     public LoanInstallmentCharge getInstallmentLoanCharge(final Integer installmentNumber) {
         for (final LoanInstallmentCharge loanChargePerInstallment : this.loanInstallmentCharge) {
-            if (installmentNumber.equals(loanChargePerInstallment.getRepaymentInstallment().getInstallmentNumber().intValue())) { return loanChargePerInstallment; }
+            if (installmentNumber.equals(loanChargePerInstallment.getRepaymentInstallment().getInstallmentNumber()
+                    .intValue())) { return loanChargePerInstallment; }
         }
         return null;
     }
@@ -883,52 +884,52 @@ public class LoanCharge extends AbstractPersistable<Long> {
     public LoanOverdueInstallmentCharge getOverdueInstallmentCharge() {
         return this.overdueInstallmentCharge;
     }
-    
-    public Money undoPaidOrPartiallyAmountBy(final Money incrementBy,final Integer installmentNumber, final Money feeAmount) {
+
+    public Money undoPaidOrPartiallyAmountBy(final Money incrementBy, final Integer installmentNumber, final Money feeAmount) {
         Money processAmount = Money.zero(incrementBy.getCurrency());
-        if(isInstalmentFee()){
-            if(installmentNumber == null){
-                processAmount = getLastPaidOrPartiallyPaidInstallmentLoanCharge(incrementBy.getCurrency()).undoPaidAmountBy(incrementBy, feeAmount);
-            }else{
+        if (isInstalmentFee()) {
+            if (installmentNumber == null) {
+                processAmount = getLastPaidOrPartiallyPaidInstallmentLoanCharge(incrementBy.getCurrency()).undoPaidAmountBy(incrementBy,
+                        feeAmount);
+            } else {
                 processAmount = getInstallmentLoanCharge(installmentNumber).undoPaidAmountBy(incrementBy, feeAmount);
             }
-        }else{
+        } else {
             processAmount = incrementBy;
         }
         Money amountPaidToDate = Money.of(processAmount.getCurrency(), this.amountPaid);
-        
+
         Money amountDeductedOnThisCharge = Money.zero(processAmount.getCurrency());
         if (processAmount.isGreaterThanOrEqualTo(amountPaidToDate)) {
-                amountDeductedOnThisCharge = amountPaidToDate;
+            amountDeductedOnThisCharge = amountPaidToDate;
             amountPaidToDate = Money.zero(processAmount.getCurrency());
             this.amountPaid = amountPaidToDate.getAmount();
             this.amountOutstanding = this.amount;
             this.paid = false;
 
         } else {
-                amountDeductedOnThisCharge = processAmount;
+            amountDeductedOnThisCharge = processAmount;
             amountPaidToDate = amountPaidToDate.minus(processAmount);
             this.amountPaid = amountPaidToDate.getAmount();
             this.amountOutstanding = calculateAmountOutstanding(incrementBy.getCurrency());
         }
         return amountDeductedOnThisCharge;
     }
-    
+
     public LoanInstallmentCharge getLastPaidOrPartiallyPaidInstallmentLoanCharge(MonetaryCurrency currency) {
         LoanInstallmentCharge paidChargePerInstallment = null;
         for (final LoanInstallmentCharge loanChargePerInstallment : this.loanInstallmentCharge) {
-                Money outstanding = Money.of(currency, loanChargePerInstallment.getAmountOutstanding());
-                final boolean partiallyPaid = outstanding.isGreaterThanZero() && outstanding.isLessThan(loanChargePerInstallment.getAmount(currency)); 
-            if ((partiallyPaid || loanChargePerInstallment.isPaid())
-                    && (paidChargePerInstallment == null || paidChargePerInstallment.getRepaymentInstallment().getDueDate()
-                            .isBefore(loanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
+            Money outstanding = Money.of(currency, loanChargePerInstallment.getAmountOutstanding());
+            final boolean partiallyPaid = outstanding.isGreaterThanZero()
+                    && outstanding.isLessThan(loanChargePerInstallment.getAmount(currency));
+            if ((partiallyPaid || loanChargePerInstallment.isPaid()) && (paidChargePerInstallment == null || paidChargePerInstallment
+                    .getRepaymentInstallment().getDueDate().isBefore(loanChargePerInstallment.getRepaymentInstallment().getDueDate()))) {
                 paidChargePerInstallment = loanChargePerInstallment;
             }
         }
         return paidChargePerInstallment;
     }
 
-    
     public Loan getLoan() {
         return this.loan;
     }

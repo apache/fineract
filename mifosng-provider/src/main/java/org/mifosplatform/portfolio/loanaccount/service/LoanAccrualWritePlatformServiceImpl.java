@@ -22,6 +22,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
+import org.mifosplatform.organisation.monetary.domain.MoneyHelper;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanInstallmentChargeData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanScheduleAccrualData;
@@ -140,7 +141,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             double iterest = interestPerDay * daysToBeAccrued;
             interestportion = BigDecimal.valueOf(iterest);
         }
-        interestportion = interestportion.setScale(accrualData.getCurrencyData().decimalPlaces(), RoundingMode.HALF_EVEN);
+        interestportion = interestportion.setScale(accrualData.getCurrencyData().decimalPlaces(), RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
 
         BigDecimal totalAccInterest = accrualData.getAccruedInterestIncome();
         BigDecimal totalAccPenalty = accrualData.getAccruedPenaltyIncome();

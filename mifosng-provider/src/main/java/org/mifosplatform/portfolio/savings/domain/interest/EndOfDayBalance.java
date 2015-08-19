@@ -12,6 +12,7 @@ import java.math.RoundingMode;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.domain.LocalDateInterval;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.organisation.monetary.domain.MoneyHelper;
 
 public class EndOfDayBalance {
 
@@ -20,7 +21,8 @@ public class EndOfDayBalance {
     private final Money endOfDayBalance;
     private final int numberOfDays;
 
-    public static EndOfDayBalance from(final LocalDate date, final Money openingBalance, final Money endOfDayBalance, final int numberOfDays) {
+    public static EndOfDayBalance from(final LocalDate date, final Money openingBalance, final Money endOfDayBalance,
+            final int numberOfDays) {
         return new EndOfDayBalance(date, openingBalance, endOfDayBalance, numberOfDays);
     }
 
@@ -42,7 +44,8 @@ public class EndOfDayBalance {
     public BigDecimal cumulativeBalance(final BigDecimal interestToCompound) {
         final BigDecimal daysAsBigDecimal = BigDecimal.valueOf(this.numberOfDays);
         final BigDecimal realBalanceForInterestCalculation = this.endOfDayBalance.getAmount().add(interestToCompound);
-        return realBalanceForInterestCalculation.multiply(daysAsBigDecimal, MathContext.DECIMAL64).setScale(9, RoundingMode.HALF_EVEN);
+        return realBalanceForInterestCalculation.multiply(daysAsBigDecimal, MathContext.DECIMAL64).setScale(9,
+                RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
     }
 
     public BigDecimal calculateInterestOnBalance(final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction,
@@ -53,10 +56,10 @@ public class EndOfDayBalance {
         final BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(this.numberOfDays), MathContext.DECIMAL64);
 
         final BigDecimal realBalanceForInterestCalculation = this.endOfDayBalance.getAmount().add(interestToCompound);
-        BigDecimal interest = BigDecimal.ZERO.setScale(9, RoundingMode.HALF_EVEN);
+        BigDecimal interest = BigDecimal.ZERO.setScale(9, RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
         if (realBalanceForInterestCalculation.compareTo(minBalanceForInterestCalculation) >= 0) {
             interest = realBalanceForInterestCalculation.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(9,
-                    RoundingMode.HALF_EVEN);
+                    RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
         }
         return interest;
     }
@@ -78,12 +81,12 @@ public class EndOfDayBalance {
 
         final BigDecimal interestRateForCompoundingPeriodPlusOne = BigDecimal.ONE.add(r);
 
-        final double interestRateForCompoundingPeriodPowered = Math.pow(interestRateForCompoundingPeriodPlusOne.doubleValue(), Integer
-                .valueOf(this.numberOfDays).doubleValue());
-        BigDecimal futureValue = presentValue.setScale(9, RoundingMode.HALF_EVEN);
+        final double interestRateForCompoundingPeriodPowered = Math.pow(interestRateForCompoundingPeriodPlusOne.doubleValue(),
+                Integer.valueOf(this.numberOfDays).doubleValue());
+        BigDecimal futureValue = presentValue.setScale(9, RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
         if (presentValue.compareTo(minBalanceForInterestCalculation) >= 0) {
             futureValue = presentValue.multiply(BigDecimal.valueOf(interestRateForCompoundingPeriodPowered), MathContext.DECIMAL64)
-                    .setScale(9, RoundingMode.HALF_EVEN);
+                    .setScale(9, RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
         }
         return futureValue.subtract(presentValue);
     }
