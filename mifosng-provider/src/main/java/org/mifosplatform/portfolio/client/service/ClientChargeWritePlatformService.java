@@ -18,7 +18,7 @@ public interface ClientChargeWritePlatformService {
     CommandProcessingResult updateCharge(Long clientId, JsonCommand command);
 
     @Transactional
-    CommandProcessingResult deleteCharge(Long clientId, Long clientChargeId, JsonCommand command);
+    CommandProcessingResult deleteCharge(Long clientId, Long clientChargeId);
 
     @Transactional
     CommandProcessingResult waiveCharge(Long clientId, Long clientChargeId);

@@ -120,11 +120,13 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
         final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
         final LocalDate transactionDate = command.localDateValueOfParameterNamed(ClientApiConstants.transactionDateParamName);
         final BigDecimal amountPaid = command.bigDecimalValueOfParameterNamed(ClientApiConstants.amountParamName);
+        final Money chargePaid = Money.of(clientCharge.getCurrency(), amountPaid);
 
-        final Money chargePaid = validatePaymentDateAndAmount(client, clientCharge, fmt, transactionDate, amountPaid);
+        // Validate business rules for payment
+        validatePaymentTransaction(client, clientCharge, fmt, transactionDate, amountPaid);
 
         // pay the charge
-        clientCharge.pay(clientCharge.getCurrency(), chargePaid);
+        clientCharge.pay(chargePaid);
 
         // create Payment Transaction
         final Map<String, Object> changes = new LinkedHashMap<>();
@@ -146,6 +148,52 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
 
     }
 
+    @Override
+    public CommandProcessingResult waiveCharge(Long clientId, Long clientChargeId) {
+        final Client client = this.clientRepository.getActiveClient(clientId);
+        final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
+        final LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+
+        // Validate business rules for payment
+        validateWaiverTransaction(client, clientCharge);
+
+        // waive the charge
+        Money waivedAmount = clientCharge.waive();
+
+        // create Waiver Transaction
+        ClientTransaction clientTransaction = ClientTransaction.waiver(client, client.getOffice(), transactionDate, waivedAmount,
+                clientCharge.getCurrency().getCode(), getAppUserIfPresent());
+        this.clientTransactionRepository.save(clientTransaction);
+
+        // update charge paid by associations
+        final ClientChargePaidBy chargePaidBy = ClientChargePaidBy.instance(clientTransaction, clientCharge, waivedAmount.getAmount());
+        clientTransaction.getClientChargePaidByCollection().add(chargePaidBy);
+
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(clientCharge.getId()) //
+                .withOfficeId(clientCharge.getClient().getOffice().getId()) //
+                .withClientId(clientCharge.getClient().getId()) //
+                .build();
+    }
+
+    @Override
+    public CommandProcessingResult deleteCharge(Long clientId, Long clientChargeId) {
+        final Client client = this.clientRepository.getActiveClient(clientId);
+        final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
+
+        // Validate business rules for charge deletion
+        validateChargeDeletion(client, clientCharge);
+
+        // delete the charge
+        clientChargeRepository.delete(clientCharge);
+
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(clientCharge.getId()) //
+                .withOfficeId(clientCharge.getClient().getOffice().getId()) //
+                .withClientId(clientCharge.getClient().getId()) //
+                .build();
+    }
+
     /**
      * Validates transaction to ensure that <br>
      * charge is active <br>
@@ -159,31 +207,39 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
      * @param fmt
      * @param transactionDate
      * @param amountPaid
+     * @param requiresTransactionDateValidation
+     *            if set to false, transaction date specific validation is
+     *            skipped
+     * @param requiresTransactionAmountValidation
+     *            if set to false transaction amount validation is skipped
      * @return
      */
-    private Money validatePaymentDateAndAmount(final Client client, final ClientCharge clientCharge, final DateTimeFormatter fmt,
-            final LocalDate transactionDate, final BigDecimal amountPaid) {
+    private void validatePaymentDateAndAmount(final Client client, final ClientCharge clientCharge, final DateTimeFormatter fmt,
+            final LocalDate transactionDate, final BigDecimal amountPaid, final boolean requiresTransactionDateValidation,
+            final boolean requiresTransactionAmountValidation) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
-
-        validateTransactionDateOnWorkingDay(transactionDate, clientCharge, fmt);
 
         if (clientCharge.isNotActive()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("charge.is.not.active");
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
-        if (client.getActivationLocalDate() != null && transactionDate.isBefore(client.getActivationLocalDate())) {
-            baseDataValidator.reset().parameter(ClientApiConstants.transactionDateParamName).value(transactionDate.toString(fmt))
-                    .failWithCodeNoParameterAddedToErrorCode("transaction.before.activationDate");
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
+        if (requiresTransactionDateValidation) {
+            validateTransactionDateOnWorkingDay(transactionDate, clientCharge, fmt);
 
-        if (DateUtils.isDateInTheFuture(transactionDate)) {
-            baseDataValidator.reset().parameter(ClientApiConstants.transactionDateParamName).value(transactionDate.toString(fmt))
-                    .failWithCodeNoParameterAddedToErrorCode("transaction.is.futureDate");
-            throw new PlatformApiDataValidationException(dataValidationErrors);
+            if (client.getActivationLocalDate() != null && transactionDate.isBefore(client.getActivationLocalDate())) {
+                baseDataValidator.reset().parameter(ClientApiConstants.transactionDateParamName).value(transactionDate.toString(fmt))
+                        .failWithCodeNoParameterAddedToErrorCode("transaction.before.activationDate");
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+
+            if (DateUtils.isDateInTheFuture(transactionDate)) {
+                baseDataValidator.reset().parameter(ClientApiConstants.transactionDateParamName).value(transactionDate.toString(fmt))
+                        .failWithCodeNoParameterAddedToErrorCode("transaction.is.futureDate");
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
         }
 
         // validate charge is not already paid or waived
@@ -195,12 +251,41 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
-        final Money chargePaid = Money.of(clientCharge.getCurrency(), amountPaid);
-        if (!clientCharge.getAmountOutstanding(clientCharge.getCurrency()).isGreaterThanOrEqualTo(chargePaid)) {
-            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.charge.amount.paid.in.access");
-            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (requiresTransactionAmountValidation) {
+            final Money chargePaid = Money.of(clientCharge.getCurrency(), amountPaid);
+            if (!clientCharge.getAmountOutstanding().isGreaterThanOrEqualTo(chargePaid)) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("transaction.invalid.charge.amount.paid.in.access");
+                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            }
         }
-        return chargePaid;
+    }
+
+    public void validateWaiverTransaction(final Client client, final ClientCharge clientCharge) {
+        DateTimeFormatter fmt = null;
+        LocalDate transactionDate = null;
+        BigDecimal amountPaid = null;
+        boolean requiresTransactionDateValidation = false;
+        boolean requiresTransactionAmountValidation = false;
+        validatePaymentDateAndAmount(client, clientCharge, fmt, transactionDate, amountPaid, requiresTransactionDateValidation,
+                requiresTransactionAmountValidation);
+    }
+
+    public void validatePaymentTransaction(final Client client, final ClientCharge clientCharge, final DateTimeFormatter fmt,
+            final LocalDate transactionDate, final BigDecimal amountPaid) {
+        boolean requiresTransactionDateValidation = true;
+        boolean requiresTransactionAmountValidation = true;
+        validatePaymentDateAndAmount(client, clientCharge, fmt, transactionDate, amountPaid, requiresTransactionDateValidation,
+                requiresTransactionAmountValidation);
+    }
+
+    public void validateChargeDeletion(final Client client, final ClientCharge clientCharge) {
+        DateTimeFormatter fmt = null;
+        LocalDate transactionDate = null;
+        BigDecimal amountPaid = null;
+        boolean requiresTransactionDateValidation = false;
+        boolean requiresTransactionAmountValidation = false;
+        validatePaymentDateAndAmount(client, clientCharge, fmt, transactionDate, amountPaid, requiresTransactionDateValidation,
+                requiresTransactionAmountValidation);
     }
 
     /**
@@ -210,19 +295,6 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
     @Override
     public CommandProcessingResult updateCharge(Long clientId, JsonCommand command) {
         this.clientChargeDataValidator.validateAdd(command.json());
-        final Client client = clientRepository.getActiveClient(clientId);
-        return null;
-    }
-
-    @Override
-    public CommandProcessingResult deleteCharge(Long clientId, Long clientChargeId, JsonCommand command) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public CommandProcessingResult waiveCharge(Long clientId, Long clientChargeId) {
-        // TODO Auto-generated method stub
         return null;
     }
 

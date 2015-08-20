@@ -46,17 +46,31 @@ public class ClientChargeData {
 
     private final Boolean isActive;
 
+    private final Boolean isPaid;
+
     private final LocalDate inactivationDate;
 
     private final Collection<ChargeData> chargeOptions;
 
+    private final Collection<ClientTransactionData> clientTransactionDatas;
+
     public static ClientChargeData instance(Long id, Long clientId, Long chargeId, String name, EnumOptionData chargeTimeType,
             LocalDate dueDate, EnumOptionData chargeCalculationType, CurrencyData currency, BigDecimal amount, BigDecimal amountPaid,
-            BigDecimal amountWaived, BigDecimal amountWrittenOff, BigDecimal amountOutstanding, boolean penalty, Boolean isActive,
-            LocalDate inactivationDate, Collection<ChargeData> chargeOptions) {
-
+            BigDecimal amountWaived, BigDecimal amountWrittenOff, BigDecimal amountOutstanding, boolean penalty, Boolean isPaid,
+            Boolean isActive, LocalDate inactivationDate, Collection<ChargeData> chargeOptions) {
+        Collection<ClientTransactionData> clientTransactionDatas = null;
         return new ClientChargeData(id, clientId, chargeId, name, chargeTimeType, dueDate, chargeCalculationType, currency, amount,
-                amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penalty, isActive, inactivationDate, chargeOptions);
+                amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penalty, isPaid, isActive, inactivationDate, chargeOptions,
+                clientTransactionDatas);
+    }
+
+    public static ClientChargeData addAssociations(ClientChargeData clientChargeData,
+            Collection<ClientTransactionData> clientTransactionDatas) {
+        return new ClientChargeData(clientChargeData.id, clientChargeData.clientId, clientChargeData.chargeId, clientChargeData.name,
+                clientChargeData.chargeTimeType, clientChargeData.dueDate, clientChargeData.chargeCalculationType,
+                clientChargeData.currency, clientChargeData.amount, clientChargeData.amountPaid, clientChargeData.amountWaived,
+                clientChargeData.amountWrittenOff, clientChargeData.amountOutstanding, clientChargeData.penalty, clientChargeData.isPaid,
+                clientChargeData.isActive, clientChargeData.inactivationDate, clientChargeData.chargeOptions, clientTransactionDatas);
     }
 
     public static ClientChargeData template(final Collection<ChargeData> chargeOptions) {
@@ -74,17 +88,20 @@ public class ClientChargeData {
         final BigDecimal amountWrittenOff = null;
         final BigDecimal amountOutstanding = null;
         final Boolean penalty = false;
+        final Boolean isPaid = null;
         final Boolean isActive = null;
         final LocalDate inactivationDate = null;
+        final Collection<ClientTransactionData> clientTransactionDatas = null;
 
         return new ClientChargeData(id, clientId, chargeId, name, chargeTimeType, dueDate, chargeCalculationType, currency, amount,
-                amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penalty, isActive, inactivationDate, chargeOptions);
+                amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penalty, isPaid, isActive, inactivationDate, chargeOptions,
+                clientTransactionDatas);
     }
 
     private ClientChargeData(Long id, Long clientId, Long chargeId, String name, EnumOptionData chargeTimeType, LocalDate dueDate,
             EnumOptionData chargeCalculationType, CurrencyData currency, BigDecimal amount, BigDecimal amountPaid, BigDecimal amountWaived,
-            BigDecimal amountWrittenOff, BigDecimal amountOutstanding, boolean penalty, Boolean isActive, LocalDate inactivationDate,
-            Collection<ChargeData> chargeOptions) {
+            BigDecimal amountWrittenOff, BigDecimal amountOutstanding, boolean penalty, Boolean isPaid, Boolean isActive,
+            LocalDate inactivationDate, Collection<ChargeData> chargeOptions, Collection<ClientTransactionData> clientTransactionDatas) {
         super();
         this.id = id;
         this.clientId = clientId;
@@ -100,11 +117,15 @@ public class ClientChargeData {
         this.amountWrittenOff = amountWrittenOff;
         this.amountOutstanding = amountOutstanding;
         this.penalty = penalty;
+        this.isPaid = isPaid;
         this.isActive = isActive;
         this.inactivationDate = inactivationDate;
 
         // template related fields
         this.chargeOptions = chargeOptions;
+
+        /// associations
+        this.clientTransactionDatas = clientTransactionDatas;
     }
 
 }

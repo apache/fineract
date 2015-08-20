@@ -10,25 +10,25 @@ import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
-import org.mifosplatform.portfolio.client.service.ClientChargeWritePlatformService;
+import org.mifosplatform.portfolio.client.service.ClientTransactionWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@CommandType(entity = ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME, action = ClientApiConstants.CLIENT_CHARGE_ACTION_DELETE)
-public class DeleteClientChargeCommandHandler implements NewCommandSourceHandler {
+@CommandType(entity = ClientApiConstants.CLIENT_RESOURCE_NAME, action = ClientApiConstants.CLIENT_TRANSACTION_ACTION_UNDO)
+public class UndoClientTransactionCommandHandler implements NewCommandSourceHandler {
 
-    private final ClientChargeWritePlatformService writePlatformService;
+    private final ClientTransactionWritePlatformService writePlatformService;
 
     @Autowired
-    public DeleteClientChargeCommandHandler(final ClientChargeWritePlatformService writePlatformService) {
+    public UndoClientTransactionCommandHandler(final ClientTransactionWritePlatformService writePlatformService) {
         this.writePlatformService = writePlatformService;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.deleteCharge(command.getClientId(), command.entityId());
+        return this.writePlatformService.undo(command.getClientId(), command.entityId());
     }
 }

@@ -8,7 +8,6 @@ package org.mifosplatform.portfolio.client.domain;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 public class ClientEnumerations {

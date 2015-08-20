@@ -17,11 +17,10 @@ import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
-import org.mifosplatform.portfolio.charge.service.ChargeDropdownReadPlatformService;
 import org.mifosplatform.portfolio.charge.service.ChargeEnumerations;
+import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.mifosplatform.portfolio.client.data.ClientChargeData;
 import org.mifosplatform.portfolio.client.exception.ClientChargeNotFoundException;
-import org.mifosplatform.portfolio.common.service.DropdownReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -33,17 +32,11 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
-    private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;
-    private final DropdownReadPlatformService dropdownReadPlatformService;
 
     @Autowired
-    public ClientChargeReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final RoutingDataSource dataSource,
-            final DropdownReadPlatformService dropdownReadPlatformService) {
+    public ClientChargeReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
         this.context = context;
-        this.chargeDropdownReadPlatformService = chargeDropdownReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.dropdownReadPlatformService = dropdownReadPlatformService;
     }
 
     public static final class ClientChargeMapper implements RowMapper<ClientChargeData> {
@@ -76,13 +69,15 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
             final int chargeCalculation = rs.getInt("chargeCalculation");
             final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(chargeCalculation);
             final boolean penalty = rs.getBoolean("penalty");
+            final Boolean isPaid = rs.getBoolean("isPaid");
             final Boolean isActive = rs.getBoolean("isActive");
             final LocalDate inactivationDate = JdbcSupport.getLocalDate(rs, "inactivationDate");
 
             final Collection<ChargeData> chargeOptions = null;
 
             return ClientChargeData.instance(id, clientId, chargeId, name, chargeTimeType, dueDate, chargeCalculationType, currency, amount,
-                    amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penalty, isActive, inactivationDate, chargeOptions);
+                    amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penalty, isPaid, isActive, inactivationDate,
+                    chargeOptions);
 
         }
 
@@ -91,7 +86,7 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
                     + "cc.amount_paid_derived as amountPaid, cc.amount_waived_derived as amountWaived, "
                     + "cc.amount_writtenoff_derived as amountWrittenOff, cc.amount_outstanding_derived as amountOutstanding, "
                     + "cc.charge_time_enum as chargeTime, cc.is_penalty as penalty, cc.charge_due_date as dueAsOfDate, "
-                    + "cc.charge_calculation_enum as chargeCalculation, "
+                    + "cc.charge_calculation_enum as chargeCalculation, cc.is_paid_derived as isPaid, cc.waived as waived, "
                     + "cc.is_active as isActive, cc.inactivated_on_date as inactivationDate, "
                     + "c.currency_code as currencyCode, oc.name as currencyName, "
                     + "oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
@@ -102,15 +97,25 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
     }
 
     @Override
-    public Collection<ClientChargeData> retrieveClientCharges(Long clientId, String status) {
+    public Collection<ClientChargeData> retrieveClientCharges(Long clientId, String status, Boolean isPaid) {
         final ClientChargeMapper rm = new ClientChargeMapper();
         final StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select ").append(rm.schema()).append(" where cc.client_id=? ");
-        if (status.equalsIgnoreCase("active")) {
+
+        // filter for active charges
+        if (status.equalsIgnoreCase(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ACTIVE)) {
             sqlBuilder.append(" and cc.is_active = 1 ");
-        } else if (status.equalsIgnoreCase("inactive")) {
+        } else if (status.equalsIgnoreCase(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_INACTIVE)) {
             sqlBuilder.append(" and cc.is_active = 0 ");
         }
+
+        // filter for paid charges
+        if (isPaid != null && isPaid) {
+            sqlBuilder.append(" and ( cc.is_paid_derived = 1 or cc.waived = 1) ");
+        } else if (isPaid != null && !isPaid) {
+            sqlBuilder.append(" and (cc.is_paid_derived = 0 and cc.waived = 0) ");
+        }
+
         sqlBuilder.append(" order by cc.charge_time_enum ASC, cc.charge_due_date ASC, cc.is_penalty ASC");
 
         return this.jdbcTemplate.query(sqlBuilder.toString(), rm, new Object[] { clientId });
@@ -129,12 +134,6 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
         } catch (final EmptyResultDataAccessException e) {
             throw new ClientChargeNotFoundException(clientChargeId, clientId);
         }
-    }
-
-    @Override
-    public ChargeData retrieveClientChargeTemplate() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }

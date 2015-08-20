@@ -2448,4 +2448,13 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder undoClientTransaction(final Long clientId, final Long transactionId) {
+        this.actionName = ClientApiConstants.CLIENT_TRANSACTION_ACTION_UNDO;
+        this.entityName = ClientApiConstants.CLIENT_RESOURCE_NAME;
+        this.entityId = transactionId;
+        this.clientId = clientId;
+        this.href = "/clients/" + clientId + "/transactions/" + transactionId + "?command=undo";
+        return this;
+    }
+
 }

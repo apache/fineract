@@ -5,16 +5,11 @@
  */
 package org.mifosplatform.portfolio.client.api;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.core.data.EnumOptionData;
-import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
 
 public class ClientApiConstants {
 
@@ -28,10 +23,22 @@ public class ClientApiConstants {
     public static final String CLIENT_CHARGE_ACTION_PAY = "PAY";
     public static final String CLIENT_CHARGE_ACTION_INACTIVATE = "INACTIVATE";
 
+    // Client charge associations and query parameters
+    public static final String CLIENT_CHARGE_QUERY_PARAM_STATUS = "chargeStatus";
+    public static final String CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL = "all";
+    public static final String CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ACTIVE = "active";
+    public static final String CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_INACTIVE = "inactive";
+    public static final String CLIENT_CHARGE_ASSOCIATIONS_TRANSACTIONS = "transactions";
+
+    // Client transaction action names
+    public static final String CLIENT_TRANSACTION_ACTION_READ = "READTRANSACTION";
+    public static final String CLIENT_TRANSACTION_ACTION_UNDO = "UNDOTRANSACTION";
+
     // Commands
     public static final String CLIENT_CHARGE_COMMAND_WAIVE_CHARGE = "waive";
     public static final String CLIENT_CHARGE_COMMAND_PAY_CHARGE = "paycharge";
     public static final String CLIENT_CHARGE_COMMAND_INACTIVATE_CHARGE = "inactivate";
+    public static final String CLIENT_TRANSACTION_COMMAND_UNDO = "undo";
 
     public static final String CLIENT_CLOSURE_REASON = "ClientClosureReason";
     public static final String CLIENT_ACTION_REASON = "ClientActionReason";
@@ -119,6 +126,7 @@ public class ClientApiConstants {
     public static final String amountParamName = "amount";
     public static final String amountPaidParamName = "amountPaid";
     public static final String chargeOptionsParamName = "chargeOptions";
+    public static final String transactionsParamName = "transactions";
 
     // client transactions response parameters
     public static final String transactionAmountParamName = "transactionAmount";
@@ -176,7 +184,7 @@ public class ClientApiConstants {
     public static final Set<String> CLIENT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(chargeIdParamName,
             clientIdParamName, chargeNameParamName, penaltyParamName, chargeTimeTypeParamName, dueAsOfDateParamName,
             chargeCalculationTypeParamName, currencyParamName, amountWaivedParamName, amountWrittenOffParamName, amountOutstandingParamName,
-            amountOrPercentageParamName, amountParamName, amountPaidParamName, chargeOptionsParamName));
+            amountOrPercentageParamName, amountParamName, amountPaidParamName, chargeOptionsParamName, transactionsParamName));
 
     public static final Set<String> CLIENT_CHARGES_ADD_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(chargeIdParamName, amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName));

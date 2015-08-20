@@ -18,9 +18,11 @@ import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.client.data.ClientTransactionData;
 import org.mifosplatform.portfolio.client.domain.ClientEnumerations;
 import org.mifosplatform.portfolio.client.domain.ClientTransactionType;
+import org.mifosplatform.portfolio.client.exception.ClientTransactionNotFoundException;
 import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
 import org.mifosplatform.portfolio.paymenttype.data.PaymentTypeData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -49,7 +51,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount, ");
             sqlBuilder.append("tr.created_date as submittedOnDate, tr.is_reversed as reversed, ");
             sqlBuilder.append("tr.external_id as externalId, o.name as officeName, o.id as officeId, ");
-            sqlBuilder.append("c.id as clientId, c.account_no as accountNo, ");
+            sqlBuilder.append("c.id as clientId, c.account_no as accountNo, ccpb.client_charge_id as clientChargeId, ");
             sqlBuilder.append("pd.payment_type_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, ");
             sqlBuilder.append("pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode,  ");
             sqlBuilder.append(
@@ -63,6 +65,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             sqlBuilder.append("left join m_payment_detail pd on tr.payment_detail_id = pd.id  ");
             sqlBuilder.append("left join m_payment_type pt  on pd.payment_type_id = pt.id ");
             sqlBuilder.append("left join m_office o on o.id = tr.office_id ");
+            sqlBuilder.append("left join m_client_charge_paid_by ccpb on ccpb.client_transaction_id = tr.id ");
             this.schemaSql = sqlBuilder.toString();
         }
 
@@ -116,15 +119,32 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
 
     @Override
     public Collection<ClientTransactionData> retrieveAllTransactions(Long clientId) {
-        final String sql = "select " + this.clientTransactionMapper.schema()
-                + " where c.id = ? order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC";
-        return this.jdbcTemplate.query(sql, this.clientTransactionMapper, new Object[] { clientId });
+        Long chargeId = null;
+        return retrieveAllTransactions(clientId, chargeId);
+    }
+
+    @Override
+    public Collection<ClientTransactionData> retrieveAllTransactions(Long clientId, Long chargeId) {
+        Object[] parameters = new Object[1];
+        String sql = "select " + this.clientTransactionMapper.schema() + " where c.id = ? ";
+        if (chargeId != null) {
+            parameters = new Object[2];
+            parameters[1] = chargeId;
+            sql = sql + " and ccpb.client_charge_id = ?";
+        }
+        parameters[0] = clientId;
+        sql = sql + " order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC";
+        return this.jdbcTemplate.query(sql, this.clientTransactionMapper, parameters);
     }
 
     @Override
     public ClientTransactionData retrieveTransaction(Long clientId, Long transactionId) {
-        final String sql = "select " + this.clientTransactionMapper.schema() + " where c.id = ? and tr.id= ?";
-        return this.jdbcTemplate.queryForObject(sql, this.clientTransactionMapper, new Object[] { clientId, transactionId });
+        try {
+            final String sql = "select " + this.clientTransactionMapper.schema() + " where c.id = ? and tr.id= ?";
+            return this.jdbcTemplate.queryForObject(sql, this.clientTransactionMapper, new Object[] { clientId, transactionId });
+        } catch (final EmptyResultDataAccessException e) {
+            throw new ClientTransactionNotFoundException(clientId, transactionId);
+        }
     }
 
 }

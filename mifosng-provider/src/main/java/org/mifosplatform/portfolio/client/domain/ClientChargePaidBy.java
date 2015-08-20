@@ -45,4 +45,20 @@ public class ClientChargePaidBy extends AbstractPersistable<Long> {
         this.amount = amount;
     }
 
+    public ClientTransaction getClientTransaction() {
+        return this.clientTransaction;
+    }
+
+    public void setClientTransaction(ClientTransaction clientTransaction) {
+        this.clientTransaction = clientTransaction;
+    }
+
+    public ClientCharge getClientCharge() {
+        return this.clientCharge;
+    }
+
+    public void setClientCharge(ClientCharge clientCharge) {
+        this.clientCharge = clientCharge;
+    }
+
 }

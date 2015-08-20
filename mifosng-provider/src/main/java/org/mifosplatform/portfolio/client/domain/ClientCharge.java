@@ -83,7 +83,7 @@ public class ClientCharge extends AbstractPersistable<Long> {
 
     @Transient
     private OrganisationCurrency currency;
-    
+
     protected ClientCharge() {
         //
     }
@@ -117,15 +117,43 @@ public class ClientCharge extends AbstractPersistable<Long> {
         this.status = status;
     }
 
-    public Money pay(final MonetaryCurrency currency, final Money amountPaid) {
-        Money amountPaidToDate = Money.of(currency, this.amountPaid);
-        Money amountOutstanding = Money.of(currency, this.amountOutstanding);
+    public Money pay(final Money amountPaid) {
+        Money amountPaidToDate = Money.of(this.getCurrency(), this.amountPaid);
+        Money amountOutstanding = Money.of(this.getCurrency(), this.amountOutstanding);
         amountPaidToDate = amountPaidToDate.plus(amountPaid);
         amountOutstanding = amountOutstanding.minus(amountPaid);
         this.amountPaid = amountPaidToDate.getAmount();
         this.amountOutstanding = amountOutstanding.getAmount();
         this.paid = determineIfFullyPaid();
-        return Money.of(currency, this.amountOutstanding);
+        return Money.of(this.getCurrency(), this.amountOutstanding);
+    }
+
+    public void undoPayment(final Money transactionAmount) {
+        Money amountPaid = getAmountPaid();
+        amountPaid = amountPaid.minus(transactionAmount);
+        this.amountPaid = amountPaid.getAmount();
+        this.amountOutstanding = calculateOutstanding();
+        this.paid = false;
+        this.status = true;
+    }
+
+    public Money waive() {
+        Money amountWaivedToDate = getAmountWaived();
+        Money amountOutstanding = getAmountOutstanding();
+        Money totalAmountWaived = amountWaivedToDate.plus(amountOutstanding);
+        this.amountWaived = totalAmountWaived.getAmount();
+        this.amountOutstanding = BigDecimal.ZERO;
+        this.waived = true;
+        return totalAmountWaived;
+    }
+
+    public void undoWaiver(final Money transactionAmount) {
+        Money amountWaived = getAmountWaived();
+        amountWaived = amountWaived.minus(transactionAmount);
+        this.amountWaived = amountWaived.getAmount();
+        this.amountOutstanding = calculateOutstanding();
+        this.waived = false;
+        this.status = true;
     }
 
     private void populateDerivedFields(final BigDecimal amount) {
@@ -158,7 +186,6 @@ public class ClientCharge extends AbstractPersistable<Long> {
     }
 
     private BigDecimal calculateOutstanding() {
-
         BigDecimal amountPaidLocal = BigDecimal.ZERO;
         if (this.amountPaid != null) {
             amountPaidLocal = this.amountPaid;
@@ -248,28 +275,28 @@ public class ClientCharge extends AbstractPersistable<Long> {
     }
 
     public boolean isPaidOrPartiallyPaid(final MonetaryCurrency currency) {
-        final Money amountWaivedOrWrittenOff = getAmountWaived(currency).plus(getAmountWrittenOff(currency));
+        final Money amountWaivedOrWrittenOff = getAmountWaived().plus(getAmountWrittenOff());
         return Money.of(currency, this.amountPaid).plus(amountWaivedOrWrittenOff).isGreaterThanZero();
     }
 
-    public Money getAmount(final MonetaryCurrency currency) {
-        return Money.of(currency, this.amount);
+    public Money getAmount() {
+        return Money.of(getCurrency(), this.amount);
     }
 
-    public Money getAmountPaid(final MonetaryCurrency currency) {
-        return Money.of(currency, this.amountPaid);
+    public Money getAmountPaid() {
+        return Money.of(getCurrency(), this.amountPaid);
     }
 
-    public Money getAmountWaived(final MonetaryCurrency currency) {
-        return Money.of(currency, this.amountWaived);
+    public Money getAmountWaived() {
+        return Money.of(getCurrency(), this.amountWaived);
     }
 
-    public Money getAmountWrittenOff(final MonetaryCurrency currency) {
-        return Money.of(currency, this.amountWrittenOff);
+    public Money getAmountWrittenOff() {
+        return Money.of(getCurrency(), this.amountWrittenOff);
     }
 
-    public Money getAmountOutstanding(final MonetaryCurrency currency) {
-        return Money.of(currency, this.amountOutstanding);
+    public Money getAmountOutstanding() {
+        return Money.of(getCurrency(), this.amountOutstanding);
     }
 
 }

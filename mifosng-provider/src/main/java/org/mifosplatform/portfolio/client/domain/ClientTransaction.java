@@ -19,14 +19,17 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.office.domain.Office;
+import org.mifosplatform.organisation.office.domain.OrganisationCurrency;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -78,6 +81,11 @@ public class ClientTransaction extends AbstractPersistable<Long> {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "clientTransaction", orphanRemoval = true)
     private Set<ClientChargePaidBy> clientChargePaidByCollection = new HashSet<>();
 
+    @Transient
+    private OrganisationCurrency currency;
+
+    protected ClientTransaction() {}
+
     public static ClientTransaction payCharge(final Client client, final Office office, PaymentDetail paymentDetail, final LocalDate date,
             final Money amount, final String currencyCode, final AppUser appUser) {
         final boolean isReversed = false;
@@ -91,7 +99,7 @@ public class ClientTransaction extends AbstractPersistable<Long> {
         final boolean isReversed = false;
         final String externalId = null;
         final PaymentDetail paymentDetail = null;
-        return new ClientTransaction(client, office, paymentDetail, ClientTransactionType.PAY_CHARGE.getValue(), date, amount, isReversed,
+        return new ClientTransaction(client, office, paymentDetail, ClientTransactionType.WAIVE_CHARGE.getValue(), date, amount, isReversed,
                 externalId, DateUtils.getDateOfTenant(), currencyCode, appUser);
     }
 
@@ -111,8 +119,44 @@ public class ClientTransaction extends AbstractPersistable<Long> {
         this.appUser = appUser;
     }
 
+    public void reverse() {
+        this.reversed = true;
+    }
+
+    public boolean isPayChargeTransaction() {
+        return ClientTransactionType.PAY_CHARGE.getValue().equals(this.typeOf);
+    }
+
+    public boolean isWaiveChargeTransaction() {
+        return ClientTransactionType.WAIVE_CHARGE.getValue().equals(this.typeOf);
+    }
+
     public Set<ClientChargePaidBy> getClientChargePaidByCollection() {
         return this.clientChargePaidByCollection;
+    }
+
+    public Long getClientId() {
+        return client.getId();
+    }
+
+    public Money getAmount() {
+        return Money.of(getCurrency(), this.amount);
+    }
+
+    public MonetaryCurrency getCurrency() {
+        return this.currency.toMonetaryCurrency();
+    }
+
+    public void setCurrency(OrganisationCurrency currency) {
+        this.currency = currency;
+    }
+
+    public String getCurrencyCode() {
+        return this.currencyCode;
+    }
+
+    public boolean isReversed() {
+        return this.reversed;
     }
 
 }

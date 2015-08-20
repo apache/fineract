@@ -13,7 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 public interface ClientTransactionReadPlatformService {
 
     @Transactional(readOnly = true)
-    public Collection<ClientTransactionData> retrieveAllTransactions(final Long clientId);
+    public Collection<ClientTransactionData> retrieveAllTransactions(Long clientId);
+
+    @Transactional(readOnly = true)
+    public Collection<ClientTransactionData> retrieveAllTransactions(final Long clientId, final Long chargeId);
 
     @Transactional(readOnly = true)
     public ClientTransactionData retrieveTransaction(Long clientId, Long transactionId);
