@@ -119,10 +119,6 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("CREATE");
     }
 
-    public boolean isReverse() {
-        return this.actionName.equalsIgnoreCase("REVERSE");
-    }
-
     public boolean isCreateDatatable() {
         return this.actionName.equalsIgnoreCase("CREATE") && this.href.startsWith("/datatables/") && this.entityId == null;
     }
@@ -215,10 +211,6 @@ public class CommandWrapper {
 
     public boolean isSurveyResource() {
         return this.href.startsWith("/survey/");
-    }
-
-    public boolean isJournalEntryResource() {
-        return this.entityName.equalsIgnoreCase("JOURNALENTRY");
     }
 
     public boolean isRegisterSurvey() {
