@@ -75,7 +75,7 @@ public class CommandHandlerProvider implements ApplicationContextAware {
             if (ArrayUtils.isNotEmpty(commandHandlerBeans)) {
                 for (final String commandHandlerName : commandHandlerBeans) {
                     LOGGER.info("Register command handler '" + commandHandlerName + "' ...");
-                    final CommandType commandType = this.applicationContext.getType(commandHandlerName).getAnnotation(CommandType.class);
+                    final CommandType commandType = this.applicationContext.findAnnotationOnBean(commandHandlerName, CommandType.class);
                     try {
                         this.registeredHandlers.put(commandType.entity() + "|" + commandType.action(), commandHandlerName);
                     } catch (final Throwable th) {
