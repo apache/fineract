@@ -12,6 +12,7 @@ import javax.sql.DataSource;
 
 import org.mifosplatform.infrastructure.core.boot.db.TenantDataSourcePortFixService;
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenantConnection;
 import org.mifosplatform.infrastructure.security.service.TenantDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -32,11 +33,8 @@ public class TenantDatabaseUpgradeService {
     protected final TenantDataSourcePortFixService tenantDataSourcePortFixService;
 
     @Autowired
-	public TenantDatabaseUpgradeService(
-			final TenantDetailsService detailsService,
-			@Qualifier("tenantDataSourceJndi") final DataSource dataSource,
-			TenantDataSourcePortFixService tenantDataSourcePortFixService)
-    {
+    public TenantDatabaseUpgradeService(final TenantDetailsService detailsService,
+            @Qualifier("tenantDataSourceJndi") final DataSource dataSource, TenantDataSourcePortFixService tenantDataSourcePortFixService) {
         this.tenantDetailsService = detailsService;
         this.tenantDataSource = dataSource;
         this.tenantDataSourcePortFixService = tenantDataSourcePortFixService;
@@ -44,36 +42,37 @@ public class TenantDatabaseUpgradeService {
 
     @PostConstruct
     public void upgradeAllTenants() {
-	upgradeTenantDB();
+        upgradeTenantDB();
         final List<MifosPlatformTenant> tenants = this.tenantDetailsService.findAllTenants();
         for (final MifosPlatformTenant tenant : tenants) {
-            if (tenant.isAutoUpdateEnabled()) {
+            final MifosPlatformTenantConnection connection = tenant.getConnection();
+            if (connection.isAutoUpdateEnabled()) {
                 final Flyway flyway = new Flyway();
-                flyway.setDataSource(tenant.databaseURL(), tenant.getSchemaUsername(), tenant.getSchemaPassword());
+                flyway.setDataSource(connection.databaseURL(), connection.getSchemaUsername(), connection.getSchemaPassword());
                 flyway.setLocations("sql/migrations/core_db");
                 flyway.setOutOfOrder(true);
                 try {
-			flyway.migrate();
+                    flyway.migrate();
                 } catch (FlywayException e) {
-					String betterMessage = e.getMessage()
-							+ "; for Tenant DB URL: " + tenant.databaseURL()
-							+ ", username: " + tenant.getSchemaUsername();
-					throw new FlywayException(betterMessage, e.getCause());
+                    String betterMessage = e.getMessage() + "; for Tenant DB URL: " + connection.databaseURL() + ", username: "
+                            + connection.getSchemaPassword();
+                    throw new FlywayException(betterMessage, e.getCause());
                 }
             }
         }
     }
 
-	/**
-	 * Initializes, and if required upgrades (using Flyway) the Tenant DB itself.
-	 */
-	private void upgradeTenantDB() {
-		final Flyway flyway = new Flyway();
-		flyway.setDataSource(tenantDataSource);
-		flyway.setLocations("sql/migrations/list_db");
-		flyway.setOutOfOrder(true);
-		flyway.migrate();
+    /**
+     * Initializes, and if required upgrades (using Flyway) the Tenant DB
+     * itself.
+     */
+    private void upgradeTenantDB() {
+        final Flyway flyway = new Flyway();
+        flyway.setDataSource(tenantDataSource);
+        flyway.setLocations("sql/migrations/list_db");
+        flyway.setOutOfOrder(true);
+        flyway.migrate();
 
-		tenantDataSourcePortFixService.fixUpTenantsSchemaServerPort();
-	}
+        tenantDataSourcePortFixService.fixUpTenantsSchemaServerPort();
+    }
 }

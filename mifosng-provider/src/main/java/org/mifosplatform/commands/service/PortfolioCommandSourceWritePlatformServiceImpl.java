@@ -74,8 +74,8 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         CommandProcessingResult result = null;
         JsonCommand command = null;
         Integer numberOfRetries = 0;
-        Integer maxNumberOfRetries = ThreadLocalContextUtil.getTenant().getMaxRetriesOnDeadlock();
-        Integer maxIntervalBetweenRetries = ThreadLocalContextUtil.getTenant().getMaxIntervalBetweenRetries();
+        Integer maxNumberOfRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxRetriesOnDeadlock();
+        Integer maxIntervalBetweenRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxIntervalBetweenRetries();
         final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
         command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(), wrapper.getEntityId(),
                 wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getSavingsId(),

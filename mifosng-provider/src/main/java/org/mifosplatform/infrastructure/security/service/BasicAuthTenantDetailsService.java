@@ -9,5 +9,5 @@ import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 
 public interface BasicAuthTenantDetailsService {
 
-    MifosPlatformTenant loadTenantById(String tenantId);
+    MifosPlatformTenant loadTenantById(String tenantId, boolean isReport);
 }
