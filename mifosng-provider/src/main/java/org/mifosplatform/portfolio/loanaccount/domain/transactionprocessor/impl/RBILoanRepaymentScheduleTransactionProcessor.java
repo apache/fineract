@@ -97,20 +97,21 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
                     loanTransaction.getTransactionDate(), installments);
 
             for (final LoanRepaymentScheduleInstallment installment : installments) {
-                if (installment.isInterestDue(currency)
+                if ((installment.isInterestDue(currency) || installment.getFeeChargesOutstanding(currency).isGreaterThanZero() || installment
+                        .getPenaltyChargesOutstanding(currency).isGreaterThanZero())
                         && (installment.isOverdueOn(loanTransaction.getTransactionDate()) || installment.getInstallmentNumber().equals(
                                 currentInstallmentBasedOnTransactionDate.getInstallmentNumber()))) {
-                    penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
+                    penaltyChargesPortion = installment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
                     transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
 
-                    feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
+                    feeChargesPortion = installment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
                     transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
 
                     final Money interestPortion = installment.payInterestComponent(transactionDate, transactionAmountRemaining);
                     transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
 
                     final Money principalPortion = Money.zero(currency);
-                    loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion,penaltyChargesPortion);
+                    loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
                 }
             }
 
@@ -209,13 +210,14 @@ public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRe
     public boolean isInterestFirstRepaymentScheduleTransactionProcessor() {
         return true;
     }
-    
+
     @Override
     protected Money handleRefundTransactionPaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed) {
 
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
-        //final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
+        // final MonetaryCurrency currency =
+        // transactionAmountUnprocessed.getCurrency();
         Money transactionAmountRemaining = transactionAmountUnprocessed;
         Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
         Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());
