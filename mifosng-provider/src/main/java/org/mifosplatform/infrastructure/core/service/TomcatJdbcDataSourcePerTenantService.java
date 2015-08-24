@@ -13,6 +13,7 @@ import javax.sql.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenantConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -42,17 +43,20 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         // default to tenant database datasource
         DataSource tenantDataSource = this.tenantDataSource;
 
-        final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+        final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant(); 
         if (tenant != null) {
+            final MifosPlatformTenantConnection tenantConnection = tenant.getConnection();
+
             synchronized (this.tenantToDataSourceMap) {
-                // if tenant information available switch to appropriate
+                // if tenantConnection information available switch to
+                // appropriate
                 // datasource
                 // for that tenant.
-                if (this.tenantToDataSourceMap.containsKey(tenant.getId())) {
-                    tenantDataSource = this.tenantToDataSourceMap.get(tenant.getId());
+                if (this.tenantToDataSourceMap.containsKey(tenantConnection.getConnectionId())) {
+                    tenantDataSource = this.tenantToDataSourceMap.get(tenantConnection.getConnectionId());
                 } else {
-                    tenantDataSource = createNewDataSourceFor(tenant);
-                    this.tenantToDataSourceMap.put(tenant.getId(), tenantDataSource);
+                    tenantDataSource = createNewDataSourceFor(tenantConnection);
+                    this.tenantToDataSourceMap.put(tenantConnection.getConnectionId(), tenantDataSource);
                 }
             }
         }
@@ -60,31 +64,31 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         return tenantDataSource;
     }
 
-    private DataSource createNewDataSourceFor(final MifosPlatformTenant tenant) {
+    // creates the data source oltp and report databases
+    private DataSource createNewDataSourceFor(final MifosPlatformTenantConnection tenantConnectionObj) {
         // see
         // http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency
 
-	// see also org.mifosplatform.DataSourceProperties.setMifosDefaults()
+        // see also org.mifosplatform.DataSourceProperties.setMifosDefaults()
 
-        final String jdbcUrl = tenant.databaseURL();
-
+        final String jdbcUrl = tenantConnectionObj.databaseURL();
         final PoolConfiguration poolConfiguration = new PoolProperties();
         poolConfiguration.setDriverClassName("com.mysql.jdbc.Driver");
-        poolConfiguration.setName(tenant.getSchemaName() + "_pool");
+        poolConfiguration.setName(tenantConnectionObj.getSchemaName() + "_pool");
         poolConfiguration.setUrl(jdbcUrl);
-        poolConfiguration.setUsername(tenant.getSchemaUsername());
-        poolConfiguration.setPassword(tenant.getSchemaPassword());
+        poolConfiguration.setUsername(tenantConnectionObj.getSchemaUsername());
+        poolConfiguration.setPassword(tenantConnectionObj.getSchemaPassword());
 
-        poolConfiguration.setInitialSize(tenant.getInitialSize());
+        poolConfiguration.setInitialSize(tenantConnectionObj.getInitialSize());
 
-        poolConfiguration.setTestOnBorrow(tenant.isTestOnBorrow());
+        poolConfiguration.setTestOnBorrow(tenantConnectionObj.isTestOnBorrow());
         poolConfiguration.setValidationQuery("SELECT 1");
-        poolConfiguration.setValidationInterval(tenant.getValidationInterval());
+        poolConfiguration.setValidationInterval(tenantConnectionObj.getValidationInterval());
 
-        poolConfiguration.setRemoveAbandoned(tenant.isRemoveAbandoned());
-        poolConfiguration.setRemoveAbandonedTimeout(tenant.getRemoveAbandonedTimeout());
-        poolConfiguration.setLogAbandoned(tenant.isLogAbandoned());
-        poolConfiguration.setAbandonWhenPercentageFull(tenant.getAbandonWhenPercentageFull());
+        poolConfiguration.setRemoveAbandoned(tenantConnectionObj.isRemoveAbandoned());
+        poolConfiguration.setRemoveAbandonedTimeout(tenantConnectionObj.getRemoveAbandonedTimeout());
+        poolConfiguration.setLogAbandoned(tenantConnectionObj.isLogAbandoned());
+        poolConfiguration.setAbandonWhenPercentageFull(tenantConnectionObj.getAbandonWhenPercentageFull());
 
         /**
          * Vishwas- Do we need to enable the below properties and add
