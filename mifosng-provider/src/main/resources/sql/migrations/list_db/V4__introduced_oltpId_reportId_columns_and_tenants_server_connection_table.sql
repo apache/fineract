@@ -1,5 +1,3 @@
-START TRANSACTION;
-
 RENAME TABLE tenants to temp_tenants;
 
 create table tenant_server_connections(`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
@@ -28,7 +26,7 @@ create table tenant_server_connections(`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
 	)
 COLLATE='utf8_general_ci'
 ENGINE=InnoDB
-AUTO_INCREMENT=2;
+AUTO_INCREMENT=1;
 
 
 INSERT INTO `tenant_server_connections` (`id`,`schema_name`,`schema_server`, `schema_server_port`, `schema_username`, `schema_password`, `auto_update`, `pool_initial_size`, `pool_validation_interval`, `pool_remove_abandoned`, `pool_remove_abandoned_timeout`, `pool_log_abandoned`, `pool_abandon_when_percentage_full`, `pool_test_on_borrow`, `pool_max_active`, `pool_min_idle`, `pool_max_idle`, `pool_suspect_timeout`, `pool_time_between_eviction_runs_millis`, `pool_min_evictable_idle_time_millis`, `deadlock_max_retries`, `deadlock_max_retry_interval`)
@@ -54,7 +52,7 @@ CREATE TABLE tenants(
 )
 COLLATE='utf8_general_ci'
 ENGINE=InnoDB
-AUTO_INCREMENT=6;
+AUTO_INCREMENT=1;
 
 INSERT INTO tenants(`id`,`identifier`,`name`,`timezone_id`,`country_id`,`joined_date`,`created_date`,`lastmodified_date`,`oltp_id`, `report_id`)
 SELECT  `id`,`identifier`,`name`,`timezone_id`,`country_id`,`joined_date`,`created_date`,`lastmodified_date`,`id`, `id` from temp_tenants ;
@@ -62,4 +60,3 @@ SELECT  `id`,`identifier`,`name`,`timezone_id`,`country_id`,`joined_date`,`creat
 
 DROP TABLE temp_tenants;
 
-COMMIT;
