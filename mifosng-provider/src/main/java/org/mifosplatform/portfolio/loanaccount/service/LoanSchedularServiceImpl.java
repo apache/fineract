@@ -92,5 +92,14 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
             if (sb.length() > 0) { throw new JobExecutionException(sb.toString()); }
         }
     }
+    
+    @Override
+    @CronTarget(jobName = JobName.RECALCULATE_INTEREST_FOR_LOAN)
+    public void recalculateInterest() {
+        Collection<Long> loanIds = this.loanReadPlatformService.fetchArrearLoans();
+        for (Long loanId : loanIds) {
+            this.loanWritePlatformService.recalculateInterest(loanId);
+        }
+    }
 
 }

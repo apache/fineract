@@ -38,7 +38,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntryRunningBalanceUpdateService {
@@ -123,7 +122,6 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
         return commandProcessingResultBuilder.build();
     }
 
-    @Transactional
     private void updateOrganizationRunningBalance(Date entityDate) {
         Map<Long, BigDecimal> runningBalanceMap = new HashMap<>(5);
         Map<Long, Map<Long, BigDecimal>> officesRunningBalance = new HashMap<>();
@@ -188,7 +186,6 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
 
     }
 
-    @Transactional
     private void updateRunningBalance(Long officeId, Date entityDate) {
         Map<Long, BigDecimal> runningBalanceMap = new HashMap<>(5);
 
