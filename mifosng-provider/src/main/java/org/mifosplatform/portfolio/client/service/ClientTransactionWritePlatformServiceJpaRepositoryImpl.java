@@ -5,8 +5,10 @@
  */
 package org.mifosplatform.portfolio.client.service;
 
+import java.util.Map;
 import java.util.Set;
 
+import org.mifosplatform.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.organisation.office.domain.OrganisationCurrencyRepositoryWrapper;
@@ -27,14 +29,17 @@ public class ClientTransactionWritePlatformServiceJpaRepositoryImpl implements C
 
     private final ClientRepositoryWrapper clientRepository;
     private final OrganisationCurrencyRepositoryWrapper organisationCurrencyRepository;
+    private final JournalEntryWritePlatformService journalEntryWritePlatformService;
 
     @Autowired
     public ClientTransactionWritePlatformServiceJpaRepositoryImpl(final ClientTransactionRepositoryWrapper clientTransactionRepository,
             final ClientRepositoryWrapper clientRepositoryWrapper,
-            final OrganisationCurrencyRepositoryWrapper organisationCurrencyRepositoryWrapper) {
+            final OrganisationCurrencyRepositoryWrapper organisationCurrencyRepositoryWrapper,
+            JournalEntryWritePlatformService journalEntryWritePlatformService) {
         this.clientTransactionRepository = clientTransactionRepository;
         this.clientRepository = clientRepositoryWrapper;
         this.organisationCurrencyRepository = organisationCurrencyRepositoryWrapper;
+        this.journalEntryWritePlatformService = journalEntryWritePlatformService;
     }
 
     @Override
@@ -66,11 +71,19 @@ public class ClientTransactionWritePlatformServiceJpaRepositoryImpl implements C
             }
         }
 
+        // generate accounting entries
+        generateAccountingEntries(clientTransaction);
+
         return new CommandProcessingResultBuilder() //
                 .withEntityId(transactionId) //
                 .withOfficeId(client.officeId()) //
                 .withClientId(clientId) //
                 .build();
+    }
+
+    private void generateAccountingEntries(ClientTransaction clientTransaction) {
+        Map<String, Object> accountingBridgeData = clientTransaction.toMapData();
+        journalEntryWritePlatformService.createJournalEntriesForClientTransactions(accountingBridgeData);
     }
 
 }

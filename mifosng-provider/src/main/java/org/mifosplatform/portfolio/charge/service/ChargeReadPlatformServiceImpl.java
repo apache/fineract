@@ -11,8 +11,11 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.joda.time.MonthDay;
+import org.mifosplatform.accounting.common.AccountingDropdownReadPlatformService;
+import org.mifosplatform.accounting.glaccount.data.GLAccountData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
@@ -45,16 +48,19 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;
     private final DropdownReadPlatformService dropdownReadPlatformService;
     private final MifosEntityAccessUtil mifosEntityAccessUtil;
+    private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
 
     @Autowired
     public ChargeReadPlatformServiceImpl(final CurrencyReadPlatformService currencyReadPlatformService,
             final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final RoutingDataSource dataSource,
-            final DropdownReadPlatformService dropdownReadPlatformService, final MifosEntityAccessUtil mifosEntityAccessUtil) {
+            final DropdownReadPlatformService dropdownReadPlatformService, final MifosEntityAccessUtil mifosEntityAccessUtil,
+            final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService) {
         this.chargeDropdownReadPlatformService = chargeDropdownReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.dropdownReadPlatformService = dropdownReadPlatformService;
         this.mifosEntityAccessUtil = mifosEntityAccessUtil;
+        this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
     }
 
     @Override
@@ -118,11 +124,13 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 .retrieveClientCalculationTypes();
         final List<EnumOptionData> clientChargeTimeTypeOptions = this.chargeDropdownReadPlatformService.retrieveClientCollectionTimeTypes();
         final List<EnumOptionData> feeFrequencyOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();
+        final Map<String, List<GLAccountData>> incomeOrLiabilityAccountOptions = this.accountingDropdownReadPlatformService
+                .retrieveAccountMappingOptionsForCharges();
 
         return ChargeData.template(currencyOptions, allowedChargeCalculationTypeOptions, allowedChargeAppliesToOptions,
                 allowedChargeTimeOptions, chargePaymentOptions, loansChargeCalculationTypeOptions, loansChargeTimeTypeOptions,
                 savingsChargeCalculationTypeOptions, savingsChargeTimeTypeOptions, clientChargeCalculationTypeOptions,
-                clientChargeTimeTypeOptions, feeFrequencyOptions);
+                clientChargeTimeTypeOptions, feeFrequencyOptions, incomeOrLiabilityAccountOptions);
     }
 
     @Override
@@ -245,8 +253,10 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                     + "c.is_active as active, oc.name as currencyName, oc.decimal_places as currencyDecimalPlaces, "
                     + "oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
                     + "oc.internationalized_name_code as currencyNameCode, c.fee_on_day as feeOnDay, c.fee_on_month as feeOnMonth, "
-                    + "c.fee_interval as feeInterval, c.fee_frequency as feeFrequency,c.min_cap as minCap,c.max_cap as maxCap "
-                    + "from m_charge c " + "join m_organisation_currency oc on c.currency_code = oc.code";
+                    + "c.fee_interval as feeInterval, c.fee_frequency as feeFrequency,c.min_cap as minCap,c.max_cap as maxCap, "
+                    + "c.income_or_liability_account_id as glAccountId , acc.name as glAccountName, acc.gl_code as glCode "
+                    + "from m_charge c " + "join m_organisation_currency oc on c.currency_code = oc.code "
+                    + " LEFT JOIN acc_gl_account acc on acc.id = c.income_or_liability_account_id ";
         }
 
         public String loanProductChargeSchema() {
@@ -303,8 +313,17 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             final BigDecimal minCap = rs.getBigDecimal("minCap");
             final BigDecimal maxCap = rs.getBigDecimal("maxCap");
 
+            // extract GL Account
+            final Long glAccountId = JdbcSupport.getLong(rs, "glAccountId");
+            final String glAccountName = rs.getString("glAccountName");
+            final String glCode = rs.getString("glCode");
+            GLAccountData glAccountData = null;
+            if (glAccountId != null) {
+                glAccountData = new GLAccountData(glAccountId, glAccountName, glCode);
+            }
+
             return ChargeData.instance(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType,
-                    chargePaymentMode, feeOnMonthDay, feeInterval, penalty, active, minCap, maxCap, feeFrequencyType);
+                    chargePaymentMode, feeOnMonthDay, feeInterval, penalty, active, minCap, maxCap, feeFrequencyType, glAccountData);
         }
     }
 

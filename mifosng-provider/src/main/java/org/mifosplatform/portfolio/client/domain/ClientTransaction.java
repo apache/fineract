@@ -6,8 +6,12 @@
 package org.mifosplatform.portfolio.client.domain;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -25,6 +29,8 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
+import org.mifosplatform.accounting.glaccount.domain.GLAccount;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
@@ -123,6 +129,54 @@ public class ClientTransaction extends AbstractPersistable<Long> {
         this.reversed = true;
     }
 
+    /**
+     * Converts the content of this Client Transaction to a map which can be
+     * passed to the accounting module
+     * 
+     * @param currencyData
+     * @return
+     */
+    public Map<String, Object> toMapData() {
+        final Map<String, Object> thisTransactionData = new LinkedHashMap<>();
+
+        final EnumOptionData transactionType = ClientEnumerations.clientTransactionType(this.typeOf);
+        Boolean accountingEnabledForAtleastOneCharge = false;
+
+        thisTransactionData.put("id", getId());
+        thisTransactionData.put("officeId", this.office.getId());
+        thisTransactionData.put("type", transactionType);
+        thisTransactionData.put("reversed", Boolean.valueOf(this.reversed));
+        thisTransactionData.put("date", getTransactionDate());
+        thisTransactionData.put("currencyCode", this.currencyCode);
+        thisTransactionData.put("amount", this.amount);
+
+        if (this.paymentDetail != null) {
+            thisTransactionData.put("paymentTypeId", this.paymentDetail.getPaymentType().getId());
+        }
+
+        if (!this.clientChargePaidByCollection.isEmpty()) {
+            final List<Map<String, Object>> clientChargesPaidData = new ArrayList<>();
+            for (final ClientChargePaidBy clientChargePaidBy : this.clientChargePaidByCollection) {
+                final Map<String, Object> clientChargePaidData = new LinkedHashMap<>();
+                clientChargePaidData.put("chargeId", clientChargePaidBy.getClientCharge().getCharge().getId());
+                clientChargePaidData.put("isPenalty", clientChargePaidBy.getClientCharge().getCharge().isPenalty());
+                clientChargePaidData.put("clientChargeId", clientChargePaidBy.getClientCharge().getId());
+                clientChargePaidData.put("amount", clientChargePaidBy.getAmount());
+                GLAccount glAccount = clientChargePaidBy.getClientCharge().getCharge().getAccount();
+                if (glAccount != null) {
+                    accountingEnabledForAtleastOneCharge = true;
+                    clientChargePaidData.put("incomeAccountId", glAccount.getId());
+                }
+                clientChargesPaidData.add(clientChargePaidData);
+            }
+            thisTransactionData.put("clientChargesPaid", clientChargesPaidData);
+        }
+
+        thisTransactionData.put("accountingEnabled", accountingEnabledForAtleastOneCharge);
+
+        return thisTransactionData;
+    }
+
     public boolean isPayChargeTransaction() {
         return ClientTransactionType.PAY_CHARGE.getValue().equals(this.typeOf);
     }
@@ -157,6 +211,10 @@ public class ClientTransaction extends AbstractPersistable<Long> {
 
     public boolean isReversed() {
         return this.reversed;
+    }
+
+    public LocalDate getTransactionDate() {
+        return new LocalDate(this.dateOf);
     }
 
 }

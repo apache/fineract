@@ -20,6 +20,8 @@ public interface JournalEntryWritePlatformService {
 
     void createJournalEntriesForSavings(Map<String, Object> accountingBridgeData);
 
+    void createJournalEntriesForClientTransactions(Map<String, Object> accountingBridgeData);
+
     CommandProcessingResult defineOpeningBalance(JsonCommand command);
-    
+
 }

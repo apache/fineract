@@ -59,41 +59,78 @@ public class AccountingDropdownReadPlatformServiceImpl implements AccountingDrop
     }
 
     @Override
+    public Map<String, List<GLAccountData>> retrieveAccountMappingOptionsForCharges() {
+        // only get income and liability accounts
+        boolean includeIncomeAccounts = true;
+        boolean includeLiabilityAccounts = true;
+
+        boolean includeAssetAccounts = false;
+        boolean includeExpenseAccounts = false;
+        boolean includeEquityAccounts = false;
+
+        return retrieveAccountMappingOptions(includeAssetAccounts, includeIncomeAccounts, includeExpenseAccounts, includeLiabilityAccounts,
+                includeEquityAccounts);
+    }
+
+    @Override
     public Map<String, List<GLAccountData>> retrieveAccountMappingOptions() {
+        boolean includeAssetAccounts = true;
+        boolean includeIncomeAccounts = true;
+        boolean includeExpenseAccounts = true;
+        boolean includeLiabilityAccounts = true;
+        boolean includeEquityAccounts = true;
+        return retrieveAccountMappingOptions(includeAssetAccounts, includeIncomeAccounts, includeExpenseAccounts, includeLiabilityAccounts,
+                includeEquityAccounts);
+    }
+
+    private Map<String, List<GLAccountData>> retrieveAccountMappingOptions(boolean includeAssetAccounts, boolean includeIncomeAccounts,
+            boolean includeExpenseAccounts, boolean includeLiabilityAccounts, boolean includeEquityAccounts) {
         final Map<String, List<GLAccountData>> accountOptions = new HashMap<>();
-        List<GLAccountData> assetAccountOptions = this.accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.ASSET);
-        if (assetAccountOptions.isEmpty()) {
-            assetAccountOptions = null;
-        }
-        accountOptions.put("assetAccountOptions", assetAccountOptions);
 
-        List<GLAccountData> incomeAccountOptions = this.accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.INCOME);
-        if (incomeAccountOptions.isEmpty()) {
-            incomeAccountOptions = null;
+        if (includeAssetAccounts) {
+            List<GLAccountData> assetAccountOptions = this.accountReadPlatformService
+                    .retrieveAllEnabledDetailGLAccounts(GLAccountType.ASSET);
+            if (assetAccountOptions.isEmpty()) {
+                assetAccountOptions = null;
+            }
+            accountOptions.put("assetAccountOptions", assetAccountOptions);
         }
-        accountOptions.put("incomeAccountOptions", incomeAccountOptions);
 
-        List<GLAccountData> expenseAccountOptions = this.accountReadPlatformService
-                .retrieveAllEnabledDetailGLAccounts(GLAccountType.EXPENSE);
-        if (expenseAccountOptions.isEmpty()) {
-            expenseAccountOptions = null;
+        if (includeIncomeAccounts) {
+            List<GLAccountData> incomeAccountOptions = this.accountReadPlatformService
+                    .retrieveAllEnabledDetailGLAccounts(GLAccountType.INCOME);
+            if (incomeAccountOptions.isEmpty()) {
+                incomeAccountOptions = null;
+            }
+            accountOptions.put("incomeAccountOptions", incomeAccountOptions);
         }
-        accountOptions.put("expenseAccountOptions", expenseAccountOptions);
 
-        List<GLAccountData> liabilityAccountOptions = this.accountReadPlatformService
-                .retrieveAllEnabledDetailGLAccounts(GLAccountType.LIABILITY);
-        if (liabilityAccountOptions.isEmpty()) {
-            liabilityAccountOptions = null;
+        if (includeExpenseAccounts) {
+            List<GLAccountData> expenseAccountOptions = this.accountReadPlatformService
+                    .retrieveAllEnabledDetailGLAccounts(GLAccountType.EXPENSE);
+            if (expenseAccountOptions.isEmpty()) {
+                expenseAccountOptions = null;
+            }
+            accountOptions.put("expenseAccountOptions", expenseAccountOptions);
         }
-        accountOptions.put("liabilityAccountOptions", liabilityAccountOptions);
-        
-		List<GLAccountData> equityAccountOptions = this.accountReadPlatformService
-				.retrieveAllEnabledDetailGLAccounts(GLAccountType.EQUITY);
-		if (equityAccountOptions.isEmpty()) {
-			equityAccountOptions = null;
-		}
-		accountOptions.put("equityAccountOptions",equityAccountOptions);
-        
+
+        if (includeLiabilityAccounts) {
+            List<GLAccountData> liabilityAccountOptions = this.accountReadPlatformService
+                    .retrieveAllEnabledDetailGLAccounts(GLAccountType.LIABILITY);
+            if (liabilityAccountOptions.isEmpty()) {
+                liabilityAccountOptions = null;
+            }
+            accountOptions.put("liabilityAccountOptions", liabilityAccountOptions);
+        }
+
+        if (includeEquityAccounts) {
+            List<GLAccountData> equityAccountOptions = this.accountReadPlatformService
+                    .retrieveAllEnabledDetailGLAccounts(GLAccountType.EQUITY);
+            if (equityAccountOptions.isEmpty()) {
+                equityAccountOptions = null;
+            }
+            accountOptions.put("equityAccountOptions", equityAccountOptions);
+        }
         return accountOptions;
     }
 
