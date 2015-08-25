@@ -48,7 +48,15 @@ public class LoanAccrualPlatformServiceImpl implements LoanAccrualPlatformServic
         }
 
         for (Map.Entry<Long, Collection<LoanScheduleAccrualData>> mapEntry : loanDataMap.entrySet()) {
-            this.loanAccrualWritePlatformService.addAccrualAccounting(mapEntry.getKey(), mapEntry.getValue(), sb);
+            try {
+                this.loanAccrualWritePlatformService.addAccrualAccounting(mapEntry.getKey(), mapEntry.getValue());
+            } catch (Exception e) {
+                Throwable realCause = e;
+                if (e.getCause() != null) {
+                    realCause = e.getCause();
+                }
+                sb.append("failed to add accural transaction for loan " + mapEntry.getKey() + " with message " + realCause.getMessage());
+            }
         }
 
         if (sb.length() > 0) { throw new JobExecutionException(sb.toString()); }
@@ -82,7 +90,15 @@ public class LoanAccrualPlatformServiceImpl implements LoanAccrualPlatformServic
         }
 
         for (Map.Entry<Long, Collection<LoanScheduleAccrualData>> mapEntry : loanDataMap.entrySet()) {
-            this.loanAccrualWritePlatformService.addPeriodicAccruals(tilldate, mapEntry.getKey(), mapEntry.getValue(), sb);
+            try {
+                this.loanAccrualWritePlatformService.addPeriodicAccruals(tilldate, mapEntry.getKey(), mapEntry.getValue());
+            } catch (Exception e) {
+                Throwable realCause = e;
+                if (e.getCause() != null) {
+                    realCause = e.getCause();
+                }
+                sb.append("failed to add accural transaction for loan " + mapEntry.getKey() + " with message " + realCause.getMessage());
+            }
         }
 
         return sb.toString();

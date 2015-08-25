@@ -12,8 +12,8 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanScheduleAccrualData;
 
 public interface LoanAccrualWritePlatformService {
 
-    void addAccrualAccounting(Long loanId, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas, StringBuilder sb);
+    void addAccrualAccounting(Long loanId, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas) throws Exception;
 
-    void addPeriodicAccruals(LocalDate tilldate, Long loanId, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas, StringBuilder sb);
+    void addPeriodicAccruals(LocalDate tilldate, Long loanId, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas) throws Exception;
 
 }
