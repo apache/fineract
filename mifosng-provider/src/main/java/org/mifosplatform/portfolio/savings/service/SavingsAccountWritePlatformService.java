@@ -32,8 +32,6 @@ public interface SavingsAccountWritePlatformService {
 
     CommandProcessingResult undoTransaction(Long savingsId, Long transactionId, boolean allowAccountTransferModification);
 
-    void postInterestForAccounts();
-
     CommandProcessingResult adjustSavingsTransaction(Long savingsId, Long transactionId, JsonCommand command);
 
     CommandProcessingResult close(Long savingsId, JsonCommand command);
@@ -66,4 +64,6 @@ public interface SavingsAccountWritePlatformService {
 
     void processPostActiveActions(SavingsAccount account, DateTimeFormatter fmt, Set<Long> existingTransactionIds,
             Set<Long> existingReversedTransactionIds);
+
+    void postInterest(SavingsAccount account);
 }

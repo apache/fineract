@@ -37,8 +37,6 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
-import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
-import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
@@ -339,7 +337,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .build();
     }
 
-    @Transactional
+
     @Override
     public CommandProcessingResult postInterest(final Long savingsId) {
 
@@ -356,7 +354,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     @Transactional
-    private void postInterest(final SavingsAccount account) {
+    @Override
+    public void postInterest(final SavingsAccount account) {
 
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
@@ -385,16 +384,6 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
     }
 
-    @CronTarget(jobName = JobName.POST_INTEREST_FOR_SAVINGS)
-    @Override
-    public void postInterestForAccounts() {
-        final List<SavingsAccount> savingsAccounts = this.savingAccountRepository
-                .findSavingAccountByStatus(SavingsAccountStatusType.ACTIVE.getValue());
-        for (final SavingsAccount savingsAccount : savingsAccounts) {
-            this.savingAccountAssembler.assignSavingAccountHelpers(savingsAccount);
-            postInterest(savingsAccount);
-        }
-    }
 
     @Override
     public CommandProcessingResult undoTransaction(final Long savingsId, final Long transactionId,
