@@ -9,7 +9,9 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,8 +19,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.joda.time.LocalDate;
+import org.junit.Before;
 import org.junit.Test;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.organisation.monetary.domain.MoneyHelper;
 import org.mifosplatform.portfolio.loanaccount.LoanScheduleTestDataHelper;
 import org.mifosplatform.portfolio.loanaccount.MonetaryCurrencyBuilder;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -36,6 +40,16 @@ import com.google.gson.JsonParser;
 public class TemplateMergeServiceTest {
 
     private TemplateMergeService tms = new TemplateMergeService();
+    
+    @Before
+    public void setUpForEachTestCase() throws Exception {
+
+        Field field = MoneyHelper.class.getDeclaredField("roundingMode");
+        field.setAccessible(true);
+        field.set(null, RoundingMode.HALF_EVEN);
+    }
+
+    
 
     @Test
     public void compileHelloTemplate() throws Exception {
