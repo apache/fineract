@@ -2323,7 +2323,7 @@ public class Loan extends AbstractPersistable<Long> {
         final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
         final LoanScheduleGenerator loanScheduleGenerator = scheduleGeneratorDTO.getLoanScheduleFactory().create(interestMethod);
 
-        final RoundingMode roundingMode = RoundingMode.valueOf(MoneyHelper.getRoundingMode());
+        final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
         final MathContext mc = new MathContext(8, roundingMode);
 
         final Integer loanTermFrequency = this.termFrequency;
@@ -4682,7 +4682,7 @@ public class Loan extends AbstractPersistable<Long> {
         final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
         final LoanScheduleGenerator loanScheduleGenerator = generatorDTO.getLoanScheduleFactory().create(interestMethod);
 
-        final RoundingMode roundingMode = RoundingMode.valueOf(MoneyHelper.getRoundingMode());
+        final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
         final MathContext mc = new MathContext(8, roundingMode);
 
         final LoanApplicationTerms loanApplicationTerms = constructLoanApplicationTerms(generatorDTO.getApplicationCurrency(),
@@ -4745,7 +4745,7 @@ public class Loan extends AbstractPersistable<Long> {
             final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
             final LoanScheduleGenerator loanScheduleGenerator = loanScheduleFactory.create(interestMethod);
 
-            final RoundingMode roundingMode = RoundingMode.valueOf(MoneyHelper.getRoundingMode());
+            final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
             final MathContext mc = new MathContext(8, roundingMode);
 
             final Integer loanTermFrequency = this.termFrequency;

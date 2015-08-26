@@ -239,7 +239,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                         BigDecimal remainingAmount = guarantorFundingDetails.getAmountRemaining();
                         if (loan.getGuaranteeAmount().compareTo(loan.getPrincpal().getAmount()) == 1) {
                             remainingAmount = remainingAmount.multiply(loan.getPrincpal().getAmount()).divide(loan.getGuaranteeAmount(),
-                                    RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
+                                    MoneyHelper.getRoundingMode());
                         }
                         AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, remainingAmount, fromAccountType,
                                 toAccountType, fromAccountId, toAccountId, description, locale, fmt, paymentDetail, fromTransferType,
@@ -381,7 +381,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
             BigDecimal totalGuaranteeAmount = loan.getGuaranteeAmount();
             BigDecimal principal = loan.getPrincpal().getAmount();
             if ((amountForRelease != null) && (totalGuaranteeAmount != null)) {
-                amountForRelease = amountForRelease.multiply(totalGuaranteeAmount).divide(principal, RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
+                amountForRelease = amountForRelease.multiply(totalGuaranteeAmount).divide(principal, MoneyHelper.getRoundingMode());
                 List<DepositAccountOnHoldTransaction> accountOnHoldTransactions = new ArrayList<>();
 
                 BigDecimal amountLeft = calculateAndRelaseGuarantorFunds(externalGuarantorList, guarantorGuarantee, amountForRelease,
@@ -467,7 +467,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         BigDecimal amountLeft = amountForRelease;
         for (GuarantorFundingDetails fundingDetails : guarantorList) {
             BigDecimal guarantorAmount = amountForRelease.multiply(fundingDetails.getAmountRemaining()).divide(totalGuaranteeAmount,
-                    RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
+                    MoneyHelper.getRoundingMode());
             if (fundingDetails.getAmountRemaining().compareTo(guarantorAmount) < 1) {
                 guarantorAmount = fundingDetails.getAmountRemaining();
             }

@@ -292,7 +292,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
 
                 final InterestMethod interestMethod = loan.getLoanRepaymentScheduleDetail().getInterestMethod();
-                final RoundingMode roundingMode = RoundingMode.valueOf(MoneyHelper.getRoundingMode());
+                final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
                 final MathContext mathContext = new MathContext(8, roundingMode);
 
                 Collection<LoanRepaymentScheduleHistory> loanRepaymentScheduleHistoryList = this.loanScheduleHistoryWritePlatformService

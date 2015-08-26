@@ -72,14 +72,14 @@ public class QuarterlyCompoundingPeriod implements CompoundingPeriod {
         BigDecimal interestEarned = BigDecimal.ZERO;
         if (cumulativeBalance.compareTo(BigDecimal.ZERO) != 0 && numberOfDays > 0) {
             final BigDecimal averageDailyBalance = cumulativeBalance.divide(BigDecimal.valueOf(numberOfDays), MathContext.DECIMAL64)
-                    .setScale(9, RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
+                    .setScale(9, MoneyHelper.getRoundingMode());
 
             final BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
             final BigDecimal dailyInterestRate = interestRateAsFraction.multiply(multiplicand, MathContext.DECIMAL64);
             final BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(numberOfDays), MathContext.DECIMAL64);
             if (averageDailyBalance.compareTo(minBalanceForInterestCalculation) >= 0) {
                 interestEarned = averageDailyBalance.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(9,
-                        RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
+                        MoneyHelper.getRoundingMode());
             }
         }
 

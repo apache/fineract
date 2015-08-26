@@ -45,7 +45,7 @@ public class EndOfDayBalance {
         final BigDecimal daysAsBigDecimal = BigDecimal.valueOf(this.numberOfDays);
         final BigDecimal realBalanceForInterestCalculation = this.endOfDayBalance.getAmount().add(interestToCompound);
         return realBalanceForInterestCalculation.multiply(daysAsBigDecimal, MathContext.DECIMAL64).setScale(9,
-                RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
+                MoneyHelper.getRoundingMode());
     }
 
     public BigDecimal calculateInterestOnBalance(final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction,
@@ -56,10 +56,10 @@ public class EndOfDayBalance {
         final BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(this.numberOfDays), MathContext.DECIMAL64);
 
         final BigDecimal realBalanceForInterestCalculation = this.endOfDayBalance.getAmount().add(interestToCompound);
-        BigDecimal interest = BigDecimal.ZERO.setScale(9, RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
+        BigDecimal interest = BigDecimal.ZERO.setScale(9, MoneyHelper.getRoundingMode());
         if (realBalanceForInterestCalculation.compareTo(minBalanceForInterestCalculation) >= 0) {
             interest = realBalanceForInterestCalculation.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(9,
-                    RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
+                    MoneyHelper.getRoundingMode());
         }
         return interest;
     }
@@ -83,10 +83,10 @@ public class EndOfDayBalance {
 
         final double interestRateForCompoundingPeriodPowered = Math.pow(interestRateForCompoundingPeriodPlusOne.doubleValue(),
                 Integer.valueOf(this.numberOfDays).doubleValue());
-        BigDecimal futureValue = presentValue.setScale(9, RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
+        BigDecimal futureValue = presentValue.setScale(9, MoneyHelper.getRoundingMode());
         if (presentValue.compareTo(minBalanceForInterestCalculation) >= 0) {
             futureValue = presentValue.multiply(BigDecimal.valueOf(interestRateForCompoundingPeriodPowered), MathContext.DECIMAL64)
-                    .setScale(9, RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
+                    .setScale(9, MoneyHelper.getRoundingMode());
         }
         return futureValue.subtract(presentValue);
     }

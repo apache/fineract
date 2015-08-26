@@ -444,7 +444,7 @@ public class LoanScheduleAssembler {
 
         final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
 
-        final RoundingMode roundingMode = RoundingMode.valueOf(MoneyHelper.getRoundingMode());
+        final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
         final MathContext mc = new MathContext(8, roundingMode);
 
         HolidayDetailDTO detailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
@@ -455,7 +455,7 @@ public class LoanScheduleAssembler {
     public LoanScheduleModel assembleForInterestRecalculation(final LoanApplicationTerms loanApplicationTerms, final Long officeId,
             List<LoanTransaction> transactions, final Set<LoanCharge> loanCharges,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor) {
-        final RoundingMode roundingMode = RoundingMode.valueOf(MoneyHelper.getRoundingMode());
+        final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
         final MathContext mc = new MathContext(8, roundingMode);
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
 
@@ -474,7 +474,7 @@ public class LoanScheduleAssembler {
             final Long officeId, List<LoanTransaction> loanTransactions,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor) {
         final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
-        final RoundingMode roundingMode = RoundingMode.valueOf(MoneyHelper.getRoundingMode());
+        final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
         final MathContext mc = new MathContext(8, roundingMode);
 
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();

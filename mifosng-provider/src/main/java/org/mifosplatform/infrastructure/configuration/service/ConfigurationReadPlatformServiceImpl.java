@@ -43,11 +43,9 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
         if (survey) {
             sql += " JOIN x_registered_table on x_registered_table.registered_table_name = c.name ";
-            sql += " WHERE x_registered_table.category =" + DataTableApiConstant.CATEGORY_PPI + " and c.is_trap_door=0";
+            sql += " WHERE x_registered_table.category =" + DataTableApiConstant.CATEGORY_PPI;
 
-        } else {
-            sql += " WHERE c.is_trap_door=0";
-        }
+        } 
 
         sql += "  order by c.id";
         final List<GlobalConfigurationPropertyData> globalConfiguration = this.jdbcTemplate.query(sql, this.rm, new Object[] {});
@@ -80,7 +78,7 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
             final String description = rs.getString("description");
             final Long id = rs.getLong("id");
             final boolean isTrapDoor = rs.getBoolean("is_trap_door");
-            return new GlobalConfigurationPropertyData(name, enabled, value, id, description);
+            return new GlobalConfigurationPropertyData(name, enabled, value, id, description, isTrapDoor);
         }
     }
 

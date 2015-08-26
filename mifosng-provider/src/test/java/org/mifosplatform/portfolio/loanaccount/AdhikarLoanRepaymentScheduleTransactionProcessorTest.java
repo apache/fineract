@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.loanaccount;
 
 import java.lang.reflect.Field;
+import java.math.RoundingMode;
 import java.util.List;
 
 import org.joda.time.LocalDate;
@@ -33,9 +34,9 @@ public class AdhikarLoanRepaymentScheduleTransactionProcessorTest {
     @Before
     public void setUpForEachTestCase() throws Exception {
 
-        Field field = MoneyHelper.class.getDeclaredField("roundingModeIntValue");
+        Field field = MoneyHelper.class.getDeclaredField("roundingMode");
         field.setAccessible(true);
-        field.setInt(null, 6);
+        field.set(null, RoundingMode.HALF_EVEN);
         this.installments = LoanScheduleTestDataHelper.createSimpleLoanSchedule(this.july2nd, this.usDollars);
 
         this.processor = new RBILoanRepaymentScheduleTransactionProcessor();

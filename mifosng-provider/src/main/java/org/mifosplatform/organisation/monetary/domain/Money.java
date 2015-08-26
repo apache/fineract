@@ -76,7 +76,7 @@ public class Money implements Comparable<Money> {
             final double existingVal = amountScaled.doubleValue();
             amountScaled = BigDecimal.valueOf(roundToMultiplesOf(existingVal, inMultiplesOf));
         }
-        this.amount = amountScaled.setScale(this.currencyDigitsAfterDecimal, RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
+        this.amount = amountScaled.setScale(this.currencyDigitsAfterDecimal, MoneyHelper.getRoundingMode());
     }
 
     public static double roundToMultiplesOf(final double existingVal, final Integer inMultiplesOf) {

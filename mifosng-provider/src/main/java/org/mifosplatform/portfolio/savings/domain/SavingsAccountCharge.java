@@ -528,7 +528,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         BigDecimal percentageOf = BigDecimal.ZERO;
 
         if (isGreaterThanZero(value)) {
-            final MathContext mc = new MathContext(8, RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
+            final MathContext mc = new MathContext(8, MoneyHelper.getRoundingMode());
             final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100l), mc);
             percentageOf = value.multiply(multiplicand, mc);
         }

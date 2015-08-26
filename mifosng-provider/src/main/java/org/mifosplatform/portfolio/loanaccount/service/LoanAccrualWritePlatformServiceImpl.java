@@ -141,7 +141,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             double iterest = interestPerDay * daysToBeAccrued;
             interestportion = BigDecimal.valueOf(iterest);
         }
-        interestportion = interestportion.setScale(accrualData.getCurrencyData().decimalPlaces(), RoundingMode.valueOf(MoneyHelper.getRoundingMode()));
+        interestportion = interestportion.setScale(accrualData.getCurrencyData().decimalPlaces(), MoneyHelper.getRoundingMode());
 
         BigDecimal totalAccInterest = accrualData.getAccruedInterestIncome();
         BigDecimal totalAccPenalty = accrualData.getAccruedPenaltyIncome();

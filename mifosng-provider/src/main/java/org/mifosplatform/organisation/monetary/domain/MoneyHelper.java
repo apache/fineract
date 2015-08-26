@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.organisation.monetary.domain;
 
+import java.math.RoundingMode;
+
 import javax.annotation.PostConstruct;
 
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -14,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MoneyHelper {
     
-    private static int roundingModeIntValue = -1;
+    private static RoundingMode roundingMode = null;
     private static ConfigurationDomainService staticConfigurationDomainService;
     
     @Autowired
@@ -26,11 +28,11 @@ public class MoneyHelper {
     }
 
     
-    public static int getRoundingMode() {
-        if (roundingModeIntValue == -1) {
-            roundingModeIntValue = staticConfigurationDomainService.getRoundingMode();
+    public static RoundingMode getRoundingMode() {
+        if (roundingMode == null) {
+            roundingMode = RoundingMode.valueOf(staticConfigurationDomainService.getRoundingMode());
         }
-        return roundingModeIntValue;
+        return roundingMode;
     }
 
 }

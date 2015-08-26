@@ -20,21 +20,25 @@ public class GlobalConfigurationPropertyData {
     private final Long id;
     @SuppressWarnings("unused")
     private final String description;
+    @SuppressWarnings("unused")
+    private final boolean trapDoor;
 
-    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value, final String description) {
+    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value, final String description, final boolean trapDoor) {
         this.name = name;
         this.enabled = enabled;
         this.value = value;
         this.id = null;
         this.description = description;
+        this.trapDoor = trapDoor;
     }
 
     public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value, final Long id,
-            final String description) {
+            final String description, final boolean isTrapDoor) {
         this.name = name;
         this.enabled = enabled;
         this.value = value;
         this.id = id;
         this.description = description;
+        this.trapDoor = isTrapDoor;
     }
 }
