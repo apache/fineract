@@ -33250,6 +33250,8 @@ Request Body:
 					<br>
 					<div class=apiClick>search?query=Petra&resource=clients,groups</div>
 					<br>
+					<div class=apiClick>search?query=Petra&resource=clients,groups&exactMatch=true</div>
+					<br>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Parameters</div></td>
@@ -33271,6 +33273,15 @@ Request Body:
 							</td>
 							<td class=fielddesc>
 								Scoped resources on which search can be performed. If there is no resource parameter passed then search will be performed on all <a href="#search">scoped</a> resources.
+							</td>
+						</tr>
+						<tr>
+							<td>
+								exactMatch
+								<br><i>(non-mandatory)</i>
+							</td>
+							<td class=fielddesc>
+								Scoped resources on which search can be performed. If there is no exactMatch parameter passed then search will be performed for all partial matches <a href="#search">scoped</a> resources.
 							</td>
 						</tr>
 					</table>
@@ -33319,6 +33330,40 @@ GET https://DomainName/api/v1/search?query=000000111
     "parentType": "client"
   }
 ]
+					</code>
+					
+					<code class="method-declaration">
+GET https://DomainName/api/v1/search?query=000000001&exactMatch=true
+					</code>
+					<code class="method-response">
+[{
+	"entityId": 1,
+	"entityAccountNo": "000000001",
+	"entityExternalId": "ID_JKZGEXF",
+	"entityName": "Group_Name_HVCU5",
+	"entityType": "GROUP",
+	"parentId": 1,
+	"parentName": "Head Office",
+	"entityStatus": {
+		"id": 300,
+		"code": "groupingStatusType.active",
+		"value": "Active"
+	}
+},
+{
+	"entityId": 1,
+	"entityAccountNo": "000000001",
+	"entityExternalId": "ID_UOZAGPZ",
+	"entityName": "Client_FirstName_KJ5B6 Client_LastName_KDGX",
+	"entityType": "CLIENT",
+	"parentId": 1,
+	"parentName": "Head Office",
+	"entityStatus": {
+		"id": 300,
+		"code": "clientStatusType.active",
+		"value": "Active"
+	}
+}]
 					</code>
 				</div>
 			</div>
