@@ -141,6 +141,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             + "g.staff_id as staffId, s.display_name as staffName, " //
             + "g.status_enum as statusEnum, g.activation_date as activationDate, " //
             + "g.hierarchy as hierarchy, " //
+            + "g.level_id as groupLevel," //
             + "g.closedon_date as closedOnDate, " + "g.submittedon_date as submittedOnDate, " + "sbu.username as submittedByUsername, "
             + "sbu.firstname as submittedByFirstname, " + "sbu.lastname as submittedByLastname, " + "clu.username as closedByUsername, "
             + "clu.firstname as closedByFirstname, " + "clu.lastname as closedByLastname, " + "acu.username as activatedByUsername, "
@@ -287,6 +288,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             final Long staffId = JdbcSupport.getLong(rs, "staffId");
             final String staffName = rs.getString("staffName");
             final String hierarchy = rs.getString("hierarchy");
+            final String groupLevel = rs.getString("groupLevel");
 
             final LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedOnDate");
             final String closedByUsername = rs.getString("closedByUsername");
@@ -307,7 +309,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
                     closedByUsername, closedByFirstname, closedByLastname);
 
             return GroupGeneralData.instance(id, accountNo, name, externalId, status, activationDate, officeId, officeName, null, null, staffId,
-                    staffName, hierarchy, timeline);
+                    staffName, hierarchy, groupLevel, timeline);
         }
     }
 
