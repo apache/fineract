@@ -640,6 +640,10 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     private LocalDate getCreatedDate() {
         return new LocalDate(this.createdDate);
     }
+    
+    public LocalDateTime getCreatedDateTime() {
+    	 return new LocalDateTime(this.createdDate);
+    }
 
     public boolean isLastTransaction(final LoanTransaction loanTransaction) {
         boolean isLatest = false;
