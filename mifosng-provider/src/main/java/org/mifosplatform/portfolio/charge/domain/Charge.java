@@ -92,7 +92,7 @@ public class Charge extends AbstractPersistable<Long> {
     private Integer feeFrequency;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "gl_account_id")
+    @JoinColumn(name = "income_or_liability_account_id")
     private GLAccount account;
 
     public static Charge fromJson(final JsonCommand command, final GLAccount account) {

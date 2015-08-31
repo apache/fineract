@@ -72,6 +72,7 @@ public class ClientTransactionWritePlatformServiceJpaRepositoryImpl implements C
         }
 
         // generate accounting entries
+        this.clientTransactionRepository.saveAndFlush(clientTransaction);
         generateAccountingEntries(clientTransaction);
 
         return new CommandProcessingResultBuilder() //

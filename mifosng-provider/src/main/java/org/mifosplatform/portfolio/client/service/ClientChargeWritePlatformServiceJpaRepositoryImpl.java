@@ -138,7 +138,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
 
         ClientTransaction clientTransaction = ClientTransaction.payCharge(client, client.getOffice(), paymentDetail, transactionDate,
                 chargePaid, clientCharge.getCurrency().getCode(), getAppUserIfPresent());
-        this.clientTransactionRepository.save(clientTransaction);
+        this.clientTransactionRepository.saveAndFlush(clientTransaction);
 
         // update charge paid by associations
         final ClientChargePaidBy chargePaidBy = ClientChargePaidBy.instance(clientTransaction, clientCharge, amountPaid);
