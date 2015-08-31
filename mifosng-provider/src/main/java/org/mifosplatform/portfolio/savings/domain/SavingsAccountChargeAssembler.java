@@ -134,8 +134,8 @@ public class SavingsAccountChargeAssembler {
         Set<Charge> productCharges = savingsProduct.charges();
         for (Charge charge : productCharges) {
             ChargeTimeType chargeTime = null;
-            if (charge.getChargeTime() != null) {
-                chargeTime = ChargeTimeType.fromInt(charge.getChargeTime());
+            if (charge.getChargeTimeType() != null) {
+                chargeTime = ChargeTimeType.fromInt(charge.getChargeTimeType());
             }
             if (chargeTime != null && chargeTime.isOnSpecifiedDueDate()) {
                 continue;

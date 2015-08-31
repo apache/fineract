@@ -63,7 +63,13 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
         // 3. setup variables for tracking important facts required for loan
         // schedule generation.
-        Money principalDisbursed = loanApplicationTerms.getPrincipal();
+        Money principalDisbursed ;
+        
+        if(loanApplicationTerms.isMultiDisburseLoan() && loanApplicationTerms.getApprovedPrincipal().isGreaterThanZero()) {
+            principalDisbursed = loanApplicationTerms.getApprovedPrincipal();
+        }else {
+            principalDisbursed = loanApplicationTerms.getPrincipal();    
+        }
         final MonetaryCurrency currency = principalDisbursed.getCurrency();
         final int numberOfRepayments = loanApplicationTerms.getNumberOfRepayments();
 
@@ -482,7 +488,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     mergeVariationsToMap(principalPortionMap, latePaymentMap, disburseDetailMap, compoundingMap), compoundingMap,
                     periodStartDateApplicableForInterest, scheduledDueDate, daysInPeriodApplicableForInterest);
 
-            if (loanApplicationTerms.getFixedEmiAmount() != null
+            if (loanApplicationTerms.getFixedEmiAmount() != null  
                     && loanApplicationTerms.getFixedEmiAmount().compareTo(principalInterestForThisPeriod.interest().getAmount()) != 1) {
                 String errorMsg = "EMI amount must be greater than : " + principalInterestForThisPeriod.interest().getAmount();
                 throw new MultiDisbursementEmiAmountException(errorMsg, principalInterestForThisPeriod.interest().getAmount(),
@@ -1644,7 +1650,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         Money cumulative = Money.zero(monetaryCurrency);
 
         for (final LoanCharge loanCharge : loanCharges) {
-            if (loanCharge.isFeeCharge()) {
+            if (!loanCharge.isDueAtDisbursement() && loanCharge.isFeeCharge()) {
                 if (loanCharge.isInstalmentFee() && isInstallmentChargeApplicable) {
                     cumulative = calculateInstallmentCharge(principalInterestForThisPeriod, numberOfRepayments, cumulative, loanCharge);
                 } else if (loanCharge.isOverdueInstallmentCharge()

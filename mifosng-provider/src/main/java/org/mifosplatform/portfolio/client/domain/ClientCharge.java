@@ -102,7 +102,7 @@ public class ClientCharge extends AbstractPersistable<Long> {
         this.client = client;
         this.charge = charge;
         this.penaltyCharge = charge.isPenalty();
-        this.chargeTime = charge.getChargeTime();
+        this.chargeTime = charge.getChargeTimeType();
         this.dueDate = (dueDate == null) ? null : dueDate.toDate();
         this.chargeCalculation = charge.getChargeCalculation();
 

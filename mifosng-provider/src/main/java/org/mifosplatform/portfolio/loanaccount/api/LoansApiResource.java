@@ -405,10 +405,9 @@ public class LoansApiResource {
 
             if (associationParameters.contains("repaymentSchedule")) {
                 mandatoryResponseParameters.add("repaymentSchedule");
-
                 final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData = loanBasicDetails.repaymentScheduleRelatedData();
                 repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, repaymentScheduleRelatedData,
-                        disbursementData, loanBasicDetails.isInterestRecalculationEnabled());
+                        disbursementData, loanBasicDetails.isInterestRecalculationEnabled(), loanBasicDetails.getTotalPaidFeeCharges());
 
                 if (associationParameters.contains("futureSchedule") && loanBasicDetails.isInterestRecalculationEnabled()) {
                     mandatoryResponseParameters.add("futureSchedule");
@@ -494,8 +493,13 @@ public class LoansApiResource {
 
             fundOptions = this.fundReadPlatformService.retrieveAllFunds();
             repaymentStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
-            chargeOptions = this.chargeReadPlatformService.retrieveLoanAccountApplicableCharges(loanId,
-                    new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT });
+            if(product.getMultiDisburseLoan()){
+            	chargeOptions = this.chargeReadPlatformService.retrieveLoanAccountApplicableCharges(loanId,
+                        new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT });
+            }else{
+            	chargeOptions = this.chargeReadPlatformService.retrieveLoanAccountApplicableCharges(loanId,
+                        new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT, ChargeTimeType.TRANCHE_DISBURSEMENT });
+            }
             chargeTemplate = this.loanChargeReadPlatformService.retrieveLoanChargeTemplate();
 
             allowedLoanOfficers = this.loanReadPlatformService.retrieveAllowedLoanOfficers(loanBasicDetails.officeId(),

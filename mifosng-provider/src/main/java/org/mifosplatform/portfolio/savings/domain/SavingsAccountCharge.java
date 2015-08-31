@@ -153,7 +153,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
         this.savingsAccount = savingsAccount;
         this.charge = chargeDefinition;
         this.penaltyCharge = chargeDefinition.isPenalty();
-        this.chargeTime = (chargeTime == null) ? chargeDefinition.getChargeTime() : chargeTime.getValue();
+        this.chargeTime = (chargeTime == null) ? chargeDefinition.getChargeTimeType() : chargeTime.getValue();
 
         if (isOnSpecifiedDueDate()) {
             if (dueDate == null) {

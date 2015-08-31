@@ -372,7 +372,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 waiveLoanCharges(loan, waiveLoanCharges);
 
                 // update the Loan summary
-                loanSummary.updateSummary(currency, loan.getPrincpal(), repaymentScheduleInstallments, new LoanSummaryWrapper(), true);
+                loanSummary.updateSummary(currency, loan.getPrincpal(), repaymentScheduleInstallments, new LoanSummaryWrapper(), true, null);
 
                 // update the total number of schedule repayments
                 loan.updateNumberOfRepayments(periods.size());

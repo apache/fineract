@@ -50,7 +50,7 @@ public class Charge extends AbstractPersistable<Long> {
     private Integer chargeAppliesTo;
 
     @Column(name = "charge_time_enum", nullable = false)
-    private Integer chargeTime;
+    private Integer chargeTimeType;
 
     @Column(name = "charge_calculation_enum")
     private Integer chargeCalculation;
@@ -93,8 +93,8 @@ public class Charge extends AbstractPersistable<Long> {
 
         final ChargeAppliesTo chargeAppliesTo = ChargeAppliesTo.fromInt(command.integerValueOfParameterNamed("chargeAppliesTo"));
         final ChargeTimeType chargeTimeType = ChargeTimeType.fromInt(command.integerValueOfParameterNamed("chargeTimeType"));
-        final ChargeCalculationType chargeCalculationType = ChargeCalculationType
-                .fromInt(command.integerValueOfParameterNamed("chargeCalculationType"));
+        final ChargeCalculationType chargeCalculationType = ChargeCalculationType.fromInt(command
+                .integerValueOfParameterNamed("chargeCalculationType"));
         final Integer chargePaymentMode = command.integerValueOfParameterNamed("chargePaymentMode");
 
         final ChargePaymentMode paymentMode = chargePaymentMode == null ? null : ChargePaymentMode.fromInt(chargePaymentMode);
@@ -116,14 +116,14 @@ public class Charge extends AbstractPersistable<Long> {
     }
 
     private Charge(final String name, final BigDecimal amount, final String currencyCode, final ChargeAppliesTo chargeAppliesTo,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean penalty, final boolean active,
-            final ChargePaymentMode paymentMode, final MonthDay feeOnMonthDay, final Integer feeInterval, final BigDecimal minCap,
-            final BigDecimal maxCap, final Integer feeFrequency) {
+            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean penalty,
+            final boolean active, final ChargePaymentMode paymentMode, final MonthDay feeOnMonthDay, final Integer feeInterval,
+            final BigDecimal minCap, final BigDecimal maxCap, final Integer feeFrequency) {
         this.name = name;
         this.amount = amount;
         this.currencyCode = currencyCode;
         this.chargeAppliesTo = chargeAppliesTo.getValue();
-        this.chargeTime = chargeTime.getValue();
+        this.chargeTimeType = chargeTime.getValue();
         this.chargeCalculation = chargeCalculationType.getValue();
         this.penalty = penalty;
         this.active = active;
@@ -143,7 +143,7 @@ public class Charge extends AbstractPersistable<Long> {
             // TODO vishwas, this validation seems unnecessary as identical
             // validation is performed in the write service
             if (!isAllowedSavingsChargeTime()) {
-                baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTime)
+                baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTimeType)
                         .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.savings");
             }
             // TODO vishwas, this validation seems unnecessary as identical
@@ -153,7 +153,7 @@ public class Charge extends AbstractPersistable<Long> {
                         .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.calculation.type.for.savings");
             }
 
-            if (!ChargeTimeType.fromInt(getChargeTime()).isWithdrawalFee()
+            if (!ChargeTimeType.fromInt(getChargeTimeType()).isWithdrawalFee()
                     && ChargeCalculationType.fromInt(getChargeCalculation()).isPercentageOfAmount()) {
                 baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
                         .failWithCodeNoParameterAddedToErrorCode("savings.charge.calculation.type.percentage.allowed.only.for.withdrawal");
@@ -161,16 +161,17 @@ public class Charge extends AbstractPersistable<Long> {
 
         } else if (isLoanCharge()) {
 
-            if (penalty && chargeTime.isTimeOfDisbursement()) { throw new ChargeDueAtDisbursementCannotBePenaltyException(name); }
+            if (penalty && (chargeTime.isTimeOfDisbursement() || chargeTime.isTrancheDisbursement())) { throw new ChargeDueAtDisbursementCannotBePenaltyException(
+                    name); }
             if (!penalty && chargeTime.isOverdueInstallment()) { throw new ChargeMustBePenaltyException(name); }
             // TODO vishwas, this validation seems unnecessary as identical
             // validation is performed in the write service
             if (!isAllowedLoanChargeTime()) {
-                baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTime)
+                baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTimeType)
                         .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
             }
         }
-        if (isPercentageOfAmount()) {
+        if (isPercentageOfApprovedAmount()) {
             this.minCap = minCap;
             this.maxCap = maxCap;
         }
@@ -208,8 +209,8 @@ public class Charge extends AbstractPersistable<Long> {
         return this.currencyCode;
     }
 
-    public Integer getChargeTime() {
-        return this.chargeTime;
+    public Integer getChargeTimeType() {
+        return this.chargeTimeType;
     }
 
     public Integer getChargeCalculation() {
@@ -233,11 +234,11 @@ public class Charge extends AbstractPersistable<Long> {
     }
 
     public boolean isAllowedLoanChargeTime() {
-        return ChargeTimeType.fromInt(this.chargeTime).isAllowedLoanChargeTime();
+        return ChargeTimeType.fromInt(this.chargeTimeType).isAllowedLoanChargeTime();
     }
 
     public boolean isAllowedClientChargeTime() {
-        return ChargeTimeType.fromInt(this.chargeTime).isAllowedClientChargeTime();
+        return ChargeTimeType.fromInt(this.chargeTimeType).isAllowedClientChargeTime();
     }
 
     public boolean isSavingsCharge() {
@@ -249,7 +250,7 @@ public class Charge extends AbstractPersistable<Long> {
     }
 
     public boolean isAllowedSavingsChargeTime() {
-        return ChargeTimeType.fromInt(this.chargeTime).isAllowedSavingsChargeTime();
+        return ChargeTimeType.fromInt(this.chargeTimeType).isAllowedSavingsChargeTime();
     }
 
     public boolean isAllowedSavingsChargeCalculationType() {
@@ -260,8 +261,12 @@ public class Charge extends AbstractPersistable<Long> {
         return ChargeCalculationType.fromInt(this.chargeCalculation).isAllowedClientChargeCalculationType();
     }
 
-    public boolean isPercentageOfAmount() {
+    public boolean isPercentageOfApprovedAmount() {
         return ChargeCalculationType.fromInt(this.chargeCalculation).isPercentageOfAmount();
+    }
+
+    public boolean isPercentageOfDisbursementAmount() {
+        return ChargeCalculationType.fromInt(this.chargeCalculation).isPercentageOfDisbursementAmount();
     }
 
     public BigDecimal getMinCap() {
@@ -304,15 +309,15 @@ public class Charge extends AbstractPersistable<Long> {
         }
 
         final String chargeTimeParamName = "chargeTimeType";
-        if (command.isChangeInIntegerParameterNamed(chargeTimeParamName, this.chargeTime)) {
+        if (command.isChangeInIntegerParameterNamed(chargeTimeParamName, this.chargeTimeType)) {
             final Integer newValue = command.integerValueOfParameterNamed(chargeTimeParamName);
             actualChanges.put(chargeTimeParamName, newValue);
             actualChanges.put("locale", localeAsInput);
-            this.chargeTime = ChargeTimeType.fromInt(newValue).getValue();
+            this.chargeTimeType = ChargeTimeType.fromInt(newValue).getValue();
 
             if (isSavingsCharge()) {
                 if (!isAllowedSavingsChargeTime()) {
-                    baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTime)
+                    baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTimeType)
                             .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.savings");
                 }
                 // if charge time is changed to monthly then validate for
@@ -326,12 +331,12 @@ public class Charge extends AbstractPersistable<Long> {
                 }
             } else if (isLoanCharge()) {
                 if (!isAllowedLoanChargeTime()) {
-                    baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTime)
+                    baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTimeType)
                             .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
                 }
             } else if (isClientCharge()) {
                 if (!isAllowedLoanChargeTime()) {
-                    baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTime)
+                    baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTimeType)
                             .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.client");
                 }
             }
@@ -365,7 +370,7 @@ public class Charge extends AbstractPersistable<Long> {
                             .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.calculation.type.for.savings");
                 }
 
-                if (!ChargeTimeType.fromInt(getChargeTime()).isWithdrawalFee()
+                if (!ChargeTimeType.fromInt(getChargeTimeType()).isWithdrawalFee()
                         && ChargeCalculationType.fromInt(getChargeCalculation()).isPercentageOfAmount()) {
                     baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
                             .failWithCodeNoParameterAddedToErrorCode("charge.calculation.type.percentage.allowed.only.for.withdrawal");
@@ -440,7 +445,7 @@ public class Charge extends AbstractPersistable<Long> {
             this.active = newValue;
         }
         // allow min and max cap to be only added to PERCENT_OF_AMOUNT for now
-        if (isPercentageOfAmount()) {
+        if (isPercentageOfApprovedAmount()) {
             final String minCapParamName = "minCap";
             if (command.isChangeInBigDecimalParameterNamed(minCapParamName, this.minCap)) {
                 final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(minCapParamName);
@@ -455,11 +460,12 @@ public class Charge extends AbstractPersistable<Long> {
                 actualChanges.put("locale", localeAsInput);
                 this.maxCap = newValue;
             }
+
         }
 
-        if (this.penalty && ChargeTimeType.fromInt(this.chargeTime)
-                .isTimeOfDisbursement()) { throw new ChargeDueAtDisbursementCannotBePenaltyException(this.name); }
-        if (!penalty && ChargeTimeType.fromInt(this.chargeTime).isOverdueInstallment()) { throw new ChargeMustBePenaltyException(name); }
+        if (this.penalty && ChargeTimeType.fromInt(this.chargeTimeType).isTimeOfDisbursement()) { throw new ChargeDueAtDisbursementCannotBePenaltyException(
+                this.name); }
+        if (!penalty && ChargeTimeType.fromInt(this.chargeTimeType).isOverdueInstallment()) { throw new ChargeMustBePenaltyException(name); }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
 
@@ -479,7 +485,7 @@ public class Charge extends AbstractPersistable<Long> {
 
     public ChargeData toData() {
 
-        final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(this.chargeTime);
+        final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(this.chargeTimeType);
         final EnumOptionData chargeAppliesTo = ChargeEnumerations.chargeAppliesTo(this.chargeAppliesTo);
         final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(this.chargeCalculation);
         final EnumOptionData chargePaymentmode = ChargeEnumerations.chargePaymentMode(this.chargePaymentMode);
@@ -499,15 +505,15 @@ public class Charge extends AbstractPersistable<Long> {
     }
 
     public boolean isMonthlyFee() {
-        return ChargeTimeType.fromInt(this.chargeTime).isMonthlyFee();
+        return ChargeTimeType.fromInt(this.chargeTimeType).isMonthlyFee();
     }
 
     public boolean isAnnualFee() {
-        return ChargeTimeType.fromInt(this.chargeTime).isAnnualFee();
+        return ChargeTimeType.fromInt(this.chargeTimeType).isAnnualFee();
     }
 
     public boolean isOverdueInstallment() {
-        return ChargeTimeType.fromInt(this.chargeTime).isOverdueInstallment();
+        return ChargeTimeType.fromInt(this.chargeTimeType).isOverdueInstallment();
     }
 
     public MonthDay getFeeOnMonthDay() {
@@ -524,5 +530,10 @@ public class Charge extends AbstractPersistable<Long> {
 
     public Integer feeFrequency() {
         return this.feeFrequency;
+    }
+
+    public boolean isDisbursementCharge() {
+        return ChargeTimeType.fromInt(this.chargeTimeType).equals(ChargeTimeType.DISBURSEMENT)
+                || ChargeTimeType.fromInt(this.chargeTimeType).equals(ChargeTimeType.TRANCHE_DISBURSEMENT);
     }
 }
