@@ -39,6 +39,7 @@ import org.mifosplatform.organisation.teller.exception.CashierExistForTellerExce
 import org.mifosplatform.organisation.teller.exception.CashierNotFoundException;
 import org.mifosplatform.organisation.teller.exception.TellerNotFoundException;
 import org.mifosplatform.organisation.teller.serialization.TellerCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.client.domain.ClientTransaction;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -177,8 +178,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         Set<Cashier> isTellerIdPresentInCashier = teller.getCashiers();
 
         for (final Cashier tellerIdInCashier : isTellerIdPresentInCashier) {
-            if (tellerIdInCashier.getTeller().getId().toString().equalsIgnoreCase(tellerId.toString())) { throw new CashierExistForTellerException(
-                    tellerId); }
+            if (tellerIdInCashier.getTeller().getId().toString()
+                    .equalsIgnoreCase(tellerId.toString())) { throw new CashierExistForTellerException(tellerId); }
 
         }
         tellerRepository.delete(teller);
@@ -407,6 +408,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
             final Long time = System.currentTimeMillis();
             final String uniqueVal = String.valueOf(time) + currentUser.getId() + cashierOffice.getId();
             final String transactionId = Long.toHexString(Long.parseLong(uniqueVal));
+            ClientTransaction clientTransaction = null;
 
             final JournalEntry debitJournalEntry = JournalEntry.createNew(cashierOffice, null, // payment
                                                                                                // detail
@@ -415,7 +417,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                     transactionId, false, // manual entry
                     cashierTxn.getTxnDate(), JournalEntryType.DEBIT, cashierTxn.getTxnAmount(), cashierTxn.getTxnNote(), // Description
                     null, null, null, // entity Type, entityId, reference number
-                    null, null); // Loan and Savings Txn
+                    null, null, clientTransaction); // Loan and Savings Txn
+
             final JournalEntry creditJournalEntry = JournalEntry.createNew(cashierOffice, null, // payment
                                                                                                 // detail
                     creditAccount, "USD", // FIXME: Take currency code from the
@@ -423,7 +426,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                     transactionId, false, // manual entry
                     cashierTxn.getTxnDate(), JournalEntryType.CREDIT, cashierTxn.getTxnAmount(), cashierTxn.getTxnNote(), // Description
                     null, null, null, // entity Type, entityId, reference number
-                    null, null); // Loan and Savings Txn
+                    null, null, clientTransaction); // Loan and Savings Txn
 
             this.glJournalEntryRepository.saveAndFlush(debitJournalEntry);
             this.glJournalEntryRepository.saveAndFlush(creditJournalEntry);

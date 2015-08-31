@@ -15,6 +15,7 @@ import java.util.Map;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.mifosplatform.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
@@ -58,6 +59,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
     private final ClientChargeRepositoryWrapper clientChargeRepository;
     private final ClientTransactionRepository clientTransactionRepository;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
+    private final JournalEntryWritePlatformService journalEntryWritePlatformService;
 
     @Autowired
     public ClientChargeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -65,7 +67,8 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
             final ClientRepositoryWrapper clientRepository, final HolidayRepositoryWrapper holidayRepositoryWrapper,
             final ConfigurationDomainService configurationDomainService, final ClientChargeRepositoryWrapper clientChargeRepository,
             final WorkingDaysRepositoryWrapper workingDaysRepository, final ClientTransactionRepository clientTransactionRepository,
-            final PaymentDetailWritePlatformService paymentDetailWritePlatformService) {
+            final PaymentDetailWritePlatformService paymentDetailWritePlatformService,
+            final JournalEntryWritePlatformService journalEntryWritePlatformService) {
         this.context = context;
         this.chargeRepository = chargeRepository;
         this.clientChargeDataValidator = clientChargeDataValidator;
@@ -76,6 +79,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
         this.workingDaysRepository = workingDaysRepository;
         this.clientTransactionRepository = clientTransactionRepository;
         this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
+        this.journalEntryWritePlatformService = journalEntryWritePlatformService;
     }
 
     @Override
@@ -134,11 +138,14 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
 
         ClientTransaction clientTransaction = ClientTransaction.payCharge(client, client.getOffice(), paymentDetail, transactionDate,
                 chargePaid, clientCharge.getCurrency().getCode(), getAppUserIfPresent());
-        this.clientTransactionRepository.save(clientTransaction);
+        this.clientTransactionRepository.saveAndFlush(clientTransaction);
 
         // update charge paid by associations
         final ClientChargePaidBy chargePaidBy = ClientChargePaidBy.instance(clientTransaction, clientCharge, amountPaid);
         clientTransaction.getClientChargePaidByCollection().add(chargePaidBy);
+
+        // generate accounting entries
+        generateAccountingEntries(clientTransaction);
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(clientCharge.getId()) //
@@ -146,6 +153,11 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
                 .withClientId(clientCharge.getClient().getId()) //
                 .build();
 
+    }
+
+    private void generateAccountingEntries(ClientTransaction clientTransaction) {
+        Map<String, Object> accountingBridgeData = clientTransaction.toMapData();
+        journalEntryWritePlatformService.createJournalEntriesForClientTransactions(accountingBridgeData);
     }
 
     @Override
@@ -294,7 +306,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
      */
     @Override
     public CommandProcessingResult updateCharge(Long clientId, JsonCommand command) {
-        this.clientChargeDataValidator.validateAdd(command.json());
+        // this.clientChargeDataValidator.validateAdd(command.json());
         return null;
     }
 

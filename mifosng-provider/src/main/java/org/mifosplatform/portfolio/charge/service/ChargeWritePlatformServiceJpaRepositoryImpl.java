@@ -10,6 +10,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.mifosplatform.accounting.glaccount.domain.GLAccount;
+import org.mifosplatform.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -19,6 +21,7 @@ import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityAccessTyp
 import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityType;
 import org.mifosplatform.infrastructure.entityaccess.service.MifosEntityAccessUtil;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.charge.api.ChargesApiConstants;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepository;
 import org.mifosplatform.portfolio.charge.exception.ChargeCannotBeDeletedException;
@@ -47,20 +50,21 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
     private final ChargeRepository chargeRepository;
     private final LoanProductRepository loanProductRepository;
     private final MifosEntityAccessUtil mifosEntityAccessUtil;
+    private final GLAccountRepositoryWrapper gLAccountRepository;
 
     @Autowired
     public ChargeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-    		final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final ChargeRepository chargeRepository, final LoanProductRepository loanProductRepository, final RoutingDataSource dataSource,
-            final MifosEntityAccessUtil mifosEntityAccessUtil
-            ) {
-    	this.context = context;
+            final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer, final ChargeRepository chargeRepository,
+            final LoanProductRepository loanProductRepository, final RoutingDataSource dataSource,
+            final MifosEntityAccessUtil mifosEntityAccessUtil, final GLAccountRepositoryWrapper glAccountRepository) {
+        this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.dataSource = dataSource;
         this.jdbcTemplate = new JdbcTemplate(this.dataSource);
         this.chargeRepository = chargeRepository;
         this.loanProductRepository = loanProductRepository;
         this.mifosEntityAccessUtil = mifosEntityAccessUtil;
+        this.gLAccountRepository = glAccountRepository;
     }
 
     @Transactional
@@ -68,18 +72,25 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
     @CacheEvict(value = "charges", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('ch')")
     public CommandProcessingResult createCharge(final JsonCommand command) {
         try {
-        	this.context.authenticatedUser();
+            this.context.authenticatedUser();
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
-            final Charge charge = Charge.fromJson(command);
+            // Retrieve linked GLAccount for Client charges (if present)
+            final Long glAccountId = command.longValueOfParameterNamed(ChargesApiConstants.glAccountIdParamName);
+
+            GLAccount glAccount = null;
+            if (glAccountId != null) {
+                glAccount = this.gLAccountRepository.findOneWithNotFoundDetection(glAccountId);
+            }
+
+            final Charge charge = Charge.fromJson(command, glAccount);
             this.chargeRepository.save(charge);
 
-            // check if the office specific products are enabled. If yes, then save this savings product against a specific office
+            // check if the office specific products are enabled. If yes, then
+            // save this savings product against a specific office
             // i.e. this savings product is specific for this office.
-            mifosEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
-            		MifosEntityAccessType.OFFICE_ACCESS_TO_CHARGES, 
-            		MifosEntityType.CHARGE, 
-            		charge.getId());
+            mifosEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(MifosEntityAccessType.OFFICE_ACCESS_TO_CHARGES,
+                    MifosEntityType.CHARGE, charge.getId());
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(charge.getId()).build();
         } catch (final DataIntegrityViolationException dve) {
@@ -114,10 +125,21 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
                     if (isChargeExistWithLoans || isChargeExistWithSavings) { throw new ChargeCannotBeUpdatedException(
                             "error.msg.charge.cannot.be.updated.it.is.used.in.loan", "This charge cannot be updated, it is used in loan"); }
                 }
-            }else if((changes.containsKey("feeFrequency") || changes.containsKey("feeInterval")) && chargeForUpdate.isLoanCharge()){
+            } else if ((changes.containsKey("feeFrequency") || changes.containsKey("feeInterval")) && chargeForUpdate.isLoanCharge()) {
                 final Boolean isChargeExistWithLoans = isAnyLoanProductsAssociateWithThisCharge(chargeId);
                 if (isChargeExistWithLoans) { throw new ChargeCannotBeUpdatedException(
-                        "error.msg.charge.frequency.cannot.be.updated.it.is.used.in.loan", "This charge frequency cannot be updated, it is used in loan"); }
+                        "error.msg.charge.frequency.cannot.be.updated.it.is.used.in.loan",
+                        "This charge frequency cannot be updated, it is used in loan"); }
+            }
+
+            // Has account Id been changed ?
+            if (changes.containsKey(ChargesApiConstants.glAccountIdParamName)) {
+                final Long newValue = command.longValueOfParameterNamed(ChargesApiConstants.glAccountIdParamName);
+                GLAccount newIncomeAccount = null;
+                if (newValue != null) {
+                    newIncomeAccount = this.gLAccountRepository.findOneWithNotFoundDetection(newValue);
+                }
+                chargeForUpdate.setAccount(newIncomeAccount);
             }
 
             if (!changes.isEmpty()) {
@@ -144,9 +166,10 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         final Boolean isChargeExistWithSavings = isAnySavingsAssociateWithThisCharge(chargeId);
 
         // TODO: Change error messages around:
-        if (!loanProducts.isEmpty() || isChargeExistWithLoans || isChargeExistWithSavings) { throw new ChargeCannotBeDeletedException(
-                "error.msg.charge.cannot.be.deleted.it.is.already.used.in.loan",
-                "This charge cannot be deleted, it is already used in loan"); }
+        if (!loanProducts.isEmpty() || isChargeExistWithLoans
+                || isChargeExistWithSavings) { throw new ChargeCannotBeDeletedException(
+                        "error.msg.charge.cannot.be.deleted.it.is.already.used.in.loan",
+                        "This charge cannot be deleted, it is already used in loan"); }
 
         chargeForDelete.delete();
 

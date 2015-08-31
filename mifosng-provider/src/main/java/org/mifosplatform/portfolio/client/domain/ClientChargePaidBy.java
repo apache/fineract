@@ -59,6 +59,11 @@ public class ClientChargePaidBy extends AbstractPersistable<Long> {
 
     public void setClientCharge(ClientCharge clientCharge) {
         this.clientCharge = clientCharge;
+
+    }
+
+    public BigDecimal getAmount() {
+        return this.amount;
     }
 
 }

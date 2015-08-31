@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum PortfolioProductType {
-    LOAN(1, "productType.loan"), SAVING(2, "productType.saving");
+    LOAN(1, "productType.loan"), SAVING(2, "productType.saving"), CLIENT(2, "productType.client");
 
     private final Integer value;
     private final String code;
@@ -33,6 +33,7 @@ public enum PortfolioProductType {
     }
 
     private static final Map<Integer, PortfolioProductType> intToEnumMap = new HashMap<>();
+
     static {
         for (final PortfolioProductType type : PortfolioProductType.values()) {
             intToEnumMap.put(type.value, type);
@@ -50,6 +51,10 @@ public enum PortfolioProductType {
 
     public boolean isLoanProduct() {
         return this.value.equals(PortfolioProductType.LOAN.getValue());
+    }
+
+    public boolean isClient() {
+        return this.value.equals(PortfolioProductType.CLIENT.getValue());
     }
 
 }

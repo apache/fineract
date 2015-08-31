@@ -23,6 +23,7 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.portfolio.charge.api.ChargesApiConstants;
 import org.mifosplatform.portfolio.charge.domain.ChargeAppliesTo;
 import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
 import org.mifosplatform.portfolio.charge.domain.ChargePaymentMode;
@@ -39,9 +40,10 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("name", "amount", "locale", "currencyCode",
-            "currencyOptions", "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions", "penalty",
-            "active", "chargePaymentMode", "feeOnMonthDay", "feeInterval", "monthDayFormat", "minCap", "maxCap", "feeFrequency"));
+    private final Set<String> supportedParameters = new HashSet<>(
+            Arrays.asList("name", "amount", "locale", "currencyCode", "currencyOptions", "chargeAppliesTo", "chargeTimeType",
+                    "chargeCalculationType", "chargeCalculationTypeOptions", "penalty", "active", "chargePaymentMode", "feeOnMonthDay",
+                    "feeInterval", "monthDayFormat", "minCap", "maxCap", "feeFrequency", ChargesApiConstants.glAccountIdParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -145,13 +147,18 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                         .isOneOfTheseValues(ChargeTimeType.validClientValues());
             }
 
-            // final ChargeTimeType ctt =
-            // ChargeTimeType.fromInt(chargeTimeType);
-
             if (chargeCalculationType != null) {
                 baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
-                        .isOneOfTheseValues(ChargeCalculationType.validValuesForSavings());
+                        .isOneOfTheseValues(ChargeCalculationType.validValuesForClients());
             }
+
+            // GL Account can be linked to clients
+            if (this.fromApiJsonHelper.parameterExists(ChargesApiConstants.glAccountIdParamName, element)) {
+                final Long glAccountId = this.fromApiJsonHelper.extractLongNamed(ChargesApiConstants.glAccountIdParamName, element);
+                baseDataValidator.reset().parameter(ChargesApiConstants.glAccountIdParamName).value(glAccountId).notNull()
+                        .longGreaterThanZero();
+            }
+
         }
 
         final String name = this.fromApiJsonHelper.extractStringNamed("name", element);
@@ -284,6 +291,12 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         if (this.fromApiJsonHelper.parameterExists("feeFrequency", element)) {
             final Integer feeFrequency = this.fromApiJsonHelper.extractIntegerNamed("feeFrequency", element, Locale.getDefault());
             baseDataValidator.reset().parameter("feeFrequency").value(feeFrequency).inMinMaxRange(0, 3);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(ChargesApiConstants.glAccountIdParamName, element)) {
+            final Long glAccountId = this.fromApiJsonHelper.extractLongNamed(ChargesApiConstants.glAccountIdParamName, element);
+            baseDataValidator.reset().parameter(ChargesApiConstants.glAccountIdParamName).value(glAccountId).notNull()
+                    .longGreaterThanZero();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
