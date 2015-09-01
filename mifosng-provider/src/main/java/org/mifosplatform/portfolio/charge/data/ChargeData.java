@@ -140,7 +140,6 @@ public class ChargeData implements Comparable<ChargeData>, Serializable {
         final List<EnumOptionData> feeFrequencyOptions = null;
         final GLAccountData account = null;
         final Map<String, List<GLAccountData>> incomeOrLiabilityAccountOptions = null;
-
         return new ChargeData(id, name, amount, currency, chargeTimeType, chargeAppliesTo, chargeCalculationType, chargePaymentMode,
                 penalty, active, currencyOptions, chargeCalculationTypeOptions, chargeAppliesToOptions, chargeTimeTypeOptions,
                 chargePaymentModeOptions, loansChargeCalculationTypeOptions, loansChargeTimeTypeOptions,

@@ -203,6 +203,11 @@ public class LoanTransactionHelper {
         return (Integer) response.get("resourceId");
     }
 
+    public Object addChargesForAllreadyDisursedLoan(final Integer loanId, final String request, final ResponseSpecification responseSpecification) {
+        final String ADD_CHARGES_URL = "/mifosng-provider/api/v1/loans/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(this.requestSpec, responseSpecification, ADD_CHARGES_URL, request, "");
+    }
+    
     public Integer updateChargesForLoan(final Integer loanId, final Integer loanchargeId, final String request) {
         System.out.println("--------------------------------- ADD CHARGES FOR LOAN --------------------------------");
         final String UPDATE_CHARGES_URL = "/mifosng-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId + "?"

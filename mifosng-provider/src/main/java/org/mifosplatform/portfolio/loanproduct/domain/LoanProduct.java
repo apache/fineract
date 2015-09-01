@@ -19,6 +19,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -83,7 +84,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @Column(name = "description")
     private String description;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "m_product_loan_charge", joinColumns = @JoinColumn(name = "product_loan_id"), inverseJoinColumns = @JoinColumn(name = "charge_id"))
     private List<Charge> charges;
 
@@ -601,6 +602,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     public Integer getAccountingType() {
         return this.accountingRule;
+    }
+    
+    public List<Charge> getLoanProductCharges(){
+    	return this.charges;
     }
 
     public void update(final LoanProductConfigurableAttributes loanConfigurableAttributes) {

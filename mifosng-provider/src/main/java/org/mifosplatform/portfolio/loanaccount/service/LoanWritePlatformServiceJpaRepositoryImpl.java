@@ -76,6 +76,7 @@ import org.mifosplatform.portfolio.calendar.exception.CalendarParameterUpdateNot
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargePaymentMode;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.mifosplatform.portfolio.charge.exception.ChargeCannotBeUpdatedException;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeAddedException;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeDeletedException;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeDeletedException.LOAN_CHARGE_CANNOT_BE_DELETED_REASON;
@@ -120,6 +121,7 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInsta
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTrancheDisbursementCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
@@ -1301,6 +1303,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .build();
     }
 
+    private void validateAddingNewChargeAllowed(Set<LoanDisbursementDetails> loanDisburseDetails) {
+        boolean pendingDisbursementAvailable = false;
+        for (LoanDisbursementDetails disbursementDetail : loanDisburseDetails) {
+            if (disbursementDetail.actualDisbursementDate() == null) {
+                pendingDisbursementAvailable = true ;
+                break ;
+            }
+        }
+        if(!pendingDisbursementAvailable) {
+            throw new ChargeCannotBeUpdatedException(
+                    "error.msg.charge.cannot.be.updated.no.pending.disbursements.in.loan", "This charge cannot be added, No disbursement is pending"); 
+        }
+    }
+    
     @Transactional
     @Override
     public CommandProcessingResult addLoanCharge(final Long loanId, final JsonCommand command) {
@@ -1310,19 +1326,42 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
 
+        Set<LoanDisbursementDetails> loanDisburseDetails = loan.getDisbursementDetails();
         final Long chargeDefinitionId = command.longValueOfParameterNamed("chargeId");
         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeDefinitionId);
 
-        final LoanCharge loanCharge = LoanCharge.createNewFromJson(loan, chargeDefinition, command);
-        this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.LOAN_ADD_CHARGE,
-                constructEntityMap(BUSINESS_ENTITY.LOAN_CHARGE, loanCharge));
-
-        validateAddLoanCharge(loan, chargeDefinition, loanCharge);
-
+        if(loan.isDisbursed() && chargeDefinition.isDisbursementCharge()) {
+            validateAddingNewChargeAllowed(loanDisburseDetails) ; //validates whether any pending disbursements are available to apply this charge    
+        }
         final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
         final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
+        
+        boolean isAppliedOnBackDate = false;
+        LoanCharge loanCharge = null;
+        if (chargeDefinition.isPercentageOfDisbursementAmount()) {
+            LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = null;
+            for (LoanDisbursementDetails disbursementDetail : loanDisburseDetails) {
+                if (disbursementDetail.actualDisbursementDate() == null) {
+                    loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition, disbursementDetail.principal(), null, null, null,
+                            disbursementDetail.expectedDisbursementDateAsLocalDate(), null, null);
+                    loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge, disbursementDetail);
+                    loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
+                    this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.LOAN_ADD_CHARGE,
+                            constructEntityMap(BUSINESS_ENTITY.LOAN_CHARGE, loanCharge));
+                    validateAddLoanCharge(loan, chargeDefinition, loanCharge);
+                    isAppliedOnBackDate = addCharge(loan, chargeDefinition, loanCharge);
+                }
+            }
+            loan.addTrancheLoanCharge(chargeDefinition);
+        } else {
+            loanCharge = LoanCharge.createNewFromJson(loan, chargeDefinition, command);
+            this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.LOAN_ADD_CHARGE,
+                    constructEntityMap(BUSINESS_ENTITY.LOAN_CHARGE, loanCharge));
 
-        boolean isAppliedOnBackDate = addCharge(loan, chargeDefinition, loanCharge);
+            validateAddLoanCharge(loan, chargeDefinition, loanCharge);
+            isAppliedOnBackDate = addCharge(loan, chargeDefinition, loanCharge);
+        }
+
         boolean reprocessRequired = true;
         if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
             if (isAppliedOnBackDate && loan.isFeeCompoundingEnabledForInterestRecalculation()) {
@@ -1331,7 +1370,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
             updateOriginalSchedule(loan);
         }
-
         if (reprocessRequired) {
             ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactions();
             if (changedTransactionDetail != null) {
@@ -1480,9 +1518,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
         }
 
-        this.loanChargeRepository.save(loanCharge);
-
         loan.addLoanCharge(loanCharge);
+
+        this.loanChargeRepository.save(loanCharge);
 
         /**
          * we want to apply charge transactions only for those loans charges
@@ -2349,7 +2387,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
     }
 
-
     @Override
     @Transactional
     public void applyOverdueChargesForLoan(final Long loanId, Collection<OverdueLoanScheduleData> overdueLoanScheduleDatas) {
@@ -2652,10 +2689,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             changedTransactionDetail = loan.updateDisbursementDateAndAmountForTranche(loanDisbursementDetails, command,
                     existingTransactionIds, existingReversedTransactionIds, changes, scheduleGeneratorDTO, currentUser);
         } else {
+            // BigDecimal setAmount = loan.getApprovedPrincipal();
             Collection<LoanDisbursementDetails> loanDisburseDetails = loan.getDisbursementDetails();
             BigDecimal setAmount = BigDecimal.ZERO;
             for (LoanDisbursementDetails details : loanDisburseDetails) {
-                if (details.actualDisbursementDate() != null) {
+                if (details.expectedDisbursementDate() != null) {
                     setAmount = setAmount.add(details.principal());
                 }
             }
@@ -2666,6 +2704,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 loan.regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO, currentUser);
             } else {
                 loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
+                loan.processPostDisbursementTransactions() ;
             }
         }
 

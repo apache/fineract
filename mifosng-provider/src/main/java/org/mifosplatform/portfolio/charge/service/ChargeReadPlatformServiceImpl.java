@@ -8,8 +8,8 @@ package org.mifosplatform.portfolio.charge.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +34,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -49,6 +50,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     private final DropdownReadPlatformService dropdownReadPlatformService;
     private final MifosEntityAccessUtil mifosEntityAccessUtil;
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Autowired
     public ChargeReadPlatformServiceImpl(final CurrencyReadPlatformService currencyReadPlatformService,
@@ -61,6 +63,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         this.dropdownReadPlatformService = dropdownReadPlatformService;
         this.mifosEntityAccessUtil = mifosEntityAccessUtil;
         this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
+        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
     @Override
@@ -172,14 +175,15 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     public Collection<ChargeData> retrieveLoanAccountApplicableCharges(final Long loanId, ChargeTimeType[] excludeChargeTimes) {
         final ChargeMapper rm = new ChargeMapper();
         StringBuilder excludeClause = new StringBuilder("");
-        Object[] params = new Object[] { loanId, ChargeAppliesTo.LOAN.getValue() };
-        params = processChargeExclusionsForLoans(excludeChargeTimes, excludeClause, params);
-        String sql = "select " + rm.chargeSchema() + " join m_loan la on la.currency_code = c.currency_code" + " where la.id=?"
-                + " and c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=?" + excludeClause + " ";
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("loanId", loanId);
+        paramMap.put("chargeAppliesTo", ChargeAppliesTo.LOAN.getValue());
+        processChargeExclusionsForLoans(excludeChargeTimes, excludeClause);
+        String sql = "select " + rm.chargeSchema() + " join m_loan la on la.currency_code = c.currency_code" + " where la.id=:loanId"
+                + " and c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=:chargeAppliesTo" + excludeClause + " ";
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
         sql += " order by c.name ";
-
-        return this.jdbcTemplate.query(sql, rm, params);
+        return this.namedParameterJdbcTemplate.query(sql, paramMap, rm);
     }
 
     /**
@@ -188,9 +192,8 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
      * @param params
      * @return
      */
-    private Object[] processChargeExclusionsForLoans(ChargeTimeType[] excludeChargeTimes, StringBuilder excludeClause, Object[] params) {
+    private void processChargeExclusionsForLoans(ChargeTimeType[] excludeChargeTimes, StringBuilder excludeClause) {
         if (excludeChargeTimes != null && excludeChargeTimes.length > 0) {
-            excludeClause = excludeClause.append(" and c.charge_time_enum not in(?) ");
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < excludeChargeTimes.length; i++) {
                 if (i != 0) {
@@ -198,24 +201,25 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 }
                 sb.append(excludeChargeTimes[i].getValue());
             }
-            params = Arrays.copyOf(params, params.length + 1);
-            params[params.length - 1] = sb.toString();
+            excludeClause = excludeClause.append(" and c.charge_time_enum not in(" + sb.toString() + ") ");
         }
-        return params;
     }
 
     @Override
     public Collection<ChargeData> retrieveLoanProductApplicableCharges(final Long loanProductId, ChargeTimeType[] excludeChargeTimes) {
         final ChargeMapper rm = new ChargeMapper();
         StringBuilder excludeClause = new StringBuilder("");
-        Object[] params = new Object[] { loanProductId, ChargeAppliesTo.LOAN.getValue() };
-        params = processChargeExclusionsForLoans(excludeChargeTimes, excludeClause, params);
-        String sql = "select " + rm.chargeSchema() + " join m_product_loan lp on lp.currency_code = c.currency_code" + " where lp.id=?"
-                + " and c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=?" + excludeClause + " ";
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("productId", loanProductId);
+        paramMap.put("chargeAppliesTo", ChargeAppliesTo.LOAN.getValue());
+        processChargeExclusionsForLoans(excludeChargeTimes, excludeClause);
+        String sql = "select " + rm.chargeSchema() + " join m_product_loan lp on lp.currency_code = c.currency_code"
+                + " where lp.id=:productId" + " and c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=:chargeAppliesTo"
+                + excludeClause + " ";
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
         sql += " order by c.name ";
 
-        return this.jdbcTemplate.query(sql, rm, params);
+        return this.namedParameterJdbcTemplate.query(sql, paramMap, rm);
     }
 
     @Override

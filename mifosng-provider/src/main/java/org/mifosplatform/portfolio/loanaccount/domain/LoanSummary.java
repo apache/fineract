@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -192,7 +193,7 @@ public final class LoanSummary {
 
     public void updateSummary(final MonetaryCurrency currency, final Money principal,
             final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, final LoanSummaryWrapper summaryWrapper,
-            final Boolean disbursed) {
+            final Boolean disbursed, Set<LoanCharge> charges) {
 
         this.totalPrincipalDisbursed = principal.getAmount();
         this.totalPrincipalRepaid = summaryWrapper.calculateTotalPrincipalRepaid(repaymentScheduleInstallments, currency).getAmount();
@@ -214,13 +215,15 @@ public final class LoanSummary {
                 this.totalFeeChargesDueAtDisbursement);
         this.totalFeeChargesCharged = totalFeeChargesCharged.getAmount();
 
-        Money totalFeeChargesRepaid = summaryWrapper.calculateTotalFeeChargesRepaid(repaymentScheduleInstallments, currency);
-        if (disbursed) {
-            totalFeeChargesRepaid = totalFeeChargesRepaid.plus(this.totalFeeChargesDueAtDisbursement);
+        Money totalFeeChargesRepaidAtDisbursement = summaryWrapper.calculateTotalChargesRepaidAtDisbursement(charges,currency);
+        this.totalFeeChargesRepaid = totalFeeChargesRepaidAtDisbursement.getAmount();
+        
+        if(charges != null) {
+            this.totalFeeChargesWaived = summaryWrapper.calculateTotalFeeChargesWaived(charges, currency).getAmount();    
+        }else {
+            this.totalFeeChargesWaived = BigDecimal.ZERO;
         }
-        this.totalFeeChargesRepaid = totalFeeChargesRepaid.getAmount();
-
-        this.totalFeeChargesWaived = summaryWrapper.calculateTotalFeeChargesWaived(repaymentScheduleInstallments, currency).getAmount();
+        
         this.totalFeeChargesWrittenOff = summaryWrapper.calculateTotalFeeChargesWrittenOff(repaymentScheduleInstallments, currency)
                 .getAmount();
 
