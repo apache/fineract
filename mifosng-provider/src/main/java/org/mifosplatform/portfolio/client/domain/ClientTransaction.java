@@ -143,6 +143,7 @@ public class ClientTransaction extends AbstractPersistable<Long> {
         Boolean accountingEnabledForAtleastOneCharge = false;
 
         thisTransactionData.put("id", getId());
+        thisTransactionData.put("clientId", getClientId());
         thisTransactionData.put("officeId", this.office.getId());
         thisTransactionData.put("type", transactionType);
         thisTransactionData.put("reversed", Boolean.valueOf(this.reversed));
