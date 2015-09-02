@@ -222,7 +222,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     .append("LEFT JOIN m_staff sf ON sf.id = gp.staff_id ")
                     .append("JOIN m_group_client gc ON gc.group_id = gp.id ")
                     .append("JOIN m_client cl ON cl.id = gc.client_id ")
-                    .append("LEFT JOIN m_loan ln ON cl.id = ln.client_id  and ln.group_id=gp.id AND ln.group_id is not null AND ( ln.loan_status_id = 300 OR ( ln.loan_status_id =200 AND ln.expected_disbursedon_date <= :dueDate )) ")
+                    .append("LEFT JOIN m_loan ln ON cl.id = ln.client_id  and ln.group_id=gp.id AND ln.group_id is not null AND ( ln.loan_status_id = 300 ) ")
                     .append("LEFT JOIN m_product_loan pl ON pl.id = ln.product_id ")
                     .append("LEFT JOIN m_currency rc on rc.`code` = ln.currency_code ")
                     .append("LEFT JOIN m_loan_repayment_schedule ls ON ls.loan_id = ln.id AND ls.completed_derived = 0 AND ls.duedate <= :dueDate ")
@@ -235,7 +235,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             } else {
                 sql.append("WHERE gp.id = :groupId ");
             }
-
+            sql.append("and (ln.loan_status_id != 200 AND ln.loan_status_id != 100) ");
+            
             sql.append("and (gp.status_enum = 300 or (gp.status_enum = 600 and gp.closedon_date >= :dueDate)) ")
                     .append("and (cl.status_enum = 300 or (cl.status_enum = 600 and cl.closedon_date >= :dueDate)) ")
                     .append("GROUP BY gp.id ,cl.id , ln.id ORDER BY gp.id , cl.id , ln.id ").append(") loandata ")
