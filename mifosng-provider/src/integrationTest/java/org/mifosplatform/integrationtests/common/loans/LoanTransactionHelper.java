@@ -538,4 +538,64 @@ public class LoanTransactionHelper {
         map.put("locale", "en");
         return new Gson().toJson(map);
     }
+    
+    public HashMap createTrancheDetail(final String id, final String date, final String amount) {
+        HashMap<String, Object> detail = new HashMap<>();
+        if(id != null){
+            detail.put("id", id);
+        }
+        detail.put("expectedDisbursementDate", date);
+        detail.put("principal", amount);
+
+        return detail;
+    }
+    
+    public Object editDisbursementDetail(final Integer loanID, final Integer disbursementId, final String approvalAmount, final String expectedDisbursementDate, 
+    		final String updatedExpectedDisbursementDate, final String updatedPrincipal, final String jsonAttributeToGetBack) {
+    	
+    	return Utils.performServerPut(this.requestSpec, this.responseSpec, createEditDisbursementURL(loanID, disbursementId), getEditDisbursementsAsJSON(approvalAmount, expectedDisbursementDate, 
+    			updatedExpectedDisbursementDate, updatedPrincipal), jsonAttributeToGetBack);
+    }
+    
+    public Object addAndDeleteDisbursementDetail(final Integer loanID, final String approvalAmount, final String expectedDisbursementDate
+    		, List<HashMap> disbursementData, final String jsonAttributeToGetBack) {
+    	
+    	return Utils.performServerPut(this.requestSpec, this.responseSpec, createAddAndDeleteDisbursementURL(loanID), 
+    			getAddAndDeleteDisbursementsAsJSON(approvalAmount, expectedDisbursementDate, disbursementData), jsonAttributeToGetBack);
+    }
+    
+    private String createEditDisbursementURL(Integer loanID, Integer disbursementId) {
+        return "/mifosng-provider/api/v1/loans/" + loanID + "/disbursements/" + disbursementId + "?" + Utils.TENANT_IDENTIFIER;
+    }
+    
+    private String createAddAndDeleteDisbursementURL(Integer loanID) {
+        return "/mifosng-provider/api/v1/loans/" + loanID + "/disbursements/editDisbursements?" +  Utils.TENANT_IDENTIFIER;
+    }
+    
+    public static String getEditDisbursementsAsJSON(final String approvalAmount, final String expectedDisbursementDate, 
+    		final String updatedExpectedDisbursementDate, final String updatedPrincipal) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", "en");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("approvedLoanAmount", approvalAmount);
+        map.put("expectedDisbursementDate", expectedDisbursementDate);
+        map.put("updatedExpectedDisbursementDate", updatedExpectedDisbursementDate);
+        map.put("updatedPrincipal", updatedPrincipal);
+        String json = new Gson().toJson(map);
+        System.out.println(json);
+        return json;
+    }
+    
+    public static String getAddAndDeleteDisbursementsAsJSON(final String approvalAmount, final String expectedDisbursementDate, 
+    		final List<HashMap> disbursementData) {
+        final HashMap map = new HashMap<>();
+        map.put("locale", "en");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("approvedLoanAmount", approvalAmount);
+        map.put("expectedDisbursementDate", expectedDisbursementDate);
+        map.put("disbursementData", disbursementData);
+        String json = new Gson().toJson(map);
+        System.out.println(json);
+        return json;
+    }
 }

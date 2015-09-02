@@ -44,8 +44,10 @@ public class LoanApplicationTestBuilder {
     private String maxOutstandingLoanBalance = "36000";
     private String graceOnPrincipalPayment = null;
     private String graceOnInterestPayment = null;
+    @SuppressWarnings("rawtypes")
     private List<HashMap> disbursementData = null;
-    private List<HashMap> charges = new ArrayList<HashMap>();
+    @SuppressWarnings("rawtypes")
+    private List<HashMap> charges = new ArrayList<>();
     private String recalculationRestFrequencyDate = null;
     private String recalculationCompoundingFrequencyDate = null;
     private String repaymentsStartingFromDate = null;
@@ -308,4 +310,8 @@ public class LoanApplicationTestBuilder {
         return this;
     }
 
+    public LoanApplicationTestBuilder withFixedEmiAmount(final String installmentAmount) {
+        this.fixedEmiAmount = installmentAmount;
+        return this;
+    }
 }
