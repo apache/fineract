@@ -888,6 +888,7 @@ public final class Client extends AbstractPersistable<Long> {
 
     public void reActivate(AppUser currentUser, Date reactivateDate) {
         this.closureDate = null;
+        this.closureReason = null;
         this.reactivateDate = reactivateDate;
         this.reactivatedBy = currentUser;
         this.updatedBy = currentUser;
