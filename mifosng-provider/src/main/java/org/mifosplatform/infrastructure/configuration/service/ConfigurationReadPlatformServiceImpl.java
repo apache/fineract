@@ -59,7 +59,7 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
         this.context.authenticatedUser();
 
         final String sql = "SELECT c.id, c.name, c.enabled, c.value, c.description, c.is_trap_door FROM "
-                + "c_configuration c where c.id=? and c.is_trap_door = 0 order by c.id";
+                + "c_configuration c where c.id=? order by c.id";
         final GlobalConfigurationPropertyData globalConfiguration = this.jdbcTemplate.queryForObject(sql, this.rm,
                 new Object[] { configId });
 
