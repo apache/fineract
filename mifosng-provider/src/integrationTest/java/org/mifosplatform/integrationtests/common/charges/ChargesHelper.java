@@ -23,6 +23,7 @@ public class ChargesHelper {
 
     private static final Integer CHARGE_APPLIES_TO_LOAN = 1;
     private static final Integer CHARGE_APPLIES_TO_SAVINGS = 2;
+    private static final Integer CHARGE_APPLIES_TO_CLIENT = 3;
 
     private static final Integer CHARGE_DISBURSEMENT_FEE = 1;
     private static final Integer CHARGE_SPECIFIED_DUE_DATE = 2;
@@ -34,6 +35,8 @@ public class ChargesHelper {
     private static final Integer CHARGE_OVERDUE_INSTALLMENT_FEE = 9;
     private static final Integer CHARGE_OVERDRAFT_FEE = 10;
     private static final Integer WEEKLY_FEE = 11;
+    
+    private static final Integer CHARGE_CLIENT_SPECIFIED_DUE_DATE = 1;
 
     public static final Integer CHARGE_CALCULATION_TYPE_FLAT = 1;
     public static final Integer CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT = 2;
@@ -247,6 +250,20 @@ public class ChargesHelper {
         map.put("name", Utils.randomNameGenerator("Charge_Loans_", 6));
         return map;
     }
+    
+    public static HashMap<String, Object> populateDefaultsClientCharge() {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("active", ChargesHelper.active);
+        map.put("amount", ChargesHelper.amount);
+        map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_CLIENT);
+        map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
+        map.put("chargeTimeType",ChargesHelper.CHARGE_SPECIFIED_DUE_DATE);
+        map.put("currencyCode", ChargesHelper.currencyCode);
+        map.put("locale", CommonConstants.locale);
+        map.put("monthDayFormat", ChargesHelper.monthDayFormat);
+        map.put("name", Utils.randomNameGenerator("Charge_client_", 8));
+        return map;
+    }
 
     public static Integer createCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String request) {
@@ -367,5 +384,16 @@ public class ChargesHelper {
         System.out.println(json);
         return json;
     }
+    
+    public static String getChargeSpecifiedDueDateJSON() {
+        final HashMap<String, Object> map = populateDefaultsClientCharge();
+        String chargesCreateJson = new Gson().toJson(map);
+        System.out.println("chargesCreateJson:"+chargesCreateJson);
+        return chargesCreateJson;
+    }
 
+    public static String applyCharge(RequestSpecification requestSpec,ResponseSpecification responseSpec, String chargeId,String json) {
+        return Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, json,"status");
+        
+    }
 }

@@ -61,7 +61,6 @@ public class ClientTransactionsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllClientTransactions(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
-
         final Collection<ClientTransactionData> clientTransactions = this.clientTransactionReadPlatformService
                 .retrieveAllTransactions(clientId);
 

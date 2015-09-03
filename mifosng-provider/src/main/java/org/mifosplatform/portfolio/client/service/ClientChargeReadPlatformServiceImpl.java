@@ -13,6 +13,8 @@ import java.util.Collection;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
@@ -30,13 +32,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlatformService {
 
+    private final PaginationHelper<ClientChargeData> paginationHelper = new PaginationHelper<>();
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
+    private final ClientChargeMapper clientChargeMapper;
 
     @Autowired
     public ClientChargeReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.clientChargeMapper = new ClientChargeMapper();
     }
 
     public static final class ClientChargeMapper implements RowMapper<ClientChargeData> {
@@ -97,10 +102,25 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
     }
 
     @Override
-    public Collection<ClientChargeData> retrieveClientCharges(Long clientId, String status, Boolean isPaid) {
+    public ClientChargeData retrieveClientCharge(Long clientId, Long clientChargeId) {
+        try {
+            this.context.authenticatedUser();
+
+            final ClientChargeMapper rm = new ClientChargeMapper();
+
+            final String sql = "select " + rm.schema() + " where cc.client_id=? and cc.id=? ";
+
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { clientId, clientChargeId });
+        } catch (final EmptyResultDataAccessException e) {
+            throw new ClientChargeNotFoundException(clientChargeId, clientId);
+        }
+    }
+    
+    @Override
+    public Page<ClientChargeData> retrieveClientCharges(Long clientId, String status, Boolean isPaid,Integer limit,Integer offset) {
         final ClientChargeMapper rm = new ClientChargeMapper();
         final StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("select ").append(rm.schema()).append(" where cc.client_id=? ");
+        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ").append(rm.schema()).append(" where cc.client_id=? ");
 
         // filter for active charges
         if (status.equalsIgnoreCase(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ACTIVE)) {
@@ -115,25 +135,10 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
         } else if (isPaid != null && !isPaid) {
             sqlBuilder.append(" and (cc.is_paid_derived = 0 and cc.waived = 0) ");
         }
-
-        sqlBuilder.append(" order by cc.charge_time_enum ASC, cc.charge_due_date ASC, cc.is_penalty ASC");
-
-        return this.jdbcTemplate.query(sqlBuilder.toString(), rm, new Object[] { clientId });
-    }
-
-    @Override
-    public ClientChargeData retrieveClientCharge(Long clientId, Long clientChargeId) {
-        try {
-            this.context.authenticatedUser();
-
-            final ClientChargeMapper rm = new ClientChargeMapper();
-
-            final String sql = "select " + rm.schema() + " where cc.client_id=? and cc.id=? ";
-
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { clientId, clientChargeId });
-        } catch (final EmptyResultDataAccessException e) {
-            throw new ClientChargeNotFoundException(clientChargeId, clientId);
-        }
+        
+        sqlBuilder.append(" order by cc.charge_time_enum ASC, cc.charge_due_date ASC, cc.is_penalty ASC "+"limit "+limit+" offset "+offset);
+        final String sqlCountRows = "SELECT FOUND_ROWS()";
+         return this.paginationHelper.fetchPage(this.jdbcTemplate,sqlCountRows, sqlBuilder.toString(),new Object[] { clientId },this.clientChargeMapper);
     }
 
 }

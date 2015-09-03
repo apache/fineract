@@ -5,13 +5,13 @@
  */
 package org.mifosplatform.portfolio.client.service;
 
-import java.util.Collection;
-
+import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.portfolio.client.data.ClientChargeData;
 
 public interface ClientChargeReadPlatformService {
 
-    Collection<ClientChargeData> retrieveClientCharges(Long clientId, String status, Boolean isPaid);
+
+    Page<ClientChargeData> retrieveClientCharges(Long clientId, String status, Boolean isPaid, Integer limit, Integer offset);
 
     ClientChargeData retrieveClientCharge(Long clientId, Long clientChargeId);
 

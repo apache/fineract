@@ -148,10 +148,10 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
         generateAccountingEntries(clientTransaction);
 
         return new CommandProcessingResultBuilder() //
+                .withTransactionId(clientTransaction.getId().toString())//
                 .withEntityId(clientCharge.getId()) //
                 .withOfficeId(clientCharge.getClient().getOffice().getId()) //
-                .withClientId(clientCharge.getClient().getId()) //
-                .build();
+                .withClientId(clientCharge.getClient().getId()).build();
 
     }
 
@@ -181,7 +181,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
         final ClientChargePaidBy chargePaidBy = ClientChargePaidBy.instance(clientTransaction, clientCharge, waivedAmount.getAmount());
         clientTransaction.getClientChargePaidByCollection().add(chargePaidBy);
 
-        return new CommandProcessingResultBuilder() //
+        return new CommandProcessingResultBuilder().withTransactionId(clientTransaction.getId().toString())//
                 .withEntityId(clientCharge.getId()) //
                 .withOfficeId(clientCharge.getClient().getOffice().getId()) //
                 .withClientId(clientCharge.getClient().getId()) //
@@ -209,8 +209,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
     /**
      * Validates transaction to ensure that <br>
      * charge is active <br>
-     * transaction date is valid (between client activation and todays date)
-     * <br>
+     * transaction date is valid (between client activation and todays date) <br>
      * charge is not already paid or waived <br>
      * amount is not more than total due
      * 

@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ClientTransactionReadPlatformServiceImpl implements ClientTransactionReadPlatformService {
-
+    
     private final JdbcTemplate jdbcTemplate;
     private final ClientTransactionMapper clientTransactionMapper;
 
@@ -37,11 +37,11 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
     public ClientTransactionReadPlatformServiceImpl(final RoutingDataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.clientTransactionMapper = new ClientTransactionMapper();
-
     }
 
     private static final class ClientTransactionMapper implements RowMapper<ClientTransactionData> {
-
+        
+       
         private final String schemaSql;
 
         public ClientTransactionMapper() {
@@ -119,8 +119,8 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
 
     @Override
     public Collection<ClientTransactionData> retrieveAllTransactions(Long clientId) {
-        Long chargeId = null;
-        return retrieveAllTransactions(clientId, chargeId);
+        Long chargeId=null;
+        return retrieveAllTransactions(clientId,chargeId);
     }
 
     @Override

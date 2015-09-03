@@ -32,6 +32,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
@@ -74,24 +75,23 @@ public class ClientChargesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllClientCharges(@PathParam("clientId") final Long clientId,
+    public String retrieveAllClientCharges(
+            @PathParam("clientId") final Long clientId,
             @DefaultValue(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL) @QueryParam(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS) final String chargeStatus,
-            @QueryParam("paid") final Boolean paid, @Context final UriInfo uriInfo) {
+            @QueryParam("paid") final Boolean paid, @Context final UriInfo uriInfo, @QueryParam("limit") final Integer limit,
+            @QueryParam("offset") final Integer offset) {
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
-
-        if (!(is(chargeStatus, ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL)
-                || is(chargeStatus, ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ACTIVE)
-                || is(chargeStatus,
-                        ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_INACTIVE))) { throw new UnrecognizedQueryParamException(
-                                ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS, chargeStatus,
-                                new Object[] { ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL,
-                                        ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ACTIVE,
-                                        ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_INACTIVE }); }
-
-        final Collection<ClientChargeData> clientCharges = this.clientChargeReadPlatformService.retrieveClientCharges(clientId,
-                chargeStatus, paid);
-
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        if (!(is(chargeStatus, ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL)
+                || is(chargeStatus, ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ACTIVE) || is(chargeStatus,
+                    ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_INACTIVE))) { throw new UnrecognizedQueryParamException(
+                ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS, chargeStatus, new Object[] {
+                        ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL,
+                        ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ACTIVE,
+                        ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_INACTIVE }); }
+
+        final Page<ClientChargeData> clientCharges = this.clientChargeReadPlatformService.retrieveClientCharges(clientId, chargeStatus,
+                paid, limit, offset);
         return this.toApiJsonSerializer.serialize(settings, clientCharges, ClientApiConstants.CLIENT_CHARGES_RESPONSE_DATA_PARAMETERS);
     }
 
@@ -123,9 +123,7 @@ public class ClientChargesApiResource {
             @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
-
         ClientChargeData clientCharge = this.clientChargeReadPlatformService.retrieveClientCharge(clientId, chargeId);
-
         // extract associations
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
@@ -136,13 +134,11 @@ public class ClientChargesApiResource {
             if (associationParameters.contains(ClientApiConstants.CLIENT_CHARGE_ASSOCIATIONS_TRANSACTIONS)) {
                 Collection<ClientTransactionData> clientTransactionDatas = this.clientTransactionReadPlatformService
                         .retrieveAllTransactions(clientId, chargeId);
-                if (CollectionUtils.isEmpty(clientTransactionDatas)) {
-                    clientTransactionDatas = null;
+                if (!CollectionUtils.isEmpty(clientTransactionDatas)) {
+                    clientCharge = ClientChargeData.addAssociations(clientCharge, clientTransactionDatas);
                 }
-                clientCharge = ClientChargeData.addAssociations(clientCharge, clientTransactionDatas);
             }
         }
-
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, clientCharge, ClientApiConstants.CLIENT_CHARGES_RESPONSE_DATA_PARAMETERS);
     }
