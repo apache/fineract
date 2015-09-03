@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 5 Sep 2015 - 15.09.RELEASE
 1. 18 May 2015 - 15.03.1.RELEASE
 1. 06 Apr 2015 - 15.03.RELEASE
 1. 22 Dec 2014 - 1.26.0.RELEASE
@@ -70,6 +71,106 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+15.09.RELEASE
+=============
+
+This Feature release ships work on new functionality like Client Fees, Per-tranche Loan charges and new set of Pentaho reports.
+
+Enhancements to the platform include the ability to configure rounding modes used throught the system, connecting to replicated servers for reporting , API's for updating details of external services (email, S3) and improvements around Seach API's and performance of certain batch Jobs.
+
+Please note that this release ships schema changes to the mifosplatform-tenants database.
+
+New Features & Improvements
+
+ - [MIFOSX-2180] - One Time Client Fees
+ - [MIFOSX-1870] - Ability to collect charge on disbursement for tranche loans during each tranch disbursement
+ - [MIFOSX-2148] - Make Rounding Mode as configurable throughout Mifos
+ - [MIFOSX-2012] - Collection Report
+ - [MIFOSX-2013] - Disbursal Report
+ - [MIFOSX-2015] - Balance Outstanding Report
+ - [MIFOSX-2016] - Active loan Summary Per Branch
+ - [MIFOSX-2135] - Ability to read/update Organizational credentials (S3 account)
+ - [MIFOSX-2153] - Add ability to configure reports related requests to be directed to a seperate server instance
+ - [MIFOSX-2163] - Performance improvement for interest recalculation scheduler job
+ - [MIFOSX-2151] - Performance improvement for overdue charge scheduler job
+ - [MIFOSX-2152] - Performance improvement for Accrual scheduler job
+ - [MIFOSX-2166] - Move accrual job transaction scope from repayment schedule level to loan level
+ - [MIFOSX-2168] - Performance improvement for interest posting scheduler job
+ - [MIFOSX-1992] - Introduce account# for Group and Centers
+ - [MIFOSX-2038] - Search API should allow "exact" or "like" search
+ - [MIFOSX-2039] - Improvements to performance of Search API implementation
+ - [MIFOSX-2122] - Ability to export pentaho reports in Excel 2007 and above (xlsx) format
+ - [MIFOSX-2136] - Make Organizational email configuration editable
+ - [MIFOSX-2063] - Ship barebones database with every release
+ - [MIFOSX-1935] - Should allow to delete the role if the user attached with that role got deleted
+ - [MIFOSX-2157] - Add a column to the c_configuration table to mark some configuration as trap door
+ - [MIFOSX-1923] - Tranche loans should support disbursement fees with each disbursement
+
+
+Bugs
+
+ - [MIFOSX-1573] - when closed clients are activated again the closed on date should be null
+ - [MIFOSX-1578] - Not able to save collection sheet if any client having JLG loan with approved state under Group
+ - [MIFOSX-1581] - Interest is not getting calculated in JLG loan for backdated disbursement and meeting falls on future date
+ - [MIFOSX-1592] - Global Search on Group Loan Account Number doesn't work
+ - [MIFOSX-1636] - Loan with Moratorium on Principal / Interest (with interest recalculation) is displaying improper installments
+ - [MIFOSX-1658] - In center summary: Active clients loan is not working as expected
+ - [MIFOSX-1659] - client submitted date is not working as expected
+ - [MIFOSX-1712] - Not able approve the Tranche loan if the loan amount is modified during approval stage
+ - [MIFOSX-1765] - Changing future meetings is not working as expected for the rescheduled loans
+ - [MIFOSX-1773] - Multiple schedule being generated for a particular loan account.
+ - [MIFOSX-1775] - If calendar is created at Center level, should not allowed to edit the same in Group level
+ - [MIFOSX-1788] - Waive interest is not working as expected
+ - [MIFOSX-1874] - Staff Assigment History Report is missing
+ - [MIFOSX-1881] - Bugs With Centers
+ - [MIFOSX-1933] - View Standing instructions page displaying wrong destination
+ - [MIFOSX-2025] - Unable to access loan account page/loan page does not load after a multi-disbursal loan is disbursed
+ - [MIFOSX-2033] - Issues related to Manage roles and permissions functionality.
+ - [MIFOSX-2047] - Unable to Edit Hooks
+ - [MIFOSX-2049] - Not able to withdraw amount from savings account if product is defined as overdraft ( but Max Overdraft limit is not defined)
+ - [MIFOSX-2050] - Issue in running client loan Account schedule report
+ - [MIFOSX-2053] - After tranche loan disbursement not able to add tranche in "Add disbursement details" page
+ - [MIFOSX-2054] - No proper error message is displayed if "Deposit Frequency Same as Group/Center meeting" checkbox is selected for individual client while submitting the application.
+ - [MIFOSX-2061] - Charges For Savings are not office specific even office specific products are enabled
+ - [MIFOSX-2062] - Gradle task for restoring tenant databases does not work
+ - [MIFOSX-2065] - Date format not getting updated in User settings
+ - [MIFOSX-2067] - Localization for Angular Components does not work
+ - [MIFOSX-2074] - Reports API (Stretchy and Pentaho) set wrong mime-type for CSV exports
+ - [MIFOSX-2075] - Not able to view Repayment schedule during Modify
+ - [MIFOSX-2085] - If First repayment date is defined then interest is not getting calculated properly for early repayments with interest recalculation
+ - [MIFOSX-2096] - Loan purpose added while submitting the Bulk JLG Loan application is not getting reflected in Loan page
+ - [MIFOSX-2102] - Loan application "submittedOnDate" property compared with server date instead of tenant date
+ - [MIFOSX-2103] - Manage employees display is not working as expected
+ - [MIFOSX-2117] - Unable to create user - with auto email generate password option
+ - [MIFOSX-2118] - The Specific due date charge that is applied second is not collected in RBI Strategy for loans
+ - [MIFOSX-2121] - Active loan Report - Export CSV is not working as expected
+ - [MIFOSX-2129] - Submitting Collection sheet for zero repayments create an entry in Loan trasaction page
+ - [MIFOSX-2131] - Unable to do add journal entry (on Ubuntu)
+ - [MIFOSX-2138] - Not able to make repayment on any date between two tranches disbursed dates
+ - [MIFOSX-2143] - Manage datatables in demo version is not working as expected
+ - [MIFOSX-2158] - Commands Registry is not populated with all the CommandHandler implementations
+ - [MIFOSX-2165] - Not able to create loan with interest recalcualtion after 600 loans are created
+ - [MIFOSX-2169] - Not able to submit JLG Loan application displays internal server error
+ - [MIFOSX-761] - Data Import Tool Clients with same name are missing while downloading loan template
+ - [MIFOSX-2090] - Fix Typos with payment types documentation
+
+
+Community-App
+
+ - [MIFOSX-899] - Community App triggers authentication when running pentaho reports for the first time
+ - [MIFOSX-1607] - Filters on lists throughout Mifos X should retrieve all data that meets the filter criteria, not just the data already displayed.
+ - [MIFOSX-1939] - UI improvements for viewing loan and savings transaction reports and receipts
+ - [MIFOSX-2030] - UI for Maker/Checker & Roles Improvement
+ - [MIFOSX-2040] - Usability enhancements for Global Search
+ - [MIFOSX-2083] - UI improvements for List Standing Instructions page
+ - [MIFOSX-2100] - Dropdowns in the report must be searchable while executing the report
+ - [MIFOSX-2101] - Capitalization of 'pagination: Previous' in Keyboard Shortcuts
+ - [MIFOSX-2105] - Active Status Color should be Light Green or Florescent Green
+ - [MIFOSX-1258] - No option to translate system defined dropdowns as value is directly used instead of code
+ - [MIFOSX-1582] - Users "Sign In" but "Log Out"—make sign/log in/out terminology consistent
+ - [MIFOSX-2055] - User not able to approve loan for a client with Loan approve permissions
+ - [MIFOSX-2044] - Demo System Log In Page Improvements
 
 15.03.1.RELEASE
 =============
