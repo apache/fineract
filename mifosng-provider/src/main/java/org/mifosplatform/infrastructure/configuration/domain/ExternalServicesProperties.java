@@ -9,12 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
@@ -22,7 +18,6 @@ import org.mifosplatform.infrastructure.configuration.data.ExternalServicesPrope
 import org.mifosplatform.infrastructure.configuration.service.ExternalServicesConstants.EXTERNALSERVICEPROPERTIES_JSON_INPUT_PARAMS;
 import org.mifosplatform.infrastructure.configuration.service.ExternalServicesConstants.SMTP_JSON_INPUT_PARAMS;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.springframework.data.annotation.Id;
 
 @Entity
 @Table(name = "c_external_service_properties")

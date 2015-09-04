@@ -13,7 +13,6 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.mifosplatform.infrastructure.configuration.exception.GlobalConfigurationPropertyCannotBeModfied;
-import org.mifosplatform.infrastructure.configuration.exception.GlobalConfigurationPropertyNotFoundException;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.security.exception.ForcePasswordResetException;
 import org.springframework.data.jpa.domain.AbstractPersistable;

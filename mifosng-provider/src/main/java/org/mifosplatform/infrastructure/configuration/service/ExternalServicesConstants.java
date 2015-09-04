@@ -8,8 +8,6 @@ package org.mifosplatform.infrastructure.configuration.service;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.mifosplatform.infrastructure.codes.CodeConstants.CODEVALUE_JSON_INPUT_PARAMS;
-
 public class ExternalServicesConstants {
 
     public static final String S3_SERVICE_NAME = "S3";

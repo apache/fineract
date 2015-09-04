@@ -14,7 +14,6 @@ import org.mifosplatform.infrastructure.configuration.data.S3CredentialsData;
 import org.mifosplatform.infrastructure.configuration.data.SMTPCredentialsData;
 import org.mifosplatform.infrastructure.configuration.exception.ExternalServiceConfigurationNotFoundException;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
-import org.mifosplatform.infrastructure.documentmanagement.data.DocumentData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -82,7 +81,7 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
     private static final class ExternalServiceMapper implements RowMapper<ExternalServicesPropertiesData> {
 
         @Override
-        public ExternalServicesPropertiesData mapRow(ResultSet rs, int rowNum) throws SQLException {
+        public ExternalServicesPropertiesData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
             // TODO Auto-generated method stub
             final String name = rs.getString("name");
             String value = rs.getString("value");
@@ -114,6 +113,7 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
         return smtpCredentialsData;
     }
 
+    @Override
     public Collection<ExternalServicesPropertiesData> retrieveOne(String serviceName) {
         String serviceNameToUse = null;
         switch (serviceName) {

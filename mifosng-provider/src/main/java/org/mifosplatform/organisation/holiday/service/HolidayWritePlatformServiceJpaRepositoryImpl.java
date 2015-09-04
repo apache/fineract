@@ -8,12 +8,10 @@ package org.mifosplatform.organisation.holiday.service;
 import static org.mifosplatform.organisation.holiday.api.HolidayApiConstants.officesParamName;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -49,7 +47,6 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
     private final HolidayDataValidator fromApiJsonDeserializer;
     private final HolidayRepositoryWrapper holidayRepository;
     private final WorkingDaysRepositoryWrapper daysRepositoryWrapper;
-    private final ConfigurationDomainService configurationDomainService;
     private final PlatformSecurityContext context;
     private final OfficeRepository officeRepository;
     private final FromJsonHelper fromApiJsonHelper;
@@ -58,14 +55,13 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
     public HolidayWritePlatformServiceJpaRepositoryImpl(final HolidayDataValidator fromApiJsonDeserializer,
             final HolidayRepositoryWrapper holidayRepository, final PlatformSecurityContext context,
             final OfficeRepository officeRepository, final FromJsonHelper fromApiJsonHelper,
-            final WorkingDaysRepositoryWrapper daysRepositoryWrapper, final ConfigurationDomainService configurationDomainService) {
+            final WorkingDaysRepositoryWrapper daysRepositoryWrapper) {
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.holidayRepository = holidayRepository;
         this.context = context;
         this.officeRepository = officeRepository;
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.daysRepositoryWrapper = daysRepositoryWrapper;
-        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional

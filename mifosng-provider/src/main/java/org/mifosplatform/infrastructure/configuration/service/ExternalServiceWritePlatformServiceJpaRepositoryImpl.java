@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ExternalServiceWritePlatformServiceJpaRepositoryImpl implements ExternalServiceWritePlatformService {
 
+    @SuppressWarnings("unused")
     private final static Logger logger = LoggerFactory.getLogger(ExternalServiceWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;

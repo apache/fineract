@@ -48,6 +48,8 @@ public class ClientChargeData {
 
     private final Boolean isPaid;
 
+    private final Boolean isWaived;
+
     private final LocalDate inactivationDate;
 
     private final Collection<ChargeData> chargeOptions;
@@ -57,11 +59,11 @@ public class ClientChargeData {
     public static ClientChargeData instance(Long id, Long clientId, Long chargeId, String name, EnumOptionData chargeTimeType,
             LocalDate dueDate, EnumOptionData chargeCalculationType, CurrencyData currency, BigDecimal amount, BigDecimal amountPaid,
             BigDecimal amountWaived, BigDecimal amountWrittenOff, BigDecimal amountOutstanding, boolean penalty, Boolean isPaid,
-            Boolean isActive, LocalDate inactivationDate, Collection<ChargeData> chargeOptions) {
+            Boolean isWaived, Boolean isActive, LocalDate inactivationDate, Collection<ChargeData> chargeOptions) {
         Collection<ClientTransactionData> clientTransactionDatas = null;
         return new ClientChargeData(id, clientId, chargeId, name, chargeTimeType, dueDate, chargeCalculationType, currency, amount,
-                amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penalty, isPaid, isActive, inactivationDate, chargeOptions,
-                clientTransactionDatas);
+                amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penalty, isPaid, isWaived, isActive, inactivationDate,
+                chargeOptions, clientTransactionDatas);
     }
 
     public static ClientChargeData addAssociations(ClientChargeData clientChargeData,
@@ -70,7 +72,8 @@ public class ClientChargeData {
                 clientChargeData.chargeTimeType, clientChargeData.dueDate, clientChargeData.chargeCalculationType,
                 clientChargeData.currency, clientChargeData.amount, clientChargeData.amountPaid, clientChargeData.amountWaived,
                 clientChargeData.amountWrittenOff, clientChargeData.amountOutstanding, clientChargeData.penalty, clientChargeData.isPaid,
-                clientChargeData.isActive, clientChargeData.inactivationDate, clientChargeData.chargeOptions, clientTransactionDatas);
+                clientChargeData.isWaived, clientChargeData.isActive, clientChargeData.inactivationDate, clientChargeData.chargeOptions,
+                clientTransactionDatas);
     }
 
     public static ClientChargeData template(final Collection<ChargeData> chargeOptions) {
@@ -90,17 +93,18 @@ public class ClientChargeData {
         final Boolean penalty = false;
         final Boolean isPaid = null;
         final Boolean isActive = null;
+        final Boolean isWaived = null;
         final LocalDate inactivationDate = null;
         final Collection<ClientTransactionData> clientTransactionDatas = null;
 
         return new ClientChargeData(id, clientId, chargeId, name, chargeTimeType, dueDate, chargeCalculationType, currency, amount,
-                amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penalty, isPaid, isActive, inactivationDate, chargeOptions,
-                clientTransactionDatas);
+                amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penalty, isPaid, isWaived, isActive, inactivationDate,
+                chargeOptions, clientTransactionDatas);
     }
 
     private ClientChargeData(Long id, Long clientId, Long chargeId, String name, EnumOptionData chargeTimeType, LocalDate dueDate,
             EnumOptionData chargeCalculationType, CurrencyData currency, BigDecimal amount, BigDecimal amountPaid, BigDecimal amountWaived,
-            BigDecimal amountWrittenOff, BigDecimal amountOutstanding, boolean penalty, Boolean isPaid, Boolean isActive,
+            BigDecimal amountWrittenOff, BigDecimal amountOutstanding, boolean penalty, Boolean isPaid, Boolean isWaived, Boolean isActive,
             LocalDate inactivationDate, Collection<ChargeData> chargeOptions, Collection<ClientTransactionData> clientTransactionDatas) {
         super();
         this.id = id;
@@ -118,6 +122,7 @@ public class ClientChargeData {
         this.amountOutstanding = amountOutstanding;
         this.penalty = penalty;
         this.isPaid = isPaid;
+        this.isWaived = isWaived;
         this.isActive = isActive;
         this.inactivationDate = inactivationDate;
 

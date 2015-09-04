@@ -8,7 +8,6 @@ package org.mifosplatform.organisation.workingdays.service;
 import java.text.ParseException;
 import java.util.Map;
 
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -28,14 +27,12 @@ import net.fortuna.ical4j.model.property.RRule;
 public class WorkingDaysWritePlatformServiceJpaRepositoryImpl implements WorkingDaysWritePlatformService {
 
     private final WorkingDaysRepositoryWrapper daysRepositoryWrapper;
-    private final ConfigurationDomainService configurationDomainService;
     private final WorkingDayValidator fromApiJsonDeserializer;
 
     @Autowired
     public WorkingDaysWritePlatformServiceJpaRepositoryImpl(final WorkingDaysRepositoryWrapper daysRepositoryWrapper,
-            final ConfigurationDomainService configurationDomainService, final WorkingDayValidator fromApiJsonDeserializer) {
+            final WorkingDayValidator fromApiJsonDeserializer) {
         this.daysRepositoryWrapper = daysRepositoryWrapper;
-        this.configurationDomainService = configurationDomainService;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
     }
 

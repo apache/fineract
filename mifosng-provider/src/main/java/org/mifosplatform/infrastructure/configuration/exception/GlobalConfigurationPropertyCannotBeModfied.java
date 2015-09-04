@@ -6,7 +6,6 @@
 package org.mifosplatform.infrastructure.configuration.exception;
 
 import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
-import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 public class GlobalConfigurationPropertyCannotBeModfied extends AbstractPlatformDomainRuleException{
     

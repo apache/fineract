@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.Map;
 
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
-import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -35,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class MifosEntityAccessWriteServiceImpl implements MifosEntityAccessWriteService {
 
     private final static Logger logger = LoggerFactory.getLogger(MifosEntityAccessWriteServiceImpl.class);
-    private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
     private final MifosEntityAccessRepository entityAccessRepository;
     private final MifosEntityRelationRepositoryWrapper mifosEntityRelationRepositoryWrapper;
     private final MifosEntityToEntityMappingRepository mifosEntityToEntityMappingRepository;
@@ -44,13 +42,11 @@ public class MifosEntityAccessWriteServiceImpl implements MifosEntityAccessWrite
 
     @Autowired
     public MifosEntityAccessWriteServiceImpl(final MifosEntityAccessRepository entityAccessRepository,
-            final CodeValueRepositoryWrapper codeValueRepositoryWrapper,
             final MifosEntityRelationRepositoryWrapper mifosEntityRelationRepositoryWrapper,
             final MifosEntityToEntityMappingRepository mifosEntityToEntityMappingRepository,
             final MifosEntityToEntityMappingRepositoryWrapper mifosEntityToEntityMappingRepositoryWrapper,
             MifosEntityDataValidator fromApiJsonDeserializer) {
         this.entityAccessRepository = entityAccessRepository;
-        this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
         this.mifosEntityToEntityMappingRepository = mifosEntityToEntityMappingRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.mifosEntityRelationRepositoryWrapper = mifosEntityRelationRepositoryWrapper;
@@ -58,7 +54,7 @@ public class MifosEntityAccessWriteServiceImpl implements MifosEntityAccessWrite
     }
 
     @Override
-    public CommandProcessingResult createEntityAccess(JsonCommand command) {
+    public CommandProcessingResult createEntityAccess(@SuppressWarnings("unused") JsonCommand command) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -88,7 +84,8 @@ public class MifosEntityAccessWriteServiceImpl implements MifosEntityAccessWrite
 
             fromApiJsonDeserializer.checkForEntity(relId.toString(), fromId, toId);
             if (startDate != null && endDate != null) {
-                if (endDate.before(startDate)) { throw new MifosEntityToEntityMappingDateException(startDate.toString(), endDate.toString()); }
+                if (endDate
+                        .before(startDate)) { throw new MifosEntityToEntityMappingDateException(startDate.toString(), endDate.toString()); }
             }
 
             final MifosEntityToEntityMapping newMap = MifosEntityToEntityMapping.newMap(mapId, fromId, toId, startDate, endDate);
@@ -119,7 +116,7 @@ public class MifosEntityAccessWriteServiceImpl implements MifosEntityAccessWrite
             fromApiJsonDeserializer.checkForEntity(relId, fromId, toId);
 
             final Map<String, Object> changes = mapForUpdate.updateMap(command);
-            
+
             if (!changes.isEmpty()) {
                 this.mifosEntityToEntityMappingRepository.saveAndFlush(mapForUpdate);
             }
@@ -128,7 +125,7 @@ public class MifosEntityAccessWriteServiceImpl implements MifosEntityAccessWrite
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
-        } 
+        }
     }
 
     @Transactional
@@ -151,8 +148,8 @@ public class MifosEntityAccessWriteServiceImpl implements MifosEntityAccessWrite
         if (realCause.getMessage().contains("rel_id_from_id_to_id")) {
             final String fromId = command.stringValueOfParameterNamed(MifosEntityApiResourceConstants.fromEnityType);
             final String toId = command.stringValueOfParameterNamed(MifosEntityApiResourceConstants.toEntityType);
-            throw new PlatformDataIntegrityException("error.msg.duplicate.entity.mapping", "EntityMapping from " + fromId + " to " + toId
-                    + " already exist");
+            throw new PlatformDataIntegrityException("error.msg.duplicate.entity.mapping",
+                    "EntityMapping from " + fromId + " to " + toId + " already exist");
         }
 
         logAsErrorUnexpectedDataIntegrityException(dve);

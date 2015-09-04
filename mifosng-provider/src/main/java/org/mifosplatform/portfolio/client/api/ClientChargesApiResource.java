@@ -75,23 +75,23 @@ public class ClientChargesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllClientCharges(
-            @PathParam("clientId") final Long clientId,
+    public String retrieveAllClientCharges(@PathParam("clientId") final Long clientId,
             @DefaultValue(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL) @QueryParam(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS) final String chargeStatus,
-            @QueryParam("paid") final Boolean paid, @Context final UriInfo uriInfo, @QueryParam("limit") final Integer limit,
-            @QueryParam("offset") final Integer offset) {
+            @QueryParam("pendingPayment") final Boolean pendingPayment, @Context final UriInfo uriInfo,
+            @QueryParam("limit") final Integer limit, @QueryParam("offset") final Integer offset) {
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (!(is(chargeStatus, ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL)
-                || is(chargeStatus, ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ACTIVE) || is(chargeStatus,
-                    ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_INACTIVE))) { throw new UnrecognizedQueryParamException(
-                ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS, chargeStatus, new Object[] {
-                        ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL,
-                        ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ACTIVE,
-                        ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_INACTIVE }); }
+                || is(chargeStatus, ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ACTIVE)
+                || is(chargeStatus,
+                        ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_INACTIVE))) { throw new UnrecognizedQueryParamException(
+                                ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS, chargeStatus,
+                                new Object[] { ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL,
+                                        ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ACTIVE,
+                                        ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_INACTIVE }); }
 
         final Page<ClientChargeData> clientCharges = this.clientChargeReadPlatformService.retrieveClientCharges(clientId, chargeStatus,
-                paid, limit, offset);
+                pendingPayment, limit, offset);
         return this.toApiJsonSerializer.serialize(settings, clientCharges, ClientApiConstants.CLIENT_CHARGES_RESPONSE_DATA_PARAMETERS);
     }
 

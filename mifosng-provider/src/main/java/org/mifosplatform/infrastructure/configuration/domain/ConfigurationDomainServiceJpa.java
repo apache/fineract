@@ -180,6 +180,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         return property.isEnabled();
     }
 
+    @Override
     public int getRoundingMode() {
         final String propertyName = "rounding-mode";
         int defaultValue = 6; // 6 Stands for HALF-EVEN

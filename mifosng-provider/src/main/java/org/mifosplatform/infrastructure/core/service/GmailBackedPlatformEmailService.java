@@ -9,7 +9,6 @@ import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
-import org.mifosplatform.infrastructure.configuration.data.S3CredentialsData;
 import org.mifosplatform.infrastructure.configuration.data.SMTPCredentialsData;
 import org.mifosplatform.infrastructure.configuration.service.ExternalServicesPropertiesReadPlatformService;
 import org.mifosplatform.infrastructure.core.domain.EmailDetail;

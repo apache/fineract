@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -35623,52 +35623,40 @@ Request Body:
           <a id="client_charge" name="client_charge" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h3>Client Charge</h3>
-					<p>Client Charge is a type of charge which is directlly applied on client.One client can have more than one client charge and client charge is created with charge time type as specified due date and calculation type as flat.
+					<h3>Client Charges</h3>
+					<p>It is typical for MFI's to directly associate charges with an implicit Client account. These
+					can be either fees or penalties</p>
+					<p>Client Charges are client specific instances of <a href="#charges">Charges</a>.  Refer <a href="#charges">Charges</a> for documentation of the various properties of a charge, Only additional properties (
+					specific to the context of a Charge being associated with a Client account) are
+					described here</p>
+
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
-							<td>chargeId</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>This ia an unique Id associate with client charge.
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>name</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Name given to the client charge.</td>
-						</tr>
-						<tr class=alt>
-							<td>active</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Indicates whether this charge  is to be created as active</b>. If active=true, then <b>activationDate</b> must be provided. If active=false, then the charge is created as <b>pending</b>.
-							</td>
-						</tr>
-						<tr class=alt>
 							<td>amountPaid</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>amount paid as client charge</b>.
-							</td>
+							<td class=fielddesc>The total amount which has been paid for this Charge
+						</td>
 						</tr>
 						<tr class=alt>
 							<td>amountWaived</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>amount waive from client charge</td>
+							<td class=fielddesc>The total amount that has been waived for this Charge
+							</td>
 						</tr>
 						<tr class=alt>
 							<td>amountOutstanding</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>The left over amount to pay .</td>
+							<td class=fielddesc>The Total outstanding amount for this Charge
+							</td>
 						</tr>
+
 						<tr class=alt>
 							<td>dueDate</td>
 						</tr>
@@ -35684,51 +35672,51 @@ Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h3>Client Transaction</h3>
-					<p>Client Charge transactions are get created when a client pays/waives off client charge.this client charge transaction shows
-						<br>the unit of amount paid as client charge.
+					<p>Client Transactions refer to transactions made directly againt a Client's internal account. Currently, these transactions are only created as a result of charge payments/waivers. You are allowed to undo a transaction, however you cannot explicitly create one.
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
-							<td>transactionId</td>
+							<td>id</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>This ia an unique Id associate with client charge Transaction.
+							<td class=fielddesc>This ia an unique Id associate with a Transaction.
 							</td>
 						</tr>
 						<tr class=alt>
-							<td>clientId</td>
+							<td>officeId</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>clientId on which client transaction got created</td>
+							<td class=fielddesc>Identifier of the office in which the transaction was made</td>
 						</tr>
 						<tr class=alt>
-							<td>isReverse</td>
+							<td>reversed</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>Indicates whether this client charge transaction is reversed or not.
+							<td class=fielddesc>Boolean Flag that indicates if this transaction is reversed.
 							</td>
 						</tr>
 						<tr class=alt>
-							<td>amountPaid</td>
+							<td>amount</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>amount paid as client charge</b>.
+							<td class=fielddesc>Transaction amount</b>.
 							</td>
 						</tr>
 						<tr class=alt>
-							<td>currency code</td>
+							<td>currency</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>currency type</td>
+							<td class=fielddesc>Details of the currency involved with the Transaction. Currently defaults
+							to the currency of the Client Charge this transaction pays </td>
 						</tr>
 						<tr class=alt>
-							<td>transaction date</td>
+							<td>date</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>date on which transaction happened</td>
+							<td class=fielddesc>Effective date of the transaction</td>
 						</tr>
 					
 					</table>
@@ -35737,8 +35725,8 @@ Request Body:
 			<a id="list_clientTransactions" name="list_clientTransactions" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>List client Transactions</h4>
-					<p>The <i>list</i> capability of client charge transaction can support <b>pagination</b> and <b>sorting</b>.</p>
+					<h4>List Client Transactions</h4>
+					<p>The <i>list</i> capability of client transaction can support <b>pagination</b> and <b>sorting</b>.</p>
 					<h5>Mandatory Arguments</h5>
 					<dl class="argument-list">
 						<dt>offset</dt>
@@ -35752,8 +35740,7 @@ Request Body:
 							Integer <span>Mandatory</span>, defaults to 200
 						</dd>
 						<dd>Restricts the size of results returned. To override the default and return all entries you must explicitly pass a non-positive integer value for limit e.g. limit=0, or limit=-1</dd>
-            </dl>
-           </dl> 
+            		</dl>
 					<p>Example Requests:</p>				
 					<div class=apiClick>clients/189/transactions</div>
 					<div class=apiClick>clients/189/transactions?offset=10&limit=50</div>				
@@ -35765,11 +35752,8 @@ GET https://DomainName/api/v1/clients/{clientId}/transactions?limit=5&offset=0
 					<code class="method-request">
 GET clients/226/transactions?limit=5&offset=0
 Content-Type: application/json
-Request Body:
-{
-	chargeId="226"
-	
-}
+No Request Body:
+
 			</code>
 			<code class="method-response">
 {
@@ -35804,126 +35788,6 @@ Request Body:
         2
       ],
       "reversed": false
-    },
-    {
-      "id": 208,
-      "officeId": 1,
-      "officeName": "Head Office",
-      "type": {
-        "id": 1,
-        "code": "clientTransactionType.payCharge",
-        "value": "PAY_CHARGE"
-      },
-      "date": [
-        2015,
-        8,
-        28
-      ],
-      "currency": {
-        "code": "USD",
-        "name": "US Dollar",
-        "decimalPlaces": 2,
-        "displaySymbol": "$",
-        "nameCode": "currency.USD",
-        "displayLabel": "US Dollar ($)"
-      },
-      "amount": 3,
-      "submittedOnDate": [
-        2015,
-        8,
-        28
-      ],
-      "reversed": false
-    },
-    {
-      "id": 207,
-      "officeId": 1,
-      "officeName": "Head Office",
-      "type": {
-        "id": 1,
-        "code": "clientTransactionType.payCharge",
-        "value": "PAY_CHARGE"
-      },
-      "date": [
-        2015,
-        8,
-        28
-      ],
-      "currency": {
-        "code": "USD",
-        "name": "US Dollar",
-        "decimalPlaces": 2,
-        "displaySymbol": "$",
-        "nameCode": "currency.USD",
-        "displayLabel": "US Dollar ($)"
-      },
-      "amount": 5,
-      "submittedOnDate": [
-        2015,
-        8,
-        28
-      ],
-      "reversed": false
-    },
-    {
-      "id": 206,
-      "officeId": 1,
-      "officeName": "Head Office",
-      "type": {
-        "id": 1,
-        "code": "clientTransactionType.payCharge",
-        "value": "PAY_CHARGE"
-      },
-      "date": [
-        2015,
-        8,
-        28
-      ],
-      "currency": {
-        "code": "USD",
-        "name": "US Dollar",
-        "decimalPlaces": 2,
-        "displaySymbol": "$",
-        "nameCode": "currency.USD",
-        "displayLabel": "US Dollar ($)"
-      },
-      "amount": 5,
-      "submittedOnDate": [
-        2015,
-        8,
-        28
-      ],
-      "reversed": false
-    },
-    {
-      "id": 205,
-      "officeId": 1,
-      "officeName": "Head Office",
-      "type": {
-        "id": 1,
-        "code": "clientTransactionType.payCharge",
-        "value": "PAY_CHARGE"
-      },
-      "date": [
-        2015,
-        8,
-        28
-      ],
-      "currency": {
-        "code": "USD",
-        "name": "US Dollar",
-        "decimalPlaces": 2,
-        "displaySymbol": "$",
-        "nameCode": "currency.USD",
-        "displayLabel": "US Dollar ($)"
-      },
-      "amount": 5,
-      "submittedOnDate": [
-        2015,
-        8,
-        28
-      ],
-      "reversed": false
     }
   ]
 }
@@ -35935,23 +35799,22 @@ Request Body:
 				<div class="method-description">
 					<h4>Add Client Charge</h4>
 					<p>
-						It is one among  the charges.It is created chargeTime type as specified due date and calculation type as flat and it can only be applied client.This API enables to add client charge to client.
+						This API associates a Client charge with an implicit Client account
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>clientId,chargeId and activationDate </td>
+							<td>chargeId and dueDate </td>
 						</tr>
 					</table>
-						<br />
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>externalId, accountNo,genderId, clientTypeId, clientClassificationId</td>
+							<td>amount</td>
 						</tr>
 					</table>
 				</div>
@@ -35964,11 +35827,11 @@ POST clients/226/charges
 Content-Type: application/json
 Request Body:
 {
-	"amount"="100"
-	chargeId="226"
-	dateFormat="dd MMMM yyyy"
-	dueDate="01 September 2015"
-	locale="en"
+    "amount" : "100",
+	"chargeId" : "226",
+	"dateFormat" : "dd MMMM yyyy",
+	"dueDate" : "01 September 2015",
+	"locale" : "en"
 }
 			</code>
 			<code class="method-response">
@@ -35999,8 +35862,13 @@ Request Body:
 							Integer <span>Mandatory</span>, defaults to 200
 						</dd>
 						<dd>Restricts the size of results returned. To override the default and return all entries you must explicitly pass a non-positive integer value for limit e.g. limit=0, or limit=-1</dd>
-            </dl>
-           </dl> 
+
+						<dt>pendingPayment</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Only returns those charges which are pending payment (neither paid or waived).</dd>
+          			</dl>
 					<p>Example Requests:</p>				
 					<div class=apiClick>clients/189/charges</div>	
 					<div class=apiClick>clients/189/charges?offset=0&limit=5</div>				
@@ -36018,119 +35886,9 @@ Request Body:
 {
   "clientId":189
  }
-            </code>
-			<code class="method-response">			
- {
-    "id": 151,
-    "clientId": 182,
-    "chargeId": 228,
-    "name": "Charge_client_1WA4XRZ1",
-    "chargeTimeType": {
-      "id": 2,
-      "code": "chargeTimeType.specifiedDueDate",
-      "value": "Specified due date"
-    },
-    "dueDate": [
-      2011,
-      10,
-      29
-    ],
-    "chargeCalculationType": {
-      "id": 1,
-      "code": "chargeCalculationType.flat",
-      "value": "Flat"
-    },
-    "currency": {
-      "code": "USD",
-      "name": "US Dollar",
-      "decimalPlaces": 2,
-      "displaySymbol": "$",
-      "nameCode": "currency.USD",
-      "displayLabel": "US Dollar ($)"
-    },
-    "amount": 200,
-    "amountPaid": 183,
-    "amountWaived": 0,
-    "amountWrittenOff": 0,
-    "amountOutstanding": 17,
-    "penalty": false,
-    "isActive": true,
-    "isPaid": false
-  },
-  {
-    "id": 160,
-    "clientId": 182,
-    "chargeId": 239,
-    "name": "Charge_client_09UC3HYL",
-    "chargeTimeType": {
-      "id": 2,
-      "code": "chargeTimeType.specifiedDueDate",
-      "value": "Specified due date"
-    },
-    "dueDate": [
-      2015,
-      8,
-      14
-    ],
-    "chargeCalculationType": {
-      "id": 1,
-      "code": "chargeCalculationType.flat",
-      "value": "Flat"
-    },
-    "currency": {
-      "code": "USD",
-      "name": "US Dollar",
-      "decimalPlaces": 2,
-      "displaySymbol": "$",
-      "nameCode": "currency.USD",
-      "displayLabel": "US Dollar ($)"
-    },
-    "amount": 100,
-    "amountPaid": 0,
-    "amountWaived": 0,
-    "amountWrittenOff": 0,
-    "amountOutstanding": 100,
-    "penalty": false,
-    "isActive": true,
-    "isPaid": false
-  },
-  {
-    "id": 163,
-    "clientId": 182,
-    "chargeId": 161,
-    "name": "Charge_client_12J3LSPO",
-    "chargeTimeType": {
-      "id": 2,
-      "code": "chargeTimeType.specifiedDueDate",
-      "value": "Specified due date"
-    },
-    "dueDate": [
-      2015,
-      9,
-      1
-    ],
-    "chargeCalculationType": {
-      "id": 1,
-      "code": "chargeCalculationType.flat",
-      "value": "Flat"
-    },
-    "currency": {
-      "code": "USD",
-      "name": "US Dollar",
-      "decimalPlaces": 2,
-      "displaySymbol": "$",
-      "nameCode": "currency.USD",
-      "displayLabel": "US Dollar ($)"
-    },
-    "amount": 100,
-    "amountPaid": 0,
-    "amountWaived": 0,
-    "amountWrittenOff": 0,
-    "amountOutstanding": 100,
-    "penalty": false,
-    "isActive": true,
-    "isPaid": false
-  }
+            		</code>
+					<code class="method-response">			
+ 
 					</code>
 				</div>
 			</div>
@@ -36141,23 +35899,14 @@ Request Body:
 				<div class="method-description">
 					<h4>Delete Client Charge</h4>
 					<p>
-						<br>A client can be associated with more than one client charge and this API enables to delete a charge from client.					
-					</p>
-					<table class=matrixHeading>
-						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
-						</tr>
-						<tr class=alt>
-							<td>chargeId
-							</td>
-						</tr>
-					</table>					
+					Deletes a Client Charge on which no transactions have taken place (either payments or waivers).				</p>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">				
-DELETE  https://localhost:8443/mifosng-provider/api/v1/clients/189/charges?command=delete
-
-POST clients/189/charges/164?command=delete
+DELETE  https://localhost:8443/mifosng-provider/api/v1/clients/{clientId}/charges/{chargeId}
+					</code>
+					<code class="method-request">
+POST clients/189/charges/164
 Content-Type: application/json
 No Request Body
             </code>
@@ -36178,7 +35927,7 @@ No Request Body
 				<div class="method-description">
 					<h4>Pay Client Charge</h4>
 					<p>
-						<br>Total or Some amount of the client charge can be paid by specifying transaction date and which should not be below or above the specifed due date.						
+						<br>Pay either a part of or the entire due amount for a charge.						
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
@@ -36194,10 +35943,10 @@ No Request Body
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">					
-POST https://localhost:8443/mifosng-provider/api/v1/clients/189/charges/157?command=paycharge
+POST https://localhost:8443/mifosng-provider/api/v1/clients/{clientId}/charges/{chargeId}?command=paycharge
 					</code>
 					<code class="method-request">
-POST clients/189/charges/157?command=paycharge
+POST clients/189/charges/157?command=payCharge
 Content-Type: application/json
 Request Body:
 {
@@ -36206,7 +35955,6 @@ Request Body:
  "locale":"en",
  "dateFormat":"dd MMMM yyyy",
  "transactionDate":"01 September 2015"
-	
 }
 			</code>
 			<code class="method-response">
@@ -36225,38 +35973,24 @@ Request Body:
 				<div class="method-description">
 					<h4>Waive Client Charge</h4>
 					<p>
-						<br>This API provieds the facility of waiving off  the client charge of a client.						
+						<br>This API provides the facility of waiving off the remaining amount on a client charge						
 					</p>
-					<table class=matrixHeading>
-						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
-						</tr>
-						<tr class=alt>
-							<td>clientId and chargeId 
-							</td>
-						</tr>
-					</table>
-						<br />					
+								
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">					
-POST https://localhost:8443/mifosng-provider/api/v1/clients/189/charges/157?command=waive
+POST https://localhost:8443/mifosng-provider/api/v1/clients/{clientId}/charges/{chargeId}?command=waive
 					</code>
 					<code class="method-request">
 POST clients/189/charges/157?command=waive						
 Content-Type: application/json
-Request Body:
-{
-	"clientId"="189"	
-	"resourceType"="164"
-	
-}
+No Request Body
 			</code>
 			<code class="method-response">
 			
 {
  	"clientId":"189",
-	"resourceType":"164"
+	"resourceId":157
 }
 					</code>
 				</div>
@@ -36265,120 +35999,28 @@ Request Body:
            <a id="revert_clientCharge" name="revert_clientCharge" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Revert Client Charge Transaction</h4>
-					<p>
-						<br>This API exists to revert the client transactions which have got created after paying the client charge 
-						<br>or after waiving off the client charge.						
-					</p>
-					<table class=matrixHeading>
-						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
-						</tr>
-						<tr class=alt>
-							<td>clientId ,chargeId and transactionId
-							</td>
-						</tr>
-					</table>
-						<br />					
+					<h4>Undo Client Transaction</h4>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">					
-POST https://localhost:8443/mifosng-provider/api/v1/clients/189/charges/157?command=undo
+POST https://localhost:8443/mifosng-provider/api/v1/clients/{clientId}/transactions/{transactionId?command=undo
 					</code>
 					<code class="method-request">
-POST clients/189/transactions/222					
+POST clients/189/transactions/222?command=undo					
 Content-Type: application/json
-Request Body:
-{
-clientId="189"
-transactionId=222
-	
-}
-			</code>
-			<code class="method-response">
+No Request Body
+					</code>
+					<code class="method-response">
 			
 {
 "officeId":1,
 "clientId":189,
 "resourceId":222
 }
-
-GET https://localhost:8443/mifosng-provider/api/v1/clients/189/charges/164?associations=all
-Content-Type: application/json
-Resonse Body:
-	{
-  "id": 164,
-  "clientId": 189,
-  "chargeId": 226,
-  "name": "Charge_client_0RC9TLF4",
-  "chargeTimeType": {
-    "id": 2,
-    "code": "chargeTimeType.specifiedDueDate",
-    "value": "Specified due date"
-  },
-  "dueDate": [
-    2015,
-    9,
-    1
-  ],
-  "chargeCalculationType": {
-    "id": 1,
-    "code": "chargeCalculationType.flat",
-    "value": "Flat"
-  },
-  "currency": {
-    "code": "USD",
-    "name": "US Dollar",
-    "decimalPlaces": 2,
-    "displaySymbol": "$",
-    "nameCode": "currency.USD",
-    "displayLabel": "US Dollar ($)"
-  },
-  "amount": 100,
-  "amountPaid": 0,
-  "amountWaived": 0,
-  "amountWrittenOff": 0,
-  "amountOutstanding": 100,
-  "penalty": false,
-  "isActive": true,
-  "isPaid": false,
-  "clientTransactionDatas": [
-    {
-      "id": 222,
-      "officeId": 1,
-      "officeName": "Head Office",
-      "type": {
-        "id": 2,
-        "code": "clientTransactionType.waiveCharge",
-        "value": "WAIVE_CHARGE"
-      },
-      "date": [
-        2015,
-        9,
-        1
-      ],
-      "currency": {
-        "code": "USD",
-        "name": "US Dollar",
-        "decimalPlaces": 2,
-        "displaySymbol": "$",
-        "nameCode": "currency.USD",
-        "displayLabel": "US Dollar ($)"
-      },
-      "amount": 100,
-      "submittedOnDate": [
-        2015,
-        9,
-        1
-      ],
-      "reversed": true
-    }
-  ]
-}
 					</code>
 				</div>
 			</div>			
-			
+<!-- End of Client Transactions -->			
 			<a id="resources_deletetemplate" name="resources_deletetemplate"
 				class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">

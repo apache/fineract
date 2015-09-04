@@ -51,7 +51,8 @@ public class TellerApiResource {
 
     @Autowired
     public TellerApiResource(PlatformSecurityContext securityContext, DefaultToApiJsonSerializer<TellerData> jsonSerializer,
-            TellerManagementReadPlatformService readPlatformService, PortfolioCommandSourceWritePlatformService commandWritePlatformService) {
+            TellerManagementReadPlatformService readPlatformService,
+            PortfolioCommandSourceWritePlatformService commandWritePlatformService) {
         super();
         this.securityContext = securityContext;
         this.jsonSerializer = jsonSerializer;
@@ -259,8 +260,8 @@ public class TellerApiResource {
         final Date fromDate = null;
         final Date toDate = null;
 
-        final CashierTransactionsWithSummaryData cashierTxnWithSummary = this.readPlatformService.retrieveCashierTransactionsWithSummary(
-                cashierId, false, fromDate, toDate, currencyCode);
+        final CashierTransactionsWithSummaryData cashierTxnWithSummary = this.readPlatformService
+                .retrieveCashierTransactionsWithSummary(cashierId, false, fromDate, toDate, currencyCode);
 
         return this.jsonSerializer.serialize(cashierTxnWithSummary);
     }

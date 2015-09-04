@@ -49,12 +49,11 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             dueRepaymentPeriodDate = firstRepaymentPeriodDate;
         } else {
             Calendar currentCalendar = loanApplicationTerms.getLoanCalendar();
-            if (currentCalendar == null) {
-                dueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
-                        loanApplicationTerms.getRepaymentEvery(), lastRepaymentDate, loanApplicationTerms.getNthDay(),
-                        loanApplicationTerms.getWeekDayType());
-            } else {
-                // If we have currentCalendar object, this neans there is a
+            dueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
+                    loanApplicationTerms.getRepaymentEvery(), lastRepaymentDate, loanApplicationTerms.getNthDay(),
+                    loanApplicationTerms.getWeekDayType());
+            if (currentCalendar != null) {
+                // If we have currentCalendar object, this means there is a
                 // calendar associated with
                 // the loan, and we should use it in order to calculate next
                 // repayment
@@ -79,8 +78,8 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                 loanApplicationTerms.getRepaymentEvery(), adjustedDate, loanApplicationTerms.getNthDay(),
                 loanApplicationTerms.getWeekDayType());
 
-        final RepaymentRescheduleType rescheduleType = RepaymentRescheduleType.fromInt(holidayDetailDTO.getWorkingDays()
-                .getRepaymentReschedulingType());
+        final RepaymentRescheduleType rescheduleType = RepaymentRescheduleType
+                .fromInt(holidayDetailDTO.getWorkingDays().getRepaymentReschedulingType());
 
         /**
          * Fix for https://mifosforge.jira.com/browse/MIFOSX-1357

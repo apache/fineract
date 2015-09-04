@@ -20,16 +20,13 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.configuration.data.ExternalServicesData;
 import org.mifosplatform.infrastructure.configuration.data.ExternalServicesPropertiesData;
 import org.mifosplatform.infrastructure.configuration.service.ExternalServicesPropertiesReadPlatformService;
-import org.mifosplatform.infrastructure.configuration.service.ExternalServicesReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -41,7 +38,6 @@ public class ExternalServicesConfigurationApiResource {
 
     private final PlatformSecurityContext context;
     private final ExternalServicesPropertiesReadPlatformService externalServicePropertiesReadPlatformService;
-    private final ExternalServicesReadPlatformService externalServiceReadPlatformService;
     private final ToApiJsonSerializer<ExternalServicesPropertiesData> toApiJsonSerializer;
     // private final ToApiJsonSerializer<S3CredentialsData>
     // s3ToApiJsonSerializer;
@@ -51,14 +47,12 @@ public class ExternalServicesConfigurationApiResource {
     @Autowired
     public ExternalServicesConfigurationApiResource(final PlatformSecurityContext context,
             final ExternalServicesPropertiesReadPlatformService readPlatformService,
-            final ExternalServicesReadPlatformService externalServicesReadPlatformService,
             final ToApiJsonSerializer<ExternalServicesPropertiesData> toApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.externalServicePropertiesReadPlatformService = readPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
-        this.externalServiceReadPlatformService = externalServicesReadPlatformService;
         // this.s3ToApiJsonSerializer = s3ToApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
