@@ -45,7 +45,7 @@ public class ClientTransactionWritePlatformServiceJpaRepositoryImpl implements C
     @Override
     public CommandProcessingResult undo(Long clientId, Long transactionId) {
 
-        final Client client = this.clientRepository.getActiveClient(clientId);
+        final Client client = this.clientRepository.getActiveClientInUserScope(clientId);
 
         final ClientTransaction clientTransaction = this.clientTransactionRepository.findOneWithNotFoundDetection(clientId, transactionId);
 

@@ -19,6 +19,7 @@ public class DisbursementData implements Comparable<DisbursementData> {
     private final LocalDate expectedDisbursementDate;
     private final LocalDate actualDisbursementDate;
     private final BigDecimal principal;
+    @SuppressWarnings("unused")
     private final String loanChargeId;
     private final BigDecimal chargeAmount;
 
@@ -43,11 +44,11 @@ public class DisbursementData implements Comparable<DisbursementData> {
     public BigDecimal amount() {
         return this.principal;
     }
-    
-    public BigDecimal getChargeAmount(){
-    	return this.chargeAmount;
+
+    public BigDecimal getChargeAmount() {
+        return this.chargeAmount;
     }
-    
+
     public boolean isDisbursed() {
         return this.actualDisbursementDate != null;
     }

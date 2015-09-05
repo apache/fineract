@@ -141,7 +141,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     protected boolean withdrawalFeeApplicableForTransfer;
 
     @ManyToMany
-    @JoinTable(name = "m_savings_product_charge", joinColumns = @JoinColumn(name = "savings_product_id"), inverseJoinColumns = @JoinColumn(name = "charge_id"))
+    @JoinTable(name = "m_savings_product_charge", joinColumns = @JoinColumn(name = "savings_product_id") , inverseJoinColumns = @JoinColumn(name = "charge_id") )
     protected Set<Charge> charges;
 
     @Column(name = "allow_overdraft")
@@ -236,9 +236,22 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         this.allowOverdraft = allowOverdraft;
         this.overdraftLimit = overdraftLimit;
 
+        esnureOverdraftLimitsSetForOverdraftAccounts();
+
         this.enforceMinRequiredBalance = enforceMinRequiredBalance;
         this.minRequiredBalance = minRequiredBalance;
         this.minBalanceForInterestCalculation = minBalanceForInterestCalculation;
+    }
+
+    /**
+     * If overdrafts are allowed and the overdraft limit is not set, set the
+     * same to Zero
+     **/
+    private void esnureOverdraftLimitsSetForOverdraftAccounts() {
+
+        if (this.allowOverdraft && this.overdraftLimit() == null) {
+            this.overdraftLimit = BigDecimal.ZERO;
+        }
     }
 
     public MonetaryCurrency currency() {
@@ -448,6 +461,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         }
 
         validateLockinDetails();
+        esnureOverdraftLimitsSetForOverdraftAccounts();
 
         return actualChanges;
     }

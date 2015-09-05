@@ -8,13 +8,14 @@ package org.mifosplatform.portfolio.client.service;
 import java.util.Collection;
 
 import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.portfolio.client.data.ClientTransactionData;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface ClientTransactionReadPlatformService {
 
     @Transactional(readOnly = true)
-    public Page<ClientTransactionData> retrieveAllTransactions(Long clientId, Integer limit, Integer offset);
+    public Page<ClientTransactionData> retrieveAllTransactions(Long clientId, SearchParameters parameters);
 
     @Transactional(readOnly = true)
     public Collection<ClientTransactionData> retrieveAllTransactions(final Long clientId, final Long chargeId);

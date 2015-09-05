@@ -23,6 +23,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.holiday.domain.HolidayRepositoryWrapper;
@@ -43,11 +44,16 @@ import org.mifosplatform.portfolio.client.domain.ClientTransactionRepository;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.mifosplatform.useradministration.domain.AppUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements ClientChargeWritePlatformService {
+
+    private final static Logger logger = LoggerFactory.getLogger(ClientChargeWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final ChargeRepositoryWrapper chargeRepository;
@@ -84,74 +90,83 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
 
     @Override
     public CommandProcessingResult addCharge(Long clientId, JsonCommand command) {
+        try {
+            this.clientChargeDataValidator.validateAdd(command.json());
 
-        this.clientChargeDataValidator.validateAdd(command.json());
+            final Client client = clientRepository.getActiveClientInUserScope(clientId);
 
-        final Client client = clientRepository.getActiveClient(clientId);
+            final Long chargeDefinitionId = command.longValueOfParameterNamed(ClientApiConstants.chargeIdParamName);
+            final Charge charge = this.chargeRepository.findOneWithNotFoundDetection(chargeDefinitionId);
 
-        final Long chargeDefinitionId = command.longValueOfParameterNamed(ClientApiConstants.chargeIdParamName);
-        final Charge charge = this.chargeRepository.findOneWithNotFoundDetection(chargeDefinitionId);
+            // validate for client charge
+            if (!charge.isClientCharge()) {
+                final String errorMessage = "Charge with identifier " + charge.getId() + " cannot be applied to a Client";
+                throw new ChargeCannotBeAppliedToException("client", errorMessage, charge.getId());
+            }
 
-        // validate for client charge
-        if (!charge.isClientCharge()) {
-            final String errorMessage = "Charge with identifier " + charge.getId() + " cannot be applied to a Client";
-            throw new ChargeCannotBeAppliedToException("client", errorMessage, charge.getId());
+            final ClientCharge clientCharge = ClientCharge.createNew(client, charge, command);
+
+            final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat());
+            validateDueDateOnWorkingDay(clientCharge, fmt);
+
+            this.clientChargeRepository.save(clientCharge);
+
+            return new CommandProcessingResultBuilder() //
+                    .withEntityId(clientCharge.getId()) //
+                    .withOfficeId(clientCharge.getClient().getOffice().getId()) //
+                    .withClientId(clientCharge.getClient().getId()) //
+                    .build();
+        } catch (DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(clientId, null, dve);
+            return CommandProcessingResult.empty();
         }
-
-        final ClientCharge clientCharge = ClientCharge.createNew(client, charge, command);
-
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat());
-        validateDueDateOnWorkingDay(clientCharge, fmt);
-
-        this.clientChargeRepository.save(clientCharge);
-
-        return new CommandProcessingResultBuilder() //
-                .withEntityId(clientCharge.getId()) //
-                .withOfficeId(clientCharge.getClient().getOffice().getId()) //
-                .withClientId(clientCharge.getClient().getId()) //
-                .build();
     }
 
     @Override
     public CommandProcessingResult payCharge(Long clientId, Long clientChargeId, JsonCommand command) {
-        this.clientChargeDataValidator.validatePayCharge(command.json());
+        try {
+            this.clientChargeDataValidator.validatePayCharge(command.json());
 
-        final Client client = this.clientRepository.getActiveClient(clientId);
+            final Client client = this.clientRepository.getActiveClientInUserScope(clientId);
 
-        final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
+            final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
 
-        final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
-        final LocalDate transactionDate = command.localDateValueOfParameterNamed(ClientApiConstants.transactionDateParamName);
-        final BigDecimal amountPaid = command.bigDecimalValueOfParameterNamed(ClientApiConstants.amountParamName);
-        final Money chargePaid = Money.of(clientCharge.getCurrency(), amountPaid);
+            final Locale locale = command.extractLocale();
+            final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+            final LocalDate transactionDate = command.localDateValueOfParameterNamed(ClientApiConstants.transactionDateParamName);
+            final BigDecimal amountPaid = command.bigDecimalValueOfParameterNamed(ClientApiConstants.amountParamName);
+            final Money chargePaid = Money.of(clientCharge.getCurrency(), amountPaid);
 
-        // Validate business rules for payment
-        validatePaymentTransaction(client, clientCharge, fmt, transactionDate, amountPaid);
+            // Validate business rules for payment
+            validatePaymentTransaction(client, clientCharge, fmt, transactionDate, amountPaid);
 
-        // pay the charge
-        clientCharge.pay(chargePaid);
+            // pay the charge
+            clientCharge.pay(chargePaid);
 
-        // create Payment Transaction
-        final Map<String, Object> changes = new LinkedHashMap<>();
-        final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
+            // create Payment Transaction
+            final Map<String, Object> changes = new LinkedHashMap<>();
+            final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
-        ClientTransaction clientTransaction = ClientTransaction.payCharge(client, client.getOffice(), paymentDetail, transactionDate,
-                chargePaid, clientCharge.getCurrency().getCode(), getAppUserIfPresent());
-        this.clientTransactionRepository.saveAndFlush(clientTransaction);
+            ClientTransaction clientTransaction = ClientTransaction.payCharge(client, client.getOffice(), paymentDetail, transactionDate,
+                    chargePaid, clientCharge.getCurrency().getCode(), getAppUserIfPresent());
+            this.clientTransactionRepository.saveAndFlush(clientTransaction);
 
-        // update charge paid by associations
-        final ClientChargePaidBy chargePaidBy = ClientChargePaidBy.instance(clientTransaction, clientCharge, amountPaid);
-        clientTransaction.getClientChargePaidByCollection().add(chargePaidBy);
+            // update charge paid by associations
+            final ClientChargePaidBy chargePaidBy = ClientChargePaidBy.instance(clientTransaction, clientCharge, amountPaid);
+            clientTransaction.getClientChargePaidByCollection().add(chargePaidBy);
 
-        // generate accounting entries
-        generateAccountingEntries(clientTransaction);
+            // generate accounting entries
+            generateAccountingEntries(clientTransaction);
 
-        return new CommandProcessingResultBuilder() //
-                .withTransactionId(clientTransaction.getId().toString())//
-                .withEntityId(clientCharge.getId()) //
-                .withOfficeId(clientCharge.getClient().getOffice().getId()) //
-                .withClientId(clientCharge.getClient().getId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .withTransactionId(clientTransaction.getId().toString())//
+                    .withEntityId(clientCharge.getId()) //
+                    .withOfficeId(clientCharge.getClient().getOffice().getId()) //
+                    .withClientId(clientCharge.getClient().getId()).build();
+        } catch (DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(clientId, clientChargeId, dve);
+            return CommandProcessingResult.empty();
+        }
 
     }
 
@@ -162,54 +177,65 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
 
     @Override
     public CommandProcessingResult waiveCharge(Long clientId, Long clientChargeId) {
-        final Client client = this.clientRepository.getActiveClient(clientId);
-        final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
-        final LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+        try {
+            final Client client = this.clientRepository.getActiveClientInUserScope(clientId);
+            final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
+            final LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
 
-        // Validate business rules for payment
-        validateWaiverTransaction(client, clientCharge);
+            // Validate business rules for payment
+            validateWaiverTransaction(client, clientCharge);
 
-        // waive the charge
-        Money waivedAmount = clientCharge.waive();
+            // waive the charge
+            Money waivedAmount = clientCharge.waive();
 
-        // create Waiver Transaction
-        ClientTransaction clientTransaction = ClientTransaction.waiver(client, client.getOffice(), transactionDate, waivedAmount,
-                clientCharge.getCurrency().getCode(), getAppUserIfPresent());
-        this.clientTransactionRepository.save(clientTransaction);
+            // create Waiver Transaction
+            ClientTransaction clientTransaction = ClientTransaction.waiver(client, client.getOffice(), transactionDate, waivedAmount,
+                    clientCharge.getCurrency().getCode(), getAppUserIfPresent());
+            this.clientTransactionRepository.save(clientTransaction);
 
-        // update charge paid by associations
-        final ClientChargePaidBy chargePaidBy = ClientChargePaidBy.instance(clientTransaction, clientCharge, waivedAmount.getAmount());
-        clientTransaction.getClientChargePaidByCollection().add(chargePaidBy);
+            // update charge paid by associations
+            final ClientChargePaidBy chargePaidBy = ClientChargePaidBy.instance(clientTransaction, clientCharge, waivedAmount.getAmount());
+            clientTransaction.getClientChargePaidByCollection().add(chargePaidBy);
 
-        return new CommandProcessingResultBuilder().withTransactionId(clientTransaction.getId().toString())//
-                .withEntityId(clientCharge.getId()) //
-                .withOfficeId(clientCharge.getClient().getOffice().getId()) //
-                .withClientId(clientCharge.getClient().getId()) //
-                .build();
+            return new CommandProcessingResultBuilder().withTransactionId(clientTransaction.getId().toString())//
+                    .withEntityId(clientCharge.getId()) //
+                    .withOfficeId(clientCharge.getClient().getOffice().getId()) //
+                    .withClientId(clientCharge.getClient().getId()) //
+                    .build();
+        } catch (DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(clientId, clientChargeId, dve);
+            return CommandProcessingResult.empty();
+        }
     }
 
     @Override
     public CommandProcessingResult deleteCharge(Long clientId, Long clientChargeId) {
-        final Client client = this.clientRepository.getActiveClient(clientId);
-        final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
+        try {
+            final Client client = this.clientRepository.getActiveClientInUserScope(clientId);
+            final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
 
-        // Validate business rules for charge deletion
-        validateChargeDeletion(client, clientCharge);
+            // Validate business rules for charge deletion
+            validateChargeDeletion(client, clientCharge);
 
-        // delete the charge
-        clientChargeRepository.delete(clientCharge);
+            // delete the charge
+            clientChargeRepository.delete(clientCharge);
 
-        return new CommandProcessingResultBuilder() //
-                .withEntityId(clientCharge.getId()) //
-                .withOfficeId(clientCharge.getClient().getOffice().getId()) //
-                .withClientId(clientCharge.getClient().getId()) //
-                .build();
+            return new CommandProcessingResultBuilder() //
+                    .withEntityId(clientCharge.getId()) //
+                    .withOfficeId(clientCharge.getClient().getOffice().getId()) //
+                    .withClientId(clientCharge.getClient().getId()) //
+                    .build();
+        } catch (DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(clientId, clientChargeId, dve);
+            return CommandProcessingResult.empty();
+        }
     }
 
     /**
      * Validates transaction to ensure that <br>
      * charge is active <br>
-     * transaction date is valid (between client activation and todays date) <br>
+     * transaction date is valid (between client activation and todays date)
+     * <br>
      * charge is not already paid or waived <br>
      * amount is not more than total due
      * 
@@ -304,14 +330,16 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
      * @return
      */
     @Override
-    public CommandProcessingResult updateCharge(Long clientId, JsonCommand command) {
-        // this.clientChargeDataValidator.validateAdd(command.json());
+    public CommandProcessingResult updateCharge(@SuppressWarnings("unused") Long clientId,
+            @SuppressWarnings("unused") JsonCommand command) {
+        // functionality not yet supported
         return null;
     }
 
     @Override
+    @SuppressWarnings("unused")
     public CommandProcessingResult inactivateCharge(Long clientId, Long clientChargeId) {
-        // TODO Auto-generated method stub
+        // functionality not yet supported
         return null;
     }
 
@@ -376,6 +404,21 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
             user = this.context.getAuthenticatedUserIfPresent();
         }
         return user;
+    }
+
+    private void handleDataIntegrityIssues(@SuppressWarnings("unused") final Long clientId, final Long clientChargeId,
+            final DataIntegrityViolationException dve) {
+
+        final Throwable realCause = dve.getMostSpecificCause();
+        if (realCause.getMessage().contains("FK_m_client_charge_paid_by_m_client_charge")) {
+
+        throw new PlatformDataIntegrityException("error.msg.client.charge.cannot.be.deleted",
+                "Client charge with id `" + clientChargeId + "` cannot be deleted as transactions have been made on the same",
+                "clientChargeId", clientChargeId); }
+
+        logger.error(dve.getMessage(), dve);
+        throw new PlatformDataIntegrityException("error.msg.client.charges.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource.");
     }
 
 }

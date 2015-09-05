@@ -6,12 +6,12 @@
 package org.mifosplatform.portfolio.client.service;
 
 import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.portfolio.client.data.ClientChargeData;
 
 public interface ClientChargeReadPlatformService {
 
-
-    Page<ClientChargeData> retrieveClientCharges(Long clientId, String status, Boolean isPaid, Integer limit, Integer offset);
+    Page<ClientChargeData> retrieveClientCharges(Long clientId, String status, Boolean pendingPayment, SearchParameters parameters);
 
     ClientChargeData retrieveClientCharge(Long clientId, Long clientChargeId);
 

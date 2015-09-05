@@ -74,14 +74,15 @@ public class ClientChargesTest {
         final String clientChargePaidTransactionId = ClientHelper.payChargesForClients(this.requestSpec, this.responseSpec, clientId,
                 clientChargeId, ClientHelper.getPayChargeJSON("25 AUGUST 2015", "10"));
         Assert.assertNotNull(clientChargePaidTransactionId);
-        isValidOutstandingAmount(ClientHelper.getClientCharge(requestSpec, responseSpec, clientId.toString()), (float) 190.0);
+        isValidOutstandingAmount(ClientHelper.getClientCharge(requestSpec, responseSpec, clientId.toString(), clientChargeId.toString()),
+                (float) 190.0);
 
         /**
          * Revert the paid client charge transaction by passing the
          * clientChargePaidTransactionId and ensure the same is reverted.
          */
-        final Integer undoTrxnId = ClientHelper.revertClientChargeTransaction(this.requestSpec, this.responseSpec, clientId.toString(),
-                clientChargePaidTransactionId);
+                final Integer undoTrxnId = ClientHelper.revertClientChargeTransaction(this.requestSpec, this.responseSpec,
+                        clientId.toString(), clientChargePaidTransactionId);
         Assert.assertNotNull(undoTrxnId);
         isReversedTransaction(clientId.toString(), undoTrxnId.toString());
         /**
@@ -103,8 +104,8 @@ public class ClientChargesTest {
          * waiveOffClientChargeTransactionId and ensured the transaction is
          * reversed.
          */
-        final Integer undoWaiveTrxnId = ClientHelper.revertClientChargeTransaction(this.requestSpec, this.responseSpec,
-                clientId.toString(), waiveOffClientChargeTransactionId);
+        final Integer undoWaiveTrxnId = ClientHelper.revertClientChargeTransaction(this.requestSpec, this.responseSpec, clientId.toString(),
+                waiveOffClientChargeTransactionId);
         Assert.assertNotNull(undoWaiveTrxnId);
         isReversedTransaction(clientId.toString(), undoWaiveTrxnId.toString());
         /**
@@ -130,7 +131,8 @@ public class ClientChargesTest {
                 clientChargeId, ClientHelper.getPayChargeJSON("25 AUGUST 2015", "100"));
         Assert.assertNotNull(chargePaid_responseId);
 
-        isValidOutstandingAmount(ClientHelper.getClientCharge(requestSpec, responseSpec, clientId.toString()), (float) 100.0);
+        isValidOutstandingAmount(ClientHelper.getClientCharge(requestSpec, responseSpec, clientId.toString(), clientChargeId.toString()),
+                (float) 100.0);
 
     }
 
@@ -147,8 +149,8 @@ public class ClientChargesTest {
     }
 
     /**
-     * Check whether the outStandingAmount is equal to expected Amount or not after
-     * paying or after waiving off the client charge.
+     * Check whether the outStandingAmount is equal to expected Amount or not
+     * after paying or after waiving off the client charge.
      * 
      * @param outStandingAmount
      * @param expectedAmount

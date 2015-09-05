@@ -373,6 +373,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.summary = new SavingsAccountSummary();
         this.allowOverdraft = allowOverdraft;
         this.overdraftLimit = overdraftLimit;
+        esnureOverdraftLimitsSetForOverdraftAccounts();
 
         this.enforceMinRequiredBalance = enforceMinRequiredBalance;
         this.minRequiredBalance = minRequiredBalance;
@@ -1110,7 +1111,20 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
 
         validateLockinDetails(baseDataValidator);
+        esnureOverdraftLimitsSetForOverdraftAccounts();
     }
+    
+    /**
+     * If overdrafts are allowed and the overdraft limit is not set, set the
+     * same to Zero
+     **/
+    private void esnureOverdraftLimitsSetForOverdraftAccounts() {
+
+        if (this.allowOverdraft && this.overdraftLimit == null) {
+            this.overdraftLimit = BigDecimal.ZERO;
+        }
+    }
+
 
     private void validateLockinDetails(final DataValidatorBuilder baseDataValidator) {
 

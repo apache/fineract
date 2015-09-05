@@ -120,6 +120,20 @@ public final class SearchParameters {
                 loanId, savingsId, orphansOnly);
     }
 
+    public static SearchParameters forPagination(final Integer offset, final Integer limit) {
+
+        final Integer maxLimitAllowed = getCheckedLimit(limit);
+        final Long staffId = null;
+        final Long loanId = null;
+        final Long savingsId = null;
+        final Boolean orphansOnly = false;
+        final String orderBy = null;
+        final String sortOrder = null;
+
+        return new SearchParameters(null, null, null, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder, staffId, null,
+                loanId, savingsId, orphansOnly);
+    }
+
     public static SearchParameters forSavings(final String sqlSearch, final String externalId, final Integer offset, final Integer limit,
             final String orderBy, final String sortOrder) {
 
@@ -171,10 +185,10 @@ public final class SearchParameters {
         this.currencyCode = null;
     }
 
-    public SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
-            final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
-            final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
-            final Long savingsId, final Boolean orphansOnly, final String currencyCode) {
+    public SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name, final String hierarchy,
+            final String firstname, final String lastname, final Integer offset, final Integer limit, final String orderBy,
+            final String sortOrder, final Long staffId, final String accountNo, final Long loanId, final Long savingsId,
+            final Boolean orphansOnly, final String currencyCode) {
         this.sqlSearch = sqlSearch;
         this.officeId = officeId;
         this.externalId = externalId;
@@ -245,11 +259,11 @@ public final class SearchParameters {
     public Long getOfficeId() {
         return this.officeId;
     }
-   
-    public String getCurrencyCode(){
+
+    public String getCurrencyCode() {
         return this.currencyCode;
     }
-    
+
     public String getExternalId() {
         return this.externalId;
     }

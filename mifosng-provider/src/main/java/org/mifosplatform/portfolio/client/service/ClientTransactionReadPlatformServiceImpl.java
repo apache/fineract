@@ -16,6 +16,7 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.client.data.ClientTransactionData;
 import org.mifosplatform.portfolio.client.domain.ClientEnumerations;
@@ -121,13 +122,24 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
     }
 
     @Override
-    public Page<ClientTransactionData> retrieveAllTransactions(Long clientId, Integer limit, Integer offset) {
+    public Page<ClientTransactionData> retrieveAllTransactions(Long clientId, SearchParameters searchParameters) {
         Object[] parameters = new Object[1];
-        String sql = "select SQL_CALC_FOUND_ROWS " + this.clientTransactionMapper.schema() + " where c.id = ? ";
+        final StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ").append(this.clientTransactionMapper.schema()).append(" where c.id = ? ");
         parameters[0] = clientId;
         final String sqlCountRows = "SELECT FOUND_ROWS()";
-        sql = sql + " order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC limit " + limit + " offset " + offset;
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sql, parameters, this.clientTransactionMapper);
+        sqlBuilder.append(" order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC ");
+
+        // apply limit and offsets
+        if (searchParameters.isLimited()) {
+            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+            if (searchParameters.isOffset()) {
+                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+            }
+        }
+
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), parameters,
+                this.clientTransactionMapper);
     }
 
     @Override

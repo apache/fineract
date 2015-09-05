@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.client.domain;
 
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +21,12 @@ import org.springframework.stereotype.Service;
 public class ClientRepositoryWrapper {
 
     private final ClientRepository repository;
+    private final PlatformSecurityContext context;
 
     @Autowired
-    public ClientRepositoryWrapper(final ClientRepository repository) {
+    public ClientRepositoryWrapper(final ClientRepository repository, final PlatformSecurityContext context) {
         this.repository = repository;
+        this.context = context;
     }
 
     public Client findOneWithNotFoundDetection(final Long id) {
@@ -44,9 +47,11 @@ public class ClientRepositoryWrapper {
         this.repository.delete(client);
     }
 
-    public Client getActiveClient(Long clientId) {
+    public Client getActiveClientInUserScope(Long clientId) {
         final Client client = this.findOneWithNotFoundDetection(clientId);
         if (client.isNotActive()) { throw new ClientNotActiveException(client.getId()); }
+        this.context.validateAccessRights(client.getOffice().getHierarchy());
         return client;
     }
+
 }

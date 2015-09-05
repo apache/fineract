@@ -16,6 +16,7 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
@@ -118,8 +119,8 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
     }
 
     @Override
-    public Page<ClientChargeData> retrieveClientCharges(Long clientId, String status, Boolean pendingPayment, Integer limit,
-            Integer offset) {
+    public Page<ClientChargeData> retrieveClientCharges(Long clientId, String status, Boolean pendingPayment,
+            SearchParameters searchParameters) {
         final ClientChargeMapper rm = new ClientChargeMapper();
         final StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ").append(rm.schema()).append(" where cc.client_id=? ");
@@ -133,13 +134,21 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
 
         // filter for paid charges
         if (pendingPayment != null && pendingPayment) {
-            sqlBuilder.append(" and ( cc.is_paid_derived = 0 and cc.waived = 1) ");
+            sqlBuilder.append(" and ( cc.is_paid_derived = 0 and cc.waived = 0) ");
         } else if (pendingPayment != null && !pendingPayment) {
-            sqlBuilder.append(" and (cc.is_paid_derived = 1 or cc.waived = 0) ");
+            sqlBuilder.append(" and (cc.is_paid_derived = 1 or cc.waived = 1) ");
         }
 
-        sqlBuilder.append(
-                " order by cc.charge_time_enum ASC, cc.charge_due_date DESC, cc.is_penalty ASC " + "limit " + limit + " offset " + offset);
+        sqlBuilder.append(" order by cc.charge_time_enum ASC, cc.charge_due_date DESC, cc.is_penalty ASC ");
+
+        // apply limit and offsets
+        if (searchParameters.isLimited()) {
+            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+            if (searchParameters.isOffset()) {
+                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+            }
+        }
+
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), new Object[] { clientId },
                 this.clientChargeMapper);
