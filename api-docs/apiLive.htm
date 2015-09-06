@@ -90,7 +90,7 @@
 <body>
 	<div id="page-wrapper">
 		<div id="flybar">
-			<div id="nav-logo">15.03.1.RELEASE</div>
+			<div id="nav-logo">15.09.RELEASE</div>
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Overview</h2>
 				<div class="flybar-menu-overview">
@@ -393,18 +393,18 @@
 							</tr>
 							<tr>
 								<td></td>
-								<td>clients/{clientId}</td>
+								<td>clients/{clientId}/charges/{clientChargeId}</td>
 								<td></td>
+								<td><a href="#clientcharges_retrieve">Retrieve a Client Charge</a></td>
 								<td></td>
-								<td></td>
-								<td><a href="#delete_clientCharge">Delete Client Charge</a></td>
+								<td><a href="#delete_clientCharge">Delete a Client Charge</a></td>
 								<td></td>
 								<td></td>
 							</tr>
 							<tr>
 								<td></td>							
-								<td>clients/{clientId}/charges/{chargeid}?command=pay</td>
-								<td><a href="#pay_clientCharge">Pay Client Charge</a></td>
+								<td>clients/{clientId}/charges/{clientChargeId}?command=pay</td>
+								<td><a href="#pay_clientCharge">Pay a Client Charge</a></td>
 								<td></td>
 								<td></td>
 								<td></td>
@@ -412,32 +412,31 @@
 							</tr>
 							<tr>
 								<td></td>
-								<td>clients/{clientId}/charges/{chargeid}?command=waive</td>
-								<td><a href="#waive_clientCharge">Waive Client Charge</a></td>							
+								<td>clients/{clientId}/charges/{clientChargeId}?command=waive</td>
+								<td><a href="#waive_clientCharge">Waive a Client Charge</a></td>							
 								<td></td>
 								<td></td>
 								<td></td>
 								<td></td>
 							</tr>
 							<tr>
-								<td ><a href="#client_transactions">Client Ttransactions</td>
-								<td>clients/{clientId}/transactions/{transactionId}?command=undo</td>
-								<td><a href="#revert_clientCharge">Revert Client Charge Transaction</a></td>								
-								<td></td>
-								<td></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td ></td>
+								<td><a href="#client_transactions">Client Transactions</td>
 								<td>clients/{clientId}/transactions</td>
-								<td><a href="#list_clientTransactions">List Client Charge Transactions</a></td>								
+								<td><a href="#list_clientTransactions">List Client Transactions</a></td>			
 								<td></td>
 								<td></td>
 								<td></td>
 								<td></td>
 							</tr>
-									
+							<tr>
+								<td></td>
+								<td>clients/{clientId}/transactions/{transactionId}?command=undo</td>
+								<td><a href="#revert_clientCharge">Undo a Client Transaction</a></td>
+								<td><a href="#clienttransactions_retrieve">Retrieve a Client Transaction</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
 							
 						</table>
 					</div>
@@ -1249,7 +1248,7 @@
 			</div>
 
 			<div class="flybar-nav">
-				<h2 class="flybar-button">Group & Collection Sheet</h2>
+				<h2 class="flybar-button">Groups</h2>
 				<div id="toc-menu-loan" class="flybar-menu">
 					<div class="tocMatrix">
 						<table class=matrixHeading>
@@ -17061,7 +17060,7 @@ Request Body:
 			products. These are typically <b>Fees</b> or <b>Penalties</b>.
 		</p>
 		<p>A <strong><i>Charge</i></strong> on mifos platform is what we use to model both <b>Fees</b> and <b>Penalties</b>.</p>
-		<p>At present we support defining charges for use in both loan and saving products.</p>
+		<p>At present we support defining charges for use with Client accounts and both loan and saving products.</p>
 		<table class=matrixHeading>
 			<tr class="matrixHeadingBG">
 				<td><div class="mifosXHeading2">Field Descriptions</div></td>
@@ -17076,9 +17075,10 @@ Request Body:
 				<td>chargeAppliesTo</td>
 			</tr>
 			<tr>
-				<td class=fielddesc>Enumeration for indicating whether charge is to be applicable for loans or savings.<br/>
+				<td class=fielddesc>Enumeration for indicating whether charge is to be applicable for loans, savings or clients.<br/>
 					1=Loans,
-					2=Savings
+					2=Savings,
+					3=Client
 				<p>Once a charge definiton has been created, this attribute cannot be changed at any point.</p>
 				</td>
 			</tr>
@@ -17186,6 +17186,13 @@ Request Body:
 			</tr>
             <tr>
             	<td class=fielddesc>This field is Optional Used to indicate the recurring(days,weeks,months and Years) charge due date starting on system calculated date for overdue penalty.<br/></td>
+            </tr>
+            <tr class=alt>
+				<td>incomeAccount</td>
+			</tr>
+            <tr>
+            	<td class=fielddesc>This field is Optional and can be used only when a charge is applied to a Client. It indicates the Income or Liability account which gets 
+            	credited when a payment is made on this charge<br/></td>
             </tr>
 		</table>
 	</div>
@@ -35726,7 +35733,7 @@ Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>List Client Transactions</h4>
-					<p>The <i>list</i> capability of client transaction can support <b>pagination</b> and <b>sorting</b>.</p>
+					<p>The <i>list</i> capability of client transaction can support <b>pagination</b>.</p>
 					<h5>Mandatory Arguments</h5>
 					<dl class="argument-list">
 						<dt>offset</dt>
@@ -35794,6 +35801,56 @@ No Request Body:
 </code>
 				</div>
 			</div>
+
+			<a id="clienttransactions_retrieve" name="clienttransactions_retrieve" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Client Transaction</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>clients/1/transactions/1</div>
+					<br>
+					<br>
+					<div class=apiClick>clients/1/transactions/1?fields=id,officeName</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/clients/{clientId}/transaction/{transactionId}
+					</code>
+					<code class="method-response">
+{
+  "id": 1,
+  "officeId": 1,
+  "officeName": "Head Office",
+  "type": {
+    "id": 1,
+    "code": "clientTransactionType.payCharge",
+    "value": "PAY_CHARGE"
+  },
+  "date": [
+    2015,
+    8,
+    17
+  ],
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "amount": 60.000000,
+  "submittedOnDate": [
+    2015,
+    8,
+    19
+  ],
+  "reversed": true
+}
+					</code>
+				</div>
+			</div>
+
 			<a id="add_clientCharge" name="add_clientCharge" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -35870,40 +35927,266 @@ Request Body:
 						<dd> Filters charges that are pending payment (neither paid or waived).</dd>
           			</dl>
 					<p>Example Requests:</p>				
-					<div class=apiClick>clients/189/charges</div>	
-					<div class=apiClick>clients/189/charges?offset=0&limit=5</div>				
+					<div class=apiClick>clients/1/charges</div>	
+					<div class=apiClick>clients/1/charges?offset=0&limit=5</div>				
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
 GET https://DomainName/api/v1/clients/{clientId}/charges?limit=5&offset=0
 					</code>
 					<code class="method-request">
-GET https://localhost:8443/mifosng-provider/api/v1/clients/189/charges?limit=5&offset=0
-
-GET clients/189/charges?limit=5&offset=0
+GET clients/1/charges?limit=5&offset=0
 Content-Type: application/json
-Request Body:
-{
-  "clientId":189
- }
+No Request Body
             		</code>
-					<code class="method-response">			
+					<code class="method-response">	
+{
+  "totalFilteredRecords": 4,
+  "pageItems": [
+    {
+      "id": 5,
+      "clientId": 1,
+      "chargeId": 6,
+      "name": "Client Fees 2",
+      "chargeTimeType": {
+        "id": 2,
+        "code": "chargeTimeType.specifiedDueDate",
+        "value": "Specified due date"
+      },
+      "dueDate": [
+        2015,
+        9,
+        1
+      ],
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 550.000000,
+      "amountPaid": 0.000000,
+      "amountWaived": 0.000000,
+      "amountWrittenOff": 0,
+      "amountOutstanding": 550.000000,
+      "penalty": false,
+      "isActive": true,
+      "isPaid": false,
+      "isWaived": false
+    },
+    {
+      "id": 4,
+      "clientId": 1,
+      "chargeId": 5,
+      "name": "Client Fee 1",
+      "chargeTimeType": {
+        "id": 2,
+        "code": "chargeTimeType.specifiedDueDate",
+        "value": "Specified due date"
+      },
+      "dueDate": [
+        2015,
+        8,
+        31
+      ],
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 120.000000,
+      "amountPaid": 0.000000,
+      "amountWaived": 120.000000,
+      "amountWrittenOff": 0,
+      "amountOutstanding": 120.000000,
+      "penalty": true,
+      "isActive": true,
+      "isPaid": false,
+      "isWaived": true
+    },
+    {
+      "id": 3,
+      "clientId": 1,
+      "chargeId": 5,
+      "name": "Client Fee 1",
+      "chargeTimeType": {
+        "id": 2,
+        "code": "chargeTimeType.specifiedDueDate",
+        "value": "Specified due date"
+      },
+      "dueDate": [
+        2015,
+        8,
+        17
+      ],
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 100.000000,
+      "amountPaid": 0.000000,
+      "amountWaived": 100.000000,
+      "amountWrittenOff": 0,
+      "amountOutstanding": 0.000000,
+      "penalty": true,
+      "isActive": true,
+      "isPaid": false,
+      "isWaived": true
+    },
+    {
+      "id": 2,
+      "clientId": 1,
+      "chargeId": 2,
+      "name": "Recurring savings Charge",
+      "chargeTimeType": {
+        "id": 7,
+        "code": "chargeTimeType.monthlyFee",
+        "value": "Monthly Fee"
+      },
+      "dueDate": [
+        2015,
+        8,
+        17
+      ],
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 100.000000,
+      "amountPaid": 0,
+      "amountWaived": 100.000000,
+      "amountWrittenOff": 0,
+      "amountOutstanding": 0.000000,
+      "penalty": false,
+      "isActive": true,
+      "isPaid": false,
+      "isWaived": true
+    }
+  ]
+}		
  
 					</code>
 				</div>
 			</div>
-			
+					<a id="clientcharges_retrieve" name="clientcharges_retrieve" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Client Charge</h4>
+					<h5>Arguments</h5>
+					<dl class="argument-list">
+						<dt>associations</dt>
+						<dd>
+							optional, <span>Either 'all' or a comma separated list of
+								loan 'associations' (itemised below).</span>
+						</dd>
+						<dd>
+							<br>Associations are just extra pieces of data that you
+							might or might not want to retrieve.<br>
+							<br>
+						</dd>
+						<dd>
+							<b>'all':</b> Gets all association data.
+						</dd>
+						<dd>
+							<b>'transactions':</b> Retrieves all transactions made on this client charge.
+						</dd>
+					</dl>
+					<p>Example Requests:</p>
+					<div class=apiClick>clients/1/charges/1</div>
+					<br>
+					<br>
+					<div class=apiClick>clients/1/charges/1?fields=name,id</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/clients/{clientId}/charges/{clientChargeId}
+					</code>
+					<code class="method-response">
+{
+  "id": 3,
+  "clientId": 1,
+  "chargeId": 5,
+  "name": "Client Fee 1",
+  "chargeTimeType": {
+    "id": 2,
+    "code": "chargeTimeType.specifiedDueDate",
+    "value": "Specified due date"
+  },
+  "dueDate": [
+    2015,
+    8,
+    17
+  ],
+  "chargeCalculationType": {
+    "id": 1,
+    "code": "chargeCalculationType.flat",
+    "value": "Flat"
+  },
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "amount": 100.000000,
+  "amountPaid": 0.000000,
+  "amountWaived": 100.000000,
+  "amountWrittenOff": 0,
+  "amountOutstanding": 0.000000,
+  "penalty": true,
+  "isActive": true,
+  "isPaid": false,
+  "isWaived": true
+}
+					</code>
+				</div>
+			</div>	
 			
         <a id="delete_clientCharge" name="delete_clientCharge" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Delete Client Charge</h4>
+					<h4>Delete a Client Charge</h4>
 					<p>
 					Deletes a Client Charge on which no transactions have taken place (either payments or waivers).				</p>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">				
-DELETE  https://localhost:8443/mifosng-provider/api/v1/clients/{clientId}/charges/{chargeId}
+DELETE  https://DomainName/api/v1/clients/{clientId}/charges/{clientChargeId}
 					</code>
 					<code class="method-request">
 POST clients/189/charges/164
@@ -35911,9 +36194,6 @@ Content-Type: application/json
 No Request Body
             </code>
 			<code class="method-response">
-			
-
-
 {
   "officeId": 1,
   "clientId": 189,
@@ -35925,7 +36205,7 @@ No Request Body
 			<a id="pay_clientCharge" name="pay_clientCharge" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Pay Client Charge</h4>
+					<h4>Pay a Client Charge</h4>
 					<p>
 						<br>Pay either a part of or the entire due amount for a charge.						
 					</p>
@@ -35935,7 +36215,7 @@ No Request Body
 						</tr>
 						<tr >
 						<td>
-							<br>transactionDate and amount<br>
+							transactionDate and amount
 							</td>
 						</tr>
 					</table>
@@ -35943,7 +36223,7 @@ No Request Body
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">					
-POST https://localhost:8443/mifosng-provider/api/v1/clients/{clientId}/charges/{chargeId}?command=paycharge
+POST https://DomainName/api/v1/clients/{clientId}/charges/{clientChargeId}?command=paycharge
 					</code>
 					<code class="method-request">
 POST clients/189/charges/157?command=payCharge
@@ -35971,7 +36251,7 @@ Request Body:
           <a id="waive_clientCharge" name="waive_clientCharge" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Waive Client Charge</h4>
+					<h4>Waive a Client Charge</h4>
 					<p>
 						<br>This API provides the facility of waiving off the remaining amount on a client charge						
 					</p>
@@ -35979,7 +36259,7 @@ Request Body:
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">					
-POST https://localhost:8443/mifosng-provider/api/v1/clients/{clientId}/charges/{chargeId}?command=waive
+POST https://DomainName/api/v1/clients/{clientId}/charges/{clientChargeId}?command=waive
 					</code>
 					<code class="method-request">
 POST clients/189/charges/157?command=waive						
@@ -35999,11 +36279,11 @@ No Request Body
            <a id="revert_clientCharge" name="revert_clientCharge" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Undo Client Transaction</h4>
+					<h4>Undo a Client Transaction</h4>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">					
-POST https://localhost:8443/mifosng-provider/api/v1/clients/{clientId}/transactions/{transactionId?command=undo
+POST https://DomainName/api/v1/clients/{clientId}/transactions/{transactionId}?command=undo
 					</code>
 					<code class="method-request">
 POST clients/189/transactions/222?command=undo					
