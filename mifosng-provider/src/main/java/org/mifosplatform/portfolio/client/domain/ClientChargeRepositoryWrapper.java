@@ -41,6 +41,7 @@ public class ClientChargeRepositoryWrapper {
 
     public void delete(final ClientCharge clientCharge) {
         this.repository.delete(clientCharge);
+        this.repository.flush();
     }
 
 }
