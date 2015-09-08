@@ -21,6 +21,7 @@ dependencies {
                 [group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: springBootVersion],
 
                 [group: 'org.springframework', name: 'spring-context-support', version: springVersion],
+				[group: 'org.springframework.security.oauth', name: 'spring-security-oauth2', version: springOauthVersion],
 
                 [group: 'javax.ws.rs', name: 'jsr311-api', version: '1.1.1'],
                 [group: 'com.sun.jersey', name: 'jersey-core', version: jerseyVersion],

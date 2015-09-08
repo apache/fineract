@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 
-import javax.ws.rs.POST;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -17,7 +17,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
-import org.mifosplatform.infrastructure.security.data.AuthenticatedUserData;
+import org.mifosplatform.infrastructure.security.data.AuthenticatedOauthUserData;
 import org.mifosplatform.infrastructure.security.service.SpringSecurityPlatformSecurityContext;
 import org.mifosplatform.useradministration.data.RoleData;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -26,53 +26,49 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.stereotype.Component;
 
-import com.sun.jersey.core.util.Base64;
-
-@Path("/authentication")
+/*
+ * Implementation of Oauth2 authentication APIs, loaded only when "oauth" profile is enabled. 
+ */
+@Path("/userdetails")
 @Component
-@Profile("basicauth")
+@Profile("oauth")
 @Scope("singleton")
-public class AuthenticationApiResource {
+public class UserDetailsApiResource {
 
-    private final DaoAuthenticationProvider customAuthenticationProvider;
-    private final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService;
+    private final ResourceServerTokenServices tokenServices;
+    private final ToApiJsonSerializer<AuthenticatedOauthUserData> apiJsonSerializerService;
     private final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext;
 
     @Autowired
-    public AuthenticationApiResource(
-            @Qualifier("customAuthenticationProvider") final DaoAuthenticationProvider customAuthenticationProvider,
-            final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService,
+    public UserDetailsApiResource(@Qualifier("tokenServices") final ResourceServerTokenServices tokenServices,
+            final ToApiJsonSerializer<AuthenticatedOauthUserData> apiJsonSerializerService,
             final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext) {
-        this.customAuthenticationProvider = customAuthenticationProvider;
+        this.tokenServices = tokenServices;
         this.apiJsonSerializerService = apiJsonSerializerService;
         this.springSecurityPlatformSecurityContext = springSecurityPlatformSecurityContext;
     }
 
-    @POST
+    @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    public String authenticate(@QueryParam("username") final String username, @QueryParam("password") final String password) {
+    public String fetchAuthenticatedUserData(@QueryParam("access_token") final String accessToken) {
 
-        final Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
-        final Authentication authenticationCheck = this.customAuthenticationProvider.authenticate(authentication);
+        final Authentication authentication = this.tokenServices.loadAuthentication(accessToken);
+        if (authentication.isAuthenticated()) {
+            final AppUser principal = (AppUser) authentication.getPrincipal();
 
-        final Collection<String> permissions = new ArrayList<>();
-        AuthenticatedUserData authenticatedUserData = new AuthenticatedUserData(username, permissions);
+            final Collection<String> permissions = new ArrayList<>();
+            AuthenticatedOauthUserData authenticatedUserData = new AuthenticatedOauthUserData(principal.getUsername(), permissions);
 
-        if (authenticationCheck.isAuthenticated()) {
-            final Collection<GrantedAuthority> authorities = new ArrayList<>(authenticationCheck.getAuthorities());
+            final Collection<GrantedAuthority> authorities = new ArrayList<>(authentication.getAuthorities());
             for (final GrantedAuthority grantedAuthority : authorities) {
                 permissions.add(grantedAuthority.getAuthority());
             }
 
-            final byte[] base64EncodedAuthenticationKey = Base64.encode(username + ":" + password);
-
-            final AppUser principal = (AppUser) authenticationCheck.getPrincipal();
             final Collection<RoleData> roles = new ArrayList<>();
             final Set<Role> userRoles = principal.getRoles();
             for (final Role role : userRoles) {
@@ -88,15 +84,15 @@ public class AuthenticationApiResource {
             final EnumOptionData organisationalRole = principal.organisationalRoleData();
 
             if (this.springSecurityPlatformSecurityContext.doesPasswordHasToBeRenewed(principal)) {
-                authenticatedUserData = new AuthenticatedUserData(username, principal.getId(), new String(base64EncodedAuthenticationKey));
+                authenticatedUserData = new AuthenticatedOauthUserData(principal.getUsername(), principal.getId(), accessToken);
             } else {
 
-                authenticatedUserData = new AuthenticatedUserData(username, officeId, officeName, staffId, staffDisplayName,
-                        organisationalRole, roles, permissions, principal.getId(), new String(base64EncodedAuthenticationKey));
+                authenticatedUserData = new AuthenticatedOauthUserData(principal.getUsername(), officeId, officeName, staffId, staffDisplayName,
+                        organisationalRole, roles, permissions, principal.getId(), accessToken);
             }
-
+            return this.apiJsonSerializerService.serialize(authenticatedUserData);
         }
+        return null;
 
-        return this.apiJsonSerializerService.serialize(authenticatedUserData);
     }
 }

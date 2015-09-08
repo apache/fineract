@@ -14,12 +14,15 @@ import org.mifosplatform.infrastructure.configuration.spring.TestsWithoutDatabas
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
+@ActiveProfiles("basicauth")
 @ContextConfiguration(classes = TestsWithoutDatabaseAndNoJobsConfiguration.class)
 public class CommandHandlerProviderTest {
 
