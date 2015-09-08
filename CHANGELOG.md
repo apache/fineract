@@ -6,11 +6,12 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
-1. 5 Sep 2015 - 15.09.RELEASE
+1. 08 Sep 2015 - 15.09.1.RELEASE
+1. 05 Sep 2015 - 15.09.RELEASE
 1. 18 May 2015 - 15.03.1.RELEASE
 1. 06 Apr 2015 - 15.03.RELEASE
 1. 22 Dec 2014 - 1.26.0.RELEASE
-1. 1 Nov 2014 - 1.25.1.RELEASE
+1. 01 Nov 2014 - 1.25.1.RELEASE
 1. 12 Oct 2014 - 1.25.0.RELEASE
 1. 10 Jul 2014 - 1.24.0.RELEASE
 1. 16 Jun 2014 - 1.23.1.RELEASE
@@ -35,15 +36,15 @@ Releases
 1. 22 Oct 2013 - 1.13.1.RELEASE
 1. 19 Oct 2013 - 1.13.0.RELEASE
 1. 16 Oct 2013 - 1.12.0.RELEASE
-1. 7 Oct 2013 - 1.11.1.RELEASE
-1. 5 Oct 2013 - 1.11.0.RELEASE
-1. 4 Oct 2013 - 1.10.3.RELEASE
+1. 07 Oct 2013 - 1.11.1.RELEASE
+1. 05 Oct 2013 - 1.11.0.RELEASE
+1. 04 Oct 2013 - 1.10.3.RELEASE
 1. 22 Sep 2013 - 1.10.2.RELEASE
 1. 20 Sep 2013 - 1.10.1.RELEASE
 1. 19 Sep 2013 - 1.10.0.RELEASE
 1. 18 Sep 2013 - 1.9.2.RELEASE
 1. 10 Sep 2013 - 1.9.1.RELEASE
-1. 8 Sep 2013 - 1.9.0.RELEASE
+1. 08 Sep 2013 - 1.9.0.RELEASE
 1. 21 Aug 2013 - 1.8.1.RELEASE
 1. 20 Aug 2013 - 1.8.0.RELEASE
 1. 14 Aug 2013 - 1.7.2.RELEASE
@@ -71,6 +72,15 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+15.09.1.RELEASE
+=============
+Bug Release
+
+Platform & API
+
+Bugs
+ - [MIFOSX-2195] - Not able to submit the new loan application for a client with charges attached
 
 15.09.RELEASE
 =============
