@@ -55,29 +55,29 @@ public class LoanChargeAssembler {
     }
 
     public Set<LoanCharge> fromParsedJson(final JsonElement element, Set<LoanDisbursementDetails> disbursementDetails) {
-        JsonArray jsonDisbursement = this.fromApiJsonHelper.extractJsonArrayNamed("disbursementData", element) ;
+        JsonArray jsonDisbursement = this.fromApiJsonHelper.extractJsonArrayNamed("disbursementData", element);
         List<Long> disbursementChargeIds = new ArrayList<>();
-       
-        if(jsonDisbursement != null && jsonDisbursement.size() > 0) {
-            for(int i = 0 ; i < jsonDisbursement.size(); i++) {
+
+        if (jsonDisbursement != null && jsonDisbursement.size() > 0) {
+            for (int i = 0; i < jsonDisbursement.size(); i++) {
                 final JsonObject jsonObject = jsonDisbursement.get(i).getAsJsonObject();
-                if(jsonObject != null && jsonObject.getAsJsonPrimitive(LoanApiConstants.loanChargeIdParameterName) != null){
+                if (jsonObject != null && jsonObject.getAsJsonPrimitive(LoanApiConstants.loanChargeIdParameterName) != null) {
                     String chargeIds = jsonObject.getAsJsonPrimitive(LoanApiConstants.loanChargeIdParameterName).getAsString();
-                    if(chargeIds != null) {
+                    if (chargeIds != null) {
                         if (chargeIds.indexOf(",") != -1) {
                             String[] chargeId = chargeIds.split(",");
                             for (String loanChargeId : chargeId) {
                                 disbursementChargeIds.add(Long.parseLong(loanChargeId));
                             }
                         } else {
-                            disbursementChargeIds.add(Long.parseLong(chargeIds)) ;
-                        }    
+                            disbursementChargeIds.add(Long.parseLong(chargeIds));
+                        }
                     }
-                    
+
                 }
             }
         }
-        
+
         final Set<LoanCharge> loanCharges = new HashSet<>();
         final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
         final Integer numberOfRepayments = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("numberOfRepayments", element);
@@ -103,8 +103,8 @@ public class LoanChargeAssembler {
                     final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerNamed("chargeTimeType", loanChargeElement, locale);
                     final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerNamed("chargeCalculationType",
                             loanChargeElement, locale);
-                    final LocalDate dueDate = this.fromApiJsonHelper
-                            .extractLocalDateNamed("dueDate", loanChargeElement, dateFormat, locale);
+                    final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed("dueDate", loanChargeElement, dateFormat,
+                            locale);
                     final Integer chargePaymentMode = this.fromApiJsonHelper.extractIntegerNamed("chargePaymentMode", loanChargeElement,
                             locale);
                     if (id == null) {
@@ -136,13 +136,16 @@ public class LoanChargeAssembler {
                         }
                         if (topLevelJsonElement.has("disbursementData") && topLevelJsonElement.get("disbursementData").isJsonArray()) {
                             final JsonArray disbursementArray = topLevelJsonElement.get("disbursementData").getAsJsonArray();
-                            JsonObject disbursementDataElement = disbursementArray.get(0).getAsJsonObject();
-                            expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                                    LoanApiConstants.disbursementDateParameterName, disbursementDataElement, dateFormat, locale);
+                            if (disbursementArray.size() > 0) {
+                                JsonObject disbursementDataElement = disbursementArray.get(0).getAsJsonObject();
+                                expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(
+                                        LoanApiConstants.disbursementDateParameterName, disbursementDataElement, dateFormat, locale);
+                            }
                         }
 
-                        if ((chargeDefinition.isPercentageOfDisbursementAmount() || chargeDefinition.isPercentageOfApprovedAmount() || chargeDefinition
-                                .getChargeCalculation() == ChargeCalculationType.FLAT.getValue()) && disbursementDetails != null) {
+                        if ((chargeDefinition.isPercentageOfDisbursementAmount() || chargeDefinition.isPercentageOfApprovedAmount()
+                                || chargeDefinition.getChargeCalculation() == ChargeCalculationType.FLAT.getValue())
+                                && disbursementDetails != null) {
                             LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = null;
                             for (LoanDisbursementDetails disbursementDetail : disbursementDetails) {
                                 if (chargeDefinition.getChargeTimeType() == ChargeTimeType.DISBURSEMENT.getValue()) {
@@ -201,10 +204,11 @@ public class LoanChargeAssembler {
                     } else {
                         final Long loanChargeId = id;
                         final LoanCharge loanCharge = this.loanChargeRepository.findOne(loanChargeId);
-                        if(disbursementChargeIds.contains(loanChargeId) && loanCharge == null) {
-                            //throw new LoanChargeNotFoundException(loanChargeId);
+                        if (disbursementChargeIds.contains(loanChargeId) && loanCharge == null) {
+                            // throw new
+                            // LoanChargeNotFoundException(loanChargeId);
                         }
-                        if(loanCharge != null) {
+                        if (loanCharge != null) {
                             loanCharge.update(amount, dueDate, numberOfRepayments);
                             loanCharges.add(loanCharge);
                         }
@@ -215,7 +219,7 @@ public class LoanChargeAssembler {
 
         return loanCharges;
     }
-    
+
     public Set<Charge> getNewLoanTrancheCharges(final JsonElement element) {
         final Set<Charge> associatedChargesForLoan = new HashSet<>();
         if (element.isJsonObject()) {
