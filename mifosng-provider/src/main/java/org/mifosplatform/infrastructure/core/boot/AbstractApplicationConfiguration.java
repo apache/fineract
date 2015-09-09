@@ -26,7 +26,7 @@ import org.springframework.context.annotation.ImportResource;
  * and MariaDB4j (because those differ in the subclasses).
  */
 @Configuration
-@Import({ WebXmlConfiguration.class, WebFrontEndConfiguration.class })
+@Import({ WebXmlConfiguration.class, WebXmlOauthConfiguration.class, WebFrontEndConfiguration.class })
 @ImportResource({ "classpath*:META-INF/spring/appContext.xml" })
 @EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class,
 		HibernateJpaAutoConfiguration.class,

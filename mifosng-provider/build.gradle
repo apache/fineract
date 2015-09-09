@@ -33,6 +33,7 @@ targetCompatibility = JavaVersion.VERSION_1_7
 
 project.ext.springBootVersion = '1.1.6.RELEASE'
 project.ext.springVersion = '4.0.7.RELEASE'
+project.ext.springOauthVersion = '2.0.4.RELEASE'
 project.ext.jerseyVersion = '1.17'
 project.ext.springDataJpaVersion = '1.7.0.RELEASE' // also change spring-boot-gradle-plugin version above
 
@@ -62,6 +63,21 @@ if (project.hasProperty('env') && project.getProperty('env') == 'dev') {
     apply from:  'dev-dependencies.gradle'
 }  else {
     apply from: 'dependencies.gradle'
+}
+
+/* Enable Oauth2 authentication based on environment, default to HTTP basic auth */
+if (project.hasProperty('security') && project.getProperty('security') == 'oauth') {
+	copy {
+	    from './properties/oauth/'
+	    into 'src/main/resources/'
+	    include '*.properties'
+	}
+}  else {
+	copy {
+	    from './properties/basicauth/'
+	    into 'src/main/resources/'
+	    include '*.properties'
+	}
 }
 
 task dist(type:Zip){

@@ -104,6 +104,8 @@
 	<li><a href="#dates_and_numbers">Updating Dates and Numbers</a></li>
 	<li><a href="#field_descriptions">Field Descriptions</a></li>
 	<li><a href="#authentication_overview">Authentication Overview</a></li>
+	<li><a href="#authentication_basicauth">Authentication HTTP Basic</a></li>
+	<li><a href="#authentication_oauth">Authentication Oauth2</a></li>
 	<li><a href="#errors">Errors</a></li>
 	<li><a href="#batch_api">Batch API</a></li>
 	<li><a href="#fullapi_matrix">Full API Matrix</a></li>
@@ -2141,10 +2143,34 @@
 									</table></td>
 							</tr>
 							<tr>
-								<td><a href="#authentication">Authentication</a></td>
+								<td><a href="#authenticationbasic">Authentication HTTP Basic</a></td>
 								<td>authentication</td>
-								<td><a href="#authenticate_request">Verify Authentication</a></td>
+								<td><a href="#authenticate_request_basic">Verify Authentication</a></td>
 								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#authenticationoauth">Authentication Oauth2</a></td>
+								<td>oauth/token</td>
+								<td><a href="#oauth">OAuth2 Access and refresh Token Request</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td></td>
+								<td><a href="#oauth_access_token_req">OAuth2 Access Token Request from refresh token</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>authenticated user</td>
+								<td></td>
+								<td><a href="#userdetails_request">Fetch Authenticated user details</a></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -3039,17 +3065,40 @@
 				<div class="method-description">
 					<h3>Authentication Overview</h3>
 					<p>
-						Authentication to the API occurs via <a
+						Authentication to the API can be configured to be supported via <a
 							href="http://en.wikipedia.org/wiki/Basic_access_authentication">HTTP
-							Basic Auth</a>.
+							Basic Auth</a> or <a href="http://tools.ietf.org/html/rfc6749">OAuth2</a>.
 					</p>
 
+					<p>
+						Default authentication is using HTTP Basic Auth. Oauth2 can be enabled by using <i>-Psecurity=oauth</i> option on gradle build command. 
+					</p>
 					<p>
 						The platform has been configured to reject plain HTTP requests and
 						to expect all API requests to be made over <a
 							href="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS</a>. All
 						requests must be authenticated.
 					</p>
+				</div>
+				<div class="method-example">
+<code>
+For eg.
+Use 'gradlew clean tomcatRunWar' for HTTP Basic Auth and use 'gradlew clean tomcatRunWar -Psecurity=oauth' for Oauth2 Authentication.
+</code>
+					</div>
+			</div>
+
+			<a id="authentication_basicauth" name="authentication_basicauth"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Authentication HTTP Basic</h3>
+					<p>
+						Authentication to the API occurs via <a
+							href="http://en.wikipedia.org/wiki/Basic_access_authentication">HTTP
+							Basic Auth</a>.
+					</p>
+
 				</div>
 				<div class="method-example">
 <code>
@@ -3098,6 +3147,63 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 					</div>
 			</div>
 
+			<a id="authentication_oauth" name="authentication_oauth"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Authentication Oauth2</h3>
+					<p>
+						Authentication to the API occurs via <a href="http://tools.ietf.org/html/rfc6749">OAuth2</a>. 'Resource Owner Password Credentials Grant' type is used.
+					</p>
+
+				</div>
+				<div class="method-example">
+<code>
+// A Javascript/Jquery example of how to login to Mifos X and use its api.
+// Typically, the javascript application would
+// 1) Display a login page to retrieve the username and password.
+// 2) Send the username, password, client_id , grant_type and client_secret to a function
+//    such as getOauthToken below which sets the HTTP bearer Auth key.
+// 3) The HTTP bearer Auth key is used in all subsequent requests
+// (see the function executeAjaxRequest below).
+
+function getOauthToken(username, password) {
+
+	var jqxhr = $.ajax({
+		url : "/mifosng-provider/api/oauth/token?username=" + credentials.username + "&password=" + credentials.password +"&client_id=community-app&grant_type=password&client_secret=123,
+		type : 'POST',
+		contentType : "application/json; charset=utf-8",
+		dataType : 'json',
+		data : "{}",
+		cache : false,
+		success : function(data, textStatus, jqXHR) {
+			authKey = data.access_token;
+		},
+		error : function(jqXHR, textStatus, errorThrown) {
+			//error processing
+		}
+	});
+}
+
+function executeAjaxRequest(url, verbType, jsonData, authKey, successFunction, errorFunction) {
+	var jqxhr = $.ajax({
+		url : url,
+		type : verbType, //POST, GET, PUT or DELETE
+		contentType : "application/json; charset=utf-8",
+		dataType : 'json',
+		data : jsonData,
+		cache : false,
+		beforeSend : function(xhr) {
+			xhr.setRequestHeader("Authorization", "bearer " + authKey);
+		},
+		success : successFunction,
+		error : errorFunction
+	});
+}
+</code>
+					</div>
+			</div>
+			
 			<a id="batch_api" name="batch_api" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -30584,12 +30690,12 @@ GET https://DomainName/api/v1/runreports/{reportName}
 			</div>
 
 			<!-- start of authentication api docs -->
-			<a id="authentication" name="authentication" class="old-syle-anchor">&nbsp;</a>
+			<a id="authenticationbasic" name="authenticationbasic" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h3>Authentication</h3>
+					<h3>Authentication HTTP Basic</h3>
 					<p>An API capability that allows client applications to verify
-						authentication details.</p>
+						authentication details using HTTP Basic Authentication.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Field Descriptions</div></td>
@@ -30608,7 +30714,7 @@ GET https://DomainName/api/v1/runreports/{reportName}
 				</div>
 			</div>
 
-			<a id="authenticate_request" name="authenticate_request" class="old-syle-anchor">&nbsp;</a>
+			<a id="authenticate_request_basic" name="authenticate_request_basic" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Verify authentication</h4>
@@ -30695,6 +30801,269 @@ No Request Body
 				</div>
 			</div>
 
+			<a id="authenticationoauth" name="authenticationoauth" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Authentication Oauth2</h3>
+					<p>An API capability that allows client applications to fetch current user details details using Oauth2.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>accessToken</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>HTTP Auth bearer key. See <a
+								href="#authentication_overview">Authentication Overview</a> for
+								an example of its use.
+							</td>
+						</tr>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<a id="oauth" name="oauth" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Authentication via OAuth2</h3>
+					<p>API for requesting OAuth2 access token and refresh token.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>grant_type</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Mandatory field.
+							Indicates the requested grant type. Supported values:
+							<span>password</span>.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>client_id</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Mandatory field.
+							Indicates the client application identity. 
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>client_secret</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional field.
+							Indicates the client application password. 
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>username</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Mandatory field.
+							Application User(resource) login name. 
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>password</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Mandatory field.
+							Application User(resource) password. 
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<a id="oauth_request" name="oauth_request" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>OAuth2 Refresh and Access Token Request</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/oauth/token?username={username}&password={password}&client_id={clientId}&grant_type={grant_type}&client_secret={client_secret}
+					</code>
+					<code class="method-request">
+POST api/oauth/token?username=mifos&password=password&client_id=community-app&grant_type=password&client_secret=123
+Content-Type: application/json
+No Request Body
+					</code>
+					<code class="method-response">
+{
+	""access_token": "b771987f-82fc-45ba-b521-bfe280c4e603",
+	"token_type": "bearer",
+	"refresh_token":"a2a89b23-8d22-4d90-8585-8f464db433b0",
+	"expires_in": 3599,
+	"scope": "all"
+}
+					</code>
+				</div>
+			</div>
+			
+			
+			<a id="oauth_access_token_req" name="oauth_access_token_req" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Authentication via OAuth2</h3>
+					<p>API for requesting OAuth2 access tokens through oAuth2 refresh tokens.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>grant_type</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Mandatory field.
+							Indicates the requested grant type. Supported values:
+							<span>refresh_token</span>.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>client_id</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Mandatory field.
+							Indicates the client application identity. 
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>client_secret</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional field.
+							Indicates the client application password. 
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>refresh_token</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Mandatory field.
+							Application refresh token to generate access token. 
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<a id="oauth_request_with_refresh" name="oauth_request_with_refresh" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>OAuth2 Token Request through Refresh Token</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/oauth/token?refresh_token={refresh_token}&client_id={clientId}&grant_type={grant_type}&client_secret={client_secret}
+					</code>
+					<code class="method-request">
+POST api/oauth/token?client_id=community-app&grant_type=refresh_token&client_secret=123&refresh_token=a2a89b23-8d22-4d90-8585-8f464db433b0
+Content-Type: application/json
+No Request Body
+					</code>
+					<code class="method-response">
+{
+	""access_token": "b771987f-82fc-45ba-b521-bfe280c4e643",
+	"token_type": "bearer",
+	"refresh_token":"a2a89b23-8d22-4d90-8585-8f464db433b0",
+	"expires_in": 3599,
+	"scope": "all"
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="userdetails_request" name="userdetails_request" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Fetch authenticated user details </h4>
+					<p>checks the Authentication and returns the set roles and permissions allowed.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/userdetails?access_token={access_token}
+					</code>
+					<code class="method-request">
+POST userdetails?access_token=bWlmb3M6cGFzc3dvcmQ=
+Content-Type: application/json
+No Request Body
+					</code>
+					<p>Example response of authenticated user user that is not linked with any staff.</p>
+					<code class="method-response">
+{
+    "username": "mifos",
+    "userId": 1,
+    "accessToken": "bWlmb3M6cGFzc3dvcmQ=",
+    "authenticated": true,
+    "officeId": 1,
+    "officeName": "Head Office",
+    "roles": [
+        {
+            "id": 1,
+            "name": "Super user",
+            "description": "This role provides all application permissions."
+        }
+    ],
+    "permissions": [
+        "ALL_FUNCTIONS"
+    ]
+}
+					</code>
+					<p>Example response of authenticated user that is linked with a staff member and role.</p>
+<code class="method-response">
+{
+    "username": "mifos",
+    "userId": 1,
+    "accessToken": "bWlmb3M6cGFzc3dvcmQ=",
+    "authenticated": true,
+    "officeId": 1,
+    "officeName": "Head Office",
+    "staffId": 1,
+    "staffDisplayName": "Director, Program",
+    "organisationalRole": {
+        "id": 100,
+        "code": "staffOrganisationalRoleType.programDirector",
+        "value": "Program Director"
+    },
+    "roles": [
+        {
+            "id": 1,
+            "name": "Super user",
+            "description": "This role provides all application permissions."
+        }
+    ],
+    "permissions": [
+        "ALL_FUNCTIONS"
+    ]
+}
+</code>
+
+
+
+
+
+					<code class="method-request">
+POST api/oauth/token?username=mifos&password=password&client_id=community-app&grant_type=password&client_secret=123
+Content-Type: application/json
+No Request Body
+					</code>
+					<code class="method-response">
+{
+    "developerMessage": "Invalid authentication details were passed in api request.",
+    "developerDocLink": "https://github.com/openMF/mifosx/wiki/HTTP-API-Error-codes",
+    "httpStatusCode": "401",
+    "defaultUserMessage": "Unauthenticated. Please login.",
+    "userMessageGlobalisationCode": "error.msg.not.authenticated",
+    "errors": []
+}
+					</code>
+				</div>
+			</div>
+			
 			<!-- start of users api docs -->
 			<a id="users" name="users" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">

@@ -28,33 +28,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.stereotype.Service;
+import org.springframework.web.filter.GenericFilterBean;
 
 /**
- * A customised version of spring security's {@link BasicAuthenticationFilter}.
  * 
- * This filter is responsible for extracting multi-tenant and basic auth
- * credentials from the request and checking that the details provided are
- * valid.
+ * This filter is responsible for extracting multi-tenant from the request and
+ * setting Cross-Origin details to response. 
  * 
- * If multi-tenant and basic auth credentials are valid, the details of the
- * tenant are stored in {@link MifosPlatformTenant} and stored in a
- * {@link ThreadLocal} variable for this request using
- * {@link ThreadLocalContextUtil}.
+ * If multi-tenant are valid, the details of the tenant are stored in
+ * {@link MifosPlatformTenant} and stored in a {@link ThreadLocal} variable for
+ * this request using {@link ThreadLocalContextUtil}.
  * 
- * If multi-tenant and basic auth credentials are invalid, a http error response
- * is returned.
+ * If multi-tenant are invalid, a http error response is returned.
+ * 
+ * Used to support Oauth2 authentication and the service is loaded only when "oauth" profile is active.
  */
-@Service(value = "basicAuthenticationProcessingFilter")
-@Profile("basicauth")
-public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFilter {
+@Service(value = "tenantIdentifierProcessingFilter")
+@Profile("oauth")
+public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
 
     private static boolean firstRequestProcessed = false;
-    private final static Logger logger = LoggerFactory.getLogger(TenantAwareBasicAuthenticationFilter.class);
+    private final static Logger logger = LoggerFactory.getLogger(TenantAwareTenantIdentifierFilter.class);
 
     private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
     private final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;
@@ -63,13 +59,12 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
 
     private final String tenantRequestHeader = "X-Mifos-Platform-TenantId";
     private final boolean exceptionIfHeaderMissing = true;
+    private final String apiUri = "/api/v1/";
 
     @Autowired
-    public TenantAwareBasicAuthenticationFilter(final AuthenticationManager authenticationManager,
-            final AuthenticationEntryPoint authenticationEntryPoint, final BasicAuthTenantDetailsService basicAuthTenantDetailsService,
+    public TenantAwareTenantIdentifierFilter(final BasicAuthTenantDetailsService basicAuthTenantDetailsService,
             final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer, final ConfigurationDomainService configurationDomainService,
             final CacheWritePlatformService cacheWritePlatformService) {
-        super(authenticationManager, authenticationEntryPoint);
         this.basicAuthTenantDetailsService = basicAuthTenantDetailsService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.configurationDomainService = configurationDomainService;
@@ -87,13 +82,19 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
 
         try {
 
-            if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-                // ignore to allow 'preflight' requests from AJAX applications
-                // in different origin (domain name)
-            } else {
+            // allows for Cross-Origin
+            // Requests (CORs) to be performed against the platform API.
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            final String reqHead = request.getHeader("Access-Control-Request-Headers");
+
+            if (null != reqHead && !reqHead.equals(null)) {
+                response.setHeader("Access-Control-Allow-Headers", reqHead);
+            }
+
+            if (!"OPTIONS".equalsIgnoreCase(request.getMethod())) {
 
                 String tenantIdentifier = request.getHeader(this.tenantRequestHeader);
-
                 if (org.apache.commons.lang.StringUtils.isBlank(tenantIdentifier)) {
                     tenantIdentifier = request.getParameter("tenantIdentifier");
                 }
@@ -112,12 +113,13 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                 ThreadLocalContextUtil.setTenant(tenant);
                 String authToken = request.getHeader("Authorization");
 
-                if (authToken != null && authToken.startsWith("Basic ")) {
-                    ThreadLocalContextUtil.setAuthToken(authToken.replaceFirst("Basic ", ""));
+                if (authToken != null && authToken.startsWith("bearer ")) {
+                    ThreadLocalContextUtil.setAuthToken(authToken.replaceFirst("bearer ", ""));
                 }
 
                 if (!firstRequestProcessed) {
-                    final String baseUrl = request.getRequestURL().toString().replace(request.getPathInfo(), "/");
+                    final String baseUrl = request.getRequestURL().toString()
+                            .replace(request.getRequestURI(), request.getContextPath() + apiUri);
                     System.setProperty("baseUrl", baseUrl);
 
                     final boolean ehcacheEnabled = this.configurationDomainService.isEhcacheEnabled();
@@ -126,11 +128,10 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                     } else {
                         this.cacheWritePlatformService.switchToCache(CacheType.NO_CACHE);
                     }
-                    TenantAwareBasicAuthenticationFilter.firstRequestProcessed = true;
+                    TenantAwareTenantIdentifierFilter.firstRequestProcessed = true;
                 }
+                chain.doFilter(request, response);
             }
-
-            super.doFilter(req, res, chain);
         } catch (final InvalidTenantIdentiferException e) {
             // deal with exception at low level
             SecurityContextHolder.getContext().setAuthentication(null);
@@ -142,5 +143,6 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
             final PlatformRequestLog log = PlatformRequestLog.from(task, request);
             logger.info(this.toApiJsonSerializer.serialize(log));
         }
+
     }
 }
