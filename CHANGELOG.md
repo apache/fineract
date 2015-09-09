@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 09 Sep 2015 - 15.09.2.RELEASE
 1. 08 Sep 2015 - 15.09.1.RELEASE
 1. 05 Sep 2015 - 15.09.RELEASE
 1. 18 May 2015 - 15.03.1.RELEASE
@@ -72,6 +73,19 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+15.09.2.RELEASE
+=============
+This feature release adds optional support for Oauth2 . A bug fix for a regression issue around productive collection sheet is also shipped in this release
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-1746] - Oauth2 for the MifosX platform
+
+Bugs
+ - [MIFOSX-2199] - Not able to generate productive collection sheet displays internal server error
+
 
 15.09.1.RELEASE
 =============
