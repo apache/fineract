@@ -520,7 +520,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 BigDecimal fixedEmiAmount = loanApplicationTerms.getFixedEmiAmount();
                 reducePrincipal = applyEarlyPaymentStrategy(loanApplicationTerms, reducePrincipal, totalCumulativePrincipal,
                         periodNumber + 1, mc, holidayDetailDTO);
-                if (fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
+                if (loanApplicationTerms.getAmortizationMethod().isEqualInstallment() && fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
                     isEmiAmountChanged = true;
                 }
                 principalForThisPeriod = principalForThisPeriod.plus(earlyPaidAmount);
@@ -643,7 +643,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                             reducePrincipal = applyEarlyPaymentStrategy(loanApplicationTerms, reducePrincipal,
                                     totalCumulativePrincipal.plus(principalForThisPeriod.minus(principalProcessed)), periodNumber + 1, mc,
                                     holidayDetailDTO);
-                            if (fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
+                            if (loanApplicationTerms.getAmortizationMethod().isEqualInstallment() && fixedEmiAmount.compareTo(loanApplicationTerms.getFixedEmiAmount()) != 0) {
                                 isEmiAmountChanged = true;
                             }
 
@@ -942,6 +942,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         loanApplicationTerms.setFixedEmiAmount(null);
                         updateFixedInstallmentAmount(mc, loanApplicationTerms, loanApplicationTerms.getExpectedDisbursementDate(),
                                 periodNumber, loanApplicationTerms.getPrincipal().minus(totalCumulativePrincipal), holidayDetailDTO);
+                    }
+                    if(loanApplicationTerms.getAmortizationMethod().isEqualPrincipal()){
+                        loanApplicationTerms.updateFixedPrincipalAmount(mc, periodNumber, loanApplicationTerms.getPrincipal().minus(totalCumulativePrincipal));
                     }
                     reducePrincipal = reducePrincipal.zero();
                 break;
