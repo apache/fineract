@@ -306,5 +306,17 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL")
                 && this.entityId == null;
     }
+    
+    public boolean isReschedule() {
+        return this.actionName.equalsIgnoreCase("RESCHEDULE") && this.entityName.equalsIgnoreCase("LOAN");
+    }
+    
+    public boolean isApproveReschedule() {
+        return this.actionName.equalsIgnoreCase("APPROVERESCHEDULE") && this.entityName.equalsIgnoreCase("LOAN");
+    }
+    
+    public boolean isRejectReschedule() {
+        return this.actionName.equalsIgnoreCase("REJECTRESCHEDULE") && this.entityName.equalsIgnoreCase("LOAN");
+    }
 
 }

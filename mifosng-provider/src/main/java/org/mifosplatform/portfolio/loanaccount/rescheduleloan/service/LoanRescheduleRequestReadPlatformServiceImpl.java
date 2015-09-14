@@ -8,10 +8,12 @@ package org.mifosplatform.portfolio.loanaccount.rescheduleloan.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
+import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
@@ -33,12 +35,14 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
 	private final JdbcTemplate jdbcTemplate;
 	private final LoanRepository loanRepository;
 	private final LoanRescheduleRequestRowMapper loanRescheduleRequestRowMapper = new LoanRescheduleRequestRowMapper();
-	
+	 private final CodeValueReadPlatformService codeValueReadPlatformService;
+	 
 	@Autowired
 	public LoanRescheduleRequestReadPlatformServiceImpl(final RoutingDataSource dataSource, 
-			LoanRepository loanRepository) {
+			LoanRepository loanRepository,  final CodeValueReadPlatformService codeValueReadPlatformService) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.loanRepository = loanRepository;
+		this.codeValueReadPlatformService = codeValueReadPlatformService ;
 	}
 	
 	private static final class LoanRescheduleRequestRowMapper implements RowMapper<LoanRescheduleRequestData> {
@@ -145,7 +149,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
 
 			return LoanRescheduleRequestData.instance(id, loanId, statusEnum, rescheduleFromInstallment, graceOnPrincipal, 
 					graceOnInterest, rescheduleFromDate, adjustedDueDate, extraTerms, interestRate, rescheduleReasonCodeValue, 
-					rescheduleReasonComment, timeline, clientName, loanAccountNumber, clientId, recalculateInterest);
+					rescheduleReasonComment, timeline, clientName, loanAccountNumber, clientId, recalculateInterest, null);
 		}
 		
 	}
@@ -190,4 +194,14 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
 		
 		return this.jdbcTemplate.query(sql, this.loanRescheduleRequestRowMapper, new Object[] { loanId, statusEnum });
 	}
+
+    @Override
+    public LoanRescheduleRequestData retrieveAllRescheduleReasons(String loanRescheduleReason) {
+        final List<CodeValueData> rescheduleReasons = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(loanRescheduleReason));
+        
+        return LoanRescheduleRequestData.instance(null, null, null, null, null, null, 
+                null, null, null, null, null, null, 
+                null, null, null, null, null,rescheduleReasons);
+    }
 }
