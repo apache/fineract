@@ -944,7 +944,19 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
             this.noteRepository.save(note);
         }
-        this.accountTransfersWritePlatformService.reverseTransfersWithFromAccountType(loanId, PortfolioAccountType.LOAN);
+
+        Collection<Long> transactionIds = new ArrayList<>();
+        for (LoanTransaction transaction : loan.getLoanTransactions()) {
+            if (transaction.isRefund() && transaction.isNotReversed()) {
+                transactionIds.add(transaction.getId());
+            }
+        }
+
+        if (!transactionIds.isEmpty()) {
+            this.accountTransfersWritePlatformService
+                    .reverseTransfersWithFromAccountTransactions(transactionIds, PortfolioAccountType.LOAN);
+            loan.updateLoanSummarAndStatus();
+        }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
@@ -1307,16 +1319,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         boolean pendingDisbursementAvailable = false;
         for (LoanDisbursementDetails disbursementDetail : loanDisburseDetails) {
             if (disbursementDetail.actualDisbursementDate() == null) {
-                pendingDisbursementAvailable = true ;
-                break ;
+                pendingDisbursementAvailable = true;
+                break;
             }
         }
-        if(!pendingDisbursementAvailable) {
-            throw new ChargeCannotBeUpdatedException(
-                    "error.msg.charge.cannot.be.updated.no.pending.disbursements.in.loan", "This charge cannot be added, No disbursement is pending"); 
-        }
+        if (!pendingDisbursementAvailable) { throw new ChargeCannotBeUpdatedException(
+                "error.msg.charge.cannot.be.updated.no.pending.disbursements.in.loan",
+                "This charge cannot be added, No disbursement is pending"); }
     }
-    
+
     @Transactional
     @Override
     public CommandProcessingResult addLoanCharge(final Long loanId, final JsonCommand command) {
@@ -1330,12 +1341,19 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Long chargeDefinitionId = command.longValueOfParameterNamed("chargeId");
         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeDefinitionId);
 
-        if(loan.isDisbursed() && chargeDefinition.isDisbursementCharge()) {
-            validateAddingNewChargeAllowed(loanDisburseDetails) ; //validates whether any pending disbursements are available to apply this charge    
+        if (loan.isDisbursed() && chargeDefinition.isDisbursementCharge()) {
+            validateAddingNewChargeAllowed(loanDisburseDetails); // validates
+                                                                 // whether any
+                                                                 // pending
+                                                                 // disbursements
+                                                                 // are
+                                                                 // available to
+                                                                 // apply this
+                                                                 // charge
         }
         final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
         final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
-        
+
         boolean isAppliedOnBackDate = false;
         LoanCharge loanCharge = null;
         if (chargeDefinition.isPercentageOfDisbursementAmount()) {
@@ -2704,7 +2722,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 loan.regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO, currentUser);
             } else {
                 loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
-                loan.processPostDisbursementTransactions() ;
+                loan.processPostDisbursementTransactions();
             }
         }
 
