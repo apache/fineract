@@ -2457,5 +2457,4 @@ public class CommandWrapperBuilder {
         this.href = "/clients/" + clientId + "/transactions/" + transactionId + "?command=undo";
         return this;
     }
-
 }
