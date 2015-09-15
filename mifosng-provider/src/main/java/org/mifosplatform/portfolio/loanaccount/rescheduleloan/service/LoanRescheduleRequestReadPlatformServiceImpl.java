@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.LocalDate;
@@ -141,7 +142,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             final String rejectedByUsername = rs.getString("rejectedByUsername");
             final String rejectedByFirstname = rs.getString("rejectedByFirstname");
             final String rejectedByLastname = rs.getString("rejectedByLastname");
-            
+            final  Collection<CodeValueData> rescheduleReasons = null ;
             final LoanRescheduleRequestTimelineData timeline = new LoanRescheduleRequestTimelineData(submittedOnDate, 
             		submittedByUsername, submittedByFirstname, submittedByLastname, approvedOnDate, approvedByUsername, 
             		approvedByFirstname, approvedByLastname, rejectedOnDate, rejectedByUsername, rejectedByFirstname, 
@@ -149,7 +150,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
 
 			return LoanRescheduleRequestData.instance(id, loanId, statusEnum, rescheduleFromInstallment, graceOnPrincipal, 
 					graceOnInterest, rescheduleFromDate, adjustedDueDate, extraTerms, interestRate, rescheduleReasonCodeValue, 
-					rescheduleReasonComment, timeline, clientName, loanAccountNumber, clientId, recalculateInterest, null);
+					rescheduleReasonComment, timeline, clientName, loanAccountNumber, clientId, recalculateInterest, rescheduleReasons);
 		}
 		
 	}
