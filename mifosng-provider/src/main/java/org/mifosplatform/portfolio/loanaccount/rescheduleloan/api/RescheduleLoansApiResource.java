@@ -72,16 +72,14 @@ public class RescheduleLoansApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveTemplate(@Context final UriInfo uriInfo, @QueryParam("commandParam") final String commandParam) {
+    public String retrieveTemplate(@Context final UriInfo uriInfo) {
 
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(RescheduleLoansApiConstants.ENTITY_NAME);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         LoanRescheduleRequestData loanRescheduleReasons = null;
-        if (compareIgnoreCase(commandParam, "rescheduleReason")) {
-            loanRescheduleReasons = this.loanRescheduleRequestReadPlatformService
-                    .retrieveAllRescheduleReasons(RescheduleLoansApiConstants.LOAN_RESCHEDULE_REASON);
-        }
+        loanRescheduleReasons = this.loanRescheduleRequestReadPlatformService
+                .retrieveAllRescheduleReasons(RescheduleLoansApiConstants.LOAN_RESCHEDULE_REASON);
 
         return this.loanRescheduleRequestToApiJsonSerializer.serialize(settings, loanRescheduleReasons);
     }
