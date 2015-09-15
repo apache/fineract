@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 15 Sep 2015 - 15.09.3.RELEASE
 1. 09 Sep 2015 - 15.09.2.RELEASE
 1. 08 Sep 2015 - 15.09.1.RELEASE
 1. 05 Sep 2015 - 15.09.RELEASE
@@ -73,6 +74,26 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+15.09.3.RELEASE
+=============
+This release adds Loan rescheduling feature and couple of bug fixes on repayments.
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-1523] - Loan rescheduling. https://mifosforge.jira.com/wiki/display/projects/Loan+rescheduling
+
+Bugs
+ - [MIFOSX-2123] - For Equal principal payments advance repayment with interest recalculation is not working as expected
+ - [MIFOSX-2209] - Reversing a repayment on a loan disbursed to a savings account reverses the amount disbursed to the savings account
+
+
+Community-App
+
+New Features & Improvements
+ - [MIFOSX-1523] - Loan rescheduling. https://mifosforge.jira.com/wiki/display/projects/Loan+rescheduling
+ - Localisation updates from https://translatewiki.net.
 
 15.09.2.RELEASE
 =============
