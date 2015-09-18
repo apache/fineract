@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -118,6 +119,11 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     @Column(name = "manually_adjusted_or_reversed", nullable = false)
     private boolean manuallyAdjustedOrReversed;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL,  orphanRemoval = true)
+    @JoinColumn(name = "loan_transaction_id", referencedColumnName= "id" , nullable = false)
+    private Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = new HashSet<>();
 
     protected LoanTransaction() {
         this.loan = null;
@@ -640,9 +646,9 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     private LocalDate getCreatedDate() {
         return new LocalDate(this.createdDate);
     }
-    
+
     public LocalDateTime getCreatedDateTime() {
-    	 return new LocalDateTime(this.createdDate);
+        return new LocalDateTime(this.createdDate);
     }
 
     public boolean isLastTransaction(final LoanTransaction loanTransaction) {
@@ -662,4 +668,40 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         }
         return isLatest;
     }
+
+    public void updateLoanTransactionToRepaymentScheduleMappings(final Collection<LoanTransactionToRepaymentScheduleMapping> mappings) {
+        Collection<LoanTransactionToRepaymentScheduleMapping> retainMappings = new ArrayList<>();
+        for (LoanTransactionToRepaymentScheduleMapping updatedrepaymentScheduleMapping : mappings) {
+            updateMapingDetail(retainMappings, updatedrepaymentScheduleMapping);
+        }
+        this.loanTransactionToRepaymentScheduleMappings.retainAll(retainMappings);
+    }
+
+    private boolean updateMapingDetail(final Collection<LoanTransactionToRepaymentScheduleMapping> retainMappings,
+            final LoanTransactionToRepaymentScheduleMapping updatedrepaymentScheduleMapping) {
+        boolean isMappingUpdated = false;
+        for (LoanTransactionToRepaymentScheduleMapping repaymentScheduleMapping : this.loanTransactionToRepaymentScheduleMappings) {
+            if (updatedrepaymentScheduleMapping.getLoanRepaymentScheduleInstallment().getId() != null
+                    && repaymentScheduleMapping.getLoanRepaymentScheduleInstallment().getDueDate()
+                            .equals(updatedrepaymentScheduleMapping.getLoanRepaymentScheduleInstallment().getDueDate())) {
+                repaymentScheduleMapping.setComponents(updatedrepaymentScheduleMapping.getPrincipalPortion(),
+                        updatedrepaymentScheduleMapping.getInterestPortion(), updatedrepaymentScheduleMapping.getFeeChargesPortion(),
+                        updatedrepaymentScheduleMapping.getPenaltyChargesPortion());
+                isMappingUpdated = true;
+                retainMappings.add(repaymentScheduleMapping);
+                break;
+            }
+        }
+        if (!isMappingUpdated) {
+            this.loanTransactionToRepaymentScheduleMappings.add(updatedrepaymentScheduleMapping);
+            retainMappings.add(updatedrepaymentScheduleMapping);
+        }
+        return isMappingUpdated;
+    }
+
+    
+    public Set<LoanTransactionToRepaymentScheduleMapping> getLoanTransactionToRepaymentScheduleMappings() {
+        return this.loanTransactionToRepaymentScheduleMappings;
+    }
+
 }
