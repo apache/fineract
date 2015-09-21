@@ -105,6 +105,10 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                         .isOneOfTheseValues(ChargeCalculationType.validValuesForLoan());
             }
             
+            if(chargeTimeType != null && chargeCalculationType != null){
+            	performChargeTimeNCalculationTypeValidation(baseDataValidator, chargeTimeType, chargeCalculationType);
+            }
+
         } else if (appliesTo.isSavingsCharge()) {
             // savings applicable validation
             final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
@@ -301,8 +305,26 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
+    
+	public void validateChargeTimeNCalculationType(Integer chargeTimeType, Integer ChargeCalculationType) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charge");
+        performChargeTimeNCalculationTypeValidation(baseDataValidator, chargeTimeType, ChargeCalculationType);
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+	}
+	
+	private void performChargeTimeNCalculationTypeValidation(DataValidatorBuilder baseDataValidator, 
+			final Integer chargeTimeType, final Integer chargeCalculationType){
+        if (chargeTimeType == ChargeTimeType.TRANCHE_DISBURSEMENT.getValue()){
+        	baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
+        			.isOneOfTheseValues(ChargeCalculationType.validValuesForTrancheDisbursement());
+        } else {
+        	baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
+        			.isNotOneOfTheseValues(ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue());
+        }	
+    }
 
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
+	private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 }
