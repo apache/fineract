@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 21 Sep 2015 - 15.09.4.RELEASE
 1. 15 Sep 2015 - 15.09.3.RELEASE
 1. 09 Sep 2015 - 15.09.2.RELEASE
 1. 08 Sep 2015 - 15.09.1.RELEASE
@@ -74,6 +75,20 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+15.09.4.RELEASE
+=============
+This release introduces linkage between loan repayment schedule and transactions. Also few bug fixes related to tranche loans.
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-2227] - Introduce Linkages between Loan repayment schedule and Transactions
+
+Bugs
+ - [MIFOSX-2240] - Charges added while submitting the loan application is not getting displayed after submitting the application for specified due date and Installment charges
+ - [MIFOSX-2258] - Do not allow rescheduling of loans which support interest recalculation and Tranche disbursement
+ - [MIFOSX-2259] - The tranche charge definition should allow only FLAT or PERCENT_OF_DISBURSEMENT_AMOUNT
 
 15.09.3.RELEASE
 =============
