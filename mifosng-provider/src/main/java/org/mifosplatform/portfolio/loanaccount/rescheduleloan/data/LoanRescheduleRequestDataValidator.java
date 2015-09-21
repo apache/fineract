@@ -161,7 +161,16 @@ public class LoanRescheduleRequestDataValidator {
                         "The loan can only be rescheduled once.");
             }
         }
-
+        if(loan.isMultiDisburmentLoan()) {
+            dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(RescheduleLoansApiConstants.resheduleForMultiDisbursementNotSupportedErrorCode,
+                    "Loan rescheduling is not supported for multidisbursement loans");
+        }
+        
+        if(loan.isInterestRecalculationEnabledForProduct()) {
+            dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(RescheduleLoansApiConstants.resheduleWithInterestRecalculationNotSupportedErrorCode,
+                    "Loan rescheduling is not supported for the loan product with interest recalculation enabled");
+        }
+        
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
