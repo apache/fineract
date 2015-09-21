@@ -1477,10 +1477,14 @@ public class Loan extends AbstractPersistable<Long> {
         }
     }
 
-    private boolean isInterestRecalculationEnabledForProduct() {
+    public boolean isInterestRecalculationEnabledForProduct() {
         return this.loanProduct.isInterestRecalculationEnabled();
     }
 
+    public boolean isMultiDisburmentLoan() {
+        return this.loanProduct.isMultiDisburseLoan() ;
+    }
+    
     /**
      * Update interest recalculation settings if product configuration changes
      */
