@@ -12,6 +12,7 @@ import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
 import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.AbstractLoanRepaymentScheduleTransactionProcessor;
 import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 
@@ -29,7 +30,8 @@ public class EarlyPaymentLoanRepaymentScheduleTransactionProcessor extends Abstr
     @Override
     protected Money handleTransactionThatIsPaymentInAdvanceOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
-            final LocalDate transactionDate, final Money paymentInAdvance) {
+            final LocalDate transactionDate, final Money paymentInAdvance,
+            final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
 
         final MonetaryCurrency currency = paymentInAdvance.getCurrency();
         Money transactionAmountRemaining = paymentInAdvance;
@@ -69,7 +71,10 @@ public class EarlyPaymentLoanRepaymentScheduleTransactionProcessor extends Abstr
 
             loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         }
-
+        if (principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion).isGreaterThanZero()) {
+            transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(currentInstallment, principalPortion,
+                    interestPortion, feeChargesPortion, penaltyChargesPortion));
+        }
         return transactionAmountRemaining;
 
     }
@@ -82,9 +87,10 @@ public class EarlyPaymentLoanRepaymentScheduleTransactionProcessor extends Abstr
     @Override
     protected Money handleTransactionThatIsALateRepaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
-            final Money transactionAmountUnprocessed) {
+            final Money transactionAmountUnprocessed, List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
 
-        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, transactionAmountUnprocessed);
+        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, transactionAmountUnprocessed,
+                transactionMappings);
     }
 
     /**
@@ -92,7 +98,8 @@ public class EarlyPaymentLoanRepaymentScheduleTransactionProcessor extends Abstr
      */
     @Override
     protected Money handleTransactionThatIsOnTimePaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed) {
+            final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed,
+            final List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
 
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
         final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
@@ -134,13 +141,17 @@ public class EarlyPaymentLoanRepaymentScheduleTransactionProcessor extends Abstr
 
             loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         }
-
+        if (principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion).isGreaterThanZero()) {
+            transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(currentInstallment, principalPortion,
+                    interestPortion, feeChargesPortion, penaltyChargesPortion));
+        }
         return transactionAmountRemaining;
     }
 
     @Override
     protected Money handleRefundTransactionPaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
-            final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed) {
+            final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed,
+            List<LoanTransactionToRepaymentScheduleMapping> transactionMappings) {
 
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
         // final MonetaryCurrency currency =
@@ -172,7 +183,10 @@ public class EarlyPaymentLoanRepaymentScheduleTransactionProcessor extends Abstr
         }
 
         loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
-
+        if (principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion).isGreaterThanZero()) {
+            transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(currentInstallment, principalPortion,
+                    interestPortion, feeChargesPortion, penaltyChargesPortion));
+        }
         return transactionAmountRemaining;
     }
 
