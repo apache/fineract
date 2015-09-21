@@ -112,6 +112,9 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
             final Map<String, Object> changes = chargeForUpdate.update(command);
 
+            this.fromApiJsonDeserializer.validateChargeTimeNCalculationType(chargeForUpdate.getChargeTimeType(),
+            																	chargeForUpdate.getChargeCalculation());
+
             // MIFOSX-900: Check if the Charge has been active before and now is
             // deactivated:
             if (changes.containsKey("active")) {
@@ -130,7 +133,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
                 if (isChargeExistWithLoans) { throw new ChargeCannotBeUpdatedException(
                         "error.msg.charge.frequency.cannot.be.updated.it.is.used.in.loan",
                         "This charge frequency cannot be updated, it is used in loan"); }
-            }
+            } 
 
             // Has account Id been changed ?
             if (changes.containsKey(ChargesApiConstants.glAccountIdParamName)) {
