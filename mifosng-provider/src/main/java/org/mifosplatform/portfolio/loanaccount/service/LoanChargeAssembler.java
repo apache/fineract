@@ -20,12 +20,10 @@ import org.mifosplatform.portfolio.charge.domain.ChargePaymentMode;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeAddedException;
-import org.mifosplatform.portfolio.charge.exception.LoanChargeNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.api.LoanApiConstants;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanChargeRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanDisbursementDetails;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanTrancheCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTrancheDisbursementCharge;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
@@ -103,8 +101,8 @@ public class LoanChargeAssembler {
                     final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerNamed("chargeTimeType", loanChargeElement, locale);
                     final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerNamed("chargeCalculationType",
                             loanChargeElement, locale);
-                    final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed("dueDate", loanChargeElement, dateFormat,
-                            locale);
+                    final LocalDate dueDate = this.fromApiJsonHelper
+                            .extractLocalDateNamed("dueDate", loanChargeElement, dateFormat, locale);
                     final Integer chargePaymentMode = this.fromApiJsonHelper.extractIntegerNamed("chargePaymentMode", loanChargeElement,
                             locale);
                     if (id == null) {
@@ -133,22 +131,19 @@ public class LoanChargeAssembler {
                             final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition, principal, amount, chargeTime,
                                     chargeCalculation, dueDate, chargePaymentModeEnum, numberOfRepayments);
                             loanCharges.add(loanCharge);
-                        }
-                        if (topLevelJsonElement.has("disbursementData") && topLevelJsonElement.get("disbursementData").isJsonArray()) {
-                            final JsonArray disbursementArray = topLevelJsonElement.get("disbursementData").getAsJsonArray();
-                            if (disbursementArray.size() > 0) {
-                                JsonObject disbursementDataElement = disbursementArray.get(0).getAsJsonObject();
-                                expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                                        LoanApiConstants.disbursementDateParameterName, disbursementDataElement, dateFormat, locale);
+                        } else {
+                            if (topLevelJsonElement.has("disbursementData") && topLevelJsonElement.get("disbursementData").isJsonArray()) {
+                                final JsonArray disbursementArray = topLevelJsonElement.get("disbursementData").getAsJsonArray();
+                                if (disbursementArray.size() > 0) {
+                                    JsonObject disbursementDataElement = disbursementArray.get(0).getAsJsonObject();
+                                    expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(
+                                            LoanApiConstants.disbursementDateParameterName, disbursementDataElement, dateFormat, locale);
+                                }
                             }
-                        }
-
-                        if ((chargeDefinition.isPercentageOfDisbursementAmount() || chargeDefinition.isPercentageOfApprovedAmount()
-                                || chargeDefinition.getChargeCalculation() == ChargeCalculationType.FLAT.getValue())
-                                && disbursementDetails != null) {
-                            LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = null;
-                            for (LoanDisbursementDetails disbursementDetail : disbursementDetails) {
-                                if (chargeDefinition.getChargeTimeType() == ChargeTimeType.DISBURSEMENT.getValue()) {
+                            
+                            if (chargeDefinition.getChargeTimeType() == ChargeTimeType.DISBURSEMENT.getValue()) {
+                                for (LoanDisbursementDetails disbursementDetail : disbursementDetails) {
+                                    LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = null;
                                     if (chargeDefinition.isPercentageOfApprovedAmount()
                                             && disbursementDetail.expectedDisbursementDateAsLocalDate().equals(expectedDisbursementDate)) {
                                         final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition, principal, amount,
@@ -168,37 +163,24 @@ public class LoanChargeAssembler {
                                             loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
                                         }
                                     }
-
-                                } else if (chargeDefinition.getChargeTimeType() == ChargeTimeType.TRANCHE_DISBURSEMENT.getValue()) {
-                                    final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition,
-                                            disbursementDetail.principal(), amount, chargeTime, chargeCalculation,
-                                            disbursementDetail.expectedDisbursementDateAsLocalDate(), chargePaymentModeEnum,
-                                            numberOfRepayments);
-                                    loanCharges.add(loanCharge);
-                                    loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge, disbursementDetail);
-                                    loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
                                 }
-                            }
-                        } else {
-                            LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = null;
-                            if (disbursementDetails != null) {
+                            } else if (chargeDefinition.getChargeTimeType() == ChargeTimeType.TRANCHE_DISBURSEMENT.getValue()) {
+                                LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = null;
                                 for (LoanDisbursementDetails disbursementDetail : disbursementDetails) {
-                                    if (!(disbursementDetail.expectedDisbursementDateAsLocalDate().isAfter(expectedDisbursementDate))) {
-                                        if (chargeDefinition.getChargeCalculation() == ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST
-                                                .getValue()
-                                                || chargeDefinition.getChargeTimeType() == ChargeTimeType.SPECIFIED_DUE_DATE.getValue()
-                                                || chargeDefinition.getChargeCalculation() == ChargeCalculationType.PERCENT_OF_INTEREST
-                                                        .getValue()) {
-                                            final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition, principal,
-                                                    amount, chargeTime, chargeCalculation, dueDate, chargePaymentModeEnum,
-                                                    numberOfRepayments);
-                                            loanCharges.add(loanCharge);
-                                            loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge,
-                                                    disbursementDetail);
-                                            loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
-                                        }
+                                    if (chargeDefinition.getChargeTimeType() == ChargeTimeType.TRANCHE_DISBURSEMENT.getValue()) {
+                                        final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition,
+                                                disbursementDetail.principal(), amount, chargeTime, chargeCalculation,
+                                                disbursementDetail.expectedDisbursementDateAsLocalDate(), chargePaymentModeEnum,
+                                                numberOfRepayments);
+                                        loanCharges.add(loanCharge);
+                                        loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge, disbursementDetail);
+                                        loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
                                     }
                                 }
+                            } else {
+                                final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition, principal, amount,
+                                        chargeTime, chargeCalculation, dueDate, chargePaymentModeEnum, numberOfRepayments);
+                                loanCharges.add(loanCharge);
                             }
                         }
                     } else {
