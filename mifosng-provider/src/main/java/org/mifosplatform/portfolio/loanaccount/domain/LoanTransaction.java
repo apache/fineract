@@ -319,6 +319,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     public void reverse() {
         this.reversed = true;
+        this.loanTransactionToRepaymentScheduleMappings.clear();
     }
 
     public void resetDerivedComponents() {

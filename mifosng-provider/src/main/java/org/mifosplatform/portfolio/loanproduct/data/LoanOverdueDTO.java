@@ -5,16 +5,19 @@
  */
 package org.mifosplatform.portfolio.loanproduct.data;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 
 public class LoanOverdueDTO {
 
     private final Loan loan;
     private final boolean runInterestRecalculation;
+    private final LocalDate recalculateFrom;
 
-    public LoanOverdueDTO(final Loan loan, final boolean runInterestRecalculation) {
+    public LoanOverdueDTO(final Loan loan, final boolean runInterestRecalculation, final LocalDate recalculateFrom) {
         this.loan = loan;
         this.runInterestRecalculation = runInterestRecalculation;
+        this.recalculateFrom = recalculateFrom;
     }
 
     public boolean isRunInterestRecalculation() {
@@ -23,5 +26,10 @@ public class LoanOverdueDTO {
 
     public Loan getLoan() {
         return this.loan;
+    }
+
+    
+    public LocalDate getRecalculateFrom() {
+        return this.recalculateFrom;
     }
 }
