@@ -1695,14 +1695,16 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         sqlBuilder.append(" WHERE ml.loan_status_id = ? ");
         sqlBuilder.append(" and ml.interest_recalculation_enabled = 1 ");
         sqlBuilder.append(" and ml.is_npa = 0 ");
+        sqlBuilder.append(" and (ml.interest_recalcualated_on is null or ml.interest_recalcualated_on <> ?)");
         sqlBuilder.append(" and ((");
         sqlBuilder.append(" mr.completed_derived is false ");
         sqlBuilder.append(" and mr.duedate < ? )");
         sqlBuilder.append(" or dd.expected_disburse_date < ? ) ");
         sqlBuilder.append(" group by ml.id");
         try {
+            String currentdate = formatter.print(DateUtils.getLocalDateOfTenant());
             return this.jdbcTemplate.queryForList(sqlBuilder.toString(), Long.class,
-                    new Object[] { LoanStatus.ACTIVE.getValue(), formatter.print(LocalDate.now()), formatter.print(LocalDate.now()) });
+                    new Object[] { LoanStatus.ACTIVE.getValue(), currentdate, currentdate, currentdate });
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }

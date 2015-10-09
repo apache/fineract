@@ -1071,9 +1071,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             for (LoanRepaymentScheduleInstallment installment : installments) {
                 if (installment.getId() == null) {
                     this.repaymentScheduleInstallmentRepository.save(installment);
-                } else {
-                    break;
-                }
+                } 
             }
             this.loanRepository.saveAndFlush(loan);
         } catch (final DataIntegrityViolationException e) {

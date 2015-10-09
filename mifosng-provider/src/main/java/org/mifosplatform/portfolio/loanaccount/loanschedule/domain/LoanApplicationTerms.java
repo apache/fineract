@@ -1270,4 +1270,9 @@ public final class LoanApplicationTerms {
         return loanCalendar;
     }
 
+    
+    public BigDecimal getFixedPrincipalAmount() {
+        return this.fixedPrincipalAmount;
+    }
+
 }
