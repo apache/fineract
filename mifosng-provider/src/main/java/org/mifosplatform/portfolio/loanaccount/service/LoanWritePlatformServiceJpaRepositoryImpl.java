@@ -2903,6 +2903,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (changedTransactionDetail != null) {
             for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                 this.loanTransactionRepository.save(mapEntry.getValue());
+                // update loan with references to the newly created
+                // transactions
+                loan.getLoanTransactions().add(mapEntry.getValue());
                 this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
         }
