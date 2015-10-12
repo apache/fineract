@@ -1836,16 +1836,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     chargesDueAtTimeOfDisbursement);
             final List<LoanRepaymentScheduleInstallment> newRepaymentScheduleInstallments = new ArrayList<>();
             MonetaryCurrency currency = outstandingBalance.getCurrency();
-            final Map<LocalDate, Money> disburseDetailMap = new HashMap<>();
-            if (loanApplicationTerms.isMultiDisburseLoan()) {
-                // fetches the first tranche amount and also updates other
-                // tranche
-                // details to map
-                BigDecimal disburseAmt = getDisbursementAmount(loanApplicationTerms, loanApplicationTerms.getExpectedDisbursementDate(),
-                        periods, chargesDueAtTimeOfDisbursement, disburseDetailMap, true);
-                outstandingBalance = outstandingBalance.zero().plus(disburseAmt);
-                outstandingBalanceAsPerRest = outstandingBalance;
-            }
 
             // early payments will be added here and as per the selected
             // strategy
@@ -1892,6 +1882,17 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             // Set fixed Amortization Amounts(either EMI or Principal )
             updateAmortization(mc, loanApplicationTerms, actualRepaymentDate, periodNumber, outstandingBalance, holidayDetailDTO);
 
+            final Map<LocalDate, Money> disburseDetailMap = new HashMap<>();
+            if (loanApplicationTerms.isMultiDisburseLoan()) {
+                // fetches the first tranche amount and also updates other
+                // tranche
+                // details to map
+                BigDecimal disburseAmt = getDisbursementAmount(loanApplicationTerms, loanApplicationTerms.getExpectedDisbursementDate(),
+                        periods, chargesDueAtTimeOfDisbursement, disburseDetailMap, true);
+                outstandingBalance = outstandingBalance.zero().plus(disburseAmt);
+                outstandingBalanceAsPerRest = outstandingBalance;
+            }
+            
             // Block process the installment and creates the period if it falls
             // before reschedule from date
             // This will create the recalculation details by applying the
