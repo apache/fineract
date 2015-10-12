@@ -131,6 +131,13 @@ $ ./runmifosx.sh
   ```
   UPDATE tenants SET schema_username = "your_username", schema_password = "your_password" WHERE identifier = "default";
   ```
+  Step four (optional): to be followed only if your mysql server hostname is other than 'localhost'
+  
+  Update the default server for connecting to *mifoplatform-default* database stored in the *tenants* table of *mifosplatform-tenants* with your mysql server hostname
+  
+  ```
+  UPDATE tenants SET schema_server = "[server hostname/ip]" WHERE identifier = "default";
+  ```
 
 #### 3.2.2 Upgrade existing database(s)
 
