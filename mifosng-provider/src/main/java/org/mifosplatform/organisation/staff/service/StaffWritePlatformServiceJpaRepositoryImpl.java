@@ -74,7 +74,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
     public CommandProcessingResult updateStaff(final Long staffId, final JsonCommand command) {
 
         try {
-            this.fromApiJsonDeserializer.validateForUpdate(command.json());
+            this.fromApiJsonDeserializer.validateForUpdate(command.json(), staffId);
 
             final Staff staffForUpdate = this.staffRepository.findOne(staffId);
             if (staffForUpdate == null) { throw new StaffNotFoundException(staffId); }
