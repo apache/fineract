@@ -81,7 +81,6 @@ CREATE TABLE `m_loanproduct_provisioning_entry` (
 	PRIMARY KEY (`id`),
 	FOREIGN KEY (`history_id`) REFERENCES `m_provisioning_history` (`id`),
 	FOREIGN KEY (`criteria_id`) REFERENCES `m_provisioning_criteria` (`id`),
-	FOREIGN KEY (`currency_code`) REFERENCES `m_currency` (`code`),
 	FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`),
 	FOREIGN KEY (`product_id`) REFERENCES `m_product_loan` (`id`),
 	FOREIGN KEY (`category_id`) REFERENCES `m_provision_category` (`id`),
