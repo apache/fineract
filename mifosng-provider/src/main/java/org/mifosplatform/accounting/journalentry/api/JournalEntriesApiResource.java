@@ -26,6 +26,8 @@ import org.mifosplatform.accounting.journalentry.data.JournalEntryAssociationPar
 import org.mifosplatform.accounting.journalentry.data.JournalEntryData;
 import org.mifosplatform.accounting.journalentry.data.OfficeOpeningBalancesData;
 import org.mifosplatform.accounting.journalentry.service.JournalEntryReadPlatformService;
+import org.mifosplatform.accounting.producttoaccountmapping.domain.PortfolioProductType;
+import org.mifosplatform.accounting.provisioning.constant.ProvisioningEntriesApiConstants;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -162,6 +164,21 @@ public class JournalEntriesApiResource {
         return this.apiJsonSerializerService.serialize(result);
     }
 
+    @GET
+    @Path("provisioning")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveJournalEntries(@QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
+            @QueryParam("entryId") final Long entryId, @Context final UriInfo uriInfo) {
+        this.context.authenticatedUser();
+        String transactionId = "P"+entryId ;
+        SearchParameters params = SearchParameters.forPagination(offset, limit) ;
+                Page<JournalEntryData> entries = this.journalEntryReadPlatformService.retrieveAll(params, null, null, null, null, transactionId, PortfolioProductType.PROVISIONING.getValue(), null) ;
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.apiJsonSerializerService.serialize(settings, entries, RESPONSE_DATA_PARAMETERS);    
+    }
+    
+    
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })

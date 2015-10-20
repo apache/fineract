@@ -14,6 +14,8 @@ public interface LoanProductReadPlatformService {
 
     Collection<LoanProductData> retrieveAllLoanProducts();
 
+    Collection<LoanProductData> retrieveAllLoanProductsForLookup(String inClass);
+    
     Collection<LoanProductData> retrieveAllLoanProductsForLookup();
 
     Collection<LoanProductData> retrieveAllLoanProductsForLookup(boolean activeOnly);

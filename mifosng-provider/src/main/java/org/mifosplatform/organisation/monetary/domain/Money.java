@@ -224,6 +224,10 @@ public class Money implements Comparable<Money> {
         return this.multiplyRetainScale(BigDecimal.valueOf(valueToMultiplyBy), roundingMode);
     }
 
+    public Money percentageOf(BigDecimal percentage, final RoundingMode roundingMode) {
+        final BigDecimal newAmount = (this.amount.multiply(percentage)).divide(BigDecimal.valueOf(100), roundingMode);
+        return Money.of(monetaryCurrency(), newAmount);
+    }
     @Override
     public int compareTo(final Money other) {
         final Money otherMoney = other;

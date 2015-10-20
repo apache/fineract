@@ -192,4 +192,12 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
         return this.clientTransaction;
     }
 
+    public Long getEntityId() {
+        return this.entityId ;
+    }
+    
+    public Integer getEntityType() {
+        return this.entityType ;
+    }
+    
 }

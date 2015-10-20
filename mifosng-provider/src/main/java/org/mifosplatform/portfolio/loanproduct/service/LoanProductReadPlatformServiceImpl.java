@@ -99,6 +99,22 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     }
 
     @Override
+    public Collection<LoanProductData> retrieveAllLoanProductsForLookup(String inClause) {
+
+        this.context.authenticatedUser();
+
+        final LoanProductLookupMapper rm = new LoanProductLookupMapper();
+
+        String sql = "select " + rm.schema();
+
+        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+            sql += " where lp.id in ( " + inClause + " ) ";
+        }
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+    }
+
+    @Override
     public Collection<LoanProductData> retrieveAllLoanProductsForLookup() {
         return retrieveAllLoanProductsForLookup(false);
     }

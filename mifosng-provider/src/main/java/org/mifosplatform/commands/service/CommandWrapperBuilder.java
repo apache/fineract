@@ -2457,4 +2457,76 @@ public class CommandWrapperBuilder {
         this.href = "/clients/" + clientId + "/transactions/" + transactionId + "?command=undo";
         return this;
     }
+    
+    public CommandWrapperBuilder createProvisioningCategory() {
+        this.actionName = "CREATE";
+        this.entityName = "PROVISIONCATEGORY";
+        this.entityId = null;
+        this.href = "/provisioningcategory";
+        return this;
+    }
+    
+    public CommandWrapperBuilder updateProvisioningCategory(final Long cateoryId) {
+        this.actionName = "UPDATE";
+        this.entityName = "PROVISIONCATEGORY";
+        this.entityId = cateoryId;
+        this.href = "/provisioningcategory/" + cateoryId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder deleteProvisioningCategory(final Long categoryId) {
+        this.actionName = "DELETE";
+        this.entityName = "PROVISIONCATEGORY";
+        this.entityId = categoryId;
+        this.href = "/provisioningcategory/" + categoryId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder createProvisioningCriteria() {
+        this.actionName = "CREATE";
+        this.entityName = "PROVISIONCRITERIA";
+        this.entityId = null;
+        this.href = "/provisioningcriteria";
+        return this;
+    }
+    
+    public CommandWrapperBuilder updateProvisioningCriteria(final Long criteriaId) {
+        this.actionName = "UPDATE";
+        this.entityName = "PROVISIONCRITERIA";
+        this.entityId = criteriaId;
+        this.href = "/provisioningcriteria/" + criteriaId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder deleteProvisioningCriteria(final Long criteriaId) {
+        this.actionName = "DELETE";
+        this.entityName = "PROVISIONCRITERIA";
+        this.entityId = criteriaId;
+        this.href = "/provisioningcriteria/" + criteriaId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder createProvisioningEntries() {
+        this.actionName = "CREATE";
+        this.entityName = "PROVISIONENTRIES";
+        this.entityId = null;
+        this.href = "/provisioningentries";
+        return this;
+    }
+    
+    public CommandWrapperBuilder createProvisioningJournalEntries(final Long entryId) {
+        this.actionName = "CREATE";
+        this.entityName = "PROVISIONJOURNALENTRIES";
+        this.entityId = entryId;
+        this.href = "/provisioningentries/"+entryId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder reCreateProvisioningEntries(final Long entryId) {
+        this.actionName = "RECREATE";
+        this.entityName = "PROVISIONENTRIES";
+        this.entityId = entryId;
+        this.href = "/provisioningentries/"+entryId;
+        return this;
+    }
 }

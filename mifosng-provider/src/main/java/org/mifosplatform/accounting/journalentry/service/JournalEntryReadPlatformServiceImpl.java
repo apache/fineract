@@ -502,4 +502,19 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 associationParametersData);
 
     }
+
+    @Override
+    public Page<JournalEntryData> retrieveJournalEntriesByEntityId(String transactionId, Long entityId, Integer entityType) {
+        JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(true,
+                true);
+        try {
+            final GLJournalEntryMapper rm = new GLJournalEntryMapper(associationParametersData);
+            final String sql = "select " + rm.schema() + " where journalEntry.transaction_id = ? and journalEntry.entity_id = ? and journalEntry.entity_type_enum = ?";
+            final String sqlCountRows = "SELECT FOUND_ROWS()";
+            Object[] data = {transactionId, entityId, entityType} ;
+            return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sql, data, rm);
+        } catch (final EmptyResultDataAccessException e) {
+            throw new JournalEntriesNotFoundException(entityId);
+        }
+    }
 }
