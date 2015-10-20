@@ -1679,6 +1679,25 @@
 								<td></td>
 								<td></td>
 							</tr>
+							
+							<tr>
+								<td><a href="#provisioningentries">Provisioning Entries</a></td>
+								<td>provisioningentries</td>
+								<td><a href="#provisioningentries_create">Create Provisioning Entry</a><br> </td>
+								<td><a href="#provisioningentries_list">List Provisioning Entries</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>provisioningentries/{entryId}</td>P
+								<td></td>
+								<td><a href="#provisioningentry_retrieve">Retrieve Provisioning Entry</a></td>
+								<td><a href="#provisioningentry_recreate">Recreates Provisionin Entry</a></td>
+								<td><a href="#provisioningentry_addjournals">Add Provisioning Journal Entries</a></td>
+								</tr>
+
+							
 						</table>
 					</div>
 				</div>
@@ -2090,7 +2109,23 @@
 								<td><a href="#paymenttype_update">Update Payment Type</a></td>
 								<td><a href="#paymnettype_delete">Delete Payment Type</a></td>
 							</tr>
-
+							<tr>
+								<td><a href="#provisioningcriteria">Provisioning Criteria</a></td>
+								<td>provisioningcriteria</td>
+								<td><a href="#create_provisioningcriteria">Create Provisioning Criteria</a></td>
+								<td><a href="#provisioningcriteria_list">List Provisioning Criteria</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>provisioningcriteria/{criteriaId}</td>
+								<td><a href="#retrieve_provisioningcriteria">Retrieve Provisioning Criteria</a></td>
+								<td><a href="#update_provisioningcriteria">Update Provisioning Criteria</a></td>
+								<td><a href="#delete_provisioningcriteria">Delete Provisioning Criteria</a></td>
+								<td></td>
+								<td></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -33626,6 +33661,244 @@ Request Body:
                 </div>
             </div>
 
+			<!-- Provisioning Entries -->
+			<a id="provisioningentries" name="provisioningentries" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Provisioning Entries</h3>
+					<p>This defines the Provisioning Entries for all active loan products
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>date</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Date on which day provisioning entries should be created
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>createjournalentries</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Boolean variable whether to add journal entries for generated provisioning entries
+							</td>
+						</tr>
+						
+					</table>
+				</div>
+			</div>
+			
+			<a id="provisioningentries_create" name="provisioningentries_create"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create new Provisioning Entries</h4>
+					<p>Creates a new Provisioning Entries</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>date</td>
+							</tr>
+						<tr class=alt>
+							<td>dateFormat</td>
+							</tr>
+						<tr class=alt>
+							<td>locale</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>createjournalentries</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					POST https://DomainName/api/v1/provisioningentries
+					</code>
+					<code class="method-request">
+					POST provisioningentries
+					Content-Type: application/json
+					Request Body:
+					{
+					"date":"16 October 2015",
+					"locale":"en",
+					"dateFormat":"dd MMMM yyyy",
+					"createjournalentries":true
+					}	
+					</code>
+					<code class="method-response">
+					{
+					"resourceId": 1
+					}
+					</code>
+				</div>
+			</div>
+			
+			<a id="provisioningentries_list" name="provisioningentries_list"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List all Provisioning Entries</h4>
+					<p>List all Provisioning Entries</p>
+					
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					GET https://DomainName/api/v1/provisioningentries
+					</code>
+					<code class="method-request">
+					GET provisioningentries
+					Content-Type: application/json
+					Request Body:
+					{
+					
+					}	
+					</code>
+					<code class="method-response">
+					{[
+					{"id":1, "journalEntry":true, "createdUser":"mifos", "createdDate":"16 October 2014"},
+					{"id":2, "journalEntry":true, "createdUser":"mifos", "createdDate":"16 October 2015"}
+					]
+					}
+					</code>
+				</div>
+			</div>
+			
+			<a id="provisioningentry_retrieve" name="provisioningentry_retrieve"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieves a Provisioning Entry</h4>
+					<p>Returns the details of a generated Provisioning Entry.</p>
+					
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					GET https://DomainName/api/v1/provisioningentries/{privisioningEntryId}
+					</code>
+					<code class="method-request">
+					GET provisioningentries
+					Content-Type: application/json
+					Request Body:
+					{
+					
+					}	
+					</code>
+					<code class="method-response">
+					{
+					"id":1, 
+					"journalEntry":true, 
+					"createdUser":"mifos", 
+					"createdDate":"16 October 2014",
+					"provisioningEntries":[
+					{"historyId":1,
+					"officeId:":1
+					"officeName:":"Head Office",
+					"currencyCode:":"USD",
+					"productId:":12,
+					"productName:":"Loan Product Name1",
+					"categoryId":4,
+					"categoryName":"LOSS",
+					"amountReserved":63098.29,
+					"liabilityAccount":4,
+					"liabilityCode":"Liability Account Name",
+					"expenseAccount":6,
+					"expenseCode":"Expense Account Name"
+					},
+					{"id":2, 
+					"journalEntry":true, 
+					"createdUser":"mifos", 
+					"createdDate":"16 October 2014",
+					"provisioningEntries":[
+					{"historyId":1,
+					"officeId:":2
+					"officeName:":"Branch Office",
+					"currencyCode:":"USD",
+					"productId:":12,
+					"productName:":"Loan Product Name1",
+					"categoryId":2,
+					"categoryName":"SUB-STANDARD",
+					"amountReserved":63098.29,
+					"liabilityAccount":1,
+					"liabilityCode":"Liability Account Name",
+					"expenseAccount":2,
+					"expenseCode":"Expense Account Name"
+					}
+					]
+					
+					}
+					</code>
+				</div>
+			</div>
+				
+								
+			<a id="provisioningentry_recreate" name="provisioningentry_recreate"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Recreates Provisioning Entry</h4>
+					<p>Recreates Provisioning Entry.</p>
+					
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					POST https://DomainName/api/v1/provisioningentries/{privisioningEntryId}?command=recreateprovisioningentry
+					</code>
+					<code class="method-request">
+					POST provisioningentries
+					Content-Type: application/json
+					Request Body:
+					{
+					"command":"recreateprovisioningentry"
+					}	
+					</code>
+					<code class="method-response">
+					{
+					"resourceId": 1
+					}
+					</code>
+				</div>
+			</div>
+			
+			<a id="provisioningentry_addjournals" name="provisioningentry_addjournals"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieves a Provisioning Entry</h4>
+					<p>Returns the details of a generated Provisioning Entry.</p>
+					
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					POST https://DomainName/api/v1/provisioningentries/{privisioningEntryId}?command=createjournalentry
+					</code>
+					<code class="method-request">
+					POST provisioningentries
+					Content-Type: application/json
+					Request Body:
+					{
+						"command":"createjournalentry"
+					}	
+					</code>
+					
+					<code class="method-response">
+					{
+					"resourceId": 1
+					}
+					</code>
+				</div>
+			</div>
+			
+			
 			<!-- end Periodic accrual API doc-->
 
 			<!-- start of Search API doc -->
@@ -35679,6 +35952,320 @@ No Request Body:
 					</code>
 				</div>
 			</div>
+			<!-- Provisioning -->
+			<a id="provisioningcriteria" name="provisioningcriteria" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Provisioning Criteria</h3>
+					<p>This defines the Provisioning Criteria
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>Provisioning Criteria Name</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Name the Provisioning Criteria
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>Loan Products</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Select all loan products for which provisioning criteria to be associated
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>Provisioning Categories</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Define minimum, maximum, percentage, liability account, expense account for all provisioning categories
+							</td>
+						</tr>
+						
+					</table>
+				</div>
+			</div>
+			
+			<a id="create_provisioningcriteria" name="create_provisioningcriteria"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create a new Provisioning Criteria</h4>
+					<p>Creates a new Provisioning Criteria</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>criteriaName</td>
+						</tr>
+						<tr class=alt>
+							<td>provisioningcriteria</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>loanProducts</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					POST https://DomainName/api/v1/provisioningcriteria
+					</code>
+					<code class="method-request">
+					POST provisioningcriteria
+					Content-Type: application/json
+					Request Body:
+					{
+					"criteriaName":"High Risk Products Criteria",
+					"loanProducts": [
+						{"id": 1,
+						"name": "LOAN_PRODUCT_3ODPK1", 
+						"includeInBorrowerCycle": false},
+						{"id": 2,
+						"name": "LOAN_PRODUCT_BXW8NC", 
+						includeInBorrowerCycle": false}
+						],
+					"provisioningcriteria": [
+						{"categoryId": 1, 
+						"categoryName": "STANDARD", 
+						"minAge": 0, 
+						"maxAge": 3, 
+						"provisioningPercentage": 1,
+						"liabilityAccount": 8, 
+						"expenseAccount": 14},
+						{"categoryId": 2, 
+						"categoryName": "SUB-STANDARD",
+						"minAge": 1,
+						"maxAge": 5,
+						"provisioningPercentage": 2,
+						"liabilityAccount": 13,
+						"expenseAccount": 13},
+						{"categoryId": 3,
+						"categoryName": "DOUBTFUL",
+						"minAge": 2,
+						"maxAge": 6,
+						"provisioningPercentage": 3,
+						"liabilityAccount": 9,
+						"expenseAccount": 10},
+						{"categoryId": 4,
+						"categoryName": "LOSS",
+						"minAge": 3,
+						"maxAge": 7,
+						"provisioningPercentage": 4,
+						"liabilityAccount": 10, 
+						"expenseAccount": 9}]
+					}	
+					</code>
+					<code class="method-response">
+					{
+					"resourceId": 1
+					}
+					</code>
+				</div>
+			</div>
+			<a id="provisioningcriteria_list" name="provisioningcriteria_list"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieves all created Provisioning Criterias</h4>
+					<p>Retrieves all created Provisioning Criterias</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					GET https://DomainName/api/v1/provisioningcriteria
+					</code>
+					<code class="method-request">
+					GET provisioningcriteria
+					Content-Type: application/json
+					Request Body:
+					{				
+					}	
+					</code>
+					<code class="method-response">
+					{
+					[
+					{"criteriaId":1,
+					 "criteriaName":"High Risk Products Criteria",
+					 "createdBy":"mifos"},
+					 {"criteriaId":2,
+					 "criteriaName":"Low Risk Products Criteria",
+					 "createdBy":"mifos"}
+					] 
+					}
+					</code>
+				</div>
+			</div>
+			<a id="retrieve_provisioningcriteria" name="retrieve_provisioningcriteria"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieves a Provisioning Criteria</h4>
+					<p>Retrieves a Provisioning Criteria</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					GET https://DomainName/api/v1/provisioningcriteria/{criteriaId}
+					</code>
+					<code class="method-request">
+					GET provisioningcriteria/{criteriaId}
+					Content-Type: application/json
+					Request Body:
+					{				
+					}	
+					</code>
+					<code class="method-response">
+					{
+					"criteriaId":1
+					"criteriaName":"High Risk Products Criteria",
+					"loanProducts": [
+						{"id": 1,
+						"name": "LOAN_PRODUCT_3ODPK1", 
+						"includeInBorrowerCycle": false},
+						{"id": 2,
+						"name": "LOAN_PRODUCT_BXW8NC", 
+						includeInBorrowerCycle": false}
+						],
+					"provisioningcriteria": [
+						{"categoryId": 1, 
+						"categoryName": "STANDARD", 
+						"minAge": 0, 
+						"maxAge": 3, 
+						"provisioningPercentage": 1,
+						"liabilityAccount": 8, 
+						"expenseAccount": 14},
+						{"categoryId": 2, 
+						"categoryName": "SUB-STANDARD",
+						"minAge": 1,
+						"maxAge": 5,
+						"provisioningPercentage": 2,
+						"liabilityAccount": 13,
+						"expenseAccount": 13},
+						{"categoryId": 3,
+						"categoryName": "DOUBTFUL",
+						"minAge": 2,
+						"maxAge": 6,
+						"provisioningPercentage": 3,
+						"liabilityAccount": 9,
+						"expenseAccount": 10},
+						{"categoryId": 4,
+						"categoryName": "LOSS",
+						"minAge": 3,
+						"maxAge": 7,
+						"provisioningPercentage": 4,
+						"liabilityAccount": 10, 
+						"expenseAccount": 9}]
+					}
+					</code>
+				</div>
+			</div>
+			<a id="update_provisioningcriteria" name="update_provisioningcriteria"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Updates a new Provisioning Criteria</h4>
+					<p>Updates a new Provisioning Criteria</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>criteriaName, loanProducts, provisioningcriteria</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					PUT https://DomainName/api/v1/provisioningcriteria/{criteriaId}
+					</code>
+					<code class="method-request">
+					PUT provisioningcriteria/{criteriaId}
+					Content-Type: application/json
+					Request Body:
+					{
+					"criteriaName":"High Risk Products Criteria1",
+					"loanProducts": [
+						{"id": 1,
+						"name": "LOAN_PRODUCT_3ODPK1", 
+						"includeInBorrowerCycle": false},
+						{"id": 2,
+						"name": "LOAN_PRODUCT_BXW8NC", 
+						includeInBorrowerCycle": false}
+						],
+					"provisioningcriteria": [
+						{"categoryId": 1, 
+						"categoryName": "STANDARD", 
+						"minAge": 0, 
+						"maxAge": 3, 
+						"provisioningPercentage": 1,
+						"liabilityAccount": 8, 
+						"expenseAccount": 14},
+						{"categoryId": 2, 
+						"categoryName": "SUB-STANDARD",
+						"minAge": 1,
+						"maxAge": 5,
+						"provisioningPercentage": 2,
+						"liabilityAccount": 13,
+						"expenseAccount": 13},
+						{"categoryId": 3,
+						"categoryName": "DOUBTFUL",
+						"minAge": 2,
+						"maxAge": 6,
+						"provisioningPercentage": 3,
+						"liabilityAccount": 9,
+						"expenseAccount": 10},
+						{"categoryId": 4,
+						"categoryName": "LOSS",
+						"minAge": 3,
+						"maxAge": 7,
+						"provisioningPercentage": 4,
+						"liabilityAccount": 10, 
+						"expenseAccount": 9}]
+					}	
+					</code>
+					<code class="method-response">
+					{
+					"resourceId": 1,
+					"changes": {
+					"criteriaName": "High Risk Products Criteria1"
+					}
+					}
+					</code>
+				</div>
+			</div>
+			<a id="delete_provisioningcriteria" name="delete_provisioningcriteria"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Deletes Provisioning Criteria</h4>
+					<p>Deletes Provisioning Criteria</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+				DELETE https://DomainName/api/v1/provisioningcriteria/{criteriaId}
+					</code>
+					<code class="method-request">
+					DELETE provisioningcriteria/{criteriaId}
+					Content-Type: application/json
+					Request Body:
+					{
+					}	
+					</code>
+					<code class="method-response">
+					{
+					"resourceId": 1,
+					}
+					</code>
+				</div>
+			</div>			
 		<!--End of Payment Type API docs-->
 
 

@@ -462,6 +462,45 @@ public class DataValidatorBuilder {
         return this;
     }
 
+    /*
+     * should be used with .notNull() before it
+     */
+    public DataValidatorBuilder longZeroOrGreater() {
+        if (this.value == null && this.ignoreNullValue) { return this; }
+
+        if (this.value != null) {
+            final Long number = Long.valueOf(this.value.toString());
+            if (number < 0) {
+                final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
+                        .append(this.parameter).append(".not.equal.or.greater.than.zero");
+                final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(this.parameter).append(
+                        " must be equal or greater than 0.");
+                final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                        defaultEnglishMessage.toString(), this.parameter, number, 0);
+                this.dataValidationErrors.add(error);
+            }
+        }
+        return this;
+    }
+
+    public DataValidatorBuilder longGreaterThanNumber(Long number) {
+        if (this.value == null && this.ignoreNullValue) { return this; }
+
+        if (this.value != null) {
+            final Long longValue = Long.valueOf(this.value.toString());
+            if (longValue < number + 1) {
+                final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
+                        .append(this.parameter).append(".not.greater.than.specified.number");
+                final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(this.parameter)
+                        .append(" must be greater than ").append(number);
+                final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                        defaultEnglishMessage.toString(), this.parameter, longValue, number);
+                this.dataValidationErrors.add(error);
+            }
+        }
+        return this;
+    }
+    
     public DataValidatorBuilder arrayNotEmpty() {
         if (this.value == null && this.ignoreNullValue) { return this; }
 

@@ -65,6 +65,7 @@ public class AccountingProcessorHelper {
     public static final String LOAN_TRANSACTION_IDENTIFIER = "L";
     public static final String SAVINGS_TRANSACTION_IDENTIFIER = "S";
     public static final String CLIENT_TRANSACTION_IDENTIFIER = "C";
+    public static final String PROVISIONING_TRANSACTION_IDENTIFIER = "P" ;
     private final JournalEntryRepository glJournalEntryRepository;
     private final ProductToGLAccountMappingRepository accountMappingRepository;
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository;
@@ -660,6 +661,33 @@ public class AccountingProcessorHelper {
         this.glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 
+    public void createProvisioningDebitJournalEntry(Date transactionDate, Long provisioningentryId, Office office, String currencyCode, GLAccount account,BigDecimal amount) {
+        LoanTransaction loanTransaction = null;
+        SavingsAccountTransaction savingsAccountTransaction = null;
+        ClientTransaction clientTransaction = null;
+        PaymentDetail paymentDetail = null ;
+        final boolean manualEntry = false;
+        String modifiedTransactionId = PROVISIONING_TRANSACTION_IDENTIFIER + provisioningentryId;
+        final JournalEntry journalEntry = JournalEntry.createNew(office, paymentDetail, account, currencyCode, modifiedTransactionId,
+                manualEntry, transactionDate, JournalEntryType.DEBIT, amount, null, PortfolioProductType.PROVISIONING.getValue(), provisioningentryId, null,
+                loanTransaction, savingsAccountTransaction, clientTransaction);
+        
+        this.glJournalEntryRepository.saveAndFlush(journalEntry);
+    }
+    
+    public void createProvisioningCreditJournalEntry(Date transactionDate, Long provisioningentryId, Office office, String currencyCode, GLAccount account, BigDecimal amount) {
+        LoanTransaction loanTransaction = null;
+        SavingsAccountTransaction savingsAccountTransaction = null;
+        ClientTransaction clientTransaction = null;
+        PaymentDetail paymentDetail = null ;
+        final boolean manualEntry = false;
+        String modifiedTransactionId = PROVISIONING_TRANSACTION_IDENTIFIER + provisioningentryId;
+        final JournalEntry journalEntry = JournalEntry.createNew(office, paymentDetail, account, currencyCode, modifiedTransactionId,
+                manualEntry, transactionDate, JournalEntryType.CREDIT, amount, null, PortfolioProductType.PROVISIONING.getValue(), provisioningentryId, null,
+                loanTransaction, savingsAccountTransaction, clientTransaction);
+        this.glJournalEntryRepository.saveAndFlush(journalEntry);
+    }
+    
     private void createDebitJournalEntryForLoan(final Office office, final String currencyCode, final GLAccount account, final Long loanId,
             final String transactionId, final Date transactionDate, final BigDecimal amount) {
         final boolean manualEntry = false;
