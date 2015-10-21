@@ -48,7 +48,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
 
         protected LoanProductProvisioningEntryMapper(String formattedDate) {
             sqlQuery = new StringBuilder()
-                    .append("select mclient.office_id, pcd.criteria_id as criteriaid, loan.product_id,loan.currency_code,")
+                    .append("select if(loan.loan_type_enum=1, mclient.office_id, mgroup.office_id) as office_id, loan.loan_type_enum, pcd.criteria_id as criteriaid, loan.product_id,loan.currency_code,")
                     .append("GREATEST(datediff(")
                     .append(formattedDate)
                     .append(",sch.duedate),0) as numberofdaysoverdue,sch.duedate, pcd.category_id, pcd.provision_percentage,")
@@ -59,6 +59,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
                     .append("(pcd.min_age <= GREATEST(datediff(").append(formattedDate).append(",sch.duedate),0) and ")
                     .append("GREATEST(datediff(").append(formattedDate).append(",sch.duedate),0) <= pcd.max_age) ")
                     .append("LEFT JOIN m_client mclient ON mclient.id = loan.client_id ")
+                    .append("LEFT JOIN m_group mgroup ON mgroup.id = loan.group_id ")
                     .append("where loan.loan_status_id=300 and sch.completed_derived=false and provision_percentage is not null ")
                     .append("GROUP BY loan.id  order by loan.product_id");
         }
