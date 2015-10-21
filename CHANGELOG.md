@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 21 Oct 2015 - 15.10.2.RELEASE
 1. 20 Oct 2015 - 15.10.1.RELEASE
 1. 21 Sep 2015 - 15.09.4.RELEASE
 1. 15 Sep 2015 - 15.09.3.RELEASE
@@ -76,6 +77,12 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+15.10.2.RELEASE
+=============
+This release is made to fix a critical bug in loan provisioning.
+Bugs
+ - [MIFOSX-2307] - Provisioning entries are not generated if tenant have group loans 
 
 15.10.1.RELEASE
 =============
