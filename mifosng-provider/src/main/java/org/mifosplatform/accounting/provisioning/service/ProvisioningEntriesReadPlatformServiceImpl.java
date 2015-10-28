@@ -54,13 +54,14 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
                     .append(",sch.duedate),0) as numberofdaysoverdue,sch.duedate, pcd.category_id, pcd.provision_percentage,")
                     .append("loan.total_outstanding_derived as outstandingbalance, pcd.liability_account, pcd.expense_account from m_loan_repayment_schedule sch")
                     .append(" LEFT JOIN m_loan loan on sch.loan_id = loan.id")
-                    .append(" LEFT JOIN m_loanproduct_provisioning_mapping lpm on lpm.product_id = loan.product_id")
-                    .append(" LEFT JOIN m_provisioning_criteria_definition pcd on pcd.criteria_id = lpm.criteria_id and ")
+                    .append(" JOIN m_loanproduct_provisioning_mapping lpm on lpm.product_id = loan.product_id")
+                    .append(" JOIN m_provisioning_criteria_definition pcd on pcd.criteria_id = lpm.criteria_id and ")
                     .append("(pcd.min_age <= GREATEST(datediff(").append(formattedDate).append(",sch.duedate),0) and ")
-                    .append("GREATEST(datediff(").append(formattedDate).append(",sch.duedate),0) <= pcd.max_age) ")
+                    .append("GREATEST(datediff(").append(formattedDate).append(",sch.duedate),0) <= pcd.max_age) and ")
+                    .append("pcd.criteria_id is not null ")
                     .append("LEFT JOIN m_client mclient ON mclient.id = loan.client_id ")
                     .append("LEFT JOIN m_group mgroup ON mgroup.id = loan.group_id ")
-                    .append("where loan.loan_status_id=300 and sch.completed_derived=false and provision_percentage is not null ")
+                    .append("where loan.loan_status_id=300 and sch.completed_derived=false ")
                     .append("GROUP BY loan.id  order by loan.product_id");
         }
 
@@ -130,8 +131,8 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
 
         private final StringBuilder sqlQuery = new StringBuilder()
         .append("select entry.id, entry.history_id as historyId, office_id, entry.criteria_id as criteriaid, office.name as officename, product.name as productname, entry.product_id, ")
-        .append("category_id, category.category_name, liability.id as liabilityid, liability.gl_code as liabilitycode, ")
-        .append("expense.id as expenseid, expense.gl_code as expensecode, entry.currency_code, entry.overdue_in_days, entry.reseve_amount from m_loanproduct_provisioning_entry entry ")
+        .append("category_id, category.category_name, liability.id as liabilityid, liability.gl_code as liabilitycode, liability.name as liabilityname, ")
+        .append("expense.id as expenseid, expense.gl_code as expensecode, expense.name as expensename, entry.currency_code, entry.overdue_in_days, entry.reseve_amount from m_loanproduct_provisioning_entry entry ")
         .append("left join m_office office ON office.id = entry.office_id ")
         .append("left join m_product_loan product ON product.id = entry.product_id ")
         .append("left join m_provision_category category ON category.id = entry.category_id ")
@@ -152,12 +153,14 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
             String categoryName = rs.getString("category_name") ;
             BigDecimal amountreserved = rs.getBigDecimal("reseve_amount");
             Long liabilityAccountCode = rs.getLong("liabilityid");
-            String liabilityAccountName = rs.getString("liabilitycode") ;
-            String expenseAccountName = rs.getString("expensecode") ;
+            String liabilityAccountglCode = rs.getString("liabilitycode") ;
+            String expenseAccountglCode = rs.getString("expensecode") ;
             Long expenseAccountCode = rs.getLong("expenseid");
             Long criteriaId = rs.getLong("criteriaid") ;
+            String liabilityAccountName = rs.getString("liabilityname") ;
+            String expenseAccountName = rs.getString("expensename") ;
             return new LoanProductProvisioningEntryData(historyId, officeId, officeName, currentcyCode, productId, productName, categoryId, categoryName, overdueDays, amountreserved,
-                    liabilityAccountCode, liabilityAccountName, expenseAccountCode, expenseAccountName, criteriaId);
+                    liabilityAccountCode, liabilityAccountglCode, liabilityAccountName, expenseAccountCode, expenseAccountglCode, expenseAccountName, criteriaId);
         }
         
         public String getSchema() {

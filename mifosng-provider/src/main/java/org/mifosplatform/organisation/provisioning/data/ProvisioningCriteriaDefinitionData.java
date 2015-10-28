@@ -17,13 +17,15 @@ public final class ProvisioningCriteriaDefinitionData implements Comparable<Prov
     private final Long maxAge;
     private final BigDecimal provisioningPercentage;
     private final Long liabilityAccount;
-    private final Long expenseAccount;
     private final String liabilityCode;
+    private final String liabilityName ;
+    private final Long expenseAccount;
     private final String expenseCode;
-
+    private final String expenseName ;
+    
     public ProvisioningCriteriaDefinitionData(Long id, Long categoryId, String categoryName, Long minAge, Long maxAge,
-            BigDecimal provisioningPercentage, Long liabilityAccount, Long expenseAccount, final String liabilityCode,
-            final String expenseCode) {
+            BigDecimal provisioningPercentage, Long liabilityAccount, final String liabilityCode, String liabilityName, Long expenseAccount, 
+            final String expenseCode, final String expenseName) {
         this.id = id;
         this.categoryId = categoryId;
         this.minAge = minAge;
@@ -34,11 +36,12 @@ public final class ProvisioningCriteriaDefinitionData implements Comparable<Prov
         this.categoryName = categoryName;
         this.liabilityCode = liabilityCode;
         this.expenseCode = expenseCode;
-
+        this.liabilityName = liabilityName ;
+        this.expenseName =  expenseName ;
     }
 
     public static ProvisioningCriteriaDefinitionData template(Long categoryId, String categoryName) {
-        return new ProvisioningCriteriaDefinitionData(null, categoryId, categoryName, null, null, null, null, null, null, null);
+        return new ProvisioningCriteriaDefinitionData(null, categoryId, categoryName, null, null, null, null, null, null, null, null, null);
     }
 
     public Long getId() {

@@ -20,6 +20,7 @@ import org.mifosplatform.accounting.provisioning.data.ProvisioningEntryData;
 import org.mifosplatform.accounting.provisioning.domain.LoanProductProvisioningEntry;
 import org.mifosplatform.accounting.provisioning.domain.ProvisioningEntry;
 import org.mifosplatform.accounting.provisioning.domain.ProvisioningEntryRepository;
+import org.mifosplatform.accounting.provisioning.exception.NoProvisioningCriteriaDefinitionFound;
 import org.mifosplatform.accounting.provisioning.exception.ProvisioningEntryAlreadyCreatedException;
 import org.mifosplatform.accounting.provisioning.exception.ProvisioningEntryNotfoundException;
 import org.mifosplatform.accounting.provisioning.exception.ProvisioningJournalEntriesCannotbeCreatedException;
@@ -36,8 +37,10 @@ import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.monetary.domain.MoneyHelper;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
+import org.mifosplatform.organisation.provisioning.data.ProvisioningCriteriaData;
 import org.mifosplatform.organisation.provisioning.domain.ProvisioningCategory;
 import org.mifosplatform.organisation.provisioning.domain.ProvisioningCategoryRepository;
+import org.mifosplatform.organisation.provisioning.service.ProvisioningCriteriaReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -55,6 +58,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     private final static Logger logger = LoggerFactory.getLogger(ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl.class);
 
     private final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService;
+    private final ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService ;
     private final LoanProductRepository loanProductRepository;
     private final GLAccountRepository glAccountRepository;
     private final OfficeRepository officeRepository;
@@ -64,16 +68,18 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final ProvisioningEntriesDefinitionJsonDeserializer fromApiJsonDeserializer;
     private final FromJsonHelper fromApiJsonHelper;
-
+    
     @Autowired
     public ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl(
             final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService,
+            final ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService,
             final LoanProductRepository loanProductRepository, final GLAccountRepository glAccountRepository,
             final OfficeRepository officeRepository, final ProvisioningCategoryRepository provisioningCategoryRepository,
             final PlatformSecurityContext platformSecurityContext, final ProvisioningEntryRepository provisioningEntryRepository,
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
             final ProvisioningEntriesDefinitionJsonDeserializer fromApiJsonDeserializer, final FromJsonHelper fromApiJsonHelper) {
         this.provisioningEntriesReadPlatformService = provisioningEntriesReadPlatformService;
+        this.provisioningCriteriaReadPlatformService = provisioningCriteriaReadPlatformService ;
         this.loanProductRepository = loanProductRepository;
         this.glAccountRepository = glAccountRepository;
         this.officeRepository = officeRepository;
@@ -102,7 +108,12 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             this.journalEntryWritePlatformService.revertProvisioningJournalEntries(requestedEntry.getCreatedDate(),
                     existingEntryData.getId(), PortfolioProductType.PROVISIONING.getValue());
         }
-        requestedEntry.setJournalEntryCreated(Boolean.TRUE);
+        if(requestedEntry.getLoanProductProvisioningEntries() == null || requestedEntry.getLoanProductProvisioningEntries().size() == 0) {
+            requestedEntry.setJournalEntryCreated(Boolean.FALSE);    
+        }else {
+            requestedEntry.setJournalEntryCreated(Boolean.TRUE);
+        }
+        
         this.provisioningEntryRepository.save(requestedEntry);
         this.journalEntryWritePlatformService.createProvisioningJournalEntries(requestedEntry);
     }
@@ -144,6 +155,10 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
         Date createdDate = parseDate(command);
         boolean addJournalEntries = isJournalEntriesRequired(command);
         try {
+            Collection<ProvisioningCriteriaData> criteriaCollection = this.provisioningCriteriaReadPlatformService.retrieveAllProvisioningCriterias() ; 
+            if(criteriaCollection == null || criteriaCollection.size() == 0){
+                throw new NoProvisioningCriteriaDefinitionFound() ;
+            }
             ProvisioningEntry requestedEntry = createProvsioningEntry(createdDate, addJournalEntries);
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(requestedEntry.getId()).build();
         } catch (DataIntegrityViolationException dve) {

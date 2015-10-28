@@ -23,6 +23,7 @@ import org.mifosplatform.organisation.provisioning.domain.ProvisioningCategory;
 import org.mifosplatform.organisation.provisioning.domain.ProvisioningCategoryRepository;
 import org.mifosplatform.organisation.provisioning.domain.ProvisioningCriteria;
 import org.mifosplatform.organisation.provisioning.domain.ProvisioningCriteriaDefinition;
+import org.mifosplatform.organisation.provisioning.exception.ProvisioningCriteriaOverlappingDefinitionException;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -68,6 +69,19 @@ public class ProvisioningCriteriaAssembler {
         return loanProducts ;
     }
     
+    private void validateRange(Set<ProvisioningCriteriaDefinition> criteriaDefinitions) {
+        List<ProvisioningCriteriaDefinition> def = new ArrayList<>() ;
+        def.addAll(criteriaDefinitions) ;
+        
+        for (int i = 0; i < def.size(); i++) {
+            for (int j = i + 1; j < def.size(); j++) {
+                if (def.get(i).isOverlapping(def.get(j))) {
+                    throw new ProvisioningCriteriaOverlappingDefinitionException() ;
+                }
+            }
+        }
+    }
+    
     public ProvisioningCriteria fromParsedJson(final JsonElement jsonElement) {
         ProvisioningCriteria provisioningCriteria = createCriteria(jsonElement);
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(jsonElement.getAsJsonObject());
@@ -82,7 +96,7 @@ public class ProvisioningCriteriaAssembler {
                     provisioningCriteria);
             criteriaDefinitions.add(provisioningCriteriaData);
         }
-
+        validateRange(criteriaDefinitions) ;
         Set<LoanProductProvisionCriteria> mapping = new HashSet<>();
         for (LoanProduct loanProduct : loanProducts) {
             mapping.add(new LoanProductProvisionCriteria(provisioningCriteria, loanProduct));

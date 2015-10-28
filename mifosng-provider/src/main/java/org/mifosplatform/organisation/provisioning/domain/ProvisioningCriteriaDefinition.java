@@ -75,4 +75,9 @@ public class ProvisioningCriteriaDefinition extends AbstractPersistable<Long> {
         this.liabilityAccount = lia ;
         this.expenseAccount = exp ;
     }
+    
+    
+    public boolean isOverlapping(ProvisioningCriteriaDefinition def) {
+        return this.minimumAge <= def.maximumAge && def.minimumAge <= this.maximumAge;
+    }
 }
