@@ -58,7 +58,6 @@ public class ProvisioningCategoryApiResource {
     }
 
     @GET
-    @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAll(@Context final UriInfo uriInfo) {

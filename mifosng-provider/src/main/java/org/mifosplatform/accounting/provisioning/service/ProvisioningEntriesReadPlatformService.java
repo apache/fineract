@@ -10,6 +10,8 @@ import java.util.Date;
 
 import org.mifosplatform.accounting.provisioning.data.LoanProductProvisioningEntryData;
 import org.mifosplatform.accounting.provisioning.data.ProvisioningEntryData;
+import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 
 
 public interface ProvisioningEntriesReadPlatformService {
@@ -18,11 +20,13 @@ public interface ProvisioningEntriesReadPlatformService {
     
     public ProvisioningEntryData retrieveProvisioningEntryData(Long entryId) ;
     
-    public Collection<ProvisioningEntryData> retrieveAllProvisioningEntries() ;
+    public Page<ProvisioningEntryData> retrieveAllProvisioningEntries(Integer offset, Integer limit) ;
     
     public ProvisioningEntryData retrieveProvisioningEntryData(String date) ;
     
     public ProvisioningEntryData retrieveProvisioningEntryDataByCriteriaId(Long criteriaId) ;
     
     public ProvisioningEntryData retrieveExistingProvisioningIdDateWithJournals() ;
+    
+    public Page<LoanProductProvisioningEntryData> retrieveProvisioningEntries(SearchParameters searchParams) ;
 }

@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.accounting.provisioning.data;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 
@@ -24,6 +25,8 @@ public class ProvisioningEntryData {
     Long modifiedById ;
     
     private String modifiedUser ;
+
+    private BigDecimal reservedAmount ;
     
     private Collection<LoanProductProvisioningEntryData> provisioningEntries ;
     
@@ -33,7 +36,7 @@ public class ProvisioningEntryData {
     }
 
     public ProvisioningEntryData(Long id, Boolean journalEntry, Long createdById,
-            String createdUser, Date createdDate, Long modifiedById, String modifiedUser) {
+            String createdUser, Date createdDate, Long modifiedById, String modifiedUser, BigDecimal totalReservedAmount) {
         this.id = id ;
         this.journalEntry = journalEntry ;
         this.createdById = createdById ;
@@ -41,6 +44,7 @@ public class ProvisioningEntryData {
         this.modifiedById = modifiedById ;
         this.modifiedUser = modifiedUser ;
         this.createdDate = createdDate ;
+        this.reservedAmount = totalReservedAmount ;
     }
     
     public void setEntries(Collection<LoanProductProvisioningEntryData> provisioningEntries) {

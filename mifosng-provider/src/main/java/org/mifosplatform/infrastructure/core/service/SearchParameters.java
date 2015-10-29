@@ -30,6 +30,11 @@ public final class SearchParameters {
     private final Long savingsId;
     private final Boolean orphansOnly;
 
+  //Provisning Entries Search Params
+    private final Long provisioningEntryId ;
+    private final Long productId ;
+    private final Long categoryId ;
+    
     public static SearchParameters from(final String sqlSearch, final Long officeId, final String externalId, final String name,
             final String hierarchy) {
         final Long staffId = null;
@@ -134,6 +139,11 @@ public final class SearchParameters {
                 loanId, savingsId, orphansOnly);
     }
 
+    public final static SearchParameters forProvisioningEntries(final Long provisioningEntryId, final Long officeId, final Long productId, 
+            final Long categoryId, final Integer offset, final Integer limit) {
+        return new SearchParameters(provisioningEntryId, officeId, productId, categoryId, offset, limit) ;
+    }
+    
     public static SearchParameters forSavings(final String sqlSearch, final String externalId, final Integer offset, final Integer limit,
             final String orderBy, final String sortOrder) {
 
@@ -183,8 +193,37 @@ public final class SearchParameters {
         this.savingsId = savingsId;
         this.orphansOnly = orphansOnly;
         this.currencyCode = null;
+        this.provisioningEntryId = null ;
+        this.productId = null ;
+        this.categoryId = null ;
+      
     }
 
+    private SearchParameters(final Long provisioningEntryId, final Long officeId, final Long productId, final Long categoryId,
+            final Integer offset, final Integer limit) {
+        this.sqlSearch = null;
+        this.externalId = null;
+        this.name = null;
+        this.hierarchy = null;
+        this.firstname = null;
+        this.lastname = null;
+        this.orderBy = null;
+        this.sortOrder = null;
+        this.staffId = null;
+        this.accountNo = null;
+        this.loanId = null;
+        this.savingsId = null;
+        this.orphansOnly = null;
+        this.currencyCode = null;
+        this.officeId = officeId;
+        this.offset = offset;
+        this.limit = limit;
+        this.provisioningEntryId = provisioningEntryId ;
+        this.productId = productId ;
+        this.categoryId = categoryId ;
+        
+    }
+    
     public SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name, final String hierarchy,
             final String firstname, final String lastname, final Integer offset, final Integer limit, final String orderBy,
             final String sortOrder, final Long staffId, final String accountNo, final Long loanId, final Long savingsId,
@@ -206,6 +245,9 @@ public final class SearchParameters {
         this.savingsId = savingsId;
         this.orphansOnly = orphansOnly;
         this.currencyCode = currencyCode;
+        this.provisioningEntryId = null ;
+        this.productId = null ;
+        this.categoryId = null ;
     }
 
     public boolean isOrderByRequested() {
@@ -331,6 +373,28 @@ public final class SearchParameters {
     public Boolean isOrphansOnly() {
         if (this.orphansOnly != null) { return this.orphansOnly; }
         return false;
+    }
+    
+    public Long getProvisioningEntryId() {
+        return this.provisioningEntryId;
+    }
+    
+    public boolean isProvisioningEntryIdPassed() {
+        return this.provisioningEntryId != null && this.provisioningEntryId != 0 ;
+    }
+    
+    public Long getProductId() {
+        return this.productId;
+    }
 
+    public boolean isProductIdPassed() {
+        return this.productId != null && this.productId != 0 ;
+    }
+    public Long getCategoryId() {
+        return this.categoryId;
+    }
+    
+    public boolean isCategoryIdPassed() {
+        return this.categoryId != null && this.categoryId != 0 ;
     }
 }
