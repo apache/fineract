@@ -87,30 +87,31 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
                         .longGreaterThanZero();
 
                 Long minimumAge = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, jsonObject);
-                baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM)
+                baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM)
                         .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, i + 1).value(minimumAge).notNull()
                         .longZeroOrGreater() ;
 
                 Long maximumAge = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, jsonObject);
-                baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM)
+                baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM)
                         .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, i + 1).value(maximumAge).notNull()
-                        .longZeroOrGreater();
+                        .longGreaterThanNumber(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, minimumAge, (i+1));
 
+                
                 BigDecimal provisioningpercentage = this.fromApiJsonHelper.extractBigDecimalNamed(
                         ProvisioningCriteriaConstants.JSON_PROVISIONING_PERCENTAGE_PARAM, jsonObject, locale);
-                baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM)
+                baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_PERCENTAGE_PARAM)
                         .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_PROVISIONING_PERCENTAGE_PARAM, i + 1).value(provisioningpercentage)
                         .notNull().zeroOrPositiveAmount();
 
                 Long liabilityAccountId = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_LIABILITY_ACCOUNT_PARAM,
                         jsonObject);
-                baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM)
+                baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_LIABILITY_ACCOUNT_PARAM)
                         .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_LIABILITY_ACCOUNT_PARAM, i + 1).value(liabilityAccountId)
                         .notNull().longGreaterThanZero() ;
 
                 Long expenseAccountId = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_EXPENSE_ACCOUNT_PARAM,
                         jsonObject);
-                baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM)
+                baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_EXPENSE_ACCOUNT_PARAM)
                         .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_EXPENSE_ACCOUNT_PARAM, i + 1).value(expenseAccountId).notNull()
                         .longGreaterThanZero() ;
             }
@@ -179,10 +180,10 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
                         .longZeroOrGreater() ;
 
                 Long maximumAge = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, jsonObject);
-                baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM)
-                        .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, i + 1).value(maximumAge).notNull()
-                        .longZeroOrGreater();
-                
+                baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM)
+                .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, i + 1).value(maximumAge).notNull()
+                .longGreaterThanNumber(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, minimumAge, (i+1));
+
                 BigDecimal provisioningpercentage = this.fromApiJsonHelper.extractBigDecimalNamed(
                         ProvisioningCriteriaConstants.JSON_PROVISIONING_PERCENTAGE_PARAM, jsonObject, locale);
                 baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM)

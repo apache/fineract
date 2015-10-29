@@ -117,7 +117,8 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
 
         private final StringBuilder sqlQuery = new StringBuilder()
                 .append("pc.id, pc.criteria_id, pc.category_id, mpc.category_name, pc.min_age, pc.max_age, ")
-                .append("pc.provision_percentage, pc.liability_account, pc.expense_account, lia.gl_code as liabilitycode, expe.gl_code as expensecode ")
+                .append("pc.provision_percentage, pc.liability_account, pc.expense_account, lia.gl_code as liabilitycode, expe.gl_code as expensecode, ")
+                .append("lia.name as liabilityname, expe.name as expensename ")
                 .append("from m_provisioning_criteria_definition as pc ")
                 .append("LEFT JOIN acc_gl_account lia ON lia.id = pc.liability_account ")
                 .append("LEFT JOIN acc_gl_account expe ON expe.id = pc.expense_account ")
@@ -134,12 +135,14 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
             Long maxAge = rs.getLong("max_age");
             BigDecimal provisioningPercentage = rs.getBigDecimal("provision_percentage");
             Long liabilityAccount = rs.getLong("liability_account");
-            Long expenseAccount = rs.getLong("expense_account");
             String liabilityAccountCode = rs.getString("liabilitycode");
+            String liabilityAccountName = rs.getString("liabilityname") ;
+            Long expenseAccount = rs.getLong("expense_account");
             String expenseAccountCode = rs.getString("expensecode");
-
+            String expenseAccountName = rs.getString("expensename") ;
+            
             return new ProvisioningCriteriaDefinitionData(id, categoryId, categoryName, minAge, maxAge, provisioningPercentage,
-                    liabilityAccount, expenseAccount, liabilityAccountCode, expenseAccountCode);
+                    liabilityAccount, liabilityAccountCode, liabilityAccountName, expenseAccount, expenseAccountCode, expenseAccountName);
         }
 
         public String schema() {

@@ -123,9 +123,11 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             GLAccount liabilityAccount = glAccountRepository.findOne(liabilityAccountId);
             GLAccount expenseAccount = glAccountRepository.findOne(expenseAccountId);
             String categoryName = null ;
+            String liabilityAccountName = null ;
+            String expenseAccountName = null ;
             ProvisioningCriteriaDefinitionData data = new ProvisioningCriteriaDefinitionData(id, categoryId, 
                     categoryName, minimumAge, maximumAge, provisioningpercentage, 
-                    liabilityAccount.getId(), expenseAccount.getId(), liabilityAccount.getGlCode(), expenseAccount.getGlCode()) ;
+                    liabilityAccount.getId(), liabilityAccount.getGlCode(), liabilityAccountName, expenseAccount.getId(), expenseAccount.getGlCode(), expenseAccountName) ;
             provisioningCriteria.update(data, liabilityAccount, expenseAccount) ;
         }
     }
@@ -143,7 +145,7 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
                     + name + "` already exists", "category name", name);
         }
         logger.error(dve.getMessage(), dve);
-        throw new PlatformDataIntegrityException("error.msg.charge.unknown.data.integrity.issue",
+        throw new PlatformDataIntegrityException("error.msg.provisioning.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 }
