@@ -40,6 +40,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.LoanRescheduleStrategyMeth
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.mifosplatform.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -124,8 +125,8 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
     public Collection<TransactionProcessingStrategyData> retreiveTransactionProcessingStrategies() {
 
         final Collection<TransactionProcessingStrategyData> strategyOptions = new ArrayList<>();
-
-        final List<LoanTransactionProcessingStrategy> strategies = this.loanTransactionProcessingStrategyRepository.findAll();
+        Sort sort = new Sort("sortOrder") ;
+        final List<LoanTransactionProcessingStrategy> strategies = this.loanTransactionProcessingStrategyRepository.findAll(sort);
         for (final LoanTransactionProcessingStrategy strategy : strategies) {
             strategyOptions.add(strategy.toData());
         }
