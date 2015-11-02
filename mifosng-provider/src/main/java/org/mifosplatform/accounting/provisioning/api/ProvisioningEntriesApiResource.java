@@ -19,7 +19,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.accounting.provisioning.constant.ProvisioningEntriesApiConstants;
+import org.mifosplatform.accounting.provisioning.data.LoanProductProvisioningEntryData;
 import org.mifosplatform.accounting.provisioning.data.ProvisioningEntryData;
+import org.mifosplatform.accounting.provisioning.domain.LoanProductProvisioningEntry;
 import org.mifosplatform.accounting.provisioning.service.ProvisioningEntriesReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
@@ -29,6 +31,8 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -42,20 +46,22 @@ public class ProvisioningEntriesApiResource {
     private final PlatformSecurityContext platformSecurityContext;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final DefaultToApiJsonSerializer<ProvisioningEntryData> toApiJsonSerializer;
-    private final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService ;
+    private final DefaultToApiJsonSerializer<Object> entriesApiJsonSerializer;
+    private final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    
+
     @Autowired
     public ProvisioningEntriesApiResource(final PlatformSecurityContext platformSecurityContext,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final DefaultToApiJsonSerializer<ProvisioningEntryData> toApiJsonSerializer,
             final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper) {
+            final ApiRequestParameterHelper apiRequestParameterHelper, final DefaultToApiJsonSerializer<Object> entriesApiJsonSerializer) {
         this.platformSecurityContext = platformSecurityContext;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
-        this.provisioningEntriesReadPlatformService = provisioningEntriesReadPlatformService ;
-        this.apiRequestParameterHelper = apiRequestParameterHelper ;
+        this.provisioningEntriesReadPlatformService = provisioningEntriesReadPlatformService;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
+        this.entriesApiJsonSerializer = entriesApiJsonSerializer;
     }
 
     @POST
@@ -68,7 +74,7 @@ public class ProvisioningEntriesApiResource {
         final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
         return this.toApiJsonSerializer.serialize(commandProcessingResult);
     }
-    
+
     @POST
     @Path("{entryId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -77,36 +83,53 @@ public class ProvisioningEntriesApiResource {
             final String apiRequestBodyAsJson) {
         CommandWrapper commandWrapper = null;
         this.platformSecurityContext.authenticatedUser();
-        if("createjournalentry".equals(commandParam)) {
+        if ("createjournalentry".equals(commandParam)) {
             commandWrapper = new CommandWrapperBuilder().createProvisioningJournalEntries(entryId).withJson(apiRequestBodyAsJson).build();
-            final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
-            return this.toApiJsonSerializer.serialize(commandProcessingResult);    
-        }else if("recreateprovisioningentry".equals(commandParam)) {
+            final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService
+                    .logCommandSource(commandWrapper);
+            return this.toApiJsonSerializer.serialize(commandProcessingResult);
+        } else if ("recreateprovisioningentry".equals(commandParam)) {
             commandWrapper = new CommandWrapperBuilder().reCreateProvisioningEntries(entryId).withJson(apiRequestBodyAsJson).build();
-            final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
-            return this.toApiJsonSerializer.serialize(commandProcessingResult);    
+            final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService
+                    .logCommandSource(commandWrapper);
+            return this.toApiJsonSerializer.serialize(commandProcessingResult);
         }
-        throw new UnrecognizedQueryParamException("command", commandParam); 
+        throw new UnrecognizedQueryParamException("command", commandParam);
     }
-    
+
     @GET
     @Path("{entryId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveProvisioningEntry(@PathParam("entryId") final Long entryId, @Context final UriInfo uriInfo) {
-        platformSecurityContext.authenticatedUser() ;
-        ProvisioningEntryData data = this.provisioningEntriesReadPlatformService.retrieveProvisioningEntryData(entryId) ;
+        platformSecurityContext.authenticatedUser();
+        ProvisioningEntryData data = this.provisioningEntriesReadPlatformService.retrieveProvisioningEntryData(entryId);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, data, ProvisioningEntriesApiConstants.PROVISIONING_ENTRY_PARAMETERS); 
+        return this.toApiJsonSerializer.serialize(settings, data, ProvisioningEntriesApiConstants.PROVISIONING_ENTRY_PARAMETERS);
     }
-    
+
+    @GET
+    @Path("entries")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveProviioningEntries(@QueryParam("entryId") final Long entryId, @QueryParam("offset") final Integer offset,
+            @QueryParam("limit") final Integer limit, @QueryParam("officeId") final Long officeId,
+            @QueryParam("productId") final Long productId, @QueryParam("categoryId") final Long categoryId, @Context final UriInfo uriInfo) {
+        this.platformSecurityContext.authenticatedUser();
+        SearchParameters params = SearchParameters.forProvisioningEntries(entryId, officeId, productId, categoryId, offset, limit);
+        Page<LoanProductProvisioningEntryData> entries = this.provisioningEntriesReadPlatformService.retrieveProvisioningEntries(params);
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.entriesApiJsonSerializer.serialize(settings, entries, ProvisioningEntriesApiConstants.PROVISIONING_ENTRY_PARAMETERS);
+    }
+
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllProvisioningEntries(@Context final UriInfo uriInfo) {
-        platformSecurityContext.authenticatedUser() ;
-        Collection<ProvisioningEntryData> data = this.provisioningEntriesReadPlatformService.retrieveAllProvisioningEntries() ;
+    public String retrieveAllProvisioningEntries(@QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
+            @Context final UriInfo uriInfo) {
+        platformSecurityContext.authenticatedUser();
+        Page<ProvisioningEntryData> data = this.provisioningEntriesReadPlatformService.retrieveAllProvisioningEntries(offset, limit);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, data, ProvisioningEntriesApiConstants.ALL_PROVISIONING_ENTRIES); 
+        return this.entriesApiJsonSerializer.serialize(settings, data, ProvisioningEntriesApiConstants.ALL_PROVISIONING_ENTRIES);
     }
 }
