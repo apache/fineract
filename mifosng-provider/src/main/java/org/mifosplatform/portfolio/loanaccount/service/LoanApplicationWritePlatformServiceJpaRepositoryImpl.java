@@ -5,14 +5,8 @@
  */
 package org.mifosplatform.portfolio.loanaccount.service;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.accountnumberformat.domain.AccountNumberFormat;
@@ -103,8 +97,13 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements LoanApplicationWritePlatformService {
@@ -629,6 +628,11 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 final Set<LoanCollateral> loanCollateral = this.loanCollateralAssembler.fromParsedJson(command.parsedJson());
                 existingLoanApplication.updateLoanCollateral(loanCollateral);
             }
+
+            final String chargesParamName = "charges";
+            if (changes.containsKey(chargesParamName)) {
+                existingLoanApplication.updateLoanCharges(possiblyModifedLoanCharges);
+            }
             
             if (changes.containsKey("recalculateLoanSchedule")) {
                 changes.remove("recalculateLoanSchedule");
@@ -640,11 +644,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 existingLoanApplication.updateLoanSchedule(loanSchedule, currentUser);
                 existingLoanApplication.recalculateAllCharges();
             }
-            
-            final String chargesParamName = "charges";
-            if (changes.containsKey(chargesParamName)) {
-                existingLoanApplication.updateLoanCharges(possiblyModifedLoanCharges);
-            }
+
 
             this.fromApiJsonDeserializer.validateLoanTermAndRepaidEveryValues(existingLoanApplication.getTermFrequency(),
                     existingLoanApplication.getTermPeriodFrequencyType(), productRelatedDetail.getNumberOfRepayments(),
