@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 04 Nov 2015 - 15.11.1.RELEASE
 1. 21 Oct 2015 - 15.10.2.RELEASE
 1. 20 Oct 2015 - 15.10.1.RELEASE
 1. 21 Sep 2015 - 15.09.4.RELEASE
@@ -77,6 +78,31 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+15.11.1.RELEASE
+=============
+This release fixes critical issues in Loan Provisioning Feature and add some UI enhancements.
+This release also includes few bug fixes as mentioned below.
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-2313] - All critical issues in Loan Provisioning
+ - [MIFOSX-2303] - Add Product/Branch/Category filtering to Loan Provisioning report
+
+Bugs
+ - [MIFOSX-2320] - Not able to make repayment after second tranche disbursement 
+ - [MIFOSX-2045] - Clarify New Loan Repayment Strategy Wording 
+ - [MIFOSX-2335] - fix removing a charge on a recalculateLoanSchedule
+ - [Mifosx-2334] - Meltdown in advanced accounting...sum of all charges is not equal to the fee charge for a transaction
+ 
+Community-App
+
+ - Localisation updates
+ - [MIFOSX-2308] - Issues in Loan Provisioning Client Side
+ - [MIFOSX-2303] - Add Product/Branch/Category filtering to Loan Provisioning report
+ - [MIFOSX-2309] - By Clicking action not able to select product from "All Products" field in "Create Provisioning Criteria" page
+ - [MIFOSX-2170] - Error message displayed while creating the datatable is not proper
 
 15.10.2.RELEASE
 =============
