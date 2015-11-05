@@ -1194,7 +1194,7 @@ public class Loan extends AbstractPersistable<Long> {
 
     }
 
-    private void updateLoanScheduleDependentDerivedFields() {
+    public void updateLoanScheduleDependentDerivedFields() {
         this.expectedMaturityDate = determineExpectedMaturityDate().toDate();
         this.actualMaturityDate = determineExpectedMaturityDate().toDate();
     }
