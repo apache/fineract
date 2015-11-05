@@ -390,7 +390,9 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 for (final LoanRepaymentScheduleInstallment repaymentScheduleInstallment : repaymentScheduleInstallments) {
                     repaymentScheduleInstallment.updateDerivedFields(currency, new LocalDate());
                 }
-
+                
+                //updates maturity date
+                loan.updateLoanScheduleDependentDerivedFields();
                 // update the loan object
                 this.loanRepository.save(loan);
             }
