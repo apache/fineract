@@ -49,6 +49,9 @@ import org.mifosplatform.portfolio.common.BusinessEventNotificationConstants.BUS
 import org.mifosplatform.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.common.service.BusinessEventNotifierService;
+import org.mifosplatform.portfolio.floatingrates.data.FloatingRateDTO;
+import org.mifosplatform.portfolio.floatingrates.data.FloatingRatePeriodData;
+import org.mifosplatform.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
 import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
@@ -88,6 +91,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final LoanAccrualPlatformService loanAccrualPlatformService;
     private final PlatformSecurityContext context;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
 
     @Autowired
     public LoanAccountDomainServiceJpa(final LoanAssembler loanAccountAssembler, final LoanRepository loanRepository,
@@ -101,7 +105,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final CalendarInstanceRepository calendarInstanceRepository,
             final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository,
             final LoanAccrualPlatformService loanAccrualPlatformService, final PlatformSecurityContext context,
-            final BusinessEventNotifierService businessEventNotifierService) {
+            final BusinessEventNotifierService businessEventNotifierService,
+            final FloatingRatesReadPlatformService floatingRatesReadPlatformService) {
         this.loanAccountAssembler = loanAccountAssembler;
         this.loanRepository = loanRepository;
         this.loanTransactionRepository = loanTransactionRepository;
@@ -119,6 +124,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.loanAccrualPlatformService = loanAccrualPlatformService;
         this.context = context;
         this.businessEventNotifierService = businessEventNotifierService;
+        this.floatingRatesReadPlatformService = floatingRatesReadPlatformService;
     }
 
     @Transactional
@@ -190,9 +196,11 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
         HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays, allowTransactionsOnHoliday,
                 allowTransactionsOnNonWorkingDay);
+        FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
+
         final ScheduleGeneratorDTO scheduleGeneratorDTO = new ScheduleGeneratorDTO(loanScheduleFactory, applicationCurrency,
                 calculatedRepaymentsStartingFromDate, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance, recalculateFrom,
-                overdurPenaltyWaitPeriod);
+                overdurPenaltyWaitPeriod, floatingRateDTO);
 
         final ChangedTransactionDetail changedTransactionDetail = loan.makeRepayment(newRepaymentTransaction,
                 defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds, isRecoveryRepayment,
@@ -237,6 +245,19 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 .withGroupId(loan.getGroupId()); //
 
         return newRepaymentTransaction;
+    }
+
+    private FloatingRateDTO constructFloatingRateDTO(final Loan loan) {
+        FloatingRateDTO floatingRateDTO = null;
+        if (loan.loanProduct().isLinkedToFloatingInterestRate()) {
+            boolean isFloatingInterestRate = loan.getIsFloatingInterestRate();
+            BigDecimal interestRateDiff = loan.getInterestRateDifferential();
+            List<FloatingRatePeriodData> baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate()
+                    .getRatePeriods();
+            floatingRateDTO = new FloatingRateDTO(isFloatingInterestRate, loan.getDisbursementDate(), interestRateDiff,
+                    baseLendingRatePeriods);
+        }
+        return floatingRateDTO;
     }
 
     private void saveLoanTransactionWithDataIntegrityViolationChecks(LoanTransaction newRepaymentTransaction) {
@@ -557,8 +578,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             compoundingCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(
                     loan.loanInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_COMPOUNDING_DETAIL.getValue());
         }
+        FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
         ScheduleGeneratorDTO scheduleGeneratorDTO = new ScheduleGeneratorDTO(loanScheduleFactory, applicationCurrency,
-                calculatedRepaymentsStartingFromDate, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance);
+                calculatedRepaymentsStartingFromDate, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance, floatingRateDTO);
 
         return scheduleGeneratorDTO;
     }

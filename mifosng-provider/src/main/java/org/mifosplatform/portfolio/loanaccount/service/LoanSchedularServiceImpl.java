@@ -18,6 +18,7 @@ import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidation
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.exception.JobExecutionException;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
+import org.mifosplatform.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,13 +32,16 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
     private final ConfigurationDomainService configurationDomainService;
     private final LoanReadPlatformService loanReadPlatformService;
     private final LoanWritePlatformService loanWritePlatformService;
+    private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
 
     @Autowired
     public LoanSchedularServiceImpl(final ConfigurationDomainService configurationDomainService,
-            final LoanReadPlatformService loanReadPlatformService, final LoanWritePlatformService loanWritePlatformService) {
+            final LoanReadPlatformService loanReadPlatformService, final LoanWritePlatformService loanWritePlatformService,
+            final FloatingRatesReadPlatformService floatingRatesReadPlatformService) {
         this.configurationDomainService = configurationDomainService;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanWritePlatformService = loanWritePlatformService;
+        this.floatingRatesReadPlatformService = floatingRatesReadPlatformService;
     }
 
     @Override
@@ -92,11 +96,11 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
             if (sb.length() > 0) { throw new JobExecutionException(sb.toString()); }
         }
     }
-    
+
     @Override
     @CronTarget(jobName = JobName.RECALCULATE_INTEREST_FOR_LOAN)
     public void recalculateInterest() {
-        Collection<Long> loanIds = this.loanReadPlatformService.fetchArrearLoans();
+        Collection<Long> loanIds = this.loanReadPlatformService.fetchLoansForInterestRecalculation();
         for (Long loanId : loanIds) {
             this.loanWritePlatformService.recalculateInterest(loanId);
         }

@@ -2529,4 +2529,20 @@ public class CommandWrapperBuilder {
         this.href = "/provisioningentries/"+entryId;
         return this;
     }
+
+    public CommandWrapperBuilder createFloatingRate() {
+        this.actionName = "CREATE";
+        this.entityName = "FLOATINGRATE";
+        this.entityId = null;
+        this.href = "/floatingrates";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateFloatingRate(final Long floatingRateId) {
+        this.actionName = "UPDATE";
+        this.entityName = "FLOATINGRATE";
+        this.entityId = floatingRateId;
+        this.href = "/floatingrates/"+floatingRateId;
+        return this;
+    }
 }

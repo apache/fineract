@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -17,6 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.holiday.domain.HolidayRepository;
 import org.mifosplatform.organisation.holiday.domain.HolidayStatusType;
@@ -45,6 +47,9 @@ import org.mifosplatform.portfolio.common.domain.DayOfWeekType;
 import org.mifosplatform.portfolio.common.domain.DaysInMonthType;
 import org.mifosplatform.portfolio.common.domain.DaysInYearType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
+import org.mifosplatform.portfolio.floatingrates.data.FloatingRateDTO;
+import org.mifosplatform.portfolio.floatingrates.data.FloatingRatePeriodData;
+import org.mifosplatform.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
 import org.mifosplatform.portfolio.loanaccount.api.LoanApiConstants;
@@ -99,6 +104,7 @@ public class LoanScheduleAssembler {
     private final ClientRepositoryWrapper clientRepository;
     private final GroupRepositoryWrapper groupRepository;
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
+    private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
 
     @Autowired
     public LoanScheduleAssembler(final FromJsonHelper fromApiJsonHelper, final LoanProductRepository loanProductRepository,
@@ -107,7 +113,8 @@ public class LoanScheduleAssembler {
             final LoanChargeAssembler loanChargeAssembler, final CalendarRepository calendarRepository,
             final HolidayRepository holidayRepository, final ConfigurationDomainService configurationDomainService,
             final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository,
-            final WorkingDaysRepositoryWrapper workingDaysRepository) {
+            final WorkingDaysRepositoryWrapper workingDaysRepository,
+            final FloatingRatesReadPlatformService floatingRatesReadPlatformService) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.loanProductRepository = loanProductRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
@@ -120,6 +127,7 @@ public class LoanScheduleAssembler {
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
         this.workingDaysRepository = workingDaysRepository;
+        this.floatingRatesReadPlatformService = floatingRatesReadPlatformService;
     }
 
     public LoanApplicationTerms assembleLoanTerms(final JsonElement element) {
@@ -164,8 +172,10 @@ public class LoanScheduleAssembler {
         final BigDecimal interestRatePerPeriod = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element);
         final PeriodFrequencyType interestRatePeriodFrequencyType = loanProduct.getInterestPeriodFrequencyType();
 
-        final BigDecimal annualNominalInterestRate = this.aprCalculator.calculateFrom(interestRatePeriodFrequencyType,
-                interestRatePerPeriod);
+        BigDecimal annualNominalInterestRate = BigDecimal.ZERO;
+        if (interestRatePerPeriod != null) {
+            annualNominalInterestRate = this.aprCalculator.calculateFrom(interestRatePeriodFrequencyType, interestRatePerPeriod);
+        }
 
         // disbursement details
         final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
@@ -296,6 +306,31 @@ public class LoanScheduleAssembler {
 
         final Integer installmentAmountInMultiplesOf = loanProduct.getInstallmentAmountInMultiplesOf();
 
+        Collection<LoanTermVariationsData> loanTermVariations = new ArrayList<>();
+        if (loanProduct.isLinkedToFloatingInterestRate()) {
+            final BigDecimal interestRateDiff = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                    LoanApiConstants.interestRateDifferentialParameterName, element);
+            final Boolean isFloatingInterestRate = this.fromApiJsonHelper.extractBooleanNamed(
+                    LoanApiConstants.isFloatingInterestRateParameterName, element);
+            List<FloatingRatePeriodData> baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate()
+                    .getRatePeriods();
+            FloatingRateDTO floatingRateDTO = new FloatingRateDTO(isFloatingInterestRate, expectedDisbursementDate, interestRateDiff,
+                    baseLendingRatePeriods);
+            Collection<FloatingRatePeriodData> applicableRates = loanProduct.fetchInterestRates(floatingRateDTO);
+
+            LocalDate interestRateStartDate = DateUtils.getLocalDateOfTenant();
+            for (FloatingRatePeriodData periodData : applicableRates) {
+                LoanTermVariationsData loanTermVariation = new LoanTermVariationsData(
+                        LoanEnumerations.loanvariationType(LoanTermVariationType.INTEREST_RATE), periodData.getFromDateAsLocalDate(),
+                        periodData.getInterestRate());
+                if (interestRateStartDate.isAfter(periodData.getFromDateAsLocalDate())) {
+                    interestRateStartDate = periodData.getFromDateAsLocalDate();
+                    annualNominalInterestRate = periodData.getInterestRate();
+                }
+                loanTermVariations.add(loanTermVariation);
+            }
+        }
+
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, nthDay, weekDayType, amortizationMethod, interestMethod,
                 interestRatePerPeriod, interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod,
@@ -304,7 +339,8 @@ public class LoanScheduleAssembler {
                 loanProduct.isMultiDisburseLoan(), emiAmount, disbursementDatas, maxOutstandingBalance, loanVariationTermsData,
                 graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, recalculationFrequencyType,
                 restCalendarInstance, compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment,
-                installmentAmountInMultiplesOf, loanProduct.preCloseInterestCalculationStrategy(), calendar, BigDecimal.ZERO);
+                installmentAmountInMultiplesOf, loanProduct.preCloseInterestCalculationStrategy(), calendar, BigDecimal.ZERO,
+                loanTermVariations);
     }
 
     private CalendarInstance createInterestRecalculationCalendarInstance(final LocalDate calendarStartDate,

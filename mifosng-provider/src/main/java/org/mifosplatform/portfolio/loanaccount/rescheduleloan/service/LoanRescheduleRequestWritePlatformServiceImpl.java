@@ -36,6 +36,9 @@ import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
+import org.mifosplatform.portfolio.floatingrates.data.FloatingRateDTO;
+import org.mifosplatform.portfolio.floatingrates.data.FloatingRatePeriodData;
+import org.mifosplatform.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargePaidByData;
 import org.mifosplatform.portfolio.loanaccount.data.ScheduleGeneratorDTO;
@@ -84,6 +87,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final LoanRepository loanRepository;
     private final LoanAssembler loanAssembler;
+    private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
 
     /**
      * LoanRescheduleRequestWritePlatformServiceImpl constructor
@@ -103,7 +107,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final LoanChargeReadPlatformService loanChargeReadPlatformService, final LoanScheduleGeneratorFactory loanScheduleFactory,
             final LoanTransactionRepository loanTransactionRepository,
             final JournalEntryWritePlatformService journalEntryWritePlatformService, final LoanRepository loanRepository,
-            final LoanAssembler loanAssembler) {
+            final LoanAssembler loanAssembler, final FloatingRatesReadPlatformService floatingRatesReadPlatformService) {
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
         this.platformSecurityContext = platformSecurityContext;
@@ -123,6 +127,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
         this.loanRepository = loanRepository;
         this.loanAssembler = loanAssembler;
+        this.floatingRatesReadPlatformService = floatingRatesReadPlatformService;
     }
 
     /**
@@ -272,8 +277,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final Map<String, Object> changes = new LinkedHashMap<>();
 
             LocalDate approvedOnDate = jsonCommand.localDateValueOfParameterNamed("approvedOnDate");
-            final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat())
-                    .withLocale(jsonCommand.extractLocale());
+            final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat()).withLocale(
+                    jsonCommand.extractLocale());
 
             changes.put("locale", jsonCommand.locale());
             changes.put("dateFormat", jsonCommand.dateFormat());
@@ -285,8 +290,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 final LoanSummary loanSummary = loan.getSummary();
 
                 final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
-                final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
-                        loan.getDisbursementDate().toDate());
+                final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan
+                        .getDisbursementDate().toDate());
                 final WorkingDays workingDays = this.workingDaysRepository.findOne();
                 final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail = loan.getLoanRepaymentScheduleDetail();
                 final MonetaryCurrency currency = loanProductRelatedDetail.getCurrency();
@@ -314,9 +319,10 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 if (loanCalendarInstance != null) {
                     loanCalendar = loanCalendarInstance.getCalendar();
                 }
+                FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
                 LoanRescheduleModel loanRescheduleModel = new DefaultLoanReschedulerFactory().reschedule(mathContext, interestMethod,
                         loanRescheduleRequest, applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance,
-                        loanCalendar);
+                        loanCalendar, floatingRateDTO);
 
                 final Collection<LoanRescheduleModelRepaymentPeriod> periods = loanRescheduleModel.getPeriods();
                 List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();
@@ -373,7 +379,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 waiveLoanCharges(loan, waiveLoanCharges);
 
                 // update the Loan summary
-                loanSummary.updateSummary(currency, loan.getPrincpal(), repaymentScheduleInstallments, new LoanSummaryWrapper(), true, null);
+                loanSummary
+                        .updateSummary(currency, loan.getPrincpal(), repaymentScheduleInstallments, new LoanSummaryWrapper(), true, null);
 
                 // update the total number of schedule repayments
                 loan.updateNumberOfRepayments(periods.size());
@@ -458,26 +465,27 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
                     final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
                             CalendarEntityType.LOANS.getValue());
-                    calculatedRepaymentsStartingFromDate = this.loanAccountDomainService
-                            .getCalculatedRepaymentsStartingFromDate(loan.getDisbursementDate(), loan, calendarInstance);
+                    calculatedRepaymentsStartingFromDate = this.loanAccountDomainService.getCalculatedRepaymentsStartingFromDate(
+                            loan.getDisbursementDate(), loan, calendarInstance);
 
                     isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
-                    holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
-                            loan.getDisbursementDate().toDate());
+                    holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan.getDisbursementDate()
+                            .toDate());
                     workingDays = this.workingDaysRepository.findOne();
                     overdurPenaltyWaitPeriod = this.configurationDomainService.retrievePenaltyWaitPeriod();
-                    recalculateFrom =  DateUtils.getLocalDateOfTenant();
+                    recalculateFrom = DateUtils.getLocalDateOfTenant();
                 }
 
                 HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
+                FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
                 ScheduleGeneratorDTO scheduleGeneratorDTO = new ScheduleGeneratorDTO(loanScheduleFactory, applicationCurrency,
                         calculatedRepaymentsStartingFromDate, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance,
-                        recalculateFrom, overdurPenaltyWaitPeriod);
+                        recalculateFrom, overdurPenaltyWaitPeriod, floatingRateDTO);
 
                 Money accruedCharge = Money.zero(loan.getCurrency());
                 if (loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
-                    Collection<LoanChargePaidByData> chargePaidByDatas = this.loanChargeReadPlatformService
-                            .retriveLoanChargesPaidBy(loanCharge.getId(), LoanTransactionType.ACCRUAL, loanInstallmentNumber);
+                    Collection<LoanChargePaidByData> chargePaidByDatas = this.loanChargeReadPlatformService.retriveLoanChargesPaidBy(
+                            loanCharge.getId(), LoanTransactionType.ACCRUAL, loanInstallmentNumber);
                     for (LoanChargePaidByData chargePaidByData : chargePaidByDatas) {
                         accruedCharge = accruedCharge.plus(chargePaidByData.getAmount());
                     }
@@ -527,8 +535,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final Map<String, Object> changes = new LinkedHashMap<>();
 
             LocalDate rejectedOnDate = jsonCommand.localDateValueOfParameterNamed("rejectedOnDate");
-            final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat())
-                    .withLocale(jsonCommand.extractLocale());
+            final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat()).withLocale(
+                    jsonCommand.extractLocale());
 
             changes.put("locale", jsonCommand.locale());
             changes.put("dateFormat", jsonCommand.dateFormat());
@@ -566,5 +574,18 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
         throw new PlatformDataIntegrityException("error.msg.loan.reschedule.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
+    }
+
+    private FloatingRateDTO constructFloatingRateDTO(final Loan loan) {
+        FloatingRateDTO floatingRateDTO = null;
+        if (loan.loanProduct().isLinkedToFloatingInterestRate()) {
+            boolean isFloatingInterestRate = loan.getIsFloatingInterestRate();
+            BigDecimal interestRateDiff = loan.getInterestRateDifferential();
+            List<FloatingRatePeriodData> baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate()
+                    .getRatePeriods();
+            floatingRateDTO = new FloatingRateDTO(isFloatingInterestRate, loan.getDisbursementDate(), interestRateDiff,
+                    baseLendingRatePeriods);
+        }
+        return floatingRateDTO;
     }
 }
