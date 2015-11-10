@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.loanproduct.domain;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,6 +44,9 @@ import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.common.domain.DaysInMonthType;
 import org.mifosplatform.portfolio.common.domain.DaysInYearType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
+import org.mifosplatform.portfolio.floatingrates.data.FloatingRateDTO;
+import org.mifosplatform.portfolio.floatingrates.data.FloatingRatePeriodData;
+import org.mifosplatform.portfolio.floatingrates.domain.FloatingRate;
 import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
@@ -153,8 +157,15 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @Column(name = "instalment_amount_in_multiples_of", nullable = true)
     private Integer installmentAmountInMultiplesOf;
 
+    @Column(name = "is_linked_to_floating_interest_rates", nullable = false)
+    private boolean isLinkedToFloatingInterestRate;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
+    private LoanProductFloatingRates floatingRates;
+
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
-            final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator) {
+            final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate) {
 
         final String name = command.stringValueOfParameterNamed("name");
         final String shortName = command.stringValueOfParameterNamed(LoanProductConstants.shortName);
@@ -174,12 +185,31 @@ public class LoanProduct extends AbstractPersistable<Long> {
         final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.integerValueOfParameterNamed("amortizationType"));
         final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.fromInt(command
                 .integerValueOfParameterNamed("repaymentFrequencyType"));
-        final PeriodFrequencyType interestFrequencyType = PeriodFrequencyType.fromInt(command
-                .integerValueOfParameterNamed("interestRateFrequencyType"));
-        final BigDecimal interestRatePerPeriod = command.bigDecimalValueOfParameterNamed("interestRatePerPeriod");
-        final BigDecimal minInterestRatePerPeriod = command.bigDecimalValueOfParameterNamed("minInterestRatePerPeriod");
-        final BigDecimal maxInterestRatePerPeriod = command.bigDecimalValueOfParameterNamed("maxInterestRatePerPeriod");
-        final BigDecimal annualInterestRate = aprCalculator.calculateFrom(interestFrequencyType, interestRatePerPeriod);
+        PeriodFrequencyType interestFrequencyType = PeriodFrequencyType.INVALID;
+        BigDecimal interestRatePerPeriod = null;
+        BigDecimal minInterestRatePerPeriod = null;
+        BigDecimal maxInterestRatePerPeriod = null;
+        BigDecimal annualInterestRate = null;
+        BigDecimal interestRateDifferential = null;
+        BigDecimal minDifferentialLendingRate = null;
+        BigDecimal maxDifferentialLendingRate = null;
+        BigDecimal defaultDifferentialLendingRate = null;
+        Boolean isFloatingInterestRateCalculationAllowed = null;
+        final Boolean isLinkedToFloatingInterestRates = command.booleanObjectValueOfParameterNamed("isLinkedToFloatingInterestRates");
+        if (isLinkedToFloatingInterestRates != null && isLinkedToFloatingInterestRates) {
+            interestRateDifferential = command.bigDecimalValueOfParameterNamed("interestRateDifferential");
+            minDifferentialLendingRate = command.bigDecimalValueOfParameterNamed("minDifferentialLendingRate");
+            maxDifferentialLendingRate = command.bigDecimalValueOfParameterNamed("maxDifferentialLendingRate");
+            defaultDifferentialLendingRate = command.bigDecimalValueOfParameterNamed("defaultDifferentialLendingRate");
+            isFloatingInterestRateCalculationAllowed = command
+                    .booleanObjectValueOfParameterNamed("isFloatingInterestRateCalculationAllowed");
+        } else {
+            interestFrequencyType = PeriodFrequencyType.fromInt(command.integerValueOfParameterNamed("interestRateFrequencyType"));
+            interestRatePerPeriod = command.bigDecimalValueOfParameterNamed("interestRatePerPeriod");
+            minInterestRatePerPeriod = command.bigDecimalValueOfParameterNamed("minInterestRatePerPeriod");
+            maxInterestRatePerPeriod = command.bigDecimalValueOfParameterNamed("maxInterestRatePerPeriod");
+            annualInterestRate = aprCalculator.calculateFrom(interestFrequencyType, interestRatePerPeriod);
+        }
 
         final Integer repaymentEvery = command.integerValueOfParameterNamed("repaymentEvery");
         final Integer numberOfRepayments = command.integerValueOfParameterNamed("numberOfRepayments");
@@ -271,7 +301,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled, interestRecalculationSettings, minimumDaysBetweenDisbursalAndFirstRepayment,
                 holdGuarantorFunds, loanProductGuaranteeDetails, principalThresholdForLastInstallment,
-                accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineEmiAmount, installmentAmountInMultiplesOf, loanConfigurableAttributes);
+                accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineEmiAmount, installmentAmountInMultiplesOf,
+                loanConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRate, interestRateDifferential,
+                minDifferentialLendingRate, maxDifferentialLendingRate, defaultDifferentialLendingRate,
+                isFloatingInterestRateCalculationAllowed);
 
     }
 
@@ -498,7 +531,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final boolean holdGuarantorFunds,
             final LoanProductGuaranteeDetails loanProductGuaranteeDetails, final BigDecimal principalThresholdForLastInstallment,
             final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion, final boolean canDefineEmiAmount,
-            final Integer installmentAmountInMultiplesOf, final LoanProductConfigurableAttributes loanProductConfigurableAttributes) {
+            final Integer installmentAmountInMultiplesOf, final LoanProductConfigurableAttributes loanProductConfigurableAttributes,
+            Boolean isLinkedToFloatingInterestRates, FloatingRate floatingRate, BigDecimal interestRateDifferential,
+            BigDecimal minDifferentialLendingRate, BigDecimal maxDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate,
+            Boolean isFloatingInterestRateCalculationAllowed) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -511,6 +547,12 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
         if (charges != null) {
             this.charges = charges;
+        }
+
+        this.isLinkedToFloatingInterestRate = isLinkedToFloatingInterestRates == null ? false : isLinkedToFloatingInterestRates;
+        if (isLinkedToFloatingInterestRate) {
+            this.floatingRates = new LoanProductFloatingRates(floatingRate, this, interestRateDifferential, minDifferentialLendingRate,
+                    maxDifferentialLendingRate, defaultDifferentialLendingRate, isFloatingInterestRateCalculationAllowed);
         }
 
         this.loanProductRelatedDetail = new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod,
@@ -603,9 +645,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
     public Integer getAccountingType() {
         return this.accountingRule;
     }
-    
-    public List<Charge> getLoanProductCharges(){
-    	return this.charges;
+
+    public List<Charge> getLoanProductCharges() {
+        return this.charges;
     }
 
     public void update(final LoanProductConfigurableAttributes loanConfigurableAttributes) {
@@ -616,10 +658,25 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return this.loanConfigurableAttributes;
     }
 
-    public Map<String, Object> update(final JsonCommand command, final AprCalculator aprCalculator) {
+    public Map<String, Object> update(final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate) {
 
         final Map<String, Object> actualChanges = this.loanProductRelatedDetail.update(command, aprCalculator);
         actualChanges.putAll(loanProductMinMaxConstraints().update(command));
+
+        final String isLinkedToFloatingInterestRates = "isLinkedToFloatingInterestRates";
+        if (command.isChangeInBooleanParameterNamed(isLinkedToFloatingInterestRates, this.isLinkedToFloatingInterestRate)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isLinkedToFloatingInterestRates);
+            actualChanges.put(isLinkedToFloatingInterestRates, newValue);
+            this.isLinkedToFloatingInterestRate = newValue;
+        }
+
+        if (this.isLinkedToFloatingInterestRate) {
+            actualChanges.putAll(loanProductFloatingRates().update(command, floatingRate));
+            this.loanProductRelatedDetail.updateForFloatingInterestRates();
+            this.loanProductMinMaxConstraints.updateForFloatingInterestRates();
+        }else{
+        	this.floatingRates = null;
+        }
 
         final String accountingTypeParamName = "accountingRule";
         if (command.isChangeInIntegerParameterNamed(accountingTypeParamName, this.accountingRule)) {
@@ -907,6 +964,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
+	private LoanProductFloatingRates loanProductFloatingRates() {
+        this.floatingRates = this.floatingRates == null 
+        		? new LoanProductFloatingRates(null, this, null, null, null, null, false) 
+        		: this.floatingRates;
+        return this.floatingRates;
+    }
+
     public boolean isAccountingDisabled() {
         return AccountingRuleType.NONE.getValue().equals(this.accountingRule);
     }
@@ -1187,4 +1251,21 @@ public class LoanProduct extends AbstractPersistable<Long> {
     public LoanProductRelatedDetail getLoanProductRelatedDetail() {
         return loanProductRelatedDetail;
     }
+
+    public boolean isLinkedToFloatingInterestRate() {
+        return this.isLinkedToFloatingInterestRate;
+    }
+
+    public LoanProductFloatingRates getFloatingRates() {
+        return this.floatingRates;
+    }
+
+    public Collection<FloatingRatePeriodData> fetchInterestRates(final FloatingRateDTO floatingRateDTO) {
+        Collection<FloatingRatePeriodData> applicableRates = new ArrayList<>(1);
+        if (isLinkedToFloatingInterestRate()) {
+            applicableRates = getFloatingRates().fetchInterestRates(floatingRateDTO);
+        }
+        return applicableRates;
+    }
+
 }

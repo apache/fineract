@@ -32,6 +32,7 @@ public class LoanScheduleRecalculationDTO {
     private final Map<LocalDate, Money> latePaymentMap;
     private final TreeMap<LocalDate, Money> compoundingMap;
     private final Map<LocalDate, Money> disburseDetailMap;
+    private final Money principalToBeScheduled;
     private final Money outstandingBalance;
     private final Money outstandingBalanceAsPerRest;
     private final List<LoanRepaymentScheduleInstallment> installments;
@@ -44,9 +45,9 @@ public class LoanScheduleRecalculationDTO {
             final LocalDate actualRepaymentDate, final Money totalCumulativePrincipal, final Money totalCumulativeInterest,
             final Money totalFeeChargesCharged, final Money totalPenaltyChargesCharged, final Money totalRepaymentExpected,
             final Money reducePrincipal, final Map<LocalDate, Money> principalPortionMap, final Map<LocalDate, Money> latePaymentMap,
-            final TreeMap<LocalDate, Money> compoundingMap, final Map<LocalDate, Money> disburseDetailMap, final Money outstandingBalance,
-            final Money outstandingBalanceAsPerRest, final List<LoanRepaymentScheduleInstallment> installments,
-            final Collection<RecalculationDetail> recalculationDetails,
+            final TreeMap<LocalDate, Money> compoundingMap, final Map<LocalDate, Money> disburseDetailMap, Money principalToBeScheduled,
+            final Money outstandingBalance, final Money outstandingBalanceAsPerRest,
+            final List<LoanRepaymentScheduleInstallment> installments, final Collection<RecalculationDetail> recalculationDetails,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final LocalDate scheduleTillDate,
             final boolean partialUpdate) {
         this.periodNumber = periodNumber;
@@ -63,6 +64,7 @@ public class LoanScheduleRecalculationDTO {
         this.latePaymentMap = latePaymentMap;
         this.compoundingMap = compoundingMap;
         this.disburseDetailMap = disburseDetailMap;
+        this.principalToBeScheduled = principalToBeScheduled;
         this.outstandingBalance = outstandingBalance;
         this.outstandingBalanceAsPerRest = outstandingBalanceAsPerRest;
         this.installments = installments;
@@ -77,14 +79,15 @@ public class LoanScheduleRecalculationDTO {
             final Money totalCumulativeInterest, final Money totalFeeChargesCharged, final Money totalPenaltyChargesCharged,
             final Money totalRepaymentExpected, final Money reducePrincipal, final Map<LocalDate, Money> principalPortionMap,
             final Map<LocalDate, Money> latePaymentMap, final TreeMap<LocalDate, Money> compoundingMap,
-            final Map<LocalDate, Money> disburseDetailMap, final Money outstandingBalance, final Money outstandingBalanceAsPerRest,
-            final List<LoanRepaymentScheduleInstallment> installments, final Collection<RecalculationDetail> recalculationDetails,
+            final Map<LocalDate, Money> disburseDetailMap, Money principalToBeScheduled, final Money outstandingBalance,
+            final Money outstandingBalanceAsPerRest, final List<LoanRepaymentScheduleInstallment> installments,
+            final Collection<RecalculationDetail> recalculationDetails,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final LocalDate scheduleTillDate) {
         final boolean partialUpdate = true;
         return new LoanScheduleRecalculationDTO(periodNumber, instalmentNumber, periodStartDate, actualRepaymentDate,
                 totalCumulativePrincipal, totalCumulativeInterest, totalFeeChargesCharged, totalPenaltyChargesCharged,
                 totalRepaymentExpected, reducePrincipal, principalPortionMap, latePaymentMap, compoundingMap, disburseDetailMap,
-                outstandingBalance, outstandingBalanceAsPerRest, installments, recalculationDetails,
+                principalToBeScheduled, outstandingBalance, outstandingBalanceAsPerRest, installments, recalculationDetails,
                 loanRepaymentScheduleTransactionProcessor, scheduleTillDate, partialUpdate);
     }
 
@@ -105,6 +108,7 @@ public class LoanScheduleRecalculationDTO {
         final Map<LocalDate, Money> latePaymentMap = null;
         final TreeMap<LocalDate, Money> compoundingMap = null;
         final Map<LocalDate, Money> disburseDetailMap = null;
+        final Money principalToBeScheduled = null;
         final Money outstandingBalance = null;
         final Money outstandingBalanceAsPerRest = null;
         final List<LoanRepaymentScheduleInstallment> installments = null;
@@ -112,7 +116,7 @@ public class LoanScheduleRecalculationDTO {
         return new LoanScheduleRecalculationDTO(periodNumber, instalmentNumber, periodStartDate, actualRepaymentDate,
                 totalCumulativePrincipal, totalCumulativeInterest, totalFeeChargesCharged, totalPenaltyChargesCharged,
                 totalRepaymentExpected, reducePrincipal, principalPortionMap, latePaymentMap, compoundingMap, disburseDetailMap,
-                outstandingBalance, outstandingBalanceAsPerRest, installments, recalculationDetails,
+                principalToBeScheduled, outstandingBalance, outstandingBalanceAsPerRest, installments, recalculationDetails,
                 loanRepaymentScheduleTransactionProcessor, scheduleTillDate, partialUpdate);
     }
 
@@ -198,6 +202,11 @@ public class LoanScheduleRecalculationDTO {
 
     public LocalDate getPeriodStartDate() {
         return this.periodStartDate;
+    }
+
+    
+    public Money getPrincipalToBeScheduled() {
+        return this.principalToBeScheduled;
     }
 
 }

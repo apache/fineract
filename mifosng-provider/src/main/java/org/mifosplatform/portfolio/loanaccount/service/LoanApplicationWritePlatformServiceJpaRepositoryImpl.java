@@ -472,12 +472,22 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         try {
             AppUser currentUser = getAppUserIfPresent();
             final Loan existingLoanApplication = retrieveLoanBy(loanId);
-            this.fromApiJsonDeserializer.validateForModify(command.json(), existingLoanApplication.loanProduct());
-
-            checkClientOrGroupActive(existingLoanApplication);
-
             if (!existingLoanApplication.isSubmittedAndPendingApproval()) { throw new LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified(
                     loanId); }
+
+            final String productIdParamName = "productId";
+            LoanProduct newLoanProduct = null; 
+            if (command.isChangeInLongParameterNamed(productIdParamName, existingLoanApplication.loanProduct().getId())) {
+                final Long productId = command.longValueOfParameterNamed(productIdParamName);
+                newLoanProduct = this.loanProductRepository.findOne(productId);
+                if (newLoanProduct == null) { throw new LoanProductNotFoundException(productId); }
+            }
+            
+            LoanProduct loanProductForValidations = newLoanProduct == null? existingLoanApplication.loanProduct(): newLoanProduct;
+            
+            this.fromApiJsonDeserializer.validateForModify(command.json(), loanProductForValidations, existingLoanApplication);
+
+            checkClientOrGroupActive(existingLoanApplication);
 
             final Set<LoanCharge> existingCharges = existingLoanApplication.charges();
             Map<Long, LoanChargeData> chargesMap = new HashMap<>();
@@ -554,33 +564,34 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 existingLoanApplication.updateGroup(group);
             }
 
-            final String productIdParamName = "productId";
-            if (changes.containsKey(productIdParamName)) {
-                final Long productId = command.longValueOfParameterNamed(productIdParamName);
-                final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
-                if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
-
-                existingLoanApplication.updateLoanProduct(loanProduct);
+            if (newLoanProduct != null) {
+                existingLoanApplication.updateLoanProduct(newLoanProduct);
                 if (!changes.containsKey("interestRateFrequencyType")) {
                     existingLoanApplication.updateInterestRateFrequencyType();
                 }
                 final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
                 final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
-                if (loanProduct.useBorrowerCycle()) {
+                if (newLoanProduct.useBorrowerCycle()) {
                     final Long clientId = this.fromJsonHelper.extractLongNamed("clientId", command.parsedJson());
                     final Long groupId = this.fromJsonHelper.extractLongNamed("groupId", command.parsedJson());
                     Integer cycleNumber = 0;
                     if (clientId != null) {
-                        cycleNumber = this.loanReadPlatformService.retriveLoanCounter(clientId, loanProduct.getId());
+                        cycleNumber = this.loanReadPlatformService.retriveLoanCounter(clientId, newLoanProduct.getId());
                     } else if (groupId != null) {
                         cycleNumber = this.loanReadPlatformService.retriveLoanCounter(groupId, AccountType.GROUP.getValue(),
-                                loanProduct.getId());
+                        		newLoanProduct.getId());
                     }
                     this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(command.parsedJson(), baseDataValidator,
-                            loanProduct, cycleNumber);
+                    		newLoanProduct, cycleNumber);
                 } else {
                     this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(command.parsedJson(), baseDataValidator,
-                            loanProduct);
+                    		newLoanProduct);
+                }
+                if(newLoanProduct.isLinkedToFloatingInterestRate()){
+                	existingLoanApplication.getLoanProductRelatedDetail().updateForFloatingInterestRates();
+                }else{
+                	existingLoanApplication.setInterestRateDifferential(null);
+                	existingLoanApplication.setIsFloatingInterestRate(null);
                 }
                 if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
             }

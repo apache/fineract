@@ -10,6 +10,7 @@ import java.math.MathContext;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
+import org.mifosplatform.portfolio.floatingrates.data.FloatingRateDTO;
 import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.DecliningBalanceInterestLoanScheduleGenerator;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.FlatInterestLoanScheduleGenerator;
@@ -21,19 +22,21 @@ public class DefaultLoanReschedulerFactory implements LoanReschedulerFactory {
     public LoanRescheduleModel reschedule(final MathContext mathContext, final InterestMethod interestMethod,
             final LoanRescheduleRequest loanRescheduleRequest, final ApplicationCurrency applicationCurrency,
             final HolidayDetailDTO holidayDetailDTO, final CalendarInstance restCalendarInstance,
-            final CalendarInstance compoundingCalendarInstance, final Calendar loanCalendar) {
+            final CalendarInstance compoundingCalendarInstance, final Calendar loanCalendar, final FloatingRateDTO floatingRateDTO) {
 
         LoanRescheduleModel loanRescheduleModel = null;
 
         switch (interestMethod) {
             case DECLINING_BALANCE:
                 loanRescheduleModel = new DecliningBalanceInterestLoanScheduleGenerator().reschedule(mathContext, loanRescheduleRequest,
-                        applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance, loanCalendar);
+                        applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance, loanCalendar,
+                        floatingRateDTO);
             break;
 
             case FLAT:
                 loanRescheduleModel = new FlatInterestLoanScheduleGenerator().reschedule(mathContext, loanRescheduleRequest,
-                        applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance, loanCalendar);
+                        applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance, loanCalendar,
+                        floatingRateDTO);
             break;
 
             case INVALID:
