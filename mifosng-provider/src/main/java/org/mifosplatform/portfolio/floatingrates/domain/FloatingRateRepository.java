@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.portfolio.floatingrates.domain;
 
+import java.util.Collection;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -15,5 +17,12 @@ public interface FloatingRateRepository extends
 
 	@Query("from FloatingRate floatingRate where floatingRate.isBaseLendingRate = 1 and floatingRate.isActive = 1")
 	FloatingRate retrieveBaseLendingRate();
+	
+	@Query("from FloatingRate floatingRate " +
+			" inner join floatingRate.floatingRatePeriods as periods" +
+			" where floatingRate.isActive = 1 " +
+			" and periods.isActive = 1 " +
+			" and periods.isDifferentialToBaseLendingRate = 1")
+	Collection<FloatingRate> retrieveFloatingRatesLinkedToBLR();
 
 }
